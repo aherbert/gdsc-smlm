@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -93,7 +93,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		var_by_2 = var * 2;
 		sqrt_var_by_2 = Math.sqrt(var_by_2);
 
-		// Determine the normalisation factor A in the event that the probability 
+		// Determine the normalisation factor A in the event that the probability
 		// distribution is being used as a discrete distribution.
 		logNormalisationGaussian = PoissonGaussianFunction.getLogNormalisation(var);
 	}
@@ -135,7 +135,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 * <p>
 	 * The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true the function does
 	 * not error if the input x is non-integer.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 * @see #isComputePMF()
 	 */
@@ -180,22 +180,22 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 			// Note: If D is camera counts then it will likely be limited to a 16-bit range
 			// Assuming the gain is at least 1 then the max q is:
-			// 65536 + 5 * s => This is an acceptable table size to pre-compute the log 
-			// factorial if s is reasonable. 
+			// 65536 + 5 * s => This is an acceptable table size to pre-compute the log
+			// factorial if s is reasonable.
 
 			logFactorial.ensureRange(qmin, qmax);
 
 			final double logu = Math.log(u);
 			double p = 0;
 
-			// Optionally use the error function for a full convolution between 
+			// Optionally use the error function for a full convolution between
 			// the Poisson PMF and Gaussian PDF
 			if (computePMF)
 			{
 				// The Poisson PMF is scaled using the gain to generate a PMF for (X=x).
 				// The Gaussian CDF over the range x-0.5 to x+0.5 is
-				// computed to provide the equivalent of the convolution of the PMF of 
-				// the scaled Poisson and the PDF of the Gaussian over the discrete 
+				// computed to provide the equivalent of the convolution of the PMF of
+				// the scaled Poisson and the PDF of the Gaussian over the discrete
 				// integer range. The output is a PMF.
 
 				for (int q = qmin; q <= qmax; q++)
@@ -236,7 +236,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			}
 
 			// Determine normalisation
-			// Note: This is needed when using this as a discrete probability distribution, 
+			// Note: This is needed when using this as a discrete probability distribution,
 			// e.g. input observed count is integer
 
 			return p;
@@ -260,7 +260,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	double gaussianCDF(final double x)
 	{
 		//return org.apache.commons.math3.special.CDF.erf(x / sqrt_var_by_2);
-		// This may not be precise enough. 
+		// This may not be precise enough.
 		// Absolute error is <3e-7. Not sure what relative error is.
 		// The standard CDF is much slower.
 		return Erf.erf(x / sqrt_var_by_2);
@@ -271,7 +271,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 * <p>
 	 * The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true the function does
 	 * not error if the input x is non-integer.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 * @see #isComputePMF()
 	 */

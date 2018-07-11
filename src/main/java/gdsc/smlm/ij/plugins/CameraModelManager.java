@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,7 +68,7 @@ public class CameraModelManager implements PlugIn
 
 	private static CameraModelSettings.Builder settings = null;
 	// Cache camera models for speed
-	private static LinkedHashMap<String, PerPixelCameraModel> map = new LinkedHashMap<String, PerPixelCameraModel>();
+	private static LinkedHashMap<String, PerPixelCameraModel> map = new LinkedHashMap<>();
 
 	private static CameraModelSettings.Builder getSettings()
 	{
@@ -223,7 +223,7 @@ public class CameraModelManager implements PlugIn
 
 	private static List<String> createList(boolean includeNone)
 	{
-		List<String> list = new TurboList<String>();
+		List<String> list = new TurboList<>();
 		if (includeNone)
 			list.add("[None]");
 		return list;
@@ -254,11 +254,11 @@ public class CameraModelManager implements PlugIn
 	}
 
 	//@formatter:off
-	private static String[] OPTIONS = { 
+	private static String[] OPTIONS = {
 			"Load a camera model",
 			"Load from directory",
-			"Print all model details", 
-			"View a camera model", 
+			"Print all model details",
+			"View a camera model",
 			"Delete a camera model",
 			"Filter an image" };
 	//@formatter:on
@@ -266,7 +266,7 @@ public class CameraModelManager implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -484,8 +484,8 @@ public class CameraModelManager implements PlugIn
 			IJ.error(TITLE, "Failed to find camera data for model: " + name);
 			return;
 		}
-		// Try and load the resource. 
-		// Do not use loadFromFile as that validates the model data. We just want 
+		// Try and load the resource.
+		// Do not use loadFromFile as that validates the model data. We just want
 		// to view the raw image.
 		ImagePlus imp = IJ.openImage(resource.getFilename());
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class

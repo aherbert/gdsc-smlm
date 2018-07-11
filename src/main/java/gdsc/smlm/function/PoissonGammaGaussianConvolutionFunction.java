@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -93,7 +93,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		// Use a range to cover the Gaussian convolution
 		range = 5 * this.s;
 
-		// Determine the normalisation factor A in the event that the probability 
+		// Determine the normalisation factor A in the event that the probability
 		// distribution is being used as a discrete distribution.
 		logNormalisationGaussian = PoissonGaussianFunction.getLogNormalisation(var);
 	}
@@ -133,7 +133,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
@@ -148,12 +148,12 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		{
 			// Note:
 			// This is a convolution of two continuous probability distributions.
-			// It does not compute a good estimate when the variance is small since the 
+			// It does not compute a good estimate when the variance is small since the
 			// single point approximation to the gaussian is not valid. This is not
 			// relevant for a EM-CCD since the variance is likely to be above 10 counts.
-			// It also underestimates the cumulative distribution (sum < 1) when the Poisson 
-			// mean is close to 1 or the gain is small (<4) due to underestimation in the 
-			// Poisson-Gamma distribution. 
+			// It also underestimates the cumulative distribution (sum < 1) when the Poisson
+			// mean is close to 1 or the gain is small (<4) due to underestimation in the
+			// Poisson-Gamma distribution.
 
 			// Use a range to cover the Gaussian convolution
 			double max = o + range;
@@ -174,7 +174,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 
 		if (cmin == cmax)
 		{
-			// Edge case with no range			
+			// Edge case with no range
 			return FastMath.exp(
 					// Poisson-Gamma
 					PoissonGammaFunction.logPoissonGamma(cmin, e, g)
@@ -184,7 +184,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 
 		double p = 0;
 
-		// Overcome the problem with small variance using a set number of steps to 
+		// Overcome the problem with small variance using a set number of steps to
 		// cover the range. This effectively makes the Poisson-Gamma a continuous
 		// probability distribution.
 		// Note:
@@ -193,7 +193,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		// is computed using integer steps.
 		//
 		// This is to computing:
-		// Poisson-Gamma PMF(c)  x  Gaussian PDF(c-o) 
+		// Poisson-Gamma PMF(c)  x  Gaussian PDF(c-o)
 		//
 		// The solution is to compute:
 		// Poisson-Gamma PMF(c)  x  Gaussian CDF(c-o-0.5,c-o+0.5)
@@ -234,7 +234,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	@Override

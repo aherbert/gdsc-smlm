@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,7 +40,7 @@ import org.apache.commons.math3.util.FastMath;
  * to Double.MIN_VALUE. This can be disabled.
  * <p>
  * The class can handle non-integer observed data. In this case the PMF is approximated as:
- * 
+ *
  * <pre>
  * PMF(l,k) = C * e^-l * l^x / gamma(k+1)
  * with:
@@ -48,7 +48,7 @@ import org.apache.commons.math3.util.FastMath;
  * gamma = the gamma function
  * C = a normalising constant.
  * </pre>
- * 
+ *
  * The normalising constant is used to ensure the PMF sums to 1. However it is omitted in this implementation for speed.
  * The PMF sums to approximately 1 for l>=4.
  */
@@ -81,7 +81,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 * <p>
 	 * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
 	 * indices should be passed in to the functions to obtain the value (and gradient).
-	 * 
+	 *
 	 * @param f
 	 *            The function to be used to calculated the expected values
 	 * @param a
@@ -127,7 +127,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
 	 */
 	@Override
@@ -159,7 +159,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[])
 	 */
 	@Override
@@ -167,7 +167,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	{
 		// Compute the negative log-likelihood to be minimised
 		// f(x) = l(x) - k * ln(l(x)) + log(k!)
-		// 
+		//
 		// Since (k * ln(l(x)))' = (k * ln(l(x))') * l'(x)
 		//                       = (k / l(x)) * l'(x)
 
@@ -212,7 +212,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
 	 */
 	@Override
@@ -238,7 +238,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[], int)
 	 */
 	@Override
@@ -320,7 +320,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
 	 */
 	@Override

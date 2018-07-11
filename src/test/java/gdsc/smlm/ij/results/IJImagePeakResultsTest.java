@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -534,7 +534,7 @@ public class IJImagePeakResultsTest
 
 	private static void addPeakResults(IJImagePeakResults r, float[] x, float[] y, float[] v)
 	{
-		TurboList<PeakResult> results = new TurboList<PeakResult>(x.length);
+		TurboList<PeakResult> results = new TurboList<>(x.length);
 		for (int i = 0; i < x.length; i++)
 			results.add(new PeakResult(x[i], y[i], v[i]));
 		r.addAll(results);
@@ -542,7 +542,7 @@ public class IJImagePeakResultsTest
 
 	private static void addPeakResults(IJImagePeakResults r, int[] t, float[] x, float[] y, float[] v)
 	{
-		TurboList<PeakResult> results = new TurboList<PeakResult>(x.length);
+		TurboList<PeakResult> results = new TurboList<>(x.length);
 		for (int i = 0; i < x.length; i++)
 			results.add(new PeakResult(t[i], 0, 0, 0, 0, 0, 0, createParams(x[i], y[i], v[i]), null));
 		r.addAll(results);

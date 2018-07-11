@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -75,7 +75,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -186,12 +186,12 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 		if (showPairs)
 		{
-			pairs = new LinkedList<PointPair>();
-			FP = new LinkedList<Pulse>();
-			FN = new LinkedList<Pulse>();
-			pairs2 = new LinkedList<PointPair>();
-			FP2 = new LinkedList<Pulse>();
-			FN2 = new LinkedList<Pulse>();
+			pairs = new LinkedList<>();
+			FP = new LinkedList<>();
+			FN = new LinkedList<>();
+			pairs2 = new LinkedList<>();
+			FP2 = new LinkedList<>();
+			FN2 = new LinkedList<>();
 		}
 
 		MatchResult result = MatchCalculator.analyseResults2D(p1, p2, dThreshold, TP, FP, FN, pairs);
@@ -247,8 +247,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 					triplesWindow.getTextPanel().clear();
 					triplePainter.setTitle(results1.getSource().getOriginal().getName());
 
-					HashMap<Pulse, Triple> map = new HashMap<Pulse, Triple>();
-					ArrayList<Triple> triples = new ArrayList<Triple>(pairs.size());
+					HashMap<Pulse, Triple> map = new HashMap<>();
+					ArrayList<Triple> triples = new ArrayList<>(pairs.size());
 					for (PointPair pair : pairs)
 					{
 						Pulse p = (Pulse) pair.getPoint1();
@@ -446,7 +446,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.utils.CoordinateProvider#getCoordinates(java.lang.String)
 	 */
 	@Override
@@ -502,7 +502,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		switch (sortIndex)
 		{
 			case 1: // Sort by time
-				ArrayList<TimeComparablePointPair> newPairs = new ArrayList<TimeComparablePointPair>(pairs.size());
+				ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
 				for (PointPair pair : pairs)
 				{
 					newPairs.add(new TimeComparablePointPair(pair));
@@ -520,7 +520,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		if (sortIndex == 1)
 		{
-			List<TimeComparableTriple> sorted = new ArrayList<TimeComparableTriple>(triples.size());
+			List<TimeComparableTriple> sorted = new ArrayList<>(triples.size());
 			for (Triple t : triples)
 				sorted.add(new TimeComparableTriple(t));
 			Collections.sort(sorted);
@@ -528,7 +528,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		}
 		else
 		{
-			List<ScoreComparableTriple> sorted = new ArrayList<ScoreComparableTriple>(triples.size());
+			List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
 			for (Triple t : triples)
 				sorted.add(new ScoreComparableTriple(t));
 			Collections.sort(sorted);
@@ -555,7 +555,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -664,7 +664,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -745,7 +745,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override

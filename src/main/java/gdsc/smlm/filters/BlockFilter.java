@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,7 +52,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
 	 */
 	@Override
@@ -102,7 +102,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -126,7 +126,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -179,7 +179,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = n; x < maxx - n; x++)
 		{
@@ -222,7 +222,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -256,7 +256,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 1; x < maxx - 1; x++)
 		{
@@ -286,7 +286,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -316,7 +316,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -344,7 +344,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -362,7 +362,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] wdata = initialise(data, maxx, maxy, n, true);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -382,7 +382,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = n; x < maxx - n; x++)
 		{
@@ -408,7 +408,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -430,7 +430,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			return;
 		}
 
-		// The size of the region 
+		// The size of the region
 		final int nX = (2 * n1 + 1);
 		final int nY = (2 * n1 + 1);
 
@@ -443,7 +443,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final float w1 = w - n;
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -464,7 +464,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = n1; x < maxx - n1; x++)
 		{
@@ -489,7 +489,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -504,7 +504,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] wdata = initialise(data, maxx, maxy, 1, true);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -521,7 +521,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 1; x < maxx - 1; x++)
 		{
@@ -543,7 +543,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -560,7 +560,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] wdata = initialise(data, maxx, maxy, w, true);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -577,7 +577,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 1; x < maxx - 1; x++)
 		{
@@ -598,7 +598,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -613,7 +613,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] wdata = initialise(data, maxx, maxy, 2, true);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -631,7 +631,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 2; x < maxx - 2; x++)
 		{
@@ -655,7 +655,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -674,7 +674,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -692,7 +692,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 2; x < maxx - 2; x++)
 		{
@@ -713,7 +713,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -728,7 +728,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] wdata = initialise(data, maxx, maxy, 3, true);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -746,7 +746,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 3; x < maxx - 3; x++)
 		{
@@ -769,7 +769,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -788,7 +788,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -806,7 +806,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		// Only sweep over the interior
 		for (int x = 3; x < maxx - 3; x++)
 		{
@@ -827,7 +827,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -853,7 +853,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -877,7 +877,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -889,7 +889,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void blockFilterNxNInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
-		// The size of the region 
+		// The size of the region
 		final int nX = (2 * n + 1);
 		final int nY = (2 * n + 1);
 
@@ -914,7 +914,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			{
 				double sum = wdata[index];
 
-				// Sweep neighbourhood - 
+				// Sweep neighbourhood -
 				// No check for boundaries as this should be an internal sweep.
 				for (int offset_d : offset)
 				{
@@ -937,7 +937,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -959,7 +959,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			return;
 		}
 
-		// The size of the region 
+		// The size of the region
 		final int nX = (2 * n1 + 1);
 		final int nY = (2 * n1 + 1);
 
@@ -1054,7 +1054,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1074,9 +1074,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 1; x < maxx - 1; x++)
 			{
 				//@formatter:off
-				buffer[index1] = 
-						wdata[index0 - 1] + wdata[index0] + wdata[index0 + 1] + 
-						wdata[index1 - 1] + wdata[index1] + wdata[index1 + 1] + 
+				buffer[index1] =
+						wdata[index0 - 1] + wdata[index0] + wdata[index0 + 1] +
+						wdata[index1 - 1] + wdata[index1] + wdata[index1 + 1] +
 						wdata[index2 - 1] + wdata[index2] + wdata[index2 + 1];
 				//@formatter:on
 				index0++;
@@ -1097,7 +1097,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1194,7 +1194,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1216,7 +1216,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1230,7 +1230,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] wdata = initialise(data, maxx, maxy, n, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1266,7 +1266,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1302,7 +1302,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 3x3 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1314,7 +1314,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] wdata = initialise(data, maxx, maxy, 1, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1346,7 +1346,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1378,7 +1378,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1406,7 +1406,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1432,7 +1432,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1448,7 +1448,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] wdata = initialise(data, maxx, maxy, n, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1481,7 +1481,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1517,7 +1517,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1545,7 +1545,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final float w1 = w - n;
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1578,7 +1578,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1612,7 +1612,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 3x3 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1624,7 +1624,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] wdata = initialise(data, maxx, maxy, 1, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1652,7 +1652,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1683,7 +1683,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified.
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1697,7 +1697,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] wdata = initialise(data, maxx, maxy, w, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1723,7 +1723,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1750,7 +1750,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 5x5 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1762,7 +1762,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] wdata = initialise(data, maxx, maxy, 2, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1788,7 +1788,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1818,7 +1818,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified.
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1834,7 +1834,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1860,7 +1860,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1888,7 +1888,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 7x7 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1900,7 +1900,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] wdata = initialise(data, maxx, maxy, 3, false);
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -1927,7 +1927,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -1958,7 +1958,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified.
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -1974,7 +1974,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
 
-		// NOTE: 
+		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
 		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
@@ -2001,7 +2001,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 		}
 
-		// Y-direction. 
+		// Y-direction.
 		width = maxy;
 		height = maxx;
 		inData = buffer;
@@ -2090,7 +2090,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -2114,7 +2114,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -2136,7 +2136,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -2176,7 +2176,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			{
 				double sum = wdata[index];
 
-				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
+				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
@@ -2219,7 +2219,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -2306,7 +2306,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				double sum1 = 0;
 				double sum2 = 0;
 
-				// Flag to indicate this pixels has a complete (2n1+1) neighbourhood 
+				// Flag to indicate this pixels has a complete (2n1+1) neighbourhood
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
@@ -2381,7 +2381,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Compute the filter within a 3x3 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -2419,7 +2419,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = (y + 1) * maxx;
 			for (int x = 0; x < maxx; x++)
 			{
-				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
+				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
@@ -2466,7 +2466,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified.
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -2500,7 +2500,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = (y + 1) * maxx;
 			for (int x = 0; x < maxx; x++)
 			{
-				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
+				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
 				boolean isInnerXY = (y > 0 && y < ylimit) && (x > 0 && x < xlimit);
 
 				// Sweep neighbourhood
@@ -2562,7 +2562,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 */
 	public ArrayListPeakResultStore(int capacity)
 	{
-		this.results = new ArrayList<PeakResult>(capacity);
+		this.results = new ArrayList<>(capacity);
 	}
 
 	/**
@@ -64,12 +64,12 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 */
 	public ArrayListPeakResultStore(ArrayListPeakResultStore store)
 	{
-		this.results = new ArrayList<PeakResult>(store.results);
+		this.results = new ArrayList<>(store.results);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#get(int)
 	 */
 	@Override
@@ -80,7 +80,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#size()
 	 */
 	@Override
@@ -91,7 +91,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -102,7 +102,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#addCollection(java.util.Collection)
 	 */
 	@Override
@@ -113,7 +113,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#addArray(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -124,7 +124,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#addStore(gdsc.smlm.results.PeakResultStore)
 	 */
 	@Override
@@ -142,7 +142,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int)
 	 */
 	@Override
@@ -153,7 +153,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int, int)
 	 */
 	@Override
@@ -171,7 +171,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -182,7 +182,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#removeCollection(java.util.Collection)
 	 */
 	@Override
@@ -193,7 +193,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#removeArray(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -204,7 +204,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#removeStore(gdsc.smlm.results.PeakResultStore)
 	 */
 	@Override
@@ -222,7 +222,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#retainCollection(java.util.Collection)
 	 */
 	@Override
@@ -233,7 +233,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#retainArray(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -244,7 +244,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#retainStore(gdsc.smlm.results.PeakResultStore)
 	 */
 	@Override
@@ -262,7 +262,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#clear()
 	 */
 	@Override
@@ -273,7 +273,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#trimToSize()
 	 */
 	@Override
@@ -284,7 +284,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
 	 */
 	@Override
@@ -295,7 +295,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#toArray()
 	 */
 	@Override
@@ -306,7 +306,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#copy()
 	 */
 	@Override
@@ -317,7 +317,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#copy(boolean)
 	 */
 	@Override
@@ -335,15 +335,15 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.PeakResultPredicate)
 	 */
 	@Override
 	public boolean removeIf(final PeakResultPredicate filter)
 	{
-		// Util we upgrade the Java version to 1.8 the ArrayList does not support 
+		// Util we upgrade the Java version to 1.8 the ArrayList does not support
 		// predicates so use a TurboList
-		TurboList<PeakResult> temp = new TurboList<PeakResult>(this.results);
+		TurboList<PeakResult> temp = new TurboList<>(this.results);
 		if (temp.removeIf(new SimplePredicate<PeakResult>()
 		{
 			@Override
@@ -353,7 +353,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 			}
 		}))
 		{
-			this.results = new ArrayList<PeakResult>(temp);
+			this.results = new ArrayList<>(temp);
 			return true;
 		}
 		return false;
@@ -361,7 +361,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#forEach(gdsc.smlm.results.procedures.PeakResultProcedure)
 	 */
 	@Override
@@ -373,7 +373,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#subset(gdsc.smlm.results.procedures.PeakResultPredicate)
 	 */
 	@Override
@@ -388,7 +388,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
 	 */
 	@Override
@@ -399,7 +399,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#indexOf(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -410,7 +410,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreList#lastIndexOf(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -421,7 +421,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStore#contains(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -432,7 +432,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreCollection#getCollection()
 	 */
 	@Override
@@ -444,7 +444,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResultStoreCollection#getCollectionReference()
 	 */
 	@Override

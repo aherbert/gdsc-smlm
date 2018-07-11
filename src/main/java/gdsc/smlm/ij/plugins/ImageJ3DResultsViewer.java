@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -172,7 +172,7 @@ import ij3d.UniverseSettings;
 
 /**
  * Draws a localisation results set using an ImageJ 3D image
- * 
+ *
  * @see <A href="https://imagej.net/3D_Viewer">https://imagej.net/3D_Viewer</a>
  */
 public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseListener
@@ -194,8 +194,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public String getShortName()
 		{
 			return getName();
-		}		
-		
+		}
+
 		public static SizeMode forNumber(int number)
 		{
 			SizeMode[] values = SizeMode.values();
@@ -204,9 +204,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return values[number];
 		}
 	};
-	
+
 	private final static String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
-	
+
 	private final static String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
 
 	private enum DepthMode implements NamedObject
@@ -223,8 +223,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public String getShortName()
 		{
 			return getName();
-		}		
-		
+		}
+
 		public static DepthMode forNumber(int number)
 		{
 			DepthMode[] values = DepthMode.values();
@@ -233,9 +233,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return values[number];
 		}
 	};
-	
+
 	private final static String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
-	
+
 	private enum TransparencyMode implements NamedObject
 	{
 		NONE { @Override
@@ -254,8 +254,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public String getShortName()
 		{
 			return getName();
-		}		
-		
+		}
+
 		public static TransparencyMode forNumber(int number)
 		{
 			TransparencyMode[] values = TransparencyMode.values();
@@ -264,8 +264,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return values[number];
 		}
 	};
-	
-	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());	
+
+	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());
 
 	private enum SortMode implements NamedObject
 	{
@@ -291,8 +291,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public String getShortName()
 		{
 			return getName();
-		}		
-		
+		}
+
 		public static SortMode forNumber(int number)
 		{
 			SortMode[] values = SortMode.values();
@@ -302,24 +302,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		public abstract String getDescription();
-		
+
 		public String getDetails()
 		{
 			return getName() + ": " + getDescription();
 		}
 	};
-	
-	private final static String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());	
-	//@formatter:on	
 
-	// To debug this from Eclipse relies on being able to find the native 
+	private final static String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
+	//@formatter:on
+
+	// To debug this from Eclipse relies on being able to find the native
 	// runtime libraries for Open GL. See the README in the eclipse project folder.
 
 	private static String version = "";
 	static
 	{
 		// Try setting -Dj3d.sortShape3DBounds for faster centroid computation
-		// See org.scijava.java3d.MasterControl.sortShape3DBounds. 
+		// See org.scijava.java3d.MasterControl.sortShape3DBounds.
 		// This only works if The VirtualUniverse has not been created.
 		java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>()
 		{
@@ -370,8 +370,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		CustomContentInstant contentInstance;
 		CustomMesh outline;
-		TurboList<PeakResult> selected = new TurboList<PeakResult>();
-		TurboList<TransformGroup> selectedNode = new TurboList<TransformGroup>();
+		TurboList<PeakResult> selected = new TurboList<>();
+		TurboList<TransformGroup> selectedNode = new TurboList<>();
 
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
 				TurboList<Point3f> points, Point3f[] sizes)
@@ -384,7 +384,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (rendering.isHighResolution())
 			{
 				// Don't draw a mesh with too much detail.
-				// Note the Icosahedron does not envelope the shape but the next division does. 
+				// Note the Icosahedron does not envelope the shape but the next division does.
 				rendering = Rendering.LOW_RES_SPHERE;
 			}
 			this.rendering = rendering;
@@ -398,8 +398,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// At each new click, check the list does not contain the points
 			// and add it.
 			// Selction is handled by a selection model.
-			// For multiple items we add new switches. Each new selected point uses the 
-			// first non-visible switch for display (or creates a new one). 
+			// For multiple items we add new switches. Each new selected point uses the
+			// first non-visible switch for display (or creates a new one).
 			// If a point is removed then set the switch off.
 
 			this.contentInstance = contentInstance;
@@ -413,7 +413,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		 */
 		private CustomMesh createOutline()
 		{
-			TurboList<Point3f> points = new TurboList<Point3f>(1);
+			TurboList<Point3f> points = new TurboList<>(1);
 			points.add(new Point3f());
 			if (settings.getRendering() == 0)
 			{
@@ -426,7 +426,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			List<Point3f> pointOutline;
 			if (rendering.is2D())
 			{
-				// Handle all the 2D objects to create an outline. 
+				// Handle all the 2D objects to create an outline.
 				pointOutline = Shape3DHelper.createLocalisationObjectOutline(rendering);
 
 				CustomLineMesh mesh = new CustomLineMesh(pointOutline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
@@ -477,7 +477,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			PeakResult r = results.get(index);
 
-			// Find in the list of selected 
+			// Find in the list of selected
 			int switchIndex = findSelected(r);
 
 			if (switchIndex == -1)
@@ -615,7 +615,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// Find all those currently selected (old selection)
 			int NO_ENTRY = -1;
-			TObjectIntHashMap<PeakResult> oldSelection = new TObjectIntHashMap<PeakResult>(selected.size(), 0.5f,
+			TObjectIntHashMap<PeakResult> oldSelection = new TObjectIntHashMap<>(selected.size(), 0.5f,
 					NO_ENTRY);
 			for (int i = 0; i < selected.size(); i++)
 			{
@@ -635,7 +635,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 
 			// Process the new selection, checking if already selected.
-			TurboList<PeakResult> toSelect = new TurboList<PeakResult>(indices.length);
+			TurboList<PeakResult> toSelect = new TurboList<>(indices.length);
 			for (int i = 0; i < indices.length; i++)
 			{
 				PeakResult r = peakResultTableModel.get(indices[i]);
@@ -729,10 +729,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private final static Transform3D IDENTITY = new Transform3D();
 
-	// No ned to store this in settings as when the plugin is first run there are no windows 
+	// No ned to store this in settings as when the plugin is first run there are no windows
 	private static String lastWindow = "";
 
-	private static HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables = new HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>>();
+	private static HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables = new HashMap<>();
 	private static ResultsTableSettings.Builder resultsTableSettings;
 	private static boolean addToSelection;
 	private static Color3f highlightColor = null;
@@ -757,7 +757,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -789,11 +789,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		addToSelection = settings.getAddToSelection();
 
-		// Get a list of the window titles available. Allow the user to select 
+		// Get a list of the window titles available. Allow the user to select
 		// an existing window or a new one.
 		String title = TITLE;
-		List<Image3DUniverse> univList = new TurboList<Image3DUniverse>();
-		List<String> titleList = new TurboList<String>();
+		List<Image3DUniverse> univList = new TurboList<>();
+		List<String> titleList = new TurboList<>();
 		titleList.add("New window");
 		buildWindowList(title, univList, titleList);
 		String[] titles = titleList.toArray(new String[titleList.size()]);
@@ -1170,7 +1170,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
 		if (t == null)
 		{
-			t = new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(
+			t = new Triplet<>(
 					new PeakResultTableModel(results, false,
 							// Note the settings do not matter until the table is set live
 							resultsTableSettings.build()),
@@ -1302,7 +1302,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				float x = peakResult.getParameterDeviation(PeakResult.X);
 				float y = peakResult.getParameterDeviation(PeakResult.Y);
 				float z = peakResult.getParameterDeviation(PeakResult.Z);
-				// Check x & y are not zero. 
+				// Check x & y are not zero.
 				// This should be OK as 2D fitting should provide these.
 				if (x == 0 || y == 0)
 					return true;
@@ -1399,7 +1399,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		float[] alpha = new float[intensity.length];
 		for (int i = 0; i < alpha.length; i++)
 		{
-			// Lowest intensity has lowest alpha (more transparent) 
+			// Lowest intensity has lowest alpha (more transparent)
 			alpha[i] = (float) (minA + range * (intensity[i] - min));
 		}
 		return alpha;
@@ -1469,7 +1469,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		float[] alpha = new float[d.length];
 		for (int i = 0; i < alpha.length; i++)
 		{
-			// Largest distance has lowest alpha (more transparent) 
+			// Largest distance has lowest alpha (more transparent)
 			alpha[i] = (float) (minA + range * (max - d[i]));
 		}
 		return alpha;
@@ -1486,7 +1486,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	static TurboList<Point3f> getPoints(MemoryPeakResults results, ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
-		final TurboList<Point3f> points = new TurboList<Point3f>(results.size());
+		final TurboList<Point3f> points = new TurboList<>(results.size());
 		if (results.is3D())
 		{
 			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
@@ -1600,7 +1600,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// We need to know if point is in-front of the eye or behind.
 			// Compute dot product (if positive then this is an acute angle).
 			// We use a descending sort so acute angles (in front of the eye)
-			// should be higher (ranked first) and obtuse angles (behind the 
+			// should be higher (ranked first) and obtuse angles (behind the
 			// eye) ranked later.
 			if (v2.dot(direction) < 0)
 				d[i] = -d[i];
@@ -1628,7 +1628,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		PeakResult[] originalPeakResults = results.toArray();
 		Point3f[] originalPoints = points.toArray(new Point3f[points.size()]);
 
-		// We need another array to store the output 
+		// We need another array to store the output
 		PeakResult[] peakResults = new PeakResult[originalPeakResults.length];
 
 		// Rewrite order
@@ -1817,7 +1817,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static HashMap<String, Color3f> colours;
 	static
 	{
-		colours = new HashMap<String, Color3f>();
+		colours = new HashMap<>();
 		Field[] fields = Color.class.getFields();
 		for (Field field : fields)
 		{
@@ -2100,7 +2100,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 				if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown()))
 					return false;
-				if ( //resultsTableSettings.getShowTable() && 
+				if ( //resultsTableSettings.getShowTable() &&
 				e.getClickCount() == 1)
 					return true;
 				if (e.getClickCount() == 2)
@@ -2118,12 +2118,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (l[i].getClass().getName().contains("Image3DUniverse"))
 			{
 				// We want to be before the Image3DUniverse to allow consuming the click event.
-				// Only allow the click event. 
-				// This disables the right-click pop-up menu. 
-				// It doesn't have anything of use for localisations anyway. 
+				// Only allow the click event.
+				// This disables the right-click pop-up menu.
+				// It doesn't have anything of use for localisations anyway.
 				canvas.removeMouseListener(l[i]);
 				canvas.addMouseListener(mouseListener);
-				canvas.addMouseListener(new MouseListenerWrapper(l[i], 
+				canvas.addMouseListener(new MouseListenerWrapper(l[i],
 						MouseListenerWrapper.MOUSE_CLICKED
 						//|MouseListenerWrapper.MOUSE_PRESSED|MouseListenerWrapper.MOUSE_RELEASED
 						));
@@ -2133,13 +2133,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// 0 = ImageCanvas3D
 		// 1 = DefaultUniverse
 		// 2 = Image3DUniverse
-		// 3 = EventCatcher	(from scijava)	
+		// 3 = EventCatcher	(from scijava)
 		MouseMotionListener[] ml = canvas.getMouseMotionListeners();
 		for (int i = 0; i < ml.length; i++)
 		{
 			if (ml[i].getClass().getName().contains("Image3DUniverse"))
 			{
-				// Ignore this as it just shows the name in the IJ status bar 
+				// Ignore this as it just shows the name in the IJ status bar
 				canvas.removeMouseMotionListener(ml[i]);
 			}
 		}
@@ -2169,7 +2169,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static PeakResultTableModelFrame findTable(ResultsMetaData data)
 	{
 		// There is a single TableModel and SelectionModel for each unique results set.
-		// This may be displayed in a window. 
+		// This may be displayed in a window.
 		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
 		PeakResultTableModelFrame table = t.c;
 		if (table != null && table.isVisible())
@@ -2220,7 +2220,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		});
 		table.setVisible(true);
 		resultsTables.put(data.digest,
-				new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(t.a, t.b, table));
+				new Triplet<>(t.a, t.b, table));
 
 		return table;
 	}
@@ -2395,7 +2395,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * Get the Content and closest intersection point at the specified canvas position
 	 * <p>
 	 * Adapted from Picker.getPickedContent(...).
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @return the Content and closest intersection point
@@ -2406,7 +2406,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final PickCanvas pickCanvas = new PickCanvas(canvas, scene);
 		pickCanvas.setMode(PickInfo.PICK_GEOMETRY);
 		pickCanvas.setFlags(PickInfo.SCENEGRAPHPATH |
-				//PickInfo.CLOSEST_INTERSECTION_POINT | 
+				//PickInfo.CLOSEST_INTERSECTION_POINT |
 				PickInfo.CLOSEST_GEOM_INFO);
 		pickCanvas.setTolerance(3);
 		pickCanvas.setShapeLocation(x, y);
@@ -2424,7 +2424,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 						c = (Content) path.getNode(j);
 				if (c == null)
 					continue;
-				return new Pair<Content, IntersectionInfo>(c, result[i].getIntersectionInfos()[0]);
+				return new Pair<>(c, result[i].getIntersectionInfos()[0]);
 			}
 			return null;
 		}
@@ -2436,7 +2436,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	/**
 	 * Creates the SMLM menu bar.
-	 * 
+	 *
 	 * @param univ
 	 *
 	 * @return the menu bar
@@ -2539,7 +2539,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		/**
 		 * Run the action
-		 * 
+		 *
 		 * @param c
 		 *            The content
 		 * @return negative for error. No further content can be processed.
@@ -2977,7 +2977,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			if (!identity)
 			{
-				// Since we require the eye-point relative to the local world 
+				// Since we require the eye-point relative to the local world
 				// the matrix is inverted
 				vWorldToLocal.invert();
 				vWorldToLocal.transform(eye);
@@ -2988,7 +2988,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			direction = new Vector3d();
 			direction.sub(dir1InLocalWorld, dir0InLocalWorld);
 
-			// Print the eye coords and direction in the virtual world. 
+			// Print the eye coords and direction in the virtual world.
 			// This can be used for a custom sort.
 			//Utils.log("%s : Eye point = %s : Direction = %s", c.getName(), eye, direction);
 			Rounder rounder = RounderFactory.create(4);
@@ -3073,7 +3073,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// We reorder the data that is used to create colours and clicked point size.
 			// This is not needed for the ItemGeometryNode as it uses the indices directly.
 			// Do this second as points is updated in-line so may break reordering the mesh
-			// if it has a reference to the points list (e.g. ItemPointMesh initially uses 
+			// if it has a reference to the points list (e.g. ItemPointMesh initially uses
 			// the points list but will create a new internal list when it is re-ordered).
 			if (reorderData)
 				reorder(indices, data);
@@ -3181,7 +3181,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			ResultsMetaData data = (ResultsMetaData) c.getUserData();
 
-			// Transform all points to the image plate and test if they are in the ROI 
+			// Transform all points to the image plate and test if they are in the ROI
 			MemoryPeakResults results = data.results;
 			TurboList<Point3f> points = data.points;
 			MemoryPeakResults newResults = new MemoryPeakResults();
@@ -3292,7 +3292,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
@@ -3607,7 +3607,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	@SuppressWarnings("unused")
 	private static Shape3D createShape(Builder settings)
 	{
-		TurboList<Point3f> points = new TurboList<Point3f>(1);
+		TurboList<Point3f> points = new TurboList<>(1);
 		points.addf(new Point3f());
 
 		// We try and match the geometry and appearance of the standard mesh.
@@ -3675,7 +3675,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static ItemMesh createItemMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
 			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
 	{
-		// This may work 
+		// This may work
 		//int MAX_ARRAY_SIZE = 1 << 28;
 		// This is a safe limit (2^27)
 		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
@@ -3688,7 +3688,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		Appearance appearance = shape.getAppearance();
 
 		// Estimate the largest array required for the data.
-		// The mesh is created by reference using an array for coords, normals and colors. 
+		// The mesh is created by reference using an array for coords, normals and colors.
 
 		int singlePointVertexSize = ga.getValidVertexCount();
 		int singlePointIndexSize = 0;
@@ -3696,7 +3696,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		int stride = Math.max(3, colorDepth);
 		if (ga instanceof IndexedGeometryArray)
 		{
-			// Indexed arrays may have much larger index array than the vertex array 
+			// Indexed arrays may have much larger index array than the vertex array
 			singlePointIndexSize = ((IndexedGeometryArray) ga).getIndexCount();
 		}
 
@@ -3758,7 +3758,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
 			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
 	{
-		// This may work 
+		// This may work
 		//int MAX_ARRAY_SIZE = 1 << 28;
 		// This is a safe limit (2^27)
 		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
@@ -3806,8 +3806,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// There does not appear to be a difference in the speed the image responds
 		// to user interaction between indexed or standard triangles.
 
-		// Currently the RepeatedIndexedTriangleMesh computes the normals a different way to 
-		// the super class to preserve the orientation of the normals. So if the coordinates 
+		// Currently the RepeatedIndexedTriangleMesh computes the normals a different way to
+		// the super class to preserve the orientation of the normals. So if the coordinates
 		// are modified through the mesh then the appearance will change. For now just use
 		// the RepeatedTriangleMesh.
 

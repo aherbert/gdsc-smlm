@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -216,7 +216,7 @@ public class FisherInformationMatrix
 	 * inverted Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the central diagonal returned.
-	 * 
+	 *
 	 * @return CRLB (or null if inversion failed)
 	 */
 	public double[] crlb()
@@ -256,7 +256,7 @@ public class FisherInformationMatrix
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
-	 * 
+	 *
 	 * The information matrix is NOT inverted. The reciprocal of the central diagonal returned for a
 	 * (possibly loose) lower bound.
 	 *
@@ -275,7 +275,7 @@ public class FisherInformationMatrix
 	 * Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the central diagonal returned.
-	 * 
+	 *
 	 * @return CRLB (or null if inversion failed)
 	 */
 	public double[] crlbSqrt()
@@ -318,7 +318,7 @@ public class FisherInformationMatrix
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central diagonal of
 	 * the Fisher information matrix.
-	 * 
+	 *
 	 * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central diagonal returned
 	 * for a (possibly loose) lower bound.
 	 *
@@ -335,7 +335,7 @@ public class FisherInformationMatrix
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
-	 * 
+	 *
 	 * The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned for a (possibly
 	 * loose) lower bound.
 	 *
@@ -355,7 +355,7 @@ public class FisherInformationMatrix
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
-	 * 
+	 *
 	 * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central diagonal returned
 	 * for a (possibly loose) lower bound.
 	 *

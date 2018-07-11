@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,20 +29,20 @@ import gdsc.core.logging.Logger;
 
 /**
  * Defines the stopping criteria for the {@link gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
- * 
+ *
  * <pre>
  * {@code
  * StoppingCritera sc; // Passed in
- * 
+ *
  * double oldError = // ... Initialised;
  * sc.initialise(a);
- * while (sc.areNotSatisfied()) 
+ * while (sc.areNotSatisfied())
  * {
  *     // do fitting
  *     newError = fit(...);
- *         	
+ *
  *     sc.evaluate(oldError, newError, a);
- *     
+ *
  *     // Set best error and update parameters a
  *     if (newError < oldError)
  *     {
@@ -50,7 +50,7 @@ import gdsc.core.logging.Logger;
  *         ...
  *     }
  * }
- *  
+ *
  * if (sc.areAchieved())
  *     // ... Do something
  * }
@@ -69,7 +69,7 @@ public abstract class StoppingCriteria
 	/**
 	 * Called at the start of the fit. It should be used to reset all
 	 * iteration counters.
-	 * 
+	 *
 	 * @param a
 	 *            Set of m coefficients for the fit
 	 */
@@ -83,7 +83,7 @@ public abstract class StoppingCriteria
 
 	/**
 	 * Perform a deep copy of the fit coefficients array and store in a variable for later comparison
-	 * 
+	 *
 	 * @param a
 	 */
 	protected void copyCoefficients(double[] a)
@@ -99,7 +99,7 @@ public abstract class StoppingCriteria
 	 * If the fitting process appears to be failing then notSatisfied can be set to false to stop iterating.
 	 * <p>
 	 * Note that if the error value is higher the NonLinearFit class will not update the fit coefficients.
-	 * 
+	 *
 	 * @param oldError
 	 *            Previous error value for the fit
 	 * @param newError
@@ -114,7 +114,7 @@ public abstract class StoppingCriteria
 	 * if the fit was improved.
 	 * <p>
 	 * Sets the notSatisfied flag to false if the maximum number of iterations is reached.
-	 * 
+	 *
 	 * @param a
 	 *            The parameters
 	 * @param improved
@@ -133,7 +133,7 @@ public abstract class StoppingCriteria
 
 	/**
 	 * Called after each {@link #evaluate(double, double, double[]) } method to check if the fitting should continue
-	 * 
+	 *
 	 * @return True if the stopping criteria have not been met (i.e. fitting should continue)
 	 */
 	public boolean areNotSatisfied()
@@ -144,7 +144,7 @@ public abstract class StoppingCriteria
 	/**
 	 * Called once {@link #areNotSatisfied()} returns false to check if the stopping criteria were
 	 * successfully achieved or the fitting was terminated.
-	 * 
+	 *
 	 * @return True if the stopping criteria are achieved
 	 */
 	public boolean areAchieved()
@@ -181,7 +181,7 @@ public abstract class StoppingCriteria
 	 * Use this to pass in a recommended minimum number of iterations to the stopping criteria
 	 * <p>
 	 * Note: Implementing classes may ignore this parameter
-	 * 
+	 *
 	 * @param minimumIterations
 	 *            the minimumIterations to set
 	 */

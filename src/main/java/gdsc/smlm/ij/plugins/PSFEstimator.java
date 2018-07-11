@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -112,7 +112,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -156,7 +156,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	 */
 	private int showDialog(ImagePlus imp)
 	{
-		// Keep class variables for the parameters we are fitting 
+		// Keep class variables for the parameters we are fitting
 		final FitConfiguration fitConfig = config.getFitConfiguration();
 		initialPeakStdDev0 = 1;
 		initialPeakStdDev1 = 1;
@@ -169,7 +169,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 		catch (IllegalStateException e)
 		{
-			// Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF 
+			// Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
 		}
 
 		if (!extraOptions)
@@ -221,7 +221,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
-		// Parameters specific to each Fit solver are collected in a second dialog 
+		// Parameters specific to each Fit solver are collected in a second dialog
 
 		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
 		gd.addNumericField("Pass_rate", config.getPassRate(), 2);
@@ -385,7 +385,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	@Override
@@ -515,7 +515,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		if (ignore[ANGLE])
 			return tryAgain;
 
-		// The angle is relative to the major axis (X). 
+		// The angle is relative to the major axis (X).
 		// It could be close to 0, 90 or 180 to allow it to be ignored in favour of a free circular function.
 
 		final double[] angles = sampleNew[ANGLE].getValues();
@@ -592,8 +592,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		if (sample1.getN() < 2)
 			return;
 
-		// The number returned is the smallest significance level at which one can reject the null 
-		// hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative 
+		// The number returned is the smallest significance level at which one can reject the null
+		// hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative
 		// that the mean paired difference is not equal to 0. For a one-sided test, divide the returned value by 2
 		p[i] = TestUtils.tTest(sample1, sample2);
 		identical[i] = (p[i] > settings.getPValue());
@@ -605,8 +605,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		if (sample1.getN() < 2)
 			return;
 
-		// The number returned is the smallest significance level at which one can reject the null 
-		// hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative 
+		// The number returned is the smallest significance level at which one can reject the null
+		// hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative
 		// that the mean paired difference is not equal to 0. For a one-sided test, divide the returned value by 2
 		p[i] = TestUtils.pairedTTest(sample1.getValues(), sample2.getValues());
 		identical[i] = (p[i] > settings.getPValue());
@@ -828,7 +828,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -897,7 +897,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	@Override
@@ -908,26 +908,26 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	public void setSource(String source)
 	{
-		// Ignored		
+		// Ignored
 	}
 
 	@Override
 	public ImageSource getSource()
 	{
-		// Ignored		
+		// Ignored
 		return null;
 	}
 
 	@Override
 	public void setBounds(Rectangle bounds)
 	{
-		// Ignored		
+		// Ignored
 	}
 
 	@Override
 	public Rectangle getBounds()
 	{
-		// Ignored		
+		// Ignored
 		return null;
 	}
 
@@ -947,7 +947,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	@Override
 	public void setConfiguration(String configuration)
 	{
-		// Ignored		
+		// Ignored
 	}
 
 	@Override

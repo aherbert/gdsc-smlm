@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,7 +32,7 @@ import gdsc.smlm.utils.Pair;
  * Allow processing work in stages, repeating only the stages necessary to render new results given changes to settings.
  * This class is designed to be used to allow live display of results upon settings changes by running the analysis on
  * worker threads.
- * 
+ *
  * @author Alex Herbert
  */
 public class Workflow<S, R>
@@ -186,10 +186,10 @@ public class Workflow<S, R>
 					else
 					{
 						// Pass through the new settings with the existing results.
-						// This allows a worker to ignore settings changes that do not effect 
+						// This allows a worker to ignore settings changes that do not effect
 						// its results but pass the new settings to downstream workers.
 						debug(" Updating existing result");
-						result = new Work(new Pair<S, R>(work.getSettings(), result.getResults()));
+						result = new Work(new Pair<>(work.getSettings(), result.getResults()));
 					}
 					lastWork = work;
 					// Add the result to the output
@@ -231,7 +231,7 @@ public class Workflow<S, R>
 			if (!worker.equalSettings(work.getSettings(), lastWork.getSettings()))
 				return false;
 
-			// We can compare these here using object references. 
+			// We can compare these here using object references.
 			// Any new results passed in will trigger equals to fail.
 			boolean result = worker.equalResults(work.getResults(), lastWork.getResults());
 			if (!result)
@@ -249,7 +249,7 @@ public class Workflow<S, R>
 
 	private WorkStack inputStack = new WorkStack();
 	private ArrayList<Thread> threads;
-	private ArrayList<RunnableWorker> workers = new ArrayList<RunnableWorker>();
+	private ArrayList<RunnableWorker> workers = new ArrayList<>();
 	private long delay = 0;
 
 	/** The debug flag. Set to true to allow print statements during operation. */
@@ -363,7 +363,7 @@ public class Workflow<S, R>
 
 	private ArrayList<Thread> startWorkers(ArrayList<RunnableWorker> workers)
 	{
-		ArrayList<Thread> threads = new ArrayList<Thread>();
+		ArrayList<Thread> threads = new ArrayList<>();
 		for (RunnableWorker w : workers)
 		{
 			Thread t = new Thread(w);
@@ -441,7 +441,7 @@ public class Workflow<S, R>
 	 */
 	public void run(S settings, R results)
 	{
-		inputStack.addWork(new Work(getTimeout(), new Pair<S, R>(settings, results)));
+		inputStack.addWork(new Work(getTimeout(), new Pair<>(settings, results)));
 	}
 
 	/**
@@ -465,7 +465,7 @@ public class Workflow<S, R>
 	 */
 	public void stage(S settings, R results)
 	{
-		inputStack.setWork(new Work(getTimeout(), new Pair<S, R>(settings, results)));
+		inputStack.setWork(new Work(getTimeout(), new Pair<>(settings, results)));
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Generate the name of the filter using the filter settings (defaults to the first parameter)
-	 * 
+	 *
 	 * @return The name of the filter
 	 */
 	protected String generateName()
@@ -63,7 +63,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Generate the type of the filter using the filter settings (default to the class name with 'Filter' removed)
-	 * 
+	 *
 	 * @return The type of the filter
 	 */
 	protected String generateType()
@@ -73,7 +73,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Filter the results
-	 * 
+	 *
 	 * @param results
 	 * @return the filtered results
 	 */
@@ -100,7 +100,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
-	 * 
+	 *
 	 * @param results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
@@ -155,7 +155,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Note that this method is to be used to score a set of results that may have been extracted from a larger set
 	 * since the number of consecutive failures before each peak are expected to be stored in the origY property. Set
 	 * this to zero and the results should be identical to {@link #filter(MemoryPeakResults, int)}
-	 * 
+	 *
 	 * @param results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
@@ -217,7 +217,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
 	 * <p>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
-	 * 
+	 *
 	 * @param results
 	 * @param score
 	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
@@ -296,7 +296,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * this to zero and the results should be identical to {@link #filterSubset(MemoryPeakResults, double[])}.
 	 * <p>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
-	 * 
+	 *
 	 * @param results
 	 * @param score
 	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
@@ -373,7 +373,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
-	 * 
+	 *
 	 * @param results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
@@ -461,7 +461,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * this to zero and the results should be identical to {@link #filterSubset(MemoryPeakResults, int, double[])}.
 	 * <p>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
-	 * 
+	 *
 	 * @param results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
@@ -541,7 +541,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * Any input PeakResult with an original value that is not zero will be treated as a true result, all other results
 	 * are false. The filter is run and the results are marked as true positive, false negative and false positive.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @return the score
@@ -586,7 +586,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * Any input PeakResult with an original value that is not zero will be treated as a true result, all other results
 	 * are false. The filter is run and the results are marked as true positive, false negative and false positive.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @param tn
@@ -640,7 +640,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @param failures
@@ -719,7 +719,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Note that this method is to be used to score a subset that was generated using
 	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
 	 * expected to be stored in the origX property.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @param failures
@@ -804,7 +804,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @param failures
@@ -884,7 +884,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Note that this method is to be used to score a set of results that may have been extracted from a larger set
 	 * since the number of consecutive failures before each peak are expected to be stored in the origY property. Set
 	 * this to zero and the results should be identical to {@link #fractionScore(List, int)}.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @param failures
@@ -966,7 +966,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Note that this method is to be used to score a subset that was generated using
 	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
 	 * expected to be stored in the origX property.
-	 * 
+	 *
 	 * @param resultsList
 	 *            a list of results to analyse
 	 * @param failures
@@ -1044,14 +1044,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Called before the accept method is called for each peak in the results. Allows pre-processing of the results.
-	 * 
+	 *
 	 * @param peakResults
 	 */
 	public abstract void setup(MemoryPeakResults peakResults);
 
 	/**
 	 * Called for each peak in the results that are filtered.
-	 * 
+	 *
 	 * @param peak
 	 * @return true if the peak should be accepted, otherwise false to reject.
 	 */
@@ -1067,7 +1067,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * The numerical value of the filter (defaults to the first parameter)
-	 * 
+	 *
 	 * @return The numerical value of the filter. Used for plotting value against performance score.
 	 */
 	public double getNumericalValue()
@@ -1077,7 +1077,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * The name of the numerical value of the filter (defaults to the first parameter)
-	 * 
+	 *
 	 * @return The name of the numerical value of the filter. Used for plotting value against performance score.
 	 */
 	public String getNumericalValueName()
@@ -1131,7 +1131,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Create the filter from the XML representation
-	 * 
+	 *
 	 * @param xml
 	 * @return the filter
 	 */
@@ -1161,7 +1161,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
@@ -1199,7 +1199,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
 	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not
 	 * match then return 0. If the other filter is null return -1.
-	 * 
+	 *
 	 * @param o
 	 *            The other filter
 	 * @return the count difference
@@ -1245,7 +1245,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * parameters. If positive then this filter has less weak parameters.
 	 * <p>
 	 * This method does not check for null or if the other filter has a different number of parameters.
-	 * 
+	 *
 	 * @param o
 	 *            The other filter
 	 * @return the count difference
@@ -1291,7 +1291,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Get the parameter value.
-	 * 
+	 *
 	 * @param index
 	 * @return The value of the specified parameter
 	 */
@@ -1303,7 +1303,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Get the parameter value. The index should always be between 0 and {@link #getNumberOfParameters()}
-	 * 
+	 *
 	 * @param index
 	 * @return The value of the specified parameter
 	 */
@@ -1325,7 +1325,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Get the recommended minimum amount by which to increment the parameter
-	 * 
+	 *
 	 * @param index
 	 * @return The increment value of the specified parameter
 	 */
@@ -1335,7 +1335,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Return a value to use to disable the parameter
 	 * <p>
 	 * Override this method if zero does not disable the parameter
-	 * 
+	 *
 	 * @param index
 	 * @return The disabled value of the specified parameter
 	 */
@@ -1369,7 +1369,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Filters can adjust the parameter by a different amount, e.g. by the delta multiplied by a range expected to
 	 * change the filter performance. This may be relevant in the case where the value is presently zero since no
 	 * relative change is possible.
-	 * 
+	 *
 	 * @param index
 	 *            The parameter index
 	 * @param delta
@@ -1383,7 +1383,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * A positive delta will adjust the parameter to be larger. A negative delta will adjust the parameter to be
 	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
-	 * 
+	 *
 	 * @param value
 	 * @param delta
 	 * @param defaultRange
@@ -1403,7 +1403,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * <p>
 	 * A positive delta will adjust the parameter to be larger. A negative delta will adjust the parameter to be
 	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
-	 * 
+	 *
 	 * @param value
 	 * @param delta
 	 * @param defaultRange
@@ -1424,7 +1424,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * A positive delta will adjust the parameter to be larger. A negative delta will adjust the parameter to be
 	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%. The adjustment is rounded up to the
 	 * next valid integer to ensure a new parameter value is created.
-	 * 
+	 *
 	 * @param value
 	 * @param delta
 	 * @param defaultRange
@@ -1458,7 +1458,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Create a new filter with the specified parameters
-	 * 
+	 *
 	 * @param parameters
 	 * @return A new filter
 	 */
@@ -1486,7 +1486,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Update the input array if the Filter's parameters are weaker. This method can be used to find the weakest
 	 * parameters across a set of filters of the same type. The weakest filter can then be used to create a subset of
 	 * pre-filtered results to use for testing the filter set.
-	 * 
+	 *
 	 * @param parameters
 	 *            The parameters
 	 */
@@ -1532,7 +1532,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Some filters requires all the data in a subset for scoring analysis. Others can create a subset using the fail
 	 * count parameter for a smaller subset that will evaluate faster. This method returns true if the subset can be
 	 * created using the fail count parameter that will be used to score the subset.
-	 * 
+	 *
 	 * @return True if the {@link #filterSubset(MemoryPeakResults, int, double[])} is valid
 	 */
 	public boolean subsetWithFailCount()
@@ -1542,7 +1542,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
 	@Override
@@ -1554,7 +1554,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
 	@Override
@@ -1566,7 +1566,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#newChromosome(double[])
 	 */
 	@Override
@@ -1577,7 +1577,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#lowerLimit()
 	 */
 	@Override
@@ -1589,7 +1589,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#upperLimit()
 	 */
 	@Override
@@ -1601,7 +1601,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#setFitness(double)
 	 */
 	@Override
@@ -1612,7 +1612,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#getFitness()
 	 */
 	@Override
@@ -1624,7 +1624,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	/**
 	 * Return the Manhattan (city-block) distance between two chromosomes. This measure is intended to return if the
 	 * sequences are the same (zero distance) or not). It is not intended for use in distance analysis.
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#distance(gdsc.smlm.ga.Chromosome)
 	 */
 	@Override
@@ -1644,7 +1644,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#equals(gdsc.smlm.ga.Chromosome)
 	 */
 	@Override
@@ -1664,7 +1664,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	/**
 	 * Get the indices of the parameters that are included in the Chromosome interface. This can be used to look up the
 	 * name of the parameter using {@link #getParameterName(int)}.
-	 * 
+	 *
 	 * @return The indices of the parameters that are included in the Chromosome interface
 	 */
 	public int[] getChromosomeParameters()
@@ -1675,7 +1675,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Return the value or Float.POSITIVE_INFINITY if value is not positive
-	 * 
+	 *
 	 * @param value
 	 * @return The limit
 	 */
@@ -1689,7 +1689,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Return the value squared or Float.POSITIVE_INFINITY if value is not positive
-	 * 
+	 *
 	 * @param value
 	 * @return The squared limit
 	 */
@@ -1703,7 +1703,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Return the value or Double.POSITIVE_INFINITY if value is not positive
-	 * 
+	 *
 	 * @param value
 	 * @return The limit
 	 */
@@ -1717,7 +1717,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/**
 	 * Return the value squared or Double.POSITIVE_INFINITY if value is not positive
-	 * 
+	 *
 	 * @param value
 	 * @return The squared limit
 	 */
@@ -1778,7 +1778,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override

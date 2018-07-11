@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -101,9 +101,9 @@ public class PoissonPoissonFunctionTest
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
 
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
@@ -121,7 +121,7 @@ public class PoissonPoissonFunctionTest
 			//	Assert.fail("P > 1: " + p);
 		}
 
-		// We have most of the likelihood density. 
+		// We have most of the likelihood density.
 		// Now keep evaluating up and down until no difference
 		final double changeTolerance = 1e-6;
 		for (int x = min - 1;; x--)
@@ -165,9 +165,9 @@ public class PoissonPoissonFunctionTest
 		// Note: The input s parameter is pre-gain.
 		PoissonPoissonFunction f = PoissonPoissonFunction.createWithStandardDeviation(1.0 / gain, s * gain);
 
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
 		int min = range[0];

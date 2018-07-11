@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -39,7 +39,7 @@ public class SkewNormalFunction
 
 	/**
 	 * Create a function with the given parameters
-	 * 
+	 *
 	 * @param parameters
 	 *            [amplitude, location, scale, alpha]
 	 */
@@ -50,7 +50,7 @@ public class SkewNormalFunction
 
 	/**
 	 * Set the parameters
-	 * 
+	 *
 	 * @param parameters
 	 *            [amplitude, location, scale, alpha]
 	 */
@@ -93,7 +93,7 @@ public class SkewNormalFunction
 
 	/**
 	 * Evaluates the skewed Gaussian at the given point * @param x
-	 * 
+	 *
 	 * @return
 	 */
 	public double evaluate(double x)
@@ -103,7 +103,7 @@ public class SkewNormalFunction
 
 	/**
 	 * Evaluates the skewed Gaussian at the given point
-	 * 
+	 *
 	 * @param x
 	 * @param parameters
 	 *            [amplitude, location, scale, alpha]
@@ -116,7 +116,7 @@ public class SkewNormalFunction
 
 	/**
 	 * Evaluates the skewed Gaussian at the given point
-	 * 
+	 *
 	 * @param x
 	 * @param amplitude
 	 * @param location
@@ -134,13 +134,13 @@ public class SkewNormalFunction
 
 	/**
 	 * Probability density function of the Gaussian
-	 * 
+	 *
 	 * @param x
 	 * @return
 	 */
 	private static double normal(double x)
 	{
-		// 1/sqrt(2*pi) = 0.39894228 
+		// 1/sqrt(2*pi) = 0.39894228
 		//return 0.39894228 * FastMath.exp(-0.5 * x*x);
 
 		// Do not normalise the area under the graph to 1. This allows the amplitude to be correctly modelled.
@@ -149,13 +149,13 @@ public class SkewNormalFunction
 
 	/**
 	 * Cumulative distribution function of the gaussian
-	 * 
+	 *
 	 * @param x
 	 * @return
 	 */
 	private static double cumul(double x)
 	{
-		// 1/sqrt(2) = 0.707106781 
+		// 1/sqrt(2) = 0.707106781
 		return 0.5 * (1 + Erf.erf(x * 0.707106781));
 	}
 }

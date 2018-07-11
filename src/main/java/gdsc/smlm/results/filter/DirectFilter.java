@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,7 +40,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup()
 	 */
 	@Override
@@ -50,7 +50,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int)
 	 */
 	@Override
@@ -60,7 +60,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int, gdsc.smlm.results.filter.FilterSetupData[])
 	 */
 	@Override
@@ -70,7 +70,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFlags()
 	 */
 	@Override
@@ -81,7 +81,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
 	 */
 	@Override
@@ -104,7 +104,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/**
 	 * Check if all of the given bits are set in the flags
-	 * 
+	 *
 	 * @param flags
 	 * @param bits
 	 * @return True if all are set
@@ -116,7 +116,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/**
 	 * Check if any of the given bits are set in the flags
-	 * 
+	 *
 	 * @param flags
 	 * @param bits
 	 * @return True if any are set
@@ -128,7 +128,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#accept(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	@Override
@@ -139,7 +139,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	@Override
@@ -147,7 +147,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getFilterType()
 	 */
 	@Override
@@ -158,7 +158,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getResult()
 	 */
 	@Override
@@ -169,7 +169,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#copy()
 	 */
 	@Override
@@ -180,7 +180,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/**
 	 * Generate a status message using all the properties of the peak that failed validation
-	 * 
+	 *
 	 * @param peak
 	 *            The peak
 	 * @param flags
@@ -228,7 +228,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 	/**
 	 * Generate a message using all flags that are set
-	 * 
+	 *
 	 * @param flags
 	 *            The validation flags
 	 * @return The message
@@ -348,7 +348,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * set) then default to the {@link #weakest(Filter)} method.
 	 * <p>
 	 * This method does not check for null or if the other filter has a different number of parameters.
-	 * 
+	 *
 	 * @param o
 	 *            The other filter
 	 * @return the count difference
@@ -369,7 +369,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 
 		//System.out.println("weakestUnsafe");
 
-		//int result = super.weakestUnsafe(o); 
+		//int result = super.weakestUnsafe(o);
 
 		if (this.strength < o.strength)
 		{

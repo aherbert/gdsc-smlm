@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -43,7 +43,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 {
 	/**
 	 * Default inverse cumulative probability accuracy.
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final double DEFAULT_INVERSE_ABSOLUTE_ACCURACY = 1e-9;
@@ -197,7 +197,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 
 	/**
 	 * Set the shape parameter
-	 * 
+	 *
 	 * @param shape
 	 * @throws NotStrictlyPositiveException
 	 *             if {@code shape <= 0}
@@ -215,7 +215,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 * Set the shape parameter
 	 * <p>
 	 * Does not throw an exception if shape is not strictly positive
-	 * 
+	 *
 	 * @param shape
 	 */
 	public void setShapeUnsafe(double shape)
@@ -250,7 +250,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 
 	/**
 	 * Set the scale parameter
-	 * 
+	 *
 	 * @param scale
 	 * @throws NotStrictlyPositiveException
 	 *             if {@code scale <= 0}
@@ -268,7 +268,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 * Set the scale parameter
 	 * <p>
 	 * Does not throw an exception if scale is not strictly positive
-	 * 
+	 *
 	 * @param scale
 	 */
 	public void setScaleUnsafe(double scale)
@@ -283,36 +283,36 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	{
 		/*
 		 * The present method must return the value of
-		 * 
+		 *
 		 * 1 x a - x
 		 * ---------- (-) exp(---)
 		 * x Gamma(a) b b
-		 * 
+		 *
 		 * where a is the shape parameter, and b the scale parameter.
 		 * Substituting the Lanczos approximation of Gamma(a) leads to the
 		 * following expression of the density
-		 * 
+		 *
 		 * a e 1 y a
 		 * - sqrt(------------------) ---- (-----------) exp(a - y + g),
 		 * x 2 pi (a + g + 0.5) L(a) a + g + 0.5
-		 * 
+		 *
 		 * where y = x / b. The above formula is the "natural" computation, which
 		 * is implemented when no overflow is likely to occur. If overflow occurs
 		 * with the natural computation, the following identity is used. It is
 		 * based on the BOOST library
 		 * http://www.boost.org/doc/libs/1_35_0/libs/math/doc/sf_and_dist/html/math_toolkit/special/sf_gamma/igamma.html
 		 * Formula (15) needs adaptations, which are detailed below.
-		 * 
+		 *
 		 * y a
 		 * (-----------) exp(a - y + g)
 		 * a + g + 0.5
 		 * y - a - g - 0.5 y (g + 0.5)
 		 * = exp(a log1pm(---------------) - ----------- + g),
 		 * a + g + 0.5 a + g + 0.5
-		 * 
+		 *
 		 * where log1pm(z) = log(1 + z) - z. Therefore, the value to be
 		 * returned is
-		 * 
+		 *
 		 * a e 1
 		 * - sqrt(------------------) ----
 		 * x 2 pi (a + g + 0.5) L(a)

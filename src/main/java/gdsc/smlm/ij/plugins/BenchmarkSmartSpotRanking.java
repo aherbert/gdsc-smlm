@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -163,7 +163,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	{
 		// Integer counts of positives (matches) and negatives
 		final int p, n;
-		// Double sums of the fractions match score and antiscore 
+		// Double sums of the fractions match score and antiscore
 		final double np, nn;
 		final ScoredSpot[] spots;
 
@@ -209,7 +209,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
 		final double[] zPosition;
 
-		ArrayList<RankResult> results = new ArrayList<RankResult>();
+		ArrayList<RankResult> results = new ArrayList<>();
 
 		public RankResults(ScoredSpot[] spots, double[] zPosition)
 		{
@@ -244,14 +244,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			this.stack = stack;
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
-			this.results = new TIntObjectHashMap<RankResults>();
+			this.results = new TIntObjectHashMap<>();
 			fitting = config.getFittingWidth();
 			requireSNR = (levels.length > 0);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -515,7 +515,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -722,9 +722,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-		List<Worker> workers = new LinkedList<Worker>();
-		List<Thread> threads = new LinkedList<Thread>();
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		List<Worker> workers = new LinkedList<>();
+		List<Thread> threads = new LinkedList<>();
 		for (int i = 0; i < nThreads; i++)
 		{
 			Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates);
@@ -778,7 +778,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		IJ.showStatus("Collecting results ...");
 
 		rankResultsId++;
-		rankResults = new TIntObjectHashMap<RankResults>();
+		rankResults = new TIntObjectHashMap<>();
 		for (Worker w : workers)
 		{
 			rankResults.putAll(w.results);
@@ -792,17 +792,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	/**
 	 * Extract all the filter candidates in order until the desired number of positives have been reached and the number
 	 * of negatives matches the configured parameters.
-	 * 
+	 *
 	 * @param filterResults
 	 * @return The filter candidates
 	 */
 	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults)
 	{
-		// Convert fractions from percent 
+		// Convert fractions from percent
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
-		final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<FilterCandidates>();
+		final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<>();
 		fP = fN = 0;
 		nP = nN = 0;
 		final double[] fX = new double[2];
@@ -953,10 +953,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	{
 		createTable();
 
-		// Summarise the ranking results. 
+		// Summarise the ranking results.
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.resultPrefix);
 
-		// nP and nN is the fractional score of the spot candidates 
+		// nP and nN is the fractional score of the spot candidates
 		addCount(sb, nP + nN);
 		addCount(sb, nP);
 		addCount(sb, nN);
@@ -1063,24 +1063,24 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		// ---
 
 		// Do a full benchmark through different Spot SNR, image sizes, densities and mask structures and see if there are patterns
-		// for a good threshold method.		
+		// for a good threshold method.
 
-		// --- 
+		// ---
 
 		// Allow using the fitted results from benchmark spot fit. Will it make a difference if we fit the candidates (some will fail
 		// if weak).
 		// Can this be done by allowing the user to select the input (spot candidates or fitted positions)?
 
-		// Perhaps I need to produce a precision estimate for all simulated spots and then only use those that achieve a certain 
+		// Perhaps I need to produce a precision estimate for all simulated spots and then only use those that achieve a certain
 		// precision, i.e. are reasonably in focus. Can this be done? Does the image PSF have a width estimate for the entire stack?
 
 		// Perhaps I should filter, fit and then filter all spots using no fail count. These then become the spots to work with
-		// for creating a smart fail count filter. 
+		// for creating a smart fail count filter.
 
 		// ---
 
 		// Pre-compute the results and have optional sort
-		ArrayList<ScoredResult> list = new ArrayList<ScoredResult>(methodNames.length);
+		ArrayList<ScoredResult> list = new ArrayList<>(methodNames.length);
 
 		for (int i = 0; i < methodNames.length; i++)
 		{

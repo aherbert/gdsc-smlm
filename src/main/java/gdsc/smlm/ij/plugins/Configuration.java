@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -93,7 +93,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -148,7 +148,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
-		// Parameters specific to each Fit solver are collected in a second dialog 
+		// Parameters specific to each Fit solver are collected in a second dialog
 
 		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
 		gd.addNumericField("Pass_rate", config.getPassRate(), 2);
@@ -353,7 +353,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider#getFitEngineConfiguration()
 	 */
 	@Override
@@ -364,7 +364,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
 	 */
 	@Override
@@ -375,7 +375,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	@Override

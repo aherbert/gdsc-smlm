@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -283,12 +283,12 @@ public class PoissonCalculatorTest
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
-		});		
+		});
 		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
-		});		
+		});
 		//@formatter:on
 	}
 
@@ -365,7 +365,7 @@ public class PoissonCalculatorTest
 					a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q, table.reject(llr, df),
 					table.getSignificanceValue(), table2.reject(llr, df), table2.getSignificanceValue());
 
-			// Only value if the product could be computed. Low ratios cause it to becomes 
+			// Only value if the product could be computed. Low ratios cause it to becomes
 			// too small to store in a double.
 			if (product.doubleValue() > 0)
 			{
@@ -413,12 +413,12 @@ public class PoissonCalculatorTest
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
-		});		
+		});
 		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
-		});		
+		});
 		//@formatter:on
 	}
 
@@ -474,7 +474,7 @@ public class PoissonCalculatorTest
 		{
 			@Override
 			public double eval(int x) {	return 0.3 + 0.75 * a[0] * (x-n4) * (x-n4); }
-		});		
+		});
 		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(
 		new BaseNonLinearFunction("Gaussian")
 		{
@@ -490,7 +490,7 @@ public class PoissonCalculatorTest
 		{
 			@Override
 			public double eval(int x) {	return 0.3 + 75 * FastMath.exp(-0.5 * Maths.pow2(x - n4) / (a[0] * a[0])); }
-		});		
+		});
 		//@formatter:on
 	}
 

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -90,7 +90,7 @@ public class FailCountManager implements PlugIn
 	private static final String TITLE = "Fail Count Manager";
 
 	//@formatter:off
-	private enum FailCountOption implements NamedObject 
+	private enum FailCountOption implements NamedObject
 	{
 		CREATE_DATA { @Override
 		public String getName() { return "Create Data"; } },
@@ -109,13 +109,13 @@ public class FailCountManager implements PlugIn
 		{
 			return getName();
 		}
-		
+
 		public static FailCountOption forOrdinal(int ordinal)
 		{
 			FailCountOption[] values = FailCountOption.values();
 			if (ordinal < 0 || ordinal >= values.length)
 					ordinal = 0;
-			return values[ordinal]; 
+			return values[ordinal];
 		}
 	};
 	//@formatter:on
@@ -338,14 +338,14 @@ public class FailCountManager implements PlugIn
 		}
 	}
 
-	private static TurboList<FailCountData> failCountData = new TurboList<FailCountData>(1);
+	private static TurboList<FailCountData> failCountData = new TurboList<>(1);
 	private static TextWindow resultsWindow = null;
 
 	private FailCountManagerSettings.Builder settings;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -424,13 +424,13 @@ public class FailCountManager implements PlugIn
 
 		Rectangle bounds = new Rectangle(source.getWidth(), source.getHeight());
 
-		// Run 
+		// Run
 		int totalFrames = Math.min(source.getFrames(), settings.getMaxFrames());
 		final int step = Utils.getProgressInterval(totalFrames);
 		IJ.showProgress(0);
 		boolean shutdown = false;
 		int slice = 0;
-		TurboList<ParameterisedFitJob> jobs = new TurboList<ParameterisedFitJob>(totalFrames);
+		TurboList<ParameterisedFitJob> jobs = new TurboList<>(totalFrames);
 		while (!shutdown && slice < totalFrames)
 		{
 			float[] data = source.next();
@@ -456,7 +456,7 @@ public class FailCountManager implements PlugIn
 		source.close();
 
 		// Extract the fail count data
-		TurboList<FailCountData> failCountData = new TurboList<FailCountData>(jobs.size());
+		TurboList<FailCountData> failCountData = new TurboList<>(jobs.size());
 		for (int i = 0; i < jobs.size(); i++)
 		{
 			ParameterisedFitJob job = jobs.getf(i);
@@ -539,7 +539,7 @@ public class FailCountManager implements PlugIn
 		if (filename == null)
 			return;
 		settings.setFilename(filename);
-		TurboList<FailCountData> failCountData = new TurboList<FailCountData>();
+		TurboList<FailCountData> failCountData = new TurboList<>();
 
 		BufferedReader br = null;
 		Pattern pattern = Pattern.compile("[\t, ]+");
@@ -739,9 +739,9 @@ public class FailCountManager implements PlugIn
 		public boolean equals(PlotData that)
 		{
 			//@formatter:off
-			return that != null && 
-					this.item == that.item && 
-					this.fixedXAxis == that.fixedXAxis && 
+			return that != null &&
+					this.item == that.item &&
+					this.fixedXAxis == that.fixedXAxis &&
 					this.rollingWindow == that.rollingWindow &&
 					this.passWeight == that.passWeight &&
 					this.failWeight == that.failWeight &&
@@ -872,7 +872,7 @@ public class FailCountManager implements PlugIn
 		// Find max fail count size
 		final int max = getMaxConsecutiveFailCount(failCountData);
 
-		final ConcurrentMonoStack<PlotData> stack = new ConcurrentMonoStack<PlotData>();
+		final ConcurrentMonoStack<PlotData> stack = new ConcurrentMonoStack<>();
 		new Thread(new PlotWorker(stack, failCountData)).start();
 
 		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
@@ -961,7 +961,7 @@ public class FailCountManager implements PlugIn
 		//final int maxPass = getMaxPassCount(failCountData);
 
 		// Create a set of fail counters
-		final TurboList<FailCounter> counters = new TurboList<FailCounter>();
+		final TurboList<FailCounter> counters = new TurboList<>();
 		TByteArrayList type = new TByteArrayList();
 		for (int i = 0; i <= maxCons; i++)
 		{
@@ -1066,14 +1066,14 @@ public class FailCountManager implements PlugIn
 
 		counters.trimToSize();
 
-		// Score each of a set of standard fail counters against each frame using how 
+		// Score each of a set of standard fail counters against each frame using how
 		// close they are to the target.
 		final double[] score = new double[counters.size()];
 		final double targetPassFraction = settings.getTargetPassFraction();
 
 		int nThreads = Prefs.getThreads();
 		ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
+		TurboList<Future<?>> futures = new TurboList<>(nThreads);
 
 		final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), failCountData.size(), nThreads > 1);
 		IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
@@ -1089,7 +1089,7 @@ public class FailCountManager implements PlugIn
 						return;
 
 					// TODO - Ideally this plugin should be run on benchmark data with ground truth.
-					// The target could be to ensure all all the correct results are fit 
+					// The target could be to ensure all all the correct results are fit
 					// and false positives are excluded from incrementing the pass counter.
 					// This could be done by saving the results from a benchmarking scoring
 					// plugin to memory as the current dataset.

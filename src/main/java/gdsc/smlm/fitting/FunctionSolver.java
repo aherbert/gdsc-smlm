@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -80,7 +80,7 @@ public interface FunctionSolver
 	 * Specifies if the function solver supports a bounded search (i.e. a search of parameter space within the total
 	 * allowed space of valid parameters, or the parameter constraints). If true then the bounds can be set before a
 	 * call to the fit(...) method.
-	 * 
+	 *
 	 * @return True if the function solver supports a bounded search
 	 */
 	public boolean isBounded();
@@ -93,7 +93,7 @@ public interface FunctionSolver
 	 * be as restrictive as the bounds for a solver that supports a bounded search. For example the constraints on a
 	 * parameter may be 0 - Infinity but the bounds may be 5 - 15. A bounded solver can be used to search within the
 	 * expected range for a parameter.
-	 * 
+	 *
 	 * @return True if the function solver supports a constrained search
 	 */
 	public boolean isConstrained();
@@ -117,7 +117,7 @@ public interface FunctionSolver
 	 * ignored for the fixed parameters.
 	 * <p>
 	 * The bounds can be used to set the expected range for a parameter.
-	 * 
+	 *
 	 * @param lower
 	 * @param upper
 	 */
@@ -126,7 +126,7 @@ public interface FunctionSolver
 	/**
 	 * Set the constraints for each of the parameters. If a subset of the parameters are fitted then the bounds can be
 	 * ignored for the fixed parameters.
-	 * 
+	 *
 	 * @param lower
 	 * @param upper
 	 */
@@ -154,7 +154,7 @@ public interface FunctionSolver
 	 * Evaluate a function with coefficients (a) for a set of data points (x, y).
 	 * <p>
 	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
-	 * 
+	 *
 	 * @param y
 	 *            Set of data points (input)
 	 * @param f

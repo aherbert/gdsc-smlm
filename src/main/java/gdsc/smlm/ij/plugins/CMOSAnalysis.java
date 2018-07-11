@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -107,7 +107,7 @@ public class CMOSAnalysis implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -158,7 +158,7 @@ public class CMOSAnalysis implements PlugIn
 				{
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
-						// Fixed offset per pixel plus a variance plus a 
+						// Fixed offset per pixel plus a variance plus a
 						// fixed gain multiplied by a Poisson sample of the photons
 						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j] + (poisson[j] * pixelGain[j]);
 						pixels[j] = clip16bit(p);
@@ -252,7 +252,7 @@ public class CMOSAnalysis implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -316,7 +316,7 @@ public class CMOSAnalysis implements PlugIn
 	private static boolean rollingAlgorithm = false;
 	private static boolean reuseProcessedData = true;
 
-	// The simulation can default roughly to the values displayed 
+	// The simulation can default roughly to the values displayed
 	// in the Huang sCMOS paper supplementary figure 1:
 
 	// Offset = Approximately Normal or Poisson. We use Poisson
@@ -324,9 +324,9 @@ public class CMOSAnalysis implements PlugIn
 	// for an offset & Poisson approaches the Gaussian at high mean.
 	private static double offset = 100;
 
-	// Variance = Exponential (equivalent to chi-squared with k=1, i.e. 
-	// sum of the squares of 1 normal distribution). 
-	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
+	// Variance = Exponential (equivalent to chi-squared with k=1, i.e.
+	// sum of the squares of 1 normal distribution).
+	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b
 	// cumul = 1 - e^-lx (with l = 1/mean)
 	// => e^-lx = 1 - cumul
 	// => -lx = log(1-0.999)
@@ -399,7 +399,7 @@ public class CMOSAnalysis implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -413,7 +413,7 @@ public class CMOSAnalysis implements PlugIn
 
 		//@formatter:off
 		IJ.log(TextUtils.wrap(
-				TITLE + ": Analyse the per-pixel offset, variance and gain of sCMOS images. " + 
+				TITLE + ": Analyse the per-pixel offset, variance and gain of sCMOS images. " +
 				"See Huang et al (2013) Video-rate nanoscopy using sCMOS camera–specific " +
 				"single-molecule localization algorithms. Nature Methods 10, 653-658 " +
 				"(Supplementary Information).",
@@ -466,7 +466,7 @@ public class CMOSAnalysis implements PlugIn
 		{
 			//IJ.showProgress(progress, totalProgress);
 
-			// Use the actual progress bar so we can show progress 
+			// Use the actual progress bar so we can show progress
 			// when all other IJ commands cannot
 			double p = (progress + 1.0) / totalProgress;
 			progressBar.show(p, true);
@@ -522,7 +522,7 @@ public class CMOSAnalysis implements PlugIn
 
 		// Create thread pool and workers
 		ExecutorService executor = Executors.newFixedThreadPool(getThreads());
-		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
+		TurboList<Future<?>> futures = new TurboList<>(nThreads);
 
 		// Simulate the zero exposure input.
 		// Simulate 20 - 200 photon images.
@@ -565,7 +565,7 @@ public class CMOSAnalysis implements PlugIn
 				}
 				catch (Exception e)
 				{
-					// This should not happen. 
+					// This should not happen.
 					e.printStackTrace();
 				}
 			}
@@ -645,9 +645,9 @@ public class CMOSAnalysis implements PlugIn
 			return false;
 		}
 
-		// Get only those with numbers at the end. 
+		// Get only those with numbers at the end.
 		// These should correspond to exposure times
-		subDirs = new TurboList<SubDir>();
+		subDirs = new TurboList<>();
 		Pattern p = Pattern.compile("([0-9]+)$");
 		for (File path : dirs)
 		{
@@ -683,7 +683,7 @@ public class CMOSAnalysis implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		//@formatter:off
-		gd.addMessage("Analyse the per-pixel offset, variance and gain of sCMOS images.\n \n" + 
+		gd.addMessage("Analyse the per-pixel offset, variance and gain of sCMOS images.\n \n" +
 				TextUtils.wrap(
 				"See Huang et al (2013) Video-rate nanoscopy using sCMOS camera–specific " +
 				"single-molecule localization algorithms. Nature Methods 10, 653-658 " +
@@ -775,15 +775,15 @@ public class CMOSAnalysis implements PlugIn
 			}
 		};
 
-		// Create thread pool and workers. The system is likely to be IO limited 
-		// so reduce the computation threads to allow the reading thread in the 
+		// Create thread pool and workers. The system is likely to be IO limited
+		// so reduce the computation threads to allow the reading thread in the
 		// SeriesImageSource to run.
-		// If the images are small enough to fit into memory then 3 threads are used, 
+		// If the images are small enough to fit into memory then 3 threads are used,
 		// otherwise it is 1.
 		int nThreads = Math.max(1, getThreads() - 3);
 		ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
-		TurboList<ImageWorker> workers = new TurboList<ImageWorker>(nThreads);
+		TurboList<Future<?>> futures = new TurboList<>(nThreads);
+		TurboList<ImageWorker> workers = new TurboList<>(nThreads);
 
 		double[][] data = new double[subDirs.size() * 2][];
 		double[] pixelOffset = null, pixelVariance = null;
@@ -886,7 +886,7 @@ public class CMOSAnalysis implements PlugIn
 						moment = new SimpleArrayMoment();
 				}
 
-				final CloseableBlockingQueue<Object> jobs = new CloseableBlockingQueue<Object>(nThreads * 2);
+				final CloseableBlockingQueue<Object> jobs = new CloseableBlockingQueue<>(nThreads * 2);
 				for (int i = 0; i < nThreads; i++)
 				{
 					final ImageWorker worker = new ImageWorker(jobs, moment);
@@ -927,7 +927,7 @@ public class CMOSAnalysis implements PlugIn
 						}
 						catch (Exception e)
 						{
-							// This should not happen. 
+							// This should not happen.
 							e.printStackTrace();
 						}
 					}
@@ -947,7 +947,7 @@ public class CMOSAnalysis implements PlugIn
 					}
 					catch (Exception e)
 					{
-						// This should not happen. 
+						// This should not happen.
 						e.printStackTrace();
 					}
 				}
@@ -960,7 +960,7 @@ public class CMOSAnalysis implements PlugIn
 
 				// Get the processing speed.
 				sw.stop();
-				// progress holds the number of calls to showProgress() for 
+				// progress holds the number of calls to showProgress() for
 				// processing a frame (i.e. number of frames)
 				double bits = (double) bitDepth * progress * source.getWidth() * source.getHeight();
 				double seconds = sw.getNanoTime() / 1e9;

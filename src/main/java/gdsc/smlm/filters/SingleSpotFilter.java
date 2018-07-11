@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -34,7 +34,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param search
 	 *            The search width for non-maximum suppression
 	 * @param border
@@ -54,7 +54,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
 	 */
 	@Override
@@ -65,7 +65,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.SpotFilter#isWeighted()
 	 */
 	@Override
@@ -76,7 +76,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
 	 */
 	@Override
@@ -87,7 +87,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.SpotFilter#hasWeights()
 	 */
 	@Override
@@ -98,7 +98,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
 	 */
 	@Override
@@ -109,7 +109,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -123,7 +123,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.SpotFilter#getName()
 	 */
 	@Override
@@ -134,7 +134,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#getParameters()
 	 */
 	@Override
@@ -147,7 +147,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.SpotFilter#getSpread()
 	 */
 	@Override

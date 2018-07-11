@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -104,7 +104,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	// Used for the results table
 	private static TextWindow resultsTable = null;
 
-	static ArrayList<CorrelationResult> results = new ArrayList<CorrelationResult>();
+	static ArrayList<CorrelationResult> results = new ArrayList<>();
 
 	private boolean spatialDomain;
 
@@ -113,7 +113,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -170,7 +170,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Show a directory selection dialog for the results directory
-	 * 
+	 *
 	 * @return True if a directory was selected
 	 */
 	private boolean getDirectory()
@@ -181,7 +181,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Save all the results to a directory
-	 * 
+	 *
 	 * @return DONE
 	 */
 	private int saveResults()
@@ -238,7 +238,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Load all the results from a directory. File must have the XML suffix
-	 * 
+	 *
 	 * @return DONE
 	 */
 	private int loadResults()
@@ -334,7 +334,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	@Override
@@ -430,7 +430,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * mask is extracted and used for the crop. If no image is provided then the full set of molecules is returned.
 	 * <p>
 	 * Set the area property to the region covered by the molecules.
-	 * 
+	 *
 	 * @param imp
 	 * @return
 	 */
@@ -471,7 +471,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		final double roix = maxx - minx;
 		final double roiy = maxy - miny;
 
-		ArrayList<Molecule> newMolecules = new ArrayList<Molecule>(PCPALMMolecules.molecules.size() / 2);
+		ArrayList<Molecule> newMolecules = new ArrayList<>(PCPALMMolecules.molecules.size() / 2);
 
 		// Support non-rectangular ROIs
 		if (roi.getMask() != null)
@@ -538,7 +538,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Log a message to the IJ log window
-	 * 
+	 *
 	 * @param format
 	 * @param args
 	 */
@@ -549,7 +549,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Perform the PC Analysis
-	 * 
+	 *
 	 * @param molecules
 	 */
 	private void analyse(ArrayList<Molecule> molecules)
@@ -581,9 +581,9 @@ public class PCPALMAnalysis implements PlugInFilter
 			// TODO - Update this using a grid with a resolution of maxDistance to increase speed
 			// by only comparing to neighbours within range.
 
-			// An all-vs-all analysis does not account for a border. 
-			// A simple solution is to only process molecules within the border but compare them 
-			// to all molecules within the region. Thus every molecule has a complete circle of the max 
+			// An all-vs-all analysis does not account for a border.
+			// A simple solution is to only process molecules within the border but compare them
+			// to all molecules within the region. Thus every molecule has a complete circle of the max
 			// radius around them to use:
 			// ----------------------
 			// |                    |
@@ -594,8 +594,8 @@ public class PCPALMAnalysis implements PlugInFilter
 			// |   --------------   |
 			// |      Region        |
 			// ----------------------
-			// If the fraction of points within the correlation distance of the edge is low then this 
-			// will not make much difference. 
+			// If the fraction of points within the correlation distance of the edge is low then this
+			// will not make much difference.
 
 			final double boundaryMinx = (useBorder) ? minx + correlationDistance : minx;
 			final double boundaryMaxx = (useBorder) ? maxx - correlationDistance : maxx;
@@ -813,7 +813,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Pad the image by the specified number of pixels
-	 * 
+	 *
 	 * @param im
 	 * @param pad
 	 * @return
@@ -834,7 +834,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	/**
 	 * Create a weight image of the same size. All pixels corresponding to the original image area
 	 * are set to 1. A window function is optionally applied.
-	 * 
+	 *
 	 * @param im
 	 * @param applyWindow
 	 * @return The weight image
@@ -855,7 +855,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * Compute the auto-correlation curve using FHT (ImageJ built-in). Computes the correlation
 	 * image and then samples the image at radii up to the specified length to get the average
 	 * correlation at a given radius.
-	 * 
+	 *
 	 * @param im
 	 * @param w
 	 * @param maxRadius
@@ -900,7 +900,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Gets the density of peaks in the image. The density is in squared pixels
-	 * 
+	 *
 	 * @param im
 	 * @return The density (in pixels^-2)
 	 */
@@ -925,7 +925,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		log("  Total Density = %g um^-2, Sample density = %g (%.2fx), Image density = %g (%.2fx)", density,
 				sampleDensity, sampleDensity / density, imageDensity, imageDensity / density);
 
-		// This is the method used by the PC-PALM MATLAB code. 
+		// This is the method used by the PC-PALM MATLAB code.
 		// The sum of the image divided by the sum of the normalisation window function
 		return uniquePoints / weightedAreaInPx;
 	}
@@ -934,7 +934,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * Compute the auto-correlation curve using FFT. Computes the correlation image and then samples
 	 * the image at radii up to the specified length to get the average correlation at a given
 	 * radius.
-	 * 
+	 *
 	 * @param im
 	 * @param w
 	 * @param maxRadius
@@ -972,7 +972,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Compute the radial average correlation function (gr)
-	 * 
+	 *
 	 * @param maxRadius
 	 *            the maximum radius to process (in pixels)
 	 * @param nmPerPixel
@@ -1082,7 +1082,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Pads the image to the next power of two and transforms into the frequency domain
-	 * 
+	 *
 	 * @param ip
 	 * @return An FHT2 image in the frequency domain
 	 */
@@ -1098,7 +1098,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Pads the image to the next power of two
-	 * 
+	 *
 	 * @param ip
 	 * @return padded image
 	 */
@@ -1136,7 +1136,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	/**
 	 * Compute the auto-correlation using the JTransforms FFT library
-	 * 
+	 *
 	 * @param ip
 	 * @return
 	 */
@@ -1224,7 +1224,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	{
 		int id = results.size() + 1;
 
-		// Convert density from pixel^-2 to um^-2 
+		// Convert density from pixel^-2 to um^-2
 		peakDensity *= 1e6 / (nmPerPixel * nmPerPixel);
 
 		CorrelationResult result = new CorrelationResult(id, PCPALMMolecules.results.getSource(), minx, miny, maxx,

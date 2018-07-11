@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -63,14 +63,14 @@ import ij3d.ImageWindow3D;
 
 /**
  * Tests for drawing a localisation results set using an ImageJ 3D image
- * 
+ *
  * @see <A href="https://imagej.net/3D_Viewer">https://imagej.net/3D_Viewer</a>
  */
 public class ImageJ3DResultsViewerTest implements PlugIn
 {
 	private final static String TITLE = "ImageJ 3D Results Viewer";
 
-	// To debug this from Eclipse relies on being able to find the native 
+	// To debug this from Eclipse relies on being able to find the native
 	// runtime libraries for Open GL. See the README in the eclipse project folder.
 
 	private static String version = "";
@@ -102,7 +102,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -156,7 +156,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		{
 			// Sphere test
 			// Put lots of spheres on a view and see how they look.
-			// Is it worth supporting an ItemTriangleStripMesh so we can control 
+			// Is it worth supporting an ItemTriangleStripMesh so we can control
 			// the sphere better than the icosahedron?
 			final Image3DUniverse univ = new Image3DUniverse();
 			univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
@@ -224,7 +224,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
-			pointList = new TurboList<Point3f>();
+			pointList = new TurboList<>();
 			int range;
 			range = 1; // 9 points
 			//range = 12; // 25^3 = 15625 points

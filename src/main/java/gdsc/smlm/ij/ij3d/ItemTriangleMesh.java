@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -105,7 +105,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	public ItemTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color, float transp,
 			double creaseAngle, TrackProgress progress)
 	{
-		// Create empty 
+		// Create empty
 		super(null, color, transp);
 
 		if (sizes != null && points.length != sizes.length && sizes.length != 1)
@@ -299,7 +299,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		final Point3f[] coords = new Point3f[vertexCount];
 		mesh.toArray(coords);
 
-		// Do not try to get the colour back from the geometry as is done 
+		// Do not try to get the colour back from the geometry as is done
 		// in the super-class. That will only work if the size is the same
 		// and this method is likely to be called when the size changes.
 		final Color3f colors[] = new Color3f[vertexCount];
@@ -431,7 +431,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
 		for (int i = 0; i < nVertices; i += 3)
 		{
-			// Use the same order as that used to compute facet normals in 
+			// Use the same order as that used to compute facet normals in
 			// org.scijava.java3d.utils.geometry.NormalGenerator
 			v1.sub(vertices[i + 2], vertices[i + 1]);
 			v2.sub(vertices[i], vertices[i + 1]);
@@ -500,7 +500,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
 	 */
 	@Override
@@ -515,7 +515,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
 	@Override
@@ -539,8 +539,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		}
 
 		// From here on we assume the current geometry will not be null
-		// as this only happens when the original size is zero. Size has 
-		// been checked at this point to be the smaller of new and old. 
+		// as this only happens when the original size is zero. Size has
+		// been checked at this point to be the smaller of new and old.
 		GeometryArray ga = (GeometryArray) getGeometry();
 
 		points = reorder(points, indices);
@@ -594,7 +594,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
 	 */
 	@Override
@@ -605,7 +605,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
 	 */
 	@Override
@@ -616,7 +616,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -629,7 +629,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -640,7 +640,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
 	@Override

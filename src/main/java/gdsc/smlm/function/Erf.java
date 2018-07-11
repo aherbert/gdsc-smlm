@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -30,7 +30,7 @@ import org.apache.commons.math3.util.FastMath;
  * <p>
  * Methods in this class are ordered by speed, not accuracy. The default call to {@link #erf(double)} is a good
  * compromise between both.
- * 
+ *
  * @see https://en.wikipedia.org/wiki/Error_function#Approximation_with_elementary_functions
  * @see Winitzki, Sergei (6 February 2008). "A handy approximation for the error function and its inverse".
  *      http://sites.google.com/site/winitzki/sergei-winitzkis-files/erf-approx.pdf
@@ -216,7 +216,7 @@ public class Erf
 
 	/**
 	 * Compute the first derivative of the Error function = (2 / sqrt(pi)) * exp(-x*x)
-	 * 
+	 *
 	 * @see http://mathworld.wolfram.com/Erf.html
 	 *
 	 * @param x

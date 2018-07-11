@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -352,7 +352,7 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * Set the failures limit. When failures exceeds the failures limit then stop fitting.
-	 * 
+	 *
 	 * @return the failuresLimit
 	 */
 	public int getFailuresLimit()
@@ -364,7 +364,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * Set the failures limit. When failures exceeds the failures limit then stop fitting.
 	 * i.e. failures=0 will stop on the first failure, failures=1 will stop on the second consecutive failure.
 	 * If negative then this is disabled and all candidates will be processed.
-	 * 
+	 *
 	 * @param failuresLimit
 	 *            the number of consecutive failures that stops the fitting process on the frame
 	 */
@@ -427,7 +427,7 @@ public class FitEngineConfiguration implements Cloneable
 			int failuresLimit = getFailuresLimit();
 			FailCounter f1 = (failuresLimit >= 1) ? ConsecutiveFailCounter.create(failuresLimit) : null;
 			double passRate = getPassRate();
-			// TODO - the allowed counts could be an input 
+			// TODO - the allowed counts could be an input
 			FailCounter f2 = (passRate > 0) ? PassRateFailCounter.create(5, passRate) : null;
 
 			// All fail counters must pass to continue fitting
@@ -451,7 +451,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * <p>
 	 * Use this option when the fitting search region is large relative the the smoothing, thus other peaks may be
 	 * within the region used for fitting.
-	 * 
+	 *
 	 * @param includeNeighbours
 	 */
 	public void setIncludeNeighbours(boolean includeNeighbours)
@@ -566,7 +566,7 @@ public class FitEngineConfiguration implements Cloneable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -579,7 +579,7 @@ public class FitEngineConfiguration implements Cloneable
 		clone.getFitConfiguration().copySettings(getFitConfiguration());
 		return clone;
 
-		//		// This is not a complete duplicate. The settings builder objects with the 
+		//		// This is not a complete duplicate. The settings builder objects with the
 		//		// underlying configuration will be the same between all instances.
 		//		try
 		//		{
@@ -865,7 +865,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * Set the number of filters to use. Call this method when all the filters have been set to clear any other stored
 	 * filters from memory. This allows the user to call {@link #setDataFilter(DataFilter, double, int)} 3 times when
 	 * then configuration has more than 3 filters already stored.
-	 * 
+	 *
 	 * @param n
 	 *            The number of filters
 	 */
@@ -882,7 +882,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * Get the fitting width. If the fitting parameter is relative this is calculated using the maximum peak standard
 	 * deviation multiplied by the fitting parameter, otherwise the absolute value is used. The value is then rounded up
 	 * to the next integer and a minimum of 2 is returned.
-	 * 
+	 *
 	 * @return The fitting width
 	 */
 	public int getFittingWidth()
@@ -898,9 +898,9 @@ public class FitEngineConfiguration implements Cloneable
 	 * Create the spot filter for identifying candidate maxima. The actual border, search width and smoothing parameters
 	 * can be configured relative to the configured standard deviations or left absolute. The standard deviation is used
 	 * to determine the Half-Width at Half-Maximum (HWHM) for each dimension and the parameters set as follows.
-	 * 
+	 *
 	 * <pre>
-	 * 
+	 *
 	 * int search = (int) Math.ceil(getSearch() * hwhmMax);
 	 * int border = (int) Math.floor(getBorder() * hwhmMax);
 	 * // For each filter
@@ -918,7 +918,7 @@ public class FitEngineConfiguration implements Cloneable
 		double hwhmMax = getHWHMMax();
 
 		// Note: rounding to 2 decimal places is a simple method for removing small errors
-		// in floating point precision from creating an incorrect integer  
+		// in floating point precision from creating an incorrect integer
 
 		// Region for maxima finding
 		int search = (int) Math.ceil(convert(getSearchParameter(), hwhmMax, 2));
@@ -992,7 +992,7 @@ public class FitEngineConfiguration implements Cloneable
 		// Use 1 if zero to get at least a single pixel width
 		double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 
-		// Only use the second width if this is part of the function. 
+		// Only use the second width if this is part of the function.
 		// This should be taken care of within the PSF helper.
 		if (initialPeakStdDev1 > 0)
 			widthMin = FastMath.min(initialPeakStdDev1, widthMin);
@@ -1170,7 +1170,7 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * Create a data processor for the spot filter
-	 * 
+	 *
 	 * @param border
 	 * @param dataFilter
 	 * @param parameter
@@ -1231,7 +1231,7 @@ public class FitEngineConfiguration implements Cloneable
 		// Most fitters fit in photons unless we have no calibration.
 		IntensityUnit intensityUnit = IntensityUnit.PHOTON;
 
-		if (//calibration.getCountPerPhoton() == 0 || 
+		if (//calibration.getCountPerPhoton() == 0 ||
 		fitConfig.isFitCameraCounts())
 			intensityUnit = IntensityUnit.COUNT;
 

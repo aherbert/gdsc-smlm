@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -75,7 +75,7 @@ public class CoordinateStoreFactory
 			return NullCoordinateStore.INSTANCE;
 
 		// This should be faster (for additions and block lookup) as it has a fixed block resolution of 1.
-		// However it may be slower if the distance is much lower than 1 and there are many points close 
+		// However it may be slower if the distance is much lower than 1 and there are many points close
 		// to the resolution distance as it will have to compute the distance for each. As a compromise
 		// we only use it when the resolution is above the min block size of the default store.
 		if (xyResolution >= GridCoordinateStore.MINIMUM_BLOCK_SIZE && xyResolution <= 1)

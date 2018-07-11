@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -61,8 +61,8 @@ public class PoissonFunctionTest
 		double maxp = 0;
 		int maxc = 0;
 
-		// Evaluate an initial range. 
-		// Poisson will have mean mu with a variance mu. 
+		// Evaluate an initial range.
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 
 		int[] range = getRange(gain, mu);
@@ -83,7 +83,7 @@ public class PoissonFunctionTest
 		if (p > 1.01)
 			Assert.fail("P > 1: " + p);
 
-		// We have most of the probability density. 
+		// We have most of the probability density.
 		// Now keep evaluating up and down until no difference
 		final double changeTolerance = 1e-6;
 		if (min > 0)
@@ -144,8 +144,8 @@ public class PoissonFunctionTest
 
 	static int[] getRange(final double gain, final double mu)
 	{
-		// Evaluate an initial range. 
-		// Poisson will have mean mu with a variance mu. 
+		// Evaluate an initial range.
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		double range = Math.max(1, Math.sqrt(mu));
 		int min = Math.max(0, (int) Math.floor(gain * (mu - 3 * range)));

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -57,7 +57,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -108,19 +108,19 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 				int maxV = FastMath.min(y + radius, maxy - 1);
 
 				// Compute sum from rolling sum using:
-				// sum(u,v) = 
-				// + s(u+N,v+N) 
+				// sum(u,v) =
+				// + s(u+N,v+N)
 				// - s(u-N-1,v+N)
 				// - s(u+N,v-N-1)
 				// + s(u-N-1,v-N-1)
-				// Note: 
+				// Note:
 				// s(u,v) = 0 when either u,v < 0
 				// s(u,v) = s(umax,v) when u>umax
 				// s(u,v) = s(u,vmax) when v>vmax
 				// s(u,v) = s(umax,vmax) when u>umax,v>vmax
 				// Likewise for ss
 
-				// + s(u+N-1,v+N-1) 
+				// + s(u+N-1,v+N-1)
 				int index = maxV * maxx + maxU;
 				sum += s[index];
 				sumSquares += ss[index];
@@ -218,7 +218,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	private void calculateRollingSums(FloatProcessor ip, double[] s_, double[] ss)
 	{
 		// Compute the rolling sum and sum of squares
-		// s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1) 
+		// s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1)
 		// ss(u,v) = f(u,v) * f(u,v) + ss(u-1,v) + ss(u,v-1) - ss(u-1,v-1)
 		// where s(u,v) = ss(u,v) = 0 when either u,v < 0
 
@@ -260,7 +260,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
@@ -297,7 +297,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -313,12 +313,12 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
 	@Override
 	public void setNPasses(int nPasses)
 	{
-		// Ignore		
+		// Ignore
 	}
 }

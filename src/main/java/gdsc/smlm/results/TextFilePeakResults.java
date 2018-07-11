@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -139,7 +139,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#begin()
 	 */
 	@Override
@@ -189,7 +189,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		String[] unitNames = helper.getUnitNames();
 
-		ArrayList<String> names = new ArrayList<String>(20);
+		ArrayList<String> names = new ArrayList<>(20);
 		if (isShowId())
 			names.add("Id");
 		names.add(peakIdColumnName);
@@ -227,7 +227,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -311,7 +311,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 	private void addPrecision(StringBuilder sb, double value, boolean computed)
 	{
-		// Cast to a float as the precision is probably limited in significant figures 
+		// Cast to a float as the precision is probably limited in significant figures
 		sb.append('\t').append((float) value);
 		if (computed)
 			sb.append('*');
@@ -334,7 +334,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
 				result.getMeanIntensity());
 
-		// Add the parameters		
+		// Add the parameters
 		final float[] params = result.getParameters();
 		if (isShowDeviations())
 		{
@@ -408,7 +408,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * Output a cluster to the results file.
 	 * <p>
 	 * Note: This is not synchronised
-	 * 
+	 *
 	 * @param cluster
 	 */
 	public void addCluster(Cluster cluster)
@@ -460,7 +460,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * Output a trace to the results file.
 	 * <p>
 	 * Note: This is not synchronised
-	 * 
+	 *
 	 * @param trace
 	 */
 	public void addTrace(Trace trace)
@@ -483,7 +483,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * Output a comment to the results file.
 	 * <p>
 	 * Note: This is not synchronised
-	 * 
+	 *
 	 * @param text
 	 */
 	public void addComment(String text)
@@ -519,7 +519,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
 	@Override
@@ -527,7 +527,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		try
 		{
-			TurboList<Result> results = new TurboList<Result>(size);
+			TurboList<Result> results = new TurboList<>(size);
 
 			StringBuilder header = new StringBuilder();
 			BufferedReader input = new BufferedReader(new FileReader(filename));

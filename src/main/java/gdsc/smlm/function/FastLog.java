@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -42,7 +42,7 @@ public abstract class FastLog
 
 	/**
 	 * Gets the scale to convert from log2 to logB (using the given base) by multiplication.
-	 * 
+	 *
 	 * <pre>
 	 * scale = Math.log(2) / Math.log(base)
 	 * </pre>
@@ -62,9 +62,9 @@ public abstract class FastLog
 	 * <pre>
 	 * return Math.log(val) / Math.log(2)
 	 * </pre>
-	 * 
+	 *
 	 * Math.log(2) is pre-computed.
-	 * 
+	 *
 	 * @param val
 	 *            the input value
 	 * @return the log2 of the value
@@ -124,7 +124,7 @@ public abstract class FastLog
 	 * </ul>
 	 * <p>
 	 * Sub-classes may handle some of the special cases.
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -160,7 +160,7 @@ public abstract class FastLog
 	 * </ul>
 	 * <p>
 	 * Sub-classes may handle some of the special cases.
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -196,7 +196,7 @@ public abstract class FastLog
 	 * </ul>
 	 * <p>
 	 * Sub-classes may handle some of the special cases.
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -238,7 +238,7 @@ public abstract class FastLog
 	 * Sub-classes may handle some of the special cases.
 	 * <p>
 	 * This can be re-implemented if {@link #fastLog(double)} can be returned in double precision.
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -277,7 +277,7 @@ public abstract class FastLog
 	 * </ul>
 	 * <p>
 	 * Sub-classes may handle some of the special cases.
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -321,7 +321,7 @@ public abstract class FastLog
 	 * Sub-classes may handle some of the special cases.
 	 * <p>
 	 * This can be re-implemented if {@link #fastLog(double)} can be returned in double precision.
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -757,7 +757,7 @@ public class OPTICS implements PlugIn
 			int[] clusters = work.a.getClusters();
 			if (IJ.debugMode)
 				IJ.log("ClusterSelected: " + Arrays.toString(clusters));
-			return new Pair<ClusterSelectedEvent, int[]>(work.a, clusters);
+			return new Pair<>(work.a, clusters);
 		}
 	}
 
@@ -766,7 +766,7 @@ public class OPTICS implements PlugIn
 	 */
 	private class ClusterSelectedWorker extends WorkflowWorker<ClusterSelectedEvent, int[]>
 	{
-		TurboList<ClusterSelectedHandler> handlers = new TurboList<ClusterSelectedHandler>();
+		TurboList<ClusterSelectedHandler> handlers = new TurboList<>();
 
 		@Override
 		public boolean equalSettings(ClusterSelectedEvent current, ClusterSelectedEvent previous)
@@ -807,7 +807,7 @@ public class OPTICS implements PlugIn
 	private boolean extraOptions, preview, debug;
 
 	// Stack to which the work is first added
-	private Workflow<OpticsSettings, Settings> workflow = new Workflow<OpticsSettings, Settings>();
+	private Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
 
 	private static int WORKER_ID = 0;
 
@@ -818,7 +818,7 @@ public class OPTICS implements PlugIn
 		BaseWorker()
 		{
 			id = WORKER_ID++;
-			// When constructing the workflow automatically add any workers 
+			// When constructing the workflow automatically add any workers
 			// that can handle cluster selections
 			if (this instanceof ClusterSelectedHandler)
 				clusterSelectedWorker.addHandler((ClusterSelectedHandler) this);
@@ -845,7 +845,7 @@ public class OPTICS implements PlugIn
 		@Override
 		public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work)
 		{
-			// The first item should be the memory peak results 
+			// The first item should be the memory peak results
 			OpticsSettings settings = work.a;
 			Settings resultList = work.b;
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
@@ -856,7 +856,7 @@ public class OPTICS implements PlugIn
 			OPTICSManager opticsManager = new OPTICSManager(p.x, p.y, bounds);
 			opticsManager.setTracker(new IJTrackProgress());
 			opticsManager.setOptions(Option.CACHE);
-			return new Pair<OpticsSettings, Settings>(settings, new Settings(results, opticsManager));
+			return new Pair<>(settings, new Settings(results, opticsManager));
 		}
 	}
 
@@ -1177,7 +1177,7 @@ public class OPTICS implements PlugIn
 			OpticsSettings settings = work.a;
 			Settings resultList = work.b;
 
-			// The first item should be the memory peak results 
+			// The first item should be the memory peak results
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
@@ -1236,7 +1236,7 @@ public class OPTICS implements PlugIn
 				}
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Pair<OpticsSettings, Settings>(settings,
+			return new Pair<>(settings,
 					new Settings(results, opticsManager, new CachedClusteringResult(opticsResult)));
 		}
 	}
@@ -1342,7 +1342,7 @@ public class OPTICS implements PlugIn
 
 				// We created a new clustering so create a new WorkerResult
 				clusteringResult = new CachedClusteringResult(opticsResult);
-				return new Pair<OpticsSettings, Settings>(settings,
+				return new Pair<>(settings,
 						new Settings(results, opticsManager, clusteringResult));
 			}
 			return work;
@@ -1354,7 +1354,7 @@ public class OPTICS implements PlugIn
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
 		{
-			// Only depends on if the clustering results are new. This is triggered 
+			// Only depends on if the clustering results are new. This is triggered
 			// in the default comparison of the Settings object.
 			return true;
 		}
@@ -1400,7 +1400,7 @@ public class OPTICS implements PlugIn
 
 	private class RandIndexWorker extends BaseWorker
 	{
-		Queue<ClusterResult> queue = new LinkedList<ClusterResult>();
+		Queue<ClusterResult> queue = new LinkedList<>();
 
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
@@ -1479,7 +1479,7 @@ public class OPTICS implements PlugIn
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
 		{
-			// Only depends on if the clustering results are new. This is triggered 
+			// Only depends on if the clustering results are new. This is triggered
 			// in the default comparison of the Settings object.
 			return true;
 		}
@@ -1669,7 +1669,7 @@ public class OPTICS implements PlugIn
 						{
 							profileColourFrom[i - 1] = profileColourTo[i] = mapper.map(i);
 						}
-						// Ensure we correctly get colours for each value 
+						// Ensure we correctly get colours for each value
 						mapper = new LUTHelper.DefaultLUTMapper(0, 255);
 					}
 					else
@@ -1817,7 +1817,7 @@ public class OPTICS implements PlugIn
 			}
 			else
 			{
-				// We could close an existing plot here. 
+				// We could close an existing plot here.
 				// However we leave it as the user may wish to keep it for something.
 			}
 
@@ -2126,7 +2126,7 @@ public class OPTICS implements PlugIn
 			if (!clusteringResult.isValid())
 			{
 				clearCache(true);
-				return new Pair<OpticsSettings, Settings>(settings,
+				return new Pair<>(settings,
 						new Settings(results, opticsManager, clusteringResult, image));
 			}
 
@@ -2201,14 +2201,14 @@ public class OPTICS implements PlugIn
 							switch (mode)
 							{
 								//@formatter:off
-								case CLUSTER_ORDER: lut = clusterOrderLut; break;								
+								case CLUSTER_ORDER: lut = clusterOrderLut; break;
 								case CLUSTER_ID:    lut = clusterLut; break;
-								case CLUSTER_DEPTH: 
-									lut = clusterDepthLut; 
+								case CLUSTER_DEPTH:
+									lut = clusterDepthLut;
 									mapper = new ValueLUTMapper(map);
 									break;
-								case LOOP: 
-									lut = loopLut; 
+								case LOOP:
+									lut = loopLut;
 									mapper = new ValueLUTMapper(loop);
 									break;
 								default:
@@ -2239,7 +2239,7 @@ public class OPTICS implements PlugIn
 			}
 			else
 			{
-				// We could close an image here. 
+				// We could close an image here.
 				// However we leave it as the user may wish to keep it for something.
 			}
 
@@ -2424,7 +2424,7 @@ public class OPTICS implements PlugIn
 				imp.setOverlay(overlay);
 			}
 
-			return new Pair<OpticsSettings, Settings>(settings,
+			return new Pair<>(settings,
 					new Settings(results, opticsManager, clusteringResult, image));
 		}
 
@@ -2629,7 +2629,7 @@ public class OPTICS implements PlugIn
 
 			if (clusters != null && clusters.length > 0)
 			{
-				TurboList<Roi> rois = new TurboList<Roi>(clusters.length);
+				TurboList<Roi> rois = new TurboList<>(clusters.length);
 				for (int clusterId : clusters)
 				{
 					ConvexHull hull = hulls[clusterId];
@@ -3007,14 +3007,14 @@ public class OPTICS implements PlugIn
 					int[] size = clusteringResult.getSize();
 					int[] level = clusteringResult.getLevel();
 
-					tableResults = new TurboList<TableResult>(size.length);
+					tableResults = new TurboList<>(size.length);
 					for (int c = 1; c < size.length; c++)
 					{
 						tableResults.add(new TableResult(c, size[c], level[c], hulls[c], bounds[c]));
 					}
 				}
 
-				// TODO: Allow user to change the distance units. 
+				// TODO: Allow user to change the distance units.
 				// Note that all clustering is currently done in pixels.
 				DistanceUnit unit = DistanceUnit.NM;
 				String name = UnitHelper.getShortName(unit);
@@ -3026,7 +3026,7 @@ public class OPTICS implements PlugIn
 				{
 					tw = new TextWindow2(TITLE + " Clusters", headings, "", 800, 400);
 
-					// Add a mouse listener to allow double click on a cluster to draw 
+					// Add a mouse listener to allow double click on a cluster to draw
 					// a polygon ROI of the convex hull, or point ROI if size <=2
 					final TextPanel tp = tw.getTextPanel();
 					tp.addMouseListener(this);
@@ -3176,7 +3176,7 @@ public class OPTICS implements PlugIn
 					TableResult r = tableResults.getf(i);
 					if (r.id == clusters[0])
 					{
-						// We can only handle selecting continuous lines so 
+						// We can only handle selecting continuous lines so
 						// for now just select the first cluster.
 						startLine = endLine = i;
 						break;
@@ -3228,7 +3228,7 @@ public class OPTICS implements PlugIn
 			// Make display of this table optional and show/hide it
 			display = work.a.getOpticsEventSettings().getShowSelectionTable();
 
-			// Optionally hide the window using 
+			// Optionally hide the window using
 			if (display)
 			{
 				// Check for a closed table
@@ -3378,7 +3378,7 @@ public class OPTICS implements PlugIn
 		{
 			OpticsSettings settings = work.a;
 			Settings resultList = work.b;
-			// The first item should be the memory peak results 
+			// The first item should be the memory peak results
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
@@ -3453,7 +3453,7 @@ public class OPTICS implements PlugIn
 				settings = settings.toBuilder().setClusteringDistance(-distance).build();
 
 				// Updated settings
-				return new Pair<OpticsSettings, Settings>(settings, resultList);
+				return new Pair<>(settings, resultList);
 			}
 			else
 			{
@@ -3514,7 +3514,7 @@ public class OPTICS implements PlugIn
 		{
 			OpticsSettings settings = work.a;
 			Settings resultList = work.b;
-			// The first item should be the memory peak results 
+			// The first item should be the memory peak results
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
@@ -3553,7 +3553,7 @@ public class OPTICS implements PlugIn
 				scrambleClusters(dbscanResult);
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Pair<OpticsSettings, Settings>(settings,
+			return new Pair<>(settings,
 					new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
 		}
 	}
@@ -3585,7 +3585,7 @@ public class OPTICS implements PlugIn
 					dbscanResult.extractClusters(settings.getCore());
 				}
 				// We created a new clustering
-				return new Pair<OpticsSettings, Settings>(settings,
+				return new Pair<>(settings,
 						new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
 			}
 			return work;
@@ -3594,7 +3594,7 @@ public class OPTICS implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -3657,7 +3657,7 @@ public class OPTICS implements PlugIn
 
 	private void createEventWorkflow()
 	{
-		eventWorkflow = new Workflow<OPTICS.ClusterSelectedEvent, int[]>();
+		eventWorkflow = new Workflow<>();
 		eventWorkflow.add(new ClusterSelectedEventWorker());
 		eventWorkflow.add(clusterSelectedWorker = new ClusterSelectedWorker());
 		eventWorkflow.start();
@@ -3904,7 +3904,7 @@ public class OPTICS implements PlugIn
 
 		gd.addMessage("--- Image ---");
 		gd.addSlider("Image_scale", 0, 15, inputSettings.getImageScale());
-		TreeSet<ImageMode> imageModeSet = new TreeSet<ImageMode>();
+		TreeSet<ImageMode> imageModeSet = new TreeSet<>();
 		imageModeSet.addAll(Arrays.asList(ImageMode.values()));
 		if (isDBSCAN)
 		{
@@ -3964,7 +3964,7 @@ public class OPTICS implements PlugIn
 					}
 				});
 
-		TreeSet<OutlineMode> outlineModeSet = new TreeSet<OutlineMode>();
+		TreeSet<OutlineMode> outlineModeSet = new TreeSet<>();
 		outlineModeSet.addAll(Arrays.asList(OutlineMode.values()));
 		if (isDBSCAN)
 		{
@@ -4170,7 +4170,7 @@ public class OPTICS implements PlugIn
 
 			inputSettings.setInputOption(ResultsManager.getInputSource(gd));
 
-			// Load the results. 
+			// Load the results.
 			if (results == null || !inputSettings.getInputOption().equals(input))
 			{
 				input = inputSettings.getInputOption();
@@ -4226,14 +4226,14 @@ public class OPTICS implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
 		 * OptionCollectedEvent)
 		 */
 		@Override
 		public void optionCollected(OptionCollectedEvent e)
 		{
-			// This occurs when any of the additional options have changed. 
+			// This occurs when any of the additional options have changed.
 			// We just add the work with no delay.
 			createWork(false);
 		}

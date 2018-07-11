@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -94,7 +94,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -148,7 +148,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	/**
 	 * Simulate the histogram for fitting
-	 * 
+	 *
 	 * @param method
 	 *            0 - sample from the fitted PDF, 1 - sample from a Poisson-Gamma-Gaussian
 	 * @return The histogram
@@ -173,7 +173,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	/**
 	 * Random sample from the cumulative probability distribution function that is used during fitting
-	 * 
+	 *
 	 * @return The histogram
 	 */
 	private int[] simulateFromPDF()
@@ -250,7 +250,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	/**
 	 * Randomly generate a histogram from poisson-gamma-gaussian samples
-	 * 
+	 *
 	 * @return The histogram
 	 */
 	private int[] simulateFromPoissonGammaGaussian()
@@ -284,7 +284,7 @@ public class EMGainAnalysis implements PlugInFilter
 			// Gaussian
 			d += _noise * random.nextGaussian();
 
-			// Convert the sample to a count 
+			// Convert the sample to a count
 			sample[n] = (int) Math.round(d + _bias);
 		}
 
@@ -297,7 +297,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	/**
 	 * Build a histogram using pixels within the image ROI
-	 * 
+	 *
 	 * @param image
 	 *            The image
 	 * @return The image histogram
@@ -346,7 +346,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	/**
 	 * Fit the EM-gain distribution (Gaussian * Gamma)
-	 * 
+	 *
 	 * @param h
 	 *            The distribution
 	 */
@@ -363,7 +363,7 @@ public class EMGainAnalysis implements PlugInFilter
 		plot.addPoints(x, y, Plot.DOT);
 		Utils.display(TITLE, plot);
 
-		// Estimate remaining parameters. 
+		// Estimate remaining parameters.
 		// Assuming a gamma_distribution(shape,scale) then mean = shape * scale
 		// scale = gain
 		// shape = Photons = mean / gain
@@ -595,7 +595,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 * Calculate the probability density function for EM-gain.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
 	 * @param c
 	 *            The count to evaluate
 	 * @param p
@@ -655,7 +655,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 * Calculate the probability density function for EM-gain, convolve with a Gaussian and then add a constant offset.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
-	 * 
+	 *
 	 * @param max
 	 *            The maximum count to evaluate
 	 * @param step
@@ -723,7 +723,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 * Calculate the probability density function for EM-gain, convolve with a Gaussian and then add a constant offset.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
-	 * 
+	 *
 	 * @param max
 	 *            The maximum count to evaluate
 	 * @param p
@@ -903,7 +903,7 @@ public class EMGainAnalysis implements PlugInFilter
 				fun = new PoissonFunction(1.0 / _gain);
 				break;
 			case 2:
-				// The mean does not matter (as normalisation is done dynamically for 
+				// The mean does not matter (as normalisation is done dynamically for
 				// PoissonGaussianFunction.likelihood(double, double) so just use zero
 				//fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / _gain, 0, _noise);
 
@@ -923,7 +923,7 @@ public class EMGainAnalysis implements PlugInFilter
 			expected += offset * expected / 100.0;
 		//expected *= _gain;
 
-		// Normalise 
+		// Normalise
 		boolean normalise = false;
 		if (normalise)
 		{
@@ -1040,7 +1040,7 @@ public class EMGainAnalysis implements PlugInFilter
 		}
 
 		// Plot the CDF of each distribution.
-		// Compute the Kolmogorov distance as the supremum (maximum) 
+		// Compute the Kolmogorov distance as the supremum (maximum)
 		// difference between the two cumulative probability distributions.
 		// https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test
 		double kolmogorovDistance = 0;
@@ -1086,7 +1086,7 @@ public class EMGainAnalysis implements PlugInFilter
 		// Note: This is not valid as the PMF should only accept integer input.
 		return 1;
 
-		//		// Determine the best step to plot the PMF. 
+		//		// Determine the best step to plot the PMF.
 		//		// Ensure there are enough points on the chart.
 		//		double step = 1.0;
 		//

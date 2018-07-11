@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -47,7 +47,7 @@ public class ResequenceResults implements PlugIn
 
 	/*
 	 * (non-)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -147,10 +147,10 @@ public class ResequenceResults implements PlugIn
 					// Move to the next position
 					mapped++;
 
-					// Check if this move will make the current block too large 
+					// Check if this move will make the current block too large
 					if (++b > block)
 					{
-						// Skip 
+						// Skip
 						mapped += skip;
 						b = 1;
 					}
@@ -174,7 +174,7 @@ public class ResequenceResults implements PlugIn
 
 	/**
 	 * Resequence the results for the original imaging sequence provided. Results are assumed to be continuous from 1.
-	 * 
+	 *
 	 * @param results
 	 * @param start
 	 *            The first frame that contained the data

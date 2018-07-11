@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -75,14 +75,14 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 		// The model has 0.5,0.5 at the centre so add an offset.
 		m.create2D(e, width, height, sum, x0 + 0.5, x1 + 0.5, false);
 
-		// Since the model only computes within +/- 5 sd only check for equality 
+		// Since the model only computes within +/- 5 sd only check for equality
 		// when the model is not zero (and there is a reasonable amount of signal)
 
 		for (int i = 0; i < e.length; i++)
 			if (e[i] > 1e-2) // Only check where there is a reasonable amount of signal
 			{
 				double error = DoubleEquality.relativeError(e[i], o[i]);
-				// We expect a small error since the ErfGaussian2DFunction uses a 
+				// We expect a small error since the ErfGaussian2DFunction uses a
 				// fast approximation of the Erf(..) (the error function). The PSFModel
 				// uses the Apache commons implementation.
 				if (error > 5e-4)

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -157,7 +157,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
 		 * SelectedResult)
@@ -177,7 +177,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
 		 */
 		@Override
@@ -188,7 +188,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
 		 */
 		@Override
@@ -199,7 +199,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
@@ -218,7 +218,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
@@ -260,7 +260,7 @@ public class MultiPathFilter implements Cloneable
 	{
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
 		 * SelectedResult)
@@ -273,7 +273,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
 		 */
 		@Override
@@ -285,7 +285,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
 		 */
 		@Override
@@ -296,7 +296,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
@@ -308,7 +308,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
@@ -487,9 +487,9 @@ public class MultiPathFilter implements Cloneable
 
 	/**
 	 * Return a deep copy of this object with a copy of the configured filters.
-	 * 
+	 *
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -500,7 +500,7 @@ public class MultiPathFilter implements Cloneable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -566,7 +566,7 @@ public class MultiPathFilter implements Cloneable
 	 * updated, for example disabling
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.
-	 * 
+	 *
 	 * @see #accept(PreprocessedPeakResult)
 	 */
 	public void setup()
@@ -583,7 +583,7 @@ public class MultiPathFilter implements Cloneable
 	 * DirectFilter.
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.
-	 * 
+	 *
 	 * @param flags
 	 *            Flags used to control the filter
 	 * @see #accept(PreprocessedPeakResult)
@@ -619,7 +619,7 @@ public class MultiPathFilter implements Cloneable
 
 	/**
 	 * Filter the peak result. This calls the accept() method in the DirectFilter.
-	 * 
+	 *
 	 * @param peak
 	 *            The peak result
 	 * @return true if the peak should be accepted, otherwise false to reject.
@@ -631,7 +631,7 @@ public class MultiPathFilter implements Cloneable
 
 	/**
 	 * Filter the peak result. This calls the accept() method in the minimal DirectFilter.
-	 * 
+	 *
 	 * @param peak
 	 *            The peak result
 	 * @return true if the peak should be accepted, otherwise false to reject.
@@ -701,12 +701,12 @@ public class MultiPathFilter implements Cloneable
 		if (store == null)
 			store = nullSelectedResultStore;
 
-		// The aim is to obtain a new result for the current candidate Id. 
+		// The aim is to obtain a new result for the current candidate Id.
 		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
-		// So we check the candidate Id and return when we have a new result for the candidate. 
+		// So we check the candidate Id and return when we have a new result for the candidate.
 		// We accept the doublet fit over the single fit if we are performing doublet fitting.
-		// If nothing matches then pick the result with the most new results, or use the default 
-		// order we processed the fits. 
+		// If nothing matches then pick the result with the most new results, or use the default
+		// order we processed the fits.
 
 		boolean doDoublet = false;
 
@@ -848,7 +848,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -934,12 +934,12 @@ public class MultiPathFilter implements Cloneable
 		if (store == null)
 			store = nullSelectedResultStore;
 
-		// The aim is to obtain a new result for the current candidate Id. 
+		// The aim is to obtain a new result for the current candidate Id.
 		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
-		// So we check the candidate Id and return when we have a new result for the candidate. 
+		// So we check the candidate Id and return when we have a new result for the candidate.
 		// We accept the doublet fit over the single fit if we are performing doublet fitting.
-		// If nothing matches then pick the result with the most new results, or use the default 
-		// order we processed the fits. 
+		// If nothing matches then pick the result with the most new results, or use the default
+		// order we processed the fits.
 
 		boolean doDoublet = false;
 
@@ -1163,8 +1163,8 @@ public class MultiPathFilter implements Cloneable
 		//			}
 		//		}
 
-		// Note - this could be made iterative. Any pass through the data may store estimates 
-		// using the SelectedResultStore and used to determine if 
+		// Note - this could be made iterative. Any pass through the data may store estimates
+		// using the SelectedResultStore and used to determine if
 
 		failCounter.reset();
 		final int total = multiPathResults.getNumberOfResults();
@@ -1285,7 +1285,7 @@ public class MultiPathFilter implements Cloneable
 					}
 					else
 					{
-						// Add the selected result but with no new results (due to duplicates) 
+						// Add the selected result but with no new results (due to duplicates)
 						store.add(new SelectedResult(null, selectedResult.fitResult));
 					}
 				}
@@ -1430,7 +1430,7 @@ public class MultiPathFilter implements Cloneable
 		final int[] ok = new int[results.length];
 
 		// Support for testing using the minimal filter.
-		// Note: We do not check the store is not null. This is private method 
+		// Note: We do not check the store is not null. This is private method
 		// and we send in a null store if necessary.
 		final boolean minimalFilter = minFilter != null;
 
@@ -1606,8 +1606,8 @@ public class MultiPathFilter implements Cloneable
 		int count = 0;
 		final int[] ok = new int[results.length];
 
-		// Support for testing using the minimal filter 
-		// Note: We do not check the store is not null. This is private method 
+		// Support for testing using the minimal filter
+		// Note: We do not check the store is not null. This is private method
 		// and we send in a null store if necessary.
 		final boolean minimalFilter = minFilter != null;
 
@@ -1707,8 +1707,8 @@ public class MultiPathFilter implements Cloneable
 			return null;
 
 		// Doublets may drift further than single spot candidates.
-		// We must validate the doublet spot without shift filtering. 
-		// Note: Only disable shift for the doublet results. 
+		// We must validate the doublet spot without shift filtering.
+		// Note: Only disable shift for the doublet results.
 		// doublets = len(multi-doublet) - len(multi) + 1
 
 		final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
@@ -1811,7 +1811,7 @@ public class MultiPathFilter implements Cloneable
 		failCounter = replaceIfNull(failCounter);
 		coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
 
-		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
+		final ArrayList<PreprocessedPeakResult> list = new ArrayList<>(results.length);
 		for (int k = 0; k < results.length; k++)
 		{
 			final MultiPathFitResults multiPathResults = results[k];
@@ -1872,7 +1872,7 @@ public class MultiPathFilter implements Cloneable
 					//						}
 					//					}
 
-					// Evaluate the result. 
+					// Evaluate the result.
 					// This allows storing more estimates in the store even if we are past the failures limit.
 					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
 					boolean newResult = false;
@@ -2024,7 +2024,7 @@ public class MultiPathFilter implements Cloneable
 	 * All results are validated with the filter and the result set in the PreprocessedPeakResult. This can be reset
 	 * using {@link #resetValidationFlag(MultiPathFitResults[])}. This result is used when scoring a subset allowing
 	 * results to be ignored from duplicate validation.
-	 * 
+	 *
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failCounter
@@ -2184,15 +2184,15 @@ public class MultiPathFilter implements Cloneable
 			final boolean evaluateFit = failCounter.isOK();
 			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
-				// Evaluate the result. 
+				// Evaluate the result.
 				// This allows storing more estimates in the store even if we are past the failures limit.
 				final PreprocessedPeakResult[] result = accept(multiPathResult, false, store);
 
-				// Note: Even if the actual result failed, the candidate may have passed and so 
+				// Note: Even if the actual result failed, the candidate may have passed and so
 				// the entire multi-path result should be retained.
 
 				// Also note that depending on the filter, different results can be selected and pushed through
-				// the store to set them valid. So we must push everything through the store to ensure nothing 
+				// the store to set them valid. So we must push everything through the store to ensure nothing
 				// is removed that could be used.
 				checkIsValid(multiPathResult.getSingleFitResult(), store);
 				checkIsValid(multiPathResult.getMultiFitResult(), store);
@@ -2203,7 +2203,7 @@ public class MultiPathFilter implements Cloneable
 				final FitResult multiDoubletFitResult = multiPathResult.getMultiDoubletFitResult();
 				if (multiDoubletFitResult != null && multiDoubletFitResult.results != null)
 				{
-					// Note: Only disable shift for the doublet results. 
+					// Note: Only disable shift for the doublet results.
 					// doublets = len(multi-doublet) - len(multi) + 1
 					final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
 					final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
@@ -2216,7 +2216,7 @@ public class MultiPathFilter implements Cloneable
 					restoreFilterState();
 				}
 
-				// This has valid results so add to the output subset 
+				// This has valid results so add to the output subset
 				newMultiPathResults[size++] = multiPathResult;
 
 				if (evaluateFit)
@@ -2289,7 +2289,7 @@ public class MultiPathFilter implements Cloneable
 	 * <p>
 	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
 	 * and negatives fields of the result.
-	 * 
+	 *
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failCounter
@@ -2316,7 +2316,7 @@ public class MultiPathFilter implements Cloneable
 	 * <p>
 	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
 	 * and negatives fields of the result.
-	 * 
+	 *
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failCounter
@@ -2454,7 +2454,7 @@ public class MultiPathFilter implements Cloneable
 			List<FractionalAssignment[]> allAssignments, FractionScoreStore scoreStore, CoordinateStore coordinateStore)
 	{
 		final double[] score = new double[4];
-		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
+		final ArrayList<FractionalAssignment> assignments = new ArrayList<>();
 
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 		if (scoreStore == null)
@@ -2715,7 +2715,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#size()
 		 */
 		@Override
@@ -2726,7 +2726,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#isEmpty()
 		 */
 		@Override
@@ -2737,7 +2737,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#contains(java.lang.Object)
 		 */
 		@Override
@@ -2748,7 +2748,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#iterator()
 		 */
 		@Override
@@ -2759,7 +2759,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#toArray()
 		 */
 		@Override
@@ -2770,7 +2770,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#toArray(java.lang.Object[])
 		 */
 		@Override
@@ -2781,7 +2781,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#add(java.lang.Object)
 		 */
 		@Override
@@ -2792,7 +2792,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#remove(java.lang.Object)
 		 */
 		@Override
@@ -2803,7 +2803,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#containsAll(java.util.Collection)
 		 */
 		@Override
@@ -2814,7 +2814,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#addAll(java.util.Collection)
 		 */
 		@Override
@@ -2825,7 +2825,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#removeAll(java.util.Collection)
 		 */
 		@Override
@@ -2836,7 +2836,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#retainAll(java.util.Collection)
 		 */
 		@Override
@@ -2847,7 +2847,7 @@ public class MultiPathFilter implements Cloneable
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Collection#clear()
 		 */
 		@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,7 @@ public class Gaussian2DPeakResultHelper
 	 * The default points to use for maximum likelihood precision computation, see
 	 * {@link #getMLVarianceX(double, double, double, double, boolean, int)}
 	 * <p>
-	 * Testing shows that 10 integration points is the fastest for realistic input parameters. 
+	 * Testing shows that 10 integration points is the fastest for realistic input parameters.
 	 */
 	public static final int POINTS = 10;
 
@@ -194,7 +194,7 @@ public class Gaussian2DPeakResultHelper
 		 */
 		double gaussianPixelIntegral(double x, double s)
 		{
-			// Find the pixel boundary. Assume 0.5 is the centre of the pixel, we round down 
+			// Find the pixel boundary. Assume 0.5 is the centre of the pixel, we round down
 			// to find the distance to the lower pixel boundary (lx):
 			// lx = x - l = x - floor(x)
 			//
@@ -230,7 +230,7 @@ public class Gaussian2DPeakResultHelper
 				throw new ConfigurationException("No calibration");
 			if (!calibration.hasNmPerPixel())
 				throw new ConfigurationException("Not a valid calibration: nm/pixel is required");
-			// Note: The Mortensen formula can be used for a sCMOS since that is like a CCD just with 
+			// Note: The Mortensen formula can be used for a sCMOS since that is like a CCD just with
 			// per pixel read noise. The noise component then should represent an average across the
 			// region used to fit the data.
 			//if (!calibration.isCCDCamera())
@@ -591,7 +591,7 @@ public class Gaussian2DPeakResultHelper
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -611,7 +611,7 @@ public class Gaussian2DPeakResultHelper
 
 		if (emCCD)
 		{
-			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getPrecisionX(a, s, N, b2 / 2.0, 2);
@@ -628,7 +628,7 @@ public class Gaussian2DPeakResultHelper
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -648,7 +648,7 @@ public class Gaussian2DPeakResultHelper
 
 		if (emCCD)
 		{
-			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getVarianceX(a, s, N, b2 / 2.0, 2);
@@ -665,7 +665,7 @@ public class Gaussian2DPeakResultHelper
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -685,7 +685,7 @@ public class Gaussian2DPeakResultHelper
 
 		if (emCCD)
 		{
-			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getMLPrecisionX(a, s, N, b2 / 2.0, true);
@@ -702,7 +702,7 @@ public class Gaussian2DPeakResultHelper
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -722,7 +722,7 @@ public class Gaussian2DPeakResultHelper
 
 		if (emCCD)
 		{
-			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getMLVarianceX(a, s, N, b2 / 2.0, true);
@@ -741,7 +741,7 @@ public class Gaussian2DPeakResultHelper
 	 * <p>
 	 * If the expected photons per pixel is unknown then use the standard deviation across the image and the method
 	 * {@link #getPrecision(double, double, double, double, boolean)}.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -768,7 +768,7 @@ public class Gaussian2DPeakResultHelper
 	 * approximation of the precision of fitting to an optical PSF for least squares estimation. Uses the Mortensen
 	 * formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -796,7 +796,7 @@ public class Gaussian2DPeakResultHelper
 	 * <p>
 	 * If the expected photons per pixel is unknown then use the standard deviation across the image and the method
 	 * {@link #getPrecision(double, double, double, double, boolean)}.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -823,7 +823,7 @@ public class Gaussian2DPeakResultHelper
 	 * approximation of the precision of fitting to an optical PSF for least squares estimation. Uses the Mortensen
 	 * formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -843,8 +843,8 @@ public class Gaussian2DPeakResultHelper
 		if (N <= 0)
 			return Double.POSITIVE_INFINITY;
 
-		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
-		// If the background is X then the variance of a Poisson distribution will be X 
+		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background.
+		// If the background is X then the variance of a Poisson distribution will be X
 		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
 		// can be used without knowing the background explicitly by using the variance of the pixels.
 
@@ -860,7 +860,7 @@ public class Gaussian2DPeakResultHelper
 	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
 	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -884,7 +884,7 @@ public class Gaussian2DPeakResultHelper
 	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
 	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -910,7 +910,7 @@ public class Gaussian2DPeakResultHelper
 	 * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
 	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -936,7 +936,7 @@ public class Gaussian2DPeakResultHelper
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * <p>
 	 * In the event of failure to integrate the formula the variance for Least Squares Estimation is returned.
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -970,7 +970,7 @@ public class Gaussian2DPeakResultHelper
 			final double I1 = computeI1(rho, integrationPoints);
 			if (I1 > 0)
 				return F * (sa2 / N) * (1 / I1);
-			//else 
+			//else
 			//	System.out.printf("Invalid I1 = %f\n", I1);
 		}
 		catch (TooManyEvaluationsException e)
@@ -983,14 +983,14 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Compute the function I1 using numerical integration. See Mortensen, et al (2010) Nature Methods 7, 377-383), SI
 	 * equation 43.
-	 * 
+	 *
 	 * <pre>
 	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
 	 *    = - sum [ t * ln(t) / (t + rho) ] dt
 	 * </pre>
-	 * 
+	 *
 	 * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
-	 * 
+	 *
 	 * @param rho
 	 * @param integrationPoints
 	 *            the number of integration points for the LegendreGaussIntegrator
@@ -1023,7 +1023,7 @@ public class Gaussian2DPeakResultHelper
 		//System.out.printf("I1 = %f (%d)\n", i1, i.getEvaluations());
 
 		// The function requires more evaluations and sometimes does not converge,
-		// presumably because log(x) significantly changes as x -> 0 where as x log(x) in the function above 
+		// presumably because log(x) significantly changes as x -> 0 where as x log(x) in the function above
 		// is more stable
 
 		//		UnivariateFunction f2 = new UnivariateFunction()
@@ -1261,11 +1261,11 @@ public class Gaussian2DPeakResultHelper
 
 	/**
 	 * Compute the cumulative normal distribution within the range -x to x:
-	 * 
+	 *
 	 * <pre>
 	 * return erf(x / sqrt(2))
 	 * </pre>
-	 * 
+	 *
 	 * This uses a fast approximation to the Error function.
 	 *
 	 * @param x
@@ -1280,11 +1280,11 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Compute the cumulative 2D normal distribution as the probability that a sample lies inside the ellipsoid
 	 * determined by its Mahalanobis distance r from the Gaussian, a direct generalization of the standard deviation.
-	 * 
+	 *
 	 * <pre>
 	 * return 1 - exp(-r * r / 2)
 	 * </pre>
-	 * 
+	 *
 	 * This formula is provided in <a href=
 	 * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
 	 *
@@ -1302,11 +1302,11 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Compute the inverse cumulative 2D normal distribution as the Mahalanobis distance r from the Gaussian given the
 	 * probability that a sample lies inside the ellipsoid determined by its distance r.
-	 * 
+	 *
 	 * <pre>
 	 * return sqrt(-2 ln (1-p) )
 	 * </pre>
-	 * 
+	 *
 	 * This formula is provided in <a href=
 	 * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
 	 *
@@ -1433,12 +1433,12 @@ public class Gaussian2DPeakResultHelper
 	 * <p>
 	 * Note: When F(r)=0.5 then the inverseCumulative2D function computes the factor to convert a standard deviation of
 	 * a 1D Gaussian to a Half-Width at Half Maxima (HWHM):
-	 * 
+	 *
 	 * <pre>
 	 * HWHM = sqrt(2 * log(2))
 	 * (F(r)=0.5 = sqrt(-2 * log(0.5)) = sqrt(-2 * log(1 / 2)) = sqrt(-2 * (log(1) - log(2))) = sqrt(-2 * -log(2))
 	 * </pre>
-	 * 
+	 *
 	 * Thus this computes the mean signal within the HWHM of a 2D Gaussian.
 	 * <p>
 	 * Note: Argument sx and sy are not checked that they are positive.

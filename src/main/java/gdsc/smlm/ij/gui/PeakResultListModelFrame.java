@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -47,7 +47,7 @@ import gdsc.smlm.results.PeakResultStoreList;
 
 /**
  * A frame that shows a PeakResultsListModel
- * 
+ *
  * @author Alex Herbert
  */
 public class PeakResultListModelFrame extends JFrame
@@ -105,7 +105,7 @@ public class PeakResultListModelFrame extends JFrame
 
 	public PeakResultListModelFrame(PeakResultListModel model, ListSelectionModel selectionModel)
 	{
-		list = new JList<PeakResult>(model);
+		list = new JList<>(model);
 		list.setPrototypeCellValue(new ExtendedPeakResult(1, 1, 1, 1));
 		list.setCellRenderer(new MyCellRenderer());
 		if (selectionModel != null)
@@ -128,7 +128,7 @@ public class PeakResultListModelFrame extends JFrame
 
 	/**
 	 * Launch the application.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws InterruptedException
@@ -176,8 +176,8 @@ public class PeakResultListModelFrame extends JFrame
 					//						public void valueChanged(ListSelectionEvent e)
 					//						{
 					//							// Only process the event if the value is not adjusting.
-					//							// Then to determine what has changed only process the 
-					//							// indices between the first and last index. 
+					//							// Then to determine what has changed only process the
+					//							// indices between the first and last index.
 					//
 					//							if (e.getValueIsAdjusting())
 					//								return;

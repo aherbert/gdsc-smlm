@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,19 +10,19 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 /*
- * 
+ *
  */
 package gdsc.smlm.function;
 
@@ -293,7 +293,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 * The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq
 	 * S7. Note that that equation computes the noise coefficient relative to a Poisson, this computes the Fisher
 	 * information. To get the noise coefficient multiply by the input parameter.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
 	@Override
@@ -303,7 +303,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 		// Check limits.
 
-		// It should be worse than the Poisson Fisher information (upper limit) but 
+		// It should be worse than the Poisson Fisher information (upper limit) but
 		// better than the Poisson-Gaussian Fisher information (lower limit).
 		// Note a low Fisher information is worse as this is the amount of information
 		// carried about the parameter.
@@ -348,7 +348,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		if (noGaussian)
 		{
 			// No Gaussian convolution
-			// Get the Fisher information for a Poisson. 
+			// Get the Fisher information for a Poisson.
 			return 1.0 / t;
 		}
 
@@ -371,19 +371,19 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		// Chao et al, S5:
 		// p(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j! . e^-1/2((z-j)/s)^2
 
-		// This is the sum over j of the probability of Poisson(j) * probability of Gaussian(z-j) 
+		// This is the sum over j of the probability of Poisson(j) * probability of Gaussian(z-j)
 
 		// Note: (fg)' => f'g + fg'
 		// e^-v => -e^-v
 		// v^j => j.v^(j-1)
 		// e^-v v^j / j! => e^-v v^(j-1) / (j-1)! - e^-v v^j / j!
 
-		// d p(z) dv = 1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2 - 
+		// d p(z) dv = 1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2 -
 		//                          sum_j=0:Inf  e^-v . v^j / j! . e^-1/2((z-j)/s)^2
 		// Note: j=0 differentiates to -e^v since v^j / j! = 1. This removes j=0 from the first sum
 		// but not the second.
 		// Over the sum the second term adds up to become p(z) so:
-		// d p(z) dv = (1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2 ) - p(z) 
+		// d p(z) dv = (1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2 ) - p(z)
 
 		// Set the first term to A, the second to P:
 		// d p(z) dv = A - P
@@ -405,21 +405,21 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		// A(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-(j+1))/s)^2
 		// A(z) = P(z-1)
 
-		// We need the convolution of the Poisson with the Gaussian 
+		// We need the convolution of the Poisson with the Gaussian
 
 		// The Poisson is a PMF. The Gaussian is a PDF.
-		// The expected value is integrated over all real z, -Inf:Inf, 
+		// The expected value is integrated over all real z, -Inf:Inf,
 		// (the full range of the Gaussian).
 
 		// Sample the values of the full range and compute a sum using Simpson integration.
 
 		// Only use part of the cumulative distribution.
 		// Start at zero for a 1-tailed truncation of the cumulative distribution.
-		// This code will be for low mean values where the contribution at zero is 
+		// This code will be for low mean values where the contribution at zero is
 		// significant.
 		int minx = 0;
 		// Find the limit. These can be cached (or may be the defaults).
-		// TODO - Determine if the Poisson can be truncated. We may have to use more of 
+		// TODO - Determine if the Poisson can be truncated. We may have to use more of
 		// the values (for example those returned by computeLimit(...).
 		int maxx;
 		// The exponent provides a rough idea of the size of the mean
@@ -473,7 +473,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		{
 			// Extreme case where there is no Poisson for convolution.
 			// Assume a Gaussian distribution. Return the Fisher information
-			// for the Gaussian with mean 0. This will happen when the cumulative 
+			// for the Gaussian with mean 0. This will happen when the cumulative
 			// probability has been altered from the default.
 			return getGaussianI();
 		}
@@ -482,13 +482,13 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		double[] p = list.toArray();
 
 		// Convolve with the Gaussian kernel.
-		// As the mean reduces the Poisson distribution is more skewed 
+		// As the mean reduces the Poisson distribution is more skewed
 		// and the extent of the kernel must change. Just increase the range
 		// for the kernel for each power of 2 the number is below 1.
 		int range = minRange;
 		for (int e = exp; range < maxRange && e <= 0; e++, range++)
 			;
-		// Ensure the kernel range covers multiple values of the Poisson distribution. 
+		// Ensure the kernel range covers multiple values of the Poisson distribution.
 		// Only applicable to small kernels
 		while (range < maxRange && range * s < 1)
 			range++;
@@ -664,7 +664,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 		Convolution.convolve(g, p, scale, ip);
 
-		// Subtract the final 1 
+		// Subtract the final 1
 		return ip.getSum() - 1;
 	}
 

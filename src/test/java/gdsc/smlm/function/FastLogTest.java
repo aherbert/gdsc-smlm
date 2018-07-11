@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -57,7 +57,7 @@ public class FastLogTest
 		public double getScale() { return LN2; }
 		@Override
 		public int getN() { return 52; }
-		
+
 		@Override
 		public float log(float x) {	return (float) Math.log(x);	}
 		@Override
@@ -70,7 +70,7 @@ public class FastLogTest
 		public double logD(double x) { return Math.log(x); }
 		@Override
 		public double  log2D(double x) { return (log(x) / LN2); }
-		
+
 		@Override
 		public float fastLog(float x) { return log(x); }
 		@Override
@@ -97,7 +97,7 @@ public class FastLogTest
 	{
 		FastLog fl;
 		String name;
-		BaseTestLog(FastLog fl) { 
+		BaseTestLog(FastLog fl) {
 			this.name = this.getClass().getSimpleName() + " " + fl.getClass().getSimpleName();
 			this.fl=fl; }
 		abstract float log(float x);
@@ -380,7 +380,7 @@ public class FastLogTest
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		TurboList<TestFastLog> test = new TurboList<TestFastLog>();
+		TurboList<TestFastLog> test = new TurboList<>();
 		int n = 13;
 		test.add(new TestFastLog(ICSIFastLog.create(n, DataType.FLOAT)));
 		test.add(new TestFastLog(new FFastLog(n)));
@@ -623,7 +623,7 @@ public class FastLogTest
 
 		RandomGenerator r = TestSettings.getRandomGenerator();
 
-		TurboList<TestFastLog> test = new TurboList<TestFastLog>();
+		TurboList<TestFastLog> test = new TurboList<>();
 		int n = 13;
 		test.add(new TestFastLog(ICSIFastLog.create(n, DataType.DOUBLE)));
 		test.add(new TestFastLog(new FFastLog(n)));
@@ -881,7 +881,7 @@ public class FastLogTest
 		TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
 		ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
-		//// Test min acceptable precision 
+		//// Test min acceptable precision
 		//TurboLog2 tf3 = new TurboLog2(8);
 		//ts.execute(new DoubleTimingTask(new TestLog(tf3), 15, x));
 		//ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
@@ -900,7 +900,7 @@ public class FastLogTest
 			TurboLog tf = new TurboLog(n);
 			ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
-			// Test same precision 
+			// Test same precision
 			TurboLog2 tf2 = new TurboLog2(n - 1);
 			ts.execute(new DoubleTimingTask(new TestLog(tf2), q + 1, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q + 1, x));

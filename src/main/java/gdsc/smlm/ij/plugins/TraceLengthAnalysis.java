@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -86,7 +86,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -254,7 +254,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -319,7 +319,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	/**
 	 * For the provided histogram x-axis bins, produce an x-axis for plotting. This functions doubles up the histogram
 	 * x-positions to allow plotting a square line profile using the ImageJ plot command.
-	 * 
+	 *
 	 * @param length
 	 * @return
 	 */
@@ -429,7 +429,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			int jump = frame - lastFrame;
 			// Get the raw distance but subtract the expected localisation error
 			double d2 = Math.max(0, Maths.distance2(lastx, lasty, x, y) - error);
-			// We expect the Mean Squared Distance (MSD) to scale linearly 
+			// We expect the Mean Squared Distance (MSD) to scale linearly
 			// with time so just weight each jump by the time gap.
 			// However we apply a correction factor for diffusion with frames.
 			sumSquared += JumpDistanceAnalysis.convertObservedToActual(d2, jump);

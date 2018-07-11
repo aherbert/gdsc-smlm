@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -38,7 +38,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
@@ -74,7 +74,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/**
 	 * Compute the error
-	 * 
+	 *
 	 * @param value
 	 * @param noise
 	 * @param numberOfFittedPoints
@@ -106,7 +106,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getTotalSumOfSquares()
 	 */
 	@Override
@@ -121,7 +121,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getResidualSumOfSquares()
 	 */
 	@Override
@@ -132,7 +132,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getCoefficientOfDetermination()
 	 */
 	@Override
@@ -143,7 +143,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getAdjustedCoefficientOfDetermination()
 	 */
 	@Override
@@ -155,7 +155,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getMeanSquaredError()
 	 */
 	@Override
@@ -171,11 +171,11 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
-	 * 
+	 *
 	 * <pre>
 	 * I = sum_i { Ei,a * Ei,b }
 	 * E = sum_i { Ei * Ei,a * Ei,b }
-	 * 
+	 *
 	 * with
 	 * i the number of data points fit using least squares using a function of n variable parameters
 	 * Ei the expected value of the function at i
@@ -226,11 +226,11 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
-	 * 
+	 *
 	 * <pre>
 	 * I = sum_i { Ei,a * Ei,b }
 	 * E = sum_i { Ei * Ei,a * Ei,b }
-	 * 
+	 *
 	 * with
 	 * i the number of data points fit using least squares using a function of n variable parameters
 	 * Ei the expected value of the function at i

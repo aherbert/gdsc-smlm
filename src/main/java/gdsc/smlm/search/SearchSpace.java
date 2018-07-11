@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -45,8 +45,8 @@ public class SearchSpace
 	private double[][] seed;
 
 	private double[][] scoredSearchSpace;
-	private ArrayList<String> scoredSearchSpaceHash = new ArrayList<String>();
-	private HashSet<String> coveredSpace = new HashSet<String>();
+	private ArrayList<String> scoredSearchSpaceHash = new ArrayList<>();
+	private HashSet<String> coveredSpace = new HashSet<>();
 	private StringBuilder sb = new StringBuilder();
 
 	// This introduces a dependency on another gdsc.smlm package
@@ -80,7 +80,7 @@ public class SearchSpace
 
 	/**
 	 * Clone the search dimensions
-	 * 
+	 *
 	 * @param dimensions
 	 *            the search dimensions
 	 * @return the clone
@@ -586,7 +586,7 @@ public class SearchSpace
 					// The point values
 					final double[] v2 = searchSpace[j];
 
-					// We started with the min value for the dimension 
+					// We started with the min value for the dimension
 					// so go from index 1 upwards
 					for (int k = 1; k < v1.length; k++)
 					{
@@ -654,7 +654,7 @@ public class SearchSpace
 			{
 				if (!changed)
 				{
-					// Switch back to enumeration of a smaller range if 
+					// Switch back to enumeration of a smaller range if
 					// the refinement has not changed the centre
 					searchMode = RefinementMode.NONE;
 					changed = reduceRange(dimensions);
@@ -662,7 +662,7 @@ public class SearchSpace
 			}
 			else if (searchMode == RefinementMode.MULTI_DIMENSION)
 			{
-				// We enumerated all the points around the optimum so 
+				// We enumerated all the points around the optimum so
 				// just switch back to enumeration of a smaller range
 				searchMode = RefinementMode.NONE;
 				changed = reduceRange(dimensions);
@@ -678,7 +678,7 @@ public class SearchSpace
 				// Check if at the bounds of the dimension values
 				final boolean atBounds = dimensions[i].isAtBounds(p[i]);
 
-				// Only if at the bounds then move the centre. 
+				// Only if at the bounds then move the centre.
 				// (There is no point moving the bounds if not currently at the limits).
 				if (atBounds)
 				{
@@ -723,7 +723,7 @@ public class SearchSpace
 					dimensions[i].setCentre(p[i]);
 				}
 
-				// Clear the memory of the space that has been searched 
+				// Clear the memory of the space that has been searched
 				// (as the search space is about to be altered so the values may not overlap).
 				coveredSpace.clear();
 
@@ -762,7 +762,7 @@ public class SearchSpace
 	 */
 	private boolean reduceRange(SearchDimension[] dimensions)
 	{
-		// First check if the range can be reduced. 
+		// First check if the range can be reduced.
 		// If not then return false as nothing can be changed.
 		boolean reduced = false;
 		for (int i = 0; i < dimensions.length; i++)
@@ -811,7 +811,7 @@ public class SearchSpace
 
 	/**
 	 * Set a tracker to allow the progress to be followed
-	 * 
+	 *
 	 * @param tracker
 	 *            the tracker to set
 	 */
@@ -823,7 +823,7 @@ public class SearchSpace
 	/**
 	 * Get the iteration. The iteration is increased each time the population grows as part of the [grow, evaluate,
 	 * select] cycle.
-	 * 
+	 *
 	 * @return the iteration
 	 */
 	public int getIteration()
@@ -833,7 +833,7 @@ public class SearchSpace
 
 	/**
 	 * Send a start message to the tracker
-	 * 
+	 *
 	 * @param stage
 	 *            The stage that has started
 	 */
@@ -976,7 +976,7 @@ public class SearchSpace
 		if (remaining > 0)
 		{
 			double[][] sample = sample(dimensions, remaining, generator);
-			ArrayList<double[]> merged = new ArrayList<double[]>(sample.length + searchSpace.length);
+			ArrayList<double[]> merged = new ArrayList<>(sample.length + searchSpace.length);
 			merged.addAll(Arrays.asList(searchSpace));
 			merged.addAll(Arrays.asList(sample));
 			searchSpace = merged.toArray(new double[merged.size()][]);

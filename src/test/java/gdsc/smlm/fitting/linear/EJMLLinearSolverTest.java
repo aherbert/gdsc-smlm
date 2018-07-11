@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -54,16 +54,16 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { 
-			new double[] { 2, -1, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
 		double[] b = new double[] { 3, 3, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 4.75, 6.5, 5.25 };
-		double[][] a_inv = new double[][] { 
-			new double[] { 0.75, 0.5, 0.25 }, 
+		double[][] a_inv = new double[][] {
+			new double[] { 0.75, 0.5, 0.25 },
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
@@ -80,7 +80,7 @@ public class EJMLLinearSolverTest
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
 	}
-	
+
 	@Test
 	public void canSolveLinearEquationWithZeroInB()
 	{
@@ -89,16 +89,16 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { 
-			new double[] { 2, -1, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
 		double[] b = new double[] { 3, 0, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 3.25, 3.5, 3.75 };
-		double[][] a_inv = new double[][] { 
-			new double[] { 0.75, 0.5, 0.25 }, 
+		double[][] a_inv = new double[][] {
+			new double[] { 0.75, 0.5, 0.25 },
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
@@ -123,17 +123,17 @@ public class EJMLLinearSolverTest
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
-		double[][] a = new double[][] { 
-			new double[] { 2, 0, -1, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, 0, -1, 0 },
 			new double[] { 0, 0, 0, 0 },
-			new double[] { -1, 0, 2, -1 }, 
+			new double[] { -1, 0, 2, -1 },
 			new double[] { 0, 0, -1, 2 } };
 		double[] b = new double[] { 3, 0, 3, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 4.75, 0, 6.5, 5.25 };
-		double[][] a_inv = new double[][] { 
-			new double[] { 0.75, 0, 0.5, 0.25 }, 
+		double[][] a_inv = new double[][] {
+			new double[] { 0.75, 0, 0.5, 0.25 },
 			new double[] { 0, 0, 0, 0 },
 			new double[] { 0.5, 0, 1, 0.5 },
 			new double[] { 0.25, 0, 0.5, 0.75 } };
@@ -161,22 +161,22 @@ public class EJMLLinearSolverTest
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
-		double[][] a = new double[][] { 
-			new double[] { 2, 0, -1, 0, 0, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, 0, -1, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
-			new double[] { -1, 0, 2, 0, 0, -1 }, 
+			new double[] { -1, 0, 2, 0, 0, -1 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, -1, 0, 0, 2 } };
 		double[] b = new double[] { 3, 0, 3, 0, 0, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 4.75, 0, 6.5, 0, 0, 5.25 };
-		double[][] a_inv = new double[][] { 
+		double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.5, 0, 1, 0, 0, 0.5 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
@@ -193,7 +193,7 @@ public class EJMLLinearSolverTest
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
 	}
-	
+
 	@Test
 	public void canInvert()
 	{
@@ -202,14 +202,14 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { 
-			new double[] { 2, -1, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
 
 		// Expected solution
-		double[][] a_inv = new double[][] { 
-			new double[] { 0.75, 0.5, 0.25 }, 
+		double[][] a_inv = new double[][] {
+			new double[] { 0.75, 0.5, 0.25 },
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
@@ -222,8 +222,8 @@ public class EJMLLinearSolverTest
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
-	}	
-	
+	}
+
 	@Test
 	public void canInvertWithZeros()
 	{
@@ -232,20 +232,20 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { 
-			new double[] { 2, 0, -1, 0, 0, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, 0, -1, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
-			new double[] { -1, 0, 2, 0, 0, -1 }, 
+			new double[] { -1, 0, 2, 0, 0, -1 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, -1, 0, 0, 2 } };
 
 		// Expected solution
-		double[][] a_inv = new double[][] { 
+		double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.5, 0, 1, 0, 0, 0.5 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
@@ -258,8 +258,8 @@ public class EJMLLinearSolverTest
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
-	}	
-	
+	}
+
 	@Test
 	public void canInvertDiagonal()
 	{
@@ -268,8 +268,8 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { 
-			new double[] { 2, -1, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
 
@@ -282,8 +282,8 @@ public class EJMLLinearSolverTest
 
 		log("a diagonal = %s\n", Arrays.toString(o));
 		Assert.assertArrayEquals("Bad inversion", e, o, 1e-4);
-	}		
-	
+	}
+
 	@Test
 	public void canInvertDiagonalWithZeros()
 	{
@@ -292,12 +292,12 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { 
-			new double[] { 2, 0, -1, 0, 0, 0 }, 
+		double[][] a = new double[][] {
+			new double[] { 2, 0, -1, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
-			new double[] { -1, 0, 2, 0, 0, -1 }, 
+			new double[] { -1, 0, 2, 0, 0, -1 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
-			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, -1, 0, 0, 2 } };
 
 		// Expected solution
@@ -309,7 +309,7 @@ public class EJMLLinearSolverTest
 
 		log("a diagonal = %s\n", Arrays.toString(o));
 		Assert.assertArrayEquals("Bad inversion", e, o, 1e-4);
-	}		
+	}
 	//@formatter:on
 
 	private abstract class SolverTimingTask extends BaseTimingTask
@@ -495,8 +495,8 @@ public class EJMLLinearSolverTest
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
 		final double[] y = new double[n];
-		final TurboList<DenseMatrix64F> aList = new TurboList<DenseMatrix64F>();
-		final TurboList<DenseMatrix64F> bList = new TurboList<DenseMatrix64F>();
+		final TurboList<DenseMatrix64F> aList = new TurboList<>();
+		final TurboList<DenseMatrix64F> bList = new TurboList<>();
 		double[] testbackground = new double[] { 0.2, 0.7 };
 		double[] testsignal1 = new double[] { 30, 100, 300 };
 		double[] testcx1 = new double[] { 4.9, 5.3 };
@@ -522,13 +522,13 @@ public class EJMLLinearSolverTest
 								@Override
 								public void execute(double value)
 								{
-									// Poisson data 
+									// Poisson data
 									y[i++] = rdg.nextPoisson(value);
 								}
 							});
 							double[][] alpha = new double[np][np];
 							double[] beta = new double[np];
-							//double ss = 
+							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
 							//TestSettings.debug("SS = %f\n", ss);
 							// As per the LVM algorithm
@@ -542,7 +542,7 @@ public class EJMLLinearSolverTest
 		DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
 		int runs = 100000 / a.length;
 		TimingService ts = new TimingService(runs);
-		TurboList<SolverTimingTask> tasks = new TurboList<SolverTimingTask>();
+		TurboList<SolverTimingTask> tasks = new TurboList<>();
 		// Added in descending speed order
 		tasks.add(new PseudoInverseSolverTimingTask(a, b));
 		tasks.add(new LinearSolverTimingTask(a, b));
@@ -809,7 +809,7 @@ public class EJMLLinearSolverTest
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
 		final double[] y = new double[n];
-		final TurboList<DenseMatrix64F> aList = new TurboList<DenseMatrix64F>();
+		final TurboList<DenseMatrix64F> aList = new TurboList<>();
 		double[] testbackground = new double[] { 0.2, 0.7 };
 		double[] testsignal1 = new double[] { 30, 100, 300 };
 		double[] testcx1 = new double[] { 4.9, 5.3 };
@@ -835,13 +835,13 @@ public class EJMLLinearSolverTest
 								@Override
 								public void execute(double value)
 								{
-									// Poisson data 
+									// Poisson data
 									y[i++] = rdg.nextPoisson(value);
 								}
 							});
 							double[][] alpha = new double[np][np];
 							double[] beta = new double[np];
-							//double ss = 
+							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
 							//TestSettings.debug("SS = %f\n", ss);
 							// As per the LVM algorithm
@@ -855,7 +855,7 @@ public class EJMLLinearSolverTest
 		double[][] answer = new double[a.length][];
 		int runs = 100000 / a.length;
 		TimingService ts = new TimingService(runs);
-		TurboList<InversionTimingTask> tasks = new TurboList<InversionTimingTask>();
+		TurboList<InversionTimingTask> tasks = new TurboList<>();
 		// Added in descending speed order
 		tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
 		tasks.add(new LinearInversionTimingTask(a, ignore, answer));
@@ -893,7 +893,7 @@ public class EJMLLinearSolverTest
 		}
 		else
 		{
-			// No Direct inversion possible.			
+			// No Direct inversion possible.
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
 				TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));

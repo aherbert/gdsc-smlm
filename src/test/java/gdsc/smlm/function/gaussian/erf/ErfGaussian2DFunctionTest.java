@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -142,7 +142,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		// Test fitting of second derivatives 
+		// Test fitting of second derivatives
 		ErfGaussian2DFunction f1a = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxy, flags,
 				zModel);
 		ErfGaussian2DFunction f1b = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxy, flags,
@@ -161,7 +161,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 									f1.initialise2(a);
 
-									// Numerically solve gradient. 
+									// Numerically solve gradient.
 									// Calculate the step size h to be an exact numerical representation
 									final double xx = a[targetParameter];
 
@@ -303,7 +303,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		// Test fitting of second derivatives 
+		// Test fitting of second derivatives
 		ErfGaussian2DFunction f2a = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(2, maxx, maxy, flags,
 				zModel);
 		ErfGaussian2DFunction f2b = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(2, maxx, maxy, flags,
@@ -331,7 +331,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																	w2[1], angle2);
 															f2.initialise2(a);
 
-															// Numerically solve gradient. 
+															// Numerically solve gradient.
 															// Calculate the step size h to be an exact numerical representation
 															final double xx = a[targetParameter];
 
@@ -464,8 +464,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
 
-		final TurboList<double[]> params = new TurboList<double[]>();
-		final TurboList<double[]> params2 = new TurboList<double[]>();
+		final TurboList<double[]> params = new TurboList<>();
+		final TurboList<double[]> params2 = new TurboList<>();
 		for (double background : testbackground)
 			// Peak 1
 			for (double signal1 : testsignal1)
@@ -652,7 +652,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									for (int j = 0; j < nparams; j++)
 									{
 										int targetParameter = gradientIndices[j];
-										// Numerically solve gradient. 
+										// Numerically solve gradient.
 										// Calculate the step size h to be an exact numerical representation
 										final double xx = a[targetParameter];
 
@@ -873,7 +873,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															for (int j = 0; j < nparams; j++)
 															{
 																int targetParameter = gradientIndices[j];
-																// Numerically solve gradient. 
+																// Numerically solve gradient.
 																// Calculate the step size h to be an exact numerical representation
 																final double xx = a[targetParameter];
 
@@ -1092,7 +1092,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
-		final TurboList<double[]> params = new TurboList<double[]>();
+		final TurboList<double[]> params = new TurboList<>();
 		for (double background : testbackground)
 			// Peak 1
 			for (double signal1 : testsignal1)
@@ -1156,7 +1156,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		TurboList<double[]> p = new TurboList<double[]>();
+		TurboList<double[]> p = new TurboList<>();
 		for (double background : testbackground)
 			// Peak 1
 			for (double signal1 : testsignal1)
@@ -1224,7 +1224,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		TestSettings.assumeMediumComplexity();
 		Assume.assumeNotNull(f2);
 
-		TurboList<double[]> p = new TurboList<double[]>();
+		TurboList<double[]> p = new TurboList<>();
 		for (double background : testbackground)
 			// Peak 1
 			for (double signal1 : testsignal1)

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -63,7 +63,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	/**
 	 * Select the top individuals using the configured fraction. The resulting subset will be at least size 2 (unless
 	 * the input is smaller or there are not enough valid individuals (fitness not null)).
-	 * 
+	 *
 	 * @param individuals
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
@@ -98,7 +98,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 
 	/**
 	 * Calculate the new size of the population after selection
-	 * 
+	 *
 	 * @param size
 	 *            The current size of the population before selection
 	 * @return The new size of the population
@@ -118,7 +118,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
 	 */
 	@Override
@@ -131,7 +131,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 
 	/**
 	 * Select pairs randomly from the population
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#next()
 	 */
 	@Override
@@ -155,12 +155,12 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 			while (second == first)
 				second = random.nextInt(0, upper);
 		}
-		return new ChromosomePair<T>(individuals.get(first), individuals.get(second));
+		return new ChromosomePair<>(individuals.get(first), individuals.get(second));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#finishBreeding()
 	 */
 	@Override
@@ -172,7 +172,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#setTracker(gdsc.core.logging.TrackProgress)
 	 */
 	@Override

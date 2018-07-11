@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -302,16 +302,16 @@ public class GUIProtosHelper
 	{
 		CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
 		builder.setPhotons(10);
-		// Note that the total gain is likely to be very different if using EM-CCD/CCD/sCMOS 
+		// Note that the total gain is likely to be very different if using EM-CCD/CCD/sCMOS
 		// so these are separate.
-		// Use counts as it is simpler to understand (and measure) than electrons on manufacturers 
+		// Use counts as it is simpler to understand (and measure) than electrons on manufacturers
 		// specification sheets.
 
 		// Need a better CCD estimate. This is Photometrics CoolSNAP HQ2
 		builder.setGain(1); // Count/electron
 		builder.setNoise(5.5); // Count
 
-		// EM-CCD: Photometrics Evolve 512 
+		// EM-CCD: Photometrics Evolve 512
 		builder.setEmGain(40); // This is the total gain in Count/electron
 		builder.setEmNoise(13); // Count
 

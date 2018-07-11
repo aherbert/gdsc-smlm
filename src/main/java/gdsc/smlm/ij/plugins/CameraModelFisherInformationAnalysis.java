@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -71,7 +71,7 @@ import ij.plugin.WindowOrganiser;
  */
 public class CameraModelFisherInformationAnalysis implements PlugIn
 {
-	// TODO 
+	// TODO
 	// Options to show the computed convolution across a range of means.
 
 	private static final String TITLE = "Camera Model Fisher Information Analysis";
@@ -84,7 +84,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		POISSON { @Override
 		public String getName() { return "Poisson"; } },
 		CCD { @Override
-		public String getName() { return "CCD"; } 
+		public String getName() { return "CCD"; }
 			  @Override
 			public boolean isFast() { return false; }
 			  @Override
@@ -94,20 +94,20 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 							@Override
 							public String getShortName() { return "CCD Approx"; }},
 		EM_CCD { @Override
-		public String getName() { return "EM-CCD"; } 
+		public String getName() { return "EM-CCD"; }
 		         @Override
 				public boolean isFast() { return false; } };
 
 		@Override
 		public abstract String getName();
-		
+
 		/**
 		 * Checks if is fast to compute.
 		 *
 		 * @return true, if is fast
 		 */
 		public boolean isFast() { return true; }
-		
+
 		/**
 		 * Checks if is fixed Fisher information at the lower bound.
 		 *
@@ -120,7 +120,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		{
 			return getName();
 		}
-		
+
 		public static CameraType forNumber(int number)
 		{
 			CameraType[] values = CameraType.values();
@@ -139,8 +139,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	 */
 	private static class FIKey
 	{
-		// This is not part of the hashcode. 
-		// It is used to ensure only the latest computations are saved to disk. 
+		// This is not part of the hashcode.
+		// It is used to ensure only the latest computations are saved to disk.
 		final long age = System.currentTimeMillis();
 
 		final int type;
@@ -212,11 +212,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 	}
 
-	private static HashMap<FIKey, PoissonFisherInformationData> cache = new HashMap<FIKey, PoissonFisherInformationData>();
+	private static HashMap<FIKey, PoissonFisherInformationData> cache = new HashMap<>();
 
 	static
 	{
-		PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<PoissonFisherInformationCache>(
+		PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
 				PoissonFisherInformationCache.getDefaultInstance()).read();
 		if (cacheData != null)
 		{
@@ -246,11 +246,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		if (data != null)
 		{
 			// This should only be called if new values have been computed.
-			// so assume we must merge the lists. 
+			// so assume we must merge the lists.
 			// Note: The lists must be sorted.
 			AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
 			//AlphaSample[] list2 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
-			TurboList<AlphaSample> list = new TurboList<AlphaSample>(list1.length + log10photons.length);
+			TurboList<AlphaSample> list = new TurboList<>(list1.length + log10photons.length);
 			int i = 0, j = 0;
 			AlphaSample.Builder a2 = AlphaSample.newBuilder();
 			while (i < list1.length && j < log10photons.length)
@@ -312,7 +312,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		{
 			int t = type.ordinal();
 			// Get the EM-CCD keys
-			TurboList<FIKey> list = new TurboList<FIKey>(cache.size());
+			TurboList<FIKey> list = new TurboList<>(cache.size());
 			for (FIKey k : cache.keySet())
 			{
 				if (k.type == t)
@@ -493,7 +493,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -515,7 +515,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
@@ -912,7 +912,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 					es = Executors.newFixedThreadPool(nThreads);
 				final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), index.length, nThreads != 1);
 				int nPerThread = (int) Math.ceil((double) index.length / nThreads);
-				TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
+				TurboList<Future<?>> futures = new TurboList<>(nThreads);
 				for (int i = 0; i < index.length; i += nPerThread)
 				{
 					final int start = i;

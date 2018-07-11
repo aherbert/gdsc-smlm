@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -61,7 +61,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, double[])
 	 */
 	@Override
@@ -115,7 +115,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	/**
 	 * Creates a string representation of the peak parameters if logging
-	 * 
+	 *
 	 * @param oldError
 	 * @param newError
 	 * @param a
@@ -197,7 +197,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	/**
 	 * Check if any dimension is below the threshold
-	 * 
+	 *
 	 * @param threshold
 	 * @param params
 	 * @param paramIndex
@@ -218,7 +218,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	/**
 	 * Check if any dimension is above the threshold
-	 * 
+	 *
 	 * @param threshold
 	 * @param params
 	 * @param paramIndex
@@ -239,7 +239,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	/**
 	 * Set the change in error that defines a negligible amount
-	 * 
+	 *
 	 * @param delta
 	 *            the delta to set
 	 */

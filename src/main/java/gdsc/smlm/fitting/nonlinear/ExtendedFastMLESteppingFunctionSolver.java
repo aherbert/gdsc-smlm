@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -107,7 +107,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 	void enableJacobianSolution(boolean enable)
 	{
 		// This method is defined at the package level for JUnit testing. It is not public
-		// as the method does not work.		
+		// as the method does not work.
 		enableJacobianSolution(enable, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
 	}
 
@@ -128,7 +128,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 	void enableJacobianSolution(boolean enable, double maxRelativeError, double maxAbsoluteError)
 	{
 		// This method is defined at the package level for JUnit testing. It is not public
-		// as the method does not work.		
+		// as the method does not work.
 		if (enable)
 		{
 			if (!(f instanceof ExtendedGradient2Function))
@@ -191,7 +191,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeStep(double[])
 	 */
 	@Override
@@ -228,7 +228,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 
 		// Simple Newton-Raphson update step as per Smith et al, (2010), SI Eq. 13:
 		// parameter -> new parameter + delta
-		// => new parameter = parameter - delta  
+		// => new parameter = parameter - delta
 		for (int i = 0; i < step.length; i++)
 			step[i] = -d1[i] / d2[i];
 	}

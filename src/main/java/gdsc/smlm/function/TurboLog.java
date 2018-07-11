@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -130,7 +130,7 @@ public class TurboLog extends FastLog
 	public TurboLog(int n)
 	{
 		// Store log value of a range of floating point numbers using a limited
-		// precision mantissa (m). The purpose of this code is to enumerate all 
+		// precision mantissa (m). The purpose of this code is to enumerate all
 		// possible mantissas of a float with limited precision (23-q). Note the
 		// mantissa represents the digits of a binary number after the binary-point: .10101010101.
 		// It is assumed that the digit before the point is a 1 if the exponent
@@ -147,14 +147,14 @@ public class TurboLog extends FastLog
 		// Then the floating-point result equals the value of the mathematical
 		// expression s x m x 2^(e-150):
 		// e-127 is the unbiased exponent. 23 is the mantissa precision
-		// = s x m x 2^(e-127-23) 
+		// = s x m x 2^(e-127-23)
 
 		// E.g. For a precision of n=(23-q)=6
 		// We enumerate:
 		// (1.000000 to 1.111111)
 
-		// The mantissa is incremented using an integer representation to allow 
-		// exact enumeration. This is then converted to a float for the call to 
+		// The mantissa is incremented using an integer representation to allow
+		// exact enumeration. This is then converted to a float for the call to
 		// log(double).
 
 		q = 23 - n;
@@ -229,7 +229,7 @@ public class TurboLog extends FastLog
 		// e-127 is the unbiased exponent. 23 is the mantissa precision
 		// = s x m x 2^(e-127-23)
 		//
-		// Here we have m as an index to the log of the mantissa including 
+		// Here we have m as an index to the log of the mantissa including
 		// the binary point. So we just need to compute
 		// log(m x 2^(e-127))
 		// = log(m) + log(2^(e-127))
@@ -264,8 +264,8 @@ public class TurboLog extends FastLog
 	{
 		// Normalize the subnormal number.
 		// The unbiased exponent starts at -127.
-		// Shift the mantissa until it is a binary number 
-		// with a leading 1: 1.10101010... 
+		// Shift the mantissa until it is a binary number
+		// with a leading 1: 1.10101010...
 
 		int e = -127;
 		while ((m & 0x800000) == 0)
@@ -288,7 +288,7 @@ public class TurboLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -296,7 +296,7 @@ public class TurboLog extends FastLog
 	@Override
 	public float fastLog(float x)
 	{
-		// As above but no checks for NaN or infinity		
+		// As above but no checks for NaN or infinity
 		final int bits = Float.floatToRawIntBits(x);
 		final int e = ((bits >>> 23) & 0xff);
 		final int m = (bits & 0x7fffff);
@@ -342,7 +342,7 @@ public class TurboLog extends FastLog
 		// e-1023 is the unbiased exponent. 52 is the mantissa precision
 		// = s x m x 2^(e-1023-52)
 		//
-		// Here we have m as an index to the log of the mantissa including 
+		// Here we have m as an index to the log of the mantissa including
 		// the binary point. So we just need to compute
 		// log(m x 2^(e-1023))
 		// = log(m) + log(2^(e-1023))
@@ -377,8 +377,8 @@ public class TurboLog extends FastLog
 	{
 		// Normalize the subnormal number.
 		// The unbiased exponent starts at -1023.
-		// Shift the mantissa until it is a binary number 
-		// with a leading 1: 1.10101010... 
+		// Shift the mantissa until it is a binary number
+		// with a leading 1: 1.10101010...
 
 		int e = -1023;
 		while ((m & 0x0010000000000000L) == 0)
@@ -401,7 +401,7 @@ public class TurboLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -409,7 +409,7 @@ public class TurboLog extends FastLog
 	@Override
 	public float fastLog(double x)
 	{
-		// As above but no checks for NaN or infinity		
+		// As above but no checks for NaN or infinity
 		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
@@ -455,7 +455,7 @@ public class TurboLog extends FastLog
 		// e-1023 is the unbiased exponent. 52 is the mantissa precision
 		// = s x m x 2^(e-1023-52)
 		//
-		// Here we have m as an index to the log of the mantissa including 
+		// Here we have m as an index to the log of the mantissa including
 		// the binary point. So we just need to compute
 		// log(m x 2^(e-1023))
 		// = log(m) + log(2^(e-1023))
@@ -491,8 +491,8 @@ public class TurboLog extends FastLog
 	{
 		// Normalize the subnormal number.
 		// The unbiased exponent starts at -1023.
-		// Shift the mantissa until it is a binary number 
-		// with a leading 1: 1.10101010... 
+		// Shift the mantissa until it is a binary number
+		// with a leading 1: 1.10101010...
 
 		int e = -1023;
 		while ((m & 0x0010000000000000L) == 0)
@@ -515,7 +515,7 @@ public class TurboLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
@@ -523,7 +523,7 @@ public class TurboLog extends FastLog
 	@Override
 	public double fastLogD(double x)
 	{
-		// As above but no checks for NaN or infinity		
+		// As above but no checks for NaN or infinity
 		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);

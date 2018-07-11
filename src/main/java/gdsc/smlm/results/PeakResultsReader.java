@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -278,13 +278,13 @@ public class PeakResultsReader
 				return;
 		}
 
-		// Support reading old IJ table results. 
+		// Support reading old IJ table results.
 		// The latest table results have dynamic columns so these must be loaded manually
 		// as guessing the column format is not supported.
 		if (header.contains(IMAGEJ_TABLE_RESULTS_HEADER_V1_V2))
 		{
 			format = FileFormat.SMLM_TABLE;
-			smlmVersion = 2; // V1/V2 doesn't matter 
+			smlmVersion = 2; // V1/V2 doesn't matter
 			readId = header.startsWith("#");
 			readEndFrame = header.contains("\tEnd ");
 			deviations = header.contains("\t+/-\t");
@@ -619,7 +619,7 @@ public class PeakResultsReader
 
 	/**
 	 * Read the results from the file. The file is read for each invocation of this method.
-	 * 
+	 *
 	 * @return The peak results
 	 */
 	public MemoryPeakResults getResults()
@@ -642,7 +642,7 @@ public class PeakResultsReader
 				getSource();
 				getBounds();
 				getConfiguration();
-				// RapidSTORM has calibration too 
+				// RapidSTORM has calibration too
 			case RAPID_STORM:
 				getCalibration();
 			default:
@@ -732,7 +732,7 @@ public class PeakResultsReader
 		final int isy = indices[1];
 		final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
 
-		// Determine if the angle is non-zero with asymmetric widths 
+		// Determine if the angle is non-zero with asymmetric widths
 		if (results.forEach(new PeakResultProcedureX()
 		{
 			@Override
@@ -783,7 +783,7 @@ public class PeakResultsReader
 				// Already a TwoAxis Gaussian
 				return;
 
-			// Otherwise this was a TwoAxisAndTheta with 1 column to remove 
+			// Otherwise this was a TwoAxisAndTheta with 1 column to remove
 			// so it should be simplified
 			psfType = PSFType.TWO_AXIS_GAUSSIAN_2D;
 		}
@@ -1116,8 +1116,8 @@ public class PeakResultsReader
 			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 			calibration.setAngleUnit(AngleUnit.DEGREE);
 
-			// Note that in older versions the background included the bias. 
-			// The bias is not included in the table and so the user will have to 
+			// Note that in older versions the background included the bias.
+			// The bias is not included in the table and so the user will have to
 			// add this manually. They will also have to add the gain.
 		}
 		else
@@ -1995,7 +1995,7 @@ public class PeakResultsReader
 			// Skip over the single line header
 			String header = input.readLine();
 
-			// V1: had the Signal and Amplitude. Parameters 
+			// V1: had the Signal and Amplitude. Parameters
 			// V2: have only the Signal.
 			// V3: Has variable columns with units for the PSF parameters. Signal was renamed to Intensity.
 			int version;
@@ -2008,7 +2008,7 @@ public class PeakResultsReader
 			{
 				version = 3;
 
-				// We support reading old IJ table results as they had fixed columns. 
+				// We support reading old IJ table results as they had fixed columns.
 				// The latest table results have dynamic columns so these must be loaded manually
 				// as guessing the column format is not supported.
 				return null;
@@ -2214,7 +2214,7 @@ public class PeakResultsReader
 		// [+/-]
 		// Y SD
 		// [+/-]
-		// [Precision] 
+		// [Precision]
 		try
 		{
 			Scanner scanner = new Scanner(line);
@@ -2296,7 +2296,7 @@ public class PeakResultsReader
 		// [+/-]
 		// Y SD
 		// [+/-]
-		// [Precision] 
+		// [Precision]
 		try
 		{
 			Scanner scanner = new Scanner(line);
@@ -2371,7 +2371,7 @@ public class PeakResultsReader
 		// Repeated:
 		//   Field[ (units)]
 		//   [+/-]
-		// [Precision] 
+		// [Precision]
 		try
 		{
 			Scanner scanner = new Scanner(line);
@@ -2671,7 +2671,7 @@ public class PeakResultsReader
 		return false;
 	}
 
-	// So that the fields can be named  
+	// So that the fields can be named
 	@SuppressWarnings("unused")
 	private PeakResult createNSTORMResult(String line)
 	{
@@ -2715,7 +2715,7 @@ public class PeakResultsReader
 		//   the cover glass).
 		//Zc: The Z position of the molecule (in nanometers) with drift
 		//    correction applied. If no drift correction was applied to this
-		//    data then Zc= Z.		
+		//    data then Zc= Z.
 		try
 		{
 			Scanner scanner = new Scanner(line);

@@ -110,7 +110,8 @@ public final class FisherProtos {
       return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_AlphaSample_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_AlphaSample_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -126,7 +127,8 @@ public final class FisherProtos {
      *
      * <code>double log_10_mean = 1;</code>
      */
-    public double getLog10Mean() {
+    @Override
+	public double getLog10Mean() {
       return log10Mean_;
     }
 
@@ -140,12 +142,14 @@ public final class FisherProtos {
      *
      * <code>double alpha = 2;</code>
      */
-    public double getAlpha() {
+    @Override
+	public double getAlpha() {
       return alpha_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -154,7 +158,8 @@ public final class FisherProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (log10Mean_ != 0D) {
         output.writeDouble(1, log10Mean_);
@@ -164,7 +169,8 @@ public final class FisherProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -292,14 +298,16 @@ public final class FisherProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FisherProtos.AlphaSample prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -327,7 +335,8 @@ public final class FisherProtos {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_AlphaSample_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_AlphaSample_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -349,7 +358,8 @@ public final class FisherProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         log10Mean_ = 0D;
 
@@ -358,16 +368,19 @@ public final class FisherProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_AlphaSample_descriptor;
       }
 
-      public gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FisherProtos.AlphaSample.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FisherProtos.AlphaSample build() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSample build() {
         gdsc.smlm.data.config.FisherProtos.AlphaSample result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -375,7 +388,8 @@ public final class FisherProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FisherProtos.AlphaSample buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSample buildPartial() {
         gdsc.smlm.data.config.FisherProtos.AlphaSample result = new gdsc.smlm.data.config.FisherProtos.AlphaSample(this);
         result.log10Mean_ = log10Mean_;
         result.alpha_ = alpha_;
@@ -383,33 +397,40 @@ public final class FisherProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FisherProtos.AlphaSample) {
           return mergeFrom((gdsc.smlm.data.config.FisherProtos.AlphaSample)other);
         } else {
@@ -430,11 +451,13 @@ public final class FisherProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -460,7 +483,8 @@ public final class FisherProtos {
        *
        * <code>double log_10_mean = 1;</code>
        */
-      public double getLog10Mean() {
+      @Override
+	public double getLog10Mean() {
         return log10Mean_;
       }
       /**
@@ -471,7 +495,7 @@ public final class FisherProtos {
        * <code>double log_10_mean = 1;</code>
        */
       public Builder setLog10Mean(double value) {
-        
+
         log10Mean_ = value;
         onChanged();
         return this;
@@ -484,7 +508,7 @@ public final class FisherProtos {
        * <code>double log_10_mean = 1;</code>
        */
       public Builder clearLog10Mean() {
-        
+
         log10Mean_ = 0D;
         onChanged();
         return this;
@@ -499,7 +523,8 @@ public final class FisherProtos {
        *
        * <code>double alpha = 2;</code>
        */
-      public double getAlpha() {
+      @Override
+	public double getAlpha() {
         return alpha_;
       }
       /**
@@ -511,7 +536,7 @@ public final class FisherProtos {
        * <code>double alpha = 2;</code>
        */
       public Builder setAlpha(double value) {
-        
+
         alpha_ = value;
         onChanged();
         return this;
@@ -525,17 +550,19 @@ public final class FisherProtos {
        * <code>double alpha = 2;</code>
        */
       public Builder clearAlpha() {
-        
+
         alpha_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -556,7 +583,8 @@ public final class FisherProtos {
 
     private static final com.google.protobuf.Parser<AlphaSample>
         PARSER = new com.google.protobuf.AbstractParser<AlphaSample>() {
-      public AlphaSample parsePartialFrom(
+      @Override
+	public AlphaSample parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -573,7 +601,8 @@ public final class FisherProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -618,7 +647,7 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample> 
+    java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample>
         getAlphaSampleList();
     /**
      * <pre>
@@ -646,7 +675,7 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
         getAlphaSampleOrBuilderList();
     /**
      * <pre>
@@ -723,7 +752,7 @@ public final class FisherProtos {
             }
             case 34: {
               if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                alphaSample_ = new java.util.ArrayList<gdsc.smlm.data.config.FisherProtos.AlphaSample>();
+                alphaSample_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000008;
               }
               alphaSample_.add(
@@ -749,7 +778,8 @@ public final class FisherProtos {
       return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -766,7 +796,8 @@ public final class FisherProtos {
      *
      * <code>int32 type = 1;</code>
      */
-    public int getType() {
+    @Override
+	public int getType() {
       return type_;
     }
 
@@ -779,7 +810,8 @@ public final class FisherProtos {
      *
      * <code>double gain = 2;</code>
      */
-    public double getGain() {
+    @Override
+	public double getGain() {
       return gain_;
     }
 
@@ -792,7 +824,8 @@ public final class FisherProtos {
      *
      * <code>double noise = 3;</code>
      */
-    public double getNoise() {
+    @Override
+	public double getNoise() {
       return noise_;
     }
 
@@ -806,7 +839,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
       return alphaSample_;
     }
     /**
@@ -817,7 +851,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
         getAlphaSampleOrBuilderList() {
       return alphaSample_;
     }
@@ -829,7 +864,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public int getAlphaSampleCount() {
+    @Override
+	public int getAlphaSampleCount() {
       return alphaSample_.size();
     }
     /**
@@ -840,7 +876,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
       return alphaSample_.get(index);
     }
     /**
@@ -851,13 +888,15 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
         int index) {
       return alphaSample_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -866,7 +905,8 @@ public final class FisherProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (type_ != 0) {
         output.writeInt32(1, type_);
@@ -882,7 +922,8 @@ public final class FisherProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -1028,14 +1069,16 @@ public final class FisherProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -1062,7 +1105,8 @@ public final class FisherProtos {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1085,7 +1129,8 @@ public final class FisherProtos {
           getAlphaSampleFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         type_ = 0;
 
@@ -1102,16 +1147,19 @@ public final class FisherProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
       }
 
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData build() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData build() {
         gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -1119,7 +1167,8 @@ public final class FisherProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData buildPartial() {
         gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData result = new gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -1140,33 +1189,40 @@ public final class FisherProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData) {
           return mergeFrom((gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData)other);
         } else {
@@ -1204,7 +1260,7 @@ public final class FisherProtos {
               alphaSampleBuilder_ = null;
               alphaSample_ = other.alphaSample_;
               bitField0_ = (bitField0_ & ~0x00000008);
-              alphaSampleBuilder_ = 
+              alphaSampleBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAlphaSampleFieldBuilder() : null;
             } else {
@@ -1216,11 +1272,13 @@ public final class FisherProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -1247,7 +1305,8 @@ public final class FisherProtos {
        *
        * <code>int32 type = 1;</code>
        */
-      public int getType() {
+      @Override
+	public int getType() {
         return type_;
       }
       /**
@@ -1258,7 +1317,7 @@ public final class FisherProtos {
        * <code>int32 type = 1;</code>
        */
       public Builder setType(int value) {
-        
+
         type_ = value;
         onChanged();
         return this;
@@ -1271,7 +1330,7 @@ public final class FisherProtos {
        * <code>int32 type = 1;</code>
        */
       public Builder clearType() {
-        
+
         type_ = 0;
         onChanged();
         return this;
@@ -1285,7 +1344,8 @@ public final class FisherProtos {
        *
        * <code>double gain = 2;</code>
        */
-      public double getGain() {
+      @Override
+	public double getGain() {
         return gain_;
       }
       /**
@@ -1296,7 +1356,7 @@ public final class FisherProtos {
        * <code>double gain = 2;</code>
        */
       public Builder setGain(double value) {
-        
+
         gain_ = value;
         onChanged();
         return this;
@@ -1309,7 +1369,7 @@ public final class FisherProtos {
        * <code>double gain = 2;</code>
        */
       public Builder clearGain() {
-        
+
         gain_ = 0D;
         onChanged();
         return this;
@@ -1323,7 +1383,8 @@ public final class FisherProtos {
        *
        * <code>double noise = 3;</code>
        */
-      public double getNoise() {
+      @Override
+	public double getNoise() {
         return noise_;
       }
       /**
@@ -1334,7 +1395,7 @@ public final class FisherProtos {
        * <code>double noise = 3;</code>
        */
       public Builder setNoise(double value) {
-        
+
         noise_ = value;
         onChanged();
         return this;
@@ -1347,7 +1408,7 @@ public final class FisherProtos {
        * <code>double noise = 3;</code>
        */
       public Builder clearNoise() {
-        
+
         noise_ = 0D;
         onChanged();
         return this;
@@ -1357,7 +1418,7 @@ public final class FisherProtos {
         java.util.Collections.emptyList();
       private void ensureAlphaSampleIsMutable() {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          alphaSample_ = new java.util.ArrayList<gdsc.smlm.data.config.FisherProtos.AlphaSample>(alphaSample_);
+          alphaSample_ = new java.util.ArrayList<>(alphaSample_);
           bitField0_ |= 0x00000008;
          }
       }
@@ -1373,7 +1434,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
         if (alphaSampleBuilder_ == null) {
           return java.util.Collections.unmodifiableList(alphaSample_);
         } else {
@@ -1388,7 +1450,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public int getAlphaSampleCount() {
+      @Override
+	public int getAlphaSampleCount() {
         if (alphaSampleBuilder_ == null) {
           return alphaSample_.size();
         } else {
@@ -1403,7 +1466,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
         if (alphaSampleBuilder_ == null) {
           return alphaSample_.get(index);
         } else {
@@ -1608,7 +1672,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
           int index) {
         if (alphaSampleBuilder_ == null) {
           return alphaSample_.get(index);  } else {
@@ -1623,7 +1688,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
            getAlphaSampleOrBuilderList() {
         if (alphaSampleBuilder_ != null) {
           return alphaSampleBuilder_.getMessageOrBuilderList();
@@ -1664,16 +1730,15 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder> 
+      public java.util.List<gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder>
            getAlphaSampleBuilderList() {
         return getAlphaSampleFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.FisherProtos.AlphaSample, gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder, gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+          gdsc.smlm.data.config.FisherProtos.AlphaSample, gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder, gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
           getAlphaSampleFieldBuilder() {
         if (alphaSampleBuilder_ == null) {
-          alphaSampleBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.FisherProtos.AlphaSample, gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder, gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>(
+          alphaSampleBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   alphaSample_,
                   ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
@@ -1682,12 +1747,14 @@ public final class FisherProtos {
         }
         return alphaSampleBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1708,7 +1775,8 @@ public final class FisherProtos {
 
     private static final com.google.protobuf.Parser<PoissonFisherInformationData>
         PARSER = new com.google.protobuf.AbstractParser<PoissonFisherInformationData>() {
-      public PoissonFisherInformationData parsePartialFrom(
+      @Override
+	public PoissonFisherInformationData parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1725,7 +1793,8 @@ public final class FisherProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1742,7 +1811,7 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> 
+    java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData>
         getDataList();
     /**
      * <pre>
@@ -1767,7 +1836,7 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
         getDataOrBuilderList();
     /**
      * <pre>
@@ -1825,7 +1894,7 @@ public final class FisherProtos {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                data_ = new java.util.ArrayList<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData>();
+                data_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               data_.add(
@@ -1851,7 +1920,8 @@ public final class FisherProtos {
       return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1867,7 +1937,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
       return data_;
     }
     /**
@@ -1877,7 +1948,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
         getDataOrBuilderList() {
       return data_;
     }
@@ -1888,7 +1960,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public int getDataCount() {
+    @Override
+	public int getDataCount() {
       return data_.size();
     }
     /**
@@ -1898,7 +1971,8 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
       return data_.get(index);
     }
     /**
@@ -1908,13 +1982,15 @@ public final class FisherProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
         int index) {
       return data_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -1923,14 +1999,16 @@ public final class FisherProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       for (int i = 0; i < data_.size(); i++) {
         output.writeMessage(1, data_.get(i));
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -2046,14 +2124,16 @@ public final class FisherProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -2080,7 +2160,8 @@ public final class FisherProtos {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2103,7 +2184,8 @@ public final class FisherProtos {
           getDataFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         if (dataBuilder_ == null) {
           data_ = java.util.Collections.emptyList();
@@ -2114,16 +2196,19 @@ public final class FisherProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FisherProtos.internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
       }
 
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache build() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache build() {
         gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -2131,7 +2216,8 @@ public final class FisherProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache buildPartial() {
         gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache result = new gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache(this);
         int from_bitField0_ = bitField0_;
         if (dataBuilder_ == null) {
@@ -2147,33 +2233,40 @@ public final class FisherProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache) {
           return mergeFrom((gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache)other);
         } else {
@@ -2202,7 +2295,7 @@ public final class FisherProtos {
               dataBuilder_ = null;
               data_ = other.data_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              dataBuilder_ = 
+              dataBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataFieldBuilder() : null;
             } else {
@@ -2214,11 +2307,13 @@ public final class FisherProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -2241,7 +2336,7 @@ public final class FisherProtos {
         java.util.Collections.emptyList();
       private void ensureDataIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          data_ = new java.util.ArrayList<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData>(data_);
+          data_ = new java.util.ArrayList<>(data_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -2256,7 +2351,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
         if (dataBuilder_ == null) {
           return java.util.Collections.unmodifiableList(data_);
         } else {
@@ -2270,7 +2366,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public int getDataCount() {
+      @Override
+	public int getDataCount() {
         if (dataBuilder_ == null) {
           return data_.size();
         } else {
@@ -2284,7 +2381,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
         if (dataBuilder_ == null) {
           return data_.get(index);
         } else {
@@ -2478,7 +2576,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
           int index) {
         if (dataBuilder_ == null) {
           return data_.get(index);  } else {
@@ -2492,7 +2591,8 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
            getDataOrBuilderList() {
         if (dataBuilder_ != null) {
           return dataBuilder_.getMessageOrBuilderList();
@@ -2530,16 +2630,15 @@ public final class FisherProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder> 
+      public java.util.List<gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder>
            getDataBuilderList() {
         return getDataFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData, gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder, gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+          gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData, gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder, gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
           getDataFieldBuilder() {
         if (dataBuilder_ == null) {
-          dataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData, gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder, gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>(
+          dataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   data_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -2548,12 +2647,14 @@ public final class FisherProtos {
         }
         return dataBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -2574,7 +2675,8 @@ public final class FisherProtos {
 
     private static final com.google.protobuf.Parser<PoissonFisherInformationCache>
         PARSER = new com.google.protobuf.AbstractParser<PoissonFisherInformationCache>() {
-      public PoissonFisherInformationCache parsePartialFrom(
+      @Override
+	public PoissonFisherInformationCache parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2591,7 +2693,8 @@ public final class FisherProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2599,17 +2702,17 @@ public final class FisherProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_AlphaSample_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_AlphaSample_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PoissonFisherInformationData_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PoissonFisherInformationCache_fieldAccessorTable;
 
@@ -2633,7 +2736,8 @@ public final class FisherProtos {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

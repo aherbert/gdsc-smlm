@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -102,7 +102,7 @@ public class LVMGradientProcedureTest
 		final FastLog fl = getFastLog();
 
 		//@formatter:off
-		
+
 		// Generic factory
 		double[] y0 = new double[1];
 		double[] y1 = new double[]{ 1 };
@@ -130,7 +130,7 @@ public class LVMGradientProcedureTest
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[5], FMLE, fl).getClass(), FastLogMLELVMGradientProcedureX5.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[4], FMLE, fl).getClass(), FastLogMLELVMGradientProcedureX4.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[1], FMLE, fl).getClass(), FastLogMLELVMGradientProcedureX.class);
-		
+
 		// Dedicated factories
 		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y0, f[6]).getClass(), LSQLVMGradientProcedure6.class);
 		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y0, f[5]).getClass(), LSQLVMGradientProcedure5.class);
@@ -156,7 +156,7 @@ public class LVMGradientProcedureTest
 		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[5], fl).getClass(), FastLogMLELVMGradientProcedureX5.class);
 		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[4], fl).getClass(), FastLogMLELVMGradientProcedureX4.class);
 		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[1], fl).getClass(), FastLogMLELVMGradientProcedureX.class);
-		
+
 		//@formatter:on
 	}
 
@@ -229,8 +229,8 @@ public class LVMGradientProcedureTest
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		int[] x = createFakeData(nparams, iter, paramsList, yList);
 		int n = x.length;
@@ -315,8 +315,8 @@ public class LVMGradientProcedureTest
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
-		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		int[] x = createFakeData(nparams, iter, paramsList, yList);
 		final int n = x.length;
@@ -434,8 +434,8 @@ public class LVMGradientProcedureTest
 		int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -549,8 +549,8 @@ public class LVMGradientProcedureTest
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList);
 
@@ -715,8 +715,8 @@ public class LVMGradientProcedureTest
 		int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList, true);
 
@@ -827,8 +827,8 @@ public class LVMGradientProcedureTest
 		int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		// 3 peaks
 		createData(3, iter, paramsList, yList, true);
@@ -996,7 +996,7 @@ public class LVMGradientProcedureTest
 			//System.out.printf("%s [%d] p12m3  %f  %f\n", type, i, p123.value, s);
 
 			// The test for different or equal is not robust to different random seeds.
-			// TestAssert.fail has been changed for TestSettings.logFailure 
+			// TestAssert.fail has been changed for TestSettings.logFailure
 
 			if (type != Type.LSQ)
 			{
@@ -1220,7 +1220,7 @@ public class LVMGradientProcedureTest
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<double[]>(paramsList.size());
+		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			params2List.add(copydouble(paramsList.get(i)));

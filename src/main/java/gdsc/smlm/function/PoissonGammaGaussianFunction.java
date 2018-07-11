@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -193,14 +193,14 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 * al (2010) Nature Methods 7, 377-383.
 	 * <p>
 	 * The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
 	public double likelihood(final double o, final double e)
 	{
 		// This did not speed up MLE fitting so has been commented out.
-		//		// When the observed ADUs and expected ADUs are much higher than the sigma then 
+		//		// When the observed ADUs and expected ADUs are much higher than the sigma then
 		//		// there is no point in convolving with a Gaussian
 		//
 		//		double mySigma = sigma;
@@ -210,7 +210,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		//			//System.out.println("Skipping convolution");
 		//			//mySigma = sigma;
 		//		}
-		//		
+		//
 		//		if (mySigma == 0)
 
 		if (sigma == 0)
@@ -237,12 +237,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		else
 		{
 			// Full evaluation of a Poisson-Gamma-Gaussian convolution PMF.
-			// Note: Convolution uses the Poisson-Gamma without the dirac 
+			// Note: Convolution uses the Poisson-Gamma without the dirac
 			// delta function. This is added later.
 
 			ConvolutionMode mode = convolutionMode;
 
-			// Integrate to infinity is not necessary. The convolution of the function with the 
+			// Integrate to infinity is not necessary. The convolution of the function with the
 			// Gaussian should be adequately sampled using a nxSD around the function value.
 			// Find a bracket around the value.
 			double range = 5 * sigma;
@@ -297,11 +297,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				int lower = (int) Math.floor(loweru);
 
 				// Do an integration of the Poisson-Gamma PMF.
-				// Trapezoid integration underestimates the total probability when the 
-				// Poisson-Gamma curve has no roots on the gradient (e.g. p<1). 
+				// Trapezoid integration underestimates the total probability when the
+				// Poisson-Gamma curve has no roots on the gradient (e.g. p<1).
 				// (Since the trapezoid lines always miss part of the curve as it decays to zero.)
 				// Simpson integration could be used to improve this.
-				// Make this an option. For now just set to true as this mode should not be used 
+				// Make this an option. For now just set to true as this mode should not be used
 				// anyway. The Simpson integrator should be faster.
 				boolean doSimpson = true;
 
@@ -309,7 +309,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// This is the CDF of the Gaussian
 				double g;
 
-				// If at zero then the Poisson-Gamma PMF approximation for u=0 
+				// If at zero then the Poisson-Gamma PMF approximation for u=0
 				// is the integral from 0 to 0.5
 				if (lower == 0)
 				{
@@ -330,8 +330,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					g = gaussianErf(lower - 0.5 - o);
 				}
 
-				// For the rest of the range the Poisson-Gamma PMF approximation for u 
-				// is the integral from u-0.5 to u+0.5 
+				// For the rest of the range the Poisson-Gamma PMF approximation for u
+				// is the integral from u-0.5 to u+0.5
 				for (int u = lower; u <= upper; u++)
 				{
 					final double prevPG = pg;
@@ -347,12 +347,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			{
 				// Use integrator
 
-				// Note that the Poisson-Gamma function has a delta function at u=0. 
-				// This prevents integration close to the zero boundary as the function 
+				// Note that the Poisson-Gamma function has a delta function at u=0.
+				// This prevents integration close to the zero boundary as the function
 				// is not smooth.
 				// So integration is done using the non-delta function version.
 
-				// The integrator may be the fastest method when the range (upper-lower) 
+				// The integrator may be the fastest method when the range (upper-lower)
 				// is large as it uses fewer points.
 
 				// Specify the function to integrate.
@@ -372,13 +372,13 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 			// Special case:
 			// Due to the Poisson-Gamma function delta function at u=0
-			// The probability at u=0 may be very large compared to the rest of 
-			// the Poisson-Gamma when e is low. To compensate always compute the 
+			// The probability at u=0 may be very large compared to the rest of
+			// the Poisson-Gamma when e is low. To compensate always compute the
 			// at u=0.
 
 			// If this function is to be used as a PMF (with discrete integer observed values)
-			// then use the Gaussian CDF convolution. This is the best option for 
-			// EM-CCD data fitting.  
+			// then use the Gaussian CDF convolution. This is the best option for
+			// EM-CCD data fitting.
 			// If this function is to be used as a PDF (e.g. for integration routines)
 			// then use the Gaussian PDF convolution.
 
@@ -416,7 +416,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 */
 	private double mortensenApproximation(final double cij, final double eta)
 	{
-		// This code is adapted from the Python source code within the supplementary information of 
+		// This code is adapted from the Python source code within the supplementary information of
 		// the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
 
 		// The implementation of the approximation is not documented.
@@ -432,7 +432,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// m = 1/alpha
 		// c = cij
 
-		// This is the value of the Poisson-Gamma at c=0: 
+		// This is the value of the Poisson-Gamma at c=0:
 		// PoissonGammaFunction.poissonGammaN(0, eta, m);
 		final double exp_eta = FastMath.exp(-eta);
 		double f0 = exp_eta * eta / m;
@@ -444,12 +444,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// at the observed count
 		final double conv0 = gaussianCDF(cij);
 
-		// [Noise * Gaussian PMF at observed count] + 
+		// [Noise * Gaussian PMF at observed count] +
 		//  [observed count * cumulative distribution of read noise at observed count]
 		// [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
 		final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
 
-		// ? 
+		// ?
 		double temp = f0 * conv0 + fp0 * conv1 + exp_eta * gaussianPDF(cij);
 
 		//		// TESTING
@@ -468,7 +468,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			temp += PoissonGammaFunction.poissonGammaN(cij, eta, m) - f0 - fp0 * cij;
 		}
 
-		// XXX : Debugging: Store the smallest likelihood we ever see. 
+		// XXX : Debugging: Store the smallest likelihood we ever see.
 		// This can be used to set a limit for the likelihood
 		//if (pMinObserved > temp && temp > 0)
 		//{
@@ -484,13 +484,13 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 * This computes the log of {@link #likelihood(double, double)}.
 	 * <p>
 	 * The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
-	 * 
+	 *
 	 * @param o
 	 *            The observed count
 	 * @param e
 	 *            The expected count
 	 * @return The log-likelihood
-	 * 
+	 *
 	 * @see #likelihood(double, double)
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
@@ -522,7 +522,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	double gaussianCDF(final double x)
 	{
 		//return 0.5 * (1 + org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2));
-		// This may not be precise enough. 
+		// This may not be precise enough.
 		// Absolute error is <3e-7. Not sure what relative error is.
 		// The standard Erf is much slower.
 		return 0.5 * (1 + Erf.erf(x / sqrt2sigma2));
@@ -540,7 +540,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	double gaussianCDF(final double x, final double x2)
 	{
 		//return 0.5 * (org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2));
-		// This may not be precise enough. 
+		// This may not be precise enough.
 		// Absolute error is <3e-7. Not sure what relative error is.
 		// The standard Erf is much slower.
 		return 0.5 * Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2);
@@ -556,7 +556,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	double gaussianErf(final double x)
 	{
 		//return org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2);
-		// This may not be precise enough. 
+		// This may not be precise enough.
 		// Absolute error is <3e-7. Not sure what relative error is.
 		// The standard Erf is much slower.
 		return Erf.erf(x / sqrt2sigma2);
@@ -679,9 +679,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			switch (convolutionMode)
 			{
 				case SIMPSON_PDF:
-					// This is a CustomSimpsonIntegrator that computes 1 refinement 
+					// This is a CustomSimpsonIntegrator that computes 1 refinement
 					// on the first iteration.
-					// Number of function evaluations = 2^(iteration+1) + 1 
+					// Number of function evaluations = 2^(iteration+1) + 1
 					// => 5 for 1 iterations
 					// => 9 for 2 iterations
 					minimalIterationCount = 1;
@@ -694,7 +694,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					// The integration points are used for each sub-interval.
 					// Function evaluations = integrationPoints * intervals.
 					// The intervals start at 1,2 and increase by at least 4 at each stage after that.
-					// At least 1 stage is done thus 3 * integrationPoints functions evaluations 
+					// At least 1 stage is done thus 3 * integrationPoints functions evaluations
 					// will be done for minimalIterationCount=1.
 					minimalIterationCount = 1;
 					final int maximalIterationCount = 32;

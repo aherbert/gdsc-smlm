@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -263,7 +263,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -283,7 +283,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (fitMaxima)
 		{
 			imp = null;
-			// The maxima will have been identified already. 
+			// The maxima will have been identified already.
 			// The image source will be found from the peak results.
 			if (!showMaximaDialog())
 				return DONE;
@@ -525,7 +525,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Initialise a new image for fitting and prepare the output results.
 	 * <p>
 	 * Calls {@link #initialise(ImageSource, Rectangle)} then {@link #initialiseFitting()}.
-	 * 
+	 *
 	 * @param imageSource
 	 *            The image source
 	 * @param bounds
@@ -548,7 +548,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * <p>
 	 * This mechanism allows additional result outputs to be added after initialisation using
 	 * {@link #addPeakResults(PeakResults)}.
-	 * 
+	 *
 	 * @param imageSource
 	 *            The image source
 	 * @param bounds
@@ -643,7 +643,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		//Calibration cal = calibration.clone();
 		// Account for the frame integration
-		// TODO - Should we change this so that if integrate frames is used then the data 
+		// TODO - Should we change this so that if integrate frames is used then the data
 		// are converted to ExtendedPeakResult with a start and end frame
 		//cal.exposureTime *= integrateFrames;
 		//if (interlacedData)
@@ -784,8 +784,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		//@formatter:off
 		EnumSet<PSFType> d = EnumSet.of(
-				PSFType.ONE_AXIS_GAUSSIAN_2D, 
-				PSFType.TWO_AXIS_GAUSSIAN_2D, 
+				PSFType.ONE_AXIS_GAUSSIAN_2D,
+				PSFType.TWO_AXIS_GAUSSIAN_2D,
 				PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D,
 				PSFType.ASTIGMATIC_GAUSSIAN_2D);
 		//@formatter:on
@@ -877,7 +877,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (extraOptions)
 				gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
 
-			// Parameters specific to each Fit solver are collected in a second dialog 
+			// Parameters specific to each Fit solver are collected in a second dialog
 
 			gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
 			gd.addNumericField("Pass_rate", config.getPassRate(), 2);
@@ -1092,7 +1092,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		// Return the plugin flags (without the DOES_STACKS flag).
-		// The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a 
+		// The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a
 		// single call to be made.
 		return plugin_flags;
 	}
@@ -1846,7 +1846,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig.setPSF(PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 		fitConfig.setFixedPSF(false);
 
-		// TODO - Support sCMOS camera. This may be 'too difficult' as the 
+		// TODO - Support sCMOS camera. This may be 'too difficult' as the
 		// user will need to have created a per-pixel calibration image
 
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
@@ -3011,7 +3011,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 			}
 
-			// Do this even if collection of calibration settings was ignored. This ensures the 
+			// Do this even if collection of calibration settings was ignored. This ensures the
 			// camera model is set.
 			if (calibration.isSCMOS())
 			{
@@ -3201,7 +3201,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			//@formatter:off
 			gd2.addMessage(String.format(
 					"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image size [%dx%d].\n \nCrop the model?",
-					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
 					width, height
 					));
 			//@formatter:on
@@ -3245,7 +3245,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * <p>
 	 * This can be called after {@link #initialiseImage(ImagePlus)} and before {@link #initialiseFitting()} to add to
 	 * the configured result outputs.
-	 * 
+	 *
 	 * @param peakResults
 	 */
 	public void addPeakResults(PeakResults peakResults)
@@ -3318,7 +3318,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	@Override
@@ -3403,7 +3403,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Process the image. The current ROI will be used to define the region processed. The noise can be estimated using
 	 * the entire frame or the ROI region.
-	 * 
+	 *
 	 * @param imp
 	 * @param ignoreBoundsForNoise
 	 *            If true estimate the noise from the entire frame, otherwise use only the ROI bounds
@@ -3415,7 +3415,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Process the image
-	 * 
+	 *
 	 * @param imageSource
 	 * @param bounds
 	 * @param ignoreBoundsForNoise
@@ -3532,7 +3532,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Check if the frame should be ignored (relevant when using interlaced data)
-	 * 
+	 *
 	 * @param frame
 	 * @return True if the frame should be ignored
 	 */
@@ -3603,7 +3603,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Creates a fitting engine using the current configuration.
-	 * 
+	 *
 	 * @return The fitting engine
 	 */
 	public FitEngine createFitEngine()
@@ -3613,7 +3613,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Creates a fitting engine using the current configuration.
-	 * 
+	 *
 	 * @param numberOfThreads
 	 * @return The fitting engine
 	 */
@@ -3626,7 +3626,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Creates a fitting engine using the current configuration.
-	 * 
+	 *
 	 * @param numberOfThreads
 	 * @param queue
 	 * @param queueSize
@@ -3676,14 +3676,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Updates the configuration for peak fitting. Configures the calculation of residuals, logging and peak validation.
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean updateFitConfiguration(FitEngineConfiguration config)
 	{
 		FitConfiguration fitConfig = config.getFitConfiguration();
 
-		// Adjust the settings that are relevant within the fitting configuration. 
+		// Adjust the settings that are relevant within the fitting configuration.
 		fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
 		logger = (resultsSettings.getLogProgress()) ? new IJLogger() : null;
 		fitConfig.setLog(logger);
@@ -3726,7 +3726,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		final int step = Utils.getProgressInterval(totalFrames);
 
 		runTime = System.nanoTime();
-		final ArrayList<PeakResult> sliceCandidates = new ArrayList<PeakResult>();
+		final ArrayList<PeakResult> sliceCandidates = new ArrayList<>();
 		final FrameCounter counter = new FrameCounter(results.getFirstFrame());
 		results.forEach(new PeakResultProcedureX()
 		{
@@ -3775,7 +3775,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Process results
 		int[] maxIndices = new int[sliceCandidates.size()];
 		int count = 0;
-		ArrayList<PeakResult> processedResults = new ArrayList<PeakResult>(sliceCandidates.size());
+		ArrayList<PeakResult> processedResults = new ArrayList<>(sliceCandidates.size());
 		for (PeakResult result : sliceCandidates)
 		{
 			// Add ExtendedPeakResults to the results if they span multiple frames (they are the result of previous fitting).
@@ -3822,7 +3822,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public int getSize()
 	{
-		// If only one output in the list it was extracted for the FitEngine to prevent 
+		// If only one output in the list it was extracted for the FitEngine to prevent
 		// passing data through all methods in the PeakResultsList. However the list
 		// returns the size using the first entry so this is OK.
 		return results.size();

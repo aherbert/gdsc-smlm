@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.model.StoppingCriteria#initialise(double[])
 	 */
 	@Override
@@ -74,7 +74,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 		super.initialise(a);
 		iterationCount = 0;
 
-		// Used to avoid flats of insignificant improvement later in the routine 
+		// Used to avoid flats of insignificant improvement later in the routine
 		if (avoidPlateau)
 		{
 			insignificantImprovmentIteration = getMaximumIterations() / 2;
@@ -89,7 +89,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.model.StoppingCriteria#copyCoefficients(double[])
 	 */
 	@Override
@@ -100,7 +100,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, double[])
 	 */
 	@Override
@@ -115,8 +115,8 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 			// Fit is worse
 			// Setting the iteration count to zero forces the negligible improvements to be sequential.
 			//
-			// Note: The NonLinearFit algorithm may jump around a low minimum finding marginally 
-			// higher error fits. If the count is reset each time then N-sequential improvements 
+			// Note: The NonLinearFit algorithm may jump around a low minimum finding marginally
+			// higher error fits. If the count is reset each time then N-sequential improvements
 			// may not be found. In practice this reset is not necessary.
 			//iterationCount = 0;
 
@@ -222,7 +222,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	public static int getExponent(double d)
 	{
 		// Copied from java.lang.StrictMath.getExponent(double d)
-		// This is only available in Java 1.6 
+		// This is only available in Java 1.6
 
 		/*
 		 * Bitwise convert d to long, mask out exponent bits, shift
@@ -234,7 +234,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 	/**
 	 * Set the number of iterations that the fit has to improve by a negligible amount
-	 * 
+	 *
 	 * @param iterationLimit
 	 *            the iterationLimit to set
 	 */
@@ -288,7 +288,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	 * significantly improving (but by the same amount each step). Chances of this will be minimised by using a maximum
 	 * number of iterations approximately twice that which allows reasonable fits to converge. E.g. If typical fitted
 	 * data converges within 10 iterations to 6 significant digits then the maximum iterations should be set to 20.
-	 * 
+	 *
 	 * @param avoidPlateau
 	 *            Set to true to avoid plateaus
 	 */

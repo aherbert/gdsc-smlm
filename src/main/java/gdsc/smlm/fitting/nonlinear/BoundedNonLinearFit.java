@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -92,7 +92,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#solve(double[], int)
 	 */
 	@Override
@@ -101,9 +101,9 @@ public class BoundedNonLinearFit extends NonLinearFit
 		if (super.solve(a, m))
 			return true;
 
-		// If using a bounded LVM is there a chance that the gradient against the bounds will 
-		// be very large and effect the linear decomposition of the matrix? 
-		// If decomposition fails try again but set the bounded params to zero (these are 
+		// If using a bounded LVM is there a chance that the gradient against the bounds will
+		// be very large and effect the linear decomposition of the matrix?
+		// If decomposition fails try again but set the bounded params to zero (these are
 		// ignored by the solver), thus skipping these params for this iteration.
 
 		if (bounds.atBounds(a))
@@ -120,7 +120,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#updateFitParameters(double[], int[], int, double[], double[])
 	 */
 	@Override
@@ -131,7 +131,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#accepted(double[], double[], int)
 	 */
 	@Override
@@ -143,7 +143,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(double[], double[], double[], double[])
 	 */
 	@Override
@@ -155,7 +155,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isBounded()
 	 */
 	@Override
@@ -166,7 +166,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isConstrained()
 	 */
 	@Override
@@ -192,7 +192,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 * different function in the same parameter space.
 	 * <p>
 	 * Setting a new function removes the current bounds.
-	 * 
+	 *
 	 * @param f
 	 *            the new gradient function
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(gdsc.smlm.function.GradientFunction)

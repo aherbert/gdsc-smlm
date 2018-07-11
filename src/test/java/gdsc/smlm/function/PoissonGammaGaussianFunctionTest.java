@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -44,20 +44,20 @@ import gdsc.test.TestSettings;
 public class PoissonGammaGaussianFunctionTest
 {
 	// Noise is in Counts and gain is total gain.
-	// This makes more sense when testing as the 
+	// This makes more sense when testing as the
 	// PoissonGammaGaussianFunction accepts 1/gain and noise as parameters.
 
 	// TODO Fix these test conditions
 
 	// Poisson-Gamma convolution sums to above 1 at lower gain.
-	// due to the Dirac delta function, i.e. the Poisson-Gamma convolution 
+	// due to the Dirac delta function, i.e. the Poisson-Gamma convolution
 	// is a PDF and the Dirac delta is a PMF from the Poisson PMF at c=0.
 	// This summing on the integer intervals (for a PMF) is invalid.
 	// Store the expected sum at different gain below 10 for testing.
 	static double[] pgSum = new double[11];
 	static
 	{
-		// Compute the sum at expected photons around 1. This produces 
+		// Compute the sum at expected photons around 1. This produces
 		// the highest sum as the contribution from the Poisson-Gamma to c=0
 		// will be the greatest.
 		// These are rounded up to 3 d.p. provide a safer upper bound.
@@ -73,7 +73,7 @@ public class PoissonGammaGaussianFunctionTest
 				for (int i = 0; i <= steps; i++)
 				{
 					double e = 0.5 * i / steps;
-					// Compute half for the first interval 
+					// Compute half for the first interval
 					double sum = PoissonGammaFunction.poissonGammaN(0, e, g) * 0.5 + PoissonGammaFunction.dirac(e);
 					for (int c = 1;; c++)
 					{
@@ -157,7 +157,7 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	// The Poisson-Gamma has a delta function at c=0. This causes problems
-	// if not correctly integrated. 
+	// if not correctly integrated.
 	// Some modes create a PMF, others a PDF so handle appropriately.
 
 	@Test
@@ -706,7 +706,7 @@ public class PoissonGammaGaussianFunctionTest
 		double p = cumulativeProbability(mu, s, g, convolutionMode, pmfMode);
 		TestSettings.info("%s : mu=%f, s=%f, g=%f, p=%f\n", getName(convolutionMode), mu, s, g, p);
 
-		// Poisson-Gamma convolution approximation does not sum to 1 at lower gain 
+		// Poisson-Gamma convolution approximation does not sum to 1 at lower gain
 		// so account for this during the test.
 		double delta = 0.02;
 		double upper = 1 + delta;
@@ -731,9 +731,9 @@ public class PoissonGammaGaussianFunctionTest
 		int min = 1;
 		int max = 0;
 
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- 3s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
@@ -750,7 +750,7 @@ public class PoissonGammaGaussianFunctionTest
 			//	Assert.fail("P > 1: " + p);
 		}
 
-		// We have most of the probability density. 
+		// We have most of the probability density.
 		// Now keep evaluating up and down until no difference
 		final double changeTolerance = 1e-6;
 		for (int x = min - 1;; x--)

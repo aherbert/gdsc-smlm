@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -172,7 +172,7 @@ public class ResultsManagerTest
 		long offset = 0;
 		try
 		{
-			// The offset is the amount to skip forward after reading the int 
+			// The offset is the amount to skip forward after reading the int
 			// magic number (4 bytes) and long offset (8 bytes)
 			//out.flush();
 			offset = out.getChannel().position() - 12;
@@ -247,7 +247,7 @@ public class ResultsManagerTest
 			}
 		}
 
-		// Read each combination 
+		// Read each combination
 		for (int channel = 1; channel <= channels; channel++)
 			for (int slice = 1; slice <= slices; slice++)
 				for (int position = 1; position <= positions; position++)
@@ -259,7 +259,7 @@ public class ResultsManagerTest
 						sb.append(" position=").append(position);
 						sb.append(" fluorophore_type=[").append(type).append(":Type ").append(type).append(":fiducial=")
 								.append(builder.getFluorophoreTypes(type - 1).getIsFiducial()).append(']');
-						// This is needed to trick the Macro class into returning the options 
+						// This is needed to trick the Macro class into returning the options
 						// for the thread to the GenericDialog used in the ResultsManager
 						Thread.currentThread().setName("Run$_");
 						Macro.setOptions(sb.toString());

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,7 +68,7 @@ public abstract class ImageModel
 
 	/**
 	 * Construct a new image model
-	 * 
+	 *
 	 * @param tOn
 	 *            Average on-state time
 	 * @param tOff
@@ -160,7 +160,7 @@ public abstract class ImageModel
 	 * more attempts to generate particles is made.
 	 * <p>
 	 * The compound's molecule coordinates will be updated by calling {@link CompoundMoleculeModel#centre()}.
-	 * 
+	 *
 	 * @param compounds
 	 * @param particles
 	 * @param distribution
@@ -182,7 +182,7 @@ public abstract class ImageModel
 			c.centre();
 		}
 
-		ArrayList<CompoundMoleculeModel> molecules = new ArrayList<CompoundMoleculeModel>(particles);
+		ArrayList<CompoundMoleculeModel> molecules = new ArrayList<>(particles);
 		//int[] count = new int[compounds.size()];
 		for (int i = 1; i <= particles; i++)
 		{
@@ -219,7 +219,7 @@ public abstract class ImageModel
 	private List<MoleculeModel> copyMolecules(CompoundMoleculeModel c)
 	{
 		int n = c.getSize();
-		List<MoleculeModel> list = new ArrayList<MoleculeModel>(n);
+		List<MoleculeModel> list = new ArrayList<>(n);
 		while (n-- > 0)
 		{
 			MoleculeModel m = c.getMolecule(n);
@@ -270,7 +270,7 @@ public abstract class ImageModel
 	 * <p
 	 * Note that the activation energy is sampled at the spatial position without movement. This is therefore an
 	 * approximation of the energy the molecule would receive if it were moving.
-	 * 
+	 *
 	 * @param molecules
 	 * @param frames
 	 * @return
@@ -279,12 +279,12 @@ public abstract class ImageModel
 			int frames)
 	{
 		frameLimit = frames;
-		ArrayList<FluorophoreSequenceModel> list = new ArrayList<FluorophoreSequenceModel>(molecules.size());
+		ArrayList<FluorophoreSequenceModel> list = new ArrayList<>(molecules.size());
 		for (int i = 0; i < molecules.size();)
 		{
 			CompoundMoleculeModel c = molecules.get(i);
-			List<FluorophoreSequenceModel> fluorophores = new ArrayList<FluorophoreSequenceModel>(c.getSize());
-			List<MoleculeModel> removed = new ArrayList<MoleculeModel>(c.getSize());
+			List<FluorophoreSequenceModel> fluorophores = new ArrayList<>(c.getSize());
+			List<MoleculeModel> removed = new ArrayList<>(c.getSize());
 			for (int n = c.getSize(); n-- > 0;)
 			{
 				// Molecule Id is ignored since we renumber the sorted collection at the end
@@ -304,7 +304,7 @@ public abstract class ImageModel
 					// If we remove the molecule from the compound then the rotation will not be around
 					// the true COM but the new COM of the reduced size compound. Keep these molecules
 					// so the rotation is valid.
-					// Note: Fluorophores have mass zero. If this changes then this will have to be updated. 
+					// Note: Fluorophores have mass zero. If this changes then this will have to be updated.
 					removed.add(new MoleculeModel(0, c.getRelativeCoordinates(n)));
 				}
 			}
@@ -346,7 +346,7 @@ public abstract class ImageModel
 	 * Create a fluorophore activation time for the given position. Derived classes can check the {@link #frameLimit}
 	 * variable to determine the limit of the simulation. If non-zero only activation times below this will be used to
 	 * generate fluorophores.
-	 * 
+	 *
 	 * @param xyz
 	 * @return the activation time
 	 */
@@ -367,7 +367,7 @@ public abstract class ImageModel
 
 	/**
 	 * Add to the list but link up the continuous pulses with previous/next pointers
-	 * 
+	 *
 	 * @param localisations
 	 * @param models
 	 */
@@ -478,7 +478,7 @@ public abstract class ImageModel
 	 * A second set of fluorophores, independent of the first, are generated using
 	 * {@link #createFluorophores(List, int)}. The correlated on-times will be created by combining the times using the
 	 * provided correlation (r):
-	 * 
+	 *
 	 * <pre>
 	 * // X1 : Fluorophore total on-times
 	 * // X2 : Independently generated fluorophore total on-times
@@ -486,7 +486,7 @@ public abstract class ImageModel
 	 * a = sqrt(1 - r * r)
 	 * newX = (r * X1 + a * X2) / (r + a)
 	 * </pre>
-	 * 
+	 *
 	 * The signal is proportional to newly generated on-times (newX) with an average of the specified photon budget.
 	 * <p>
 	 * The photon budget can either be distributed evenly over the fluorophore lifetime or per frame (see
@@ -497,7 +497,7 @@ public abstract class ImageModel
 	 * <p>
 	 * A random fraction of the fluorophores will move using a random walk with the diffusion coefficient defined in the
 	 * compound.
-	 * 
+	 *
 	 * @param compoundFluorophores
 	 *            The compounds containing the fluorophores
 	 * @param fixedFraction
@@ -515,9 +515,9 @@ public abstract class ImageModel
 	public List<LocalisationModel> createImage(List<CompoundMoleculeModel> compoundFluorophores, double fixedFraction,
 			int maxFrames, double photonBudget, double correlation, boolean rotate)
 	{
-		List<LocalisationModel> localisations = new ArrayList<LocalisationModel>();
+		List<LocalisationModel> localisations = new ArrayList<>();
 		// Extract the fluorophores in all the compounds
-		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<FluorophoreSequenceModel>(
+		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>(
 				compoundFluorophores.size());
 		for (CompoundMoleculeModel c : compoundFluorophores)
 		{
@@ -529,7 +529,7 @@ public abstract class ImageModel
 		}
 		final int nMolecules = fluorophores.size();
 
-		// Check the correlation bounds. 
+		// Check the correlation bounds.
 		// Correlation for photons per frame verses total on time should be negative.
 		// Correlation for total photons verses total on time should be positive.
 		double r;
@@ -558,7 +558,7 @@ public abstract class ImageModel
 			//PearsonsCorrelation c = new PearsonsCorrelation();
 
 			// Create a second set of fluorophores. This is used to generate the correlated photon data
-			List<FluorophoreSequenceModel> fluorophores2 = new ArrayList<FluorophoreSequenceModel>();
+			List<FluorophoreSequenceModel> fluorophores2 = new ArrayList<>();
 			while (fluorophores2.size() < fluorophores.size())
 			{
 				FluorophoreSequenceModel f = createFluorophore(0, new double[] { 0, 0, 0 }, maxFrames);
@@ -594,7 +594,7 @@ public abstract class ImageModel
 				correlatedOnTime = newCorrelatedOnTime;
 			}
 
-			// Get the average on time from the correlated sample. 
+			// Get the average on time from the correlated sample.
 			// Using the population value (tOn * (1+nBlinks)) over-estimates the on time.
 			final double averageTotalTOn = correlatedOnTime.getMean();
 
@@ -619,7 +619,7 @@ public abstract class ImageModel
 		}
 		else
 		{
-			// Sample from the provided distribution. Do not over-write the class level distribution to allow 
+			// Sample from the provided distribution. Do not over-write the class level distribution to allow
 			// running again with a different shape parameter / photon budget.
 			if (photonDistribution != null)
 			{
@@ -671,7 +671,7 @@ public abstract class ImageModel
 	/**
 	 * Create localisations for each time frame using the fluorophores in the compound. The compound is moved using the
 	 * specified diffusion rate.
-	 * 
+	 *
 	 * @param compound
 	 *            Compound containing one or more fluorophores
 	 * @param localisations
@@ -691,14 +691,14 @@ public abstract class ImageModel
 			int maxFrames, double[] photons, int photonIndex, boolean rotate)
 	{
 		// -=-=-
-		// TODO: 
+		// TODO:
 		// Account for the variable nature of fluorophore intensities in real data?
 		// Perhaps add quantum efficiency simulation using a Binomial distribution?
 		// -=-=-
 		final double frameInterval = 1;
 
 		// Extract the fluorophores
-		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<FluorophoreSequenceModel>();
+		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>();
 		for (int i = compound.getSize(); i-- > 0;)
 			if (compound.getMolecule(i) instanceof FluorophoreSequenceModel)
 			{
@@ -707,7 +707,7 @@ public abstract class ImageModel
 		final int nFluorophores = fluorophores.size();
 
 		// Get the duration of each fluorophore sequence
-		List<List<double[]>> bursts = new ArrayList<List<double[]>>(nFluorophores);
+		List<List<double[]>> bursts = new ArrayList<>(nFluorophores);
 		int[] sequenceStartT = new int[nFluorophores];
 		int[] sequenceEndT = new int[nFluorophores];
 
@@ -795,20 +795,20 @@ public abstract class ImageModel
 					if (photonBudgetPerFrame)
 					{
 						// -=-=-
-						// Photon budget is the rate per frame 
+						// Photon budget is the rate per frame
 						// -=-=-
-						// This suffers from the exponential distribution of the tOn which destroys the 
+						// This suffers from the exponential distribution of the tOn which destroys the
 						// shape of the gamma distribution when tOn is short, i.e. may onTime values are less than 1
 						//intensity = randomGenerator.nextPoisson(photonBudget * onTime[i]);
 
-						// Ignore the time that the fluorophore is on and simply use the random sample. 
+						// Ignore the time that the fluorophore is on and simply use the random sample.
 						// This allows the simulation to match observed experimental data.
 						intensity = randomGenerator.nextPoisson(photonBudget[i]);
 					}
 					else
 					{
 						// -=-=-
-						// When photon budget is for the entire lifetime then allocate proportionately 
+						// When photon budget is for the entire lifetime then allocate proportionately
 						// using the time fraction
 						// -=-=-
 						intensity = randomGenerator.nextPoisson(photonBudget[i] * onTime[i][step] / totalOnTime[i]);
@@ -832,7 +832,7 @@ public abstract class ImageModel
 				{
 					// TODO
 					// Confined diffusion only asks if the molecule moved into a region that is allowed.
-					// A better model would be to ask if the move went out of bounds. If yes then the molecules 
+					// A better model would be to ask if the move went out of bounds. If yes then the molecules
 					// should be reflected back into the allowed region using the vector of the original move.
 
 					// This only works because the coordinates are a reference
@@ -880,7 +880,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set the random generator for creating the image
-	 * 
+	 *
 	 * @param random
 	 */
 	public void setRandomGenerator(RandomGenerator random)
@@ -894,7 +894,7 @@ public abstract class ImageModel
 	/**
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * per dimension.
-	 * 
+	 *
 	 * @see {@link gdsc.smlm.model.MoleculeModel#move(double, RandomGenerator) }
 	 * @see {@link gdsc.smlm.model.MoleculeModel#walk(double, RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
@@ -911,7 +911,7 @@ public abstract class ImageModel
 	/**
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * for a movement along a random unit vector in the XY plane, i.e. 2 dimensions together.
-	 * 
+	 *
 	 * @see {@link gdsc.smlm.model.MoleculeModel#slide(double, double[], RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
 	 * @return The step size
@@ -927,7 +927,7 @@ public abstract class ImageModel
 	/**
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * for a movement along a random unit vector, i.e. all 3 dimensions together.
-	 * 
+	 *
 	 * @see {@link gdsc.smlm.model.MoleculeModel#slide(double, double[], RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
 	 * @return The step size
@@ -950,7 +950,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set the distribution used to generate the photon budget of a fluorophore
-	 * 
+	 *
 	 * @param photonDistribution
 	 *            the photon distribution to set
 	 */
@@ -986,7 +986,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set to true if the photon budget is per frame. The default is for the lifetime of the fluorophore.
-	 * 
+	 *
 	 * @param photonBudgetPerFrame
 	 *            if true the image will be created using the photon budget per frame
 	 */
@@ -997,7 +997,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set the distribution used to confine any diffusing molecules
-	 * 
+	 *
 	 * @param confinementDistribution
 	 */
 	public void setConfinementDistribution(SpatialDistribution confinementDistribution)
@@ -1016,7 +1016,7 @@ public abstract class ImageModel
 	/**
 	 * Set the number of attempts to move a diffusing molecule. If the molecule cannot be successfully moved within the
 	 * confinement distribution then it remains fixed.
-	 * 
+	 *
 	 * @param confinementAttempts
 	 *            the confinementAttempts to set
 	 */
@@ -1027,7 +1027,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set to true if only diffusing in XY
-	 * 
+	 *
 	 * @return True if only diffusing in XY
 	 */
 	public boolean isDiffusion2D()
@@ -1037,7 +1037,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set to true to only diffuse in XY
-	 * 
+	 *
 	 * @param diffusion2d
 	 *            true to only diffuse in XY
 	 */
@@ -1048,7 +1048,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set to true if rotation is around the z-axis (i.e. rotation in the 2D plane)
-	 * 
+	 *
 	 * @return True if using 2D rotation
 	 */
 	public boolean isRotation2D()
@@ -1058,7 +1058,7 @@ public abstract class ImageModel
 
 	/**
 	 * Set to true to rotate around the z-axis (i.e. rotation in the 2D plane)
-	 * 
+	 *
 	 * @param rotation2D
 	 *            True if using 2D rotation
 	 */

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -47,7 +47,7 @@ public class Gaussian2DFitter
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param fitConfiguration
 	 */
 	public Gaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration)
@@ -123,7 +123,7 @@ public class Gaussian2DFitter
 	 * Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
 	 * <p>
 	 * Adapted from the CCPN fit_peaks routine for Python.
-	 * 
+	 *
 	 * @param data
 	 *            The data to fit
 	 * @param maxx
@@ -145,7 +145,7 @@ public class Gaussian2DFitter
 	 * e.g. Y,X : Index for [y,z] = MaxX*y + x.
 	 * <p>
 	 * Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
-	 * 
+	 *
 	 * @param data
 	 *            The data to fit
 	 * @param maxx
@@ -214,7 +214,7 @@ public class Gaussian2DFitter
 	 * <p>
 	 * If multiple peaks heights are provided then always use the minimum value in the data since it cannot be assumed
 	 * that all peaks are away from the edge of the data.
-	 * 
+	 *
 	 * @param data
 	 * @param maxx
 	 * @param maxy
@@ -231,7 +231,7 @@ public class Gaussian2DFitter
 
 		// -----
 		// Noted that if the peak height is negative then fitting becomes unstable.
-		// This is likely when fitting multiple peaks since the initial edge guess 
+		// This is likely when fitting multiple peaks since the initial edge guess
 		// for the background may be wrong.
 		// Use the edge value for single peaks but the minimum value in the data if fitting
 		// multiple peaks.
@@ -312,7 +312,7 @@ public class Gaussian2DFitter
 	 * <p>
 	 * If a peak location is outside the region bounds and has no input width parameters set or from the fit
 	 * configuration then fitting will fail (this is because they cannot be estimated).
-	 * 
+	 *
 	 * @param data
 	 *            The data to fit
 	 * @param maxx
@@ -354,7 +354,7 @@ public class Gaussian2DFitter
 	 * <p>
 	 * If a peak location is outside the region bounds and has no input width parameters set or from the fit
 	 * configuration then fitting will fail (this is because they cannot be estimated).
-	 * 
+	 *
 	 * @param data
 	 *            The data to fit
 	 * @param maxx
@@ -604,7 +604,7 @@ public class Gaussian2DFitter
 			double xpos = params[j + Gaussian2DFunction.X_POSITION];
 			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
 
-			// Set-up for estimating peak width at half maximum 
+			// Set-up for estimating peak width at half maximum
 			position[0] = (int) Math.round(xpos);
 			position[1] = (int) Math.round(ypos);
 			int index = position[1] * maxx + position[0];
@@ -612,10 +612,10 @@ public class Gaussian2DFitter
 			double sx, sy, angle;
 			if (fitConfiguration.isZFitting())
 			{
-				// Use the widths at z=0. 
+				// Use the widths at z=0.
 				// These are used to determine the centre-of-mass range search.
 				// It does not matter if they are negative as we use max(1, sx+sy)
-				// to search for the centre. It will also effect the conversion of 
+				// to search for the centre. It will also effect the conversion of
 				// amplitudes to signal.
 				sx = fitConfiguration.getInitialXSD();
 				sy = fitConfiguration.getInitialYSD();
@@ -686,7 +686,7 @@ public class Gaussian2DFitter
 			// If the position is on the integer grid then use a centre-of-mass approximation
 			if (npeaks == 1 && xpos == position[0] && ypos == position[1])
 			{
-				// Estimate using centre of mass around peak index 
+				// Estimate using centre of mass around peak index
 				// Use 2 * SD estimate to calculate the range around the index that should be considered.
 				// SD = (sx+sy)/2 => Range = sx+sy
 				final int range = Math.max(1, (int) Math.ceil(sx + sy));
@@ -833,7 +833,7 @@ public class Gaussian2DFitter
 
 		if (npeaks == 1)
 		{
-			// Allow the signal to explain all the data. This assumes the data window entirely covers the spot. 
+			// Allow the signal to explain all the data. This assumes the data window entirely covers the spot.
 			double sum = 0;
 			for (int i = 1; i < ySize; i++)
 				sum += y[i];
@@ -867,7 +867,7 @@ public class Gaussian2DFitter
 				// This is a problem for MLE fitting
 				if (solver.isStrictlyPositiveFunction())
 				{
-					// If this is zero it causes problems when computing gradients since the 
+					// If this is zero it causes problems when computing gradients since the
 					// Gaussian function may not exist. So use a small value instead.
 					lower[j + Gaussian2DFunction.SIGNAL] = 0; //.1;
 				}
@@ -894,12 +894,12 @@ public class Gaussian2DFitter
 				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
 				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
 			}
-			// TODO - Add support for z-depth fitting. Currently this is unbounded.			
+			// TODO - Add support for z-depth fitting. Currently this is unbounded.
 			if (isZFitting)
 			{
 				lower[j + Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 				upper[j + Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
-				// The widths are not fit but set simple limits 
+				// The widths are not fit but set simple limits
 				// to avoid errors when checking the limits
 				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD];
 				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD];
@@ -917,7 +917,7 @@ public class Gaussian2DFitter
 		{
 			// This is a problem for MLE fitting
 
-			// If the lower bounds are zero it causes problems when computing gradients since 
+			// If the lower bounds are zero it causes problems when computing gradients since
 			// the Gaussian function may not exist. So use a small value instead.
 			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 			{
@@ -979,7 +979,7 @@ public class Gaussian2DFitter
 		if (fitConfiguration.getMinWidthFactor() < 1 && fitConfiguration.getMinWidthFactor() >= 0)
 		{
 			// Add some buffer to allow fitting to go past then come back to the limit
-			// This also allows fitting to fail if the spot is definitely smaller than the configured limits.  
+			// This also allows fitting to fail if the spot is definitely smaller than the configured limits.
 			return fitConfiguration.getMinWidthFactor() * 0.7;
 		}
 		return 0;
@@ -995,7 +995,7 @@ public class Gaussian2DFitter
 		if (fitConfiguration.getMaxWidthFactor() > 1)
 		{
 			// Add some buffer to allow fitting to go past then come back to the limit.
-			// This also allows fitting to fail if the spot is definitely bigger than the configured limits.  
+			// This also allows fitting to fail if the spot is definitely bigger than the configured limits.
 			return fitConfiguration.getMaxWidthFactor() * 1.5;
 		}
 		return Double.MAX_VALUE;
@@ -1004,7 +1004,7 @@ public class Gaussian2DFitter
 	/**
 	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the signal to zero and
 	 * background to zero (or negative if the background estimate is < 0).
-	 * 
+	 *
 	 * @param maxx
 	 *            The x range of the data
 	 * @param maxy
@@ -1056,7 +1056,7 @@ public class Gaussian2DFitter
 	/**
 	 * Swap the axes so that the major axis is the X axis.
 	 * Correct the fit angle to lie within the 0-180 degree domain from the major-axis.
-	 * 
+	 *
 	 * @param i
 	 *            The angle position within the parameter array
 	 * @param params
@@ -1085,7 +1085,7 @@ public class Gaussian2DFitter
 		int iy = i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE;
 		double xWidth = params[ix];
 		double yWidth = params[iy];
-		// The fit will compute the angle from the major axis. 
+		// The fit will compute the angle from the major axis.
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)
 		{
@@ -1116,7 +1116,7 @@ public class Gaussian2DFitter
 
 	/**
 	 * Convert the Full-Width at Half-Maximum to the Standard Deviation
-	 * 
+	 *
 	 * @param fwhm
 	 * @return sd
 	 */
@@ -1127,7 +1127,7 @@ public class Gaussian2DFitter
 
 	/**
 	 * Convert the Standard Deviation to the Full-Width at Half-Maximum
-	 * 
+	 *
 	 * @param sd
 	 * @return fwhm
 	 */
@@ -1164,7 +1164,7 @@ public class Gaussian2DFitter
 	/**
 	 * Return true if the last call to a fit(...) method created a function solver. This allows the properties to be
 	 * accessed for the last fit. Otherwise the properties will return zero.
-	 * 
+	 *
 	 * @return True if the last call to a fit(...) method created a function solver
 	 */
 	public boolean solvedLastFit()
@@ -1196,7 +1196,7 @@ public class Gaussian2DFitter
 	 *             if the arguments are outside the valid ranges
 	 */
 	public void setWidthFactor(
-			//double minimumWidthFactor, 
+			//double minimumWidthFactor,
 			double maximumWidthFactor)
 	{
 		//		if (minimumWidthFactor < 0 || minimumWidthFactor > 1)

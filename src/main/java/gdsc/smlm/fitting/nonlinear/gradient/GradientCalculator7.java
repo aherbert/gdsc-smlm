@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,7 +40,7 @@ public class GradientCalculator7 extends GradientCalculator
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
@@ -217,7 +217,7 @@ public class GradientCalculator7 extends GradientCalculator
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[] double[], double[][],
 	 * double[], gdsc.fitting.function.NonLinearFunction)
 	 */
@@ -432,7 +432,7 @@ public class GradientCalculator7 extends GradientCalculator
 
 		// Compute:
 		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
 

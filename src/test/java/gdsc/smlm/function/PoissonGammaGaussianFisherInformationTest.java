@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -50,9 +50,9 @@ public class PoissonGammaGaussianFisherInformationTest
 		PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, 1);
 		f.setMeanThreshold(Double.POSITIVE_INFINITY);
 
-		// Due to a limited convolution (for an infinite range) 
+		// Due to a limited convolution (for an infinite range)
 		// the class works up to mean of about 300. Above that the approximation using
-		// half the Poisson Fisher information should be used instead. 
+		// half the Poisson Fisher information should be used instead.
 		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
 		for (int exp = -12; exp <= 4; exp++)
 		{
@@ -102,9 +102,9 @@ public class PoissonGammaGaussianFisherInformationTest
 	{
 		f.setMeanThreshold(Double.POSITIVE_INFINITY);
 
-		// Due to a limited convolution (for an infinite range) 
+		// Due to a limited convolution (for an infinite range)
 		// the class works up to mean of about 300. Above that the approximation using
-		// half the Poisson Fisher information should be used instead. 
+		// half the Poisson Fisher information should be used instead.
 		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
 
 		// exp == -12 => p = 1e-6
@@ -146,7 +146,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		int mins = 5;
 		int maxs = 5;
 
-		// The relative Fisher information plateaus at low photons. 
+		// The relative Fisher information plateaus at low photons.
 		// Output where this is.
 		double p = 1e-100;
 		double p2 = 1e-200; //Double.MIN_NORMAL; //Double.longBitsToDouble(0x4000000000001L);
@@ -202,7 +202,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		if (doSearch)
 		{
 			// This is the full 52-bit mantissa of a double with zero for the unbiased exponent,
-			// i.e. the largest sub-normal number. 
+			// i.e. the largest sub-normal number.
 			long upper = (1L << 52) - 1;
 			Assert.assertTrue(1.0 / Double.longBitsToDouble(upper) != Double.POSITIVE_INFINITY);
 			long lower = 1;

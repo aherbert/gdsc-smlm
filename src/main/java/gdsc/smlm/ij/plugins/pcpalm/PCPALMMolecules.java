@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -185,7 +185,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -266,8 +266,8 @@ public class PCPALMMolecules implements PlugIn
 		if (runMode == 0 || runMode == 3)
 		{
 			// Blinking rate is mentioned in the PC-PALM protocol and so we include it here.
-			// TODO - Add automated estimation of the blinking rate from the data using the method of 
-			// Annibale, et al (2011), Quantitative photo activated localization microscopy: unraveling the 
+			// TODO - Add automated estimation of the blinking rate from the data using the method of
+			// Annibale, et al (2011), Quantitative photo activated localization microscopy: unraveling the
 			// effects of photoblinking. PLoS One, 6(7): e22678 (http://dx.doi.org/10.1371%2Fjournal.pone.0022678)
 			densityProtein = densityPeaks / blinkingRate;
 			log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)", Utils.rounded(densityPeaks * 1e6),
@@ -298,7 +298,7 @@ public class PCPALMMolecules implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<String>();
+		List<String> titles = new LinkedList<>();
 		if (WindowManager.getWindowCount() > 0)
 		{
 			for (int imageID : WindowManager.getIDList())
@@ -503,7 +503,7 @@ public class PCPALMMolecules implements PlugIn
 		log("%d localisations with an average precision of %.2f", results.size(), sigmaRaw);
 
 		log("Fitting molecule precision...");
-		ArrayList<Molecule> singles = new ArrayList<Molecule>();
+		ArrayList<Molecule> singles = new ArrayList<>();
 		molecules = extractMolecules(results, sigmaRaw, singles);
 		if (singlesModeIndex == 1)
 			molecules.addAll(singles);
@@ -581,7 +581,7 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results) throws DataException
 	{
-		ArrayList<Molecule> molecules = new ArrayList<Molecule>(results.size());
+		ArrayList<Molecule> molecules = new ArrayList<>(results.size());
 
 		// Access calibrated data
 		StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
@@ -598,7 +598,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Calculate the average precision by fitting a skewed Gaussian to the histogram of the precision distribution.
-	 * 
+	 *
 	 * @param molecules
 	 * @param subTitle
 	 * @return The average precision
@@ -614,7 +614,7 @@ public class PCPALMMolecules implements PlugIn
 	 * <p>
 	 * A simple mean and SD of the histogram is computed. If the mean of the Skewed Gaussian does not fit within 3 SDs
 	 * of the simple mean then the simple mean is returned.
-	 * 
+	 *
 	 * @param molecules
 	 * @param title
 	 *            the plot title (null if no plot should be displayed)
@@ -638,7 +638,7 @@ public class PCPALMMolecules implements PlugIn
 			stats.addValue(data[i]);
 		}
 
-		// Set the min and max y-values using 1.5 x IQR 
+		// Set the min and max y-values using 1.5 x IQR
 		if (removeOutliers)
 		{
 			double lower = stats.getPercentile(25);
@@ -866,7 +866,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Add the skewed gaussian to the histogram plot
-	 * 
+	 *
 	 * @param plot
 	 * @param x
 	 * @param parameters
@@ -885,7 +885,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Group all localisations in successive frames within 2.5x of the initial precision estimate into a single molecule
-	 * 
+	 *
 	 * @param results
 	 *            The results
 	 * @param sigmaRaw
@@ -902,7 +902,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Trace localisations
-	 * 
+	 *
 	 * @param results
 	 *            The results
 	 * @param distance
@@ -920,7 +920,7 @@ public class PCPALMMolecules implements PlugIn
 		double distanceThreshold = distance / results.getNmPerPixel();
 		tm.traceMolecules(distanceThreshold, time);
 		Trace[] traces = tm.getTraces();
-		ArrayList<Molecule> molecules = new ArrayList<Molecule>(traces.length);
+		ArrayList<Molecule> molecules = new ArrayList<>(traces.length);
 
 		// These plugins are not really supported so just leave them to throw an exception if
 		// the data cannot be handled
@@ -941,7 +941,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Calculate the density of peaks in the original data
-	 * 
+	 *
 	 * @return The peak density
 	 */
 	private double calculatePeakDensity()
@@ -955,7 +955,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Return a new list, removing all molecules with a precision over 3x of the precision estimate
-	 * 
+	 *
 	 * @param molecules
 	 * @param sigmaS
 	 *            The precision estimate
@@ -963,7 +963,7 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	private ArrayList<Molecule> filterMolecules(ArrayList<Molecule> molecules, double sigmaS)
 	{
-		ArrayList<Molecule> newMolecules = new ArrayList<Molecule>(molecules.size());
+		ArrayList<Molecule> newMolecules = new ArrayList<>(molecules.size());
 		final double limit = 3 * sigmaS;
 		for (Molecule m : molecules)
 		{
@@ -984,7 +984,7 @@ public class PCPALMMolecules implements PlugIn
 		int timeInFrames = FastMath.max(1,
 				(int) Math.round(tThreshold * 1000.0 / results.getCalibrationReader().getExposureTime()));
 
-		ArrayList<Molecule> singles = new ArrayList<Molecule>();
+		ArrayList<Molecule> singles = new ArrayList<>();
 		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
 		molecules.addAll(singles);
 	}
@@ -1069,7 +1069,7 @@ public class PCPALMMolecules implements PlugIn
 		UniformDistribution dist = new UniformDistribution(null, new double[] { width, width, 0 },
 				randomGenerator.nextInt());
 
-		molecules = new ArrayList<Molecule>(nMolecules);
+		molecules = new ArrayList<>(nMolecules);
 		// Create some dummy results since the calibration is required for later analysis
 		results = new MemoryPeakResults(PSFHelper.create(PSFType.CUSTOM));
 		results.setCalibration(CalibrationHelper.create(nmPerPixel, 1, 100));
@@ -1078,7 +1078,7 @@ public class PCPALMMolecules implements PlugIn
 		int count = 0;
 
 		// Generate a sequence of coordinates
-		ArrayList<double[]> xyz = new ArrayList<double[]>((int) (nMolecules * 1.1));
+		ArrayList<double[]> xyz = new ArrayList<>((int) (nMolecules * 1.1));
 
 		Statistics statsRadius = new Statistics();
 		Statistics statsSize = new Statistics();
@@ -1098,28 +1098,28 @@ public class PCPALMMolecules implements PlugIn
 			// It may be that a mask is created first using the model. The particles are placed on the mask using
 			// a specified density. This simulation produces a figure to show either a damped cosine function
 			// (circles) or an exponential (fluctuations). The number of particles in each circle may be randomly
-			// determined just by density. The figure does not discuss the derivation of the cluster size 
+			// determined just by density. The figure does not discuss the derivation of the cluster size
 			// statistic.
-			// 
+			//
 			// If this plugin simulation is run with a uniform distribution and blinking rate of 1 then the damped
 			// cosine function is reproduced. The curve crosses g(r)=1 at a value equivalent to the average
-			// distance to the centre-of-mass of each drawn cluster, not the input cluster radius parameter (which 
+			// distance to the centre-of-mass of each drawn cluster, not the input cluster radius parameter (which
 			// is a hard upper limit on the distance to centre).
 
 			final int maskSize = lowResolutionImageSize;
 			int[] mask = null;
 			maskScale = width / maskSize; // scale is in nm/pixel
 
-			ArrayList<double[]> clusterCentres = new ArrayList<double[]>();
+			ArrayList<double[]> clusterCentres = new ArrayList<>();
 			int totalSteps = 1 + (int) Math.ceil(nMolecules / clusterNumber);
 			if (clusterSimulation == 2 || clusterSimulation == 3)
 			{
 				// Clusters are non-overlapping circles
 
-				// Ensure the circles do not overlap by using an exclusion mask that accumulates 
+				// Ensure the circles do not overlap by using an exclusion mask that accumulates
 				// out-of-bounds pixels by drawing the last cluster (plus some border) on an image. When no
 				// more pixels are available then stop generating molecules.
-				// This is done by cumulatively filling a mask and using the MaskDistribution to select 
+				// This is done by cumulatively filling a mask and using the MaskDistribution to select
 				// a new point. This may be slow but it works.
 
 				// TODO - Allow clusters of different sizes...
@@ -1135,7 +1135,7 @@ public class PCPALMMolecules implements PlugIn
 				if (clusterSimulation == 3)
 				{
 					// Generate a mask of circles then sample from that.
-					// If we want to fill the mask completely then adjust the total steps to be the number of 
+					// If we want to fill the mask completely then adjust the total steps to be the number of
 					// circles that can fit inside the mask.
 					totalSteps = (int) (maskSize * maskSize / (Math.PI * Maths.pow2(clusterRadius / maskScale)));
 				}
@@ -1174,7 +1174,7 @@ public class PCPALMMolecules implements PlugIn
 			{
 				// Clusters are overlapping circles
 
-				// Pick centres randomly from the distribution 
+				// Pick centres randomly from the distribution
 				while (clusterCentres.size() < totalSteps)
 					clusterCentres.add(dist.next());
 			}
@@ -1439,7 +1439,7 @@ public class PCPALMMolecules implements PlugIn
 					double max = 0;
 					for (int x = 0; x < newCount; x++)
 					{
-						// Compare to all-other molecules and get the minimum distance 
+						// Compare to all-other molecules and get the minimum distance
 						// needed to join at least one
 						double linkDistance = Double.POSITIVE_INFINITY;
 						for (int y = 0; y < newCount; y++)
@@ -1449,7 +1449,7 @@ public class PCPALMMolecules implements PlugIn
 							if (matrix[x][y] < linkDistance)
 								linkDistance = matrix[x][y];
 						}
-						// Check if this is larger 
+						// Check if this is larger
 						if (max < linkDistance)
 							max = linkDistance;
 					}
@@ -1546,11 +1546,11 @@ public class PCPALMMolecules implements PlugIn
 	{
 		// We want to know the fraction of distances between molecules at the 99th percentile
 		// that are intra- rather than inter-molecule.
-		// Do single linkage clustering of closest pair at this distance and count the number of 
+		// Do single linkage clustering of closest pair at this distance and count the number of
 		// links that are inter and intra.
 
 		// Convert molecules for clustering
-		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
+		ArrayList<ClusterPoint> points = new ArrayList<>(molecules.size());
 		for (Molecule m : molecules)
 			// Precision was used to store the molecule ID
 			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
@@ -1601,7 +1601,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Fill the given mask with the fill value using a circle with the specified centre and radius
-	 * 
+	 *
 	 * @param mask
 	 * @param maskSize
 	 * @param cx
@@ -1945,7 +1945,7 @@ public class PCPALMMolecules implements PlugIn
 		if (showHighResolutionImage)
 			displayImage(namePrefix + " (high res)", molecules, minx, miny, maxx, maxy, nmPerPixel, false, binaryImage);
 
-		// Store the molecules, the data range and the dMin. 
+		// Store the molecules, the data range and the dMin.
 		// This will be used by a filter plugin that crops sections from the image for PC analysis
 		PCPALMMolecules.molecules = molecules;
 
@@ -1962,7 +1962,7 @@ public class PCPALMMolecules implements PlugIn
 
 		// ***
 		// The PC-PALM + PLoS One papers describe using a binary image.
-		// However both papers provide MatLab code where the number of particles is 
+		// However both papers provide MatLab code where the number of particles is
 		// calculated using sum(sum(I)). This indicates a non binary image could be input
 		// to the routine to calculate the correlation function g(r).
 		// ***
@@ -2123,7 +2123,7 @@ public class PCPALMMolecules implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -2148,7 +2148,7 @@ public class PCPALMMolecules implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
 		@Override
@@ -2167,7 +2167,7 @@ public class PCPALMMolecules implements PlugIn
 
 	/**
 	 * Log a message to the IJ log window
-	 * 
+	 *
 	 * @param format
 	 * @param args
 	 */

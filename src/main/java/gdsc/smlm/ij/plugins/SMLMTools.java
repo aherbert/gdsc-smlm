@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,7 +72,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		screenDimension = IJ.getScreenSize();
 	}
 
-	private HashMap<String, String[]> plugins = new HashMap<String, String[]>();
+	private HashMap<String, String[]> plugins = new HashMap<>();
 	private boolean addSpacer = false;
 
 	/**
@@ -120,7 +120,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.frame.PlugInFrame#windowClosing(java.awt.event.WindowEvent)
 	 */
 	@Override
@@ -154,7 +154,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.frame.PlugInFrame#run(java.lang.String)
 	 */
 	@Override
@@ -173,7 +173,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
 
 		// Read into memory
-		ArrayList<String[]> plugins = new ArrayList<String[]>();
+		ArrayList<String[]> plugins = new ArrayList<>();
 		int gaps = 0;
 		BufferedReader input = null;
 		try
@@ -215,7 +215,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		}
 		catch (IOException e)
 		{
-			// Ignore 
+			// Ignore
 		}
 		finally
 		{
@@ -280,7 +280,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 		if (IJ.isMacintosh())
 		{
-			// This is needed as the OSX scroll pane adds scrollbars when the panel 
+			// This is needed as the OSX scroll pane adds scrollbars when the panel
 			// is close in size to the scroll pane
 			int padding = 15;
 			d.width += padding;
@@ -295,7 +295,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 	/**
 	 * Selectively ignore certain plugins
-	 * 
+	 *
 	 * @param tokens
 	 *            The tokens from the plugins.config file
 	 * @return true if the plugin should be ignored

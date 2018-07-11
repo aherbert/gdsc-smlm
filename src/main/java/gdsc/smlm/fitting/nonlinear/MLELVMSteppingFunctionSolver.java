@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -141,7 +141,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#preProcess()
 	 */
 	@Override
@@ -153,7 +153,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#prepareY(double[])
 	 */
 	@Override
@@ -180,7 +180,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
 	 */
 	@Override
@@ -208,7 +208,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#computeValues(double[])
 	 */
 	@Override
@@ -236,7 +236,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
 	 */
 	@Override
@@ -244,7 +244,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	{
 		// The Hessian matrix refers to the log-likelihood ratio.
 		// Compute and invert a matrix related to the Poisson log-likelihood.
-		// This assumes this does achieve the maximum likelihood estimate for a 
+		// This assumes this does achieve the maximum likelihood estimate for a
 		// Poisson process.
 		Gradient1Function f1 = (Gradient1Function) f;
 		// Capture the y-values if necessary
@@ -269,7 +269,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
 	{
 		// Compute and invert a matrix related to the Poisson log-likelihood.
-		// This assumes this does achieve the maximum likelihood estimate for a 
+		// This assumes this does achieve the maximum likelihood estimate for a
 		// Poisson process.
 		// We must wrap the gradient function if weights are present.
 		Gradient1Function f1 = (Gradient1Function) f;
@@ -286,7 +286,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
 	@Override
@@ -322,7 +322,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
 	@Override
@@ -334,7 +334,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
 	@Override

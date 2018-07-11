@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,7 @@ public class ImagePSFModel extends PSFModel
 	 * <p>
 	 * The noise fraction parameter can specify how to remove noise. All pixels below the fraction are set to zero. The
 	 * remaining pixels are normalised to 1 to create a PDF for the image.
-	 * 
+	 *
 	 * @param image
 	 *            The image consisting of a stack of square pixel buffers. The buffers are stored in YX order.
 	 * @param zCentre
@@ -88,7 +88,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Construct the ImagePSF.
-	 * 
+	 *
 	 * @param image
 	 *            The image consisting of a stack of square pixel buffers. The buffers are stored in YX order.
 	 * @param zCentre
@@ -216,7 +216,7 @@ public class ImagePSFModel extends PSFModel
 	 * The noise fraction parameter can specify how to remove noise. Pixels are sorted in descending order and
 	 * cumulatively summed. All pixels below the fraction of the total sum are set to zero. The remaining pixels are
 	 * normalised to 1 to create a PDF for the image.
-	 * 
+	 *
 	 * @param image
 	 * @param scratch
 	 * @param noiseFraction
@@ -265,7 +265,7 @@ public class ImagePSFModel extends PSFModel
 	/**
 	 * The noise fraction parameter can specify how to remove noise. All pixels below the fraction of the maximum are
 	 * set to zero. The remaining pixels are adjusted by the height of the first pixel below the cutoff.
-	 * 
+	 *
 	 * @param image
 	 * @param noiseFraction
 	 */
@@ -320,7 +320,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Normalise the image so that the brightest frame has a sum of 1
-	 * 
+	 *
 	 * @param image
 	 */
 	private void normalise(double[][] image)
@@ -392,7 +392,7 @@ public class ImagePSFModel extends PSFModel
 	private void calculateRollingSums(double[] s)
 	{
 		// Compute the rolling sum
-		// s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1) 
+		// s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1)
 		// where s(u,v) = 0 when either u,v < 0
 
 		final int maxx = psfWidth;
@@ -463,7 +463,7 @@ public class ImagePSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
 	 */
 	@Override
@@ -482,7 +482,7 @@ public class ImagePSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
 	 */
 	@Override
@@ -579,7 +579,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Construct a PSF function based at the origin using the specified range in each dimension.
-	 * 
+	 *
 	 * @param x0range
 	 *            The maximum range in dimension 0 (width)
 	 * @param x1range
@@ -607,14 +607,14 @@ public class ImagePSFModel extends PSFModel
 			return data;
 		final double[] sumPsf = sumImage[slice];
 
-		// Determine PSF blocks. 
+		// Determine PSF blocks.
 		// We need to map vertices of each pixel in the PSF onto the output image.
-		// Use (psfX+1) to describe upper bounds of pixel => mapping back describes lower bounds of PSF pixel 
+		// Use (psfX+1) to describe upper bounds of pixel => mapping back describes lower bounds of PSF pixel
 		// outX = (psfX + 1 - psfX0) * unitsPerPixel + origin
 		// =>
 		// psfX = (outX - origin) / unitsPerPixel + psfX0 - 1
 
-		// Note that if the PSF pixels do not exactly fit into the image pixels, then the lookup index 
+		// Note that if the PSF pixels do not exactly fit into the image pixels, then the lookup index
 		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method is
 		// to do linear interpolation between the pixel sums.
 
@@ -633,7 +633,7 @@ public class ImagePSFModel extends PSFModel
 		}
 		else
 		{
-			// If we are not interpolating then we use the centre of the pixel so convert 
+			// If we are not interpolating then we use the centre of the pixel so convert
 			// the vertices to the pixel centre using a 0.5 pixel offset.
 			for (int i = 0; i < u.length; i++)
 				lu[i] = (int) (u[i] + 0.5);
@@ -665,8 +665,8 @@ public class ImagePSFModel extends PSFModel
 				if (interpolate)
 				{
 					// Do linear interpolation
-					// sum = 
-					// + s(upperU,upperV) 
+					// sum =
+					// + s(upperU,upperV)
 					// - s(lowerU,upperV)
 					// - s(upperU,lowerV)
 					// + s(lowerU,lowerV)
@@ -722,12 +722,12 @@ public class ImagePSFModel extends PSFModel
 	private double sum(double[] s, int lowerU, int lowerV, int upperU, int upperV)
 	{
 		// Compute sum from rolling sum using:
-		// sum = 
-		// + s(upperU,upperV) 
+		// sum =
+		// + s(upperU,upperV)
 		// - s(lowerU,upperV)
 		// - s(upperU,lowerV)
 		// + s(lowerU,lowerV)
-		// Note: 
+		// Note:
 		// s(u,v) = 0 when either u,v < 0
 		// s(u,v) = s(umax,v) when u>umax
 		// s(u,v) = s(u,vmax) when v>vmax
@@ -767,12 +767,12 @@ public class ImagePSFModel extends PSFModel
 	private double safeSum(double[] s, int lowerU, int lowerV, int upperU, int upperV)
 	{
 		// Compute sum from rolling sum using:
-		// sum = 
-		// + s(upperU,upperV) 
+		// sum =
+		// + s(upperU,upperV)
 		// - s(lowerU,upperV)
 		// - s(upperU,lowerV)
 		// + s(lowerU,lowerV)
-		// Note: 
+		// Note:
 		// s(u,v) = 0 when either u,v < 0
 		// s(u,v) = s(umax,v) when u>umax
 		// s(u,v) = s(u,vmax) when v>vmax
@@ -822,7 +822,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Find the sum to the point x,y. x,y is assumed to be within the range x0,y0 to x0+1,y0+1.
-	 * 
+	 *
 	 * @param sum
 	 * @param x0
 	 * @param y0
@@ -853,7 +853,7 @@ public class ImagePSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
 	@Override
@@ -955,7 +955,7 @@ public class ImagePSFModel extends PSFModel
 		for (int i = 0; i < n; i++)
 		{
 			final double p = randomX.nextDouble();
-			// If outside the observed PSF then skip 
+			// If outside the observed PSF then skip
 			if (p > max)
 				continue;
 			final int index = findIndex(sumPsf, p);
@@ -995,7 +995,7 @@ public class ImagePSFModel extends PSFModel
 
 	private int getSlice(double x2)
 	{
-		// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
+		// We assume the PSF was imaged axially with increasing z-stage position (moving the stage
 		// closer to the objective). Thus higher z-coordinate are for higher slice numbers.
 		final int slice = (int) Math.round(x2 / unitsPerSlice) + zCentre;
 		lastSlice = slice;
@@ -1004,7 +1004,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Find the index such that sum[index] <= p < sum[index+1]
-	 * 
+	 *
 	 * @param sum
 	 * @param p
 	 * @return the index (or -1)
@@ -1044,7 +1044,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Set the PSF centre for the given slice. The centre must be within the width/size of the PSF.
-	 * 
+	 *
 	 * @param slice
 	 * @param x0
 	 * @param x1
@@ -1064,7 +1064,7 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * Set the PSF centre for the given slice. The centre is relative to 0,0.
-	 * 
+	 *
 	 * @param slice
 	 * @param x0
 	 * @param x1
@@ -1131,7 +1131,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		// The concept of HWHM only applies to a PSF that is a peaked maxima.
 		// This may not be true for an image. To approximate this we assume that
-		// the peak is Gaussian and find the sum which equals the integral of 
+		// the peak is Gaussian and find the sum which equals the integral of
 		// a Gaussian at HWHM = SD * 1.17741 (i.e. Gaussian2DFunction.SD_TO_FWHM_FACTOR)
 		final double integral = Erf.erf(Gaussian2DFunction.SD_TO_HWHM_FACTOR / Math.sqrt(2));
 

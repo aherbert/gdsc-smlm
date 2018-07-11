@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -36,7 +36,7 @@ import gdsc.smlm.results.PeakResult;
  * Fitted peaks are selected first and in the event of multiple results the peak with the strongest signal is
  * selected. Otherwise failed starting positions are selected and in the event of multiple results the closest
  * position will be chosen.
- * 
+ *
  * @deprecated Filtering of the results is no longer supported
  */
 @Deprecated
@@ -61,7 +61,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int,
 	 * gdsc.smlm.results.PeakResult[])
 	 */
@@ -77,7 +77,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 				float[] coord = filter.get(i);
 				final float dx = r.getXPosition() - coord[0];
 				final float dy = r.getYPosition() - coord[1];
-				// Only check if within the distance threshold 
+				// Only check if within the distance threshold
 				if (dx * dx + dy * dy < d2)
 				{
 					// Then filter by signal strength
@@ -95,7 +95,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, float, float)
 	 */
 	@Override
@@ -122,7 +122,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.engine.filter.ResultFilter#finalise()
 	 */
 	@Override
@@ -162,19 +162,19 @@ public class OptimumDistanceResultFilter extends ResultFilter
 		// The peak results can be in any order so use a set to find the unique results
 		if (unique > 0)
 		{
-			TreeSet<PeakResult> set = new TreeSet<PeakResult>();
+			TreeSet<PeakResult> set = new TreeSet<>();
 			for (PeakResult r : bestPeakResults)
 			{
 				if (r != null)
 					set.add(r);
 			}
 
-			peakResults = new ArrayList<PeakResult>(set.size());
+			peakResults = new ArrayList<>(set.size());
 			peakResults.addAll(set);
 		}
 		else
 		{
-			peakResults = new ArrayList<PeakResult>();
+			peakResults = new ArrayList<>();
 		}
 	}
 }

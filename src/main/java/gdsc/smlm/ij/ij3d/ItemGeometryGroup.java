@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -217,7 +217,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		ga.getCoordinates(0, coordinates);
 		float[] coordinates2 = new float[coordinates.length];
 
-		// Get the bounds so we can set the centroid and bounds for each object 
+		// Get the bounds so we can set the centroid and bounds for each object
 		Bounds bounds = new Shape3D(ga, null).getBounds();
 
 		Transform3D t3d = new Transform3D();
@@ -294,7 +294,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 			// Store the point index in the geometry for intersection analysis
 			ga2.setUserData(i);
 
-			// Allow per-item appearance with shared attributes. 
+			// Allow per-item appearance with shared attributes.
 			// This allows a global transparency for PointArray.
 			appearance = (Appearance) defaultAppearance.cloneNodeComponent(false);
 			if (!isPointArray)
@@ -317,8 +317,8 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 					// Note that this entire class is based on an assumption that setting
 					// the colour using attributes is faster/easier than if the input GA
 					// has per-vertex colours. It is definitely easier to support more GA
-					// formats and types (e.g. indexed/stripped) if appearance is used per 
-					// item. No testing has been done on the speed the image is rendered. 
+					// formats and types (e.g. indexed/stripped) if appearance is used per
+					// item. No testing has been done on the speed the image is rendered.
 
 					if (hasAlpha)
 					{
@@ -450,7 +450,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	@Override
 	protected TransparencyAttributes getTransparencyAttributes()
 	{
-		// Ignore this as transparency is handled by this class alone 
+		// Ignore this as transparency is handled by this class alone
 		return null;
 	}
 
@@ -504,7 +504,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		{
 			appearance.setPointAttributes(null);
 
-			// These are the defaults. We may need them if we want to support mesh 
+			// These are the defaults. We may need them if we want to support mesh
 			// display when the polygon mode is Line
 			PolygonAttributes polygonAttributes = appearance.getPolygonAttributes();
 			if (polygonAttributes == null)
@@ -557,7 +557,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -593,7 +593,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
 	@Override
@@ -635,7 +635,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
 	@Override
@@ -676,7 +676,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
 	 */
 	@Override
@@ -695,7 +695,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		}
 		if (isPointArray)
 		{
-			// PointArray alpha must be updated  
+			// PointArray alpha must be updated
 			final boolean hasAlpha = alpha != null;
 			for (int i = 0; i < geometryArray.length; i++)
 			{
@@ -738,7 +738,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		}
 		if (isPointArray)
 		{
-			// PointArray alpha must be updated  
+			// PointArray alpha must be updated
 			final boolean hasAlpha = alpha != null;
 			for (int i = 0; i < geometryArray.length; i++)
 			{
@@ -753,7 +753,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
 	 */
 	@Override
@@ -814,7 +814,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
 	 */
 	@Override

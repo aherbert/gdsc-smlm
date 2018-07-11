@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -56,7 +56,7 @@ public class IJImageSource extends ImageSource
 
 	/**
 	 * Create a new image source using the name of the image file
-	 * 
+	 *
 	 * @param name
 	 */
 	public IJImageSource(String name)
@@ -66,7 +66,7 @@ public class IJImageSource extends ImageSource
 
 	/**
 	 * Create a new image source using the path to the image file
-	 * 
+	 *
 	 * @param name
 	 * @param path
 	 */
@@ -78,7 +78,7 @@ public class IJImageSource extends ImageSource
 
 	/**
 	 * Create a new image source from an ImagePlus
-	 * 
+	 *
 	 * @param imp
 	 */
 	public IJImageSource(ImagePlus imp)
@@ -142,7 +142,7 @@ public class IJImageSource extends ImageSource
 				if (ox != cal.xOrigin || oy != cal.yOrigin)
 					throw new IllegalArgumentException("Origin must be in integer pixels");
 				// ImageJ has a negative origin to indicate 0,0 of the image
-				// is greater than the actual origin. The ImageSource convention is 
+				// is greater than the actual origin. The ImageSource convention is
 				// to have the origin represent the shift of the 0,0 pixel from the origin.
 				return new int[] { (int) -ox, (int) -oy };
 			}
@@ -167,7 +167,7 @@ public class IJImageSource extends ImageSource
 
 	/**
 	 * Create a new image source from an ImageProcessor
-	 * 
+	 *
 	 * @param name
 	 * @param ip
 	 */
@@ -182,7 +182,7 @@ public class IJImageSource extends ImageSource
 
 	/**
 	 * Create a new image source from an ImagePlus. Specify a single frame for processing.
-	 * 
+	 *
 	 * @param imp
 	 * @param frame
 	 */
@@ -194,7 +194,7 @@ public class IJImageSource extends ImageSource
 	/**
 	 * Create a new image source from an ImagePlus. Specify a start frame and any additional frames (after the start)
 	 * for processing.
-	 * 
+	 *
 	 * @param imp
 	 * @param startFrame
 	 *            The first frame to process
@@ -226,7 +226,7 @@ public class IJImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#openSource()
 	 */
 	@Override
@@ -265,7 +265,7 @@ public class IJImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
@@ -292,7 +292,7 @@ public class IJImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#initialiseSequentialRead()
 	 */
 	@Override
@@ -304,7 +304,7 @@ public class IJImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
 	 */
 	@Override
@@ -321,7 +321,7 @@ public class IJImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
 	 */
 	@Override
@@ -357,7 +357,7 @@ public class IJImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#toString()
 	 */
 	@Override

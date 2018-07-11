@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,7 +60,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	/**
 	 * Select the top individual and then the rest using a probability set by their rank. The resulting subset will be
 	 * at least size 2 (unless the input is smaller or there are not enough valid individuals (fitness not null)).
-	 * 
+	 *
 	 * @param individuals
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
@@ -71,7 +71,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		if (individuals == null || individuals.size() < 3)
 			return individuals;
 
-		ArrayList<Chromosome<T>> sorted = new ArrayList<Chromosome<T>>(individuals.size());
+		ArrayList<Chromosome<T>> sorted = new ArrayList<>(individuals.size());
 		// Add only those with a fitness score
 		for (Chromosome<T> c : individuals)
 			if (c.getFitness() != null)
@@ -90,7 +90,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		ChromosomeComparator.sort(sorted);
 
 		// Create the output subset
-		ArrayList<Chromosome<T>> subset = new ArrayList<Chromosome<T>>(size);
+		ArrayList<Chromosome<T>> subset = new ArrayList<>(size);
 
 		// Get the number of point available for selection:
 		// n in this case is (size-1) since we include the top ranking individual.
@@ -128,14 +128,14 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 				{
 					// Pick this point
 					subset.add(sorted.get(i));
-					// Update the cumulative then eliminate from future selection  
+					// Update the cumulative then eliminate from future selection
 					cumulative -= rank[i];
 					rank[i] = 0;
 					break;
 				}
 			}
 
-			// Check we chose something 
+			// Check we chose something
 			if (previous == cumulative)
 				throw new RuntimeException("Failed to select a candidate. Size = " + subset.size() + " / " + size);
 		}
@@ -148,7 +148,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
 	 */
 	@Override
@@ -160,7 +160,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 			return;
 		}
 
-		// This method may be called when fitness is unknown. 
+		// This method may be called when fitness is unknown.
 		// Only sort those with a fitness score.
 		ArrayList<Chromosome<T>> list = null;
 		int count = 0;
@@ -180,8 +180,8 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 			else
 			{
 				// A mixed population, some of which we can sort and some we cannot.
-				list = new ArrayList<Chromosome<T>>(toSort);
-				ArrayList<Chromosome<T>> subset = new ArrayList<Chromosome<T>>(count);
+				list = new ArrayList<>(toSort);
+				ArrayList<Chromosome<T>> subset = new ArrayList<>(count);
 				for (Chromosome<T> c : individuals)
 				{
 					if (c.getFitness() == null)
@@ -202,7 +202,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		}
 		else
 		{
-			list = new ArrayList<Chromosome<T>>(individuals);
+			list = new ArrayList<>(individuals);
 			ChromosomeComparator.sort(list);
 
 			// Build a cumulative array of rank weighting. The highest ranked starts at n.
@@ -240,7 +240,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	 * Select pairs randomly from the population. The first is selected from the top n individuals with n starting at 1
 	 * and incrementing for each call. The second is selected from the entire population with the weighting equal to
 	 * their ranking by fitness.
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#next()
 	 */
 	@Override
@@ -276,7 +276,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 				second = nextSample();
 		}
 		//System.out.printf("Next [%d] %d x %d\n", n, first, second);
-		return new ChromosomePair<T>(sorted.get(first), sorted.get(second));
+		return new ChromosomePair<>(sorted.get(first), sorted.get(second));
 	}
 
 	private int nextSample()
@@ -291,7 +291,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
 	/**
 	 * Find the index such that sum[index-1] <= key < sum[index]
-	 * 
+	 *
 	 * @param sum
 	 * @param p
 	 * @return the index (or -1)
@@ -306,7 +306,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
 	/**
 	 * Find the index such that sum[index-1] <= key < sum[index]
-	 * 
+	 *
 	 * @param sum
 	 * @param p
 	 * @return the index (or -1)
@@ -316,7 +316,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		if (key < sum[0])
 			return 0;
 
-		// Adapted from Arrays.binarySearch which 
+		// Adapted from Arrays.binarySearch which
 		// finds the actual key value or returns a negative insertion point:
 
 		// If we find the actual key return the next index above.
@@ -335,13 +335,13 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 			else if (midVal > key)
 				high = mid - 1;
 			else
-				// Changed from Arrays.binarySearch 
+				// Changed from Arrays.binarySearch
 				//return mid; // key found
 				// If we find the actual key return the next index above.
 				return mid + 1;
 		}
 
-		// Changed from Arrays.binarySearch 
+		// Changed from Arrays.binarySearch
 		//return -(low + 1);  // key not found.
 		// If we do not find the actual key return the insertion point
 		return low;
@@ -349,7 +349,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.SelectionStrategy#finishBreeding()
 	 */
 	@Override

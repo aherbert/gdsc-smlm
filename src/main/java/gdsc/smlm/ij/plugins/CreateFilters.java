@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -79,7 +79,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -91,11 +91,11 @@ public class CreateFilters implements PlugIn, ItemListener
 			return;
 
 		// This method assumes valid XML elements have been input with no root node.
-		// The output will be an expanded set of the same XML elements with specific 
+		// The output will be an expanded set of the same XML elements with specific
 		// attributes updated.
 
-		// Each top level element is processed. All the attributes are scanned and if 
-		// they contain a 'min:max:increment' token the attribute is enumerated to 
+		// Each top level element is processed. All the attributes are scanned and if
+		// they contain a 'min:max:increment' token the attribute is enumerated to
 		// the output XML, replicating the element.
 
 		// Add a dummy root element to allow the XML to be loaded as a document
@@ -147,7 +147,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		// Get entire element as a string
 		String xmlString = gdsc.core.utils.XmlUtils.getString(node, false);
 
-		ArrayList<StringBuilder> out = new ArrayList<StringBuilder>();
+		ArrayList<StringBuilder> out = new ArrayList<>();
 
 		// Process through the XML appending to the current output.
 		String[] tokens = xmlString.split("\\s+");
@@ -177,12 +177,12 @@ public class CreateFilters implements PlugIn, ItemListener
 				final String suffix = "\"" + match.group(5);
 
 				// Enumerate the attribute
-				ArrayList<String> attributeText = new ArrayList<String>();
+				ArrayList<String> attributeText = new ArrayList<>();
 				for (BigDecimal bd = min; bd.compareTo(max) <= 0; bd = bd.add(inc))
 					attributeText.add(prefix + bd.toString() + suffix);
 
 				// Add to the current output
-				ArrayList<StringBuilder> out2 = new ArrayList<StringBuilder>(out.size() * attributeText.size());
+				ArrayList<StringBuilder> out2 = new ArrayList<>(out.size() * attributeText.size());
 
 				if (enumerateEarly)
 				{
@@ -365,7 +365,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		String xml = filter.toXML();
 		if (attributeSubstitutions != null)
 		{
-			// Process the XML substituting attributes in the order they occur using a SAX parser. 
+			// Process the XML substituting attributes in the order they occur using a SAX parser.
 			// Write the new XMl to a buffer.
 			StringBuilder sb = new StringBuilder();
 			try
@@ -405,10 +405,10 @@ public class CreateFilters implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String,
 		 * org.xml.sax.Attributes)
-		 * 
+		 *
 		 * Only start elements have attributes so this is where the substitutions are made
 		 */
 		@Override
@@ -436,9 +436,9 @@ public class CreateFilters implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
-		 * 
+		 *
 		 * We must respect the end elements since combined filters require them. They can be later stripped using a
 		 * pretty print XML method.
 		 */

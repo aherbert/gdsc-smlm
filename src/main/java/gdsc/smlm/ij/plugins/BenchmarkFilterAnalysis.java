@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -179,7 +179,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int minFailCount = 0;
 	private static int maxFailCount = 10;
 
-	// This can be used during filtering. 
+	// This can be used during filtering.
 	// However the min filter is not used to determine if candidates are valid (that is the primary filter).
 	// It is used to store poor estimates during fitting. So we can set it to null.
 	private static final DirectFilter minimalFilter = null;
@@ -188,8 +188,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double maxResidualsThreshold = 0.6;
 	private double residualsThreshold = 1; // Disabled
 	private static double duplicateDistance = 0;
-	// This is a flag that is passed around but is only set once, i.e. 
-	// analysis is done using either absolute or relative distances. 
+	// This is a flag that is passed around but is only set once, i.e.
+	// analysis is done using either absolute or relative distances.
 	private static boolean duplicateDistanceAbsolute = true;
 	private static double minDuplicateDistance = 0;
 	private static double maxDuplicateDistance = 5;
@@ -255,8 +255,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double pEnrichmentPadding = 0.1;
 	private static int pConvergedCount = 2;
 
-	private static TIntObjectHashMap<boolean[]> searchRangeMap = new TIntObjectHashMap<boolean[]>();
-	private static TIntObjectHashMap<double[]> stepSizeMap = new TIntObjectHashMap<double[]>();
+	private static TIntObjectHashMap<boolean[]> searchRangeMap = new TIntObjectHashMap<>();
+	private static TIntObjectHashMap<double[]> stepSizeMap = new TIntObjectHashMap<>();
 
 	private static boolean showTP = false;
 	private static boolean showFP = false;
@@ -288,9 +288,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
 	private static String resultsPrefix3, limitRange;
 
-	private static ArrayList<NamedPlot> plots = new ArrayList<NamedPlot>();
-	private static HashMap<String, ComplexFilterScore> bestFilter = new HashMap<String, ComplexFilterScore>();
-	private static LinkedList<String> bestFilterOrder = new LinkedList<String>();
+	private static ArrayList<NamedPlot> plots = new ArrayList<>();
+	private static HashMap<String, ComplexFilterScore> bestFilter = new HashMap<>();
+	private static LinkedList<String> bestFilterOrder = new LinkedList<>();
 
 	private static HashMap<String, ComplexFilterScore> iterBestFilter = null;
 
@@ -442,7 +442,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -490,7 +490,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final int nActual = actual.length;
 			final boolean[] matched = new boolean[nActual];
 			actual = filterUsingBorder(actual);
-			// We could use distanceInPixels for the resolution. Using a bigger size may allow the 
+			// We could use distanceInPixels for the resolution. Using a bigger size may allow the
 			// different fit locations to be in the same cell and so the grid manager can use it's cache.
 			final double resolution = 2 * distanceInPixels;
 			final PeakResultGridManager resultGrid = new PeakResultGridManager(actual, resolution);
@@ -593,7 +593,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					if (actual.length == 0)
 						continue;
 
-					final ArrayList<ResultAssignment> assignments = new ArrayList<ResultAssignment>(actual.length);
+					final ArrayList<ResultAssignment> assignments = new ArrayList<>(actual.length);
 					for (int j = 0; j < actual.length; j++)
 					{
 						final double d2 = actual[j].distance2(peak.getX(), peak.getY());
@@ -637,14 +637,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 									depthFitStats.add(actual[j].getZPosition());
 								}
 
-								// Accumulate for all possible matches						
+								// Accumulate for all possible matches
 								signalFactorStats.add(signalFactor);
 								distanceStats.add(d);
 							}
 						}
 					}
 
-					// Save 
+					// Save
 					if (!assignments.isEmpty())
 					{
 						final ResultAssignment[] tmp = new ResultAssignment[assignments.size()];
@@ -687,12 +687,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
-	private static ArrayList<FilterResult> scores = new ArrayList<FilterResult>();
+	private static ArrayList<FilterResult> scores = new ArrayList<>();
 
 	private static String[] COLUMNS = {
-			// Scores using integer scoring		
+			// Scores using integer scoring
 			"TP", "FP", "FN", "Precision", "Recall", "F1", "Jaccard",
-			// Scores using fractional scoring 
+			// Scores using fractional scoring
 			"fTP", "fFP", "fFN", "fPrecision", "fRecall", "fF1", "fJaccard", };
 
 	private static boolean[] showColumns;
@@ -726,7 +726,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -933,7 +933,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							currentParameters);
 
 				}
-				// Check if we can continue (e.g. not max iterations or escape pressed) 
+				// Check if we can continue (e.g. not max iterations or escape pressed)
 				if (!checker.canContinue)
 					break;
 			}
@@ -945,7 +945,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (!loadFitResults())
 				return;
 
-			// Reduce the range over which the filter parameters are searched. Note that this range 
+			// Reduce the range over which the filter parameters are searched. Note that this range
 			// is centred around the current optimum.
 			if (iterationMinRangeReduction < 1)
 			{
@@ -972,7 +972,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (current != null)
 		//if (converged)
 		{
-			// Set-up the plugin so that it can be run again (in iterative mode) 
+			// Set-up the plugin so that it can be run again (in iterative mode)
 			// and the results reported for the top filter.
 			// If the user runs the non-iterative mode then the results will be lost.
 			iterBestFilter = bestFilter;
@@ -1022,8 +1022,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!showScoreDialog())
 			return;
 
-		// Set the variables used for scoring. Note: these are used throughout the plugin in various 
-		// methods so it is easier to just set them here and reset them later than pass the score 
+		// Set the variables used for scoring. Note: these are used throughout the plugin in various
+		// methods so it is easier to just set them here and reset them later than pass the score
 		// versions through to every method.
 		double[] stash = createParameters();
 		failCount = scoreFailCount;
@@ -1125,8 +1125,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				if (gd.wasOKed())
 				{
 					setLastFile(null);
-					List<FilterSet> filterSets = new ArrayList<FilterSet>(1);
-					List<Filter> filters = new ArrayList<Filter>(1);
+					List<FilterSet> filterSets = new ArrayList<>(1);
+					List<Filter> filters = new ArrayList<>(1);
 					filters.add((DirectFilter) f);
 					FilterSet filterSet = new FilterSet(filters);
 					filterSets.add(filterSet);
@@ -1182,7 +1182,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					}
 
 					// Check they are not empty lists
-					List<FilterSet> filterSets2 = new LinkedList<FilterSet>();
+					List<FilterSet> filterSets2 = new LinkedList<>();
 					for (FilterSet filterSet : filterSets)
 					{
 						if (filterSet.size() != 0)
@@ -1257,7 +1257,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private void expandFilters()
 	{
-		// Do not clear these when reading a new set of filters. 
+		// Do not clear these when reading a new set of filters.
 		// The filters may be the same with slight modifications and so it is useful to keep the last settings.
 		//searchRangeMap.clear();
 		//stepSizeMap.clear();
@@ -1323,7 +1323,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		IJ.showStatus("Expanding filters ...");
 
-		List<FilterSet> filterList2 = new ArrayList<FilterSet>(filterList.size());
+		List<FilterSet> filterList2 = new ArrayList<>(filterList.size());
 		for (FilterSet filterSet : filterList)
 		{
 			c = filterList2.size();
@@ -1435,7 +1435,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		double[] increment2 = increment.clone();
 		int capacity = (int) countCombinations(parameters, parameters2, increment);
 
-		ArrayList<Filter> list = new ArrayList<Filter>(capacity);
+		ArrayList<Filter> list = new ArrayList<>(capacity);
 
 		// Initialise with a filter set at the minimum for each parameter.
 		// Get the weakest parameters for those not expanded.
@@ -1471,7 +1471,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			final double[] values = stats.getValues();
 
-			final ArrayList<Filter> list2 = new ArrayList<Filter>((values.length + 1) * list.size());
+			final ArrayList<Filter> list2 = new ArrayList<>((values.length + 1) * list.size());
 			for (int k = 0; k < list.size(); k++)
 			{
 				final Filter f = list.get(k);
@@ -1591,10 +1591,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// localisation.
 			//
 			// Use the following scoring scheme for all candidates:
-			// 
+			//
 			//  Candidates
-			// +----------------------------------------+  
-			// |   Actual matches                       | 
+			// +----------------------------------------+
+			// |   Actual matches                       |
 			// |  +-----------+                TN       |
 			// |  |  FN       |                         |
 			// |  |      +----------                    |
@@ -1617,32 +1617,32 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			//
 			// When fitting only produces one result it is possible to compute the TN score.
 			// Since unfitted candidates can only be TN or FN we could accumulate these scores and cache them.
-			// This was the old method of benchmarking single spot fitting and allowed more scores to be 
+			// This was the old method of benchmarking single spot fitting and allowed more scores to be
 			// computed.
 			//
 			// When fitting produces multiple results then we have to score each fit result against all possible
-			// actual results and keep a record of the scores. These can then be assessed when the specific 
+			// actual results and keep a record of the scores. These can then be assessed when the specific
 			// results have been chosen by result filtering.
 			//
 			// Using a distance ramped scoring function the degree of match can be varied from 0 to 1.
 			// Using a signal-factor ramped scoring function the degree of fitted can be varied from 0 to 1.
-			// When using ramped scoring functions the fractional allocation of scores using the above scheme 
-			// is performed, i.e. candidates are treated as if they both match and unmatch. This results in 
+			// When using ramped scoring functions the fractional allocation of scores using the above scheme
+			// is performed, i.e. candidates are treated as if they both match and unmatch. This results in
 			// an equivalent to multiple analysis using different thresholds and averaging of the scores.
 			//
-			// The totals TP+FP+TN+FN must equal the number of spot candidates. This allows different fitting 
+			// The totals TP+FP+TN+FN must equal the number of spot candidates. This allows different fitting
 			// methods to be compared since the total number of candidates is the same.
 			//
 			// Precision = TP / (TP+FP)    : This is always valid as a minimum criteria score
-			// Recall    = TP / (TP+FN)    : This is valid between different fitting methods since a method that 
+			// Recall    = TP / (TP+FN)    : This is valid between different fitting methods since a method that
 			//                               fits more spots will have a potentially lower FN
 			// Jaccard   = TP / (TP+FN+FP) : This is valid between fitting methods
 			//
 			// -=-=-=-
-			// As an alternative scoring system, different fitting methods can be compared using the same TP 
-			// value but calculating FN = localisations - TP and FP as Positives - TP. This creates a score 
-			// against the original number of simulated molecules using everything that was passed through the 
-			// filter (Positives). This score is comparable when a different spot candidate filter has been used 
+			// As an alternative scoring system, different fitting methods can be compared using the same TP
+			// value but calculating FN = localisations - TP and FP as Positives - TP. This creates a score
+			// against the original number of simulated molecules using everything that was passed through the
+			// filter (Positives). This score is comparable when a different spot candidate filter has been used
 			// and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
 			// -=-=-=-
 
@@ -1677,15 +1677,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 
 			// Store all the results
-			final ArrayList<MultiPathFitResults> results = new ArrayList<MultiPathFitResults>(
+			final ArrayList<MultiPathFitResults> results = new ArrayList<>(
 					BenchmarkSpotFit.fitResults.size());
 			final List<MultiPathFitResults> syncResults = Collections.synchronizedList(results);
 
 			// This could be multi-threaded ...
 			final int nThreads = getThreads(BenchmarkSpotFit.fitResults.size());
-			final BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
-			final List<FitResultsWorker> workers = new LinkedList<FitResultsWorker>();
-			final List<Thread> threads = new LinkedList<Thread>();
+			final BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+			final List<FitResultsWorker> workers = new LinkedList<>();
+			final List<Thread> threads = new LinkedList<>();
 			final AtomicInteger uniqueId = new AtomicInteger();
 			CoordinateStore coordinateStore = createCoordinateStore();
 			for (int i = 0; i < nThreads; i++)
@@ -1778,17 +1778,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private TIntObjectHashMap<IdPeakResult[]> getCoordinates(MemoryPeakResults results)
 	{
-		final TIntObjectHashMap<IdPeakResult[]> coords = new TIntObjectHashMap<IdPeakResult[]>();
+		final TIntObjectHashMap<IdPeakResult[]> coords = new TIntObjectHashMap<>();
 		if (results.size() > 0)
 		{
-			// Do not use HashMap directly to build the coords object since there 
-			// will be many calls to getEntry(). Instead sort the results and use 
+			// Do not use HashMap directly to build the coords object since there
+			// will be many calls to getEntry(). Instead sort the results and use
 			// a new list for each time point
 			results.sort();
 
 			final Counter uniqueId = new Counter();
 			final FrameCounter counter = new FrameCounter();
-			final TurboList<PeakResult> tmp = new TurboList<PeakResult>();
+			final TurboList<PeakResult> tmp = new TurboList<>();
 			// Add the results to the lists
 			results.forEach(new PeakResultProcedure()
 			{
@@ -2556,12 +2556,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private ComplexFilterScore reportResults(boolean newResults)
 	{
-		return reportResults(newResults, new ArrayList<ComplexFilterScore>(bestFilter.values()));
+		return reportResults(newResults, new ArrayList<>(bestFilter.values()));
 	}
 
 	private ComplexFilterScore reportResults(boolean newResults, ComplexFilterScore optimum)
 	{
-		List<ComplexFilterScore> filters = new ArrayList<ComplexFilterScore>(1);
+		List<ComplexFilterScore> filters = new ArrayList<>(1);
 		filters.add(optimum);
 		return reportResults(newResults, filters);
 	}
@@ -2594,7 +2594,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			for (ComplexFilterScore fs : filters)
 			{
-				final ArrayList<FractionalAssignment[]> list = new ArrayList<FractionalAssignment[]>(
+				final ArrayList<FractionalAssignment[]> list = new ArrayList<>(
 						resultsList.length);
 				final FractionClassificationResult r = scoreFilter(fs.getFilter(), minimalFilter, resultsList, list,
 						coordinateStore);
@@ -2691,7 +2691,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		if (topFilterClassificationResult == null)
 		{
-			topFilterResults = new ArrayList<FractionalAssignment[]>(resultsList.length);
+			topFilterResults = new ArrayList<>(resultsList.length);
 			topFilterClassificationResult = scoreFilter(bestFilter, minimalFilter, resultsList, topFilterResults,
 					coordinateStore);
 		}
@@ -3221,8 +3221,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Find the limits in the current scores
 				final double[] lower = ss_filter.getParameters().clone();
 				final double[] upper = lower.clone();
-				// Allow the SearchSpace algorithms to be seeded with an initial population 
-				// for the first evaluation of the optimum. This is done when the input filter 
+				// Allow the SearchSpace algorithms to be seeded with an initial population
+				// for the first evaluation of the optimum. This is done when the input filter
 				// set is not a range.
 				seed = new double[filterSet.size()][];
 				int c = 0;
@@ -3298,7 +3298,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// Note:
 					// Enrichment search and GA just use the upper and lower bounds to seed the population
 					// These can use FixedDimension and we add the current optimum to the seed.
-					// Range search uses SearchDimension and we must centre on the optimum after creation.							
+					// Range search uses SearchDimension and we must centre on the optimum after creation.
 					for (int i = 0; i < originalDimensions.length; i++)
 					{
 						double centre = p[i];
@@ -3308,7 +3308,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							// Set the range around the centre.
 							// This uses the range for each param when we read the filters.
 							r = range[i];
-							// Optionally reduce the width of the dimensions. 
+							// Optionally reduce the width of the dimensions.
 							if (rangeReduction > 0 && rangeReduction < 1)
 								r *= rangeReduction;
 						}
@@ -3438,20 +3438,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 				// Create the genetic algorithm
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
-				SimpleMutator<FilterScore> mutator = new SimpleMutator<FilterScore>(random, mutationRate);
+				SimpleMutator<FilterScore> mutator = new SimpleMutator<>(random, mutationRate);
 				// Override the settings with the step length, a min of zero and the configured upper
 				double[] upper = ss_filter.upperLimit();
 				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
-				Recombiner<FilterScore> recombiner = new SimpleRecombiner<FilterScore>(random, crossoverRate,
+				Recombiner<FilterScore> recombiner = new SimpleRecombiner<>(random, crossoverRate,
 						meanChildren);
 				SelectionStrategy<FilterScore> selectionStrategy;
 				// If the initial population is huge ensure that the first selection culls to the correct size
 				final int selectionMax = (int) (selectionFraction * populationSize);
 				if (rampedSelection)
-					selectionStrategy = new RampedSelectionStrategy<FilterScore>(random, selectionFraction,
+					selectionStrategy = new RampedSelectionStrategy<>(random, selectionFraction,
 							selectionMax);
 				else
-					selectionStrategy = new SimpleSelectionStrategy<FilterScore>(random, selectionFraction,
+					selectionStrategy = new SimpleSelectionStrategy<>(random, selectionFraction,
 							selectionMax);
 				ToleranceChecker<FilterScore> ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3,
 						convergedCount);
@@ -3460,7 +3460,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				List<Filter> filters = filterSet.getFilters();
 				if (filterSet.size() < populationSize)
 				{
-					filters = new ArrayList<Filter>(populationSize);
+					filters = new ArrayList<>(populationSize);
 					// Add the existing filters if they are not a range input file
 					if (!rangeInput)
 						filters.addAll(filterSet.getFilters());
@@ -3472,7 +3472,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							null);
 					filters.addAll(searchSpaceToFilters(sample));
 				}
-				ga_population = new Population<FilterScore>(filters);
+				ga_population = new Population<>(filters);
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
 				selectionStrategy.setTracker(this);
@@ -3659,8 +3659,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						sample = SearchSpace.sampleWithoutRounding(dimensions, seedSize - size, null);
 						seed = merge(seed, sample);
 					}
-					// Note: If we have an optimum and we are not seeding this should not matter as the dimensions 
-					// have been centred on the current optimum					
+					// Note: If we have an optimum and we are not seeding this should not matter as the dimensions
+					// have been centred on the current optimum
 					ss.seed(seed);
 					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
@@ -3827,7 +3827,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (best != null)
 		{
 			// Only assess the top 1 filter for the summary
-			List<Filter> list = new ArrayList<Filter>();
+			List<Filter> list = new ArrayList<>();
 			list.add((DirectFilter) best);
 			filterSet = new FilterSet(filterSet.getName(), list);
 		}
@@ -3953,7 +3953,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		boolean allowDuplicates = true; // This could be an option?
 
-		// XXX - Commented out the requirement to be the same type to store for later analysis. 
+		// XXX - Commented out the requirement to be the same type to store for later analysis.
 		// This may break the code, however I think that all filter sets should be able to have a best filter
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
@@ -4070,7 +4070,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		else if (sample != null)
 		{
 			// Merge
-			ArrayList<double[]> merged = new ArrayList<double[]>(sample.length + seed.length);
+			ArrayList<double[]> merged = new ArrayList<>(sample.length + seed.length);
 			merged.addAll(Arrays.asList(seed));
 			merged.addAll(Arrays.asList(sample));
 			seed = merged.toArray(new double[merged.size()][]);
@@ -4102,7 +4102,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/**
 	 * Enumerate on the min interval to convert an off grid result to one on the grid
-	 * 
+	 *
 	 * @param best
 	 *            The optimum
 	 * @param enabled
@@ -4117,7 +4117,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/**
 	 * Enumerate on the min interval to convert an off grid result to one on the grid
-	 * 
+	 *
 	 * @param best
 	 *            The optimum
 	 * @param enabled
@@ -4412,8 +4412,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					if (pSeedSize > 0)
 					{
 						// Add current optimum to seed
-						// Note: If we have an optimum and we are not seeding this should not matter as the dimensions 
-						// have been centred on the current optimum					
+						// Note: If we have an optimum and we are not seeding this should not matter as the dimensions
+						// have been centred on the current optimum
 						double[][] seed = new double[1][];
 						seed[0] = point;
 						// Sample without rounding as the seed will be rounded
@@ -4790,7 +4790,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/**
 	 * When the two filters have equal scores, select the filter using the filter parameters
-	 * 
+	 *
 	 * @param filter1
 	 * @param filter2
 	 * @return The chosen filter (the one with the strongest parameters)
@@ -4827,7 +4827,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private double getScore(FractionClassificationResult r, final int index)
 	{
-		// This order must match the COLUMNS order 
+		// This order must match the COLUMNS order
 		switch (index)
 		{
 			case 0:
@@ -4967,7 +4967,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
 
-		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
+		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<>(resultsList.length);
 		multiPathFilter.fractionScoreSubset(resultsList, ConsecutiveFailCounter.create(failCount), nActual,
 				allAssignments, null, coordinateStore);
 		return allAssignments;
@@ -4990,7 +4990,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// TN as any candidate that does not match a true result.
 		// FN as any candidate that does match a true result (that is not matched by any fit result)
 		// To do this properly would require that we store all the matches of candidates to the data.
-		// These can then be totalled up given the candidates that have not been used to create a positive. 
+		// These can then be totalled up given the candidates that have not been used to create a positive.
 
 		// Integer results
 		final ClassificationResult r2 = (requireIntegerResults) ? createIntegerResult(r) : null;
@@ -5027,8 +5027,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		//		// TP are all fit results that can be matched to a spot
 		//		// FP are all fit results that cannot be matched to a spot
 		//		// FN are the number of missed spots
-		//		// Note: We cannot calculate TN since this is the number of fit candidates that are 
-		//		// filtered after fitting that do not match a spot or were not fitted. 
+		//		// Note: We cannot calculate TN since this is the number of fit candidates that are
+		//		// filtered after fitting that do not match a spot or were not fitted.
 		//		final double fp = r.getPositives() - r.getTP();
 		//		final double fn = nActual - r.getTP();
 		//		return new FractionClassificationResult(r.getTP(), fp, 0, fn);
@@ -5085,10 +5085,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			filterFilename = filename;
 			Prefs.set(KEY_FILTER_FILENAME, filename);
 
-			List<Filter> filters = new ArrayList<Filter>(1);
+			List<Filter> filters = new ArrayList<>(1);
 			filters.add(filter);
 			FilterSet filterSet = new FilterSet(filter.getName(), filters);
-			List<FilterSet> list = new ArrayList<FilterSet>(1);
+			List<FilterSet> list = new ArrayList<>(1);
 			list.add(filterSet);
 			saveFilterSet(filterSet, filename);
 		}
@@ -5108,7 +5108,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		OutputStreamWriter out = null;
 		try
 		{
-			List<FilterSet> list = new ArrayList<FilterSet>(1);
+			List<FilterSet> list = new ArrayList<>(1);
 			list.add(filterSet);
 			FileOutputStream fos = new FileOutputStream(filename);
 			out = new OutputStreamWriter(fos, "UTF-8");
@@ -5173,7 +5173,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/**
 	 * Save PeakFit configuration template using the current benchmark settings.
-	 * 
+	 *
 	 * @param topFilterSummary
 	 */
 	private void saveTemplate(String topFilterSummary)
@@ -5309,7 +5309,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					@Override
 					public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 					{
-						// If the event is null then this is the final call when the 
+						// If the event is null then this is the final call when the
 						// dialog has been closed. We ignore this to prevent generating a
 						// image the user has not seen.
 						if (e == null)
@@ -5441,7 +5441,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			DirectFilter filter)
 	{
 		// TODO : This analysis ignores the partial match distance.
-		// Use the score for each result to get a weighted histogram. 
+		// Use the score for each result to get a weighted histogram.
 
 		if (!depthRecallAnalysis || simulationParameters.fixedDepth)
 			return null;
@@ -5456,7 +5456,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
 		double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
-		// To get the number of TP at each depth will require that the filter is run 
+		// To get the number of TP at each depth will require that the filter is run
 		// manually to get the results that pass.
 		if (allAssignments == null)
 			allAssignments = getAssignments(filter);
@@ -5998,7 +5998,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore#add(int)
 	 */
 	@Override
@@ -6287,7 +6287,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			else
 				count = 0;
 
-			// Note: if the converged count was negative then no convergence can be achieved 
+			// Note: if the converged count was negative then no convergence can be achieved
 			// using the point coordinates as this is disabled. So the code only reaches here with
 			// a count of zero, effectively skipping this as it is always false.
 			if (count > convergedCount)
@@ -6352,15 +6352,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				return false;
 			}
 
-			SearchResult<FilterScore> p = new SearchResult<FilterScore>(previous.filter.getParameters(), previous);
-			SearchResult<FilterScore> c = new SearchResult<FilterScore>(current.filter.getParameters(), current);
+			SearchResult<FilterScore> p = new SearchResult<>(previous.filter.getParameters(), previous);
+			SearchResult<FilterScore> c = new SearchResult<>(current.filter.getParameters(), current);
 
 			if (filterChecker.converged(p, c))
 			{
 				logConvergence(prefix, "filter parameters");
 				return true;
 			}
-			// Directly call the method with the scores 
+			// Directly call the method with the scores
 			if (scoreChecker.converged(p.score, c.score))
 			{
 				logConvergence(prefix, "score");
@@ -6407,7 +6407,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
-	// Used to implement the FitnessFunction interface 
+	// Used to implement the FitnessFunction interface
 	private String ga_statusPrefix = "";
 	private Population<FilterScore> ga_population;
 
@@ -6513,7 +6513,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -6582,7 +6582,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -6640,7 +6640,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			scoreResults[job.index] = scoreFilter(filter, minFilter, failCount, residualsThreshold, duplicateDistance,
 					coordinateStore2, createTextResult);
 
-			// Allow debugging the score 
+			// Allow debugging the score
 			//			if (failCount == 3 && DoubleEquality.almostEqualRelativeOrAbsolute(residualsThreshold, 0.35, 0, 0.01) &&
 			//					DoubleEquality.almostEqualRelativeOrAbsolute(duplicateDistance, 2.5, 0, 0.01))
 			//			{
@@ -6678,7 +6678,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		if (scoreResults.length == 1)
 		{
-			// No need to multi-thread this			
+			// No need to multi-thread this
 			scoreResults[0] = scoreFilter((DirectFilter) filterSet.getFilters().get(0), minimalFilter, createTextResult,
 					coordinateStore);
 		}
@@ -6686,9 +6686,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// Multi-thread score all the result
 			final int nThreads = getThreads(scoreResults.length);
-			final BlockingQueue<ScoreJob> jobs = new ArrayBlockingQueue<ScoreJob>(nThreads * 2);
-			final List<ScoreWorker> workers = new LinkedList<ScoreWorker>();
-			final List<Thread> threads = new LinkedList<Thread>();
+			final BlockingQueue<ScoreJob> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+			final List<ScoreWorker> workers = new LinkedList<>();
+			final List<Thread> threads = new LinkedList<>();
 			for (int i = 0; i < nThreads; i++)
 			{
 				final ScoreWorker worker = new ScoreWorker(jobs, scoreResults, createTextResult,
@@ -6789,9 +6789,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// Multi-thread score all the result
 			final int nThreads = getThreads(scoreResults.length);
-			final BlockingQueue<ParameterScoreJob> jobs = new ArrayBlockingQueue<ParameterScoreJob>(nThreads * 2);
-			final List<ParameterScoreWorker> workers = new LinkedList<ParameterScoreWorker>();
-			final List<Thread> threads = new LinkedList<Thread>();
+			final BlockingQueue<ParameterScoreJob> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+			final List<ParameterScoreWorker> workers = new LinkedList<>();
+			final List<Thread> threads = new LinkedList<>();
 			for (int i = 0; i < nThreads; i++)
 			{
 				final ParameterScoreWorker worker = new ParameterScoreWorker(jobs, scoreResults, createTextResult);
@@ -6916,7 +6916,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
 					ConsecutiveFailCounter.create(failCount), true);
 
-			//MultiPathFilter.resetValidationFlag(ga_resultsListToScore);			
+			//MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
 
 			//ga_resultsListToScore = ga_resultsList;
 
@@ -6965,7 +6965,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
 
-		// Show the result if it achieves the criteria limit 
+		// Show the result if it achieves the criteria limit
 		final String text = (createTextResult && criteria >= minCriteria) ? createResult(filter, r).toString() : null;
 
 		return new FilterScoreResult(score, criteria, filter, text);
@@ -7018,7 +7018,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
 	 */
 	@Override
@@ -7031,7 +7031,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private ArrayList<Filter> populationToFilters(List<? extends Chromosome<FilterScore>> individuals)
 	{
-		ArrayList<Filter> filters = new ArrayList<Filter>(individuals.size());
+		ArrayList<Filter> filters = new ArrayList<>(individuals.size());
 		for (Chromosome<FilterScore> c : individuals)
 			filters.add((DirectFilter) c);
 		return filters;
@@ -7045,7 +7045,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private List<Filter> searchSpaceToFilters(DirectFilter f, double[][] searchSpace)
 	{
 		final int size = ((searchSpace == null) ? 0 : searchSpace.length) + ((f == null) ? 0 : 1);
-		ArrayList<Filter> filters = new ArrayList<Filter>(size);
+		ArrayList<Filter> filters = new ArrayList<>(size);
 		if (f != null)
 			filters.add(f);
 		if (searchSpace != null)
@@ -7056,7 +7056,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.FitnessFunction#fitness(gdsc.smlm.ga.Chromosome)
 	 */
 	@Override
@@ -7078,7 +7078,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.FitnessFunction#shutdown()
 	 */
 	@Override
@@ -7182,7 +7182,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			add(text, ga_iteration);
 			gaWindow.append(text.toString());
 
-			return new SearchResult<FilterScore>(parameters, max);
+			return new SearchResult<>(parameters, max);
 		}
 
 		@Override
@@ -7217,7 +7217,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				{
 					max = result;
 				}
-				scores[index] = new SearchResult<FilterScore>(points[index], result);
+				scores[index] = new SearchResult<>(points[index], result);
 			}
 
 			if (showResultsTable)
@@ -7305,7 +7305,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		add(text, ga_iteration);
 		gaWindow.append(text.toString());
 
-		return new SearchResult<FilterScore>(filter.getParameters(), max);
+		return new SearchResult<>(filter.getParameters(), max);
 	}
 
 	@Override
@@ -7331,7 +7331,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				max = result;
 			}
-			scores[index] = new SearchResult<FilterScore>(result.r.filter.getParameters(), result);
+			scores[index] = new SearchResult<>(result.r.filter.getParameters(), result);
 		}
 
 		es_optimum = max;
@@ -7350,7 +7350,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.search.FullScoreFunction#cut(gdsc.smlm.search.SearchResult[], int)
 	 */
 	@Override
@@ -7408,7 +7408,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#progress(double)
 	 */
 	@Override
@@ -7432,7 +7432,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#progress(long, long)
 	 */
 	@Override
@@ -7443,29 +7443,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#incrementProgress(double)
 	 */
 	@Override
 	public void incrementProgress(double fraction)
 	{
-		// Ignore		
+		// Ignore
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#log(java.lang.String, java.lang.Object[])
 	 */
 	@Override
 	public void log(String format, Object... args)
 	{
-		// Ignore		
+		// Ignore
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#status(java.lang.String, java.lang.Object[])
 	 */
 	@Override
@@ -7476,19 +7476,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#isEnded()
 	 */
 	@Override
 	public boolean isEnded()
 	{
-		// Ignore		
+		// Ignore
 		return false;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#isProgress()
 	 */
 	@Override
@@ -7499,7 +7499,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#isLogging()
 	 */
 	@Override
@@ -7510,7 +7510,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.core.logging.TrackProgress#isStatus()
 	 */
 	@Override
@@ -7599,7 +7599,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Note:
 		// We leave the simple filter settings alone. These may be enabled as well, e.g. by the BenchmarkSpotFit plugin
 
-		// We could set the fail count range dynamically using a window around the best filter 
+		// We could set the fail count range dynamically using a window around the best filter
 
 		config.setFailuresLimit(best.failCount);
 
@@ -7863,8 +7863,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (BenchmarkSpotFilter.lastAnalysisBorder == null || BenchmarkSpotFilter.lastAnalysisBorder.x == 0)
 			return results;
 		// Just implement a hard border
-		// Note: This is mainly relevant when loading in simulated ground truth data. 
-		// The simulations performed by Create Data already use a border when doing a 
+		// Note: This is mainly relevant when loading in simulated ground truth data.
+		// The simulations performed by Create Data already use a border when doing a
 		// random distribution.
 		final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
 		final float border = lastAnalysisBorder.x;

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -42,8 +42,8 @@ import gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class SolverSpeedTest
 {
-	private static ArrayList<float[][]> Adata = new ArrayList<float[][]>();
-	private static ArrayList<float[]> Bdata = new ArrayList<float[]>();
+	private static ArrayList<float[][]> Adata = new ArrayList<>();
+	private static ArrayList<float[]> Bdata = new ArrayList<>();
 	private static RandomGenerator rand = TestSettings.getRandomGenerator();
 
 	private static synchronized void ensureData(int size)
@@ -492,7 +492,7 @@ public class SolverSpeedTest
 	private static ArrayList<float[][]> copyAfloat(ArrayList<float[][]> a, int iter)
 	{
 		iter = FastMath.min(a.size(), iter);
-		ArrayList<float[][]> a2 = new ArrayList<float[][]>(iter);
+		ArrayList<float[][]> a2 = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
 			a2.add(copyfloat(a.get(i)));
 		return a2;
@@ -510,7 +510,7 @@ public class SolverSpeedTest
 	private static ArrayList<float[]> copyBfloat(ArrayList<float[]> b, int iter)
 	{
 		iter = FastMath.min(b.size(), iter);
-		ArrayList<float[]> b2 = new ArrayList<float[]>(iter);
+		ArrayList<float[]> b2 = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
 			b2.add(Arrays.copyOf(b.get(i), b.get(i).length));
 		return b2;
@@ -519,7 +519,7 @@ public class SolverSpeedTest
 	private static ArrayList<double[][]> copyAdouble(ArrayList<float[][]> a, int iter)
 	{
 		iter = FastMath.min(a.size(), iter);
-		ArrayList<double[][]> a2 = new ArrayList<double[][]>(iter);
+		ArrayList<double[][]> a2 = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
 			a2.add(copydouble(a.get(i)));
 		return a2;
@@ -528,7 +528,7 @@ public class SolverSpeedTest
 	private static ArrayList<double[]> copyA2double(ArrayList<float[][]> a, int iter)
 	{
 		iter = FastMath.min(a.size(), iter);
-		ArrayList<double[]> a2 = new ArrayList<double[]>(iter);
+		ArrayList<double[]> a2 = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
 			a2.add(new DenseMatrix64F(copydouble(a.get(i))).data);
 		return a2;
@@ -546,7 +546,7 @@ public class SolverSpeedTest
 	private static ArrayList<double[]> copyBdouble(ArrayList<float[]> b, int iter)
 	{
 		iter = FastMath.min(b.size(), iter);
-		ArrayList<double[]> b2 = new ArrayList<double[]>(iter);
+		ArrayList<double[]> b2 = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
 			b2.add(copydouble(b.get(i)));
 		return b2;

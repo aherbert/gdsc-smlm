@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -38,7 +38,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	/**
 	 * Create a new instance using the full set of parameters for the function and the number of points the function
 	 * evaluates. The parameters that are not within the function gradient indices array will be fixed.
-	 * 
+	 *
 	 * @param fun
 	 *            The function
 	 * @param a
@@ -60,7 +60,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	/**
 	 * Set the predictor coefficients for the function that are not fixed (i.e. those corresponding to the gradient
 	 * indices in the wrapped function). The fixed coefficients are set in the constructor.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NonLinearFunction#initialise(double[])
 	 */
 	@Override
@@ -74,7 +74,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
 	 */
 	@Override
@@ -91,7 +91,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
 	 */
 	@Override
@@ -102,7 +102,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int)
 	 */
 	@Override
@@ -113,7 +113,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])
 	 */
 	@Override
@@ -124,7 +124,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
 	 */
 	@Override
@@ -135,7 +135,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
 	 */
 	@Override
@@ -146,7 +146,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
 	@Override
@@ -164,7 +164,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
 	 */
 	@Override
@@ -187,7 +187,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
 	 */
 	@Override
@@ -198,7 +198,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
 	 */
 	@Override
@@ -217,6 +217,6 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 			jacobian[i] = dyda;
 		}
 
-		return new Pair<double[], double[][]>(values, jacobian);
+		return new Pair<>(values, jacobian);
 	}
 }

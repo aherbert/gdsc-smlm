@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -95,7 +95,7 @@ public class FastMLEGradient2ProcedureTest
 	public void gradientProcedureIsNotSlowerThanGradientCalculator()
 	{
 		// Note: The procedure does not have a lot of work within loops. It is only a single loop
-		// so unrolling does not produce performance gains. The JVM can optimise this. 
+		// so unrolling does not produce performance gains. The JVM can optimise this.
 
 		gradientProcedureIsNotSlowerThanGradientCalculator(4);
 		gradientProcedureIsNotSlowerThanGradientCalculator(5);
@@ -109,8 +109,8 @@ public class FastMLEGradient2ProcedureTest
 		int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -268,8 +268,8 @@ public class FastMLEGradient2ProcedureTest
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -338,8 +338,8 @@ public class FastMLEGradient2ProcedureTest
 		int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -387,8 +387,8 @@ public class FastMLEGradient2ProcedureTest
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList);
 
@@ -475,8 +475,8 @@ public class FastMLEGradient2ProcedureTest
 		int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList, true);
 
@@ -516,7 +516,7 @@ public class FastMLEGradient2ProcedureTest
 
 				double gradient1 = (llh - lll) / (2 * d);
 				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
-				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
+				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d,
 				//		gradient1, d1[j], gradient2, d2[j]);
 				failCounter.run(j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
@@ -650,7 +650,7 @@ public class FastMLEGradient2ProcedureTest
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<double[]>(paramsList.size());
+		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			params2List.add(copydouble(paramsList.get(i)));

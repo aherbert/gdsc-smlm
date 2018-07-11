@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -204,7 +204,7 @@ public class SCMOSLikelihoodWrapperTest
 		}
 		else if (!f1.evaluatesSD1())
 		{
-			// No evaluation of second width needs only variation in width 0 so truncate 
+			// No evaluation of second width needs only variation in width 0 so truncate
 			testw1 = Arrays.copyOf(testw1, 2);
 			noSecondWidth = true;
 		}
@@ -274,7 +274,7 @@ public class SCMOSLikelihoodWrapperTest
 
 									ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
 
-									// Numerically solve gradient. 
+									// Numerically solve gradient.
 									// Calculate the step size h to be an exact numerical representation
 									final double xx = a[targetParameter];
 
@@ -337,7 +337,7 @@ public class SCMOSLikelihoodWrapperTest
 	@Test
 	public void fitEllipticalComputesGradient()
 	{
-		// The elliptical function gradient evaluation is worse 
+		// The elliptical function gradient evaluation is worse
 		DoubleEquality tmp = eq;
 		eq = eqPerDatum;
 		functionComputesGradient(GaussianFunctionFactory.FIT_ELLIPTICAL);
@@ -365,7 +365,7 @@ public class SCMOSLikelihoodWrapperTest
 	@Test
 	public void fitNBEllipticalComputesGradient()
 	{
-		// The elliptical function gradient evaluation is worse 
+		// The elliptical function gradient evaluation is worse
 		DoubleEquality tmp = eq;
 		eq = eqPerDatum;
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
@@ -407,7 +407,7 @@ public class SCMOSLikelihoodWrapperTest
 		}
 		else if (!f1.evaluatesSD1())
 		{
-			// No evaluation of second width needs only variation in width 0 so truncate 
+			// No evaluation of second width needs only variation in width 0 so truncate
 			testw1 = Arrays.copyOf(testw1, 2);
 			noSecondWidth = true;
 		}
@@ -478,7 +478,7 @@ public class SCMOSLikelihoodWrapperTest
 
 									ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
 
-									// Numerically solve gradient. 
+									// Numerically solve gradient.
 									// Calculate the step size h to be an exact numerical representation
 									final double xx = a[targetParameter];
 
@@ -790,22 +790,22 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			@Override
 			public double eval(int x) {	return a[0] * (x-n2); }
-		});		
+		});
 		canComputePValue(new BaseNonLinearFunction("Quadratic")
 		{
 			@Override
 			public double eval(int x) {	return a[0] * (x-n2) * (x-n2); }
-		});		
+		});
 		canComputePValue(new BaseNonLinearFunction("Linear+C")
 		{
 			@Override
 			public double eval(int x) {	return 10 * a[0] + (x-n2); }
-		});		
+		});
 		canComputePValue(new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
 			public double eval(int x) {	return 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
-		});		
+		});
 		//@formatter:on
 	}
 
@@ -864,7 +864,7 @@ public class SCMOSLikelihoodWrapperTest
 			TestSettings.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
 					product.round(new MathContext(4)).toString(), q);
 
-			// Only value if the product could be computed. Low ratios cause it to becomes 
+			// Only value if the product could be computed. Low ratios cause it to becomes
 			// too small to store in a double.
 			if (product.doubleValue() > 0)
 				TestAssert.assertEqualsRelative("Log-likelihood", llr, llr2, 1e-10);

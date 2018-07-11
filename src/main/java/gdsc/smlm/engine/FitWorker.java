@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -162,9 +162,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	// Contains the index in the list of maxima for any neighbours
 	private int candidateNeighbourCount = 0;
 	private Candidate[] candidateNeighbours = null;
-	// Contains the index in the list of fitted results for any neighbours 
+	// Contains the index in the list of fitted results for any neighbours
 	private int fittedNeighbourCount = 0;
-	// The fitted neighbours use the same parameters and result 
+	// The fitted neighbours use the same parameters and result
 	// as output from fitting the function. They should be converted to PeakResults
 	// at the end of fitting. This allows using different representations of the PSF.
 	private Candidate[] fittedNeighbours = null;
@@ -335,7 +335,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// This is not very close so make sure the closest estimate is stored
 				return (this.d2 > d2);
 			}
-			// If it is close enough then we use to fit precision.			
+			// If it is close enough then we use to fit precision.
 			if (this.precision > precision)
 				return true;
 			return false;
@@ -462,7 +462,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			noise = (float) fitConfig.getNoise();
 		}
 
-		// Disable the use of the direct filter within the FitConfiguration validate method. 
+		// Disable the use of the direct filter within the FitConfiguration validate method.
 		// This allows validate() to be used for basic filtering of all fit results (e.g. using the fit region bounds).
 		// The validation of each result will be performed by the FitConfiguration implementation
 		// of the IDirectFilter interface. This may involve the DirectFilter object.
@@ -490,7 +490,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/**
 	 * Set the parameters for smoothing the image, searching for maxima and fitting maxima. This should be called before
 	 * the {@link #run()} method to configure the fitting.
-	 * 
+	 *
 	 * @param spotFilter
 	 *            The spot filter for identifying fitting candidates
 	 * @param fitting
@@ -512,7 +512,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * <p>
 	 * WARNING: The FitWorker fits a sub-region of the data for each maxima. It then updates the FitResult parameters
 	 * with an offset reflecting the position. The initialParameters are not updated with this offset unless configured.
-	 * 
+	 *
 	 * @param job
 	 *            The fit job
 	 */
@@ -537,7 +537,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		borderLimitX = width - border;
 		borderLimitY = height - border;
 		data = job.data;
-		dataEstimator = null; // This is tied to the input data 
+		dataEstimator = null; // This is tied to the input data
 
 		// 06-Jun-2017
 		// The data model was changed to store the signal in photons.
@@ -547,7 +547,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// - the legacy MLE solvers which model camera amplification
 		// - the basic LVM solver without a camera calibration
 
-		// Note: Assume that the camera model has been correctly initialised to be 
+		// Note: Assume that the camera model has been correctly initialised to be
 		// relative to the global origin.
 		if (isFitCameraCounts)
 		{
@@ -650,7 +650,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Perform the Gaussian fit
 
 			// The SpotFitter is used to create a dynamic MultiPathFitResult object.
-			// This is then passed to a multi-path filter. Thus the same fitting decision process 
+			// This is then passed to a multi-path filter. Thus the same fitting decision process
 			// is used when benchmarking and when running on actual data.
 
 			// Note: The SpotFitter labels each PreprocessedFitResult using the offset in the FitResult object.
@@ -696,8 +696,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				filter = this.filter;
 			}
 
-			// If we are benchmarking then do not generate results dynamically since we will store all 
-			// results in the fit job. 
+			// If we are benchmarking then do not generate results dynamically since we will store all
+			// results in the fit job.
 			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, ie2, !benchmarking);
 			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
 
@@ -844,7 +844,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		if (logger != null)
 			logger.info("%d: Slice %d: %d candidates", workerId, slice, maxCandidate);
 
-		sliceResults = new TurboList<PeakResult>(maxCandidate);
+		sliceResults = new TurboList<>(maxCandidate);
 		if (requireIndices)
 		{
 			job.setResults(sliceResults);
@@ -861,7 +861,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
 		{
-			// Use a per-pixel variance for weighting. 
+			// Use a per-pixel variance for weighting.
 			// Only get this if the bounds have changed to enable efficient caching.
 			if (newBounds)
 			{
@@ -885,12 +885,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private void initialiseFitting()
 	{
-		// Note that a ParameterisedFitJob can pass in a maxCandidate and the list is longer 
+		// Note that a ParameterisedFitJob can pass in a maxCandidate and the list is longer
 		// than candidates.getSize(). We must allocate for the maximum candidate Id (even if not processed).
 		final int length = candidates.getLength();
 
 		candidateNeighbours = allocateArray(candidateNeighbours, length);
-		// Allocate enough room for all fits to be doublets 
+		// Allocate enough room for all fits to be doublets
 		fittedNeighbours = allocateArray(fittedNeighbours, length * 2);
 
 		clearEstimates(length);
@@ -911,7 +911,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	// Used to add fitted results to the grid for the current fit position.
-	// This prevents filtering duplicates within the current fit results, 
+	// This prevents filtering duplicates within the current fit results,
 	// only with all that has been fit before.
 	private Candidate[] queue = new Candidate[5];
 	private int queueSize = 0;
@@ -1129,8 +1129,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Update the initial params since we may have used an estimate
 			// This will ensure that the width factor is computed correctly.
 
-			// Q. Should this be ignored for existing results? They have already passed validation. 
-			// So we do not have to be as strict on their width and could just use the drift from 
+			// Q. Should this be ignored for existing results? They have already passed validation.
+			// So we do not have to be as strict on their width and could just use the drift from
 			// the the initial estimate.
 			// For now do a full validation since multi-fit results are only accepted if existing
 			// results are still valid.
@@ -1233,8 +1233,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private class CandidateSpotFitter
 	{
 		// TODO: When using an astigmatism z-model it is possible to fit two spots that are colocated.
-		// So the colocation checks to existing peaks should be refined to allow both spots if they 
-		// have suitably different z-depths (i.e. X/Y widths). 
+		// So the colocation checks to existing peaks should be refined to allow both spots if they
+		// have suitably different z-depths (i.e. X/Y widths).
 
 		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
@@ -1249,8 +1249,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		int neighbours;
 		double singleBackground = Double.NaN, multiBackground = Double.NaN;
 
-		// Flag each neighbour peak that is pre-computed for the multi-fit. 
-		// These are fitted peaks outside the fit region. 
+		// Flag each neighbour peak that is pre-computed for the multi-fit.
+		// These are fitted peaks outside the fit region.
 		private boolean[] precomputed = null;
 		private int precomputedFittedNeighbourCount = -1;
 
@@ -1292,7 +1292,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			height = regionBounds.height;
 
 			fitConfig.setFitRegion(width, height, 0.5);
-			// The variance is always needed in each fit of the same data 
+			// The variance is always needed in each fit of the same data
 			fitConfig.setObservationWeights(var_g2);
 
 			// Analyse neighbours and include them in the fit if they are within a set height of this peak.
@@ -1385,9 +1385,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					precomputed = new boolean[fittedNeighbourCount];
 
-					// The fitted result will be relative to (0,0) in the fit data and already 
-					// have an offset applied so that 0.5 is the centre of a pixel. (Note: the 
-					// parameters were created from a PreprocessedPeakResult generated by the 
+					// The fitted result will be relative to (0,0) in the fit data and already
+					// have an offset applied so that 0.5 is the centre of a pixel. (Note: the
+					// parameters were created from a PreprocessedPeakResult generated by the
 					// PreprocessedPeakResults factory.)
 					// We can test the coordinates exactly against the fit frame.
 					final float xmin = regionBounds.x;
@@ -1421,7 +1421,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				final double xOffset = regionBounds.x + 0.5;
 				final double yOffset = regionBounds.y + 0.5;
 
-				// Pre-compute the already fitted peaks. 
+				// Pre-compute the already fitted peaks.
 
 				precomputedFunctionParamsMulti = new double[1 + parametersPerPeak * precomputedFittedNeighbourCount];
 				for (int i = 0, j = 0; i < fittedNeighbourCount; i++)
@@ -1452,7 +1452,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			computedMulti = true;
 
-			// Do not do a multi-fit if the configuration is not set to include neighbours 
+			// Do not do a multi-fit if the configuration is not set to include neighbours
 			if (neighbours == 0 || !config.isIncludeNeighbours())
 				return null;
 
@@ -1464,8 +1464,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// something is there. This can be used as an initial estimate for one of the
 			// peaks in the multiple fit (i.e. the closest one)
 			//
-			// If the fits fails then we can guess that the region has no good peaks and 
-			// it is not worth doing a multiple fit.			
+			// If the fits fails then we can guess that the region has no good peaks and
+			// it is not worth doing a multiple fit.
 			// -=-=-=-
 
 			// Flag each peak that is precomputed
@@ -1505,11 +1505,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			double[] params = new double[1 + npeaks * parametersPerPeak];
 
 			// Estimate background.
-			// Use the fitted peaks within the region or fall-back to the estimate for 
+			// Use the fitted peaks within the region or fall-back to the estimate for
 			// a single peak (i.e. low point of the region).
 			params[Gaussian2DFunction.BACKGROUND] = (backgroundCount == 0) ? getFittingBackgroundSingle()
 					: background / backgroundCount;
-			// Store for debugging 
+			// Store for debugging
 			background = params[Gaussian2DFunction.BACKGROUND];
 
 			// Support bounds on the known fitted peaks
@@ -1521,8 +1521,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				upper[i] = Double.POSITIVE_INFINITY;
 			}
 
-			// Note: If difference-of-smoothing is performed the heights have background subtracted so 
-			// it must be added back 
+			// Note: If difference-of-smoothing is performed the heights have background subtracted so
+			// it must be added back
 
 			final boolean[] amplitudeEstimate = new boolean[npeaks];
 
@@ -1579,11 +1579,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 			}
 
-			// XXX Debugging the bad parameters 
+			// XXX Debugging the bad parameters
 			//double bbefore = params[Gaussian2DFunction.BACKGROUND];
 			//double[] before = params.clone();
 
-			// In the case of a bad background estimate (e.g. uneven illumination) the peaks may 
+			// In the case of a bad background estimate (e.g. uneven illumination) the peaks may
 			// be below the background.
 			// Check the heights are positive.
 
@@ -1641,8 +1641,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final boolean smartFilter = fitConfig.isSmartFilter();
 			final boolean disableSimpleFilter = fitConfig.isDisableSimpleFilter();
 			final boolean computeDeviationsFlag = fitConfig.getComputeDeviationsFlag();
-			// Check if the filter requires deviations as we temporarily disable the 
-			// smart filter (so fitConfig.isComputeDeviations() could be false) but the 
+			// Check if the filter requires deviations as we temporarily disable the
+			// smart filter (so fitConfig.isComputeDeviations() could be false) but the
 			// deviations will be required later
 			if (fitConfig.isComputeDeviations())
 				fitConfig.setComputeDeviations(true);
@@ -1751,26 +1751,26 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				//				// Primary candidate
 				//				int offset = 0;
-				//				System.out.printf("[%d] %d MC %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[0], 
-				//						DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6])); 
-				//				
+				//				System.out.printf("[%d] %d MC %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[0],
+				//						DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]),
+				//						DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]),
+				//						DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]),
+				//						DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]),
+				//						DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]),
+				//						DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6]));
+				//
 				//				// Neighbours
 				//				int nn = 1;
 				//				for (int i = 0; i < candidateNeighbourCount; i++)
 				//				{
 				//					offset += Gaussian2DFunction.NUMBER_PER_PEAK;
-				//					System.out.printf("[%d] %d N %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[nn], 
-				//							DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6])); 
+				//					System.out.printf("[%d] %d N %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[nn],
+				//							DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]),
+				//							DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]),
+				//							DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]),
+				//							DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]),
+				//							DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]),
+				//							DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6]));
 				//					nn++;
 				//				}
 				//
@@ -1780,20 +1780,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//					if (subtract[i])
 				//						continue;
 				//					offset += Gaussian2DFunction.NUMBER_PER_PEAK;
-				//					System.out.printf("[%d] %d F %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[nn], 
-				//							DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]), 
-				//							DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]), 
+				//					System.out.printf("[%d] %d F %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[nn],
+				//							DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]),
+				//							DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]),
+				//							DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]),
+				//							DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]),
+				//							DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]),
 				//							DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6]));
 				//					nn++;
 				//				}
 
-				// The primary candidate is not bounded. Check it has not drifted close to 
-				// a neighbour. 
+				// The primary candidate is not bounded. Check it has not drifted close to
+				// a neighbour.
 
-				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at
 				//    fitting a doublet so is ignored.
 				// 4. Check if there is an unfit candidate spot closer than the current candidate.
 				//    This represents drift out to fit another spot that will be fit later.
@@ -1812,7 +1812,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Distance to current candidate fitted as a single
 				final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
 
-				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at
 				//    fitting a doublet so is ignored..
 
 				final CandidateList peakNeighbours = findPeakNeighbours(candidates.get(candidateId));
@@ -1832,7 +1832,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						{
 							// There is another fitted result that is closer.
 							// Note: The fit region is not centred on the other spot so this fit will probably
-							// be worse and is discarded (not compared to the existing fit to get the best one). 
+							// be worse and is discarded (not compared to the existing fit to get the best one).
 
 							mind2 = d2;
 							ii = i;
@@ -1852,7 +1852,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						//System.out.printf("Multi drift to another result: [%d,%d] %d\n", slice, candidateId, otherId);
 						resultType = ResultType.EXISTING;
 
-						// Update the initial parameters to the position of the existing result so 
+						// Update the initial parameters to the position of the existing result so
 						// that drift is correct for filtering
 						initialParams[Gaussian2DFunction.X_POSITION] = peakNeighbours
 								.get(ii).params[Gaussian2DFunction.X_POSITION] - cc.fromFitRegionToGlobalX();
@@ -1903,7 +1903,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							if (otherId > candidateId)
 								resultType = ResultType.CANDIDATE;
 
-							// Update the initial parameters to the position of the candidate so 
+							// Update the initial parameters to the position of the candidate so
 							// that drift is correct for filtering
 							initialParams[Gaussian2DFunction.X_POSITION] = candidates.get(otherId).x - regionBounds.x;
 							initialParams[Gaussian2DFunction.Y_POSITION] = candidates.get(otherId).y - regionBounds.y;
@@ -1986,19 +1986,19 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		private double getLocalBackground(int n, int npeaks, double[] params, final int flags,
 				double[] precomputedFunction)
 		{
-			// Note: This does not include any precomputed peaks. 
+			// Note: This does not include any precomputed peaks.
 			// These will be outside the fit region but may have an effect on peaks near
 			// the edge of the fit region. They are added separately.
 
 			// Note: This computes each function around the target point. This will scale poorly
 			// when the density is high (n(n-1)), e.g. 4 peaks in the fit region = 12 evaluations.
 			// An alternative is to evaluate each peak in the region.
-			// Build the local background using all but the peak of interest summed 
+			// Build the local background using all but the peak of interest summed
 			// from a small region around the peak.
-			// This will scale linearly with the number of peaks.			
+			// This will scale linearly with the number of peaks.
 
 			double[] spotParams = extractSpotParams(params, n);
-			// Do not evaluate over a large region for speed. 
+			// Do not evaluate over a large region for speed.
 			// Use only +/- 1 SD as this is 68% of the Gaussian volume or 5 pixels.
 			int maxx = FastGaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 1, 5);
 			int maxy = FastGaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 1, 5);
@@ -2034,7 +2034,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (precomputedFunction == null)
 				return 0;
 
-			// Find the centre pixel. 
+			// Find the centre pixel.
 			int cx = (int) (params[Gaussian2DFunction.X_POSITION] + 0.5);
 			int cy = (int) (params[Gaussian2DFunction.Y_POSITION] + 0.5);
 
@@ -2065,19 +2065,19 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		//                 = ([local sum] - [peak sum]) / area  (multiple peaks)
 
 		// Noise
-		// -----		
+		// -----
 		// Using the standard deviation around each spot generates a noise
-		// that is far too high. The standard deviation can only be used from 
+		// that is far too high. The standard deviation can only be used from
 		// background regions. This is the global noise estimate and is used
 		// when there is no calibration to convert to photons.
 		//
 		// When a calibration is available then the local background can be used
 		// assuming it is Poisson shot noise. The local background must be converted
 		// to photons and combined with the read noise of the camera in photons.
-		// If an EM-CCD camera the photon shot variance must be doubled 
+		// If an EM-CCD camera the photon shot variance must be doubled
 		// (EM-CCD noise factor of 2).
 		//
-		// Note that the read noise must be in the same units as those used 
+		// Note that the read noise must be in the same units as those used
 		// for fitting so it is then converted back if the fitting is done in counts.
 
 		// The FitConfiguration provides a flag for fitting in camera counts and
@@ -2114,7 +2114,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Add the 0.5 pixel offset to get the centre pixel
 			int x = (int) (spotParams[Gaussian2DFunction.X_POSITION] + 0.5);
 			int y = (int) (spotParams[Gaussian2DFunction.Y_POSITION] + 0.5);
-			// Do not evaluate over a large region for speed. 
+			// Do not evaluate over a large region for speed.
 			// Use only 50% of the Gaussian volume or 3 pixels.
 			int nx = getRange(spotParams[Gaussian2DFunction.X_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
 			int ny = getRange(spotParams[Gaussian2DFunction.Y_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
@@ -2223,7 +2223,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Add the 0.5 pixel offset to get the centre pixel
 			int x = (int) (spotParams[Gaussian2DFunction.X_POSITION] + 0.5);
 			int y = (int) (spotParams[Gaussian2DFunction.Y_POSITION] + 0.5);
-			// Do not evaluate over a large region for speed. 
+			// Do not evaluate over a large region for speed.
 			// Use only 50% of the Gaussian volume or 3 pixels.
 			int nx = getRange(spotParams[Gaussian2DFunction.X_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
 			int ny = getRange(spotParams[Gaussian2DFunction.Y_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
@@ -2327,9 +2327,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Q. Should the parameters be mapped using the z-model. Currently the validatePeak(...)
 			// method of the FitConfiguration handles this dynamically and then the results are
-			// converted to PreProcessedPeakResults which also handles the mapping.			
+			// converted to PreProcessedPeakResults which also handles the mapping.
 
-			// The error is now set by the function solver. Not all function solvers can compute 
+			// The error is now set by the function solver. Not all function solvers can compute
 			// the sum-of-squares so we can no longer update the error to be the independent
 			// of the solver.
 
@@ -2345,7 +2345,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Ensure we have a multi result
 			getResultMulti();
 
-			// Note this assumes that this method will be called after a multi fit and that the 
+			// Note this assumes that this method will be called after a multi fit and that the
 			// residuals were computed.
 			final double[] residuals = residualsMulti;
 			qaMulti = computeQA((residuals == null) ? null : (FitResult) resultMulti.data, regionBounds, residuals);
@@ -2372,13 +2372,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (resultMulti.status != 0)
 				return null;
 
-			// Note this assumes that this method will be called after a multi fit and that the 
+			// Note this assumes that this method will be called after a multi fit and that the
 			// residuals were computed.
 			if (residualsMulti == null)
 				return null;
 
-			// Ideally all multi-results must be valid to proceed with doublet fitting. 
-			// We do not perform validation of the results. So we assume that the results have 
+			// Ideally all multi-results must be valid to proceed with doublet fitting.
+			// We do not perform validation of the results. So we assume that the results have
 			// been checked and are valid and continue.
 
 			final PreprocessedPeakResult[] fitResults = resultMulti.results;
@@ -2388,7 +2388,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final double[] fittedParams = multiFitResult.getParameters();
 			final float background = (float) fittedParams[Gaussian2DFunction.BACKGROUND];
 
-			// Get the neighbours 
+			// Get the neighbours
 			final CandidateList neighbours = findNeighbours(candidates.get(candidateId)).copy();
 
 			// Exclude the fitted candidate neighbours from the candidate neighbours
@@ -2432,7 +2432,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 						// Choose option 3 for simplicity. Note that the original fitted coordinates
 						// should be more accurate as the fit region was centred around the spot. Also
-						// note that due to bounding the fit coordinates (from the multi-fit) of any 
+						// note that due to bounding the fit coordinates (from the multi-fit) of any
 						// existing spot will be limited to a single pixel shift in XY.
 						continue NEXT_RESULT;
 					}
@@ -2455,14 +2455,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				peakNeighbours2.add(new Candidate(x, y, otherId, params, null, 0, 0, 0, true));
 			}
 
-			// Create the precomputed function values. This is the function defined by the 
+			// Create the precomputed function values. This is the function defined by the
 			// fit result apart from the central candidate.
 			int nPeaks = fittedParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 			double[] precomputedFunctionParams = null;
 			double[] precomputedFunctionValues = null;
 			if (nPeaks > 1)
 			{
-				// Remove the actual fitted peak. 
+				// Remove the actual fitted peak.
 				precomputedFunctionParams = extractOtherParams(fittedParams, 0, nPeaks);
 				Gaussian2DFunction func = fitConfig.createGaussianFunction(nPeaks - 1, width, height);
 				precomputedFunctionValues = new StandardValueProcedure().getValues(func, precomputedFunctionParams);
@@ -2490,7 +2490,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			FitResult fitResult = new FitResult(FitStatus.OK, degreesOfFreedom, 0, null, parameters, null, 1,
 					nFittedParameters, null, 0, 0);
 
-			// Evaluate the multi fit as if fitted as a single peak. 
+			// Evaluate the multi fit as if fitted as a single peak.
 			// The resulting function value are used in the doublet fit
 			double singleValue = valueMulti;
 
@@ -2541,8 +2541,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (resultDoubletMulti != null && resultDoubletMulti.status == 0 && resultDoubletMulti.results != null)
 			{
 				// The code below builds a combined result for the multi-fit and the primary candidate
-				// fitted as a doublet. However this means that validation will be repeated on the spots that have 
-				// been validated before. This is a small overhead but allows using the multi-doublet result to 
+				// fitted as a doublet. However this means that validation will be repeated on the spots that have
+				// been validated before. This is a small overhead but allows using the multi-doublet result to
 				// return all the fit results combined.
 
 				// Fitting 2 spots is better than 1 and does not clash with any of the other multi-fit results.
@@ -2615,8 +2615,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				for (int i = 1; i < resultMulti.results.length; i++)
 				{
 					PreprocessedPeakResult r = resultMulti.results[i];
-					// Increment the ID by one since the position in the parameters array is moved to 
-					// accommodate 2 preceding peaks and not 1 
+					// Increment the ID by one since the position in the parameters array is moved to
+					// accommodate 2 preceding peaks and not 1
 					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId() + 1,
 							initialParams, params, paramDevs,
 							//getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
@@ -2704,11 +2704,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Estimate background.
 			// Use the multi-fitting background as this uses the background of fitted neighbours if available.
-			// Use the fitted peaks within the region or fall-back to the estimate for 
+			// Use the fitted peaks within the region or fall-back to the estimate for
 			// a single peak (i.e. low point of the region).
 			params[Gaussian2DFunction.BACKGROUND] = (backgroundCount == 0) ? getFittingBackgroundSingle()
 					: background / backgroundCount;
-			// Store for debugging 
+			// Store for debugging
 			background = params[Gaussian2DFunction.BACKGROUND];
 
 			final boolean[] amplitudeEstimate = new boolean[1];
@@ -2774,7 +2774,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 			}
 
-			// If there were neighbours or we have an estimate 
+			// If there were neighbours or we have an estimate
 			// then use off grid pixels to prevent re-estimate of CoM
 			// (since the CoM estimate will be skewed by the neighbours, or is not needed)
 			if (fittedNeighbourCount != 0 || candidateNeighbourCount != 0 || usingEstimate)
@@ -2793,7 +2793,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					localStats[n] = (fittedNeighbourCount == 0)
 							// If there are no other fitted peaks in the region then compute
-							// using the fitted background 
+							// using the fitted background
 							? getLocalStatistics(params, null)
 							// If there are other fitted peaks in the region then compute the local
 							// background using the mean without the function value
@@ -2835,18 +2835,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Distinguish those we have estimated using the amplitudeEstimate array.
 				// Trivial analysis shows that estimates have a lower relative error than a default initial guess.
 				//				int offset = 0;
-				//				System.out.printf("[%d] %d C %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[0], 
-				//						DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]), 
-				//						DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6])); 
+				//				System.out.printf("[%d] %d C %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[0],
+				//						DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]),
+				//						DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]),
+				//						DoubleEquality.relativeError(initialParams[offset + 3], params[offset + 3]),
+				//						DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]),
+				//						DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]),
+				//						DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6]));
 
-				// The primary candidate is not bounded. Check it has not drifted close to 
-				// a neighbour. 
+				// The primary candidate is not bounded. Check it has not drifted close to
+				// a neighbour.
 
-				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at
 				//    fitting a doublet so is ignored.
 				// 4. Check if there is an unfit candidate spot closer than the current candidate.
 				//    This represents drift out to fit another spot that will be fit later.
@@ -2867,7 +2867,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Distance to current candidate fitted as a single
 				final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
 
-				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at
 				//    fitting a doublet so is ignored..
 
 				final CandidateList peakNeighbours = findPeakNeighbours(candidates.get(candidateId));
@@ -2887,7 +2887,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						{
 							// There is another fitted result that is closer.
 							// Note: The fit region is not centred on the other spot so this fit will probably
-							// be worse and is discarded (not compared to the existing fit to get the best one). 
+							// be worse and is discarded (not compared to the existing fit to get the best one).
 
 							mind2 = d2;
 							ii = i;
@@ -2904,10 +2904,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 									peakNeighbours.get(ii).params[Gaussian2DFunction.X_POSITION],
 									peakNeighbours.get(ii).params[Gaussian2DFunction.Y_POSITION]);
 						}
-						//System.out.printf("Single drift to another result: [%d,%d] %d\n", slice, candidateId, otherId);						
+						//System.out.printf("Single drift to another result: [%d,%d] %d\n", slice, candidateId, otherId);
 						resultType = ResultType.EXISTING;
 
-						// Update the initial parameters to the position of the existing result so 
+						// Update the initial parameters to the position of the existing result so
 						// that drift is correct for filtering
 						initialParams[Gaussian2DFunction.X_POSITION] = peakNeighbours
 								.get(ii).params[Gaussian2DFunction.X_POSITION] - cc.fromFitRegionToGlobalX();
@@ -2958,7 +2958,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							if (otherId > candidateId)
 								resultType = ResultType.CANDIDATE;
 
-							// Update the initial parameters to the position of the candidate so 
+							// Update the initial parameters to the position of the candidate so
 							// that drift is correct for filtering
 							initialParams[Gaussian2DFunction.X_POSITION] = candidates.get(otherId).x - regionBounds.x;
 							initialParams[Gaussian2DFunction.Y_POSITION] = candidates.get(otherId).y - regionBounds.y;
@@ -3017,7 +3017,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//				}
 				//				else if (precomputedFittedNeighbourCount != 0)
 				//				{
-				//					// Add the contribution from the precomputed neighbours 
+				//					// Add the contribution from the precomputed neighbours
 				//					localBackgroundSingle = fitParams[Gaussian2DFunction.BACKGROUND] +
 				//							getBackgroundContribution(getPrecomputedFittedNeighbours(), fitParams);
 				//					//// Debug if this ever adds a significant amount
@@ -3079,7 +3079,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Ensure we have a single result
 			getResultSingle();
 
-			// Note this assumes that this method will be called after a single fit and that the 
+			// Note this assumes that this method will be called after a single fit and that the
 			// residuals were computed.
 			final double[] residuals = residualsSingle;
 			qaSingle = computeQA((residuals == null) ? null : (FitResult) resultSingle.data, regionBounds, residuals);
@@ -3106,7 +3106,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			resultDoubletSingle = fitAsDoublet((FitResult) resultSingle.data, region, precomputedFittedNeighboursSingle,
 					residualsThreshold, neighbours, peakNeighbours, qaSingle, valueSingle, localBackgroundSingle);
 
-			// Check if the deviations require updating. 
+			// Check if the deviations require updating.
 			// This will be the case if we have stored function parameters for the single fit.
 			if (resultDoubletSingle != null && resultDoubletSingle.status == 0 && resultDoubletSingle.results != null &&
 					functionParamsSingle != null)
@@ -3190,7 +3190,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final int cx = (int) Math.round(params[Gaussian2DFunction.X_POSITION]);
 			final int cy = (int) Math.round(params[Gaussian2DFunction.Y_POSITION]);
 
-			// Q. The primary candidate may have drifted. Should we check it is reasonably centred in the region?. 
+			// Q. The primary candidate may have drifted. Should we check it is reasonably centred in the region?.
 
 			QuadrantAnalysis qa = new QuadrantAnalysis();
 			qa.quadrantAnalysis(residuals, width, height, cx, cy);
@@ -3250,7 +3250,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Note: Quadrant analysis sets the positions using 0.5,0.5 as the centre of the pixel.
 			// The fitting does not, so subtract 0.5.
-			// Note that we set position and signal but leave the z-position and widths to their 
+			// Note that we set position and signal but leave the z-position and widths to their
 			// standard values since this is 'new' fit.
 
 			doubletParams[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
@@ -3265,12 +3265,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// If validation is on in the fit configuration:
 			// - Disable checking of position movement since we guessed the 2-peak location.
-			// - Disable checking within the fit region as we do that per peak 
+			// - Disable checking within the fit region as we do that per peak
 			//   (which is better than failing if either peak is outside the region)
 			// - Increase the iterations level then reset afterwards.
 			// Note: If simple validation is using the precision from the fit deviations
 			// then it will be a under-estimate. This is good enough for initial filtering
-			// and the deviations for the entire function parameters will be re-computed 
+			// and the deviations for the entire function parameters will be re-computed
 			// for the pre-processed peak results.
 
 			// TODO - Should width and signal validation be disabled too?
@@ -3321,13 +3321,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			if (newFitResult.getStatus() == FitStatus.OK)
 			{
-				// Adjusted Coefficient of determination is not good for non-linear models. Use the 
+				// Adjusted Coefficient of determination is not good for non-linear models. Use the
 				// Bayesian Information Criterion (BIC):
 
 				// TODO - Make the selection criteria for Doublets configurable:
 				// MLE - AIC, BIC, LLR
 				// WLSE - AIC, BIC, q-values of each chi-square
-				// LSE - Adjusted coefficient of determination 
+				// LSE - Adjusted coefficient of determination
 
 				// Note: Numerical recipes pp 669 uses 0.1 for q-value for weighted least squares fitting
 				// This is 0.9 for p!
@@ -3343,9 +3343,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				)
 				{
 					// ------------
-					// TODO: Check this is still true as we may need to change the improvement criterion. 
+					// TODO: Check this is still true as we may need to change the improvement criterion.
 					// Note: the residuals are no longer computed for all solvers.
-					// The MLE is only good if we are modelling the camera noise. 
+					// The MLE is only good if we are modelling the camera noise.
 					// The MLE put out by the Poisson model is not better than using the IC from the fit residuals.
 					// ------------
 					ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
@@ -3414,9 +3414,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Validation of fit. For each spot:
 				// 1. Check the spot is inside the region
 				// 2. Check the distance of each new centre from the original centre.
-				//    If the shift is too far (e.g. half the distance to the edge), the centre 
-				//    must be in the correct quadrant. 
-				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				//    If the shift is too far (e.g. half the distance to the edge), the centre
+				//    must be in the correct quadrant.
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at
 				//    fitting a doublet so is ignored.
 				// 4. Check if there is an unfit candidate spot closer than the current candidate.
 				//    This represents drift out to fit another spot that will be fit later.
@@ -3444,7 +3444,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// 1. Check the spot is inside the region
 
 					// Note that during processing the data is assumed to refer to the top-left
-					// corner of the pixel. The coordinates should be represented in the middle of the pixel 
+					// corner of the pixel. The coordinates should be represented in the middle of the pixel
 					// so add a 0.5 shift to the coordinates.
 					final double xpos = fitParams[Gaussian2DFunction.X_POSITION + offset] + 0.5;
 					final double ypos = fitParams[Gaussian2DFunction.Y_POSITION + offset] + 0.5;
@@ -3458,7 +3458,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					}
 
 					// 2. Check the distance of each new centre from the original centre.
-					//    If the shift is too far (e.g. half the distance to the edge), the centre 
+					//    If the shift is too far (e.g. half the distance to the edge), the centre
 					//    must be in the correct quadrant.
 
 					double xShift = fitParams[Gaussian2DFunction.X_POSITION + offset] -
@@ -3469,7 +3469,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					{
 						// Allow large shifts if they are along the vector
 						final double a = QuadrantAnalysis.getAngle(qa.vector, new double[] { xShift, yShift });
-						// Check the domain is OK (the angle is in radians). 
+						// Check the domain is OK (the angle is in radians).
 						// Allow up to a 45 degree difference to show the shift is along the vector
 						if (a > 0.785398 && a < 2.356194)
 						{
@@ -3486,14 +3486,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Spots from the doublet must be closer to the single fit than any other spots.
 					// This is true for candidates we have yet to fit or already fitted candidates.
 
-					// Distance to current candidate 
+					// Distance to current candidate
 					xShift = fitParams[Gaussian2DFunction.X_POSITION + offset] -
 							initialParams[Gaussian2DFunction.X_POSITION];
 					yShift = fitParams[Gaussian2DFunction.Y_POSITION + offset] -
 							initialParams[Gaussian2DFunction.Y_POSITION];
 					final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
 
-					// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+					// 3. Check we are not closer to a fitted spot. This has already had a chance at
 					//    fitting a doublet so is ignored..
 
 					if (peakNeighbours.getSize() != 0)
@@ -3520,10 +3520,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 								// There is another fitted result that is closer.
 								// Note: The fit region is not centred on the other spot so this fit will probably
 								// be worse and is discarded (not compared to the existing fit to get the best one).
-								// Q. Should this be returned for validation? 
+								// Q. Should this be returned for validation?
 								// A. Currently the MultiPathFilter accepts any new result and all existing results must pass.
 								// So we could return this as an existing result which would make validation tougher.
-								// However the existing result should have been subtracted from the input data so it will not 
+								// However the existing result should have been subtracted from the input data so it will not
 								// be a full peak making validation incorrect. So at the moment we ignore this result.
 								// Note that any new result will still have to be valid.
 								continue NEXT_PEAK;
@@ -3567,7 +3567,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							// There is another candidate to be fit later that is closer.
 							// This may be used as an estimate so we return it as such (i.e we do not ignore it)
 
-							// Update the initial parameters to the position of the candidate so 
+							// Update the initial parameters to the position of the candidate so
 							// that drift is correct for filtering
 							initialParams[Gaussian2DFunction.X_POSITION + offset] = candidates.get(otherId).x -
 									regionBounds.x;
@@ -3668,7 +3668,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				precision = peak.getLocationVarianceCRLB();
 				break;
 			default:
-				// Get a standard precision, even if inaccurate it is good enough for 
+				// Get a standard precision, even if inaccurate it is good enough for
 				// differentiating estimates
 				precision = peak.getLocationVariance();
 				//precision = 0;
@@ -3693,7 +3693,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		// dx and dy should be <=1 pixel when a candidate is being fit since we use bounds.
 		// They can be larger if we drifted close to another candidate (e.g. during doublet fitting)
-		// or if this is the result of fitting the current candidate (which is not bounded).		
+		// or if this is the result of fitting the current candidate (which is not bounded).
 		if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
 		{
 			//if (dynamicMultiPathFitResult.candidateId != i)
@@ -3836,7 +3836,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		if (allFittedNeighbours == null)
 		{
-			// Using the neighbour grid 
+			// Using the neighbour grid
 			allFittedNeighbours = gridManager.getFittedNeighbours(candidate.x, candidate.y);
 		}
 		return allFittedNeighbours;
@@ -3881,7 +3881,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		candidateNeighbourCount = 0;
 
 		// Using the neighbour grid.
-		// Note this will also include all higher intensity spots that failed to be fit. 
+		// Note this will also include all higher intensity spots that failed to be fit.
 		// These may still have estimates.
 		CandidateList neighbours = findNeighbours(spot);
 		for (int i = 0; i < neighbours.getSize(); i++)
@@ -3911,7 +3911,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		//				throw new RuntimeException("invalid grid neighbours");
 		//		}
 
-		// Check all existing maxima. 
+		// Check all existing maxima.
 
 		fittedNeighbourCount = 0;
 		if (fittedBackground.getN() != 0)
@@ -3933,7 +3933,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//	fittedNeighbourIndices[fittedNeighbourCount++] = i;
 			//}
 
-			// Note: A smarter filter would be to compute the bounding rectangle of each fitted result and see if it 
+			// Note: A smarter filter would be to compute the bounding rectangle of each fitted result and see if it
 			// overlaps the target region. This would involve overlap analysis
 			final double x0min = regionBounds.x;
 			final double y0min = regionBounds.y;
@@ -3960,7 +3960,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/**
 	 * Copied from java.awt.geom.Rectangle2D and modified assuming width and height is non-zero
-	 * 
+	 *
 	 * @param r1
 	 * @param r2
 	 * @return true if they intersect
@@ -4002,7 +4002,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/**
 	 * Get an estimate of the background level using the median of the image.
-	 * 
+	 *
 	 * @return The background level
 	 */
 	private float estimateBackground()
@@ -4015,7 +4015,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/**
 	 * Get an estimate of the background level using the fitted peaks. If no fits available then estimate background
 	 * using mean of image.
-	 * 
+	 *
 	 * @param peakResults
 	 * @param width
 	 * @param height
@@ -4069,7 +4069,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	public static float estimateNoise(float[] data, int width, int height, NoiseEstimatorMethod method)
 	{
-		// Do the same logic as the non-static method 
+		// Do the same logic as the non-static method
 		DataEstimator dataEstimator = newDataEstimator(data, width, height);
 		return estimateNoise(dataEstimator, FitProtosHelper.convertNoiseEstimatorMethod(method));
 	}
@@ -4078,7 +4078,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		// No methods using a background region are good so we just use the global noise estimate
 		//if (dataEstimator.isBackgroundRegion())
-		//	return dataEstimator.getNoise();		
+		//	return dataEstimator.getNoise();
 		return dataEstimator.getNoise(method);
 	}
 
@@ -4103,7 +4103,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * Identify failed peaks that seem quite high, e.g. if above the background + 3X the noise.
 	 * <p>
 	 * Updates the input failed array to contain the candidates.
-	 * 
+	 *
 	 * @param failed
 	 * @param failedCount
 	 * @param background
@@ -4128,7 +4128,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
@@ -4191,7 +4191,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/**
 	 * Set to true to use the average fitted background as the background estimate for new fits. The default is to use
 	 * the image average as the background for all fits.
-	 * 
+	 *
 	 * @param Use
 	 *            the average fitted background as the background estimate for new fits
 	 */
@@ -4213,7 +4213,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/**
 	 * Set the counter. This can be used to count the type of fitting process that was performed.
-	 * 
+	 *
 	 * @param counter
 	 *            The counter
 	 */
@@ -4230,7 +4230,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
 	 */
 	@Override
@@ -4241,15 +4241,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
 	 */
 	@Override
 	public int getNumberOfResults()
 	{
-		// This is the total number of results we produce. 
+		// This is the total number of results we produce.
 		// Note that although we have may a maximum candidate less than the length
-		// of the candidate list, we continue processing candidates if we have an 
+		// of the candidate list, we continue processing candidates if we have an
 		// estimate. This is possibly a candidate that was a good fit but was not labelled
 		// as a new result because of drift to another yet-to-be-processed candidate.
 		return candidates.getLength();
@@ -4322,7 +4322,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Set up per-pixel noise
 				if (cameraModel.isPerPixelModel())
 				{
-					// Note: The region bounds are relative to the data bounds origin so 
+					// Note: The region bounds are relative to the data bounds origin so
 					// convert them to absolute
 					Rectangle bounds = new Rectangle(regionBounds);
 					bounds.x += cc.dataBounds.x;
@@ -4345,9 +4345,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				final float offsetx = cc.dataBounds.x + regionBounds.x + 0.5f;
 				final float offsety = cc.dataBounds.y + regionBounds.y + 0.5f;
 
-				// Note that the PreprocessedPeakResult will have coordinates 
-				// in the global reference frame. We store estimates relative to 
-				// the data bounds without the pixel offset making them suitable 
+				// Note that the PreprocessedPeakResult will have coordinates
+				// in the global reference frame. We store estimates relative to
+				// the data bounds without the pixel offset making them suitable
 				// for initialising fitting.
 				estimateOffsetx = -cc.dataBounds.x - 0.5f;
 				estimateOffsety = -cc.dataBounds.y - 0.5f;
@@ -4458,7 +4458,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
 	 */
 	@Override
@@ -4470,7 +4470,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
 	 */
 	@Override
@@ -4486,7 +4486,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// of fitting using a higher fail count or different residuals/neighbour
 			// thresholds.
 			// This means fitting and then selection of the best filter settings
-			// must be iterated until convergence to ensure the fitting+filter is 
+			// must be iterated until convergence to ensure the fitting+filter is
 			// optimum.
 
 			if (dynamicMultiPathFitResult.isValid)
@@ -4517,13 +4517,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
 	 */
 	@Override
 	public int getTotalCandidates()
 	{
-		// This is the total number of candidates Ids we may produce		
+		// This is the total number of candidates Ids we may produce
 		return candidates.getLength();
 	}
 
@@ -4534,7 +4534,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
 	 * SelectedResult)
 	 */
@@ -4557,11 +4557,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				final int candidateId = dynamicMultiPathFitResult.candidateId;
 				//@formatter:off
-				logger.info("Not fit %d (%d,%d) %s", candidateId, 
+				logger.info("Not fit %d (%d,%d) %s", candidateId,
 						cc.fromDataToGlobalX(candidates.get(candidateId).x),
 						cc.fromDataToGlobalY(candidates.get(candidateId).y),
 						(selectedResult.fitResult!=null && selectedResult.fitResult.data!=null) ?
-						((FitResult) selectedResult.fitResult.data).getStatus().toString() : "");								
+						((FitResult) selectedResult.fitResult.data).getStatus().toString() : "");
 				//@formatter:on
 			}
 			return;
@@ -4656,7 +4656,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			switch (fitResult.getStatus())
 			{
 				case OK:
-					// We log good results in the loop above. 
+					// We log good results in the loop above.
 					break;
 
 				case BAD_PARAMETERS:
@@ -4700,7 +4700,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
 	 */
 	@Override
@@ -4712,7 +4712,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
 	 */
 	@Override
@@ -4727,25 +4727,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
 	 * PreprocessedPeakResult)
 	 */
 	@Override
 	public void pass(PreprocessedPeakResult result)
 	{
-		// Do not ignore these. They may be from a fit result that is eventually not selected so we cannot 
+		// Do not ignore these. They may be from a fit result that is eventually not selected so we cannot
 		// wait until the add(...) method is called with the selected result.
 		storeEstimate(result.getCandidateId(), result, FILTER_RANK_PRIMARY);
 
 		// We must implement the same logic as the default SimpleSelectedResultStore which visits every
-		// candidate that has passed the main filter 
+		// candidate that has passed the main filter
 		isValid[result.getCandidateId()] = true;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
 	 * PreprocessedPeakResult)
 	 */
@@ -4758,7 +4758,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/**
 	 * Create a minimum filter to use for storing estimates
-	 * 
+	 *
 	 * @return The minimal filter
 	 */
 	public static IDirectFilter createMinimalFilter(PrecisionMethod precisionMethod)

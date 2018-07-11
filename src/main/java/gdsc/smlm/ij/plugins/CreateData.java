@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -312,7 +312,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean trackMode = false;
 	private boolean extraOptions = false;
 
-	// Hold private variables for settings that are ignored in simple/benchmark mode 
+	// Hold private variables for settings that are ignored in simple/benchmark mode
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
@@ -588,7 +588,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -613,11 +613,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Each localisation set is a collection of localisations that represent all localisations
 		// with the same ID that are on in the same image time frame (Note: the simulation
-		// can create many localisations per fluorophore per time frame which is useful when 
+		// can create many localisations per fluorophore per time frame which is useful when
 		// modelling moving particles)
 		List<LocalisationModelSet> localisationSets = null;
 
-		// Each fluorophore contains the on and off times when light was emitted 
+		// Each fluorophore contains the on and off times when light was emitted
 		List<? extends FluorophoreSequenceModel> fluorophores = null;
 
 		if (simpleMode || benchmarkMode || spotMode)
@@ -659,7 +659,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// ---------------
 				// SPOT SIMULATION
 				// ---------------
-				// The spot simulation draws 0 or 1 random point per frame. 
+				// The spot simulation draws 0 or 1 random point per frame.
 				// Ensure we have 50% of the frames with a spot.
 				nextN = new int[settings.getParticles() * 2];
 				Arrays.fill(nextN, 0, settings.getParticles(), 1);
@@ -716,8 +716,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			RandomGenerator random = null;
 
-			localisations = new ArrayList<LocalisationModel>(settings.getParticles());
-			localisationSets = new ArrayList<LocalisationModelSet>(settings.getParticles());
+			localisations = new ArrayList<>(settings.getParticles());
+			localisationSets = new ArrayList<>(settings.getParticles());
 
 			final int minPhotons = (int) settings.getPhotonsPerSecond();
 			final int range = (int) settings.getPhotonsPerSecondMaximum() - minPhotons + 1;
@@ -801,8 +801,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// The full simulation draws n random points in space.
 				// The same molecule may appear in multiple frames, move and blink.
 				//
-				// Points are modelled as fluorophores that must be activated and then will 
-				// blink and photo-bleach. The molecules may diffuse and this can be simulated 
+				// Points are modelled as fluorophores that must be activated and then will
+				// blink and photo-bleach. The molecules may diffuse and this can be simulated
 				// with many steps per image frame. All steps from a frame are collected
 				// into a localisation set which can be drawn on the output image.
 
@@ -854,7 +854,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return;
 			}
 
-			// Map the fluorophore ID to the compound for mixtures 
+			// Map the fluorophore ID to the compound for mixtures
 			if (compounds.size() > 1)
 			{
 				idToCompound = new TIntIntHashMap(fluorophores.size());
@@ -948,7 +948,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Output the theoretical limits for fitting a Gaussian and store the benchmark settings
-	 * 
+	 *
 	 * @param dist
 	 *            The distribution
 	 */
@@ -1029,9 +1029,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// The precision calculation is dependent on the model. The classic Mortensen formula
-		// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided 
+		// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided
 		// for WLSE requires an offset to the background used to stabilise the fitting. This is
-		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
+		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision
 		// is the same as MLE with the caveat of numerical instability.
 
 		// Apply QE directly to simulated photons to allow computation of bounds
@@ -1126,24 +1126,24 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Read noise is in electrons.
 			double readNoise = settings.getReadNoise();
 
-			// In an EM-CCD camera the read noise (in electrons) is swamped by amplification of the signal. 
+			// In an EM-CCD camera the read noise (in electrons) is swamped by amplification of the signal.
 			// We get the same result by dividing the read noise (in electrons) by the EM-gain.
 			if (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
 			{
-				// Add EM-CCD noise factor. The implementation of the Mortensen formula 
+				// Add EM-CCD noise factor. The implementation of the Mortensen formula
 				// using the standard deviation expects this factor.
 				// See gdsc.smlm.results.Gaussian2DPeakResultHelper.getPrecision(double, double, double, double, boolean)
 				backgroundVariance *= 2;
 				readNoise /= settings.getEmGain();
 			}
 
-			// Get the expected value at each pixel in electrons. Assuming a Poisson distribution this 
+			// Get the expected value at each pixel in electrons. Assuming a Poisson distribution this
 			// is equal to the total variance at the pixel.
 			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
-			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
+			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an
 			// approximation of the background noise for the precision computation.
 
 			// We get the total background in electrons
@@ -1163,7 +1163,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Store the simulation settings
-	 * 
+	 *
 	 * @param particles
 	 */
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
@@ -1204,7 +1204,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Calculate the signal precision for least squares fitting. Uses the Thompson formula:
 	 * (Thompson, et al (2002) Biophysical Journal 82, 2775-2783), equation 19
-	 * 
+	 *
 	 * @param a
 	 *            The size of the pixels in nm
 	 * @param s
@@ -1246,7 +1246,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Check if the total steps can fit all the fluorophores end times. If not then ask the user if they want to draw
 	 * extra
 	 * frames. Return the total steps to simulate (either the original steps or a larger number to fit all the data).
-	 * 
+	 *
 	 * @param totalSteps
 	 * @param fluorophores
 	 * @return The new total steps to simulate
@@ -1319,7 +1319,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (imp.getStackSize() > 1)
 		{
 			ImageStack stack = imp.getImageStack();
-			List<int[]> masks = new ArrayList<int[]>(stack.getSize());
+			List<int[]> masks = new ArrayList<>(stack.getSize());
 			int[] maxMask = new int[w * h];
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
@@ -1407,7 +1407,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (sp.get(i) >= t)
 				c++;
 
-		// Convert 
+		// Convert
 		final double scale = ((double) c) / mask.length;
 		//System.out.printf("Scale = %f\n", scale);
 		areaInUm = scale * settings.getSize() * settings.getPixelPitch() * settings.getSize() *
@@ -1471,7 +1471,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Get the PSF half-width at half-maxima
-	 * 
+	 *
 	 * @return
 	 */
 	private double getHWHM()
@@ -1539,7 +1539,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			else
 			{
 				PSF.Builder psfBuilder;
-				// Set the PSF as a Gaussian using the width at z=0. 
+				// Set the PSF as a Gaussian using the width at z=0.
 				// In future this could be improved for other PSFs.
 				psfBuilder = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
 				psfBuilder.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
@@ -1551,7 +1551,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Get the PSF standard deviation for a Gaussian using the PSF half-width at half-maxima
-	 * 
+	 *
 	 * @return
 	 */
 	private double getPsfSD()
@@ -1561,7 +1561,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Get the PSF half-width at half-maxima from the Image PSF
-	 * 
+	 *
 	 * @return
 	 */
 	private double getImageHWHM()
@@ -1589,7 +1589,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return -1;
 		}
 
-		// The width of the PSF is specified in pixels of the PSF image. Convert to the pixels of the 
+		// The width of the PSF is specified in pixels of the PSF image. Convert to the pixels of the
 		// output image
 		return 0.5 * psfSettings.getFwhm() * psfSettings.getPixelSize() / settings.getPixelPitch();
 	}
@@ -1622,7 +1622,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Create distribution within an XY border
-	 * 
+	 *
 	 * @param border
 	 * @return
 	 */
@@ -1654,7 +1654,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return new UniformDistribution(min, max, rvg);
 		}
 
-		// Create a distribution using random generators for each dimension 
+		// Create a distribution using random generators for each dimension
 		UniformDistribution distribution = new UniformDistribution(min, max, this);
 		return distribution;
 	}
@@ -1738,13 +1738,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Filter those not in the distribution
-	 * 
+	 *
 	 * @param localisationSets
 	 * @return
 	 */
 	private List<LocalisationModelSet> filterToImageBounds(List<LocalisationModelSet> localisationSets)
 	{
-		List<LocalisationModelSet> newLocalisations = new ArrayList<LocalisationModelSet>(localisationSets.size());
+		List<LocalisationModelSet> newLocalisations = new ArrayList<>(localisationSets.size());
 		SpatialDistribution bounds = createUniformDistribution(0);
 		for (LocalisationModelSet s : localisationSets)
 		{
@@ -1794,7 +1794,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						for (int i = 0; i < values.length; i++)
 							values[i] *= scale;
 
-						// TODO - Investigate the limits of this distribution. 
+						// TODO - Investigate the limits of this distribution.
 						// How far above and below the input data will values be generated.
 
 						// Create the distribution using the recommended number of bins
@@ -1810,7 +1810,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				}
 				catch (NullArgumentException e)
 				{
-					// Ignore 
+					// Ignore
 				}
 				catch (NumberFormatException e)
 				{
@@ -1851,7 +1851,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Allow fractional integration steps
 		final double simulationStepsPerFrame = (settings.getStepsPerSecond() * settings.getExposureTime()) / 1000.0;
 
-		List<LocalisationModelSet> newLocalisations = new ArrayList<LocalisationModelSet>(
+		List<LocalisationModelSet> newLocalisations = new ArrayList<>(
 				(int) (localisations.size() / simulationStepsPerFrame));
 
 		//System.out.printf("combineSimulationSteps @ %f\n", simulationStepsPerFrame);
@@ -1891,7 +1891,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final double firstFrame = getStartFrame(subset.get(0), simulationStepsPerFrame);
 				final double lastFrame = getEndFrame(subset.get(subset.size() - 1), simulationStepsPerFrame);
 
-				// Get the first frame offset and allocate space to store all potential frames  
+				// Get the first frame offset and allocate space to store all potential frames
 				final int intFirstFrame = (int) firstFrame;
 				final int intLastFrame = (int) Math.ceil(lastFrame);
 				LocalisationModelSet[] sets = new LocalisationModelSet[intLastFrame - intFirstFrame + 1];
@@ -1899,7 +1899,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Process each step
 				for (LocalisationModel l : subset)
 				{
-					// Get the fractional start and end frames 
+					// Get the fractional start and end frames
 					double startFrame = getStartFrame(l, simulationStepsPerFrame);
 					double endFrame = getEndFrame(l, simulationStepsPerFrame);
 
@@ -1910,7 +1910,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Check if the span covers a fraction of the end frame, otherwise decrement to ignore that frame
 					if (end > start && endFrame == end)
 					{
-						// E.g. convert 
+						// E.g. convert
 						// Steps:      |-- 0 --|
 						// Frames: |- 0 -|- 1 -|- 2 -|
 						// to
@@ -1953,7 +1953,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							{
 								state |= LocalisationModel.PREVIOUS | (l.hasNext() ? LocalisationModel.NEXT : 0);
 								// |=====|----|
-								// |     |     
+								// |     |
 								// |     endFrame
 								// end
 								fraction = (endFrame - end);
@@ -1987,7 +1987,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					{
 						sets[i].setPrevious(previous);
 
-						// Create a data array and store the current intensity. 
+						// Create a data array and store the current intensity.
 						// This is used later to filter based on SNR
 						sets[i].setData(new double[] { 0, 0, 0, 0, sets[i].getIntensity() //* gain
 						});
@@ -2006,7 +2006,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Check if any of the coordinates for the subset are different
-	 * 
+	 *
 	 * @param subset
 	 * @return True if the coordinates move
 	 */
@@ -2027,7 +2027,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Get the simulation frame start point for the localisation
-	 * 
+	 *
 	 * @param localisationModel
 	 * @param simulationStepsPerFrame
 	 * @return
@@ -2040,7 +2040,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Get the simulation frame end point for the localisation
-	 * 
+	 *
 	 * @param localisationModel
 	 * @param simulationStepsPerFrame
 	 * @return
@@ -2054,7 +2054,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Create a new localisation model with the same id and position but with a fraction of the intensity and the
 	 * specified state
-	 * 
+	 *
 	 * @param l
 	 * @param fraction
 	 * @param state
@@ -2102,7 +2102,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * image.
 	 * <p>
 	 * Note that the localisations are filtered using the signal. The input list of localisations will be updated.
-	 * 
+	 *
 	 * @param localisationSets
 	 * @return The localisations
 	 */
@@ -2168,7 +2168,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Multi-thread for speed
 		PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
 		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-		List<Future<?>> futures = new LinkedList<Future<?>>();
+		List<Future<?>> futures = new LinkedList<>();
 
 		// Count all the frames to process
 		frame = 0;
@@ -2371,7 +2371,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Create a PSF model from the image that contains all the z-slices needed to draw the given localisations
-	 * 
+	 *
 	 * @param localisationSets
 	 * @return
 	 */
@@ -2399,7 +2399,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (psfSettings.getFwhm() <= 0)
 				throw new RuntimeException("Missing FWHM calibration settings for image: " + imp.getTitle());
 
-			// To save memory construct the Image PSF using only the slices that are within 
+			// To save memory construct the Image PSF using only the slices that are within
 			// the depth of field of the simulation
 			double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
 			for (LocalisationModelSet l : localisationSets)
@@ -2421,7 +2421,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Calculate the start/end slices to cover the depth of field
 			// This logic must match the ImagePSFModel.
 			final double unitsPerSlice = psfSettings.getPixelDepth() / settings.getPixelPitch();
-			// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
+			// We assume the PSF was imaged axially with increasing z-stage position (moving the stage
 			// closer to the objective). Thus higher z-coordinate are for higher slice numbers.
 			int lower = (int) Math.round(minZ / unitsPerSlice) + zCentre;
 			int upper = (int) Math.round(maxZ / unitsPerSlice) + zCentre;
@@ -2431,7 +2431,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			upper = (upper < 0) ? 0 : (upper >= nSlices) ? nSlices - 1 : upper;
 			lower = (lower < 0) ? 0 : (lower >= nSlices) ? nSlices - 1 : lower;
 
-			// We cannot just extract the correct slices since the 
+			// We cannot just extract the correct slices since the
 			// Image PSF requires the z-centre for normalisation
 			if (!(lower <= zCentre && upper >= zCentre))
 			{
@@ -2578,7 +2578,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private PSFModel createPSFModel(double[] xyz)
 	{
 		// Create a set with a single model
-		List<LocalisationModelSet> localisationSets = new TurboList<LocalisationModelSet>(1);
+		List<LocalisationModelSet> localisationSets = new TurboList<>(1);
 		LocalisationModelSet set = new LocalisationModelSet(0, 0);
 		LocalisationModel m = new LocalisationModel(0, 0, xyz, 1, 0);
 		set.add(m);
@@ -2643,7 +2643,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
-			// Use a dummy coordinate to find out the fixed variance and gain 
+			// Use a dummy coordinate to find out the fixed variance and gain
 			float variance = cameraModel.getVariance(0, 0);
 			float gain = cameraModel.getGain(0, 0);
 
@@ -2717,7 +2717,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.stack = stack;
 			this.poissonNoise = poissonNoise;
 			this.random = random;
-			// This could be >=1 but the rest of the code ignores EM-gain if it is <=1			
+			// This could be >=1 but the rest of the code ignores EM-gain if it is <=1
 			emGain = (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1) ? settings.getEmGain()
 					: 0;
 			qe = getQuantumEfficiency();
@@ -2725,7 +2725,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -2749,7 +2749,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// *The output is rounded to remain a discrete distribution
 
 			// In order to analytically determine the noise around each localisation
-			// the background is simulated separately. This is added to the 
+			// the background is simulated separately. This is added to the
 			// simulation for the rendered photons.
 			// This is possible because the Gamma(shape,scale) distribution can be added:
 			// Gamma(a+b,scale) = Gamma(a,scale) + Gamma(b,scale)
@@ -2829,7 +2829,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						}
 					}
 
-					// Skip if nothing has been drawn. Note that if the localisation set is skipped then the 
+					// Skip if nothing has been drawn. Note that if the localisation set is skipped then the
 					// intensity must be set to zero to prevent the SNR checks using the eliminated neighbours.
 					if (totalPhotonsRendered == 0)
 					{
@@ -2896,12 +2896,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// noise = shot noise + read noise
 					// *-*-*-*-*
 					// Note that the noise we are calculating is the noise that would be in the image with no
-					// fluorophore present. This is the true background noise and it is the noise that is  
-					// estimated by the Peak Fit plugin. This noise therefore IGNORES THE SHOT NOISE of the 
+					// fluorophore present. This is the true background noise and it is the noise that is
+					// estimated by the Peak Fit plugin. This noise therefore IGNORES THE SHOT NOISE of the
 					// fluorophore SIGNAL.
 					// *-*-*-*-*
 
-					// The variance of the background image is currently in electrons^2 
+					// The variance of the background image is currently in electrons^2
 					double totalNoise = Math.sqrt(localStats[3]);
 
 					// Convert noise from electrons back to photons for convenience when computing SNR using the signal in photons.
@@ -2918,7 +2918,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					//System.out.printf("Noise = %g e-\n", totalNoiseInPhotons);
 
-					// Ensure the new data is added before the intensity is updated. This avoids 
+					// Ensure the new data is added before the intensity is updated. This avoids
 					// syncronisation clashes in the getIntensity(...) function.
 					// Use the total photons rendered for signal filtering.
 					// [0] = background (photons)
@@ -2943,7 +2943,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					}
 
 					newLocalisations.add(localisationSet);
-					// The parameters should have the background and intensity in 
+					// The parameters should have the background and intensity in
 					// photons before noise (as a perfect result).
 					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams((float) backgroundInPhotons,
 							intensity, x, y, z, sx, sy);
@@ -2963,7 +2963,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			for (int i = 0; i < image.length; i++)
 				image[i] += background[i];
 
-			// Apply camera gain. Note that the noise component of the camera gain IS the 
+			// Apply camera gain. Note that the noise component of the camera gain IS the
 			// read noise. Thus the read noise is expected to be different for each camera gain.
 			// Also add the bias.
 			cameraModel.applyGainAndBias(cameraModel.getBounds(), image);
@@ -2992,14 +2992,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				}
 			}
 
-			// Apply EM gain 
+			// Apply EM gain
 			if (emGain != 0)
 			{
 				final boolean tubbsModel = false;
 				// See: https://www.andor.com/learning-academy/sensitivity-making-sense-of-sensitivity
-				// there is a statistical variation in the overall number of electrons generated from an initial 
-				// charge packet by the gain register. This uncertainty is quantified by a parameter called "Noise Factor" 
-				// and detailed theoretical and measured analysis has placed this Noise Factor at a value of √2 (or 1.41) 
+				// there is a statistical variation in the overall number of electrons generated from an initial
+				// charge packet by the gain register. This uncertainty is quantified by a parameter called "Noise Factor"
+				// and detailed theoretical and measured analysis has placed this Noise Factor at a value of √2 (or 1.41)
 				// for EMCCD technology.
 
 				// A Stochastic Model for Electron Multiplication Charge-Coupled Devices – From Theory to Practice
@@ -3008,14 +3008,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// - Poisson for photon shot noise
 				// - Gamma for EM gain
 				// - Normal for read noise
-				// EM gain is essentially a repeated loop of input N and get out M where the each N has a probability of 
-				// being amplified. This has been modelled as a series of Poisson or Binomial trials and then the curve 
+				// EM gain is essentially a repeated loop of input N and get out M where the each N has a probability of
+				// being amplified. This has been modelled as a series of Poisson or Binomial trials and then the curve
 				// fitted.
 
 				if (tubbsModel)
 				{
 					// Tubbs's model
-					// Equation 14: is a gamma distribution for electrons created in the register 
+					// Equation 14: is a gamma distribution for electrons created in the register
 					for (int i = 0; i < image.length; i++)
 					{
 						if (image[i] <= 0)
@@ -3030,8 +3030,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Standard gamma distribution
 					// This is what is modelled in the Poisson-Gamma-Gaussian likelihood model
 
-					// Since the call random.nextGamma(...) creates a Gamma distribution 
-					// which pre-calculates factors only using the scale parameter we 
+					// Since the call random.nextGamma(...) creates a Gamma distribution
+					// which pre-calculates factors only using the scale parameter we
 					// create a custom gamma distribution where the shape can be set as a property.
 					double shape = 1;
 					CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), shape,
@@ -3067,7 +3067,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		/**
 		 * Compute the mean and variance for image 1 and image 2 for the region where the spot was inserted.
 		 * The region is defined by an area around the origin.
-		 * 
+		 *
 		 * @param image1
 		 * @param image2
 		 * @param origY
@@ -3130,7 +3130,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Check if the localisation, or its neighbours, reach the SNR thresholds. The intensity and noise are after EM-gain
 	 * has been applied.
-	 * 
+	 *
 	 * @param localisationSet
 	 * @param intensity
 	 * @param noise
@@ -3189,9 +3189,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				double mean = backgroundPixels[0];
 
-				// Simulate N photons hitting the image. The total photons (N) is 
+				// Simulate N photons hitting the image. The total photons (N) is
 				// the mean for each pixel multiplied by the number of pixels.
-				// Note: The number of samples (N) must be Poisson distributed, i.e. 
+				// Note: The number of samples (N) must be Poisson distributed, i.e.
 				// the total amount of photons per frame is Poisson noise.
 				long samples = random.nextPoisson(mean * backgroundPixels.length);
 
@@ -3278,7 +3278,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Find the first index from the starting index where the localisation matches the time
-	 * 
+	 *
 	 * @param localisations
 	 * @param fromIndex
 	 *            start index
@@ -3295,7 +3295,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Find the last index from the starting index where the localisation matches the time
-	 * 
+	 *
 	 * @param localisations
 	 * @param fromIndex
 	 *            start index
@@ -3319,7 +3319,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Find the first index from the starting index where the localisation matches the id
-	 * 
+	 *
 	 * @param localisations
 	 * @param fromIndex
 	 *            start index
@@ -3335,7 +3335,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Find the last index from the starting index where the localisation matches the Id
-	 * 
+	 *
 	 * @param localisations
 	 * @param fromIndex
 	 *            start index
@@ -3358,7 +3358,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private List<LocalisationModel> toLocalisations(List<LocalisationModelSet> localisationSets)
 	{
-		ArrayList<LocalisationModel> localisations = new ArrayList<LocalisationModel>(localisationSets.size());
+		ArrayList<LocalisationModel> localisations = new ArrayList<>(localisationSets.size());
 		for (LocalisationModelSet s : localisationSets)
 			localisations.add(s.toLocalisation());
 		return localisations;
@@ -3366,7 +3366,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Remove all fluorophores which were not drawn
-	 * 
+	 *
 	 * @param fluorophores
 	 * @param localisations
 	 * @return
@@ -3380,7 +3380,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		TIntHashSet idSet = new TIntHashSet((movingMolecules != null) ? movingMolecules.capacity() : 0);
 		for (LocalisationModel l : localisations)
 			idSet.add(l.getId());
-		List<FluorophoreSequenceModel> newFluorophores = new ArrayList<FluorophoreSequenceModel>(idSet.size());
+		List<FluorophoreSequenceModel> newFluorophores = new ArrayList<>(idSet.size());
 		for (FluorophoreSequenceModel f : fluorophores)
 		{
 			if (idSet.contains(f.getId()))
@@ -3572,7 +3572,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				IJ.showStatus("Calculating density ...");
 				final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
-				final List<Future<?>> futures = new LinkedList<Future<?>>();
+				final List<Future<?>> futures = new LinkedList<>();
 				final TFloatArrayList coordsX = new TFloatArrayList();
 				final TFloatArrayList coordsY = new TFloatArrayList();
 				final Statistics densityStats = stats[DENSITY];
@@ -3750,7 +3750,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final int[] density = dm.calculateDensity(radius, true);
 				addDensity(densityStats, density);
 
-				// Store the density for each result. This does not need to be synchronised 
+				// Store the density for each result. This does not need to be synchronised
 				// since the indices in different threads are unique.
 				for (int i = 0, index = allIndex; i < density.length; i++, index++)
 					allDensity[index] = density[i];
@@ -3773,7 +3773,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Copy all the settings from the results into a new results set labelled with the name suffix
-	 * 
+	 *
 	 * @param nameSuffix
 	 * @return The new results set
 	 */
@@ -3839,7 +3839,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Sort by id then time, then rebuild the neighbour pointers.
-	 * 
+	 *
 	 * @param localisations
 	 */
 	private void rebuildNeighbours(List<LocalisationModel> localisations)
@@ -3905,7 +3905,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Save the image to a TIFF file
-	 * 
+	 *
 	 * @param imp
 	 */
 	private void saveImage(ImagePlus imp)
@@ -3954,7 +3954,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Create a set of results that represent the molecule continuous on-times (pulses)
-	 * 
+	 *
 	 * @param localisations
 	 * @param results
 	 * @param title
@@ -4102,7 +4102,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Update the fluorophores relative coordinates to absolute
-	 * 
+	 *
 	 * @param molecules
 	 */
 	@SuppressWarnings("unused")
@@ -4123,7 +4123,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Save the fluorophores to a text file
-	 * 
+	 *
 	 * @param fluorophores
 	 */
 	private void saveFluorophores(List<? extends FluorophoreSequenceModel> fluorophores)
@@ -4185,7 +4185,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Save the localisations to a text file
-	 * 
+	 *
 	 * @param localisations
 	 */
 	private void saveLocalisations(List<LocalisationModel> localisations)
@@ -4413,7 +4413,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Show a dialog allowing the parameters for a simple/benchmark simulation to be performed
-	 * 
+	 *
 	 * @return True if the parameters were collected
 	 */
 	private boolean showSimpleDialog()
@@ -4827,7 +4827,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Check if there are any suitable PSF images open. If so add a choice to allow the selection of the Gaussian or
 	 * Image PSF model. If no PSF images are open then add options for the wavelength and NA for the simulated
 	 * microscope.
-	 * 
+	 *
 	 * @param gd
 	 * @return
 	 */
@@ -4835,7 +4835,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		gd.addMessage("--- PSF Model ---");
 		List<String> imageNames = PSFCombiner.createImageList();
-		TurboList<String> availableModels = new TurboList<String>();
+		TurboList<String> availableModels = new TurboList<>();
 		availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
 		availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);
 		final String[] images;
@@ -4976,7 +4976,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Show a dialog allowing the parameters for a simulation to be performed
-	 * 
+	 *
 	 * @return True if the parameters were collected
 	 */
 	private boolean showDialog()
@@ -5030,7 +5030,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addSlider("Fixed_fraction (%)", 0, 100, settings.getFixedFraction() * 100);
 		gd.addChoice("Confinement", CONFINEMENT, settings.getConfinement());
 		gd.addNumericField("Photons (sec^-1)", settings.getPhotonsPerSecond(), 0);
-		// We cannot use the correlation moe with fixed life time tracks 
+		// We cannot use the correlation moe with fixed life time tracks
 		String[] dist = (trackMode) ? Arrays.copyOf(PHOTON_DISTRIBUTION, PHOTON_DISTRIBUTION.length - 1)
 				: PHOTON_DISTRIBUTION;
 		gd.addChoice("Photon_distribution", dist, settings.getPhotonDistribution());
@@ -5387,7 +5387,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Build a list of suitable background images. Images must be greyscale.
-	 * 
+	 *
 	 * @return
 	 */
 	private String[] createBackgroundImageList()
@@ -5417,7 +5417,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Build a list of suitable distribution images. Images must be square.
-	 * 
+	 *
 	 * @return
 	 */
 	private String[] createDistributionImageList()
@@ -5552,9 +5552,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Mixture.Builder builder = Mixture.newBuilder();
 				TextFormat.merge(text, builder);
 
-				compounds = new ArrayList<CompoundMoleculeModel>(builder.getMoleculeCount());
+				compounds = new ArrayList<>(builder.getMoleculeCount());
 				int id = 1;
-				compoundNames = new ArrayList<String>(builder.getMoleculeCount());
+				compoundNames = new ArrayList<>(builder.getMoleculeCount());
 				for (Molecule m : builder.getMoleculeList())
 				{
 					MoleculeModel[] molecules = new MoleculeModel[m.getAtomCount()];
@@ -5588,7 +5588,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		else
 		{
 			// Create a simple compound with one molecule at the origin
-			compounds = new ArrayList<CompoundMoleculeModel>(1);
+			compounds = new ArrayList<>(1);
 			CompoundMoleculeModel m = new CompoundMoleculeModel(1, 0, 0, 0,
 					Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 			m.setDiffusionRate(settings.getDiffusionRate() * diffusionFactor);
@@ -5604,13 +5604,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private enum SeedMode
 	{
 		//@formatter:off
-		DEFAULT{ 
+		DEFAULT{
 			@Override boolean identicalOffset() { return false; }
 			@Override boolean identicalAddition() { return false; } },
-		REPRODUCE_EACH_STARTUP{ 
+		REPRODUCE_EACH_STARTUP{
 				@Override boolean identicalOffset() { return true; }
 				@Override boolean identicalAddition() { return false; } },
-		REPRODUCE_EACH_RUN{ 
+		REPRODUCE_EACH_RUN{
 			@Override boolean identicalOffset() { return true; }
 			@Override boolean identicalAddition() { return true; } };
 		//@formatter:on
@@ -5656,9 +5656,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
-	 * 
+	 *
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.RandomGeneratorFactory#createRandomGenerator()
 	 */
 	@Override
@@ -5720,7 +5720,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void loadBenchmarkData()
 	{
-		// Note: Do not reset memory until failure. This allows the load method to use the 
+		// Note: Do not reset memory until failure. This allows the load method to use the
 		// last simulation parameters to set settings.
 
 		if (!showLoadDialog())
@@ -5782,7 +5782,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Simple fix is to use the global photon background.
 		// TODO - Subtract the spots from the local region and compute the true local background.
-		// Note this requires knowing the PSF width. If this is a loaded ground truth dataset then 
+		// Note this requires knowing the PSF width. If this is a loaded ground truth dataset then
 		// it probably will not have Gaussian widths.
 		results.setZeroBackground(IntensityUnit.PHOTON, (float) simulationParameters.b);
 	}
@@ -5840,7 +5840,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (benchmarkAuto)
 		{
-			// Load directly from a results file. This is mainly to be used to load simulations 
+			// Load directly from a results file. This is mainly to be used to load simulations
 			// saved to memory then saved to file.
 			PeakResultsReader r = new PeakResultsReader(benchmarkFile);
 			MemoryPeakResults results = r.getResults();
@@ -5856,7 +5856,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			loadSettings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 		//String tmp = loadSettings.getLocalisationsFilename();
 		loadSettings.setLocalisationsFilename(benchmarkFile);
-		// TODO - This could be configurable to ignore fields that are not required, 
+		// TODO - This could be configurable to ignore fields that are not required,
 		// e.g. the dataset name
 		LocalisationList localisations = LoadLocalisations.loadLocalisations(loadSettings);
 		//loadSettings.setLocalisationsFilename(tmp);
@@ -6116,15 +6116,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Compute total background variance in photons
 		double backgroundVariance = b;
-		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
-		// so this is "double-counting" the EM-CCD.  
+		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor
+		// so this is "double-counting" the EM-CCD.
 		//if (emCCD)
 		//	backgroundVariance *= 2;
 
 		// Read noise is in ADUs. Convert to Photons to get contribution to background variance
 		double readNoiseInPhotons = readNoise / gain;
 
-		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
+		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this
 		// is equal to the total variance at the pixel.
 		double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
 
@@ -6137,7 +6137,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Show a dialog allowing the parameters for a benchmark simulation to be loaded
-	 * 
+	 *
 	 * @return True if the parameters were collected
 	 */
 	private boolean showLoadDialog()

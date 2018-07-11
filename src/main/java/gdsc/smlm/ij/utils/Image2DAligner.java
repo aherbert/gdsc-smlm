@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,16 +37,16 @@ import ij.process.ImageProcessor;
  * Perform 2D image alignment using normalised cross-correlation.
  * <p>
  * Uses the following formula:
- * 
+ *
  * <pre>
  *  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
  * </pre>
- * 
+ *
  * The summation in the numerator is computed using a conjugate multiplication in the frequency domain. The summation
  * terms are computed using rolling sum tables. Images are converted to the full range of an unsigned 16-bit integer
  * before computation to avoid errors in the rolling sum tables. This should have minimal impact on the
  * correlation value since it is normalised.
- * 
+ *
  * @see <a href=
  *      "https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</a>
  * @see <a href="http://scribblethink.org/Work/nvisionInterface/nip.html">Fast Normalized Cross-Correlation by J.P.
@@ -85,7 +85,7 @@ public class Image2DAligner implements Cloneable
 			size = w * h;
 			ix = getInsert(dht.nc, w);
 			iy = getInsert(dht.nr, h);
-			// Make storage of the original data optional. It is just used for 
+			// Make storage of the original data optional. It is just used for
 			// the spatial domain correlation check
 			if (isCheckCorrelation())
 			{
@@ -233,7 +233,7 @@ public class Image2DAligner implements Cloneable
 		if (image.getBitDepth() != 32)
 			return createDHT(new FloatImage2D(image), dhtData);
 
-		// Shift mean to 0 with optional window		
+		// Shift mean to 0 with optional window
 		int w = image.getWidth(), h = image.getHeight();
 		double[] wx = createXWindow(w);
 		double[] wy = createYWindow(h);
@@ -347,7 +347,7 @@ public class Image2DAligner implements Cloneable
 	{
 		// Note the FHT power spectrum centre is at n/2 of an even sized image.
 		// So we must insert the centre at that point. To do this we check for odd/even
-		// and offset if necessary. 
+		// and offset if necessary.
 		int diff = maxN - n;
 		return ((diff & 1) == 1) ? (diff + 1) / 2 : diff / 2;
 	}
@@ -520,7 +520,7 @@ public class Image2DAligner implements Cloneable
 
 	private DHTData createDHT(Image2D image, DHTData dhtData)
 	{
-		// Shift mean to 0 with optional window		
+		// Shift mean to 0 with optional window
 		int w = image.getWidth(), h = image.getHeight();
 		double[] wx = createXWindow(w);
 		double[] wy = createYWindow(h);
@@ -662,7 +662,7 @@ public class Image2DAligner implements Cloneable
 
 		// Normalise:
 		//  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
-		// 
+		//
 		// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
 
 		// Only do this over the range where at least half the original images overlap,
@@ -696,15 +696,15 @@ public class Image2DAligner implements Cloneable
 		checkCorrelation(target, correlation, maxi);
 
 		// Compute sum from rolling sum using:
-		// sum(x,y,w,h) = 
-		// + s(x+w-1,y+h-1) 
+		// sum(x,y,w,h) =
+		// + s(x+w-1,y+h-1)
 		// - s(x-1,y+h-1)
 		// - s(x+w-1,y-1)
 		// + s(x-1,y-1)
-		// Note: 
+		// Note:
 		// s(i,j) = 0 when either i,j < 0
-		// i = imax when i>imax 
-		// j = jmax when j>jmax 
+		// i = imax when i>imax
+		// j = jmax when j>jmax
 
 		// Note: The correlation is for the movement of the reference over the target
 		int nc_2 = nc / 2;
@@ -903,7 +903,7 @@ public class Image2DAligner implements Cloneable
 			// No check possible
 			return;
 
-		// The maximum correlation without normalisation 
+		// The maximum correlation without normalisation
 		int[] xy = correlation.getXY(maxi);
 
 		// Find the range for the target and reference
@@ -916,7 +916,7 @@ public class Image2DAligner implements Cloneable
 
 		// For the reference we express as a shift relative to the centre
 		// and subtract the half-width.
-		// Formally: (nc_2 - xy[0]) // shift 
+		// Formally: (nc_2 - xy[0]) // shift
 		//           + nc_2          // centre
 		//           - nc_2          // Half width
 		int rx = Math.max(0, -xy[0] + nc_2);
@@ -971,15 +971,15 @@ public class Image2DAligner implements Cloneable
 	private void compute(int x_1, int y_1, int x_w_1, int y_h_1, int w, int h, double[] s_, double[] ss, double[] sum)
 	{
 		// Compute sum from rolling sum using:
-		// sum(x,y,w,h) = 
-		// + s(x+w-1,y+h-1) 
+		// sum(x,y,w,h) =
+		// + s(x+w-1,y+h-1)
 		// - s(x-1,y+h-1)
 		// - s(x+w-1,y-1)
 		// + s(x-1,y-1)
-		// Note: 
+		// Note:
 		// s(i,j) = 0 when either i,j < 0
-		// i = imax when i>imax 
-		// j = jmax when j>jmax 
+		// i = imax when i>imax
+		// j = jmax when j>jmax
 
 		// This has been adapted from Image2D to compute the twos sums together
 
@@ -1032,7 +1032,7 @@ public class Image2DAligner implements Cloneable
 	public static double[] performCubicFit(FloatProcessor fp, int i, int j, int refinements, double relativeThreshold)
 	{
 		double[] centre = new double[] { i, j, fp.getf(i, j) };
-		// This value will be progressively halved. 
+		// This value will be progressively halved.
 		// Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
 		// 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
 		double range = 0.5;
@@ -1128,7 +1128,7 @@ public class Image2DAligner implements Cloneable
 		double[] centre = new double[] { 1, 1, surface.get(12) };
 		double[] y = new double[9];
 		int[] iy = new int[3];
-		// This value will be progressively halved. 
+		// This value will be progressively halved.
 		// Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
 		// 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
 		double range = 0.5;

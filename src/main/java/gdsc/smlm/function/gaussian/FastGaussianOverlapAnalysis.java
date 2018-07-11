@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -70,7 +70,7 @@ public class FastGaussianOverlapAnalysis
 		if (size < 0)
 			throw new IllegalArgumentException("Input range is too large: maxx * maxy = " + ((long) maxx) * maxy);
 		// We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
-		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
+		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss
 		// centred in the middle of a pixel we need to adjust each centre.
 		// Then we subtract the position of the target gaussian.
 		centrex = maxx * 0.5 - 0.5 - params[Gaussian2DFunction.X_POSITION];
@@ -148,7 +148,7 @@ public class FastGaussianOverlapAnalysis
 	/**
 	 * Get the overlap. This is the sum of all the functions added to the analysis using {@link #add(double[])} within
 	 * the region defined in the constructor.
-	 * 
+	 *
 	 * @return The overlap
 	 */
 	public double getOverlap()

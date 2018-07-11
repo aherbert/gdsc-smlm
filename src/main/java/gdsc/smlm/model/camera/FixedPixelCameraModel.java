@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -108,7 +108,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getBounds()
 	 */
 	@Override
@@ -119,7 +119,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
 	 */
 	@Override
@@ -129,7 +129,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
 	@Override
@@ -140,7 +140,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
 	 */
 	@Override
@@ -151,7 +151,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getBias(java.awt.Rectangle)
 	 */
 	@Override
@@ -162,7 +162,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getGain(java.awt.Rectangle)
 	 */
 	@Override
@@ -173,7 +173,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
 	 */
 	@Override
@@ -184,7 +184,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedVariance(java.awt.Rectangle)
 	 */
 	@Override
@@ -219,7 +219,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getMeanVariance(java.awt.Rectangle)
 	 */
 	@Override
@@ -230,7 +230,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
 	 */
 	@Override
@@ -241,7 +241,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
 	 */
 	@Override
@@ -252,7 +252,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
 	 */
 	@Override
@@ -263,7 +263,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(java.awt.Rectangle, float[])
 	 */
 	@Override
@@ -274,7 +274,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
 	 */
 	@Override
@@ -285,7 +285,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
 	 */
 	@Override
@@ -296,7 +296,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
 	 */
 	@Override
@@ -307,7 +307,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
 	 */
 	@Override
@@ -318,7 +318,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
 	 */
 	@Override
@@ -329,7 +329,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
 	 */
 	@Override
@@ -343,7 +343,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
 	 */
 	@Override
@@ -357,7 +357,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(float[])
 	 */
 	@Override
@@ -371,7 +371,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
 	 */
 	@Override
@@ -385,7 +385,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
 	 */
 	@Override
@@ -399,7 +399,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
 	 */
 	@Override
@@ -413,7 +413,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
 	@Override
@@ -424,7 +424,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override

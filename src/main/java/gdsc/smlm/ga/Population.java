@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -48,7 +48,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Create a population of individuals
-	 * 
+	 *
 	 * @param individuals
 	 *            The population of individuals
 	 * @throws InvalidPopulationSize
@@ -88,7 +88,7 @@ public class Population<T extends Comparable<T>>
 	 * <p>
 	 * Note: the subset of individuals selected for the next generation by the selection strategy will be unchanged
 	 * (i.e. no mutation). This allows the fittest individuals to remain unchanged.
-	 * 
+	 *
 	 * @param mutator
 	 * @param recombiner
 	 * @param checker
@@ -136,7 +136,7 @@ public class Population<T extends Comparable<T>>
 		if (individuals.size() >= populationSize)
 			return;
 
-		ArrayList<Chromosome<T>> newIndividuals = new ArrayList<Chromosome<T>>(populationSize - individuals.size());
+		ArrayList<Chromosome<T>> newIndividuals = new ArrayList<>(populationSize - individuals.size());
 
 		// Check for a minimum population size & mutate the individuals to achieve it.
 		// This allows a seed population of 1 to evolve.
@@ -225,7 +225,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Check for duplicates in the current and new populations
-	 * 
+	 *
 	 * @param newIndividuals
 	 *            The new population
 	 * @param c
@@ -246,7 +246,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Check if a chromosome matches the sequence
-	 * 
+	 *
 	 * @param c
 	 *            The chromosome
 	 * @param s
@@ -264,7 +264,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Calculate the fitness of the population
-	 * 
+	 *
 	 * @param fitnessFunction
 	 * @return The fittest individual
 	 */
@@ -276,7 +276,7 @@ public class Population<T extends Comparable<T>>
 		T max = null;
 
 		// Subset only those with no fitness score (the others must be unchanged)
-		ArrayList<Chromosome<T>> subset = new ArrayList<Chromosome<T>>(individuals.size());
+		ArrayList<Chromosome<T>> subset = new ArrayList<>(individuals.size());
 		long count = 0;
 		for (Chromosome<T> c : individuals)
 		{
@@ -319,7 +319,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Select a subset of the population
-	 * 
+	 *
 	 * @param selection
 	 *            The selection strategy
 	 * @return True if a valid population was selected (size>=1)
@@ -334,7 +334,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Get the population size limit to achieve when growing the population
-	 * 
+	 *
 	 * @return the populationSize
 	 */
 	public int getPopulationSize()
@@ -344,7 +344,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Set the population size limit to achieve when growing the population
-	 * 
+	 *
 	 * @param populationSize
 	 *            the population size to set
 	 */
@@ -356,7 +356,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Get the number of failed recombinations/mutations to allow before the stopping attempts to grow the population
-	 * 
+	 *
 	 * @return the failure limit
 	 */
 	public int getFailureLimit()
@@ -366,7 +366,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Set the number of failed recombinations/mutations to allow before the stopping attempts to grow the population
-	 * 
+	 *
 	 * @param failureLimit
 	 *            the failure limit
 	 */
@@ -385,7 +385,7 @@ public class Population<T extends Comparable<T>>
 
 	/**
 	 * Set a tracker to allow the progress to be followed
-	 * 
+	 *
 	 * @param tracker
 	 *            the tracker to set
 	 */
@@ -397,7 +397,7 @@ public class Population<T extends Comparable<T>>
 	/**
 	 * Get the iteration. The iteration is increased each time the population grows as part of the [grow, evaluate,
 	 * select] cycle.
-	 * 
+	 *
 	 * @return the iteration
 	 */
 	public int getIteration()

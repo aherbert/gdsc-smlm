@@ -118,7 +118,8 @@ public final class MoleculeProtos {
       return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Atom_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Atom_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -130,7 +131,8 @@ public final class MoleculeProtos {
     /**
      * <code>double mass = 1;</code>
      */
-    public double getMass() {
+    @Override
+	public double getMass() {
       return mass_;
     }
 
@@ -139,7 +141,8 @@ public final class MoleculeProtos {
     /**
      * <code>double x = 2;</code>
      */
-    public double getX() {
+    @Override
+	public double getX() {
       return x_;
     }
 
@@ -148,7 +151,8 @@ public final class MoleculeProtos {
     /**
      * <code>double y = 3;</code>
      */
-    public double getY() {
+    @Override
+	public double getY() {
       return y_;
     }
 
@@ -157,12 +161,14 @@ public final class MoleculeProtos {
     /**
      * <code>double z = 4;</code>
      */
-    public double getZ() {
+    @Override
+	public double getZ() {
       return z_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -171,7 +177,8 @@ public final class MoleculeProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (mass_ != 0D) {
         output.writeDouble(1, mass_);
@@ -187,7 +194,8 @@ public final class MoleculeProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -337,14 +345,16 @@ public final class MoleculeProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.MoleculeProtos.Atom prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -367,7 +377,8 @@ public final class MoleculeProtos {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Atom_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Atom_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -389,7 +400,8 @@ public final class MoleculeProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         mass_ = 0D;
 
@@ -402,16 +414,19 @@ public final class MoleculeProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Atom_descriptor;
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Atom getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Atom getDefaultInstanceForType() {
         return gdsc.smlm.data.config.MoleculeProtos.Atom.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Atom build() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Atom build() {
         gdsc.smlm.data.config.MoleculeProtos.Atom result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -419,7 +434,8 @@ public final class MoleculeProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Atom buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Atom buildPartial() {
         gdsc.smlm.data.config.MoleculeProtos.Atom result = new gdsc.smlm.data.config.MoleculeProtos.Atom(this);
         result.mass_ = mass_;
         result.x_ = x_;
@@ -429,33 +445,40 @@ public final class MoleculeProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.MoleculeProtos.Atom) {
           return mergeFrom((gdsc.smlm.data.config.MoleculeProtos.Atom)other);
         } else {
@@ -482,11 +505,13 @@ public final class MoleculeProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -508,14 +533,15 @@ public final class MoleculeProtos {
       /**
        * <code>double mass = 1;</code>
        */
-      public double getMass() {
+      @Override
+	public double getMass() {
         return mass_;
       }
       /**
        * <code>double mass = 1;</code>
        */
       public Builder setMass(double value) {
-        
+
         mass_ = value;
         onChanged();
         return this;
@@ -524,7 +550,7 @@ public final class MoleculeProtos {
        * <code>double mass = 1;</code>
        */
       public Builder clearMass() {
-        
+
         mass_ = 0D;
         onChanged();
         return this;
@@ -534,14 +560,15 @@ public final class MoleculeProtos {
       /**
        * <code>double x = 2;</code>
        */
-      public double getX() {
+      @Override
+	public double getX() {
         return x_;
       }
       /**
        * <code>double x = 2;</code>
        */
       public Builder setX(double value) {
-        
+
         x_ = value;
         onChanged();
         return this;
@@ -550,7 +577,7 @@ public final class MoleculeProtos {
        * <code>double x = 2;</code>
        */
       public Builder clearX() {
-        
+
         x_ = 0D;
         onChanged();
         return this;
@@ -560,14 +587,15 @@ public final class MoleculeProtos {
       /**
        * <code>double y = 3;</code>
        */
-      public double getY() {
+      @Override
+	public double getY() {
         return y_;
       }
       /**
        * <code>double y = 3;</code>
        */
       public Builder setY(double value) {
-        
+
         y_ = value;
         onChanged();
         return this;
@@ -576,7 +604,7 @@ public final class MoleculeProtos {
        * <code>double y = 3;</code>
        */
       public Builder clearY() {
-        
+
         y_ = 0D;
         onChanged();
         return this;
@@ -586,14 +614,15 @@ public final class MoleculeProtos {
       /**
        * <code>double z = 4;</code>
        */
-      public double getZ() {
+      @Override
+	public double getZ() {
         return z_;
       }
       /**
        * <code>double z = 4;</code>
        */
       public Builder setZ(double value) {
-        
+
         z_ = value;
         onChanged();
         return this;
@@ -602,17 +631,19 @@ public final class MoleculeProtos {
        * <code>double z = 4;</code>
        */
       public Builder clearZ() {
-        
+
         z_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -633,7 +664,8 @@ public final class MoleculeProtos {
 
     private static final com.google.protobuf.Parser<Atom>
         PARSER = new com.google.protobuf.AbstractParser<Atom>() {
-      public Atom parsePartialFrom(
+      @Override
+	public Atom parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -650,7 +682,8 @@ public final class MoleculeProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.MoleculeProtos.Atom getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Atom getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -683,7 +716,7 @@ public final class MoleculeProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom> 
+    java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom>
         getAtomList();
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
@@ -696,7 +729,7 @@ public final class MoleculeProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder>
         getAtomOrBuilderList();
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
@@ -765,7 +798,7 @@ public final class MoleculeProtos {
             }
             case 34: {
               if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                atom_ = new java.util.ArrayList<gdsc.smlm.data.config.MoleculeProtos.Atom>();
+                atom_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000008;
               }
               atom_.add(
@@ -791,7 +824,8 @@ public final class MoleculeProtos {
       return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Molecule_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Molecule_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -804,7 +838,8 @@ public final class MoleculeProtos {
     /**
      * <code>double fraction = 1;</code>
      */
-    public double getFraction() {
+    @Override
+	public double getFraction() {
       return fraction_;
     }
 
@@ -813,7 +848,8 @@ public final class MoleculeProtos {
     /**
      * <code>double diffusion_rate = 2;</code>
      */
-    public double getDiffusionRate() {
+    @Override
+	public double getDiffusionRate() {
       return diffusionRate_;
     }
 
@@ -822,12 +858,13 @@ public final class MoleculeProtos {
     /**
      * <code>string diffusion_type = 3;</code>
      */
-    public java.lang.String getDiffusionType() {
+    @Override
+	public java.lang.String getDiffusionType() {
       java.lang.Object ref = diffusionType_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         diffusionType_ = s;
@@ -837,11 +874,12 @@ public final class MoleculeProtos {
     /**
      * <code>string diffusion_type = 3;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getDiffusionTypeBytes() {
       java.lang.Object ref = diffusionType_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         diffusionType_ = b;
@@ -856,38 +894,44 @@ public final class MoleculeProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom> getAtomList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom> getAtomList() {
       return atom_;
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder>
         getAtomOrBuilderList() {
       return atom_;
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    public int getAtomCount() {
+    @Override
+	public int getAtomCount() {
       return atom_.size();
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    public gdsc.smlm.data.config.MoleculeProtos.Atom getAtom(int index) {
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Atom getAtom(int index) {
       return atom_.get(index);
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
      */
-    public gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder getAtomOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder getAtomOrBuilder(
         int index) {
       return atom_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -896,7 +940,8 @@ public final class MoleculeProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (fraction_ != 0D) {
         output.writeDouble(1, fraction_);
@@ -912,7 +957,8 @@ public final class MoleculeProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -1057,14 +1103,16 @@ public final class MoleculeProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.MoleculeProtos.Molecule prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -1087,7 +1135,8 @@ public final class MoleculeProtos {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Molecule_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Molecule_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1110,7 +1159,8 @@ public final class MoleculeProtos {
           getAtomFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         fraction_ = 0D;
 
@@ -1127,16 +1177,19 @@ public final class MoleculeProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Molecule_descriptor;
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Molecule getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Molecule getDefaultInstanceForType() {
         return gdsc.smlm.data.config.MoleculeProtos.Molecule.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Molecule build() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Molecule build() {
         gdsc.smlm.data.config.MoleculeProtos.Molecule result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -1144,7 +1197,8 @@ public final class MoleculeProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Molecule buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Molecule buildPartial() {
         gdsc.smlm.data.config.MoleculeProtos.Molecule result = new gdsc.smlm.data.config.MoleculeProtos.Molecule(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -1165,33 +1219,40 @@ public final class MoleculeProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.MoleculeProtos.Molecule) {
           return mergeFrom((gdsc.smlm.data.config.MoleculeProtos.Molecule)other);
         } else {
@@ -1230,7 +1291,7 @@ public final class MoleculeProtos {
               atomBuilder_ = null;
               atom_ = other.atom_;
               bitField0_ = (bitField0_ & ~0x00000008);
-              atomBuilder_ = 
+              atomBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAtomFieldBuilder() : null;
             } else {
@@ -1242,11 +1303,13 @@ public final class MoleculeProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -1269,14 +1332,15 @@ public final class MoleculeProtos {
       /**
        * <code>double fraction = 1;</code>
        */
-      public double getFraction() {
+      @Override
+	public double getFraction() {
         return fraction_;
       }
       /**
        * <code>double fraction = 1;</code>
        */
       public Builder setFraction(double value) {
-        
+
         fraction_ = value;
         onChanged();
         return this;
@@ -1285,7 +1349,7 @@ public final class MoleculeProtos {
        * <code>double fraction = 1;</code>
        */
       public Builder clearFraction() {
-        
+
         fraction_ = 0D;
         onChanged();
         return this;
@@ -1295,14 +1359,15 @@ public final class MoleculeProtos {
       /**
        * <code>double diffusion_rate = 2;</code>
        */
-      public double getDiffusionRate() {
+      @Override
+	public double getDiffusionRate() {
         return diffusionRate_;
       }
       /**
        * <code>double diffusion_rate = 2;</code>
        */
       public Builder setDiffusionRate(double value) {
-        
+
         diffusionRate_ = value;
         onChanged();
         return this;
@@ -1311,7 +1376,7 @@ public final class MoleculeProtos {
        * <code>double diffusion_rate = 2;</code>
        */
       public Builder clearDiffusionRate() {
-        
+
         diffusionRate_ = 0D;
         onChanged();
         return this;
@@ -1321,7 +1386,8 @@ public final class MoleculeProtos {
       /**
        * <code>string diffusion_type = 3;</code>
        */
-      public java.lang.String getDiffusionType() {
+      @Override
+	public java.lang.String getDiffusionType() {
         java.lang.Object ref = diffusionType_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -1336,11 +1402,12 @@ public final class MoleculeProtos {
       /**
        * <code>string diffusion_type = 3;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getDiffusionTypeBytes() {
         java.lang.Object ref = diffusionType_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           diffusionType_ = b;
@@ -1357,7 +1424,7 @@ public final class MoleculeProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         diffusionType_ = value;
         onChanged();
         return this;
@@ -1366,7 +1433,7 @@ public final class MoleculeProtos {
        * <code>string diffusion_type = 3;</code>
        */
       public Builder clearDiffusionType() {
-        
+
         diffusionType_ = getDefaultInstance().getDiffusionType();
         onChanged();
         return this;
@@ -1380,7 +1447,7 @@ public final class MoleculeProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         diffusionType_ = value;
         onChanged();
         return this;
@@ -1390,7 +1457,7 @@ public final class MoleculeProtos {
         java.util.Collections.emptyList();
       private void ensureAtomIsMutable() {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          atom_ = new java.util.ArrayList<gdsc.smlm.data.config.MoleculeProtos.Atom>(atom_);
+          atom_ = new java.util.ArrayList<>(atom_);
           bitField0_ |= 0x00000008;
          }
       }
@@ -1401,7 +1468,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom> getAtomList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom> getAtomList() {
         if (atomBuilder_ == null) {
           return java.util.Collections.unmodifiableList(atom_);
         } else {
@@ -1411,7 +1479,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
        */
-      public int getAtomCount() {
+      @Override
+	public int getAtomCount() {
         if (atomBuilder_ == null) {
           return atom_.size();
         } else {
@@ -1421,7 +1490,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
        */
-      public gdsc.smlm.data.config.MoleculeProtos.Atom getAtom(int index) {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Atom getAtom(int index) {
         if (atomBuilder_ == null) {
           return atom_.get(index);
         } else {
@@ -1571,7 +1641,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
        */
-      public gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder getAtomOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder getAtomOrBuilder(
           int index) {
         if (atomBuilder_ == null) {
           return atom_.get(index);  } else {
@@ -1581,7 +1652,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder>
            getAtomOrBuilderList() {
         if (atomBuilder_ != null) {
           return atomBuilder_.getMessageOrBuilderList();
@@ -1607,16 +1679,15 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Atom atom = 4;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom.Builder> 
+      public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Atom.Builder>
            getAtomBuilderList() {
         return getAtomFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.MoleculeProtos.Atom, gdsc.smlm.data.config.MoleculeProtos.Atom.Builder, gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder> 
+          gdsc.smlm.data.config.MoleculeProtos.Atom, gdsc.smlm.data.config.MoleculeProtos.Atom.Builder, gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder>
           getAtomFieldBuilder() {
         if (atomBuilder_ == null) {
-          atomBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.MoleculeProtos.Atom, gdsc.smlm.data.config.MoleculeProtos.Atom.Builder, gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder>(
+          atomBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   atom_,
                   ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
@@ -1625,12 +1696,14 @@ public final class MoleculeProtos {
         }
         return atomBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1651,7 +1724,8 @@ public final class MoleculeProtos {
 
     private static final com.google.protobuf.Parser<Molecule>
         PARSER = new com.google.protobuf.AbstractParser<Molecule>() {
-      public Molecule parsePartialFrom(
+      @Override
+	public Molecule parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1668,7 +1742,8 @@ public final class MoleculeProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.MoleculeProtos.Molecule getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Molecule getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1681,7 +1756,7 @@ public final class MoleculeProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule> 
+    java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule>
         getMoleculeList();
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
@@ -1694,7 +1769,7 @@ public final class MoleculeProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder>
         getMoleculeOrBuilderList();
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
@@ -1744,7 +1819,7 @@ public final class MoleculeProtos {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                molecule_ = new java.util.ArrayList<gdsc.smlm.data.config.MoleculeProtos.Molecule>();
+                molecule_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               molecule_.add(
@@ -1770,7 +1845,8 @@ public final class MoleculeProtos {
       return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Mixture_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Mixture_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1782,38 +1858,44 @@ public final class MoleculeProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule> getMoleculeList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule> getMoleculeList() {
       return molecule_;
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder>
         getMoleculeOrBuilderList() {
       return molecule_;
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    public int getMoleculeCount() {
+    @Override
+	public int getMoleculeCount() {
       return molecule_.size();
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    public gdsc.smlm.data.config.MoleculeProtos.Molecule getMolecule(int index) {
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Molecule getMolecule(int index) {
       return molecule_.get(index);
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
      */
-    public gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder getMoleculeOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder getMoleculeOrBuilder(
         int index) {
       return molecule_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -1822,14 +1904,16 @@ public final class MoleculeProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       for (int i = 0; i < molecule_.size(); i++) {
         output.writeMessage(1, molecule_.get(i));
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -1945,14 +2029,16 @@ public final class MoleculeProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.MoleculeProtos.Mixture prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -1975,7 +2061,8 @@ public final class MoleculeProtos {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Mixture_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Mixture_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1998,7 +2085,8 @@ public final class MoleculeProtos {
           getMoleculeFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         if (moleculeBuilder_ == null) {
           molecule_ = java.util.Collections.emptyList();
@@ -2009,16 +2097,19 @@ public final class MoleculeProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.MoleculeProtos.internal_static_gdsc_smlm_data_config_Mixture_descriptor;
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Mixture getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Mixture getDefaultInstanceForType() {
         return gdsc.smlm.data.config.MoleculeProtos.Mixture.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Mixture build() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Mixture build() {
         gdsc.smlm.data.config.MoleculeProtos.Mixture result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -2026,7 +2117,8 @@ public final class MoleculeProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.MoleculeProtos.Mixture buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Mixture buildPartial() {
         gdsc.smlm.data.config.MoleculeProtos.Mixture result = new gdsc.smlm.data.config.MoleculeProtos.Mixture(this);
         int from_bitField0_ = bitField0_;
         if (moleculeBuilder_ == null) {
@@ -2042,33 +2134,40 @@ public final class MoleculeProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.MoleculeProtos.Mixture) {
           return mergeFrom((gdsc.smlm.data.config.MoleculeProtos.Mixture)other);
         } else {
@@ -2097,7 +2196,7 @@ public final class MoleculeProtos {
               moleculeBuilder_ = null;
               molecule_ = other.molecule_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              moleculeBuilder_ = 
+              moleculeBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getMoleculeFieldBuilder() : null;
             } else {
@@ -2109,11 +2208,13 @@ public final class MoleculeProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -2136,7 +2237,7 @@ public final class MoleculeProtos {
         java.util.Collections.emptyList();
       private void ensureMoleculeIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          molecule_ = new java.util.ArrayList<gdsc.smlm.data.config.MoleculeProtos.Molecule>(molecule_);
+          molecule_ = new java.util.ArrayList<>(molecule_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -2147,7 +2248,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule> getMoleculeList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule> getMoleculeList() {
         if (moleculeBuilder_ == null) {
           return java.util.Collections.unmodifiableList(molecule_);
         } else {
@@ -2157,7 +2259,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
        */
-      public int getMoleculeCount() {
+      @Override
+	public int getMoleculeCount() {
         if (moleculeBuilder_ == null) {
           return molecule_.size();
         } else {
@@ -2167,7 +2270,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
        */
-      public gdsc.smlm.data.config.MoleculeProtos.Molecule getMolecule(int index) {
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Molecule getMolecule(int index) {
         if (moleculeBuilder_ == null) {
           return molecule_.get(index);
         } else {
@@ -2317,7 +2421,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
        */
-      public gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder getMoleculeOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder getMoleculeOrBuilder(
           int index) {
         if (moleculeBuilder_ == null) {
           return molecule_.get(index);  } else {
@@ -2327,7 +2432,8 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder>
            getMoleculeOrBuilderList() {
         if (moleculeBuilder_ != null) {
           return moleculeBuilder_.getMessageOrBuilderList();
@@ -2353,16 +2459,15 @@ public final class MoleculeProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.Molecule molecule = 1;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule.Builder> 
+      public java.util.List<gdsc.smlm.data.config.MoleculeProtos.Molecule.Builder>
            getMoleculeBuilderList() {
         return getMoleculeFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.MoleculeProtos.Molecule, gdsc.smlm.data.config.MoleculeProtos.Molecule.Builder, gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder> 
+          gdsc.smlm.data.config.MoleculeProtos.Molecule, gdsc.smlm.data.config.MoleculeProtos.Molecule.Builder, gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder>
           getMoleculeFieldBuilder() {
         if (moleculeBuilder_ == null) {
-          moleculeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.MoleculeProtos.Molecule, gdsc.smlm.data.config.MoleculeProtos.Molecule.Builder, gdsc.smlm.data.config.MoleculeProtos.MoleculeOrBuilder>(
+          moleculeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   molecule_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -2371,12 +2476,14 @@ public final class MoleculeProtos {
         }
         return moleculeBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -2397,7 +2504,8 @@ public final class MoleculeProtos {
 
     private static final com.google.protobuf.Parser<Mixture>
         PARSER = new com.google.protobuf.AbstractParser<Mixture>() {
-      public Mixture parsePartialFrom(
+      @Override
+	public Mixture parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2414,7 +2522,8 @@ public final class MoleculeProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.MoleculeProtos.Mixture getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.MoleculeProtos.Mixture getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2422,17 +2531,17 @@ public final class MoleculeProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Atom_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Atom_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Molecule_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Molecule_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Mixture_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Mixture_fieldAccessorTable;
 
@@ -2455,7 +2564,8 @@ public final class MoleculeProtos {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

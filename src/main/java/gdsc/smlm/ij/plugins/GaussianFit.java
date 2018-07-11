@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -109,7 +109,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -162,8 +162,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	{
 		//@formatter:off
 		EnumSet<PSFType> d = EnumSet.of(
-				PSFType.ONE_AXIS_GAUSSIAN_2D, 
-				PSFType.TWO_AXIS_GAUSSIAN_2D, 
+				PSFType.ONE_AXIS_GAUSSIAN_2D,
+				PSFType.TWO_AXIS_GAUSSIAN_2D,
 				PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		//@formatter:on
 		_PSFTypeValues = d.toArray(new PSFType[d.size()]);
@@ -176,7 +176,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
@@ -247,7 +247,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/**
 	 * Calculate the min/max limits for the image. The max is set at the 99th percentile of the data.
-	 * 
+	 *
 	 * @param ip
 	 * @return The limits
 	 */
@@ -262,7 +262,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (data == null) // Float processor
 			return limits;
 
-		// 8/16 bit greyscale image. Set upper limit to the height of the 99% percentile. 
+		// 8/16 bit greyscale image. Set upper limit to the height of the 99% percentile.
 		int limit = (int) (99.0 * ip.getPixelCount() / 100.0);
 		int count = 0;
 		int i = 0;
@@ -281,7 +281,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -372,7 +372,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	@Override
@@ -428,7 +428,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/**
 	 * Show the points as an overlay
-	 * 
+	 *
 	 * @param nMaxima
 	 * @param xpoints
 	 * @param ypoints
@@ -449,7 +449,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	/**
 	 * Perform fitting using the chosen maxima. Update the overlay if successful.
-	 * 
+	 *
 	 * @param ip
 	 *            The input image
 	 */
@@ -723,7 +723,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Find the indices of the maxima using the currently configured parameters
 	 * <p>
 	 * Data must be arranged in yx block order, i.e. height rows of width.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -763,7 +763,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Data must be arranged in yx block order, i.e. height rows of width.
 	 * <p>
 	 * Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -786,7 +786,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Data must be arranged in yx block order, i.e. height rows of width.
 	 * <p>
 	 * Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -861,7 +861,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
 	 * <p>
 	 * Data must be arranged in yx block order, i.e. height rows of width.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -946,7 +946,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * <p>
 	 * Note: The fitted coordinates are offset by 0.5, i.e. using the middle of the pixel. This equates to input data
 	 * 0,0 representing 0.5,0.5.
-	 * 
+	 *
 	 * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX, StdDevY, Angle.
 	 *         Null if no fit is possible.
 	 */
@@ -974,7 +974,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * The angle parameter is only set if using elliptical Gaussian fitting.
 	 * <p>
 	 * Note: The returned fit coordinates should be offset by 0.5 if the input data represents pixels
-	 * 
+	 *
 	 * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX, StdDevY, Angle. Null
 	 *         if no fit is possible.
 	 */
@@ -1033,7 +1033,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	@Override
 	public void setNPasses(int nPasses)
 	{
-		// Nothing to do		
+		// Nothing to do
 	}
 
 	/**

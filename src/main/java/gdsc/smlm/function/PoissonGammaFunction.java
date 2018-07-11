@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -84,7 +84,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
 	 * @param c
 	 *            The count to evaluate
 	 * @param p
@@ -101,8 +101,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			// The observed count converted to photons
 			final double c_m = c / m;
 
-			// The current implementation of Bessel.II(x) is Infinity at x==710. 
-			// Also exp(-c/m -p) will be sub-normal at < -709. 
+			// The current implementation of Bessel.II(x) is Infinity at x==710.
+			// Also exp(-c/m -p) will be sub-normal at < -709.
 			// Switch to an approximation.
 			final double x = 2 * Math.sqrt(p * c_m);
 			final double _c_m_p = -c_m - p;
@@ -111,21 +111,21 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				// Approximate Bessel function i1(x) when using large x:
 				// i1(x) ~ exp(x)/sqrt(2*pi*x)
 				// However the entire equation is logged (creating transform),
-				// evaluated then raised to e to prevent overflow error on 
+				// evaluated then raised to e to prevent overflow error on
 				// large exp(x)
 
 				// p = sqrt(p / (c * m)) * exp(-c_m - p) * exp(2 * sqrt(cp_m)) / sqrt(2*pi*2*sqrt(cp_m))
 				// p = sqrt(p / (c * m)) * exp(-c_m - p) * exp(x) / sqrt(2*pi*x)
 				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + x - 0.5 * log(2*pi*x)
 
-				// This is the transform from the Python source code within the supplementary information of 
+				// This is the transform from the Python source code within the supplementary information of
 				// the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
 				// p = sqrt(p / (c * m)) * exp(-c_m - p) * exp(2 * sqrt(cp_m)) / (sqrt(2*pi)*sqrt(2*sqrt(cp_m)))
 				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(sqrt(2*pi)*sqrt(2*sqrt(cp_m)))
 				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(sqrt(2)*sqrt(pi)*sqrt(2)*sqrt(sqrt(cp_m)))
 				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(2*sqrt(pi)*sqrt(sqrt(cp_m)))
 
-				// This avoids a call to Math.pow 
+				// This avoids a call to Math.pow
 				//final double transform = 0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x);
 
 				//final double transform2 = 0.5 * Math.log(p / (c * m)) - c_m - p + x -
@@ -144,7 +144,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		}
 		else if (c == 0.0)
 		{
-			// This is the Dirac delta function plus the probability of 
+			// This is the Dirac delta function plus the probability of
 			// the Poisson-Gamma distribution with shape n=1 at c=0 (reduced to an exponential):
 			// Dirac = exp^-p
 
@@ -155,15 +155,15 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			// 1/((n-1)!m^n) c^(n-1) * e^-c/m
 
 			// If the Gamma takes positive integer arguments it is an Erlang distribution,
-			// i.e., the sum of n independent exponentially distributed random variables, 
+			// i.e., the sum of n independent exponentially distributed random variables,
 			// each of which has a mean of p.
-			// The Gamma is only non-zero at c==0 when n=1. 
+			// The Gamma is only non-zero at c==0 when n=1.
 			// Then it is just an exponential distribution.
 
-			// Poisson probability of n=1: FastMath.exp(-p) * p 
+			// Poisson probability of n=1: FastMath.exp(-p) * p
 			// Gamma probability of c=0 given n=1, Gamma(shape=1,scale=m) = 1 / m
 
-			//System.out.printf("p=%g, m=%g gamma=%g  pp=%g\n", p, m, 
+			//System.out.printf("p=%g, m=%g gamma=%g  pp=%g\n", p, m,
 			//		new CustomGammaDistribution(null, 1, m).density(0), 1/m);
 
 			return FastMath.exp(-p) * (1 + p / m);
@@ -183,7 +183,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * If c==0 then the true probability is obtained by adding Math.exp(-p).
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
 	 * @param c
 	 *            The count to evaluate
 	 * @param p
@@ -304,8 +304,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			else
 			{
 				// G(c) = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
-				// dG(c)/dp = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . n * p^(n-1) c^(n-1) / m^n } - e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n } 
-				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=1 to inf { 1/((n-1)!(n-1)!) . p^(n-1) c^(n-1) / m^(n-1) } - G(c) 
+				// dG(c)/dp = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . n * p^(n-1) c^(n-1) / m^n } - e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
+				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=1 to inf { 1/((n-1)!(n-1)!) . p^(n-1) c^(n-1) / m^(n-1) } - G(c)
 				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=0 to inf { 1/(n!^2) . (pc/m)^n } - G(c)
 
 				// Bessel I0 = sum n=0 to inf { 1/(n!^2) . ((x/2)^2)^n }
@@ -324,7 +324,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		else if (c == 0.0)
 		{
 			// f(p) = exp(-p) * (1 + p / m)
-			// df/dp = (-exp(-p) * (1 + p / m)) + (exp(-p) / m)   
+			// df/dp = (-exp(-p) * (1 + p / m)) + (exp(-p) / m)
 			double exp_p = FastMath.exp(-p);
 			double G = exp_p * (1 + p / m);
 			dG_dp[0] = exp_p / m - G;
@@ -346,7 +346,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * If c==0 then the true probability is obtained by adding Math.exp(-p).
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
 	 * @param c
 	 *            The count to evaluate
 	 * @param p
@@ -419,7 +419,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 */
 	static double poissonGammaPartial(double c, double p, double m, double[] dG_dp)
 	{
-		// As above but do not subtract the function value G from the gradient. 
+		// As above but do not subtract the function value G from the gradient.
 		if (c > 0.0)
 		{
 			final double c_m = c / m;
@@ -480,7 +480,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	{
 		// As above but:
 		// - do not multiply by exp^-p
-		// - do not subtract the function value G from the gradient. 
+		// - do not subtract the function value G from the gradient.
 		if (c > 0.0)
 		{
 			final double c_m = c / m;
@@ -518,7 +518,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * Calculate the log probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
 	 * @param c
 	 *            The count to evaluate
 	 * @param p
@@ -557,7 +557,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
@@ -568,7 +568,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	@Override
@@ -579,7 +579,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
 	 */
 	@Override

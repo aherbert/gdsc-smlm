@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -82,11 +82,11 @@ public class PSFCalculator implements PlugIn, DialogListener
 		double sd = calculate(settings, false);
 		if (sd < 0)
 			return;
-		
+
 		SettingsManager.writeSettings(this.settings);
 
 		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
-		FitConfiguration fitConfig = config.getFitConfiguration(); 
+		FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setNmPerPixel(getPixelPitch());
 		fitConfig.setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
 		fitConfig.setInitialPeakStdDev(sd);
@@ -96,7 +96,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	/**
 	 * Present an interactive dialog that allows the user to calculate the Gaussian PSF standard deviation using the
 	 * provided settings.
-	 * 
+	 *
 	 * @param settings
 	 * @param simpleMode
 	 *            Only present a wavelength, NA and proportionality factor fields.
@@ -236,7 +236,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * <p>
 	 * <a href="http://en.wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile">http://en.
 	 * wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile</a>
-	 * 
+	 *
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
@@ -257,7 +257,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * Using a scale factor of 1 results in the best match of the Gaussian to the Airy profile. A value above 1 should
 	 * be used to increase the width to account for deviation of the optical system from the theoretical limit and
 	 * out-of-focus objects.
-	 * 
+	 *
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
@@ -273,15 +273,15 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	/**
 	 * If the pixel size (a) is provided the standard deviation (s) is adjusted to account for square pixels:
-	 * 
+	 *
 	 * <pre>
 	 * sa^2 = s^2 + a^2/12.
 	 * </pre>
-	 * 
+	 *
 	 * This is relevant if using a single Gaussian evaluated at the centre of the pixel (0.5,0.5) to represent the value
 	 * over the entire pixel. If using a complete Gaussian function using the integral of the error function (erf) then
 	 * this is not needed.
-	 * 
+	 *
 	 * @param s
 	 *            Gaussian standard deviation
 	 * @param a
@@ -297,7 +297,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	/**
 	 * Calculates the expected PSF standard deviation (pixels) for a Gaussian approximation to the Airy disk.
-	 * 
+	 *
 	 * @param pixelPitch
 	 *            Camera pixel pitch in micrometers (um)
 	 * @param magnification
@@ -327,7 +327,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * Calculates the PSF peak width for the Airy disk at the first dark ring (zero intersection).
 	 * <p>
 	 * Width is the lambda / (2*pi*NA).
-	 * 
+	 *
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
@@ -342,7 +342,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	/**
 	 * Calculates the PSF peak width for the Airy disk at the first dark ring (zero intersection).
-	 * 
+	 *
 	 * @param pixelPitch
 	 *            Camera pixel pitch in micrometers (um)
 	 * @param magnification
@@ -482,7 +482,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	/**
 	 * Calculate the intensity of the Gaussian at distance x from the centre
-	 * 
+	 *
 	 * @param x
 	 * @return The intensity
 	 */

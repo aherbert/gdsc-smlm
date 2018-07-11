@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,7 +68,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#getHeaderEnd()
 	 */
 	@Override
@@ -139,7 +139,7 @@ public class MALKFilePeakResults extends FilePeakResults
 			// Copy it so it can be modified
 			CalibrationWriter cw = new CalibrationWriter(getCalibration());
 
-			// Create converters 
+			// Create converters
 			try
 			{
 				toNMConverter = cw.getDistanceConverter(DistanceUnit.NM);
@@ -162,7 +162,7 @@ public class MALKFilePeakResults extends FilePeakResults
 			setCalibration(cw.getCalibration());
 		}
 
-		// The data loses PSF information so reset this to a custom type with 
+		// The data loses PSF information so reset this to a custom type with
 		// no additional parameters.
 		setPSF(PSFHelper.create(PSFType.CUSTOM));
 
@@ -170,14 +170,14 @@ public class MALKFilePeakResults extends FilePeakResults
 
 		// Create converters to avoid null pointers
 		if (toNMConverter == null)
-			toNMConverter = new IdentityTypeConverter<DistanceUnit>(null);
+			toNMConverter = new IdentityTypeConverter<>(null);
 		if (toPhotonConverter == null)
-			toPhotonConverter = new IdentityTypeConverter<IntensityUnit>(null);
+			toPhotonConverter = new IdentityTypeConverter<>(null);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#getHeaderComments()
 	 */
 	@Override
@@ -207,7 +207,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#getFieldNames()
 	 */
 	@Override
@@ -228,7 +228,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -259,7 +259,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -277,7 +277,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -314,7 +314,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
 	@Override
@@ -322,7 +322,7 @@ public class MALKFilePeakResults extends FilePeakResults
 	{
 		try
 		{
-			TurboList<Result> results = new TurboList<Result>(size);
+			TurboList<Result> results = new TurboList<>(size);
 
 			StringBuilder header = new StringBuilder();
 			BufferedReader input = new BufferedReader(new FileReader(filename));

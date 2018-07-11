@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -62,7 +62,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 	 * positions. A minimum of 1 crossover position is selected to ensure crossover.
 	 * <p>
 	 * The positions are then chosen randomly and the new chromosome generated.
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Recombiner#cross(gdsc.smlm.ga.Chromosome<T>, gdsc.smlm.ga.Chromosome<T>)
 	 */
 	@Override
@@ -145,6 +145,6 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 		c2 = c2.newChromosome(n2);
 
 		// Ensure the child order is random
-		return (ran.nextDouble() < 0.5) ? new ChromosomePair<T>(c1, c2) : new ChromosomePair<T>(c2, c1);
+		return (ran.nextDouble() < 0.5) ? new ChromosomePair<>(c1, c2) : new ChromosomePair<>(c2, c1);
 	}
 }

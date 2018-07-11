@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -117,7 +117,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 				throw new IllegalStateException();
 		}
 
-		// This introduces a dependency on a different package, and relies on that 
+		// This introduces a dependency on a different package, and relies on that
 		// computing the correct answer. However that code predates this and so the
 		// test ensures that the FisherInformationCalculator functions correctly.
 		PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
@@ -132,7 +132,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 
 		if (emCCD)
 		{
-			// Assumes half the poisson fisher information 
+			// Assumes half the poisson fisher information
 			SimpleArrayUtils.multiply(e, 0.5);
 		}
 
@@ -140,7 +140,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 
 		if (model == Model.POISSON || model == Model.HALF_POISSON)
 		{
-			// Get the Mortensen approximation for fitting Poisson data with a Gaussian. 
+			// Get the Mortensen approximation for fitting Poisson data with a Gaussian.
 			// Set a to 100 for the square pixel adjustment.
 			double a = 100;
 			double s = params[Gaussian2DFunction.X_SD] * a;
@@ -198,7 +198,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 
 		f1 = (Gradient1Function) OffsetFunctionFactory.wrapFunction(func, var);
 
-		// This introduces a dependency on a different package, and relies on that 
+		// This introduces a dependency on a different package, and relies on that
 		// computing the correct answer. However that code predates this and so the
 		// test ensures that the FisherInformationCalculator functions correctly.
 		PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);

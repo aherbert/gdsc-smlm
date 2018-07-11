@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -51,7 +51,7 @@ import org.apache.commons.math3.util.FastMath;
  * prediction is set to zero; (b) if the observed random variable (x) is negative it is also set to zero. This occurs
  * when true signal readout from the sCMOS camera is low enough to be negated by readout noise. In this case the noise
  * can be ignored.
- * 
+ *
  * @see Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms.
  *      Nature Methods 10, 653–658.
  */
@@ -254,7 +254,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
 	 */
 	@Override
@@ -330,13 +330,13 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		// From https://en.wikipedia.org/wiki/Likelihood-ratio_test#Use:
 		// LLR = -2 * [ ln(likelihood for alternative model) - ln(likelihood for null model)]
 		// The model with more parameters (here alternative) will always fit at least as well—
-		// i.e., have the same or greater log-likelihood—than the model with fewer parameters 
+		// i.e., have the same or greater log-likelihood—than the model with fewer parameters
 		// (here null)
 
 		double llAlternative = computeObservedLikelihood();
 		double llNull = ll;
 
-		// The alternative should always fit better than the null model 
+		// The alternative should always fit better than the null model
 		if (llNull < llAlternative)
 			llNull = llAlternative;
 
@@ -362,7 +362,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[])
 	 */
 	@Override
@@ -376,7 +376,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		// f(x) = l(x) - k * ln(l(x)) + log(gamma(k+1))
 		// with l(x) as the Poisson mean (the output dependent on the function variables x)
 		// and k the observed value.
-		// 
+		//
 		// Since (k * ln(l(x)))' = (k * ln(l(x))') * l'(x)
 		//                       = (k / l(x)) * l'(x)
 
@@ -412,7 +412,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
 	 */
 	@Override
@@ -434,7 +434,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[], int)
 	 */
 	@Override
@@ -493,7 +493,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		if (u < 0)
 			u = 0;
 		double l = u + var_g2;
-		// Note we need the Math.log(g) to normalise the Poisson distribution to 1 
+		// Note we need the Math.log(g) to normalise the Poisson distribution to 1
 		// since the observed values (k) are scaled by the gain
 		double ll = l + Math.log(g);
 		if (x != 0)
@@ -533,7 +533,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
 	 */
 	@Override
@@ -544,11 +544,11 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 
 	/**
 	 * Compute the Fisher's Information Matrix (I) for fitted variables:
-	 * 
+	 *
 	 * <pre>
 	 * Iab = sum(k) 1/(uk+vark/gk^2)  (duk da) * (duk db)
 	 * </pre>
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @return Fisher's Information Matrix (I)

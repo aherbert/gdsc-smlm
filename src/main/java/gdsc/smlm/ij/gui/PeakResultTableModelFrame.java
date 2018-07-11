@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -77,7 +77,7 @@ import ij.gui.ScreenDimensionHelper;
 
 /**
  * A frame that shows a PeakResultsTableModel
- * 
+ *
  * @author Alex Herbert
  */
 public class PeakResultTableModelFrame extends JFrame implements ActionListener
@@ -155,7 +155,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		add(scroll);
 		pack();
 
-		// If the window is never set visible then we cannot ensure this happens in 
+		// If the window is never set visible then we cannot ensure this happens in
 		// the closing event so do it here and again when opened.
 		model.setLive(false);
 
@@ -268,7 +268,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
@@ -586,7 +586,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	/**
 	 * Launch the application.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws InterruptedException
@@ -651,8 +651,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					//						public void valueChanged(ListSelectionEvent e)
 					//						{
 					//							// Only process the event if the value is not adjusting.
-					//							// Then to determine what has changed only process the 
-					//							// indices between the first and last index. 
+					//							// Then to determine what has changed only process the
+					//							// indices between the first and last index.
 					//
 					//							if (e.getValueIsAdjusting())
 					//								return;
@@ -669,7 +669,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					d2.setTitle("D2");
 					// Since we have the same selection model we need the same row sorter,
 					// otherwise the selection is scrambled by sorting.
-					// The alternative would be to get the source for the selection event (the table) 
+					// The alternative would be to get the source for the selection event (the table)
 					// and get the row sorter to do the mapping.
 					// However this breaks deletion of data as the row sorter double processes the deletion.
 					// Basically only one table can use the same selection model when sorting is desired.

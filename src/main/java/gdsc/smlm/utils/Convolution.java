@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -265,7 +265,7 @@ public class Convolution
 	{
 		checkInput(x, h);
 		// See Junit class ConvolveTest to determine when to switch to the FFT method.
-		// This is not perfect for all length combinations but the switch will happen 
+		// This is not perfect for all length combinations but the switch will happen
 		// when the two methods are roughly the same speed.
 		int min, max;
 		if (x.length < h.length)
@@ -526,7 +526,7 @@ public class Convolution
 	{
 		checkInput(x, h1, h2);
 		// See Junit class ConvolveTest to determine when to switch to the FFT method.
-		// This is not perfect for all length combinations but the switch will happen 
+		// This is not perfect for all length combinations but the switch will happen
 		// when the two methods are roughly the same speed.
 		int min, max;
 		if (x.length < h1.length)
@@ -606,8 +606,8 @@ public class Convolution
 		final int iTotalLength = (int) totalLength;
 		final double[] y = new double[iTotalLength];
 
-		// Convolution sum. x is reversed verses h. 
-		// h is scaled up with zeros. 
+		// Convolution sum. x is reversed verses h.
+		// h is scaled up with zeros.
 		// This is equivalent to using x every interval of scale.
 		for (int n = 0; n < iTotalLength; n++)
 		{
@@ -621,7 +621,7 @@ public class Convolution
 			// The modulus indicates how many values are zero
 			// before the first non-zero value in H (in the descending direction).
 			int mod = k % scale;
-			// kk is the index in input distribution h (in the descending direction). 
+			// kk is the index in input distribution h (in the descending direction).
 			int kk = k / scale;
 			// If there are non-zero value shift the indices
 			if (mod != 0)
@@ -758,8 +758,8 @@ public class Convolution
 		final int iTotalLength = (int) totalLength;
 		final double[][] y = new double[2][iTotalLength];
 
-		// Convolution sum. x is reversed verses h. 
-		// h is scaled up with zeros. 
+		// Convolution sum. x is reversed verses h.
+		// h is scaled up with zeros.
 		// This is equivalent to using x every interval of scale.
 		for (int n = 0; n < iTotalLength; n++)
 		{
@@ -773,7 +773,7 @@ public class Convolution
 			// The modulus indicates how many values are zero
 			// before the first non-zero value in H (in the descending direction).
 			int mod = k % scale;
-			// kk is the index in input distribution h (in the descending direction). 
+			// kk is the index in input distribution h (in the descending direction).
 			int kk = k / scale;
 			// If there are non-zero value shift the indices
 			if (mod != 0)

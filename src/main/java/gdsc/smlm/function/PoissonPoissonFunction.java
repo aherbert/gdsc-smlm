@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,7 +60,7 @@ import gdsc.core.utils.Maths;
  * prediction is set to zero; (b) if the observed random variable (x) is negative it is also set to zero. This occurs
  * when true signal readout from the sCMOS camera is low enough to be negated by readout noise. In this case the noise
  * can be ignored.
- * 
+ *
  * @see Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms.
  *      Nature Methods 10, 653–658. *
  */
@@ -130,7 +130,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
@@ -142,12 +142,12 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 		if (o < 0 || e <= 0)
 			return 0;
 
-		// Allow non-integer observed value using the gamma function to provide a 
+		// Allow non-integer observed value using the gamma function to provide a
 		// factorial for non-integer values. Standard Poisson:
 		// PMF(l,k) = C * e^-l * l^k / gamma(k+1)
 		// log(PMF) = -l + k * log(l) - logGamma(k+1)
 
-		// P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi) 
+		// P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)
 		// = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br/>
 
 		// LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br/>
@@ -163,7 +163,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 
 	/**
 	 * Return the log of the factorial for the given real number, using the gamma function
-	 * 
+	 *
 	 * @param k
 	 * @return the log factorial
 	 */
@@ -176,7 +176,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 
 	/**
 	 * Return the factorial for the given real number, using the gamma function
-	 * 
+	 *
 	 * @param k
 	 * @return the factorial
 	 */
@@ -189,7 +189,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	@Override
@@ -201,12 +201,12 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 		if (o < 0 || e <= 0)
 			return Double.NEGATIVE_INFINITY;
 
-		// Allow non-integer observed value using the gamma function to provide a 
+		// Allow non-integer observed value using the gamma function to provide a
 		// factorial for non-integer values. Standard Poisson:
 		// PMF(l,k) = C * e^-l * l^k / gamma(k+1)
 		// log(PMF) = -l + k * log(l) - logGamma(k+1)
 
-		// P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi) 
+		// P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)
 		// = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br/>
 
 		// LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br/>

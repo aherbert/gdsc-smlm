@@ -49,7 +49,8 @@ public final class GUIProtos {
     public static final int CUSTOM_TEMPLATE_VALUE = 2;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -81,16 +82,19 @@ public final class GUIProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         TemplateType> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<TemplateType>() {
-            public TemplateType findValueByNumber(int number) {
+            @Override
+			public TemplateType findValueByNumber(int number) {
               return TemplateType.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -336,7 +340,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_GUIFilterSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -348,7 +353,8 @@ public final class GUIProtos {
     /**
      * <code>float max_drift = 1;</code>
      */
-    public float getMaxDrift() {
+    @Override
+	public float getMaxDrift() {
       return maxDrift_;
     }
 
@@ -357,7 +363,8 @@ public final class GUIProtos {
     /**
      * <code>float min_signal = 2;</code>
      */
-    public float getMinSignal() {
+    @Override
+	public float getMinSignal() {
       return minSignal_;
     }
 
@@ -366,7 +373,8 @@ public final class GUIProtos {
     /**
      * <code>float min_snr = 3;</code>
      */
-    public float getMinSnr() {
+    @Override
+	public float getMinSnr() {
       return minSnr_;
     }
 
@@ -375,7 +383,8 @@ public final class GUIProtos {
     /**
      * <code>double max_precision = 4;</code>
      */
-    public double getMaxPrecision() {
+    @Override
+	public double getMaxPrecision() {
       return maxPrecision_;
     }
 
@@ -384,7 +393,8 @@ public final class GUIProtos {
     /**
      * <code>float max_width = 5;</code>
      */
-    public float getMaxWidth() {
+    @Override
+	public float getMaxWidth() {
       return maxWidth_;
     }
 
@@ -393,7 +403,8 @@ public final class GUIProtos {
     /**
      * <code>float min_width = 6;</code>
      */
-    public float getMinWidth() {
+    @Override
+	public float getMinWidth() {
       return minWidth_;
     }
 
@@ -402,12 +413,13 @@ public final class GUIProtos {
     /**
      * <code>string mask_title = 7;</code>
      */
-    public java.lang.String getMaskTitle() {
+    @Override
+	public java.lang.String getMaskTitle() {
       java.lang.Object ref = maskTitle_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         maskTitle_ = s;
@@ -417,11 +429,12 @@ public final class GUIProtos {
     /**
      * <code>string mask_title = 7;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getMaskTitleBytes() {
       java.lang.Object ref = maskTitle_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         maskTitle_ = b;
@@ -436,12 +449,13 @@ public final class GUIProtos {
     /**
      * <code>string free_filter = 8;</code>
      */
-    public java.lang.String getFreeFilter() {
+    @Override
+	public java.lang.String getFreeFilter() {
       java.lang.Object ref = freeFilter_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         freeFilter_ = s;
@@ -451,11 +465,12 @@ public final class GUIProtos {
     /**
      * <code>string free_filter = 8;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFreeFilterBytes() {
       java.lang.Object ref = freeFilter_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         freeFilter_ = b;
@@ -470,12 +485,13 @@ public final class GUIProtos {
     /**
      * <code>string filter_template = 9;</code>
      */
-    public java.lang.String getFilterTemplate() {
+    @Override
+	public java.lang.String getFilterTemplate() {
       java.lang.Object ref = filterTemplate_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         filterTemplate_ = s;
@@ -485,11 +501,12 @@ public final class GUIProtos {
     /**
      * <code>string filter_template = 9;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFilterTemplateBytes() {
       java.lang.Object ref = filterTemplate_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filterTemplate_ = b;
@@ -504,12 +521,13 @@ public final class GUIProtos {
     /**
      * <code>string filter_analysis_directory = 10;</code>
      */
-    public java.lang.String getFilterAnalysisDirectory() {
+    @Override
+	public java.lang.String getFilterAnalysisDirectory() {
       java.lang.Object ref = filterAnalysisDirectory_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         filterAnalysisDirectory_ = s;
@@ -519,11 +537,12 @@ public final class GUIProtos {
     /**
      * <code>string filter_analysis_directory = 10;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFilterAnalysisDirectoryBytes() {
       java.lang.Object ref = filterAnalysisDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filterAnalysisDirectory_ = b;
@@ -538,12 +557,13 @@ public final class GUIProtos {
     /**
      * <code>string filter_set_filename = 11;</code>
      */
-    public java.lang.String getFilterSetFilename() {
+    @Override
+	public java.lang.String getFilterSetFilename() {
       java.lang.Object ref = filterSetFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         filterSetFilename_ = s;
@@ -553,11 +573,12 @@ public final class GUIProtos {
     /**
      * <code>string filter_set_filename = 11;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFilterSetFilenameBytes() {
       java.lang.Object ref = filterSetFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filterSetFilename_ = b;
@@ -568,7 +589,8 @@ public final class GUIProtos {
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -577,7 +599,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (maxDrift_ != 0F) {
         output.writeFloat(1, maxDrift_);
@@ -614,7 +637,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -821,14 +845,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.GUIFilterSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -855,7 +881,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_GUIFilterSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -877,7 +904,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         maxDrift_ = 0F;
 
@@ -904,16 +932,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.GUIFilterSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings build() {
         gdsc.smlm.data.config.GUIProtos.GUIFilterSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -921,7 +952,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.GUIFilterSettings result = new gdsc.smlm.data.config.GUIProtos.GUIFilterSettings(this);
         result.maxDrift_ = maxDrift_;
         result.minSignal_ = minSignal_;
@@ -938,33 +970,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.GUIFilterSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.GUIFilterSettings)other);
         } else {
@@ -1017,11 +1056,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -1043,14 +1084,15 @@ public final class GUIProtos {
       /**
        * <code>float max_drift = 1;</code>
        */
-      public float getMaxDrift() {
+      @Override
+	public float getMaxDrift() {
         return maxDrift_;
       }
       /**
        * <code>float max_drift = 1;</code>
        */
       public Builder setMaxDrift(float value) {
-        
+
         maxDrift_ = value;
         onChanged();
         return this;
@@ -1059,7 +1101,7 @@ public final class GUIProtos {
        * <code>float max_drift = 1;</code>
        */
       public Builder clearMaxDrift() {
-        
+
         maxDrift_ = 0F;
         onChanged();
         return this;
@@ -1069,14 +1111,15 @@ public final class GUIProtos {
       /**
        * <code>float min_signal = 2;</code>
        */
-      public float getMinSignal() {
+      @Override
+	public float getMinSignal() {
         return minSignal_;
       }
       /**
        * <code>float min_signal = 2;</code>
        */
       public Builder setMinSignal(float value) {
-        
+
         minSignal_ = value;
         onChanged();
         return this;
@@ -1085,7 +1128,7 @@ public final class GUIProtos {
        * <code>float min_signal = 2;</code>
        */
       public Builder clearMinSignal() {
-        
+
         minSignal_ = 0F;
         onChanged();
         return this;
@@ -1095,14 +1138,15 @@ public final class GUIProtos {
       /**
        * <code>float min_snr = 3;</code>
        */
-      public float getMinSnr() {
+      @Override
+	public float getMinSnr() {
         return minSnr_;
       }
       /**
        * <code>float min_snr = 3;</code>
        */
       public Builder setMinSnr(float value) {
-        
+
         minSnr_ = value;
         onChanged();
         return this;
@@ -1111,7 +1155,7 @@ public final class GUIProtos {
        * <code>float min_snr = 3;</code>
        */
       public Builder clearMinSnr() {
-        
+
         minSnr_ = 0F;
         onChanged();
         return this;
@@ -1121,14 +1165,15 @@ public final class GUIProtos {
       /**
        * <code>double max_precision = 4;</code>
        */
-      public double getMaxPrecision() {
+      @Override
+	public double getMaxPrecision() {
         return maxPrecision_;
       }
       /**
        * <code>double max_precision = 4;</code>
        */
       public Builder setMaxPrecision(double value) {
-        
+
         maxPrecision_ = value;
         onChanged();
         return this;
@@ -1137,7 +1182,7 @@ public final class GUIProtos {
        * <code>double max_precision = 4;</code>
        */
       public Builder clearMaxPrecision() {
-        
+
         maxPrecision_ = 0D;
         onChanged();
         return this;
@@ -1147,14 +1192,15 @@ public final class GUIProtos {
       /**
        * <code>float max_width = 5;</code>
        */
-      public float getMaxWidth() {
+      @Override
+	public float getMaxWidth() {
         return maxWidth_;
       }
       /**
        * <code>float max_width = 5;</code>
        */
       public Builder setMaxWidth(float value) {
-        
+
         maxWidth_ = value;
         onChanged();
         return this;
@@ -1163,7 +1209,7 @@ public final class GUIProtos {
        * <code>float max_width = 5;</code>
        */
       public Builder clearMaxWidth() {
-        
+
         maxWidth_ = 0F;
         onChanged();
         return this;
@@ -1173,14 +1219,15 @@ public final class GUIProtos {
       /**
        * <code>float min_width = 6;</code>
        */
-      public float getMinWidth() {
+      @Override
+	public float getMinWidth() {
         return minWidth_;
       }
       /**
        * <code>float min_width = 6;</code>
        */
       public Builder setMinWidth(float value) {
-        
+
         minWidth_ = value;
         onChanged();
         return this;
@@ -1189,7 +1236,7 @@ public final class GUIProtos {
        * <code>float min_width = 6;</code>
        */
       public Builder clearMinWidth() {
-        
+
         minWidth_ = 0F;
         onChanged();
         return this;
@@ -1199,7 +1246,8 @@ public final class GUIProtos {
       /**
        * <code>string mask_title = 7;</code>
        */
-      public java.lang.String getMaskTitle() {
+      @Override
+	public java.lang.String getMaskTitle() {
         java.lang.Object ref = maskTitle_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -1214,11 +1262,12 @@ public final class GUIProtos {
       /**
        * <code>string mask_title = 7;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getMaskTitleBytes() {
         java.lang.Object ref = maskTitle_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           maskTitle_ = b;
@@ -1235,7 +1284,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         maskTitle_ = value;
         onChanged();
         return this;
@@ -1244,7 +1293,7 @@ public final class GUIProtos {
        * <code>string mask_title = 7;</code>
        */
       public Builder clearMaskTitle() {
-        
+
         maskTitle_ = getDefaultInstance().getMaskTitle();
         onChanged();
         return this;
@@ -1258,7 +1307,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         maskTitle_ = value;
         onChanged();
         return this;
@@ -1268,7 +1317,8 @@ public final class GUIProtos {
       /**
        * <code>string free_filter = 8;</code>
        */
-      public java.lang.String getFreeFilter() {
+      @Override
+	public java.lang.String getFreeFilter() {
         java.lang.Object ref = freeFilter_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -1283,11 +1333,12 @@ public final class GUIProtos {
       /**
        * <code>string free_filter = 8;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFreeFilterBytes() {
         java.lang.Object ref = freeFilter_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           freeFilter_ = b;
@@ -1304,7 +1355,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         freeFilter_ = value;
         onChanged();
         return this;
@@ -1313,7 +1364,7 @@ public final class GUIProtos {
        * <code>string free_filter = 8;</code>
        */
       public Builder clearFreeFilter() {
-        
+
         freeFilter_ = getDefaultInstance().getFreeFilter();
         onChanged();
         return this;
@@ -1327,7 +1378,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         freeFilter_ = value;
         onChanged();
         return this;
@@ -1337,7 +1388,8 @@ public final class GUIProtos {
       /**
        * <code>string filter_template = 9;</code>
        */
-      public java.lang.String getFilterTemplate() {
+      @Override
+	public java.lang.String getFilterTemplate() {
         java.lang.Object ref = filterTemplate_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -1352,11 +1404,12 @@ public final class GUIProtos {
       /**
        * <code>string filter_template = 9;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFilterTemplateBytes() {
         java.lang.Object ref = filterTemplate_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filterTemplate_ = b;
@@ -1373,7 +1426,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         filterTemplate_ = value;
         onChanged();
         return this;
@@ -1382,7 +1435,7 @@ public final class GUIProtos {
        * <code>string filter_template = 9;</code>
        */
       public Builder clearFilterTemplate() {
-        
+
         filterTemplate_ = getDefaultInstance().getFilterTemplate();
         onChanged();
         return this;
@@ -1396,7 +1449,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         filterTemplate_ = value;
         onChanged();
         return this;
@@ -1406,7 +1459,8 @@ public final class GUIProtos {
       /**
        * <code>string filter_analysis_directory = 10;</code>
        */
-      public java.lang.String getFilterAnalysisDirectory() {
+      @Override
+	public java.lang.String getFilterAnalysisDirectory() {
         java.lang.Object ref = filterAnalysisDirectory_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -1421,11 +1475,12 @@ public final class GUIProtos {
       /**
        * <code>string filter_analysis_directory = 10;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFilterAnalysisDirectoryBytes() {
         java.lang.Object ref = filterAnalysisDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filterAnalysisDirectory_ = b;
@@ -1442,7 +1497,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         filterAnalysisDirectory_ = value;
         onChanged();
         return this;
@@ -1451,7 +1506,7 @@ public final class GUIProtos {
        * <code>string filter_analysis_directory = 10;</code>
        */
       public Builder clearFilterAnalysisDirectory() {
-        
+
         filterAnalysisDirectory_ = getDefaultInstance().getFilterAnalysisDirectory();
         onChanged();
         return this;
@@ -1465,7 +1520,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         filterAnalysisDirectory_ = value;
         onChanged();
         return this;
@@ -1475,7 +1530,8 @@ public final class GUIProtos {
       /**
        * <code>string filter_set_filename = 11;</code>
        */
-      public java.lang.String getFilterSetFilename() {
+      @Override
+	public java.lang.String getFilterSetFilename() {
         java.lang.Object ref = filterSetFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -1490,11 +1546,12 @@ public final class GUIProtos {
       /**
        * <code>string filter_set_filename = 11;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFilterSetFilenameBytes() {
         java.lang.Object ref = filterSetFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filterSetFilename_ = b;
@@ -1511,7 +1568,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         filterSetFilename_ = value;
         onChanged();
         return this;
@@ -1520,7 +1577,7 @@ public final class GUIProtos {
        * <code>string filter_set_filename = 11;</code>
        */
       public Builder clearFilterSetFilename() {
-        
+
         filterSetFilename_ = getDefaultInstance().getFilterSetFilename();
         onChanged();
         return this;
@@ -1534,17 +1591,19 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         filterSetFilename_ = value;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1565,7 +1624,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<GUIFilterSettings>
         PARSER = new com.google.protobuf.AbstractParser<GUIFilterSettings>() {
-      public GUIFilterSettings parsePartialFrom(
+      @Override
+	public GUIFilterSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1582,7 +1642,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1728,7 +1789,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1740,7 +1802,8 @@ public final class GUIProtos {
     /**
      * <code>double pixel_pitch = 1;</code>
      */
-    public double getPixelPitch() {
+    @Override
+	public double getPixelPitch() {
       return pixelPitch_;
     }
 
@@ -1749,7 +1812,8 @@ public final class GUIProtos {
     /**
      * <code>double magnification = 2;</code>
      */
-    public double getMagnification() {
+    @Override
+	public double getMagnification() {
       return magnification_;
     }
 
@@ -1758,7 +1822,8 @@ public final class GUIProtos {
     /**
      * <code>double beam_expander = 3;</code>
      */
-    public double getBeamExpander() {
+    @Override
+	public double getBeamExpander() {
       return beamExpander_;
     }
 
@@ -1767,7 +1832,8 @@ public final class GUIProtos {
     /**
      * <code>double wavelength = 4;</code>
      */
-    public double getWavelength() {
+    @Override
+	public double getWavelength() {
       return wavelength_;
     }
 
@@ -1776,7 +1842,8 @@ public final class GUIProtos {
     /**
      * <code>double numerical_aperture = 5;</code>
      */
-    public double getNumericalAperture() {
+    @Override
+	public double getNumericalAperture() {
       return numericalAperture_;
     }
 
@@ -1785,7 +1852,8 @@ public final class GUIProtos {
     /**
      * <code>bool adjust_for_square_pixels = 6;</code>
      */
-    public boolean getAdjustForSquarePixels() {
+    @Override
+	public boolean getAdjustForSquarePixels() {
       return adjustForSquarePixels_;
     }
 
@@ -1794,12 +1862,14 @@ public final class GUIProtos {
     /**
      * <code>double proportionality_factor = 7;</code>
      */
-    public double getProportionalityFactor() {
+    @Override
+	public double getProportionalityFactor() {
       return proportionalityFactor_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -1808,7 +1878,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (pixelPitch_ != 0D) {
         output.writeDouble(1, pixelPitch_);
@@ -1833,7 +1904,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -2014,14 +2086,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -2048,7 +2122,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2070,7 +2145,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         pixelPitch_ = 0D;
 
@@ -2089,16 +2165,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings build() {
         gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -2106,7 +2185,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings(this);
         result.pixelPitch_ = pixelPitch_;
         result.magnification_ = magnification_;
@@ -2119,33 +2199,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings)other);
         } else {
@@ -2181,11 +2268,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -2207,14 +2296,15 @@ public final class GUIProtos {
       /**
        * <code>double pixel_pitch = 1;</code>
        */
-      public double getPixelPitch() {
+      @Override
+	public double getPixelPitch() {
         return pixelPitch_;
       }
       /**
        * <code>double pixel_pitch = 1;</code>
        */
       public Builder setPixelPitch(double value) {
-        
+
         pixelPitch_ = value;
         onChanged();
         return this;
@@ -2223,7 +2313,7 @@ public final class GUIProtos {
        * <code>double pixel_pitch = 1;</code>
        */
       public Builder clearPixelPitch() {
-        
+
         pixelPitch_ = 0D;
         onChanged();
         return this;
@@ -2233,14 +2323,15 @@ public final class GUIProtos {
       /**
        * <code>double magnification = 2;</code>
        */
-      public double getMagnification() {
+      @Override
+	public double getMagnification() {
         return magnification_;
       }
       /**
        * <code>double magnification = 2;</code>
        */
       public Builder setMagnification(double value) {
-        
+
         magnification_ = value;
         onChanged();
         return this;
@@ -2249,7 +2340,7 @@ public final class GUIProtos {
        * <code>double magnification = 2;</code>
        */
       public Builder clearMagnification() {
-        
+
         magnification_ = 0D;
         onChanged();
         return this;
@@ -2259,14 +2350,15 @@ public final class GUIProtos {
       /**
        * <code>double beam_expander = 3;</code>
        */
-      public double getBeamExpander() {
+      @Override
+	public double getBeamExpander() {
         return beamExpander_;
       }
       /**
        * <code>double beam_expander = 3;</code>
        */
       public Builder setBeamExpander(double value) {
-        
+
         beamExpander_ = value;
         onChanged();
         return this;
@@ -2275,7 +2367,7 @@ public final class GUIProtos {
        * <code>double beam_expander = 3;</code>
        */
       public Builder clearBeamExpander() {
-        
+
         beamExpander_ = 0D;
         onChanged();
         return this;
@@ -2285,14 +2377,15 @@ public final class GUIProtos {
       /**
        * <code>double wavelength = 4;</code>
        */
-      public double getWavelength() {
+      @Override
+	public double getWavelength() {
         return wavelength_;
       }
       /**
        * <code>double wavelength = 4;</code>
        */
       public Builder setWavelength(double value) {
-        
+
         wavelength_ = value;
         onChanged();
         return this;
@@ -2301,7 +2394,7 @@ public final class GUIProtos {
        * <code>double wavelength = 4;</code>
        */
       public Builder clearWavelength() {
-        
+
         wavelength_ = 0D;
         onChanged();
         return this;
@@ -2311,14 +2404,15 @@ public final class GUIProtos {
       /**
        * <code>double numerical_aperture = 5;</code>
        */
-      public double getNumericalAperture() {
+      @Override
+	public double getNumericalAperture() {
         return numericalAperture_;
       }
       /**
        * <code>double numerical_aperture = 5;</code>
        */
       public Builder setNumericalAperture(double value) {
-        
+
         numericalAperture_ = value;
         onChanged();
         return this;
@@ -2327,7 +2421,7 @@ public final class GUIProtos {
        * <code>double numerical_aperture = 5;</code>
        */
       public Builder clearNumericalAperture() {
-        
+
         numericalAperture_ = 0D;
         onChanged();
         return this;
@@ -2337,14 +2431,15 @@ public final class GUIProtos {
       /**
        * <code>bool adjust_for_square_pixels = 6;</code>
        */
-      public boolean getAdjustForSquarePixels() {
+      @Override
+	public boolean getAdjustForSquarePixels() {
         return adjustForSquarePixels_;
       }
       /**
        * <code>bool adjust_for_square_pixels = 6;</code>
        */
       public Builder setAdjustForSquarePixels(boolean value) {
-        
+
         adjustForSquarePixels_ = value;
         onChanged();
         return this;
@@ -2353,7 +2448,7 @@ public final class GUIProtos {
        * <code>bool adjust_for_square_pixels = 6;</code>
        */
       public Builder clearAdjustForSquarePixels() {
-        
+
         adjustForSquarePixels_ = false;
         onChanged();
         return this;
@@ -2363,14 +2458,15 @@ public final class GUIProtos {
       /**
        * <code>double proportionality_factor = 7;</code>
        */
-      public double getProportionalityFactor() {
+      @Override
+	public double getProportionalityFactor() {
         return proportionalityFactor_;
       }
       /**
        * <code>double proportionality_factor = 7;</code>
        */
       public Builder setProportionalityFactor(double value) {
-        
+
         proportionalityFactor_ = value;
         onChanged();
         return this;
@@ -2379,17 +2475,19 @@ public final class GUIProtos {
        * <code>double proportionality_factor = 7;</code>
        */
       public Builder clearProportionalityFactor() {
-        
+
         proportionalityFactor_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -2410,7 +2508,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<PSFCalculatorSettings>
         PARSER = new com.google.protobuf.AbstractParser<PSFCalculatorSettings>() {
-      public PSFCalculatorSettings parsePartialFrom(
+      @Override
+	public PSFCalculatorSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2427,7 +2526,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2573,7 +2673,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -2585,7 +2686,8 @@ public final class GUIProtos {
     /**
      * <code>int32 number_of_peaks = 1;</code>
      */
-    public int getNumberOfPeaks() {
+    @Override
+	public int getNumberOfPeaks() {
       return numberOfPeaks_;
     }
 
@@ -2594,7 +2696,8 @@ public final class GUIProtos {
     /**
      * <code>double p_value = 2;</code>
      */
-    public double getPValue() {
+    @Override
+	public double getPValue() {
       return pValue_;
     }
 
@@ -2603,7 +2706,8 @@ public final class GUIProtos {
     /**
      * <code>bool update_preferences = 3;</code>
      */
-    public boolean getUpdatePreferences() {
+    @Override
+	public boolean getUpdatePreferences() {
       return updatePreferences_;
     }
 
@@ -2612,7 +2716,8 @@ public final class GUIProtos {
     /**
      * <code>bool debug_psf_estimator = 4;</code>
      */
-    public boolean getDebugPsfEstimator() {
+    @Override
+	public boolean getDebugPsfEstimator() {
       return debugPsfEstimator_;
     }
 
@@ -2621,7 +2726,8 @@ public final class GUIProtos {
     /**
      * <code>bool iterate = 5;</code>
      */
-    public boolean getIterate() {
+    @Override
+	public boolean getIterate() {
       return iterate_;
     }
 
@@ -2630,7 +2736,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_histograms = 6;</code>
      */
-    public boolean getShowHistograms() {
+    @Override
+	public boolean getShowHistograms() {
       return showHistograms_;
     }
 
@@ -2639,12 +2746,14 @@ public final class GUIProtos {
     /**
      * <code>int32 histogram_bins = 7;</code>
      */
-    public int getHistogramBins() {
+    @Override
+	public int getHistogramBins() {
       return histogramBins_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -2653,7 +2762,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (numberOfPeaks_ != 0) {
         output.writeInt32(1, numberOfPeaks_);
@@ -2678,7 +2788,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -2847,14 +2958,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -2881,7 +2994,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2903,7 +3017,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         numberOfPeaks_ = 0;
 
@@ -2922,16 +3037,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings build() {
         gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -2939,7 +3057,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings(this);
         result.numberOfPeaks_ = numberOfPeaks_;
         result.pValue_ = pValue_;
@@ -2952,33 +3071,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings)other);
         } else {
@@ -3014,11 +3140,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -3040,14 +3168,15 @@ public final class GUIProtos {
       /**
        * <code>int32 number_of_peaks = 1;</code>
        */
-      public int getNumberOfPeaks() {
+      @Override
+	public int getNumberOfPeaks() {
         return numberOfPeaks_;
       }
       /**
        * <code>int32 number_of_peaks = 1;</code>
        */
       public Builder setNumberOfPeaks(int value) {
-        
+
         numberOfPeaks_ = value;
         onChanged();
         return this;
@@ -3056,7 +3185,7 @@ public final class GUIProtos {
        * <code>int32 number_of_peaks = 1;</code>
        */
       public Builder clearNumberOfPeaks() {
-        
+
         numberOfPeaks_ = 0;
         onChanged();
         return this;
@@ -3066,14 +3195,15 @@ public final class GUIProtos {
       /**
        * <code>double p_value = 2;</code>
        */
-      public double getPValue() {
+      @Override
+	public double getPValue() {
         return pValue_;
       }
       /**
        * <code>double p_value = 2;</code>
        */
       public Builder setPValue(double value) {
-        
+
         pValue_ = value;
         onChanged();
         return this;
@@ -3082,7 +3212,7 @@ public final class GUIProtos {
        * <code>double p_value = 2;</code>
        */
       public Builder clearPValue() {
-        
+
         pValue_ = 0D;
         onChanged();
         return this;
@@ -3092,14 +3222,15 @@ public final class GUIProtos {
       /**
        * <code>bool update_preferences = 3;</code>
        */
-      public boolean getUpdatePreferences() {
+      @Override
+	public boolean getUpdatePreferences() {
         return updatePreferences_;
       }
       /**
        * <code>bool update_preferences = 3;</code>
        */
       public Builder setUpdatePreferences(boolean value) {
-        
+
         updatePreferences_ = value;
         onChanged();
         return this;
@@ -3108,7 +3239,7 @@ public final class GUIProtos {
        * <code>bool update_preferences = 3;</code>
        */
       public Builder clearUpdatePreferences() {
-        
+
         updatePreferences_ = false;
         onChanged();
         return this;
@@ -3118,14 +3249,15 @@ public final class GUIProtos {
       /**
        * <code>bool debug_psf_estimator = 4;</code>
        */
-      public boolean getDebugPsfEstimator() {
+      @Override
+	public boolean getDebugPsfEstimator() {
         return debugPsfEstimator_;
       }
       /**
        * <code>bool debug_psf_estimator = 4;</code>
        */
       public Builder setDebugPsfEstimator(boolean value) {
-        
+
         debugPsfEstimator_ = value;
         onChanged();
         return this;
@@ -3134,7 +3266,7 @@ public final class GUIProtos {
        * <code>bool debug_psf_estimator = 4;</code>
        */
       public Builder clearDebugPsfEstimator() {
-        
+
         debugPsfEstimator_ = false;
         onChanged();
         return this;
@@ -3144,14 +3276,15 @@ public final class GUIProtos {
       /**
        * <code>bool iterate = 5;</code>
        */
-      public boolean getIterate() {
+      @Override
+	public boolean getIterate() {
         return iterate_;
       }
       /**
        * <code>bool iterate = 5;</code>
        */
       public Builder setIterate(boolean value) {
-        
+
         iterate_ = value;
         onChanged();
         return this;
@@ -3160,7 +3293,7 @@ public final class GUIProtos {
        * <code>bool iterate = 5;</code>
        */
       public Builder clearIterate() {
-        
+
         iterate_ = false;
         onChanged();
         return this;
@@ -3170,14 +3303,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_histograms = 6;</code>
        */
-      public boolean getShowHistograms() {
+      @Override
+	public boolean getShowHistograms() {
         return showHistograms_;
       }
       /**
        * <code>bool show_histograms = 6;</code>
        */
       public Builder setShowHistograms(boolean value) {
-        
+
         showHistograms_ = value;
         onChanged();
         return this;
@@ -3186,7 +3320,7 @@ public final class GUIProtos {
        * <code>bool show_histograms = 6;</code>
        */
       public Builder clearShowHistograms() {
-        
+
         showHistograms_ = false;
         onChanged();
         return this;
@@ -3196,14 +3330,15 @@ public final class GUIProtos {
       /**
        * <code>int32 histogram_bins = 7;</code>
        */
-      public int getHistogramBins() {
+      @Override
+	public int getHistogramBins() {
         return histogramBins_;
       }
       /**
        * <code>int32 histogram_bins = 7;</code>
        */
       public Builder setHistogramBins(int value) {
-        
+
         histogramBins_ = value;
         onChanged();
         return this;
@@ -3212,17 +3347,19 @@ public final class GUIProtos {
        * <code>int32 histogram_bins = 7;</code>
        */
       public Builder clearHistogramBins() {
-        
+
         histogramBins_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -3243,7 +3380,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<PSFEstimatorSettings>
         PARSER = new com.google.protobuf.AbstractParser<PSFEstimatorSettings>() {
-      public PSFEstimatorSettings parsePartialFrom(
+      @Override
+	public PSFEstimatorSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -3260,7 +3398,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3807,7 +3946,7 @@ public final class GUIProtos {
 
     /**
      * <pre>
-     * The camera model name. This should contain all the information required to 
+     * The camera model name. This should contain all the information required to
      * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
      * </pre>
      *
@@ -3816,7 +3955,7 @@ public final class GUIProtos {
     java.lang.String getCameraModelName();
     /**
      * <pre>
-     * The camera model name. This should contain all the information required to 
+     * The camera model name. This should contain all the information required to
      * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
      * </pre>
      *
@@ -4461,7 +4600,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -4473,7 +4613,8 @@ public final class GUIProtos {
     /**
      * <code>int32 size = 1;</code>
      */
-    public int getSize() {
+    @Override
+	public int getSize() {
       return size_;
     }
 
@@ -4482,7 +4623,8 @@ public final class GUIProtos {
     /**
      * <code>double depth = 2;</code>
      */
-    public double getDepth() {
+    @Override
+	public double getDepth() {
       return depth_;
     }
 
@@ -4491,7 +4633,8 @@ public final class GUIProtos {
     /**
      * <code>bool fixed_Depth = 3;</code>
      */
-    public boolean getFixedDepth() {
+    @Override
+	public boolean getFixedDepth() {
       return fixedDepth_;
     }
 
@@ -4500,7 +4643,8 @@ public final class GUIProtos {
     /**
      * <code>double seconds = 4;</code>
      */
-    public double getSeconds() {
+    @Override
+	public double getSeconds() {
       return seconds_;
     }
 
@@ -4509,7 +4653,8 @@ public final class GUIProtos {
     /**
      * <code>double exposure_time = 5;</code>
      */
-    public double getExposureTime() {
+    @Override
+	public double getExposureTime() {
       return exposureTime_;
     }
 
@@ -4518,7 +4663,8 @@ public final class GUIProtos {
     /**
      * <code>double steps_per_second = 6;</code>
      */
-    public double getStepsPerSecond() {
+    @Override
+	public double getStepsPerSecond() {
       return stepsPerSecond_;
     }
 
@@ -4527,12 +4673,13 @@ public final class GUIProtos {
     /**
      * <code>string illumination = 7;</code>
      */
-    public java.lang.String getIllumination() {
+    @Override
+	public java.lang.String getIllumination() {
       java.lang.Object ref = illumination_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         illumination_ = s;
@@ -4542,11 +4689,12 @@ public final class GUIProtos {
     /**
      * <code>string illumination = 7;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getIlluminationBytes() {
       java.lang.Object ref = illumination_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         illumination_ = b;
@@ -4561,12 +4709,13 @@ public final class GUIProtos {
     /**
      * <code>string background_image = 8;</code>
      */
-    public java.lang.String getBackgroundImage() {
+    @Override
+	public java.lang.String getBackgroundImage() {
       java.lang.Object ref = backgroundImage_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         backgroundImage_ = s;
@@ -4576,11 +4725,12 @@ public final class GUIProtos {
     /**
      * <code>string background_image = 8;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getBackgroundImageBytes() {
       java.lang.Object ref = backgroundImage_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         backgroundImage_ = b;
@@ -4595,12 +4745,13 @@ public final class GUIProtos {
     /**
      * <code>string distribution = 9;</code>
      */
-    public java.lang.String getDistribution() {
+    @Override
+	public java.lang.String getDistribution() {
       java.lang.Object ref = distribution_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         distribution_ = s;
@@ -4610,11 +4761,12 @@ public final class GUIProtos {
     /**
      * <code>string distribution = 9;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getDistributionBytes() {
       java.lang.Object ref = distribution_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         distribution_ = b;
@@ -4629,12 +4781,13 @@ public final class GUIProtos {
     /**
      * <code>string distribution_mask = 10;</code>
      */
-    public java.lang.String getDistributionMask() {
+    @Override
+	public java.lang.String getDistributionMask() {
       java.lang.Object ref = distributionMask_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         distributionMask_ = s;
@@ -4644,11 +4797,12 @@ public final class GUIProtos {
     /**
      * <code>string distribution_mask = 10;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getDistributionMaskBytes() {
       java.lang.Object ref = distributionMask_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         distributionMask_ = b;
@@ -4663,7 +4817,8 @@ public final class GUIProtos {
     /**
      * <code>double distribution_mask_slice_depth = 11;</code>
      */
-    public double getDistributionMaskSliceDepth() {
+    @Override
+	public double getDistributionMaskSliceDepth() {
       return distributionMaskSliceDepth_;
     }
 
@@ -4672,7 +4827,8 @@ public final class GUIProtos {
     /**
      * <code>bool poisson_noise = 12;</code>
      */
-    public boolean getPoissonNoise() {
+    @Override
+	public boolean getPoissonNoise() {
       return poissonNoise_;
     }
 
@@ -4681,7 +4837,8 @@ public final class GUIProtos {
     /**
      * <code>double background = 13;</code>
      */
-    public double getBackground() {
+    @Override
+	public double getBackground() {
       return background_;
     }
 
@@ -4690,7 +4847,8 @@ public final class GUIProtos {
     /**
      * <code>double em_gain = 14;</code>
      */
-    public double getEmGain() {
+    @Override
+	public double getEmGain() {
       return emGain_;
     }
 
@@ -4699,7 +4857,8 @@ public final class GUIProtos {
     /**
      * <code>double camera_gain = 15;</code>
      */
-    public double getCameraGain() {
+    @Override
+	public double getCameraGain() {
       return cameraGain_;
     }
 
@@ -4708,7 +4867,8 @@ public final class GUIProtos {
     /**
      * <code>double quantum_efficiency = 16;</code>
      */
-    public double getQuantumEfficiency() {
+    @Override
+	public double getQuantumEfficiency() {
       return quantumEfficiency_;
     }
 
@@ -4721,7 +4881,8 @@ public final class GUIProtos {
      *
      * <code>double read_noise = 17;</code>
      */
-    public double getReadNoise() {
+    @Override
+	public double getReadNoise() {
       return readNoise_;
     }
 
@@ -4730,7 +4891,8 @@ public final class GUIProtos {
     /**
      * <code>int32 bias = 18;</code>
      */
-    public int getBias() {
+    @Override
+	public int getBias() {
       return bias_;
     }
 
@@ -4739,7 +4901,8 @@ public final class GUIProtos {
     /**
      * <code>int32 particles = 19;</code>
      */
-    public int getParticles() {
+    @Override
+	public int getParticles() {
       return particles_;
     }
 
@@ -4748,7 +4911,8 @@ public final class GUIProtos {
     /**
      * <code>bool sample_per_frame = 20;</code>
      */
-    public boolean getSamplePerFrame() {
+    @Override
+	public boolean getSamplePerFrame() {
       return samplePerFrame_;
     }
 
@@ -4763,7 +4927,8 @@ public final class GUIProtos {
      *
      * <code>double photons_per_second = 21;</code>
      */
-    public double getPhotonsPerSecond() {
+    @Override
+	public double getPhotonsPerSecond() {
       return photonsPerSecond_;
     }
 
@@ -4777,7 +4942,8 @@ public final class GUIProtos {
      *
      * <code>double photons_per_second_maximum = 22;</code>
      */
-    public double getPhotonsPerSecondMaximum() {
+    @Override
+	public double getPhotonsPerSecondMaximum() {
       return photonsPerSecondMaximum_;
     }
 
@@ -4791,12 +4957,13 @@ public final class GUIProtos {
      *
      * <code>string photon_distribution = 23;</code>
      */
-    public java.lang.String getPhotonDistribution() {
+    @Override
+	public java.lang.String getPhotonDistribution() {
       java.lang.Object ref = photonDistribution_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         photonDistribution_ = s;
@@ -4811,11 +4978,12 @@ public final class GUIProtos {
      *
      * <code>string photon_distribution = 23;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getPhotonDistributionBytes() {
       java.lang.Object ref = photonDistribution_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         photonDistribution_ = b;
@@ -4830,12 +4998,13 @@ public final class GUIProtos {
     /**
      * <code>string photon_distribution_file = 24;</code>
      */
-    public java.lang.String getPhotonDistributionFile() {
+    @Override
+	public java.lang.String getPhotonDistributionFile() {
       java.lang.Object ref = photonDistributionFile_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         photonDistributionFile_ = s;
@@ -4845,11 +5014,12 @@ public final class GUIProtos {
     /**
      * <code>string photon_distribution_file = 24;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getPhotonDistributionFileBytes() {
       java.lang.Object ref = photonDistributionFile_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         photonDistributionFile_ = b;
@@ -4864,7 +5034,8 @@ public final class GUIProtos {
     /**
      * <code>double photon_shape = 25;</code>
      */
-    public double getPhotonShape() {
+    @Override
+	public double getPhotonShape() {
       return photonShape_;
     }
 
@@ -4873,7 +5044,8 @@ public final class GUIProtos {
     /**
      * <code>double correlation = 26;</code>
      */
-    public double getCorrelation() {
+    @Override
+	public double getCorrelation() {
       return correlation_;
     }
 
@@ -4882,12 +5054,13 @@ public final class GUIProtos {
     /**
      * <code>string psf_model = 27;</code>
      */
-    public java.lang.String getPsfModel() {
+    @Override
+	public java.lang.String getPsfModel() {
       java.lang.Object ref = psfModel_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         psfModel_ = s;
@@ -4897,11 +5070,12 @@ public final class GUIProtos {
     /**
      * <code>string psf_model = 27;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getPsfModelBytes() {
       java.lang.Object ref = psfModel_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         psfModel_ = b;
@@ -4916,12 +5090,13 @@ public final class GUIProtos {
     /**
      * <code>string psf_image_name = 28;</code>
      */
-    public java.lang.String getPsfImageName() {
+    @Override
+	public java.lang.String getPsfImageName() {
       java.lang.Object ref = psfImageName_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         psfImageName_ = s;
@@ -4931,11 +5106,12 @@ public final class GUIProtos {
     /**
      * <code>string psf_image_name = 28;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getPsfImageNameBytes() {
       java.lang.Object ref = psfImageName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         psfImageName_ = b;
@@ -4950,7 +5126,8 @@ public final class GUIProtos {
     /**
      * <code>bool enter_width = 29;</code>
      */
-    public boolean getEnterWidth() {
+    @Override
+	public boolean getEnterWidth() {
       return enterWidth_;
     }
 
@@ -4959,7 +5136,8 @@ public final class GUIProtos {
     /**
      * <code>double wavelength = 30;</code>
      */
-    public double getWavelength() {
+    @Override
+	public double getWavelength() {
       return wavelength_;
     }
 
@@ -4968,7 +5146,8 @@ public final class GUIProtos {
     /**
      * <code>double numerical_aperture = 31;</code>
      */
-    public double getNumericalAperture() {
+    @Override
+	public double getNumericalAperture() {
       return numericalAperture_;
     }
 
@@ -4977,7 +5156,8 @@ public final class GUIProtos {
     /**
      * <code>double psf_sd = 32;</code>
      */
-    public double getPsfSd() {
+    @Override
+	public double getPsfSd() {
       return psfSd_;
     }
 
@@ -4986,7 +5166,8 @@ public final class GUIProtos {
     /**
      * <code>double pixel_pitch = 33;</code>
      */
-    public double getPixelPitch() {
+    @Override
+	public double getPixelPitch() {
       return pixelPitch_;
     }
 
@@ -4995,7 +5176,8 @@ public final class GUIProtos {
     /**
      * <code>double density = 34;</code>
      */
-    public double getDensity() {
+    @Override
+	public double getDensity() {
       return density_;
     }
 
@@ -5004,7 +5186,8 @@ public final class GUIProtos {
     /**
      * <code>double diffusion_rate = 35;</code>
      */
-    public double getDiffusionRate() {
+    @Override
+	public double getDiffusionRate() {
       return diffusionRate_;
     }
 
@@ -5013,7 +5196,8 @@ public final class GUIProtos {
     /**
      * <code>int32 diffusion_type = 36;</code>
      */
-    public int getDiffusionType() {
+    @Override
+	public int getDiffusionType() {
       return diffusionType_;
     }
 
@@ -5022,7 +5206,8 @@ public final class GUIProtos {
     /**
      * <code>bool compound_molecules = 37;</code>
      */
-    public boolean getCompoundMolecules() {
+    @Override
+	public boolean getCompoundMolecules() {
       return compoundMolecules_;
     }
 
@@ -5031,12 +5216,13 @@ public final class GUIProtos {
     /**
      * <code>string compound_text = 38;</code>
      */
-    public java.lang.String getCompoundText() {
+    @Override
+	public java.lang.String getCompoundText() {
       java.lang.Object ref = compoundText_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         compoundText_ = s;
@@ -5046,11 +5232,12 @@ public final class GUIProtos {
     /**
      * <code>string compound_text = 38;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getCompoundTextBytes() {
       java.lang.Object ref = compoundText_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         compoundText_ = b;
@@ -5065,7 +5252,8 @@ public final class GUIProtos {
     /**
      * <code>bool diffuse_2D = 39;</code>
      */
-    public boolean getDiffuse2D() {
+    @Override
+	public boolean getDiffuse2D() {
       return diffuse2D_;
     }
 
@@ -5074,7 +5262,8 @@ public final class GUIProtos {
     /**
      * <code>bool rotate_initial_orientation = 40;</code>
      */
-    public boolean getRotateInitialOrientation() {
+    @Override
+	public boolean getRotateInitialOrientation() {
       return rotateInitialOrientation_;
     }
 
@@ -5083,7 +5272,8 @@ public final class GUIProtos {
     /**
      * <code>bool rotate_during_simulation = 41;</code>
      */
-    public boolean getRotateDuringSimulation() {
+    @Override
+	public boolean getRotateDuringSimulation() {
       return rotateDuringSimulation_;
     }
 
@@ -5092,7 +5282,8 @@ public final class GUIProtos {
     /**
      * <code>bool rotate_2D = 42;</code>
      */
-    public boolean getRotate2D() {
+    @Override
+	public boolean getRotate2D() {
       return rotate2D_;
     }
 
@@ -5101,7 +5292,8 @@ public final class GUIProtos {
     /**
      * <code>double fixedFraction = 43;</code>
      */
-    public double getFixedFraction() {
+    @Override
+	public double getFixedFraction() {
       return fixedFraction_;
     }
 
@@ -5110,12 +5302,13 @@ public final class GUIProtos {
     /**
      * <code>string confinement = 44;</code>
      */
-    public java.lang.String getConfinement() {
+    @Override
+	public java.lang.String getConfinement() {
       java.lang.Object ref = confinement_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         confinement_ = s;
@@ -5125,11 +5318,12 @@ public final class GUIProtos {
     /**
      * <code>string confinement = 44;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getConfinementBytes() {
       java.lang.Object ref = confinement_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         confinement_ = b;
@@ -5144,12 +5338,13 @@ public final class GUIProtos {
     /**
      * <code>string confinement_mask = 45;</code>
      */
-    public java.lang.String getConfinementMask() {
+    @Override
+	public java.lang.String getConfinementMask() {
       java.lang.Object ref = confinementMask_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         confinementMask_ = s;
@@ -5159,11 +5354,12 @@ public final class GUIProtos {
     /**
      * <code>string confinement_mask = 45;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getConfinementMaskBytes() {
       java.lang.Object ref = confinementMask_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         confinementMask_ = b;
@@ -5178,7 +5374,8 @@ public final class GUIProtos {
     /**
      * <code>double confinement_mask_slice_depth = 46;</code>
      */
-    public double getConfinementMaskSliceDepth() {
+    @Override
+	public double getConfinementMaskSliceDepth() {
       return confinementMaskSliceDepth_;
     }
 
@@ -5187,7 +5384,8 @@ public final class GUIProtos {
     /**
      * <code>double confinement_radius = 47;</code>
      */
-    public double getConfinementRadius() {
+    @Override
+	public double getConfinementRadius() {
       return confinementRadius_;
     }
 
@@ -5196,7 +5394,8 @@ public final class GUIProtos {
     /**
      * <code>int32 pulse_interval = 48;</code>
      */
-    public int getPulseInterval() {
+    @Override
+	public int getPulseInterval() {
       return pulseInterval_;
     }
 
@@ -5205,7 +5404,8 @@ public final class GUIProtos {
     /**
      * <code>double pulse_ratio = 49;</code>
      */
-    public double getPulseRatio() {
+    @Override
+	public double getPulseRatio() {
       return pulseRatio_;
     }
 
@@ -5218,7 +5418,8 @@ public final class GUIProtos {
      *
      * <code>double t_on = 50;</code>
      */
-    public double getTOn() {
+    @Override
+	public double getTOn() {
       return tOn_;
     }
 
@@ -5231,7 +5432,8 @@ public final class GUIProtos {
      *
      * <code>double t_off_short = 51;</code>
      */
-    public double getTOffShort() {
+    @Override
+	public double getTOffShort() {
       return tOffShort_;
     }
 
@@ -5244,7 +5446,8 @@ public final class GUIProtos {
      *
      * <code>double t_off_long = 52;</code>
      */
-    public double getTOffLong() {
+    @Override
+	public double getTOffLong() {
       return tOffLong_;
     }
 
@@ -5257,7 +5460,8 @@ public final class GUIProtos {
      *
      * <code>double n_blinks_short = 53;</code>
      */
-    public double getNBlinksShort() {
+    @Override
+	public double getNBlinksShort() {
       return nBlinksShort_;
     }
 
@@ -5270,7 +5474,8 @@ public final class GUIProtos {
      *
      * <code>double n_blinks_long = 54;</code>
      */
-    public double getNBlinksLong() {
+    @Override
+	public double getNBlinksLong() {
       return nBlinksLong_;
     }
 
@@ -5283,7 +5488,8 @@ public final class GUIProtos {
      *
      * <code>bool n_blinks_geometric_distribution = 55;</code>
      */
-    public boolean getNBlinksGeometricDistribution() {
+    @Override
+	public boolean getNBlinksGeometricDistribution() {
       return nBlinksGeometricDistribution_;
     }
 
@@ -5292,7 +5498,8 @@ public final class GUIProtos {
     /**
      * <code>double min_photons = 56;</code>
      */
-    public double getMinPhotons() {
+    @Override
+	public double getMinPhotons() {
       return minPhotons_;
     }
 
@@ -5301,7 +5508,8 @@ public final class GUIProtos {
     /**
      * <code>double min_snr_t1 = 57;</code>
      */
-    public double getMinSnrT1() {
+    @Override
+	public double getMinSnrT1() {
       return minSnrT1_;
     }
 
@@ -5310,7 +5518,8 @@ public final class GUIProtos {
     /**
      * <code>double min_snr_tN = 58;</code>
      */
-    public double getMinSnrTN() {
+    @Override
+	public double getMinSnrTN() {
       return minSnrTN_;
     }
 
@@ -5319,7 +5528,8 @@ public final class GUIProtos {
     /**
      * <code>bool raw_image = 59;</code>
      */
-    public boolean getRawImage() {
+    @Override
+	public boolean getRawImage() {
       return rawImage_;
     }
 
@@ -5328,7 +5538,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_image = 60;</code>
      */
-    public boolean getSaveImage() {
+    @Override
+	public boolean getSaveImage() {
       return saveImage_;
     }
 
@@ -5337,7 +5548,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_image_results = 61;</code>
      */
-    public boolean getSaveImageResults() {
+    @Override
+	public boolean getSaveImageResults() {
       return saveImageResults_;
     }
 
@@ -5346,7 +5558,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_localisations = 62;</code>
      */
-    public boolean getSaveLocalisations() {
+    @Override
+	public boolean getSaveLocalisations() {
       return saveLocalisations_;
     }
 
@@ -5355,7 +5568,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_fluorophores = 63;</code>
      */
-    public boolean getSaveFluorophores() {
+    @Override
+	public boolean getSaveFluorophores() {
       return saveFluorophores_;
     }
 
@@ -5364,12 +5578,13 @@ public final class GUIProtos {
     /**
      * <code>string image_filename = 64;</code>
      */
-    public java.lang.String getImageFilename() {
+    @Override
+	public java.lang.String getImageFilename() {
       java.lang.Object ref = imageFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         imageFilename_ = s;
@@ -5379,11 +5594,12 @@ public final class GUIProtos {
     /**
      * <code>string image_filename = 64;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getImageFilenameBytes() {
       java.lang.Object ref = imageFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         imageFilename_ = b;
@@ -5398,12 +5614,13 @@ public final class GUIProtos {
     /**
      * <code>string image_results_filename = 65;</code>
      */
-    public java.lang.String getImageResultsFilename() {
+    @Override
+	public java.lang.String getImageResultsFilename() {
       java.lang.Object ref = imageResultsFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         imageResultsFilename_ = s;
@@ -5413,11 +5630,12 @@ public final class GUIProtos {
     /**
      * <code>string image_results_filename = 65;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getImageResultsFilenameBytes() {
       java.lang.Object ref = imageResultsFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         imageResultsFilename_ = b;
@@ -5432,12 +5650,13 @@ public final class GUIProtos {
     /**
      * <code>string fluorophoresFilename = 66;</code>
      */
-    public java.lang.String getFluorophoresFilename() {
+    @Override
+	public java.lang.String getFluorophoresFilename() {
       java.lang.Object ref = fluorophoresFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         fluorophoresFilename_ = s;
@@ -5447,11 +5666,12 @@ public final class GUIProtos {
     /**
      * <code>string fluorophoresFilename = 66;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFluorophoresFilenameBytes() {
       java.lang.Object ref = fluorophoresFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         fluorophoresFilename_ = b;
@@ -5466,7 +5686,8 @@ public final class GUIProtos {
     /**
      * <code>int32 cell_size = 67;</code>
      */
-    public int getCellSize() {
+    @Override
+	public int getCellSize() {
       return cellSize_;
     }
 
@@ -5475,7 +5696,8 @@ public final class GUIProtos {
     /**
      * <code>double probability_binary = 68;</code>
      */
-    public double getProbabilityBinary() {
+    @Override
+	public double getProbabilityBinary() {
       return probabilityBinary_;
     }
 
@@ -5484,7 +5706,8 @@ public final class GUIProtos {
     /**
      * <code>double min_binary_distance = 69;</code>
      */
-    public double getMinBinaryDistance() {
+    @Override
+	public double getMinBinaryDistance() {
       return minBinaryDistance_;
     }
 
@@ -5493,7 +5716,8 @@ public final class GUIProtos {
     /**
      * <code>double max_binary_distance = 70;</code>
      */
-    public double getMaxBinaryDistance() {
+    @Override
+	public double getMaxBinaryDistance() {
       return maxBinaryDistance_;
     }
 
@@ -5502,7 +5726,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_histograms = 71;</code>
      */
-    public boolean getShowHistograms() {
+    @Override
+	public boolean getShowHistograms() {
       return showHistograms_;
     }
 
@@ -5511,7 +5736,8 @@ public final class GUIProtos {
     /**
      * <code>bool choose_histograms = 72;</code>
      */
-    public boolean getChooseHistograms() {
+    @Override
+	public boolean getChooseHistograms() {
       return chooseHistograms_;
     }
 
@@ -5520,7 +5746,8 @@ public final class GUIProtos {
     /**
      * <code>int32 histogram_bins = 73;</code>
      */
-    public int getHistogramBins() {
+    @Override
+	public int getHistogramBins() {
       return histogramBins_;
     }
 
@@ -5529,7 +5756,8 @@ public final class GUIProtos {
     /**
      * <code>bool remove_outliers = 74;</code>
      */
-    public boolean getRemoveOutliers() {
+    @Override
+	public boolean getRemoveOutliers() {
       return removeOutliers_;
     }
 
@@ -5538,7 +5766,8 @@ public final class GUIProtos {
     /**
      * <code>float density_radius = 75;</code>
      */
-    public float getDensityRadius() {
+    @Override
+	public float getDensityRadius() {
       return densityRadius_;
     }
 
@@ -5551,7 +5780,8 @@ public final class GUIProtos {
      *
      * <code>float depth_of_field = 76;</code>
      */
-    public float getDepthOfField() {
+    @Override
+	public float getDepthOfField() {
       return depthOfField_;
     }
 
@@ -5560,7 +5790,8 @@ public final class GUIProtos {
     /**
      * <code>double x_position = 77;</code>
      */
-    public double getXPosition() {
+    @Override
+	public double getXPosition() {
       return xPosition_;
     }
 
@@ -5569,7 +5800,8 @@ public final class GUIProtos {
     /**
      * <code>double y_position = 78;</code>
      */
-    public double getYPosition() {
+    @Override
+	public double getYPosition() {
       return yPosition_;
     }
 
@@ -5578,7 +5810,8 @@ public final class GUIProtos {
     /**
      * <code>double z_position = 79;</code>
      */
-    public double getZPosition() {
+    @Override
+	public double getZPosition() {
       return zPosition_;
     }
 
@@ -5591,7 +5824,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
      */
-    public int getCameraTypeValue() {
+    @Override
+	public int getCameraTypeValue() {
       return cameraType_;
     }
     /**
@@ -5601,7 +5835,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
       gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
       return result == null ? gdsc.smlm.data.config.CalibrationProtos.CameraType.UNRECOGNIZED : result;
     }
@@ -5610,18 +5845,19 @@ public final class GUIProtos {
     private volatile java.lang.Object cameraModelName_;
     /**
      * <pre>
-     * The camera model name. This should contain all the information required to 
+     * The camera model name. This should contain all the information required to
      * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
      * </pre>
      *
      * <code>string camera_model_name = 81;</code>
      */
-    public java.lang.String getCameraModelName() {
+    @Override
+	public java.lang.String getCameraModelName() {
       java.lang.Object ref = cameraModelName_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         cameraModelName_ = s;
@@ -5630,17 +5866,18 @@ public final class GUIProtos {
     }
     /**
      * <pre>
-     * The camera model name. This should contain all the information required to 
+     * The camera model name. This should contain all the information required to
      * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
      * </pre>
      *
      * <code>string camera_model_name = 81;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getCameraModelNameBytes() {
       java.lang.Object ref = cameraModelName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         cameraModelName_ = b;
@@ -5655,7 +5892,8 @@ public final class GUIProtos {
     /**
      * <code>bool random_crop = 82;</code>
      */
-    public boolean getRandomCrop() {
+    @Override
+	public boolean getRandomCrop() {
       return randomCrop_;
     }
 
@@ -5668,7 +5906,8 @@ public final class GUIProtos {
      *
      * <code>int32 origin_x = 83;</code>
      */
-    public int getOriginX() {
+    @Override
+	public int getOriginX() {
       return originX_;
     }
 
@@ -5681,7 +5920,8 @@ public final class GUIProtos {
      *
      * <code>int32 origin_y = 84;</code>
      */
-    public int getOriginY() {
+    @Override
+	public int getOriginY() {
       return originY_;
     }
 
@@ -5694,7 +5934,8 @@ public final class GUIProtos {
      *
      * <code>double depth_of_focus = 85;</code>
      */
-    public double getDepthOfFocus() {
+    @Override
+	public double getDepthOfFocus() {
       return depthOfFocus_;
     }
 
@@ -5703,12 +5944,13 @@ public final class GUIProtos {
     /**
      * <code>string astigmatism_model = 86;</code>
      */
-    public java.lang.String getAstigmatismModel() {
+    @Override
+	public java.lang.String getAstigmatismModel() {
       java.lang.Object ref = astigmatismModel_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         astigmatismModel_ = s;
@@ -5718,11 +5960,12 @@ public final class GUIProtos {
     /**
      * <code>string astigmatism_model = 86;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getAstigmatismModelBytes() {
       java.lang.Object ref = astigmatismModel_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         astigmatismModel_ = b;
@@ -5733,7 +5976,8 @@ public final class GUIProtos {
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -5742,7 +5986,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (size_ != 0) {
         output.writeInt32(1, size_);
@@ -6004,7 +6249,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -6923,14 +7169,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CreateDataSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -6957,7 +7205,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -6979,7 +7228,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         size_ = 0;
 
@@ -7156,16 +7406,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CreateDataSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CreateDataSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.CreateDataSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CreateDataSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CreateDataSettings build() {
         gdsc.smlm.data.config.GUIProtos.CreateDataSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -7173,7 +7426,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CreateDataSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CreateDataSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.CreateDataSettings result = new gdsc.smlm.data.config.GUIProtos.CreateDataSettings(this);
         result.size_ = size_;
         result.depth_ = depth_;
@@ -7265,33 +7519,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.CreateDataSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.CreateDataSettings)other);
         } else {
@@ -7580,11 +7841,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -7606,14 +7869,15 @@ public final class GUIProtos {
       /**
        * <code>int32 size = 1;</code>
        */
-      public int getSize() {
+      @Override
+	public int getSize() {
         return size_;
       }
       /**
        * <code>int32 size = 1;</code>
        */
       public Builder setSize(int value) {
-        
+
         size_ = value;
         onChanged();
         return this;
@@ -7622,7 +7886,7 @@ public final class GUIProtos {
        * <code>int32 size = 1;</code>
        */
       public Builder clearSize() {
-        
+
         size_ = 0;
         onChanged();
         return this;
@@ -7632,14 +7896,15 @@ public final class GUIProtos {
       /**
        * <code>double depth = 2;</code>
        */
-      public double getDepth() {
+      @Override
+	public double getDepth() {
         return depth_;
       }
       /**
        * <code>double depth = 2;</code>
        */
       public Builder setDepth(double value) {
-        
+
         depth_ = value;
         onChanged();
         return this;
@@ -7648,7 +7913,7 @@ public final class GUIProtos {
        * <code>double depth = 2;</code>
        */
       public Builder clearDepth() {
-        
+
         depth_ = 0D;
         onChanged();
         return this;
@@ -7658,14 +7923,15 @@ public final class GUIProtos {
       /**
        * <code>bool fixed_Depth = 3;</code>
        */
-      public boolean getFixedDepth() {
+      @Override
+	public boolean getFixedDepth() {
         return fixedDepth_;
       }
       /**
        * <code>bool fixed_Depth = 3;</code>
        */
       public Builder setFixedDepth(boolean value) {
-        
+
         fixedDepth_ = value;
         onChanged();
         return this;
@@ -7674,7 +7940,7 @@ public final class GUIProtos {
        * <code>bool fixed_Depth = 3;</code>
        */
       public Builder clearFixedDepth() {
-        
+
         fixedDepth_ = false;
         onChanged();
         return this;
@@ -7684,14 +7950,15 @@ public final class GUIProtos {
       /**
        * <code>double seconds = 4;</code>
        */
-      public double getSeconds() {
+      @Override
+	public double getSeconds() {
         return seconds_;
       }
       /**
        * <code>double seconds = 4;</code>
        */
       public Builder setSeconds(double value) {
-        
+
         seconds_ = value;
         onChanged();
         return this;
@@ -7700,7 +7967,7 @@ public final class GUIProtos {
        * <code>double seconds = 4;</code>
        */
       public Builder clearSeconds() {
-        
+
         seconds_ = 0D;
         onChanged();
         return this;
@@ -7710,14 +7977,15 @@ public final class GUIProtos {
       /**
        * <code>double exposure_time = 5;</code>
        */
-      public double getExposureTime() {
+      @Override
+	public double getExposureTime() {
         return exposureTime_;
       }
       /**
        * <code>double exposure_time = 5;</code>
        */
       public Builder setExposureTime(double value) {
-        
+
         exposureTime_ = value;
         onChanged();
         return this;
@@ -7726,7 +7994,7 @@ public final class GUIProtos {
        * <code>double exposure_time = 5;</code>
        */
       public Builder clearExposureTime() {
-        
+
         exposureTime_ = 0D;
         onChanged();
         return this;
@@ -7736,14 +8004,15 @@ public final class GUIProtos {
       /**
        * <code>double steps_per_second = 6;</code>
        */
-      public double getStepsPerSecond() {
+      @Override
+	public double getStepsPerSecond() {
         return stepsPerSecond_;
       }
       /**
        * <code>double steps_per_second = 6;</code>
        */
       public Builder setStepsPerSecond(double value) {
-        
+
         stepsPerSecond_ = value;
         onChanged();
         return this;
@@ -7752,7 +8021,7 @@ public final class GUIProtos {
        * <code>double steps_per_second = 6;</code>
        */
       public Builder clearStepsPerSecond() {
-        
+
         stepsPerSecond_ = 0D;
         onChanged();
         return this;
@@ -7762,7 +8031,8 @@ public final class GUIProtos {
       /**
        * <code>string illumination = 7;</code>
        */
-      public java.lang.String getIllumination() {
+      @Override
+	public java.lang.String getIllumination() {
         java.lang.Object ref = illumination_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -7777,11 +8047,12 @@ public final class GUIProtos {
       /**
        * <code>string illumination = 7;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getIlluminationBytes() {
         java.lang.Object ref = illumination_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           illumination_ = b;
@@ -7798,7 +8069,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         illumination_ = value;
         onChanged();
         return this;
@@ -7807,7 +8078,7 @@ public final class GUIProtos {
        * <code>string illumination = 7;</code>
        */
       public Builder clearIllumination() {
-        
+
         illumination_ = getDefaultInstance().getIllumination();
         onChanged();
         return this;
@@ -7821,7 +8092,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         illumination_ = value;
         onChanged();
         return this;
@@ -7831,7 +8102,8 @@ public final class GUIProtos {
       /**
        * <code>string background_image = 8;</code>
        */
-      public java.lang.String getBackgroundImage() {
+      @Override
+	public java.lang.String getBackgroundImage() {
         java.lang.Object ref = backgroundImage_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -7846,11 +8118,12 @@ public final class GUIProtos {
       /**
        * <code>string background_image = 8;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getBackgroundImageBytes() {
         java.lang.Object ref = backgroundImage_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           backgroundImage_ = b;
@@ -7867,7 +8140,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         backgroundImage_ = value;
         onChanged();
         return this;
@@ -7876,7 +8149,7 @@ public final class GUIProtos {
        * <code>string background_image = 8;</code>
        */
       public Builder clearBackgroundImage() {
-        
+
         backgroundImage_ = getDefaultInstance().getBackgroundImage();
         onChanged();
         return this;
@@ -7890,7 +8163,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         backgroundImage_ = value;
         onChanged();
         return this;
@@ -7900,7 +8173,8 @@ public final class GUIProtos {
       /**
        * <code>string distribution = 9;</code>
        */
-      public java.lang.String getDistribution() {
+      @Override
+	public java.lang.String getDistribution() {
         java.lang.Object ref = distribution_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -7915,11 +8189,12 @@ public final class GUIProtos {
       /**
        * <code>string distribution = 9;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getDistributionBytes() {
         java.lang.Object ref = distribution_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           distribution_ = b;
@@ -7936,7 +8211,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         distribution_ = value;
         onChanged();
         return this;
@@ -7945,7 +8220,7 @@ public final class GUIProtos {
        * <code>string distribution = 9;</code>
        */
       public Builder clearDistribution() {
-        
+
         distribution_ = getDefaultInstance().getDistribution();
         onChanged();
         return this;
@@ -7959,7 +8234,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         distribution_ = value;
         onChanged();
         return this;
@@ -7969,7 +8244,8 @@ public final class GUIProtos {
       /**
        * <code>string distribution_mask = 10;</code>
        */
-      public java.lang.String getDistributionMask() {
+      @Override
+	public java.lang.String getDistributionMask() {
         java.lang.Object ref = distributionMask_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -7984,11 +8260,12 @@ public final class GUIProtos {
       /**
        * <code>string distribution_mask = 10;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getDistributionMaskBytes() {
         java.lang.Object ref = distributionMask_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           distributionMask_ = b;
@@ -8005,7 +8282,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         distributionMask_ = value;
         onChanged();
         return this;
@@ -8014,7 +8291,7 @@ public final class GUIProtos {
        * <code>string distribution_mask = 10;</code>
        */
       public Builder clearDistributionMask() {
-        
+
         distributionMask_ = getDefaultInstance().getDistributionMask();
         onChanged();
         return this;
@@ -8028,7 +8305,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         distributionMask_ = value;
         onChanged();
         return this;
@@ -8038,14 +8315,15 @@ public final class GUIProtos {
       /**
        * <code>double distribution_mask_slice_depth = 11;</code>
        */
-      public double getDistributionMaskSliceDepth() {
+      @Override
+	public double getDistributionMaskSliceDepth() {
         return distributionMaskSliceDepth_;
       }
       /**
        * <code>double distribution_mask_slice_depth = 11;</code>
        */
       public Builder setDistributionMaskSliceDepth(double value) {
-        
+
         distributionMaskSliceDepth_ = value;
         onChanged();
         return this;
@@ -8054,7 +8332,7 @@ public final class GUIProtos {
        * <code>double distribution_mask_slice_depth = 11;</code>
        */
       public Builder clearDistributionMaskSliceDepth() {
-        
+
         distributionMaskSliceDepth_ = 0D;
         onChanged();
         return this;
@@ -8064,14 +8342,15 @@ public final class GUIProtos {
       /**
        * <code>bool poisson_noise = 12;</code>
        */
-      public boolean getPoissonNoise() {
+      @Override
+	public boolean getPoissonNoise() {
         return poissonNoise_;
       }
       /**
        * <code>bool poisson_noise = 12;</code>
        */
       public Builder setPoissonNoise(boolean value) {
-        
+
         poissonNoise_ = value;
         onChanged();
         return this;
@@ -8080,7 +8359,7 @@ public final class GUIProtos {
        * <code>bool poisson_noise = 12;</code>
        */
       public Builder clearPoissonNoise() {
-        
+
         poissonNoise_ = false;
         onChanged();
         return this;
@@ -8090,14 +8369,15 @@ public final class GUIProtos {
       /**
        * <code>double background = 13;</code>
        */
-      public double getBackground() {
+      @Override
+	public double getBackground() {
         return background_;
       }
       /**
        * <code>double background = 13;</code>
        */
       public Builder setBackground(double value) {
-        
+
         background_ = value;
         onChanged();
         return this;
@@ -8106,7 +8386,7 @@ public final class GUIProtos {
        * <code>double background = 13;</code>
        */
       public Builder clearBackground() {
-        
+
         background_ = 0D;
         onChanged();
         return this;
@@ -8116,14 +8396,15 @@ public final class GUIProtos {
       /**
        * <code>double em_gain = 14;</code>
        */
-      public double getEmGain() {
+      @Override
+	public double getEmGain() {
         return emGain_;
       }
       /**
        * <code>double em_gain = 14;</code>
        */
       public Builder setEmGain(double value) {
-        
+
         emGain_ = value;
         onChanged();
         return this;
@@ -8132,7 +8413,7 @@ public final class GUIProtos {
        * <code>double em_gain = 14;</code>
        */
       public Builder clearEmGain() {
-        
+
         emGain_ = 0D;
         onChanged();
         return this;
@@ -8142,14 +8423,15 @@ public final class GUIProtos {
       /**
        * <code>double camera_gain = 15;</code>
        */
-      public double getCameraGain() {
+      @Override
+	public double getCameraGain() {
         return cameraGain_;
       }
       /**
        * <code>double camera_gain = 15;</code>
        */
       public Builder setCameraGain(double value) {
-        
+
         cameraGain_ = value;
         onChanged();
         return this;
@@ -8158,7 +8440,7 @@ public final class GUIProtos {
        * <code>double camera_gain = 15;</code>
        */
       public Builder clearCameraGain() {
-        
+
         cameraGain_ = 0D;
         onChanged();
         return this;
@@ -8168,14 +8450,15 @@ public final class GUIProtos {
       /**
        * <code>double quantum_efficiency = 16;</code>
        */
-      public double getQuantumEfficiency() {
+      @Override
+	public double getQuantumEfficiency() {
         return quantumEfficiency_;
       }
       /**
        * <code>double quantum_efficiency = 16;</code>
        */
       public Builder setQuantumEfficiency(double value) {
-        
+
         quantumEfficiency_ = value;
         onChanged();
         return this;
@@ -8184,7 +8467,7 @@ public final class GUIProtos {
        * <code>double quantum_efficiency = 16;</code>
        */
       public Builder clearQuantumEfficiency() {
-        
+
         quantumEfficiency_ = 0D;
         onChanged();
         return this;
@@ -8198,7 +8481,8 @@ public final class GUIProtos {
        *
        * <code>double read_noise = 17;</code>
        */
-      public double getReadNoise() {
+      @Override
+	public double getReadNoise() {
         return readNoise_;
       }
       /**
@@ -8209,7 +8493,7 @@ public final class GUIProtos {
        * <code>double read_noise = 17;</code>
        */
       public Builder setReadNoise(double value) {
-        
+
         readNoise_ = value;
         onChanged();
         return this;
@@ -8222,7 +8506,7 @@ public final class GUIProtos {
        * <code>double read_noise = 17;</code>
        */
       public Builder clearReadNoise() {
-        
+
         readNoise_ = 0D;
         onChanged();
         return this;
@@ -8232,14 +8516,15 @@ public final class GUIProtos {
       /**
        * <code>int32 bias = 18;</code>
        */
-      public int getBias() {
+      @Override
+	public int getBias() {
         return bias_;
       }
       /**
        * <code>int32 bias = 18;</code>
        */
       public Builder setBias(int value) {
-        
+
         bias_ = value;
         onChanged();
         return this;
@@ -8248,7 +8533,7 @@ public final class GUIProtos {
        * <code>int32 bias = 18;</code>
        */
       public Builder clearBias() {
-        
+
         bias_ = 0;
         onChanged();
         return this;
@@ -8258,14 +8543,15 @@ public final class GUIProtos {
       /**
        * <code>int32 particles = 19;</code>
        */
-      public int getParticles() {
+      @Override
+	public int getParticles() {
         return particles_;
       }
       /**
        * <code>int32 particles = 19;</code>
        */
       public Builder setParticles(int value) {
-        
+
         particles_ = value;
         onChanged();
         return this;
@@ -8274,7 +8560,7 @@ public final class GUIProtos {
        * <code>int32 particles = 19;</code>
        */
       public Builder clearParticles() {
-        
+
         particles_ = 0;
         onChanged();
         return this;
@@ -8284,14 +8570,15 @@ public final class GUIProtos {
       /**
        * <code>bool sample_per_frame = 20;</code>
        */
-      public boolean getSamplePerFrame() {
+      @Override
+	public boolean getSamplePerFrame() {
         return samplePerFrame_;
       }
       /**
        * <code>bool sample_per_frame = 20;</code>
        */
       public Builder setSamplePerFrame(boolean value) {
-        
+
         samplePerFrame_ = value;
         onChanged();
         return this;
@@ -8300,7 +8587,7 @@ public final class GUIProtos {
        * <code>bool sample_per_frame = 20;</code>
        */
       public Builder clearSamplePerFrame() {
-        
+
         samplePerFrame_ = false;
         onChanged();
         return this;
@@ -8316,7 +8603,8 @@ public final class GUIProtos {
        *
        * <code>double photons_per_second = 21;</code>
        */
-      public double getPhotonsPerSecond() {
+      @Override
+	public double getPhotonsPerSecond() {
         return photonsPerSecond_;
       }
       /**
@@ -8329,7 +8617,7 @@ public final class GUIProtos {
        * <code>double photons_per_second = 21;</code>
        */
       public Builder setPhotonsPerSecond(double value) {
-        
+
         photonsPerSecond_ = value;
         onChanged();
         return this;
@@ -8344,7 +8632,7 @@ public final class GUIProtos {
        * <code>double photons_per_second = 21;</code>
        */
       public Builder clearPhotonsPerSecond() {
-        
+
         photonsPerSecond_ = 0D;
         onChanged();
         return this;
@@ -8359,7 +8647,8 @@ public final class GUIProtos {
        *
        * <code>double photons_per_second_maximum = 22;</code>
        */
-      public double getPhotonsPerSecondMaximum() {
+      @Override
+	public double getPhotonsPerSecondMaximum() {
         return photonsPerSecondMaximum_;
       }
       /**
@@ -8371,7 +8660,7 @@ public final class GUIProtos {
        * <code>double photons_per_second_maximum = 22;</code>
        */
       public Builder setPhotonsPerSecondMaximum(double value) {
-        
+
         photonsPerSecondMaximum_ = value;
         onChanged();
         return this;
@@ -8385,7 +8674,7 @@ public final class GUIProtos {
        * <code>double photons_per_second_maximum = 22;</code>
        */
       public Builder clearPhotonsPerSecondMaximum() {
-        
+
         photonsPerSecondMaximum_ = 0D;
         onChanged();
         return this;
@@ -8400,7 +8689,8 @@ public final class GUIProtos {
        *
        * <code>string photon_distribution = 23;</code>
        */
-      public java.lang.String getPhotonDistribution() {
+      @Override
+	public java.lang.String getPhotonDistribution() {
         java.lang.Object ref = photonDistribution_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -8420,11 +8710,12 @@ public final class GUIProtos {
        *
        * <code>string photon_distribution = 23;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getPhotonDistributionBytes() {
         java.lang.Object ref = photonDistribution_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           photonDistribution_ = b;
@@ -8446,7 +8737,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         photonDistribution_ = value;
         onChanged();
         return this;
@@ -8460,7 +8751,7 @@ public final class GUIProtos {
        * <code>string photon_distribution = 23;</code>
        */
       public Builder clearPhotonDistribution() {
-        
+
         photonDistribution_ = getDefaultInstance().getPhotonDistribution();
         onChanged();
         return this;
@@ -8479,7 +8770,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         photonDistribution_ = value;
         onChanged();
         return this;
@@ -8489,7 +8780,8 @@ public final class GUIProtos {
       /**
        * <code>string photon_distribution_file = 24;</code>
        */
-      public java.lang.String getPhotonDistributionFile() {
+      @Override
+	public java.lang.String getPhotonDistributionFile() {
         java.lang.Object ref = photonDistributionFile_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -8504,11 +8796,12 @@ public final class GUIProtos {
       /**
        * <code>string photon_distribution_file = 24;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getPhotonDistributionFileBytes() {
         java.lang.Object ref = photonDistributionFile_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           photonDistributionFile_ = b;
@@ -8525,7 +8818,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         photonDistributionFile_ = value;
         onChanged();
         return this;
@@ -8534,7 +8827,7 @@ public final class GUIProtos {
        * <code>string photon_distribution_file = 24;</code>
        */
       public Builder clearPhotonDistributionFile() {
-        
+
         photonDistributionFile_ = getDefaultInstance().getPhotonDistributionFile();
         onChanged();
         return this;
@@ -8548,7 +8841,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         photonDistributionFile_ = value;
         onChanged();
         return this;
@@ -8558,14 +8851,15 @@ public final class GUIProtos {
       /**
        * <code>double photon_shape = 25;</code>
        */
-      public double getPhotonShape() {
+      @Override
+	public double getPhotonShape() {
         return photonShape_;
       }
       /**
        * <code>double photon_shape = 25;</code>
        */
       public Builder setPhotonShape(double value) {
-        
+
         photonShape_ = value;
         onChanged();
         return this;
@@ -8574,7 +8868,7 @@ public final class GUIProtos {
        * <code>double photon_shape = 25;</code>
        */
       public Builder clearPhotonShape() {
-        
+
         photonShape_ = 0D;
         onChanged();
         return this;
@@ -8584,14 +8878,15 @@ public final class GUIProtos {
       /**
        * <code>double correlation = 26;</code>
        */
-      public double getCorrelation() {
+      @Override
+	public double getCorrelation() {
         return correlation_;
       }
       /**
        * <code>double correlation = 26;</code>
        */
       public Builder setCorrelation(double value) {
-        
+
         correlation_ = value;
         onChanged();
         return this;
@@ -8600,7 +8895,7 @@ public final class GUIProtos {
        * <code>double correlation = 26;</code>
        */
       public Builder clearCorrelation() {
-        
+
         correlation_ = 0D;
         onChanged();
         return this;
@@ -8610,7 +8905,8 @@ public final class GUIProtos {
       /**
        * <code>string psf_model = 27;</code>
        */
-      public java.lang.String getPsfModel() {
+      @Override
+	public java.lang.String getPsfModel() {
         java.lang.Object ref = psfModel_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -8625,11 +8921,12 @@ public final class GUIProtos {
       /**
        * <code>string psf_model = 27;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getPsfModelBytes() {
         java.lang.Object ref = psfModel_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           psfModel_ = b;
@@ -8646,7 +8943,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         psfModel_ = value;
         onChanged();
         return this;
@@ -8655,7 +8952,7 @@ public final class GUIProtos {
        * <code>string psf_model = 27;</code>
        */
       public Builder clearPsfModel() {
-        
+
         psfModel_ = getDefaultInstance().getPsfModel();
         onChanged();
         return this;
@@ -8669,7 +8966,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         psfModel_ = value;
         onChanged();
         return this;
@@ -8679,7 +8976,8 @@ public final class GUIProtos {
       /**
        * <code>string psf_image_name = 28;</code>
        */
-      public java.lang.String getPsfImageName() {
+      @Override
+	public java.lang.String getPsfImageName() {
         java.lang.Object ref = psfImageName_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -8694,11 +8992,12 @@ public final class GUIProtos {
       /**
        * <code>string psf_image_name = 28;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getPsfImageNameBytes() {
         java.lang.Object ref = psfImageName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           psfImageName_ = b;
@@ -8715,7 +9014,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         psfImageName_ = value;
         onChanged();
         return this;
@@ -8724,7 +9023,7 @@ public final class GUIProtos {
        * <code>string psf_image_name = 28;</code>
        */
       public Builder clearPsfImageName() {
-        
+
         psfImageName_ = getDefaultInstance().getPsfImageName();
         onChanged();
         return this;
@@ -8738,7 +9037,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         psfImageName_ = value;
         onChanged();
         return this;
@@ -8748,14 +9047,15 @@ public final class GUIProtos {
       /**
        * <code>bool enter_width = 29;</code>
        */
-      public boolean getEnterWidth() {
+      @Override
+	public boolean getEnterWidth() {
         return enterWidth_;
       }
       /**
        * <code>bool enter_width = 29;</code>
        */
       public Builder setEnterWidth(boolean value) {
-        
+
         enterWidth_ = value;
         onChanged();
         return this;
@@ -8764,7 +9064,7 @@ public final class GUIProtos {
        * <code>bool enter_width = 29;</code>
        */
       public Builder clearEnterWidth() {
-        
+
         enterWidth_ = false;
         onChanged();
         return this;
@@ -8774,14 +9074,15 @@ public final class GUIProtos {
       /**
        * <code>double wavelength = 30;</code>
        */
-      public double getWavelength() {
+      @Override
+	public double getWavelength() {
         return wavelength_;
       }
       /**
        * <code>double wavelength = 30;</code>
        */
       public Builder setWavelength(double value) {
-        
+
         wavelength_ = value;
         onChanged();
         return this;
@@ -8790,7 +9091,7 @@ public final class GUIProtos {
        * <code>double wavelength = 30;</code>
        */
       public Builder clearWavelength() {
-        
+
         wavelength_ = 0D;
         onChanged();
         return this;
@@ -8800,14 +9101,15 @@ public final class GUIProtos {
       /**
        * <code>double numerical_aperture = 31;</code>
        */
-      public double getNumericalAperture() {
+      @Override
+	public double getNumericalAperture() {
         return numericalAperture_;
       }
       /**
        * <code>double numerical_aperture = 31;</code>
        */
       public Builder setNumericalAperture(double value) {
-        
+
         numericalAperture_ = value;
         onChanged();
         return this;
@@ -8816,7 +9118,7 @@ public final class GUIProtos {
        * <code>double numerical_aperture = 31;</code>
        */
       public Builder clearNumericalAperture() {
-        
+
         numericalAperture_ = 0D;
         onChanged();
         return this;
@@ -8826,14 +9128,15 @@ public final class GUIProtos {
       /**
        * <code>double psf_sd = 32;</code>
        */
-      public double getPsfSd() {
+      @Override
+	public double getPsfSd() {
         return psfSd_;
       }
       /**
        * <code>double psf_sd = 32;</code>
        */
       public Builder setPsfSd(double value) {
-        
+
         psfSd_ = value;
         onChanged();
         return this;
@@ -8842,7 +9145,7 @@ public final class GUIProtos {
        * <code>double psf_sd = 32;</code>
        */
       public Builder clearPsfSd() {
-        
+
         psfSd_ = 0D;
         onChanged();
         return this;
@@ -8852,14 +9155,15 @@ public final class GUIProtos {
       /**
        * <code>double pixel_pitch = 33;</code>
        */
-      public double getPixelPitch() {
+      @Override
+	public double getPixelPitch() {
         return pixelPitch_;
       }
       /**
        * <code>double pixel_pitch = 33;</code>
        */
       public Builder setPixelPitch(double value) {
-        
+
         pixelPitch_ = value;
         onChanged();
         return this;
@@ -8868,7 +9172,7 @@ public final class GUIProtos {
        * <code>double pixel_pitch = 33;</code>
        */
       public Builder clearPixelPitch() {
-        
+
         pixelPitch_ = 0D;
         onChanged();
         return this;
@@ -8878,14 +9182,15 @@ public final class GUIProtos {
       /**
        * <code>double density = 34;</code>
        */
-      public double getDensity() {
+      @Override
+	public double getDensity() {
         return density_;
       }
       /**
        * <code>double density = 34;</code>
        */
       public Builder setDensity(double value) {
-        
+
         density_ = value;
         onChanged();
         return this;
@@ -8894,7 +9199,7 @@ public final class GUIProtos {
        * <code>double density = 34;</code>
        */
       public Builder clearDensity() {
-        
+
         density_ = 0D;
         onChanged();
         return this;
@@ -8904,14 +9209,15 @@ public final class GUIProtos {
       /**
        * <code>double diffusion_rate = 35;</code>
        */
-      public double getDiffusionRate() {
+      @Override
+	public double getDiffusionRate() {
         return diffusionRate_;
       }
       /**
        * <code>double diffusion_rate = 35;</code>
        */
       public Builder setDiffusionRate(double value) {
-        
+
         diffusionRate_ = value;
         onChanged();
         return this;
@@ -8920,7 +9226,7 @@ public final class GUIProtos {
        * <code>double diffusion_rate = 35;</code>
        */
       public Builder clearDiffusionRate() {
-        
+
         diffusionRate_ = 0D;
         onChanged();
         return this;
@@ -8930,14 +9236,15 @@ public final class GUIProtos {
       /**
        * <code>int32 diffusion_type = 36;</code>
        */
-      public int getDiffusionType() {
+      @Override
+	public int getDiffusionType() {
         return diffusionType_;
       }
       /**
        * <code>int32 diffusion_type = 36;</code>
        */
       public Builder setDiffusionType(int value) {
-        
+
         diffusionType_ = value;
         onChanged();
         return this;
@@ -8946,7 +9253,7 @@ public final class GUIProtos {
        * <code>int32 diffusion_type = 36;</code>
        */
       public Builder clearDiffusionType() {
-        
+
         diffusionType_ = 0;
         onChanged();
         return this;
@@ -8956,14 +9263,15 @@ public final class GUIProtos {
       /**
        * <code>bool compound_molecules = 37;</code>
        */
-      public boolean getCompoundMolecules() {
+      @Override
+	public boolean getCompoundMolecules() {
         return compoundMolecules_;
       }
       /**
        * <code>bool compound_molecules = 37;</code>
        */
       public Builder setCompoundMolecules(boolean value) {
-        
+
         compoundMolecules_ = value;
         onChanged();
         return this;
@@ -8972,7 +9280,7 @@ public final class GUIProtos {
        * <code>bool compound_molecules = 37;</code>
        */
       public Builder clearCompoundMolecules() {
-        
+
         compoundMolecules_ = false;
         onChanged();
         return this;
@@ -8982,7 +9290,8 @@ public final class GUIProtos {
       /**
        * <code>string compound_text = 38;</code>
        */
-      public java.lang.String getCompoundText() {
+      @Override
+	public java.lang.String getCompoundText() {
         java.lang.Object ref = compoundText_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -8997,11 +9306,12 @@ public final class GUIProtos {
       /**
        * <code>string compound_text = 38;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getCompoundTextBytes() {
         java.lang.Object ref = compoundText_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           compoundText_ = b;
@@ -9018,7 +9328,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         compoundText_ = value;
         onChanged();
         return this;
@@ -9027,7 +9337,7 @@ public final class GUIProtos {
        * <code>string compound_text = 38;</code>
        */
       public Builder clearCompoundText() {
-        
+
         compoundText_ = getDefaultInstance().getCompoundText();
         onChanged();
         return this;
@@ -9041,7 +9351,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         compoundText_ = value;
         onChanged();
         return this;
@@ -9051,14 +9361,15 @@ public final class GUIProtos {
       /**
        * <code>bool diffuse_2D = 39;</code>
        */
-      public boolean getDiffuse2D() {
+      @Override
+	public boolean getDiffuse2D() {
         return diffuse2D_;
       }
       /**
        * <code>bool diffuse_2D = 39;</code>
        */
       public Builder setDiffuse2D(boolean value) {
-        
+
         diffuse2D_ = value;
         onChanged();
         return this;
@@ -9067,7 +9378,7 @@ public final class GUIProtos {
        * <code>bool diffuse_2D = 39;</code>
        */
       public Builder clearDiffuse2D() {
-        
+
         diffuse2D_ = false;
         onChanged();
         return this;
@@ -9077,14 +9388,15 @@ public final class GUIProtos {
       /**
        * <code>bool rotate_initial_orientation = 40;</code>
        */
-      public boolean getRotateInitialOrientation() {
+      @Override
+	public boolean getRotateInitialOrientation() {
         return rotateInitialOrientation_;
       }
       /**
        * <code>bool rotate_initial_orientation = 40;</code>
        */
       public Builder setRotateInitialOrientation(boolean value) {
-        
+
         rotateInitialOrientation_ = value;
         onChanged();
         return this;
@@ -9093,7 +9405,7 @@ public final class GUIProtos {
        * <code>bool rotate_initial_orientation = 40;</code>
        */
       public Builder clearRotateInitialOrientation() {
-        
+
         rotateInitialOrientation_ = false;
         onChanged();
         return this;
@@ -9103,14 +9415,15 @@ public final class GUIProtos {
       /**
        * <code>bool rotate_during_simulation = 41;</code>
        */
-      public boolean getRotateDuringSimulation() {
+      @Override
+	public boolean getRotateDuringSimulation() {
         return rotateDuringSimulation_;
       }
       /**
        * <code>bool rotate_during_simulation = 41;</code>
        */
       public Builder setRotateDuringSimulation(boolean value) {
-        
+
         rotateDuringSimulation_ = value;
         onChanged();
         return this;
@@ -9119,7 +9432,7 @@ public final class GUIProtos {
        * <code>bool rotate_during_simulation = 41;</code>
        */
       public Builder clearRotateDuringSimulation() {
-        
+
         rotateDuringSimulation_ = false;
         onChanged();
         return this;
@@ -9129,14 +9442,15 @@ public final class GUIProtos {
       /**
        * <code>bool rotate_2D = 42;</code>
        */
-      public boolean getRotate2D() {
+      @Override
+	public boolean getRotate2D() {
         return rotate2D_;
       }
       /**
        * <code>bool rotate_2D = 42;</code>
        */
       public Builder setRotate2D(boolean value) {
-        
+
         rotate2D_ = value;
         onChanged();
         return this;
@@ -9145,7 +9459,7 @@ public final class GUIProtos {
        * <code>bool rotate_2D = 42;</code>
        */
       public Builder clearRotate2D() {
-        
+
         rotate2D_ = false;
         onChanged();
         return this;
@@ -9155,14 +9469,15 @@ public final class GUIProtos {
       /**
        * <code>double fixedFraction = 43;</code>
        */
-      public double getFixedFraction() {
+      @Override
+	public double getFixedFraction() {
         return fixedFraction_;
       }
       /**
        * <code>double fixedFraction = 43;</code>
        */
       public Builder setFixedFraction(double value) {
-        
+
         fixedFraction_ = value;
         onChanged();
         return this;
@@ -9171,7 +9486,7 @@ public final class GUIProtos {
        * <code>double fixedFraction = 43;</code>
        */
       public Builder clearFixedFraction() {
-        
+
         fixedFraction_ = 0D;
         onChanged();
         return this;
@@ -9181,7 +9496,8 @@ public final class GUIProtos {
       /**
        * <code>string confinement = 44;</code>
        */
-      public java.lang.String getConfinement() {
+      @Override
+	public java.lang.String getConfinement() {
         java.lang.Object ref = confinement_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -9196,11 +9512,12 @@ public final class GUIProtos {
       /**
        * <code>string confinement = 44;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getConfinementBytes() {
         java.lang.Object ref = confinement_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           confinement_ = b;
@@ -9217,7 +9534,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         confinement_ = value;
         onChanged();
         return this;
@@ -9226,7 +9543,7 @@ public final class GUIProtos {
        * <code>string confinement = 44;</code>
        */
       public Builder clearConfinement() {
-        
+
         confinement_ = getDefaultInstance().getConfinement();
         onChanged();
         return this;
@@ -9240,7 +9557,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         confinement_ = value;
         onChanged();
         return this;
@@ -9250,7 +9567,8 @@ public final class GUIProtos {
       /**
        * <code>string confinement_mask = 45;</code>
        */
-      public java.lang.String getConfinementMask() {
+      @Override
+	public java.lang.String getConfinementMask() {
         java.lang.Object ref = confinementMask_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -9265,11 +9583,12 @@ public final class GUIProtos {
       /**
        * <code>string confinement_mask = 45;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getConfinementMaskBytes() {
         java.lang.Object ref = confinementMask_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           confinementMask_ = b;
@@ -9286,7 +9605,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         confinementMask_ = value;
         onChanged();
         return this;
@@ -9295,7 +9614,7 @@ public final class GUIProtos {
        * <code>string confinement_mask = 45;</code>
        */
       public Builder clearConfinementMask() {
-        
+
         confinementMask_ = getDefaultInstance().getConfinementMask();
         onChanged();
         return this;
@@ -9309,7 +9628,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         confinementMask_ = value;
         onChanged();
         return this;
@@ -9319,14 +9638,15 @@ public final class GUIProtos {
       /**
        * <code>double confinement_mask_slice_depth = 46;</code>
        */
-      public double getConfinementMaskSliceDepth() {
+      @Override
+	public double getConfinementMaskSliceDepth() {
         return confinementMaskSliceDepth_;
       }
       /**
        * <code>double confinement_mask_slice_depth = 46;</code>
        */
       public Builder setConfinementMaskSliceDepth(double value) {
-        
+
         confinementMaskSliceDepth_ = value;
         onChanged();
         return this;
@@ -9335,7 +9655,7 @@ public final class GUIProtos {
        * <code>double confinement_mask_slice_depth = 46;</code>
        */
       public Builder clearConfinementMaskSliceDepth() {
-        
+
         confinementMaskSliceDepth_ = 0D;
         onChanged();
         return this;
@@ -9345,14 +9665,15 @@ public final class GUIProtos {
       /**
        * <code>double confinement_radius = 47;</code>
        */
-      public double getConfinementRadius() {
+      @Override
+	public double getConfinementRadius() {
         return confinementRadius_;
       }
       /**
        * <code>double confinement_radius = 47;</code>
        */
       public Builder setConfinementRadius(double value) {
-        
+
         confinementRadius_ = value;
         onChanged();
         return this;
@@ -9361,7 +9682,7 @@ public final class GUIProtos {
        * <code>double confinement_radius = 47;</code>
        */
       public Builder clearConfinementRadius() {
-        
+
         confinementRadius_ = 0D;
         onChanged();
         return this;
@@ -9371,14 +9692,15 @@ public final class GUIProtos {
       /**
        * <code>int32 pulse_interval = 48;</code>
        */
-      public int getPulseInterval() {
+      @Override
+	public int getPulseInterval() {
         return pulseInterval_;
       }
       /**
        * <code>int32 pulse_interval = 48;</code>
        */
       public Builder setPulseInterval(int value) {
-        
+
         pulseInterval_ = value;
         onChanged();
         return this;
@@ -9387,7 +9709,7 @@ public final class GUIProtos {
        * <code>int32 pulse_interval = 48;</code>
        */
       public Builder clearPulseInterval() {
-        
+
         pulseInterval_ = 0;
         onChanged();
         return this;
@@ -9397,14 +9719,15 @@ public final class GUIProtos {
       /**
        * <code>double pulse_ratio = 49;</code>
        */
-      public double getPulseRatio() {
+      @Override
+	public double getPulseRatio() {
         return pulseRatio_;
       }
       /**
        * <code>double pulse_ratio = 49;</code>
        */
       public Builder setPulseRatio(double value) {
-        
+
         pulseRatio_ = value;
         onChanged();
         return this;
@@ -9413,7 +9736,7 @@ public final class GUIProtos {
        * <code>double pulse_ratio = 49;</code>
        */
       public Builder clearPulseRatio() {
-        
+
         pulseRatio_ = 0D;
         onChanged();
         return this;
@@ -9427,7 +9750,8 @@ public final class GUIProtos {
        *
        * <code>double t_on = 50;</code>
        */
-      public double getTOn() {
+      @Override
+	public double getTOn() {
         return tOn_;
       }
       /**
@@ -9438,7 +9762,7 @@ public final class GUIProtos {
        * <code>double t_on = 50;</code>
        */
       public Builder setTOn(double value) {
-        
+
         tOn_ = value;
         onChanged();
         return this;
@@ -9451,7 +9775,7 @@ public final class GUIProtos {
        * <code>double t_on = 50;</code>
        */
       public Builder clearTOn() {
-        
+
         tOn_ = 0D;
         onChanged();
         return this;
@@ -9465,7 +9789,8 @@ public final class GUIProtos {
        *
        * <code>double t_off_short = 51;</code>
        */
-      public double getTOffShort() {
+      @Override
+	public double getTOffShort() {
         return tOffShort_;
       }
       /**
@@ -9476,7 +9801,7 @@ public final class GUIProtos {
        * <code>double t_off_short = 51;</code>
        */
       public Builder setTOffShort(double value) {
-        
+
         tOffShort_ = value;
         onChanged();
         return this;
@@ -9489,7 +9814,7 @@ public final class GUIProtos {
        * <code>double t_off_short = 51;</code>
        */
       public Builder clearTOffShort() {
-        
+
         tOffShort_ = 0D;
         onChanged();
         return this;
@@ -9503,7 +9828,8 @@ public final class GUIProtos {
        *
        * <code>double t_off_long = 52;</code>
        */
-      public double getTOffLong() {
+      @Override
+	public double getTOffLong() {
         return tOffLong_;
       }
       /**
@@ -9514,7 +9840,7 @@ public final class GUIProtos {
        * <code>double t_off_long = 52;</code>
        */
       public Builder setTOffLong(double value) {
-        
+
         tOffLong_ = value;
         onChanged();
         return this;
@@ -9527,7 +9853,7 @@ public final class GUIProtos {
        * <code>double t_off_long = 52;</code>
        */
       public Builder clearTOffLong() {
-        
+
         tOffLong_ = 0D;
         onChanged();
         return this;
@@ -9541,7 +9867,8 @@ public final class GUIProtos {
        *
        * <code>double n_blinks_short = 53;</code>
        */
-      public double getNBlinksShort() {
+      @Override
+	public double getNBlinksShort() {
         return nBlinksShort_;
       }
       /**
@@ -9552,7 +9879,7 @@ public final class GUIProtos {
        * <code>double n_blinks_short = 53;</code>
        */
       public Builder setNBlinksShort(double value) {
-        
+
         nBlinksShort_ = value;
         onChanged();
         return this;
@@ -9565,7 +9892,7 @@ public final class GUIProtos {
        * <code>double n_blinks_short = 53;</code>
        */
       public Builder clearNBlinksShort() {
-        
+
         nBlinksShort_ = 0D;
         onChanged();
         return this;
@@ -9579,7 +9906,8 @@ public final class GUIProtos {
        *
        * <code>double n_blinks_long = 54;</code>
        */
-      public double getNBlinksLong() {
+      @Override
+	public double getNBlinksLong() {
         return nBlinksLong_;
       }
       /**
@@ -9590,7 +9918,7 @@ public final class GUIProtos {
        * <code>double n_blinks_long = 54;</code>
        */
       public Builder setNBlinksLong(double value) {
-        
+
         nBlinksLong_ = value;
         onChanged();
         return this;
@@ -9603,7 +9931,7 @@ public final class GUIProtos {
        * <code>double n_blinks_long = 54;</code>
        */
       public Builder clearNBlinksLong() {
-        
+
         nBlinksLong_ = 0D;
         onChanged();
         return this;
@@ -9617,7 +9945,8 @@ public final class GUIProtos {
        *
        * <code>bool n_blinks_geometric_distribution = 55;</code>
        */
-      public boolean getNBlinksGeometricDistribution() {
+      @Override
+	public boolean getNBlinksGeometricDistribution() {
         return nBlinksGeometricDistribution_;
       }
       /**
@@ -9628,7 +9957,7 @@ public final class GUIProtos {
        * <code>bool n_blinks_geometric_distribution = 55;</code>
        */
       public Builder setNBlinksGeometricDistribution(boolean value) {
-        
+
         nBlinksGeometricDistribution_ = value;
         onChanged();
         return this;
@@ -9641,7 +9970,7 @@ public final class GUIProtos {
        * <code>bool n_blinks_geometric_distribution = 55;</code>
        */
       public Builder clearNBlinksGeometricDistribution() {
-        
+
         nBlinksGeometricDistribution_ = false;
         onChanged();
         return this;
@@ -9651,14 +9980,15 @@ public final class GUIProtos {
       /**
        * <code>double min_photons = 56;</code>
        */
-      public double getMinPhotons() {
+      @Override
+	public double getMinPhotons() {
         return minPhotons_;
       }
       /**
        * <code>double min_photons = 56;</code>
        */
       public Builder setMinPhotons(double value) {
-        
+
         minPhotons_ = value;
         onChanged();
         return this;
@@ -9667,7 +9997,7 @@ public final class GUIProtos {
        * <code>double min_photons = 56;</code>
        */
       public Builder clearMinPhotons() {
-        
+
         minPhotons_ = 0D;
         onChanged();
         return this;
@@ -9677,14 +10007,15 @@ public final class GUIProtos {
       /**
        * <code>double min_snr_t1 = 57;</code>
        */
-      public double getMinSnrT1() {
+      @Override
+	public double getMinSnrT1() {
         return minSnrT1_;
       }
       /**
        * <code>double min_snr_t1 = 57;</code>
        */
       public Builder setMinSnrT1(double value) {
-        
+
         minSnrT1_ = value;
         onChanged();
         return this;
@@ -9693,7 +10024,7 @@ public final class GUIProtos {
        * <code>double min_snr_t1 = 57;</code>
        */
       public Builder clearMinSnrT1() {
-        
+
         minSnrT1_ = 0D;
         onChanged();
         return this;
@@ -9703,14 +10034,15 @@ public final class GUIProtos {
       /**
        * <code>double min_snr_tN = 58;</code>
        */
-      public double getMinSnrTN() {
+      @Override
+	public double getMinSnrTN() {
         return minSnrTN_;
       }
       /**
        * <code>double min_snr_tN = 58;</code>
        */
       public Builder setMinSnrTN(double value) {
-        
+
         minSnrTN_ = value;
         onChanged();
         return this;
@@ -9719,7 +10051,7 @@ public final class GUIProtos {
        * <code>double min_snr_tN = 58;</code>
        */
       public Builder clearMinSnrTN() {
-        
+
         minSnrTN_ = 0D;
         onChanged();
         return this;
@@ -9729,14 +10061,15 @@ public final class GUIProtos {
       /**
        * <code>bool raw_image = 59;</code>
        */
-      public boolean getRawImage() {
+      @Override
+	public boolean getRawImage() {
         return rawImage_;
       }
       /**
        * <code>bool raw_image = 59;</code>
        */
       public Builder setRawImage(boolean value) {
-        
+
         rawImage_ = value;
         onChanged();
         return this;
@@ -9745,7 +10078,7 @@ public final class GUIProtos {
        * <code>bool raw_image = 59;</code>
        */
       public Builder clearRawImage() {
-        
+
         rawImage_ = false;
         onChanged();
         return this;
@@ -9755,14 +10088,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_image = 60;</code>
        */
-      public boolean getSaveImage() {
+      @Override
+	public boolean getSaveImage() {
         return saveImage_;
       }
       /**
        * <code>bool save_image = 60;</code>
        */
       public Builder setSaveImage(boolean value) {
-        
+
         saveImage_ = value;
         onChanged();
         return this;
@@ -9771,7 +10105,7 @@ public final class GUIProtos {
        * <code>bool save_image = 60;</code>
        */
       public Builder clearSaveImage() {
-        
+
         saveImage_ = false;
         onChanged();
         return this;
@@ -9781,14 +10115,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_image_results = 61;</code>
        */
-      public boolean getSaveImageResults() {
+      @Override
+	public boolean getSaveImageResults() {
         return saveImageResults_;
       }
       /**
        * <code>bool save_image_results = 61;</code>
        */
       public Builder setSaveImageResults(boolean value) {
-        
+
         saveImageResults_ = value;
         onChanged();
         return this;
@@ -9797,7 +10132,7 @@ public final class GUIProtos {
        * <code>bool save_image_results = 61;</code>
        */
       public Builder clearSaveImageResults() {
-        
+
         saveImageResults_ = false;
         onChanged();
         return this;
@@ -9807,14 +10142,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_localisations = 62;</code>
        */
-      public boolean getSaveLocalisations() {
+      @Override
+	public boolean getSaveLocalisations() {
         return saveLocalisations_;
       }
       /**
        * <code>bool save_localisations = 62;</code>
        */
       public Builder setSaveLocalisations(boolean value) {
-        
+
         saveLocalisations_ = value;
         onChanged();
         return this;
@@ -9823,7 +10159,7 @@ public final class GUIProtos {
        * <code>bool save_localisations = 62;</code>
        */
       public Builder clearSaveLocalisations() {
-        
+
         saveLocalisations_ = false;
         onChanged();
         return this;
@@ -9833,14 +10169,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_fluorophores = 63;</code>
        */
-      public boolean getSaveFluorophores() {
+      @Override
+	public boolean getSaveFluorophores() {
         return saveFluorophores_;
       }
       /**
        * <code>bool save_fluorophores = 63;</code>
        */
       public Builder setSaveFluorophores(boolean value) {
-        
+
         saveFluorophores_ = value;
         onChanged();
         return this;
@@ -9849,7 +10186,7 @@ public final class GUIProtos {
        * <code>bool save_fluorophores = 63;</code>
        */
       public Builder clearSaveFluorophores() {
-        
+
         saveFluorophores_ = false;
         onChanged();
         return this;
@@ -9859,7 +10196,8 @@ public final class GUIProtos {
       /**
        * <code>string image_filename = 64;</code>
        */
-      public java.lang.String getImageFilename() {
+      @Override
+	public java.lang.String getImageFilename() {
         java.lang.Object ref = imageFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -9874,11 +10212,12 @@ public final class GUIProtos {
       /**
        * <code>string image_filename = 64;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getImageFilenameBytes() {
         java.lang.Object ref = imageFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           imageFilename_ = b;
@@ -9895,7 +10234,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         imageFilename_ = value;
         onChanged();
         return this;
@@ -9904,7 +10243,7 @@ public final class GUIProtos {
        * <code>string image_filename = 64;</code>
        */
       public Builder clearImageFilename() {
-        
+
         imageFilename_ = getDefaultInstance().getImageFilename();
         onChanged();
         return this;
@@ -9918,7 +10257,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         imageFilename_ = value;
         onChanged();
         return this;
@@ -9928,7 +10267,8 @@ public final class GUIProtos {
       /**
        * <code>string image_results_filename = 65;</code>
        */
-      public java.lang.String getImageResultsFilename() {
+      @Override
+	public java.lang.String getImageResultsFilename() {
         java.lang.Object ref = imageResultsFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -9943,11 +10283,12 @@ public final class GUIProtos {
       /**
        * <code>string image_results_filename = 65;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getImageResultsFilenameBytes() {
         java.lang.Object ref = imageResultsFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           imageResultsFilename_ = b;
@@ -9964,7 +10305,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         imageResultsFilename_ = value;
         onChanged();
         return this;
@@ -9973,7 +10314,7 @@ public final class GUIProtos {
        * <code>string image_results_filename = 65;</code>
        */
       public Builder clearImageResultsFilename() {
-        
+
         imageResultsFilename_ = getDefaultInstance().getImageResultsFilename();
         onChanged();
         return this;
@@ -9987,7 +10328,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         imageResultsFilename_ = value;
         onChanged();
         return this;
@@ -9997,7 +10338,8 @@ public final class GUIProtos {
       /**
        * <code>string fluorophoresFilename = 66;</code>
        */
-      public java.lang.String getFluorophoresFilename() {
+      @Override
+	public java.lang.String getFluorophoresFilename() {
         java.lang.Object ref = fluorophoresFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -10012,11 +10354,12 @@ public final class GUIProtos {
       /**
        * <code>string fluorophoresFilename = 66;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFluorophoresFilenameBytes() {
         java.lang.Object ref = fluorophoresFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           fluorophoresFilename_ = b;
@@ -10033,7 +10376,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         fluorophoresFilename_ = value;
         onChanged();
         return this;
@@ -10042,7 +10385,7 @@ public final class GUIProtos {
        * <code>string fluorophoresFilename = 66;</code>
        */
       public Builder clearFluorophoresFilename() {
-        
+
         fluorophoresFilename_ = getDefaultInstance().getFluorophoresFilename();
         onChanged();
         return this;
@@ -10056,7 +10399,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         fluorophoresFilename_ = value;
         onChanged();
         return this;
@@ -10066,14 +10409,15 @@ public final class GUIProtos {
       /**
        * <code>int32 cell_size = 67;</code>
        */
-      public int getCellSize() {
+      @Override
+	public int getCellSize() {
         return cellSize_;
       }
       /**
        * <code>int32 cell_size = 67;</code>
        */
       public Builder setCellSize(int value) {
-        
+
         cellSize_ = value;
         onChanged();
         return this;
@@ -10082,7 +10426,7 @@ public final class GUIProtos {
        * <code>int32 cell_size = 67;</code>
        */
       public Builder clearCellSize() {
-        
+
         cellSize_ = 0;
         onChanged();
         return this;
@@ -10092,14 +10436,15 @@ public final class GUIProtos {
       /**
        * <code>double probability_binary = 68;</code>
        */
-      public double getProbabilityBinary() {
+      @Override
+	public double getProbabilityBinary() {
         return probabilityBinary_;
       }
       /**
        * <code>double probability_binary = 68;</code>
        */
       public Builder setProbabilityBinary(double value) {
-        
+
         probabilityBinary_ = value;
         onChanged();
         return this;
@@ -10108,7 +10453,7 @@ public final class GUIProtos {
        * <code>double probability_binary = 68;</code>
        */
       public Builder clearProbabilityBinary() {
-        
+
         probabilityBinary_ = 0D;
         onChanged();
         return this;
@@ -10118,14 +10463,15 @@ public final class GUIProtos {
       /**
        * <code>double min_binary_distance = 69;</code>
        */
-      public double getMinBinaryDistance() {
+      @Override
+	public double getMinBinaryDistance() {
         return minBinaryDistance_;
       }
       /**
        * <code>double min_binary_distance = 69;</code>
        */
       public Builder setMinBinaryDistance(double value) {
-        
+
         minBinaryDistance_ = value;
         onChanged();
         return this;
@@ -10134,7 +10480,7 @@ public final class GUIProtos {
        * <code>double min_binary_distance = 69;</code>
        */
       public Builder clearMinBinaryDistance() {
-        
+
         minBinaryDistance_ = 0D;
         onChanged();
         return this;
@@ -10144,14 +10490,15 @@ public final class GUIProtos {
       /**
        * <code>double max_binary_distance = 70;</code>
        */
-      public double getMaxBinaryDistance() {
+      @Override
+	public double getMaxBinaryDistance() {
         return maxBinaryDistance_;
       }
       /**
        * <code>double max_binary_distance = 70;</code>
        */
       public Builder setMaxBinaryDistance(double value) {
-        
+
         maxBinaryDistance_ = value;
         onChanged();
         return this;
@@ -10160,7 +10507,7 @@ public final class GUIProtos {
        * <code>double max_binary_distance = 70;</code>
        */
       public Builder clearMaxBinaryDistance() {
-        
+
         maxBinaryDistance_ = 0D;
         onChanged();
         return this;
@@ -10170,14 +10517,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_histograms = 71;</code>
        */
-      public boolean getShowHistograms() {
+      @Override
+	public boolean getShowHistograms() {
         return showHistograms_;
       }
       /**
        * <code>bool show_histograms = 71;</code>
        */
       public Builder setShowHistograms(boolean value) {
-        
+
         showHistograms_ = value;
         onChanged();
         return this;
@@ -10186,7 +10534,7 @@ public final class GUIProtos {
        * <code>bool show_histograms = 71;</code>
        */
       public Builder clearShowHistograms() {
-        
+
         showHistograms_ = false;
         onChanged();
         return this;
@@ -10196,14 +10544,15 @@ public final class GUIProtos {
       /**
        * <code>bool choose_histograms = 72;</code>
        */
-      public boolean getChooseHistograms() {
+      @Override
+	public boolean getChooseHistograms() {
         return chooseHistograms_;
       }
       /**
        * <code>bool choose_histograms = 72;</code>
        */
       public Builder setChooseHistograms(boolean value) {
-        
+
         chooseHistograms_ = value;
         onChanged();
         return this;
@@ -10212,7 +10561,7 @@ public final class GUIProtos {
        * <code>bool choose_histograms = 72;</code>
        */
       public Builder clearChooseHistograms() {
-        
+
         chooseHistograms_ = false;
         onChanged();
         return this;
@@ -10222,14 +10571,15 @@ public final class GUIProtos {
       /**
        * <code>int32 histogram_bins = 73;</code>
        */
-      public int getHistogramBins() {
+      @Override
+	public int getHistogramBins() {
         return histogramBins_;
       }
       /**
        * <code>int32 histogram_bins = 73;</code>
        */
       public Builder setHistogramBins(int value) {
-        
+
         histogramBins_ = value;
         onChanged();
         return this;
@@ -10238,7 +10588,7 @@ public final class GUIProtos {
        * <code>int32 histogram_bins = 73;</code>
        */
       public Builder clearHistogramBins() {
-        
+
         histogramBins_ = 0;
         onChanged();
         return this;
@@ -10248,14 +10598,15 @@ public final class GUIProtos {
       /**
        * <code>bool remove_outliers = 74;</code>
        */
-      public boolean getRemoveOutliers() {
+      @Override
+	public boolean getRemoveOutliers() {
         return removeOutliers_;
       }
       /**
        * <code>bool remove_outliers = 74;</code>
        */
       public Builder setRemoveOutliers(boolean value) {
-        
+
         removeOutliers_ = value;
         onChanged();
         return this;
@@ -10264,7 +10615,7 @@ public final class GUIProtos {
        * <code>bool remove_outliers = 74;</code>
        */
       public Builder clearRemoveOutliers() {
-        
+
         removeOutliers_ = false;
         onChanged();
         return this;
@@ -10274,14 +10625,15 @@ public final class GUIProtos {
       /**
        * <code>float density_radius = 75;</code>
        */
-      public float getDensityRadius() {
+      @Override
+	public float getDensityRadius() {
         return densityRadius_;
       }
       /**
        * <code>float density_radius = 75;</code>
        */
       public Builder setDensityRadius(float value) {
-        
+
         densityRadius_ = value;
         onChanged();
         return this;
@@ -10290,7 +10642,7 @@ public final class GUIProtos {
        * <code>float density_radius = 75;</code>
        */
       public Builder clearDensityRadius() {
-        
+
         densityRadius_ = 0F;
         onChanged();
         return this;
@@ -10304,7 +10656,8 @@ public final class GUIProtos {
        *
        * <code>float depth_of_field = 76;</code>
        */
-      public float getDepthOfField() {
+      @Override
+	public float getDepthOfField() {
         return depthOfField_;
       }
       /**
@@ -10315,7 +10668,7 @@ public final class GUIProtos {
        * <code>float depth_of_field = 76;</code>
        */
       public Builder setDepthOfField(float value) {
-        
+
         depthOfField_ = value;
         onChanged();
         return this;
@@ -10328,7 +10681,7 @@ public final class GUIProtos {
        * <code>float depth_of_field = 76;</code>
        */
       public Builder clearDepthOfField() {
-        
+
         depthOfField_ = 0F;
         onChanged();
         return this;
@@ -10338,14 +10691,15 @@ public final class GUIProtos {
       /**
        * <code>double x_position = 77;</code>
        */
-      public double getXPosition() {
+      @Override
+	public double getXPosition() {
         return xPosition_;
       }
       /**
        * <code>double x_position = 77;</code>
        */
       public Builder setXPosition(double value) {
-        
+
         xPosition_ = value;
         onChanged();
         return this;
@@ -10354,7 +10708,7 @@ public final class GUIProtos {
        * <code>double x_position = 77;</code>
        */
       public Builder clearXPosition() {
-        
+
         xPosition_ = 0D;
         onChanged();
         return this;
@@ -10364,14 +10718,15 @@ public final class GUIProtos {
       /**
        * <code>double y_position = 78;</code>
        */
-      public double getYPosition() {
+      @Override
+	public double getYPosition() {
         return yPosition_;
       }
       /**
        * <code>double y_position = 78;</code>
        */
       public Builder setYPosition(double value) {
-        
+
         yPosition_ = value;
         onChanged();
         return this;
@@ -10380,7 +10735,7 @@ public final class GUIProtos {
        * <code>double y_position = 78;</code>
        */
       public Builder clearYPosition() {
-        
+
         yPosition_ = 0D;
         onChanged();
         return this;
@@ -10390,14 +10745,15 @@ public final class GUIProtos {
       /**
        * <code>double z_position = 79;</code>
        */
-      public double getZPosition() {
+      @Override
+	public double getZPosition() {
         return zPosition_;
       }
       /**
        * <code>double z_position = 79;</code>
        */
       public Builder setZPosition(double value) {
-        
+
         zPosition_ = value;
         onChanged();
         return this;
@@ -10406,7 +10762,7 @@ public final class GUIProtos {
        * <code>double z_position = 79;</code>
        */
       public Builder clearZPosition() {
-        
+
         zPosition_ = 0D;
         onChanged();
         return this;
@@ -10420,7 +10776,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
        */
-      public int getCameraTypeValue() {
+      @Override
+	public int getCameraTypeValue() {
         return cameraType_;
       }
       /**
@@ -10442,7 +10799,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
         gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
         return result == null ? gdsc.smlm.data.config.CalibrationProtos.CameraType.UNRECOGNIZED : result;
       }
@@ -10457,7 +10815,7 @@ public final class GUIProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         cameraType_ = value.getNumber();
         onChanged();
         return this;
@@ -10470,7 +10828,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
        */
       public Builder clearCameraType() {
-        
+
         cameraType_ = 0;
         onChanged();
         return this;
@@ -10479,13 +10837,14 @@ public final class GUIProtos {
       private java.lang.Object cameraModelName_ = "";
       /**
        * <pre>
-       * The camera model name. This should contain all the information required to 
+       * The camera model name. This should contain all the information required to
        * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
        * </pre>
        *
        * <code>string camera_model_name = 81;</code>
        */
-      public java.lang.String getCameraModelName() {
+      @Override
+	public java.lang.String getCameraModelName() {
         java.lang.Object ref = cameraModelName_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -10499,17 +10858,18 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * The camera model name. This should contain all the information required to 
+       * The camera model name. This should contain all the information required to
        * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
        * </pre>
        *
        * <code>string camera_model_name = 81;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getCameraModelNameBytes() {
         java.lang.Object ref = cameraModelName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           cameraModelName_ = b;
@@ -10520,7 +10880,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * The camera model name. This should contain all the information required to 
+       * The camera model name. This should contain all the information required to
        * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
        * </pre>
        *
@@ -10531,28 +10891,28 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         cameraModelName_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The camera model name. This should contain all the information required to 
+       * The camera model name. This should contain all the information required to
        * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
        * </pre>
        *
        * <code>string camera_model_name = 81;</code>
        */
       public Builder clearCameraModelName() {
-        
+
         cameraModelName_ = getDefaultInstance().getCameraModelName();
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The camera model name. This should contain all the information required to 
+       * The camera model name. This should contain all the information required to
        * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
        * </pre>
        *
@@ -10564,7 +10924,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         cameraModelName_ = value;
         onChanged();
         return this;
@@ -10574,14 +10934,15 @@ public final class GUIProtos {
       /**
        * <code>bool random_crop = 82;</code>
        */
-      public boolean getRandomCrop() {
+      @Override
+	public boolean getRandomCrop() {
         return randomCrop_;
       }
       /**
        * <code>bool random_crop = 82;</code>
        */
       public Builder setRandomCrop(boolean value) {
-        
+
         randomCrop_ = value;
         onChanged();
         return this;
@@ -10590,7 +10951,7 @@ public final class GUIProtos {
        * <code>bool random_crop = 82;</code>
        */
       public Builder clearRandomCrop() {
-        
+
         randomCrop_ = false;
         onChanged();
         return this;
@@ -10604,7 +10965,8 @@ public final class GUIProtos {
        *
        * <code>int32 origin_x = 83;</code>
        */
-      public int getOriginX() {
+      @Override
+	public int getOriginX() {
         return originX_;
       }
       /**
@@ -10615,7 +10977,7 @@ public final class GUIProtos {
        * <code>int32 origin_x = 83;</code>
        */
       public Builder setOriginX(int value) {
-        
+
         originX_ = value;
         onChanged();
         return this;
@@ -10628,7 +10990,7 @@ public final class GUIProtos {
        * <code>int32 origin_x = 83;</code>
        */
       public Builder clearOriginX() {
-        
+
         originX_ = 0;
         onChanged();
         return this;
@@ -10642,7 +11004,8 @@ public final class GUIProtos {
        *
        * <code>int32 origin_y = 84;</code>
        */
-      public int getOriginY() {
+      @Override
+	public int getOriginY() {
         return originY_;
       }
       /**
@@ -10653,7 +11016,7 @@ public final class GUIProtos {
        * <code>int32 origin_y = 84;</code>
        */
       public Builder setOriginY(int value) {
-        
+
         originY_ = value;
         onChanged();
         return this;
@@ -10666,7 +11029,7 @@ public final class GUIProtos {
        * <code>int32 origin_y = 84;</code>
        */
       public Builder clearOriginY() {
-        
+
         originY_ = 0;
         onChanged();
         return this;
@@ -10680,7 +11043,8 @@ public final class GUIProtos {
        *
        * <code>double depth_of_focus = 85;</code>
        */
-      public double getDepthOfFocus() {
+      @Override
+	public double getDepthOfFocus() {
         return depthOfFocus_;
       }
       /**
@@ -10691,7 +11055,7 @@ public final class GUIProtos {
        * <code>double depth_of_focus = 85;</code>
        */
       public Builder setDepthOfFocus(double value) {
-        
+
         depthOfFocus_ = value;
         onChanged();
         return this;
@@ -10704,7 +11068,7 @@ public final class GUIProtos {
        * <code>double depth_of_focus = 85;</code>
        */
       public Builder clearDepthOfFocus() {
-        
+
         depthOfFocus_ = 0D;
         onChanged();
         return this;
@@ -10714,7 +11078,8 @@ public final class GUIProtos {
       /**
        * <code>string astigmatism_model = 86;</code>
        */
-      public java.lang.String getAstigmatismModel() {
+      @Override
+	public java.lang.String getAstigmatismModel() {
         java.lang.Object ref = astigmatismModel_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -10729,11 +11094,12 @@ public final class GUIProtos {
       /**
        * <code>string astigmatism_model = 86;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getAstigmatismModelBytes() {
         java.lang.Object ref = astigmatismModel_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           astigmatismModel_ = b;
@@ -10750,7 +11116,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         astigmatismModel_ = value;
         onChanged();
         return this;
@@ -10759,7 +11125,7 @@ public final class GUIProtos {
        * <code>string astigmatism_model = 86;</code>
        */
       public Builder clearAstigmatismModel() {
-        
+
         astigmatismModel_ = getDefaultInstance().getAstigmatismModel();
         onChanged();
         return this;
@@ -10773,17 +11139,19 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         astigmatismModel_ = value;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -10804,7 +11172,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<CreateDataSettings>
         PARSER = new com.google.protobuf.AbstractParser<CreateDataSettings>() {
-      public CreateDataSettings parsePartialFrom(
+      @Override
+	public CreateDataSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -10821,7 +11190,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.CreateDataSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.CreateDataSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -11139,7 +11509,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -11151,12 +11522,13 @@ public final class GUIProtos {
     /**
      * <code>string localisationsFilename = 1;</code>
      */
-    public java.lang.String getLocalisationsFilename() {
+    @Override
+	public java.lang.String getLocalisationsFilename() {
       java.lang.Object ref = localisationsFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         localisationsFilename_ = s;
@@ -11166,11 +11538,12 @@ public final class GUIProtos {
     /**
      * <code>string localisationsFilename = 1;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getLocalisationsFilenameBytes() {
       java.lang.Object ref = localisationsFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         localisationsFilename_ = b;
@@ -11185,7 +11558,8 @@ public final class GUIProtos {
     /**
      * <code>int32 header_lines = 2;</code>
      */
-    public int getHeaderLines() {
+    @Override
+	public int getHeaderLines() {
       return headerLines_;
     }
 
@@ -11194,12 +11568,13 @@ public final class GUIProtos {
     /**
      * <code>string comment = 3;</code>
      */
-    public java.lang.String getComment() {
+    @Override
+	public java.lang.String getComment() {
       java.lang.Object ref = comment_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         comment_ = s;
@@ -11209,11 +11584,12 @@ public final class GUIProtos {
     /**
      * <code>string comment = 3;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getCommentBytes() {
       java.lang.Object ref = comment_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         comment_ = b;
@@ -11228,12 +11604,13 @@ public final class GUIProtos {
     /**
      * <code>string delimiter = 4;</code>
      */
-    public java.lang.String getDelimiter() {
+    @Override
+	public java.lang.String getDelimiter() {
       java.lang.Object ref = delimiter_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         delimiter_ = s;
@@ -11243,11 +11620,12 @@ public final class GUIProtos {
     /**
      * <code>string delimiter = 4;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getDelimiterBytes() {
       java.lang.Object ref = delimiter_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         delimiter_ = b;
@@ -11266,7 +11644,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public boolean hasCalibration() {
+    @Override
+	public boolean hasCalibration() {
       return calibration_ != null;
     }
     /**
@@ -11276,7 +11655,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
       return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
     }
     /**
@@ -11286,7 +11666,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
       return getCalibration();
     }
 
@@ -11295,7 +11676,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_t = 11;</code>
      */
-    public int getFieldT() {
+    @Override
+	public int getFieldT() {
       return fieldT_;
     }
 
@@ -11304,7 +11686,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_id = 12;</code>
      */
-    public int getFieldId() {
+    @Override
+	public int getFieldId() {
       return fieldId_;
     }
 
@@ -11313,7 +11696,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_x = 13;</code>
      */
-    public int getFieldX() {
+    @Override
+	public int getFieldX() {
       return fieldX_;
     }
 
@@ -11322,7 +11706,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_y = 14;</code>
      */
-    public int getFieldY() {
+    @Override
+	public int getFieldY() {
       return fieldY_;
     }
 
@@ -11331,7 +11716,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_z = 15;</code>
      */
-    public int getFieldZ() {
+    @Override
+	public int getFieldZ() {
       return fieldZ_;
     }
 
@@ -11340,7 +11726,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_i = 16;</code>
      */
-    public int getFieldI() {
+    @Override
+	public int getFieldI() {
       return fieldI_;
     }
 
@@ -11349,7 +11736,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_sx = 17;</code>
      */
-    public int getFieldSx() {
+    @Override
+	public int getFieldSx() {
       return fieldSx_;
     }
 
@@ -11358,7 +11746,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_sy = 18;</code>
      */
-    public int getFieldSy() {
+    @Override
+	public int getFieldSy() {
       return fieldSy_;
     }
 
@@ -11367,7 +11756,8 @@ public final class GUIProtos {
     /**
      * <code>int32 field_precision = 19;</code>
      */
-    public int getFieldPrecision() {
+    @Override
+	public int getFieldPrecision() {
       return fieldPrecision_;
     }
 
@@ -11376,12 +11766,13 @@ public final class GUIProtos {
     /**
      * <code>string name = 21;</code>
      */
-    public java.lang.String getName() {
+    @Override
+	public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         name_ = s;
@@ -11391,11 +11782,12 @@ public final class GUIProtos {
     /**
      * <code>string name = 21;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
@@ -11410,7 +11802,8 @@ public final class GUIProtos {
     /**
      * <code>bool limit_z = 22;</code>
      */
-    public boolean getLimitZ() {
+    @Override
+	public boolean getLimitZ() {
       return limitZ_;
     }
 
@@ -11419,7 +11812,8 @@ public final class GUIProtos {
     /**
      * <code>double min_z = 23;</code>
      */
-    public double getMinZ() {
+    @Override
+	public double getMinZ() {
       return minZ_;
     }
 
@@ -11428,12 +11822,14 @@ public final class GUIProtos {
     /**
      * <code>double max_z = 24;</code>
      */
-    public double getMaxZ() {
+    @Override
+	public double getMaxZ() {
       return maxZ_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -11442,7 +11838,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (!getLocalisationsFilenameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, localisationsFilename_);
@@ -11500,7 +11897,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -11758,14 +12156,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -11792,7 +12192,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -11814,7 +12215,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         localisationsFilename_ = "";
 
@@ -11859,16 +12261,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings build() {
         gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -11876,7 +12281,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = new gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings(this);
         result.localisationsFilename_ = localisationsFilename_;
         result.headerLines_ = headerLines_;
@@ -11904,33 +12310,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings)other);
         } else {
@@ -12003,11 +12416,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -12029,7 +12444,8 @@ public final class GUIProtos {
       /**
        * <code>string localisationsFilename = 1;</code>
        */
-      public java.lang.String getLocalisationsFilename() {
+      @Override
+	public java.lang.String getLocalisationsFilename() {
         java.lang.Object ref = localisationsFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -12044,11 +12460,12 @@ public final class GUIProtos {
       /**
        * <code>string localisationsFilename = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getLocalisationsFilenameBytes() {
         java.lang.Object ref = localisationsFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           localisationsFilename_ = b;
@@ -12065,7 +12482,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         localisationsFilename_ = value;
         onChanged();
         return this;
@@ -12074,7 +12491,7 @@ public final class GUIProtos {
        * <code>string localisationsFilename = 1;</code>
        */
       public Builder clearLocalisationsFilename() {
-        
+
         localisationsFilename_ = getDefaultInstance().getLocalisationsFilename();
         onChanged();
         return this;
@@ -12088,7 +12505,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         localisationsFilename_ = value;
         onChanged();
         return this;
@@ -12098,14 +12515,15 @@ public final class GUIProtos {
       /**
        * <code>int32 header_lines = 2;</code>
        */
-      public int getHeaderLines() {
+      @Override
+	public int getHeaderLines() {
         return headerLines_;
       }
       /**
        * <code>int32 header_lines = 2;</code>
        */
       public Builder setHeaderLines(int value) {
-        
+
         headerLines_ = value;
         onChanged();
         return this;
@@ -12114,7 +12532,7 @@ public final class GUIProtos {
        * <code>int32 header_lines = 2;</code>
        */
       public Builder clearHeaderLines() {
-        
+
         headerLines_ = 0;
         onChanged();
         return this;
@@ -12124,7 +12542,8 @@ public final class GUIProtos {
       /**
        * <code>string comment = 3;</code>
        */
-      public java.lang.String getComment() {
+      @Override
+	public java.lang.String getComment() {
         java.lang.Object ref = comment_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -12139,11 +12558,12 @@ public final class GUIProtos {
       /**
        * <code>string comment = 3;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getCommentBytes() {
         java.lang.Object ref = comment_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           comment_ = b;
@@ -12160,7 +12580,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         comment_ = value;
         onChanged();
         return this;
@@ -12169,7 +12589,7 @@ public final class GUIProtos {
        * <code>string comment = 3;</code>
        */
       public Builder clearComment() {
-        
+
         comment_ = getDefaultInstance().getComment();
         onChanged();
         return this;
@@ -12183,7 +12603,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         comment_ = value;
         onChanged();
         return this;
@@ -12193,7 +12613,8 @@ public final class GUIProtos {
       /**
        * <code>string delimiter = 4;</code>
        */
-      public java.lang.String getDelimiter() {
+      @Override
+	public java.lang.String getDelimiter() {
         java.lang.Object ref = delimiter_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -12208,11 +12629,12 @@ public final class GUIProtos {
       /**
        * <code>string delimiter = 4;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getDelimiterBytes() {
         java.lang.Object ref = delimiter_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           delimiter_ = b;
@@ -12229,7 +12651,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         delimiter_ = value;
         onChanged();
         return this;
@@ -12238,7 +12660,7 @@ public final class GUIProtos {
        * <code>string delimiter = 4;</code>
        */
       public Builder clearDelimiter() {
-        
+
         delimiter_ = getDefaultInstance().getDelimiter();
         onChanged();
         return this;
@@ -12252,7 +12674,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         delimiter_ = value;
         onChanged();
         return this;
@@ -12268,7 +12690,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public boolean hasCalibration() {
+      @Override
+	public boolean hasCalibration() {
         return calibrationBuilder_ != null || calibration_ != null;
       }
       /**
@@ -12278,7 +12701,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
         if (calibrationBuilder_ == null) {
           return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
         } else {
@@ -12371,7 +12795,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder getCalibrationBuilder() {
-        
+
         onChanged();
         return getCalibrationFieldBuilder().getBuilder();
       }
@@ -12382,7 +12806,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
         if (calibrationBuilder_ != null) {
           return calibrationBuilder_.getMessageOrBuilder();
         } else {
@@ -12398,11 +12823,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> 
+          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>
           getCalibrationFieldBuilder() {
         if (calibrationBuilder_ == null) {
-          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>(
+          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getCalibration(),
                   getParentForChildren(),
                   isClean());
@@ -12415,14 +12839,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_t = 11;</code>
        */
-      public int getFieldT() {
+      @Override
+	public int getFieldT() {
         return fieldT_;
       }
       /**
        * <code>int32 field_t = 11;</code>
        */
       public Builder setFieldT(int value) {
-        
+
         fieldT_ = value;
         onChanged();
         return this;
@@ -12431,7 +12856,7 @@ public final class GUIProtos {
        * <code>int32 field_t = 11;</code>
        */
       public Builder clearFieldT() {
-        
+
         fieldT_ = 0;
         onChanged();
         return this;
@@ -12441,14 +12866,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_id = 12;</code>
        */
-      public int getFieldId() {
+      @Override
+	public int getFieldId() {
         return fieldId_;
       }
       /**
        * <code>int32 field_id = 12;</code>
        */
       public Builder setFieldId(int value) {
-        
+
         fieldId_ = value;
         onChanged();
         return this;
@@ -12457,7 +12883,7 @@ public final class GUIProtos {
        * <code>int32 field_id = 12;</code>
        */
       public Builder clearFieldId() {
-        
+
         fieldId_ = 0;
         onChanged();
         return this;
@@ -12467,14 +12893,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_x = 13;</code>
        */
-      public int getFieldX() {
+      @Override
+	public int getFieldX() {
         return fieldX_;
       }
       /**
        * <code>int32 field_x = 13;</code>
        */
       public Builder setFieldX(int value) {
-        
+
         fieldX_ = value;
         onChanged();
         return this;
@@ -12483,7 +12910,7 @@ public final class GUIProtos {
        * <code>int32 field_x = 13;</code>
        */
       public Builder clearFieldX() {
-        
+
         fieldX_ = 0;
         onChanged();
         return this;
@@ -12493,14 +12920,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_y = 14;</code>
        */
-      public int getFieldY() {
+      @Override
+	public int getFieldY() {
         return fieldY_;
       }
       /**
        * <code>int32 field_y = 14;</code>
        */
       public Builder setFieldY(int value) {
-        
+
         fieldY_ = value;
         onChanged();
         return this;
@@ -12509,7 +12937,7 @@ public final class GUIProtos {
        * <code>int32 field_y = 14;</code>
        */
       public Builder clearFieldY() {
-        
+
         fieldY_ = 0;
         onChanged();
         return this;
@@ -12519,14 +12947,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_z = 15;</code>
        */
-      public int getFieldZ() {
+      @Override
+	public int getFieldZ() {
         return fieldZ_;
       }
       /**
        * <code>int32 field_z = 15;</code>
        */
       public Builder setFieldZ(int value) {
-        
+
         fieldZ_ = value;
         onChanged();
         return this;
@@ -12535,7 +12964,7 @@ public final class GUIProtos {
        * <code>int32 field_z = 15;</code>
        */
       public Builder clearFieldZ() {
-        
+
         fieldZ_ = 0;
         onChanged();
         return this;
@@ -12545,14 +12974,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_i = 16;</code>
        */
-      public int getFieldI() {
+      @Override
+	public int getFieldI() {
         return fieldI_;
       }
       /**
        * <code>int32 field_i = 16;</code>
        */
       public Builder setFieldI(int value) {
-        
+
         fieldI_ = value;
         onChanged();
         return this;
@@ -12561,7 +12991,7 @@ public final class GUIProtos {
        * <code>int32 field_i = 16;</code>
        */
       public Builder clearFieldI() {
-        
+
         fieldI_ = 0;
         onChanged();
         return this;
@@ -12571,14 +13001,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_sx = 17;</code>
        */
-      public int getFieldSx() {
+      @Override
+	public int getFieldSx() {
         return fieldSx_;
       }
       /**
        * <code>int32 field_sx = 17;</code>
        */
       public Builder setFieldSx(int value) {
-        
+
         fieldSx_ = value;
         onChanged();
         return this;
@@ -12587,7 +13018,7 @@ public final class GUIProtos {
        * <code>int32 field_sx = 17;</code>
        */
       public Builder clearFieldSx() {
-        
+
         fieldSx_ = 0;
         onChanged();
         return this;
@@ -12597,14 +13028,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_sy = 18;</code>
        */
-      public int getFieldSy() {
+      @Override
+	public int getFieldSy() {
         return fieldSy_;
       }
       /**
        * <code>int32 field_sy = 18;</code>
        */
       public Builder setFieldSy(int value) {
-        
+
         fieldSy_ = value;
         onChanged();
         return this;
@@ -12613,7 +13045,7 @@ public final class GUIProtos {
        * <code>int32 field_sy = 18;</code>
        */
       public Builder clearFieldSy() {
-        
+
         fieldSy_ = 0;
         onChanged();
         return this;
@@ -12623,14 +13055,15 @@ public final class GUIProtos {
       /**
        * <code>int32 field_precision = 19;</code>
        */
-      public int getFieldPrecision() {
+      @Override
+	public int getFieldPrecision() {
         return fieldPrecision_;
       }
       /**
        * <code>int32 field_precision = 19;</code>
        */
       public Builder setFieldPrecision(int value) {
-        
+
         fieldPrecision_ = value;
         onChanged();
         return this;
@@ -12639,7 +13072,7 @@ public final class GUIProtos {
        * <code>int32 field_precision = 19;</code>
        */
       public Builder clearFieldPrecision() {
-        
+
         fieldPrecision_ = 0;
         onChanged();
         return this;
@@ -12649,7 +13082,8 @@ public final class GUIProtos {
       /**
        * <code>string name = 21;</code>
        */
-      public java.lang.String getName() {
+      @Override
+	public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -12664,11 +13098,12 @@ public final class GUIProtos {
       /**
        * <code>string name = 21;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
@@ -12685,7 +13120,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         name_ = value;
         onChanged();
         return this;
@@ -12694,7 +13129,7 @@ public final class GUIProtos {
        * <code>string name = 21;</code>
        */
       public Builder clearName() {
-        
+
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
@@ -12708,7 +13143,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         name_ = value;
         onChanged();
         return this;
@@ -12718,14 +13153,15 @@ public final class GUIProtos {
       /**
        * <code>bool limit_z = 22;</code>
        */
-      public boolean getLimitZ() {
+      @Override
+	public boolean getLimitZ() {
         return limitZ_;
       }
       /**
        * <code>bool limit_z = 22;</code>
        */
       public Builder setLimitZ(boolean value) {
-        
+
         limitZ_ = value;
         onChanged();
         return this;
@@ -12734,7 +13170,7 @@ public final class GUIProtos {
        * <code>bool limit_z = 22;</code>
        */
       public Builder clearLimitZ() {
-        
+
         limitZ_ = false;
         onChanged();
         return this;
@@ -12744,14 +13180,15 @@ public final class GUIProtos {
       /**
        * <code>double min_z = 23;</code>
        */
-      public double getMinZ() {
+      @Override
+	public double getMinZ() {
         return minZ_;
       }
       /**
        * <code>double min_z = 23;</code>
        */
       public Builder setMinZ(double value) {
-        
+
         minZ_ = value;
         onChanged();
         return this;
@@ -12760,7 +13197,7 @@ public final class GUIProtos {
        * <code>double min_z = 23;</code>
        */
       public Builder clearMinZ() {
-        
+
         minZ_ = 0D;
         onChanged();
         return this;
@@ -12770,14 +13207,15 @@ public final class GUIProtos {
       /**
        * <code>double max_z = 24;</code>
        */
-      public double getMaxZ() {
+      @Override
+	public double getMaxZ() {
         return maxZ_;
       }
       /**
        * <code>double max_z = 24;</code>
        */
       public Builder setMaxZ(double value) {
-        
+
         maxZ_ = value;
         onChanged();
         return this;
@@ -12786,17 +13224,19 @@ public final class GUIProtos {
        * <code>double max_z = 24;</code>
        */
       public Builder clearMaxZ() {
-        
+
         maxZ_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -12817,7 +13257,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<LoadLocalisationsSettings>
         PARSER = new com.google.protobuf.AbstractParser<LoadLocalisationsSettings>() {
-      public LoadLocalisationsSettings parsePartialFrom(
+      @Override
+	public LoadLocalisationsSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -12834,7 +13275,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -13312,7 +13754,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -13324,7 +13767,8 @@ public final class GUIProtos {
     /**
      * <code>double distance_threshold = 1;</code>
      */
-    public double getDistanceThreshold() {
+    @Override
+	public double getDistanceThreshold() {
       return distanceThreshold_;
     }
 
@@ -13333,7 +13777,8 @@ public final class GUIProtos {
     /**
      * <code>double distance_exclusion = 2;</code>
      */
-    public double getDistanceExclusion() {
+    @Override
+	public double getDistanceExclusion() {
       return distanceExclusion_;
     }
 
@@ -13342,7 +13787,8 @@ public final class GUIProtos {
     /**
      * <code>double time_threshold = 3;</code>
      */
-    public double getTimeThreshold() {
+    @Override
+	public double getTimeThreshold() {
       return timeThreshold_;
     }
 
@@ -13351,13 +13797,15 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
      */
-    public int getTimeUnitValue() {
+    @Override
+	public int getTimeUnitValue() {
       return timeUnit_;
     }
     /**
      * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
      */
-    public gdsc.smlm.data.config.UnitProtos.TimeUnit getTimeUnit() {
+    @Override
+	public gdsc.smlm.data.config.UnitProtos.TimeUnit getTimeUnit() {
       gdsc.smlm.data.config.UnitProtos.TimeUnit result = gdsc.smlm.data.config.UnitProtos.TimeUnit.valueOf(timeUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.TimeUnit.UNRECOGNIZED : result;
     }
@@ -13367,7 +13815,8 @@ public final class GUIProtos {
     /**
      * <code>int32 trace_mode = 5;</code>
      */
-    public int getTraceMode() {
+    @Override
+	public int getTraceMode() {
       return traceMode_;
     }
 
@@ -13376,7 +13825,8 @@ public final class GUIProtos {
     /**
      * <code>int32 clustering_algorithm = 6;</code>
      */
-    public int getClusteringAlgorithm() {
+    @Override
+	public int getClusteringAlgorithm() {
       return clusteringAlgorithm_;
     }
 
@@ -13385,7 +13835,8 @@ public final class GUIProtos {
     /**
      * <code>int32 pulse_interval = 7;</code>
      */
-    public int getPulseInterval() {
+    @Override
+	public int getPulseInterval() {
       return pulseInterval_;
     }
 
@@ -13394,7 +13845,8 @@ public final class GUIProtos {
     /**
      * <code>int32 pulse_window = 8;</code>
      */
-    public int getPulseWindow() {
+    @Override
+	public int getPulseWindow() {
       return pulseWindow_;
     }
 
@@ -13403,7 +13855,8 @@ public final class GUIProtos {
     /**
      * <code>bool split_pulses = 9;</code>
      */
-    public boolean getSplitPulses() {
+    @Override
+	public boolean getSplitPulses() {
       return splitPulses_;
     }
 
@@ -13412,7 +13865,8 @@ public final class GUIProtos {
     /**
      * <code>double blinking_rate = 10;</code>
      */
-    public double getBlinkingRate() {
+    @Override
+	public double getBlinkingRate() {
       return blinkingRate_;
     }
 
@@ -13421,7 +13875,8 @@ public final class GUIProtos {
     /**
      * <code>bool optimise = 11;</code>
      */
-    public boolean getOptimise() {
+    @Override
+	public boolean getOptimise() {
       return optimise_;
     }
 
@@ -13430,7 +13885,8 @@ public final class GUIProtos {
     /**
      * <code>double min_distance_threshold = 12;</code>
      */
-    public double getMinDistanceThreshold() {
+    @Override
+	public double getMinDistanceThreshold() {
       return minDistanceThreshold_;
     }
 
@@ -13439,7 +13895,8 @@ public final class GUIProtos {
     /**
      * <code>double max_distance_threshold = 13;</code>
      */
-    public double getMaxDistanceThreshold() {
+    @Override
+	public double getMaxDistanceThreshold() {
       return maxDistanceThreshold_;
     }
 
@@ -13452,7 +13909,8 @@ public final class GUIProtos {
      *
      * <code>int32 min_time_threshold = 14;</code>
      */
-    public int getMinTimeThreshold() {
+    @Override
+	public int getMinTimeThreshold() {
       return minTimeThreshold_;
     }
 
@@ -13465,7 +13923,8 @@ public final class GUIProtos {
      *
      * <code>int32 max_time_threshold = 15;</code>
      */
-    public int getMaxTimeThreshold() {
+    @Override
+	public int getMaxTimeThreshold() {
       return maxTimeThreshold_;
     }
 
@@ -13474,7 +13933,8 @@ public final class GUIProtos {
     /**
      * <code>int32 optimiser_steps = 16;</code>
      */
-    public int getOptimiserSteps() {
+    @Override
+	public int getOptimiserSteps() {
       return optimiserSteps_;
     }
 
@@ -13483,7 +13943,8 @@ public final class GUIProtos {
     /**
      * <code>int32 optimiser_plot = 17;</code>
      */
-    public int getOptimiserPlot() {
+    @Override
+	public int getOptimiserPlot() {
       return optimiserPlot_;
     }
 
@@ -13492,7 +13953,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_traces = 18;</code>
      */
-    public boolean getSaveTraces() {
+    @Override
+	public boolean getSaveTraces() {
       return saveTraces_;
     }
 
@@ -13501,7 +13963,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_histograms = 19;</code>
      */
-    public boolean getShowHistograms() {
+    @Override
+	public boolean getShowHistograms() {
       return showHistograms_;
     }
 
@@ -13510,7 +13973,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_trace_data = 20;</code>
      */
-    public boolean getSaveTraceData() {
+    @Override
+	public boolean getSaveTraceData() {
       return saveTraceData_;
     }
 
@@ -13519,12 +13983,13 @@ public final class GUIProtos {
     /**
      * <code>string trace_data_directory = 21;</code>
      */
-    public java.lang.String getTraceDataDirectory() {
+    @Override
+	public java.lang.String getTraceDataDirectory() {
       java.lang.Object ref = traceDataDirectory_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         traceDataDirectory_ = s;
@@ -13534,11 +13999,12 @@ public final class GUIProtos {
     /**
      * <code>string trace_data_directory = 21;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getTraceDataDirectoryBytes() {
       java.lang.Object ref = traceDataDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         traceDataDirectory_ = b;
@@ -13553,7 +14019,8 @@ public final class GUIProtos {
     /**
      * <code>int32 histogram_bins = 22;</code>
      */
-    public int getHistogramBins() {
+    @Override
+	public int getHistogramBins() {
       return histogramBins_;
     }
 
@@ -13562,7 +14029,8 @@ public final class GUIProtos {
     /**
      * <code>bool remove_outliers = 23;</code>
      */
-    public boolean getRemoveOutliers() {
+    @Override
+	public boolean getRemoveOutliers() {
       return removeOutliers_;
     }
 
@@ -13571,7 +14039,8 @@ public final class GUIProtos {
     /**
      * <code>bool refit_option = 24;</code>
      */
-    public boolean getRefitOption() {
+    @Override
+	public boolean getRefitOption() {
       return refitOption_;
     }
 
@@ -13584,7 +14053,8 @@ public final class GUIProtos {
      *
      * <code>int32 minimum_trace_length = 25;</code>
      */
-    public int getMinimumTraceLength() {
+    @Override
+	public int getMinimumTraceLength() {
       return minimumTraceLength_;
     }
 
@@ -13593,7 +14063,8 @@ public final class GUIProtos {
     /**
      * <code>bool truncate = 26;</code>
      */
-    public boolean getTruncate() {
+    @Override
+	public boolean getTruncate() {
       return truncate_;
     }
 
@@ -13602,7 +14073,8 @@ public final class GUIProtos {
     /**
      * <code>bool internal_distances = 27;</code>
      */
-    public boolean getInternalDistances() {
+    @Override
+	public boolean getInternalDistances() {
       return internalDistances_;
     }
 
@@ -13611,7 +14083,8 @@ public final class GUIProtos {
     /**
      * <code>bool sub_sampled_distances = 28;</code>
      */
-    public boolean getSubSampledDistances() {
+    @Override
+	public boolean getSubSampledDistances() {
       return subSampledDistances_;
     }
 
@@ -13620,7 +14093,8 @@ public final class GUIProtos {
     /**
      * <code>bool ignore_ends = 29;</code>
      */
-    public boolean getIgnoreEnds() {
+    @Override
+	public boolean getIgnoreEnds() {
       return ignoreEnds_;
     }
 
@@ -13629,7 +14103,8 @@ public final class GUIProtos {
     /**
      * <code>bool precision_correction = 30;</code>
      */
-    public boolean getPrecisionCorrection() {
+    @Override
+	public boolean getPrecisionCorrection() {
       return precisionCorrection_;
     }
 
@@ -13638,7 +14113,8 @@ public final class GUIProtos {
     /**
      * <code>bool msd_correction = 31;</code>
      */
-    public boolean getMsdCorrection() {
+    @Override
+	public boolean getMsdCorrection() {
       return msdCorrection_;
     }
 
@@ -13647,7 +14123,8 @@ public final class GUIProtos {
     /**
      * <code>bool mle = 32;</code>
      */
-    public boolean getMle() {
+    @Override
+	public boolean getMle() {
       return mle_;
     }
 
@@ -13656,7 +14133,8 @@ public final class GUIProtos {
     /**
      * <code>int32 fit_length = 33;</code>
      */
-    public int getFitLength() {
+    @Override
+	public int getFitLength() {
       return fitLength_;
     }
 
@@ -13665,7 +14143,8 @@ public final class GUIProtos {
     /**
      * <code>int32 fit_restarts = 34;</code>
      */
-    public int getFitRestarts() {
+    @Override
+	public int getFitRestarts() {
       return fitRestarts_;
     }
 
@@ -13674,12 +14153,14 @@ public final class GUIProtos {
     /**
      * <code>int32 jump_distance = 35;</code>
      */
-    public int getJumpDistance() {
+    @Override
+	public int getJumpDistance() {
       return jumpDistance_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -13688,7 +14169,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (distanceThreshold_ != 0D) {
         output.writeDouble(1, distanceThreshold_);
@@ -13797,7 +14279,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -14213,14 +14696,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.ClusteringSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -14247,7 +14732,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -14269,7 +14755,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         distanceThreshold_ = 0D;
 
@@ -14344,16 +14831,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ClusteringSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ClusteringSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.ClusteringSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ClusteringSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ClusteringSettings build() {
         gdsc.smlm.data.config.GUIProtos.ClusteringSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -14361,7 +14851,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ClusteringSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ClusteringSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.ClusteringSettings result = new gdsc.smlm.data.config.GUIProtos.ClusteringSettings(this);
         result.distanceThreshold_ = distanceThreshold_;
         result.distanceExclusion_ = distanceExclusion_;
@@ -14402,33 +14893,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.ClusteringSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.ClusteringSettings)other);
         } else {
@@ -14549,11 +15047,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -14575,14 +15075,15 @@ public final class GUIProtos {
       /**
        * <code>double distance_threshold = 1;</code>
        */
-      public double getDistanceThreshold() {
+      @Override
+	public double getDistanceThreshold() {
         return distanceThreshold_;
       }
       /**
        * <code>double distance_threshold = 1;</code>
        */
       public Builder setDistanceThreshold(double value) {
-        
+
         distanceThreshold_ = value;
         onChanged();
         return this;
@@ -14591,7 +15092,7 @@ public final class GUIProtos {
        * <code>double distance_threshold = 1;</code>
        */
       public Builder clearDistanceThreshold() {
-        
+
         distanceThreshold_ = 0D;
         onChanged();
         return this;
@@ -14601,14 +15102,15 @@ public final class GUIProtos {
       /**
        * <code>double distance_exclusion = 2;</code>
        */
-      public double getDistanceExclusion() {
+      @Override
+	public double getDistanceExclusion() {
         return distanceExclusion_;
       }
       /**
        * <code>double distance_exclusion = 2;</code>
        */
       public Builder setDistanceExclusion(double value) {
-        
+
         distanceExclusion_ = value;
         onChanged();
         return this;
@@ -14617,7 +15119,7 @@ public final class GUIProtos {
        * <code>double distance_exclusion = 2;</code>
        */
       public Builder clearDistanceExclusion() {
-        
+
         distanceExclusion_ = 0D;
         onChanged();
         return this;
@@ -14627,14 +15129,15 @@ public final class GUIProtos {
       /**
        * <code>double time_threshold = 3;</code>
        */
-      public double getTimeThreshold() {
+      @Override
+	public double getTimeThreshold() {
         return timeThreshold_;
       }
       /**
        * <code>double time_threshold = 3;</code>
        */
       public Builder setTimeThreshold(double value) {
-        
+
         timeThreshold_ = value;
         onChanged();
         return this;
@@ -14643,7 +15146,7 @@ public final class GUIProtos {
        * <code>double time_threshold = 3;</code>
        */
       public Builder clearTimeThreshold() {
-        
+
         timeThreshold_ = 0D;
         onChanged();
         return this;
@@ -14653,7 +15156,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
        */
-      public int getTimeUnitValue() {
+      @Override
+	public int getTimeUnitValue() {
         return timeUnit_;
       }
       /**
@@ -14667,7 +15171,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
        */
-      public gdsc.smlm.data.config.UnitProtos.TimeUnit getTimeUnit() {
+      @Override
+	public gdsc.smlm.data.config.UnitProtos.TimeUnit getTimeUnit() {
         gdsc.smlm.data.config.UnitProtos.TimeUnit result = gdsc.smlm.data.config.UnitProtos.TimeUnit.valueOf(timeUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.TimeUnit.UNRECOGNIZED : result;
       }
@@ -14678,7 +15183,7 @@ public final class GUIProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         timeUnit_ = value.getNumber();
         onChanged();
         return this;
@@ -14687,7 +15192,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
        */
       public Builder clearTimeUnit() {
-        
+
         timeUnit_ = 0;
         onChanged();
         return this;
@@ -14697,14 +15202,15 @@ public final class GUIProtos {
       /**
        * <code>int32 trace_mode = 5;</code>
        */
-      public int getTraceMode() {
+      @Override
+	public int getTraceMode() {
         return traceMode_;
       }
       /**
        * <code>int32 trace_mode = 5;</code>
        */
       public Builder setTraceMode(int value) {
-        
+
         traceMode_ = value;
         onChanged();
         return this;
@@ -14713,7 +15219,7 @@ public final class GUIProtos {
        * <code>int32 trace_mode = 5;</code>
        */
       public Builder clearTraceMode() {
-        
+
         traceMode_ = 0;
         onChanged();
         return this;
@@ -14723,14 +15229,15 @@ public final class GUIProtos {
       /**
        * <code>int32 clustering_algorithm = 6;</code>
        */
-      public int getClusteringAlgorithm() {
+      @Override
+	public int getClusteringAlgorithm() {
         return clusteringAlgorithm_;
       }
       /**
        * <code>int32 clustering_algorithm = 6;</code>
        */
       public Builder setClusteringAlgorithm(int value) {
-        
+
         clusteringAlgorithm_ = value;
         onChanged();
         return this;
@@ -14739,7 +15246,7 @@ public final class GUIProtos {
        * <code>int32 clustering_algorithm = 6;</code>
        */
       public Builder clearClusteringAlgorithm() {
-        
+
         clusteringAlgorithm_ = 0;
         onChanged();
         return this;
@@ -14749,14 +15256,15 @@ public final class GUIProtos {
       /**
        * <code>int32 pulse_interval = 7;</code>
        */
-      public int getPulseInterval() {
+      @Override
+	public int getPulseInterval() {
         return pulseInterval_;
       }
       /**
        * <code>int32 pulse_interval = 7;</code>
        */
       public Builder setPulseInterval(int value) {
-        
+
         pulseInterval_ = value;
         onChanged();
         return this;
@@ -14765,7 +15273,7 @@ public final class GUIProtos {
        * <code>int32 pulse_interval = 7;</code>
        */
       public Builder clearPulseInterval() {
-        
+
         pulseInterval_ = 0;
         onChanged();
         return this;
@@ -14775,14 +15283,15 @@ public final class GUIProtos {
       /**
        * <code>int32 pulse_window = 8;</code>
        */
-      public int getPulseWindow() {
+      @Override
+	public int getPulseWindow() {
         return pulseWindow_;
       }
       /**
        * <code>int32 pulse_window = 8;</code>
        */
       public Builder setPulseWindow(int value) {
-        
+
         pulseWindow_ = value;
         onChanged();
         return this;
@@ -14791,7 +15300,7 @@ public final class GUIProtos {
        * <code>int32 pulse_window = 8;</code>
        */
       public Builder clearPulseWindow() {
-        
+
         pulseWindow_ = 0;
         onChanged();
         return this;
@@ -14801,14 +15310,15 @@ public final class GUIProtos {
       /**
        * <code>bool split_pulses = 9;</code>
        */
-      public boolean getSplitPulses() {
+      @Override
+	public boolean getSplitPulses() {
         return splitPulses_;
       }
       /**
        * <code>bool split_pulses = 9;</code>
        */
       public Builder setSplitPulses(boolean value) {
-        
+
         splitPulses_ = value;
         onChanged();
         return this;
@@ -14817,7 +15327,7 @@ public final class GUIProtos {
        * <code>bool split_pulses = 9;</code>
        */
       public Builder clearSplitPulses() {
-        
+
         splitPulses_ = false;
         onChanged();
         return this;
@@ -14827,14 +15337,15 @@ public final class GUIProtos {
       /**
        * <code>double blinking_rate = 10;</code>
        */
-      public double getBlinkingRate() {
+      @Override
+	public double getBlinkingRate() {
         return blinkingRate_;
       }
       /**
        * <code>double blinking_rate = 10;</code>
        */
       public Builder setBlinkingRate(double value) {
-        
+
         blinkingRate_ = value;
         onChanged();
         return this;
@@ -14843,7 +15354,7 @@ public final class GUIProtos {
        * <code>double blinking_rate = 10;</code>
        */
       public Builder clearBlinkingRate() {
-        
+
         blinkingRate_ = 0D;
         onChanged();
         return this;
@@ -14853,14 +15364,15 @@ public final class GUIProtos {
       /**
        * <code>bool optimise = 11;</code>
        */
-      public boolean getOptimise() {
+      @Override
+	public boolean getOptimise() {
         return optimise_;
       }
       /**
        * <code>bool optimise = 11;</code>
        */
       public Builder setOptimise(boolean value) {
-        
+
         optimise_ = value;
         onChanged();
         return this;
@@ -14869,7 +15381,7 @@ public final class GUIProtos {
        * <code>bool optimise = 11;</code>
        */
       public Builder clearOptimise() {
-        
+
         optimise_ = false;
         onChanged();
         return this;
@@ -14879,14 +15391,15 @@ public final class GUIProtos {
       /**
        * <code>double min_distance_threshold = 12;</code>
        */
-      public double getMinDistanceThreshold() {
+      @Override
+	public double getMinDistanceThreshold() {
         return minDistanceThreshold_;
       }
       /**
        * <code>double min_distance_threshold = 12;</code>
        */
       public Builder setMinDistanceThreshold(double value) {
-        
+
         minDistanceThreshold_ = value;
         onChanged();
         return this;
@@ -14895,7 +15408,7 @@ public final class GUIProtos {
        * <code>double min_distance_threshold = 12;</code>
        */
       public Builder clearMinDistanceThreshold() {
-        
+
         minDistanceThreshold_ = 0D;
         onChanged();
         return this;
@@ -14905,14 +15418,15 @@ public final class GUIProtos {
       /**
        * <code>double max_distance_threshold = 13;</code>
        */
-      public double getMaxDistanceThreshold() {
+      @Override
+	public double getMaxDistanceThreshold() {
         return maxDistanceThreshold_;
       }
       /**
        * <code>double max_distance_threshold = 13;</code>
        */
       public Builder setMaxDistanceThreshold(double value) {
-        
+
         maxDistanceThreshold_ = value;
         onChanged();
         return this;
@@ -14921,7 +15435,7 @@ public final class GUIProtos {
        * <code>double max_distance_threshold = 13;</code>
        */
       public Builder clearMaxDistanceThreshold() {
-        
+
         maxDistanceThreshold_ = 0D;
         onChanged();
         return this;
@@ -14935,7 +15449,8 @@ public final class GUIProtos {
        *
        * <code>int32 min_time_threshold = 14;</code>
        */
-      public int getMinTimeThreshold() {
+      @Override
+	public int getMinTimeThreshold() {
         return minTimeThreshold_;
       }
       /**
@@ -14946,7 +15461,7 @@ public final class GUIProtos {
        * <code>int32 min_time_threshold = 14;</code>
        */
       public Builder setMinTimeThreshold(int value) {
-        
+
         minTimeThreshold_ = value;
         onChanged();
         return this;
@@ -14959,7 +15474,7 @@ public final class GUIProtos {
        * <code>int32 min_time_threshold = 14;</code>
        */
       public Builder clearMinTimeThreshold() {
-        
+
         minTimeThreshold_ = 0;
         onChanged();
         return this;
@@ -14973,7 +15488,8 @@ public final class GUIProtos {
        *
        * <code>int32 max_time_threshold = 15;</code>
        */
-      public int getMaxTimeThreshold() {
+      @Override
+	public int getMaxTimeThreshold() {
         return maxTimeThreshold_;
       }
       /**
@@ -14984,7 +15500,7 @@ public final class GUIProtos {
        * <code>int32 max_time_threshold = 15;</code>
        */
       public Builder setMaxTimeThreshold(int value) {
-        
+
         maxTimeThreshold_ = value;
         onChanged();
         return this;
@@ -14997,7 +15513,7 @@ public final class GUIProtos {
        * <code>int32 max_time_threshold = 15;</code>
        */
       public Builder clearMaxTimeThreshold() {
-        
+
         maxTimeThreshold_ = 0;
         onChanged();
         return this;
@@ -15007,14 +15523,15 @@ public final class GUIProtos {
       /**
        * <code>int32 optimiser_steps = 16;</code>
        */
-      public int getOptimiserSteps() {
+      @Override
+	public int getOptimiserSteps() {
         return optimiserSteps_;
       }
       /**
        * <code>int32 optimiser_steps = 16;</code>
        */
       public Builder setOptimiserSteps(int value) {
-        
+
         optimiserSteps_ = value;
         onChanged();
         return this;
@@ -15023,7 +15540,7 @@ public final class GUIProtos {
        * <code>int32 optimiser_steps = 16;</code>
        */
       public Builder clearOptimiserSteps() {
-        
+
         optimiserSteps_ = 0;
         onChanged();
         return this;
@@ -15033,14 +15550,15 @@ public final class GUIProtos {
       /**
        * <code>int32 optimiser_plot = 17;</code>
        */
-      public int getOptimiserPlot() {
+      @Override
+	public int getOptimiserPlot() {
         return optimiserPlot_;
       }
       /**
        * <code>int32 optimiser_plot = 17;</code>
        */
       public Builder setOptimiserPlot(int value) {
-        
+
         optimiserPlot_ = value;
         onChanged();
         return this;
@@ -15049,7 +15567,7 @@ public final class GUIProtos {
        * <code>int32 optimiser_plot = 17;</code>
        */
       public Builder clearOptimiserPlot() {
-        
+
         optimiserPlot_ = 0;
         onChanged();
         return this;
@@ -15059,14 +15577,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_traces = 18;</code>
        */
-      public boolean getSaveTraces() {
+      @Override
+	public boolean getSaveTraces() {
         return saveTraces_;
       }
       /**
        * <code>bool save_traces = 18;</code>
        */
       public Builder setSaveTraces(boolean value) {
-        
+
         saveTraces_ = value;
         onChanged();
         return this;
@@ -15075,7 +15594,7 @@ public final class GUIProtos {
        * <code>bool save_traces = 18;</code>
        */
       public Builder clearSaveTraces() {
-        
+
         saveTraces_ = false;
         onChanged();
         return this;
@@ -15085,14 +15604,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_histograms = 19;</code>
        */
-      public boolean getShowHistograms() {
+      @Override
+	public boolean getShowHistograms() {
         return showHistograms_;
       }
       /**
        * <code>bool show_histograms = 19;</code>
        */
       public Builder setShowHistograms(boolean value) {
-        
+
         showHistograms_ = value;
         onChanged();
         return this;
@@ -15101,7 +15621,7 @@ public final class GUIProtos {
        * <code>bool show_histograms = 19;</code>
        */
       public Builder clearShowHistograms() {
-        
+
         showHistograms_ = false;
         onChanged();
         return this;
@@ -15111,14 +15631,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_trace_data = 20;</code>
        */
-      public boolean getSaveTraceData() {
+      @Override
+	public boolean getSaveTraceData() {
         return saveTraceData_;
       }
       /**
        * <code>bool save_trace_data = 20;</code>
        */
       public Builder setSaveTraceData(boolean value) {
-        
+
         saveTraceData_ = value;
         onChanged();
         return this;
@@ -15127,7 +15648,7 @@ public final class GUIProtos {
        * <code>bool save_trace_data = 20;</code>
        */
       public Builder clearSaveTraceData() {
-        
+
         saveTraceData_ = false;
         onChanged();
         return this;
@@ -15137,7 +15658,8 @@ public final class GUIProtos {
       /**
        * <code>string trace_data_directory = 21;</code>
        */
-      public java.lang.String getTraceDataDirectory() {
+      @Override
+	public java.lang.String getTraceDataDirectory() {
         java.lang.Object ref = traceDataDirectory_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -15152,11 +15674,12 @@ public final class GUIProtos {
       /**
        * <code>string trace_data_directory = 21;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getTraceDataDirectoryBytes() {
         java.lang.Object ref = traceDataDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           traceDataDirectory_ = b;
@@ -15173,7 +15696,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         traceDataDirectory_ = value;
         onChanged();
         return this;
@@ -15182,7 +15705,7 @@ public final class GUIProtos {
        * <code>string trace_data_directory = 21;</code>
        */
       public Builder clearTraceDataDirectory() {
-        
+
         traceDataDirectory_ = getDefaultInstance().getTraceDataDirectory();
         onChanged();
         return this;
@@ -15196,7 +15719,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         traceDataDirectory_ = value;
         onChanged();
         return this;
@@ -15206,14 +15729,15 @@ public final class GUIProtos {
       /**
        * <code>int32 histogram_bins = 22;</code>
        */
-      public int getHistogramBins() {
+      @Override
+	public int getHistogramBins() {
         return histogramBins_;
       }
       /**
        * <code>int32 histogram_bins = 22;</code>
        */
       public Builder setHistogramBins(int value) {
-        
+
         histogramBins_ = value;
         onChanged();
         return this;
@@ -15222,7 +15746,7 @@ public final class GUIProtos {
        * <code>int32 histogram_bins = 22;</code>
        */
       public Builder clearHistogramBins() {
-        
+
         histogramBins_ = 0;
         onChanged();
         return this;
@@ -15232,14 +15756,15 @@ public final class GUIProtos {
       /**
        * <code>bool remove_outliers = 23;</code>
        */
-      public boolean getRemoveOutliers() {
+      @Override
+	public boolean getRemoveOutliers() {
         return removeOutliers_;
       }
       /**
        * <code>bool remove_outliers = 23;</code>
        */
       public Builder setRemoveOutliers(boolean value) {
-        
+
         removeOutliers_ = value;
         onChanged();
         return this;
@@ -15248,7 +15773,7 @@ public final class GUIProtos {
        * <code>bool remove_outliers = 23;</code>
        */
       public Builder clearRemoveOutliers() {
-        
+
         removeOutliers_ = false;
         onChanged();
         return this;
@@ -15258,14 +15783,15 @@ public final class GUIProtos {
       /**
        * <code>bool refit_option = 24;</code>
        */
-      public boolean getRefitOption() {
+      @Override
+	public boolean getRefitOption() {
         return refitOption_;
       }
       /**
        * <code>bool refit_option = 24;</code>
        */
       public Builder setRefitOption(boolean value) {
-        
+
         refitOption_ = value;
         onChanged();
         return this;
@@ -15274,7 +15800,7 @@ public final class GUIProtos {
        * <code>bool refit_option = 24;</code>
        */
       public Builder clearRefitOption() {
-        
+
         refitOption_ = false;
         onChanged();
         return this;
@@ -15288,7 +15814,8 @@ public final class GUIProtos {
        *
        * <code>int32 minimum_trace_length = 25;</code>
        */
-      public int getMinimumTraceLength() {
+      @Override
+	public int getMinimumTraceLength() {
         return minimumTraceLength_;
       }
       /**
@@ -15299,7 +15826,7 @@ public final class GUIProtos {
        * <code>int32 minimum_trace_length = 25;</code>
        */
       public Builder setMinimumTraceLength(int value) {
-        
+
         minimumTraceLength_ = value;
         onChanged();
         return this;
@@ -15312,7 +15839,7 @@ public final class GUIProtos {
        * <code>int32 minimum_trace_length = 25;</code>
        */
       public Builder clearMinimumTraceLength() {
-        
+
         minimumTraceLength_ = 0;
         onChanged();
         return this;
@@ -15322,14 +15849,15 @@ public final class GUIProtos {
       /**
        * <code>bool truncate = 26;</code>
        */
-      public boolean getTruncate() {
+      @Override
+	public boolean getTruncate() {
         return truncate_;
       }
       /**
        * <code>bool truncate = 26;</code>
        */
       public Builder setTruncate(boolean value) {
-        
+
         truncate_ = value;
         onChanged();
         return this;
@@ -15338,7 +15866,7 @@ public final class GUIProtos {
        * <code>bool truncate = 26;</code>
        */
       public Builder clearTruncate() {
-        
+
         truncate_ = false;
         onChanged();
         return this;
@@ -15348,14 +15876,15 @@ public final class GUIProtos {
       /**
        * <code>bool internal_distances = 27;</code>
        */
-      public boolean getInternalDistances() {
+      @Override
+	public boolean getInternalDistances() {
         return internalDistances_;
       }
       /**
        * <code>bool internal_distances = 27;</code>
        */
       public Builder setInternalDistances(boolean value) {
-        
+
         internalDistances_ = value;
         onChanged();
         return this;
@@ -15364,7 +15893,7 @@ public final class GUIProtos {
        * <code>bool internal_distances = 27;</code>
        */
       public Builder clearInternalDistances() {
-        
+
         internalDistances_ = false;
         onChanged();
         return this;
@@ -15374,14 +15903,15 @@ public final class GUIProtos {
       /**
        * <code>bool sub_sampled_distances = 28;</code>
        */
-      public boolean getSubSampledDistances() {
+      @Override
+	public boolean getSubSampledDistances() {
         return subSampledDistances_;
       }
       /**
        * <code>bool sub_sampled_distances = 28;</code>
        */
       public Builder setSubSampledDistances(boolean value) {
-        
+
         subSampledDistances_ = value;
         onChanged();
         return this;
@@ -15390,7 +15920,7 @@ public final class GUIProtos {
        * <code>bool sub_sampled_distances = 28;</code>
        */
       public Builder clearSubSampledDistances() {
-        
+
         subSampledDistances_ = false;
         onChanged();
         return this;
@@ -15400,14 +15930,15 @@ public final class GUIProtos {
       /**
        * <code>bool ignore_ends = 29;</code>
        */
-      public boolean getIgnoreEnds() {
+      @Override
+	public boolean getIgnoreEnds() {
         return ignoreEnds_;
       }
       /**
        * <code>bool ignore_ends = 29;</code>
        */
       public Builder setIgnoreEnds(boolean value) {
-        
+
         ignoreEnds_ = value;
         onChanged();
         return this;
@@ -15416,7 +15947,7 @@ public final class GUIProtos {
        * <code>bool ignore_ends = 29;</code>
        */
       public Builder clearIgnoreEnds() {
-        
+
         ignoreEnds_ = false;
         onChanged();
         return this;
@@ -15426,14 +15957,15 @@ public final class GUIProtos {
       /**
        * <code>bool precision_correction = 30;</code>
        */
-      public boolean getPrecisionCorrection() {
+      @Override
+	public boolean getPrecisionCorrection() {
         return precisionCorrection_;
       }
       /**
        * <code>bool precision_correction = 30;</code>
        */
       public Builder setPrecisionCorrection(boolean value) {
-        
+
         precisionCorrection_ = value;
         onChanged();
         return this;
@@ -15442,7 +15974,7 @@ public final class GUIProtos {
        * <code>bool precision_correction = 30;</code>
        */
       public Builder clearPrecisionCorrection() {
-        
+
         precisionCorrection_ = false;
         onChanged();
         return this;
@@ -15452,14 +15984,15 @@ public final class GUIProtos {
       /**
        * <code>bool msd_correction = 31;</code>
        */
-      public boolean getMsdCorrection() {
+      @Override
+	public boolean getMsdCorrection() {
         return msdCorrection_;
       }
       /**
        * <code>bool msd_correction = 31;</code>
        */
       public Builder setMsdCorrection(boolean value) {
-        
+
         msdCorrection_ = value;
         onChanged();
         return this;
@@ -15468,7 +16001,7 @@ public final class GUIProtos {
        * <code>bool msd_correction = 31;</code>
        */
       public Builder clearMsdCorrection() {
-        
+
         msdCorrection_ = false;
         onChanged();
         return this;
@@ -15478,14 +16011,15 @@ public final class GUIProtos {
       /**
        * <code>bool mle = 32;</code>
        */
-      public boolean getMle() {
+      @Override
+	public boolean getMle() {
         return mle_;
       }
       /**
        * <code>bool mle = 32;</code>
        */
       public Builder setMle(boolean value) {
-        
+
         mle_ = value;
         onChanged();
         return this;
@@ -15494,7 +16028,7 @@ public final class GUIProtos {
        * <code>bool mle = 32;</code>
        */
       public Builder clearMle() {
-        
+
         mle_ = false;
         onChanged();
         return this;
@@ -15504,14 +16038,15 @@ public final class GUIProtos {
       /**
        * <code>int32 fit_length = 33;</code>
        */
-      public int getFitLength() {
+      @Override
+	public int getFitLength() {
         return fitLength_;
       }
       /**
        * <code>int32 fit_length = 33;</code>
        */
       public Builder setFitLength(int value) {
-        
+
         fitLength_ = value;
         onChanged();
         return this;
@@ -15520,7 +16055,7 @@ public final class GUIProtos {
        * <code>int32 fit_length = 33;</code>
        */
       public Builder clearFitLength() {
-        
+
         fitLength_ = 0;
         onChanged();
         return this;
@@ -15530,14 +16065,15 @@ public final class GUIProtos {
       /**
        * <code>int32 fit_restarts = 34;</code>
        */
-      public int getFitRestarts() {
+      @Override
+	public int getFitRestarts() {
         return fitRestarts_;
       }
       /**
        * <code>int32 fit_restarts = 34;</code>
        */
       public Builder setFitRestarts(int value) {
-        
+
         fitRestarts_ = value;
         onChanged();
         return this;
@@ -15546,7 +16082,7 @@ public final class GUIProtos {
        * <code>int32 fit_restarts = 34;</code>
        */
       public Builder clearFitRestarts() {
-        
+
         fitRestarts_ = 0;
         onChanged();
         return this;
@@ -15556,14 +16092,15 @@ public final class GUIProtos {
       /**
        * <code>int32 jump_distance = 35;</code>
        */
-      public int getJumpDistance() {
+      @Override
+	public int getJumpDistance() {
         return jumpDistance_;
       }
       /**
        * <code>int32 jump_distance = 35;</code>
        */
       public Builder setJumpDistance(int value) {
-        
+
         jumpDistance_ = value;
         onChanged();
         return this;
@@ -15572,17 +16109,19 @@ public final class GUIProtos {
        * <code>int32 jump_distance = 35;</code>
        */
       public Builder clearJumpDistance() {
-        
+
         jumpDistance_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -15603,7 +16142,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<ClusteringSettings>
         PARSER = new com.google.protobuf.AbstractParser<ClusteringSettings>() {
-      public ClusteringSettings parsePartialFrom(
+      @Override
+	public ClusteringSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -15620,7 +16160,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.ClusteringSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.ClusteringSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -15766,7 +16307,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -15778,7 +16320,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_selection_table = 1;</code>
      */
-    public boolean getShowSelectionTable() {
+    @Override
+	public boolean getShowSelectionTable() {
       return showSelectionTable_;
     }
 
@@ -15787,7 +16330,8 @@ public final class GUIProtos {
     /**
      * <code>bool table_create_selection = 2;</code>
      */
-    public boolean getTableCreateSelection() {
+    @Override
+	public boolean getTableCreateSelection() {
       return tableCreateSelection_;
     }
 
@@ -15796,7 +16340,8 @@ public final class GUIProtos {
     /**
      * <code>bool image_create_selection = 3;</code>
      */
-    public boolean getImageCreateSelection() {
+    @Override
+	public boolean getImageCreateSelection() {
       return imageCreateSelection_;
     }
 
@@ -15805,7 +16350,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_create_selection = 4;</code>
      */
-    public boolean getPlotCreateSelection() {
+    @Override
+	public boolean getPlotCreateSelection() {
       return plotCreateSelection_;
     }
 
@@ -15814,7 +16360,8 @@ public final class GUIProtos {
     /**
      * <code>bool table_show_selection = 5;</code>
      */
-    public boolean getTableShowSelection() {
+    @Override
+	public boolean getTableShowSelection() {
       return tableShowSelection_;
     }
 
@@ -15823,7 +16370,8 @@ public final class GUIProtos {
     /**
      * <code>bool image_show_selection = 6;</code>
      */
-    public boolean getImageShowSelection() {
+    @Override
+	public boolean getImageShowSelection() {
       return imageShowSelection_;
     }
 
@@ -15832,12 +16380,14 @@ public final class GUIProtos {
     /**
      * <code>bool plot_show_selection = 7;</code>
      */
-    public boolean getPlotShowSelection() {
+    @Override
+	public boolean getPlotShowSelection() {
       return plotShowSelection_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -15846,7 +16396,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (showSelectionTable_ != false) {
         output.writeBool(1, showSelectionTable_);
@@ -15871,7 +16422,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -16040,14 +16592,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -16074,7 +16628,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -16096,7 +16651,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         showSelectionTable_ = false;
 
@@ -16115,16 +16671,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings build() {
         gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -16132,7 +16691,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsEventSettings(this);
         result.showSelectionTable_ = showSelectionTable_;
         result.tableCreateSelection_ = tableCreateSelection_;
@@ -16145,33 +16705,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)other);
         } else {
@@ -16207,11 +16774,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -16233,14 +16802,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_selection_table = 1;</code>
        */
-      public boolean getShowSelectionTable() {
+      @Override
+	public boolean getShowSelectionTable() {
         return showSelectionTable_;
       }
       /**
        * <code>bool show_selection_table = 1;</code>
        */
       public Builder setShowSelectionTable(boolean value) {
-        
+
         showSelectionTable_ = value;
         onChanged();
         return this;
@@ -16249,7 +16819,7 @@ public final class GUIProtos {
        * <code>bool show_selection_table = 1;</code>
        */
       public Builder clearShowSelectionTable() {
-        
+
         showSelectionTable_ = false;
         onChanged();
         return this;
@@ -16259,14 +16829,15 @@ public final class GUIProtos {
       /**
        * <code>bool table_create_selection = 2;</code>
        */
-      public boolean getTableCreateSelection() {
+      @Override
+	public boolean getTableCreateSelection() {
         return tableCreateSelection_;
       }
       /**
        * <code>bool table_create_selection = 2;</code>
        */
       public Builder setTableCreateSelection(boolean value) {
-        
+
         tableCreateSelection_ = value;
         onChanged();
         return this;
@@ -16275,7 +16846,7 @@ public final class GUIProtos {
        * <code>bool table_create_selection = 2;</code>
        */
       public Builder clearTableCreateSelection() {
-        
+
         tableCreateSelection_ = false;
         onChanged();
         return this;
@@ -16285,14 +16856,15 @@ public final class GUIProtos {
       /**
        * <code>bool image_create_selection = 3;</code>
        */
-      public boolean getImageCreateSelection() {
+      @Override
+	public boolean getImageCreateSelection() {
         return imageCreateSelection_;
       }
       /**
        * <code>bool image_create_selection = 3;</code>
        */
       public Builder setImageCreateSelection(boolean value) {
-        
+
         imageCreateSelection_ = value;
         onChanged();
         return this;
@@ -16301,7 +16873,7 @@ public final class GUIProtos {
        * <code>bool image_create_selection = 3;</code>
        */
       public Builder clearImageCreateSelection() {
-        
+
         imageCreateSelection_ = false;
         onChanged();
         return this;
@@ -16311,14 +16883,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_create_selection = 4;</code>
        */
-      public boolean getPlotCreateSelection() {
+      @Override
+	public boolean getPlotCreateSelection() {
         return plotCreateSelection_;
       }
       /**
        * <code>bool plot_create_selection = 4;</code>
        */
       public Builder setPlotCreateSelection(boolean value) {
-        
+
         plotCreateSelection_ = value;
         onChanged();
         return this;
@@ -16327,7 +16900,7 @@ public final class GUIProtos {
        * <code>bool plot_create_selection = 4;</code>
        */
       public Builder clearPlotCreateSelection() {
-        
+
         plotCreateSelection_ = false;
         onChanged();
         return this;
@@ -16337,14 +16910,15 @@ public final class GUIProtos {
       /**
        * <code>bool table_show_selection = 5;</code>
        */
-      public boolean getTableShowSelection() {
+      @Override
+	public boolean getTableShowSelection() {
         return tableShowSelection_;
       }
       /**
        * <code>bool table_show_selection = 5;</code>
        */
       public Builder setTableShowSelection(boolean value) {
-        
+
         tableShowSelection_ = value;
         onChanged();
         return this;
@@ -16353,7 +16927,7 @@ public final class GUIProtos {
        * <code>bool table_show_selection = 5;</code>
        */
       public Builder clearTableShowSelection() {
-        
+
         tableShowSelection_ = false;
         onChanged();
         return this;
@@ -16363,14 +16937,15 @@ public final class GUIProtos {
       /**
        * <code>bool image_show_selection = 6;</code>
        */
-      public boolean getImageShowSelection() {
+      @Override
+	public boolean getImageShowSelection() {
         return imageShowSelection_;
       }
       /**
        * <code>bool image_show_selection = 6;</code>
        */
       public Builder setImageShowSelection(boolean value) {
-        
+
         imageShowSelection_ = value;
         onChanged();
         return this;
@@ -16379,7 +16954,7 @@ public final class GUIProtos {
        * <code>bool image_show_selection = 6;</code>
        */
       public Builder clearImageShowSelection() {
-        
+
         imageShowSelection_ = false;
         onChanged();
         return this;
@@ -16389,14 +16964,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_show_selection = 7;</code>
        */
-      public boolean getPlotShowSelection() {
+      @Override
+	public boolean getPlotShowSelection() {
         return plotShowSelection_;
       }
       /**
        * <code>bool plot_show_selection = 7;</code>
        */
       public Builder setPlotShowSelection(boolean value) {
-        
+
         plotShowSelection_ = value;
         onChanged();
         return this;
@@ -16405,17 +16981,19 @@ public final class GUIProtos {
        * <code>bool plot_show_selection = 7;</code>
        */
       public Builder clearPlotShowSelection() {
-        
+
         plotShowSelection_ = false;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -16436,7 +17014,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<OpticsEventSettings>
         PARSER = new com.google.protobuf.AbstractParser<OpticsEventSettings>() {
-      public OpticsEventSettings parsePartialFrom(
+      @Override
+	public OpticsEventSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -16453,7 +17032,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -16492,7 +17072,7 @@ public final class GUIProtos {
 
     /**
      * <pre>
-     ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+     ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data)
      * </pre>
      *
      * <code>int32 number_of_split_sets = 3;</code>
@@ -17014,7 +17594,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -17030,12 +17611,13 @@ public final class GUIProtos {
      *
      * <code>string input_option = 1;</code>
      */
-    public java.lang.String getInputOption() {
+    @Override
+	public java.lang.String getInputOption() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
@@ -17049,11 +17631,12 @@ public final class GUIProtos {
      *
      * <code>string input_option = 1;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getInputOptionBytes() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
@@ -17072,7 +17655,8 @@ public final class GUIProtos {
      *
      * <code>int32 optics_mode = 2;</code>
      */
-    public int getOpticsMode() {
+    @Override
+	public int getOpticsMode() {
       return opticsMode_;
     }
 
@@ -17080,12 +17664,13 @@ public final class GUIProtos {
     private int numberOfSplitSets_;
     /**
      * <pre>
-     ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+     ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data)
      * </pre>
      *
      * <code>int32 number_of_split_sets = 3;</code>
      */
-    public int getNumberOfSplitSets() {
+    @Override
+	public int getNumberOfSplitSets() {
       return numberOfSplitSets_;
     }
 
@@ -17099,7 +17684,8 @@ public final class GUIProtos {
      *
      * <code>bool use_random_vectors = 4;</code>
      */
-    public boolean getUseRandomVectors() {
+    @Override
+	public boolean getUseRandomVectors() {
       return useRandomVectors_;
     }
 
@@ -17113,7 +17699,8 @@ public final class GUIProtos {
      *
      * <code>bool save_approximate_sets = 5;</code>
      */
-    public boolean getSaveApproximateSets() {
+    @Override
+	public boolean getSaveApproximateSets() {
       return saveApproximateSets_;
     }
 
@@ -17122,7 +17709,8 @@ public final class GUIProtos {
     /**
      * <code>int32 sample_mode = 6;</code>
      */
-    public int getSampleMode() {
+    @Override
+	public int getSampleMode() {
       return sampleMode_;
     }
 
@@ -17136,7 +17724,8 @@ public final class GUIProtos {
      *
      * <code>double generating_distance = 7;</code>
      */
-    public double getGeneratingDistance() {
+    @Override
+	public double getGeneratingDistance() {
       return generatingDistance_;
     }
 
@@ -17152,7 +17741,8 @@ public final class GUIProtos {
      *
      * <code>int32 min_points = 8;</code>
      */
-    public int getMinPoints() {
+    @Override
+	public int getMinPoints() {
       return minPoints_;
     }
 
@@ -17165,7 +17755,8 @@ public final class GUIProtos {
      *
      * <code>int32 clustering_mode = 9;</code>
      */
-    public int getClusteringMode() {
+    @Override
+	public int getClusteringMode() {
       return clusteringMode_;
     }
 
@@ -17178,7 +17769,8 @@ public final class GUIProtos {
      *
      * <code>double xi = 10;</code>
      */
-    public double getXi() {
+    @Override
+	public double getXi() {
       return xi_;
     }
 
@@ -17191,7 +17783,8 @@ public final class GUIProtos {
      *
      * <code>bool topLevel = 11;</code>
      */
-    public boolean getTopLevel() {
+    @Override
+	public boolean getTopLevel() {
       return topLevel_;
     }
 
@@ -17206,7 +17799,8 @@ public final class GUIProtos {
      *
      * <code>double upper_limit = 12;</code>
      */
-    public double getUpperLimit() {
+    @Override
+	public double getUpperLimit() {
       return upperLimit_;
     }
 
@@ -17220,7 +17814,8 @@ public final class GUIProtos {
      *
      * <code>double lower_limit = 13;</code>
      */
-    public double getLowerLimit() {
+    @Override
+	public double getLowerLimit() {
       return lowerLimit_;
     }
 
@@ -17233,7 +17828,8 @@ public final class GUIProtos {
      *
      * <code>int32 samples = 14;</code>
      */
-    public int getSamples() {
+    @Override
+	public int getSamples() {
       return samples_;
     }
 
@@ -17246,7 +17842,8 @@ public final class GUIProtos {
      *
      * <code>double sample_fraction = 15;</code>
      */
-    public double getSampleFraction() {
+    @Override
+	public double getSampleFraction() {
       return sampleFraction_;
     }
 
@@ -17260,7 +17857,8 @@ public final class GUIProtos {
      *
      * <code>double fraction_noise = 16;</code>
      */
-    public double getFractionNoise() {
+    @Override
+	public double getFractionNoise() {
       return fractionNoise_;
     }
 
@@ -17273,7 +17871,8 @@ public final class GUIProtos {
      *
      * <code>double clustering_distance = 17;</code>
      */
-    public double getClusteringDistance() {
+    @Override
+	public double getClusteringDistance() {
       return clusteringDistance_;
     }
 
@@ -17287,7 +17886,8 @@ public final class GUIProtos {
      *
      * <code>bool core = 18;</code>
      */
-    public boolean getCore() {
+    @Override
+	public boolean getCore() {
       return core_;
     }
 
@@ -17300,7 +17900,8 @@ public final class GUIProtos {
      *
      * <code>double image_scale = 19;</code>
      */
-    public double getImageScale() {
+    @Override
+	public double getImageScale() {
       return imageScale_;
     }
 
@@ -17313,7 +17914,8 @@ public final class GUIProtos {
      *
      * <code>int32 image_mode = 20;</code>
      */
-    public int getImageMode() {
+    @Override
+	public int getImageMode() {
       return imageMode_;
     }
 
@@ -17326,7 +17928,8 @@ public final class GUIProtos {
      *
      * <code>bool weighted = 21;</code>
      */
-    public boolean getWeighted() {
+    @Override
+	public boolean getWeighted() {
       return weighted_;
     }
 
@@ -17339,7 +17942,8 @@ public final class GUIProtos {
      *
      * <code>bool equalised = 22;</code>
      */
-    public boolean getEqualised() {
+    @Override
+	public boolean getEqualised() {
       return equalised_;
     }
 
@@ -17352,7 +17956,8 @@ public final class GUIProtos {
      *
      * <code>int32 plot_mode = 23;</code>
      */
-    public int getPlotMode() {
+    @Override
+	public int getPlotMode() {
       return plotMode_;
     }
 
@@ -17365,7 +17970,8 @@ public final class GUIProtos {
      *
      * <code>int32 outline_mode = 24;</code>
      */
-    public int getOutlineMode() {
+    @Override
+	public int getOutlineMode() {
       return outlineMode_;
     }
 
@@ -17378,7 +17984,8 @@ public final class GUIProtos {
      *
      * <code>int32 spanning_tree_mode = 25;</code>
      */
-    public int getSpanningTreeMode() {
+    @Override
+	public int getSpanningTreeMode() {
       return spanningTreeMode_;
     }
 
@@ -17393,7 +18000,8 @@ public final class GUIProtos {
      *
      * <code>double lambda = 26;</code>
      */
-    public double getLambda() {
+    @Override
+	public double getLambda() {
       return lambda_;
     }
 
@@ -17406,7 +18014,8 @@ public final class GUIProtos {
      *
      * <code>bool show_table = 27;</code>
      */
-    public boolean getShowTable() {
+    @Override
+	public boolean getShowTable() {
       return showTable_;
     }
 
@@ -17419,7 +18028,8 @@ public final class GUIProtos {
      *
      * <code>int32 table_sort_mode = 28;</code>
      */
-    public int getTableSortMode() {
+    @Override
+	public int getTableSortMode() {
       return tableSortMode_;
     }
 
@@ -17432,7 +18042,8 @@ public final class GUIProtos {
      *
      * <code>bool table_reverse_sort = 29;</code>
      */
-    public boolean getTableReverseSort() {
+    @Override
+	public boolean getTableReverseSort() {
       return tableReverseSort_;
     }
 
@@ -17445,7 +18056,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
      */
-    public boolean hasOpticsEventSettings() {
+    @Override
+	public boolean hasOpticsEventSettings() {
       return opticsEventSettings_ != null;
     }
     /**
@@ -17455,7 +18067,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
      */
-    public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
       return opticsEventSettings_ == null ? gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
     }
     /**
@@ -17465,12 +18078,14 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
      */
-    public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
       return getOpticsEventSettings();
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -17479,7 +18094,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (!getInputOptionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
@@ -17573,7 +18189,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -17958,14 +18575,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.OpticsSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -17992,7 +18611,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -18014,7 +18634,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         inputOption_ = "";
 
@@ -18083,16 +18704,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.OpticsSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.OpticsSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.OpticsSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsSettings build() {
         gdsc.smlm.data.config.GUIProtos.OpticsSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -18100,7 +18724,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.OpticsSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.OpticsSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsSettings(this);
         result.inputOption_ = inputOption_;
         result.opticsMode_ = opticsMode_;
@@ -18140,33 +18765,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsSettings)other);
         } else {
@@ -18272,11 +18904,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -18302,7 +18936,8 @@ public final class GUIProtos {
        *
        * <code>string input_option = 1;</code>
        */
-      public java.lang.String getInputOption() {
+      @Override
+	public java.lang.String getInputOption() {
         java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -18321,11 +18956,12 @@ public final class GUIProtos {
        *
        * <code>string input_option = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getInputOptionBytes() {
         java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
@@ -18346,7 +18982,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -18359,7 +18995,7 @@ public final class GUIProtos {
        * <code>string input_option = 1;</code>
        */
       public Builder clearInputOption() {
-        
+
         inputOption_ = getDefaultInstance().getInputOption();
         onChanged();
         return this;
@@ -18377,7 +19013,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -18391,7 +19027,8 @@ public final class GUIProtos {
        *
        * <code>int32 optics_mode = 2;</code>
        */
-      public int getOpticsMode() {
+      @Override
+	public int getOpticsMode() {
         return opticsMode_;
       }
       /**
@@ -18402,7 +19039,7 @@ public final class GUIProtos {
        * <code>int32 optics_mode = 2;</code>
        */
       public Builder setOpticsMode(int value) {
-        
+
         opticsMode_ = value;
         onChanged();
         return this;
@@ -18415,7 +19052,7 @@ public final class GUIProtos {
        * <code>int32 optics_mode = 2;</code>
        */
       public Builder clearOpticsMode() {
-        
+
         opticsMode_ = 0;
         onChanged();
         return this;
@@ -18424,36 +19061,37 @@ public final class GUIProtos {
       private int numberOfSplitSets_ ;
       /**
        * <pre>
-       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data)
        * </pre>
        *
        * <code>int32 number_of_split_sets = 3;</code>
        */
-      public int getNumberOfSplitSets() {
+      @Override
+	public int getNumberOfSplitSets() {
         return numberOfSplitSets_;
       }
       /**
        * <pre>
-       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data)
        * </pre>
        *
        * <code>int32 number_of_split_sets = 3;</code>
        */
       public Builder setNumberOfSplitSets(int value) {
-        
+
         numberOfSplitSets_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data)
        * </pre>
        *
        * <code>int32 number_of_split_sets = 3;</code>
        */
       public Builder clearNumberOfSplitSets() {
-        
+
         numberOfSplitSets_ = 0;
         onChanged();
         return this;
@@ -18468,7 +19106,8 @@ public final class GUIProtos {
        *
        * <code>bool use_random_vectors = 4;</code>
        */
-      public boolean getUseRandomVectors() {
+      @Override
+	public boolean getUseRandomVectors() {
         return useRandomVectors_;
       }
       /**
@@ -18480,7 +19119,7 @@ public final class GUIProtos {
        * <code>bool use_random_vectors = 4;</code>
        */
       public Builder setUseRandomVectors(boolean value) {
-        
+
         useRandomVectors_ = value;
         onChanged();
         return this;
@@ -18494,7 +19133,7 @@ public final class GUIProtos {
        * <code>bool use_random_vectors = 4;</code>
        */
       public Builder clearUseRandomVectors() {
-        
+
         useRandomVectors_ = false;
         onChanged();
         return this;
@@ -18509,7 +19148,8 @@ public final class GUIProtos {
        *
        * <code>bool save_approximate_sets = 5;</code>
        */
-      public boolean getSaveApproximateSets() {
+      @Override
+	public boolean getSaveApproximateSets() {
         return saveApproximateSets_;
       }
       /**
@@ -18521,7 +19161,7 @@ public final class GUIProtos {
        * <code>bool save_approximate_sets = 5;</code>
        */
       public Builder setSaveApproximateSets(boolean value) {
-        
+
         saveApproximateSets_ = value;
         onChanged();
         return this;
@@ -18535,7 +19175,7 @@ public final class GUIProtos {
        * <code>bool save_approximate_sets = 5;</code>
        */
       public Builder clearSaveApproximateSets() {
-        
+
         saveApproximateSets_ = false;
         onChanged();
         return this;
@@ -18545,14 +19185,15 @@ public final class GUIProtos {
       /**
        * <code>int32 sample_mode = 6;</code>
        */
-      public int getSampleMode() {
+      @Override
+	public int getSampleMode() {
         return sampleMode_;
       }
       /**
        * <code>int32 sample_mode = 6;</code>
        */
       public Builder setSampleMode(int value) {
-        
+
         sampleMode_ = value;
         onChanged();
         return this;
@@ -18561,7 +19202,7 @@ public final class GUIProtos {
        * <code>int32 sample_mode = 6;</code>
        */
       public Builder clearSampleMode() {
-        
+
         sampleMode_ = 0;
         onChanged();
         return this;
@@ -18576,7 +19217,8 @@ public final class GUIProtos {
        *
        * <code>double generating_distance = 7;</code>
        */
-      public double getGeneratingDistance() {
+      @Override
+	public double getGeneratingDistance() {
         return generatingDistance_;
       }
       /**
@@ -18588,7 +19230,7 @@ public final class GUIProtos {
        * <code>double generating_distance = 7;</code>
        */
       public Builder setGeneratingDistance(double value) {
-        
+
         generatingDistance_ = value;
         onChanged();
         return this;
@@ -18602,7 +19244,7 @@ public final class GUIProtos {
        * <code>double generating_distance = 7;</code>
        */
       public Builder clearGeneratingDistance() {
-        
+
         generatingDistance_ = 0D;
         onChanged();
         return this;
@@ -18619,7 +19261,8 @@ public final class GUIProtos {
        *
        * <code>int32 min_points = 8;</code>
        */
-      public int getMinPoints() {
+      @Override
+	public int getMinPoints() {
         return minPoints_;
       }
       /**
@@ -18633,7 +19276,7 @@ public final class GUIProtos {
        * <code>int32 min_points = 8;</code>
        */
       public Builder setMinPoints(int value) {
-        
+
         minPoints_ = value;
         onChanged();
         return this;
@@ -18649,7 +19292,7 @@ public final class GUIProtos {
        * <code>int32 min_points = 8;</code>
        */
       public Builder clearMinPoints() {
-        
+
         minPoints_ = 0;
         onChanged();
         return this;
@@ -18663,7 +19306,8 @@ public final class GUIProtos {
        *
        * <code>int32 clustering_mode = 9;</code>
        */
-      public int getClusteringMode() {
+      @Override
+	public int getClusteringMode() {
         return clusteringMode_;
       }
       /**
@@ -18674,7 +19318,7 @@ public final class GUIProtos {
        * <code>int32 clustering_mode = 9;</code>
        */
       public Builder setClusteringMode(int value) {
-        
+
         clusteringMode_ = value;
         onChanged();
         return this;
@@ -18687,7 +19331,7 @@ public final class GUIProtos {
        * <code>int32 clustering_mode = 9;</code>
        */
       public Builder clearClusteringMode() {
-        
+
         clusteringMode_ = 0;
         onChanged();
         return this;
@@ -18701,7 +19345,8 @@ public final class GUIProtos {
        *
        * <code>double xi = 10;</code>
        */
-      public double getXi() {
+      @Override
+	public double getXi() {
         return xi_;
       }
       /**
@@ -18712,7 +19357,7 @@ public final class GUIProtos {
        * <code>double xi = 10;</code>
        */
       public Builder setXi(double value) {
-        
+
         xi_ = value;
         onChanged();
         return this;
@@ -18725,7 +19370,7 @@ public final class GUIProtos {
        * <code>double xi = 10;</code>
        */
       public Builder clearXi() {
-        
+
         xi_ = 0D;
         onChanged();
         return this;
@@ -18739,7 +19384,8 @@ public final class GUIProtos {
        *
        * <code>bool topLevel = 11;</code>
        */
-      public boolean getTopLevel() {
+      @Override
+	public boolean getTopLevel() {
         return topLevel_;
       }
       /**
@@ -18750,7 +19396,7 @@ public final class GUIProtos {
        * <code>bool topLevel = 11;</code>
        */
       public Builder setTopLevel(boolean value) {
-        
+
         topLevel_ = value;
         onChanged();
         return this;
@@ -18763,7 +19409,7 @@ public final class GUIProtos {
        * <code>bool topLevel = 11;</code>
        */
       public Builder clearTopLevel() {
-        
+
         topLevel_ = false;
         onChanged();
         return this;
@@ -18779,7 +19425,8 @@ public final class GUIProtos {
        *
        * <code>double upper_limit = 12;</code>
        */
-      public double getUpperLimit() {
+      @Override
+	public double getUpperLimit() {
         return upperLimit_;
       }
       /**
@@ -18792,7 +19439,7 @@ public final class GUIProtos {
        * <code>double upper_limit = 12;</code>
        */
       public Builder setUpperLimit(double value) {
-        
+
         upperLimit_ = value;
         onChanged();
         return this;
@@ -18807,7 +19454,7 @@ public final class GUIProtos {
        * <code>double upper_limit = 12;</code>
        */
       public Builder clearUpperLimit() {
-        
+
         upperLimit_ = 0D;
         onChanged();
         return this;
@@ -18822,7 +19469,8 @@ public final class GUIProtos {
        *
        * <code>double lower_limit = 13;</code>
        */
-      public double getLowerLimit() {
+      @Override
+	public double getLowerLimit() {
         return lowerLimit_;
       }
       /**
@@ -18834,7 +19482,7 @@ public final class GUIProtos {
        * <code>double lower_limit = 13;</code>
        */
       public Builder setLowerLimit(double value) {
-        
+
         lowerLimit_ = value;
         onChanged();
         return this;
@@ -18848,7 +19496,7 @@ public final class GUIProtos {
        * <code>double lower_limit = 13;</code>
        */
       public Builder clearLowerLimit() {
-        
+
         lowerLimit_ = 0D;
         onChanged();
         return this;
@@ -18862,7 +19510,8 @@ public final class GUIProtos {
        *
        * <code>int32 samples = 14;</code>
        */
-      public int getSamples() {
+      @Override
+	public int getSamples() {
         return samples_;
       }
       /**
@@ -18873,7 +19522,7 @@ public final class GUIProtos {
        * <code>int32 samples = 14;</code>
        */
       public Builder setSamples(int value) {
-        
+
         samples_ = value;
         onChanged();
         return this;
@@ -18886,7 +19535,7 @@ public final class GUIProtos {
        * <code>int32 samples = 14;</code>
        */
       public Builder clearSamples() {
-        
+
         samples_ = 0;
         onChanged();
         return this;
@@ -18900,7 +19549,8 @@ public final class GUIProtos {
        *
        * <code>double sample_fraction = 15;</code>
        */
-      public double getSampleFraction() {
+      @Override
+	public double getSampleFraction() {
         return sampleFraction_;
       }
       /**
@@ -18911,7 +19561,7 @@ public final class GUIProtos {
        * <code>double sample_fraction = 15;</code>
        */
       public Builder setSampleFraction(double value) {
-        
+
         sampleFraction_ = value;
         onChanged();
         return this;
@@ -18924,7 +19574,7 @@ public final class GUIProtos {
        * <code>double sample_fraction = 15;</code>
        */
       public Builder clearSampleFraction() {
-        
+
         sampleFraction_ = 0D;
         onChanged();
         return this;
@@ -18939,7 +19589,8 @@ public final class GUIProtos {
        *
        * <code>double fraction_noise = 16;</code>
        */
-      public double getFractionNoise() {
+      @Override
+	public double getFractionNoise() {
         return fractionNoise_;
       }
       /**
@@ -18951,7 +19602,7 @@ public final class GUIProtos {
        * <code>double fraction_noise = 16;</code>
        */
       public Builder setFractionNoise(double value) {
-        
+
         fractionNoise_ = value;
         onChanged();
         return this;
@@ -18965,7 +19616,7 @@ public final class GUIProtos {
        * <code>double fraction_noise = 16;</code>
        */
       public Builder clearFractionNoise() {
-        
+
         fractionNoise_ = 0D;
         onChanged();
         return this;
@@ -18979,7 +19630,8 @@ public final class GUIProtos {
        *
        * <code>double clustering_distance = 17;</code>
        */
-      public double getClusteringDistance() {
+      @Override
+	public double getClusteringDistance() {
         return clusteringDistance_;
       }
       /**
@@ -18990,7 +19642,7 @@ public final class GUIProtos {
        * <code>double clustering_distance = 17;</code>
        */
       public Builder setClusteringDistance(double value) {
-        
+
         clusteringDistance_ = value;
         onChanged();
         return this;
@@ -19003,7 +19655,7 @@ public final class GUIProtos {
        * <code>double clustering_distance = 17;</code>
        */
       public Builder clearClusteringDistance() {
-        
+
         clusteringDistance_ = 0D;
         onChanged();
         return this;
@@ -19018,7 +19670,8 @@ public final class GUIProtos {
        *
        * <code>bool core = 18;</code>
        */
-      public boolean getCore() {
+      @Override
+	public boolean getCore() {
         return core_;
       }
       /**
@@ -19030,7 +19683,7 @@ public final class GUIProtos {
        * <code>bool core = 18;</code>
        */
       public Builder setCore(boolean value) {
-        
+
         core_ = value;
         onChanged();
         return this;
@@ -19044,7 +19697,7 @@ public final class GUIProtos {
        * <code>bool core = 18;</code>
        */
       public Builder clearCore() {
-        
+
         core_ = false;
         onChanged();
         return this;
@@ -19058,7 +19711,8 @@ public final class GUIProtos {
        *
        * <code>double image_scale = 19;</code>
        */
-      public double getImageScale() {
+      @Override
+	public double getImageScale() {
         return imageScale_;
       }
       /**
@@ -19069,7 +19723,7 @@ public final class GUIProtos {
        * <code>double image_scale = 19;</code>
        */
       public Builder setImageScale(double value) {
-        
+
         imageScale_ = value;
         onChanged();
         return this;
@@ -19082,7 +19736,7 @@ public final class GUIProtos {
        * <code>double image_scale = 19;</code>
        */
       public Builder clearImageScale() {
-        
+
         imageScale_ = 0D;
         onChanged();
         return this;
@@ -19096,7 +19750,8 @@ public final class GUIProtos {
        *
        * <code>int32 image_mode = 20;</code>
        */
-      public int getImageMode() {
+      @Override
+	public int getImageMode() {
         return imageMode_;
       }
       /**
@@ -19107,7 +19762,7 @@ public final class GUIProtos {
        * <code>int32 image_mode = 20;</code>
        */
       public Builder setImageMode(int value) {
-        
+
         imageMode_ = value;
         onChanged();
         return this;
@@ -19120,7 +19775,7 @@ public final class GUIProtos {
        * <code>int32 image_mode = 20;</code>
        */
       public Builder clearImageMode() {
-        
+
         imageMode_ = 0;
         onChanged();
         return this;
@@ -19134,7 +19789,8 @@ public final class GUIProtos {
        *
        * <code>bool weighted = 21;</code>
        */
-      public boolean getWeighted() {
+      @Override
+	public boolean getWeighted() {
         return weighted_;
       }
       /**
@@ -19145,7 +19801,7 @@ public final class GUIProtos {
        * <code>bool weighted = 21;</code>
        */
       public Builder setWeighted(boolean value) {
-        
+
         weighted_ = value;
         onChanged();
         return this;
@@ -19158,7 +19814,7 @@ public final class GUIProtos {
        * <code>bool weighted = 21;</code>
        */
       public Builder clearWeighted() {
-        
+
         weighted_ = false;
         onChanged();
         return this;
@@ -19172,7 +19828,8 @@ public final class GUIProtos {
        *
        * <code>bool equalised = 22;</code>
        */
-      public boolean getEqualised() {
+      @Override
+	public boolean getEqualised() {
         return equalised_;
       }
       /**
@@ -19183,7 +19840,7 @@ public final class GUIProtos {
        * <code>bool equalised = 22;</code>
        */
       public Builder setEqualised(boolean value) {
-        
+
         equalised_ = value;
         onChanged();
         return this;
@@ -19196,7 +19853,7 @@ public final class GUIProtos {
        * <code>bool equalised = 22;</code>
        */
       public Builder clearEqualised() {
-        
+
         equalised_ = false;
         onChanged();
         return this;
@@ -19210,7 +19867,8 @@ public final class GUIProtos {
        *
        * <code>int32 plot_mode = 23;</code>
        */
-      public int getPlotMode() {
+      @Override
+	public int getPlotMode() {
         return plotMode_;
       }
       /**
@@ -19221,7 +19879,7 @@ public final class GUIProtos {
        * <code>int32 plot_mode = 23;</code>
        */
       public Builder setPlotMode(int value) {
-        
+
         plotMode_ = value;
         onChanged();
         return this;
@@ -19234,7 +19892,7 @@ public final class GUIProtos {
        * <code>int32 plot_mode = 23;</code>
        */
       public Builder clearPlotMode() {
-        
+
         plotMode_ = 0;
         onChanged();
         return this;
@@ -19248,7 +19906,8 @@ public final class GUIProtos {
        *
        * <code>int32 outline_mode = 24;</code>
        */
-      public int getOutlineMode() {
+      @Override
+	public int getOutlineMode() {
         return outlineMode_;
       }
       /**
@@ -19259,7 +19918,7 @@ public final class GUIProtos {
        * <code>int32 outline_mode = 24;</code>
        */
       public Builder setOutlineMode(int value) {
-        
+
         outlineMode_ = value;
         onChanged();
         return this;
@@ -19272,7 +19931,7 @@ public final class GUIProtos {
        * <code>int32 outline_mode = 24;</code>
        */
       public Builder clearOutlineMode() {
-        
+
         outlineMode_ = 0;
         onChanged();
         return this;
@@ -19286,7 +19945,8 @@ public final class GUIProtos {
        *
        * <code>int32 spanning_tree_mode = 25;</code>
        */
-      public int getSpanningTreeMode() {
+      @Override
+	public int getSpanningTreeMode() {
         return spanningTreeMode_;
       }
       /**
@@ -19297,7 +19957,7 @@ public final class GUIProtos {
        * <code>int32 spanning_tree_mode = 25;</code>
        */
       public Builder setSpanningTreeMode(int value) {
-        
+
         spanningTreeMode_ = value;
         onChanged();
         return this;
@@ -19310,7 +19970,7 @@ public final class GUIProtos {
        * <code>int32 spanning_tree_mode = 25;</code>
        */
       public Builder clearSpanningTreeMode() {
-        
+
         spanningTreeMode_ = 0;
         onChanged();
         return this;
@@ -19326,7 +19986,8 @@ public final class GUIProtos {
        *
        * <code>double lambda = 26;</code>
        */
-      public double getLambda() {
+      @Override
+	public double getLambda() {
         return lambda_;
       }
       /**
@@ -19339,7 +20000,7 @@ public final class GUIProtos {
        * <code>double lambda = 26;</code>
        */
       public Builder setLambda(double value) {
-        
+
         lambda_ = value;
         onChanged();
         return this;
@@ -19354,7 +20015,7 @@ public final class GUIProtos {
        * <code>double lambda = 26;</code>
        */
       public Builder clearLambda() {
-        
+
         lambda_ = 0D;
         onChanged();
         return this;
@@ -19368,7 +20029,8 @@ public final class GUIProtos {
        *
        * <code>bool show_table = 27;</code>
        */
-      public boolean getShowTable() {
+      @Override
+	public boolean getShowTable() {
         return showTable_;
       }
       /**
@@ -19379,7 +20041,7 @@ public final class GUIProtos {
        * <code>bool show_table = 27;</code>
        */
       public Builder setShowTable(boolean value) {
-        
+
         showTable_ = value;
         onChanged();
         return this;
@@ -19392,7 +20054,7 @@ public final class GUIProtos {
        * <code>bool show_table = 27;</code>
        */
       public Builder clearShowTable() {
-        
+
         showTable_ = false;
         onChanged();
         return this;
@@ -19406,7 +20068,8 @@ public final class GUIProtos {
        *
        * <code>int32 table_sort_mode = 28;</code>
        */
-      public int getTableSortMode() {
+      @Override
+	public int getTableSortMode() {
         return tableSortMode_;
       }
       /**
@@ -19417,7 +20080,7 @@ public final class GUIProtos {
        * <code>int32 table_sort_mode = 28;</code>
        */
       public Builder setTableSortMode(int value) {
-        
+
         tableSortMode_ = value;
         onChanged();
         return this;
@@ -19430,7 +20093,7 @@ public final class GUIProtos {
        * <code>int32 table_sort_mode = 28;</code>
        */
       public Builder clearTableSortMode() {
-        
+
         tableSortMode_ = 0;
         onChanged();
         return this;
@@ -19444,7 +20107,8 @@ public final class GUIProtos {
        *
        * <code>bool table_reverse_sort = 29;</code>
        */
-      public boolean getTableReverseSort() {
+      @Override
+	public boolean getTableReverseSort() {
         return tableReverseSort_;
       }
       /**
@@ -19455,7 +20119,7 @@ public final class GUIProtos {
        * <code>bool table_reverse_sort = 29;</code>
        */
       public Builder setTableReverseSort(boolean value) {
-        
+
         tableReverseSort_ = value;
         onChanged();
         return this;
@@ -19468,7 +20132,7 @@ public final class GUIProtos {
        * <code>bool table_reverse_sort = 29;</code>
        */
       public Builder clearTableReverseSort() {
-        
+
         tableReverseSort_ = false;
         onChanged();
         return this;
@@ -19484,7 +20148,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
        */
-      public boolean hasOpticsEventSettings() {
+      @Override
+	public boolean hasOpticsEventSettings() {
         return opticsEventSettingsBuilder_ != null || opticsEventSettings_ != null;
       }
       /**
@@ -19494,7 +20159,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
        */
-      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
         if (opticsEventSettingsBuilder_ == null) {
           return opticsEventSettings_ == null ? gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
         } else {
@@ -19587,7 +20253,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
        */
       public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder getOpticsEventSettingsBuilder() {
-        
+
         onChanged();
         return getOpticsEventSettingsFieldBuilder().getBuilder();
       }
@@ -19598,7 +20264,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
        */
-      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
         if (opticsEventSettingsBuilder_ != null) {
           return opticsEventSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -19614,11 +20281,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.GUIProtos.OpticsEventSettings, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder, gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder> 
+          gdsc.smlm.data.config.GUIProtos.OpticsEventSettings, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder, gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder>
           getOpticsEventSettingsFieldBuilder() {
         if (opticsEventSettingsBuilder_ == null) {
-          opticsEventSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder, gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder>(
+          opticsEventSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getOpticsEventSettings(),
                   getParentForChildren(),
                   isClean());
@@ -19626,12 +20292,14 @@ public final class GUIProtos {
         }
         return opticsEventSettingsBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -19652,7 +20320,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<OpticsSettings>
         PARSER = new com.google.protobuf.AbstractParser<OpticsSettings>() {
-      public OpticsSettings parsePartialFrom(
+      @Override
+	public OpticsSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -19669,7 +20338,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.OpticsSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.OpticsSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -19805,7 +20475,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -19817,13 +20488,15 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
      */
-    public int getTemplateTypeValue() {
+    @Override
+	public int getTemplateTypeValue() {
       return templateType_;
     }
     /**
      * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
      */
-    public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
       gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
       return result == null ? gdsc.smlm.data.config.GUIProtos.TemplateType.UNRECOGNIZED : result;
     }
@@ -19833,12 +20506,13 @@ public final class GUIProtos {
     /**
      * <code>string name = 2;</code>
      */
-    public java.lang.String getName() {
+    @Override
+	public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         name_ = s;
@@ -19848,11 +20522,12 @@ public final class GUIProtos {
     /**
      * <code>string name = 2;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
@@ -19867,12 +20542,13 @@ public final class GUIProtos {
     /**
      * <code>string filename = 3;</code>
      */
-    public java.lang.String getFilename() {
+    @Override
+	public java.lang.String getFilename() {
       java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         filename_ = s;
@@ -19882,11 +20558,12 @@ public final class GUIProtos {
     /**
      * <code>string filename = 3;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFilenameBytes() {
       java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filename_ = b;
@@ -19901,12 +20578,13 @@ public final class GUIProtos {
     /**
      * <code>string tif_filename = 4;</code>
      */
-    public java.lang.String getTifFilename() {
+    @Override
+	public java.lang.String getTifFilename() {
       java.lang.Object ref = tifFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         tifFilename_ = s;
@@ -19916,11 +20594,12 @@ public final class GUIProtos {
     /**
      * <code>string tif_filename = 4;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getTifFilenameBytes() {
       java.lang.Object ref = tifFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         tifFilename_ = b;
@@ -19931,7 +20610,8 @@ public final class GUIProtos {
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -19940,7 +20620,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber()) {
         output.writeEnum(1, templateType_);
@@ -19956,7 +20637,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -20090,14 +20772,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.DefaultTemplate prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -20124,7 +20808,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -20146,7 +20831,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         templateType_ = 0;
 
@@ -20159,16 +20845,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.DefaultTemplate.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate build() {
         gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -20176,7 +20865,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate buildPartial() {
         gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplate(this);
         result.templateType_ = templateType_;
         result.name_ = name_;
@@ -20186,33 +20876,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplate)other);
         } else {
@@ -20242,11 +20939,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -20268,7 +20967,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
        */
-      public int getTemplateTypeValue() {
+      @Override
+	public int getTemplateTypeValue() {
         return templateType_;
       }
       /**
@@ -20282,7 +20982,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
        */
-      public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
         gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
         return result == null ? gdsc.smlm.data.config.GUIProtos.TemplateType.UNRECOGNIZED : result;
       }
@@ -20293,7 +20994,7 @@ public final class GUIProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         templateType_ = value.getNumber();
         onChanged();
         return this;
@@ -20302,7 +21003,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
        */
       public Builder clearTemplateType() {
-        
+
         templateType_ = 0;
         onChanged();
         return this;
@@ -20312,7 +21013,8 @@ public final class GUIProtos {
       /**
        * <code>string name = 2;</code>
        */
-      public java.lang.String getName() {
+      @Override
+	public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -20327,11 +21029,12 @@ public final class GUIProtos {
       /**
        * <code>string name = 2;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
@@ -20348,7 +21051,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         name_ = value;
         onChanged();
         return this;
@@ -20357,7 +21060,7 @@ public final class GUIProtos {
        * <code>string name = 2;</code>
        */
       public Builder clearName() {
-        
+
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
@@ -20371,7 +21074,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         name_ = value;
         onChanged();
         return this;
@@ -20381,7 +21084,8 @@ public final class GUIProtos {
       /**
        * <code>string filename = 3;</code>
        */
-      public java.lang.String getFilename() {
+      @Override
+	public java.lang.String getFilename() {
         java.lang.Object ref = filename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -20396,11 +21100,12 @@ public final class GUIProtos {
       /**
        * <code>string filename = 3;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFilenameBytes() {
         java.lang.Object ref = filename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filename_ = b;
@@ -20417,7 +21122,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         filename_ = value;
         onChanged();
         return this;
@@ -20426,7 +21131,7 @@ public final class GUIProtos {
        * <code>string filename = 3;</code>
        */
       public Builder clearFilename() {
-        
+
         filename_ = getDefaultInstance().getFilename();
         onChanged();
         return this;
@@ -20440,7 +21145,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         filename_ = value;
         onChanged();
         return this;
@@ -20450,7 +21155,8 @@ public final class GUIProtos {
       /**
        * <code>string tif_filename = 4;</code>
        */
-      public java.lang.String getTifFilename() {
+      @Override
+	public java.lang.String getTifFilename() {
         java.lang.Object ref = tifFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -20465,11 +21171,12 @@ public final class GUIProtos {
       /**
        * <code>string tif_filename = 4;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getTifFilenameBytes() {
         java.lang.Object ref = tifFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           tifFilename_ = b;
@@ -20486,7 +21193,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         tifFilename_ = value;
         onChanged();
         return this;
@@ -20495,7 +21202,7 @@ public final class GUIProtos {
        * <code>string tif_filename = 4;</code>
        */
       public Builder clearTifFilename() {
-        
+
         tifFilename_ = getDefaultInstance().getTifFilename();
         onChanged();
         return this;
@@ -20509,17 +21216,19 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         tifFilename_ = value;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -20540,7 +21249,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<DefaultTemplate>
         PARSER = new com.google.protobuf.AbstractParser<DefaultTemplate>() {
-      public DefaultTemplate parsePartialFrom(
+      @Override
+	public DefaultTemplate parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -20557,7 +21267,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -20570,7 +21281,7 @@ public final class GUIProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> 
+    java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate>
         getDefaultTemplatesList();
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
@@ -20583,7 +21294,7 @@ public final class GUIProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>
         getDefaultTemplatesOrBuilderList();
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
@@ -20637,7 +21348,7 @@ public final class GUIProtos {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                defaultTemplates_ = new java.util.ArrayList<gdsc.smlm.data.config.GUIProtos.DefaultTemplate>();
+                defaultTemplates_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               defaultTemplates_.add(
@@ -20663,7 +21374,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -20675,38 +21387,44 @@ public final class GUIProtos {
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
       return defaultTemplates_;
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>
         getDefaultTemplatesOrBuilderList() {
       return defaultTemplates_;
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    public int getDefaultTemplatesCount() {
+    @Override
+	public int getDefaultTemplatesCount() {
       return defaultTemplates_.size();
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
       return defaultTemplates_.get(index);
     }
     /**
      * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
      */
-    public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
         int index) {
       return defaultTemplates_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -20715,14 +21433,16 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       for (int i = 0; i < defaultTemplates_.size(); i++) {
         output.writeMessage(1, defaultTemplates_.get(i));
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -20838,14 +21558,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -20872,7 +21594,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -20895,7 +21618,8 @@ public final class GUIProtos {
           getDefaultTemplatesFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         if (defaultTemplatesBuilder_ == null) {
           defaultTemplates_ = java.util.Collections.emptyList();
@@ -20906,16 +21630,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings build() {
         gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -20923,7 +21650,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings(this);
         int from_bitField0_ = bitField0_;
         if (defaultTemplatesBuilder_ == null) {
@@ -20939,33 +21667,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)other);
         } else {
@@ -20994,7 +21729,7 @@ public final class GUIProtos {
               defaultTemplatesBuilder_ = null;
               defaultTemplates_ = other.defaultTemplates_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              defaultTemplatesBuilder_ = 
+              defaultTemplatesBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDefaultTemplatesFieldBuilder() : null;
             } else {
@@ -21006,11 +21741,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -21033,7 +21770,7 @@ public final class GUIProtos {
         java.util.Collections.emptyList();
       private void ensureDefaultTemplatesIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          defaultTemplates_ = new java.util.ArrayList<gdsc.smlm.data.config.GUIProtos.DefaultTemplate>(defaultTemplates_);
+          defaultTemplates_ = new java.util.ArrayList<>(defaultTemplates_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -21044,7 +21781,8 @@ public final class GUIProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
         if (defaultTemplatesBuilder_ == null) {
           return java.util.Collections.unmodifiableList(defaultTemplates_);
         } else {
@@ -21054,7 +21792,8 @@ public final class GUIProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
-      public int getDefaultTemplatesCount() {
+      @Override
+	public int getDefaultTemplatesCount() {
         if (defaultTemplatesBuilder_ == null) {
           return defaultTemplates_.size();
         } else {
@@ -21064,7 +21803,8 @@ public final class GUIProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
         if (defaultTemplatesBuilder_ == null) {
           return defaultTemplates_.get(index);
         } else {
@@ -21214,7 +21954,8 @@ public final class GUIProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
-      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
           int index) {
         if (defaultTemplatesBuilder_ == null) {
           return defaultTemplates_.get(index);  } else {
@@ -21224,7 +21965,8 @@ public final class GUIProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>
            getDefaultTemplatesOrBuilderList() {
         if (defaultTemplatesBuilder_ != null) {
           return defaultTemplatesBuilder_.getMessageOrBuilderList();
@@ -21250,16 +21992,15 @@ public final class GUIProtos {
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder> 
+      public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder>
            getDefaultTemplatesBuilderList() {
         return getDefaultTemplatesFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.GUIProtos.DefaultTemplate, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder, gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+          gdsc.smlm.data.config.GUIProtos.DefaultTemplate, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder, gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>
           getDefaultTemplatesFieldBuilder() {
         if (defaultTemplatesBuilder_ == null) {
-          defaultTemplatesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.GUIProtos.DefaultTemplate, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder, gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>(
+          defaultTemplatesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   defaultTemplates_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -21268,12 +22009,14 @@ public final class GUIProtos {
         }
         return defaultTemplatesBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -21294,7 +22037,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<DefaultTemplateSettings>
         PARSER = new com.google.protobuf.AbstractParser<DefaultTemplateSettings>() {
-      public DefaultTemplateSettings parsePartialFrom(
+      @Override
+	public DefaultTemplateSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -21311,7 +22055,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -21332,7 +22077,7 @@ public final class GUIProtos {
 
     /**
      * <pre>
-     * Set to true to select from a list of standard templates 
+     * Set to true to select from a list of standard templates
      * </pre>
      *
      * <code>bool select_standard_templates = 2;</code>
@@ -21341,7 +22086,7 @@ public final class GUIProtos {
 
     /**
      * <pre>
-     * Set to true to select templates from a configuration directory 
+     * Set to true to select templates from a configuration directory
      * </pre>
      *
      * <code>bool select_custom_directory = 3;</code>
@@ -21368,7 +22113,7 @@ public final class GUIProtos {
 
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
@@ -21377,7 +22122,7 @@ public final class GUIProtos {
         getSelectedStandardTemplatesList();
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
@@ -21385,7 +22130,7 @@ public final class GUIProtos {
     int getSelectedStandardTemplatesCount();
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
@@ -21393,7 +22138,7 @@ public final class GUIProtos {
     java.lang.String getSelectedStandardTemplates(int index);
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
@@ -21403,7 +22148,7 @@ public final class GUIProtos {
 
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
@@ -21412,7 +22157,7 @@ public final class GUIProtos {
         getSelectedCustomTemplatesList();
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
@@ -21420,7 +22165,7 @@ public final class GUIProtos {
     int getSelectedCustomTemplatesCount();
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
@@ -21428,7 +22173,7 @@ public final class GUIProtos {
     java.lang.String getSelectedCustomTemplates(int index);
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
@@ -21586,7 +22331,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -21603,7 +22349,8 @@ public final class GUIProtos {
      *
      * <code>int32 option = 1;</code>
      */
-    public int getOption() {
+    @Override
+	public int getOption() {
       return option_;
     }
 
@@ -21611,12 +22358,13 @@ public final class GUIProtos {
     private boolean selectStandardTemplates_;
     /**
      * <pre>
-     * Set to true to select from a list of standard templates 
+     * Set to true to select from a list of standard templates
      * </pre>
      *
      * <code>bool select_standard_templates = 2;</code>
      */
-    public boolean getSelectStandardTemplates() {
+    @Override
+	public boolean getSelectStandardTemplates() {
       return selectStandardTemplates_;
     }
 
@@ -21624,12 +22372,13 @@ public final class GUIProtos {
     private boolean selectCustomDirectory_;
     /**
      * <pre>
-     * Set to true to select templates from a configuration directory 
+     * Set to true to select templates from a configuration directory
      * </pre>
      *
      * <code>bool select_custom_directory = 3;</code>
      */
-    public boolean getSelectCustomDirectory() {
+    @Override
+	public boolean getSelectCustomDirectory() {
       return selectCustomDirectory_;
     }
 
@@ -21642,12 +22391,13 @@ public final class GUIProtos {
      *
      * <code>string configuration_directory = 4;</code>
      */
-    public java.lang.String getConfigurationDirectory() {
+    @Override
+	public java.lang.String getConfigurationDirectory() {
       java.lang.Object ref = configurationDirectory_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         configurationDirectory_ = s;
@@ -21661,11 +22411,12 @@ public final class GUIProtos {
      *
      * <code>string configuration_directory = 4;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getConfigurationDirectoryBytes() {
       java.lang.Object ref = configurationDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         configurationDirectory_ = b;
@@ -21679,43 +22430,47 @@ public final class GUIProtos {
     private com.google.protobuf.LazyStringList selectedStandardTemplates_;
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
      */
-    public com.google.protobuf.ProtocolStringList
+    @Override
+	public com.google.protobuf.ProtocolStringList
         getSelectedStandardTemplatesList() {
       return selectedStandardTemplates_;
     }
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
      */
-    public int getSelectedStandardTemplatesCount() {
+    @Override
+	public int getSelectedStandardTemplatesCount() {
       return selectedStandardTemplates_.size();
     }
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
      */
-    public java.lang.String getSelectedStandardTemplates(int index) {
+    @Override
+	public java.lang.String getSelectedStandardTemplates(int index) {
       return selectedStandardTemplates_.get(index);
     }
     /**
      * <pre>
-     * Used for the multiMode option to select standard templates 
+     * Used for the multiMode option to select standard templates
      * </pre>
      *
      * <code>repeated string selected_standard_templates = 5;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSelectedStandardTemplatesBytes(int index) {
       return selectedStandardTemplates_.getByteString(index);
     }
@@ -21724,43 +22479,47 @@ public final class GUIProtos {
     private com.google.protobuf.LazyStringList selectedCustomTemplates_;
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
      */
-    public com.google.protobuf.ProtocolStringList
+    @Override
+	public com.google.protobuf.ProtocolStringList
         getSelectedCustomTemplatesList() {
       return selectedCustomTemplates_;
     }
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
      */
-    public int getSelectedCustomTemplatesCount() {
+    @Override
+	public int getSelectedCustomTemplatesCount() {
       return selectedCustomTemplates_.size();
     }
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
      */
-    public java.lang.String getSelectedCustomTemplates(int index) {
+    @Override
+	public java.lang.String getSelectedCustomTemplates(int index) {
       return selectedCustomTemplates_.get(index);
     }
     /**
      * <pre>
-     * Used for the multiMode option to select custom templates 
+     * Used for the multiMode option to select custom templates
      * </pre>
      *
      * <code>repeated string selected_custom_templates = 6;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSelectedCustomTemplatesBytes(int index) {
       return selectedCustomTemplates_.getByteString(index);
     }
@@ -21774,12 +22533,13 @@ public final class GUIProtos {
      *
      * <code>string template = 7;</code>
      */
-    public java.lang.String getTemplate() {
+    @Override
+	public java.lang.String getTemplate() {
       java.lang.Object ref = template_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         template_ = s;
@@ -21793,11 +22553,12 @@ public final class GUIProtos {
      *
      * <code>string template = 7;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getTemplateBytes() {
       java.lang.Object ref = template_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         template_ = b;
@@ -21816,12 +22577,14 @@ public final class GUIProtos {
      *
      * <code>bool close = 8;</code>
      */
-    public boolean getClose() {
+    @Override
+	public boolean getClose() {
       return close_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -21830,7 +22593,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (option_ != 0) {
         output.writeInt32(1, option_);
@@ -21858,7 +22622,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -22041,14 +22806,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -22075,7 +22842,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -22097,7 +22865,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         option_ = 0;
 
@@ -22118,16 +22887,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings build() {
         gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -22135,7 +22907,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -22160,33 +22933,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings)other);
         } else {
@@ -22241,11 +23021,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -22272,7 +23054,8 @@ public final class GUIProtos {
        *
        * <code>int32 option = 1;</code>
        */
-      public int getOption() {
+      @Override
+	public int getOption() {
         return option_;
       }
       /**
@@ -22283,7 +23066,7 @@ public final class GUIProtos {
        * <code>int32 option = 1;</code>
        */
       public Builder setOption(int value) {
-        
+
         option_ = value;
         onChanged();
         return this;
@@ -22296,7 +23079,7 @@ public final class GUIProtos {
        * <code>int32 option = 1;</code>
        */
       public Builder clearOption() {
-        
+
         option_ = 0;
         onChanged();
         return this;
@@ -22305,36 +23088,37 @@ public final class GUIProtos {
       private boolean selectStandardTemplates_ ;
       /**
        * <pre>
-       * Set to true to select from a list of standard templates 
+       * Set to true to select from a list of standard templates
        * </pre>
        *
        * <code>bool select_standard_templates = 2;</code>
        */
-      public boolean getSelectStandardTemplates() {
+      @Override
+	public boolean getSelectStandardTemplates() {
         return selectStandardTemplates_;
       }
       /**
        * <pre>
-       * Set to true to select from a list of standard templates 
+       * Set to true to select from a list of standard templates
        * </pre>
        *
        * <code>bool select_standard_templates = 2;</code>
        */
       public Builder setSelectStandardTemplates(boolean value) {
-        
+
         selectStandardTemplates_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to select from a list of standard templates 
+       * Set to true to select from a list of standard templates
        * </pre>
        *
        * <code>bool select_standard_templates = 2;</code>
        */
       public Builder clearSelectStandardTemplates() {
-        
+
         selectStandardTemplates_ = false;
         onChanged();
         return this;
@@ -22343,36 +23127,37 @@ public final class GUIProtos {
       private boolean selectCustomDirectory_ ;
       /**
        * <pre>
-       * Set to true to select templates from a configuration directory 
+       * Set to true to select templates from a configuration directory
        * </pre>
        *
        * <code>bool select_custom_directory = 3;</code>
        */
-      public boolean getSelectCustomDirectory() {
+      @Override
+	public boolean getSelectCustomDirectory() {
         return selectCustomDirectory_;
       }
       /**
        * <pre>
-       * Set to true to select templates from a configuration directory 
+       * Set to true to select templates from a configuration directory
        * </pre>
        *
        * <code>bool select_custom_directory = 3;</code>
        */
       public Builder setSelectCustomDirectory(boolean value) {
-        
+
         selectCustomDirectory_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to select templates from a configuration directory 
+       * Set to true to select templates from a configuration directory
        * </pre>
        *
        * <code>bool select_custom_directory = 3;</code>
        */
       public Builder clearSelectCustomDirectory() {
-        
+
         selectCustomDirectory_ = false;
         onChanged();
         return this;
@@ -22386,7 +23171,8 @@ public final class GUIProtos {
        *
        * <code>string configuration_directory = 4;</code>
        */
-      public java.lang.String getConfigurationDirectory() {
+      @Override
+	public java.lang.String getConfigurationDirectory() {
         java.lang.Object ref = configurationDirectory_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -22405,11 +23191,12 @@ public final class GUIProtos {
        *
        * <code>string configuration_directory = 4;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getConfigurationDirectoryBytes() {
         java.lang.Object ref = configurationDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           configurationDirectory_ = b;
@@ -22430,7 +23217,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         configurationDirectory_ = value;
         onChanged();
         return this;
@@ -22443,7 +23230,7 @@ public final class GUIProtos {
        * <code>string configuration_directory = 4;</code>
        */
       public Builder clearConfigurationDirectory() {
-        
+
         configurationDirectory_ = getDefaultInstance().getConfigurationDirectory();
         onChanged();
         return this;
@@ -22461,7 +23248,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         configurationDirectory_ = value;
         onChanged();
         return this;
@@ -22476,49 +23263,53 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public com.google.protobuf.ProtocolStringList
+      @Override
+	public com.google.protobuf.ProtocolStringList
           getSelectedStandardTemplatesList() {
         return selectedStandardTemplates_.getUnmodifiableView();
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public int getSelectedStandardTemplatesCount() {
+      @Override
+	public int getSelectedStandardTemplatesCount() {
         return selectedStandardTemplates_.size();
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public java.lang.String getSelectedStandardTemplates(int index) {
+      @Override
+	public java.lang.String getSelectedStandardTemplates(int index) {
         return selectedStandardTemplates_.get(index);
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSelectedStandardTemplatesBytes(int index) {
         return selectedStandardTemplates_.getByteString(index);
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
@@ -22535,7 +23326,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
@@ -22552,7 +23343,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
@@ -22567,7 +23358,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
@@ -22580,7 +23371,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select standard templates 
+       * Used for the multiMode option to select standard templates
        * </pre>
        *
        * <code>repeated string selected_standard_templates = 5;</code>
@@ -22606,49 +23397,53 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
        */
-      public com.google.protobuf.ProtocolStringList
+      @Override
+	public com.google.protobuf.ProtocolStringList
           getSelectedCustomTemplatesList() {
         return selectedCustomTemplates_.getUnmodifiableView();
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
        */
-      public int getSelectedCustomTemplatesCount() {
+      @Override
+	public int getSelectedCustomTemplatesCount() {
         return selectedCustomTemplates_.size();
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
        */
-      public java.lang.String getSelectedCustomTemplates(int index) {
+      @Override
+	public java.lang.String getSelectedCustomTemplates(int index) {
         return selectedCustomTemplates_.get(index);
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSelectedCustomTemplatesBytes(int index) {
         return selectedCustomTemplates_.getByteString(index);
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
@@ -22665,7 +23460,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
@@ -22682,7 +23477,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
@@ -22697,7 +23492,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
@@ -22710,7 +23505,7 @@ public final class GUIProtos {
       }
       /**
        * <pre>
-       * Used for the multiMode option to select custom templates 
+       * Used for the multiMode option to select custom templates
        * </pre>
        *
        * <code>repeated string selected_custom_templates = 6;</code>
@@ -22735,7 +23530,8 @@ public final class GUIProtos {
        *
        * <code>string template = 7;</code>
        */
-      public java.lang.String getTemplate() {
+      @Override
+	public java.lang.String getTemplate() {
         java.lang.Object ref = template_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -22754,11 +23550,12 @@ public final class GUIProtos {
        *
        * <code>string template = 7;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getTemplateBytes() {
         java.lang.Object ref = template_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           template_ = b;
@@ -22779,7 +23576,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         template_ = value;
         onChanged();
         return this;
@@ -22792,7 +23589,7 @@ public final class GUIProtos {
        * <code>string template = 7;</code>
        */
       public Builder clearTemplate() {
-        
+
         template_ = getDefaultInstance().getTemplate();
         onChanged();
         return this;
@@ -22810,7 +23607,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         template_ = value;
         onChanged();
         return this;
@@ -22824,7 +23621,8 @@ public final class GUIProtos {
        *
        * <code>bool close = 8;</code>
        */
-      public boolean getClose() {
+      @Override
+	public boolean getClose() {
         return close_;
       }
       /**
@@ -22835,7 +23633,7 @@ public final class GUIProtos {
        * <code>bool close = 8;</code>
        */
       public Builder setClose(boolean value) {
-        
+
         close_ = value;
         onChanged();
         return this;
@@ -22848,17 +23646,19 @@ public final class GUIProtos {
        * <code>bool close = 8;</code>
        */
       public Builder clearClose() {
-        
+
         close_ = false;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -22879,7 +23679,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<ConfigurationTemplateSettings>
         PARSER = new com.google.protobuf.AbstractParser<ConfigurationTemplateSettings>() {
-      public ConfigurationTemplateSettings parsePartialFrom(
+      @Override
+	public ConfigurationTemplateSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -22896,7 +23697,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -23046,7 +23848,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -23058,7 +23861,8 @@ public final class GUIProtos {
     /**
      * <code>int32 mode = 1;</code>
      */
-    public int getMode() {
+    @Override
+	public int getMode() {
       return mode_;
     }
 
@@ -23071,7 +23875,8 @@ public final class GUIProtos {
      *
      * <code>int32 field_width = 2;</code>
      */
-    public int getFieldWidth() {
+    @Override
+	public int getFieldWidth() {
       return fieldWidth_;
     }
 
@@ -23080,7 +23885,8 @@ public final class GUIProtos {
     /**
      * <code>double y_dither = 3;</code>
      */
-    public double getYDither() {
+    @Override
+	public double getYDither() {
       return yDither_;
     }
 
@@ -23089,7 +23895,8 @@ public final class GUIProtos {
     /**
      * <code>double z_dither = 4;</code>
      */
-    public double getZDither() {
+    @Override
+	public double getZDither() {
       return zDither_;
     }
 
@@ -23098,7 +23905,8 @@ public final class GUIProtos {
     /**
      * <code>double nm_per_pixel = 5;</code>
      */
-    public double getNmPerPixel() {
+    @Override
+	public double getNmPerPixel() {
       return nmPerPixel_;
     }
 
@@ -23107,7 +23915,8 @@ public final class GUIProtos {
     /**
      * <code>double nm_per_slice = 6;</code>
      */
-    public double getNmPerSlice() {
+    @Override
+	public double getNmPerSlice() {
       return nmPerSlice_;
     }
 
@@ -23116,12 +23925,14 @@ public final class GUIProtos {
     /**
      * <code>double diameter = 7;</code>
      */
-    public double getDiameter() {
+    @Override
+	public double getDiameter() {
       return diameter_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -23130,7 +23941,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (mode_ != 0) {
         output.writeInt32(1, mode_);
@@ -23155,7 +23967,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -23332,14 +24145,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -23366,7 +24181,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -23388,7 +24204,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         mode_ = 0;
 
@@ -23407,16 +24224,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings build() {
         gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -23424,7 +24244,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = new gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings(this);
         result.mode_ = mode_;
         result.fieldWidth_ = fieldWidth_;
@@ -23437,33 +24258,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)other);
         } else {
@@ -23499,11 +24327,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -23525,14 +24355,15 @@ public final class GUIProtos {
       /**
        * <code>int32 mode = 1;</code>
        */
-      public int getMode() {
+      @Override
+	public int getMode() {
         return mode_;
       }
       /**
        * <code>int32 mode = 1;</code>
        */
       public Builder setMode(int value) {
-        
+
         mode_ = value;
         onChanged();
         return this;
@@ -23541,7 +24372,7 @@ public final class GUIProtos {
        * <code>int32 mode = 1;</code>
        */
       public Builder clearMode() {
-        
+
         mode_ = 0;
         onChanged();
         return this;
@@ -23555,7 +24386,8 @@ public final class GUIProtos {
        *
        * <code>int32 field_width = 2;</code>
        */
-      public int getFieldWidth() {
+      @Override
+	public int getFieldWidth() {
         return fieldWidth_;
       }
       /**
@@ -23566,7 +24398,7 @@ public final class GUIProtos {
        * <code>int32 field_width = 2;</code>
        */
       public Builder setFieldWidth(int value) {
-        
+
         fieldWidth_ = value;
         onChanged();
         return this;
@@ -23579,7 +24411,7 @@ public final class GUIProtos {
        * <code>int32 field_width = 2;</code>
        */
       public Builder clearFieldWidth() {
-        
+
         fieldWidth_ = 0;
         onChanged();
         return this;
@@ -23589,14 +24421,15 @@ public final class GUIProtos {
       /**
        * <code>double y_dither = 3;</code>
        */
-      public double getYDither() {
+      @Override
+	public double getYDither() {
         return yDither_;
       }
       /**
        * <code>double y_dither = 3;</code>
        */
       public Builder setYDither(double value) {
-        
+
         yDither_ = value;
         onChanged();
         return this;
@@ -23605,7 +24438,7 @@ public final class GUIProtos {
        * <code>double y_dither = 3;</code>
        */
       public Builder clearYDither() {
-        
+
         yDither_ = 0D;
         onChanged();
         return this;
@@ -23615,14 +24448,15 @@ public final class GUIProtos {
       /**
        * <code>double z_dither = 4;</code>
        */
-      public double getZDither() {
+      @Override
+	public double getZDither() {
         return zDither_;
       }
       /**
        * <code>double z_dither = 4;</code>
        */
       public Builder setZDither(double value) {
-        
+
         zDither_ = value;
         onChanged();
         return this;
@@ -23631,7 +24465,7 @@ public final class GUIProtos {
        * <code>double z_dither = 4;</code>
        */
       public Builder clearZDither() {
-        
+
         zDither_ = 0D;
         onChanged();
         return this;
@@ -23641,14 +24475,15 @@ public final class GUIProtos {
       /**
        * <code>double nm_per_pixel = 5;</code>
        */
-      public double getNmPerPixel() {
+      @Override
+	public double getNmPerPixel() {
         return nmPerPixel_;
       }
       /**
        * <code>double nm_per_pixel = 5;</code>
        */
       public Builder setNmPerPixel(double value) {
-        
+
         nmPerPixel_ = value;
         onChanged();
         return this;
@@ -23657,7 +24492,7 @@ public final class GUIProtos {
        * <code>double nm_per_pixel = 5;</code>
        */
       public Builder clearNmPerPixel() {
-        
+
         nmPerPixel_ = 0D;
         onChanged();
         return this;
@@ -23667,14 +24502,15 @@ public final class GUIProtos {
       /**
        * <code>double nm_per_slice = 6;</code>
        */
-      public double getNmPerSlice() {
+      @Override
+	public double getNmPerSlice() {
         return nmPerSlice_;
       }
       /**
        * <code>double nm_per_slice = 6;</code>
        */
       public Builder setNmPerSlice(double value) {
-        
+
         nmPerSlice_ = value;
         onChanged();
         return this;
@@ -23683,7 +24519,7 @@ public final class GUIProtos {
        * <code>double nm_per_slice = 6;</code>
        */
       public Builder clearNmPerSlice() {
-        
+
         nmPerSlice_ = 0D;
         onChanged();
         return this;
@@ -23693,14 +24529,15 @@ public final class GUIProtos {
       /**
        * <code>double diameter = 7;</code>
        */
-      public double getDiameter() {
+      @Override
+	public double getDiameter() {
         return diameter_;
       }
       /**
        * <code>double diameter = 7;</code>
        */
       public Builder setDiameter(double value) {
-        
+
         diameter_ = value;
         onChanged();
         return this;
@@ -23709,17 +24546,19 @@ public final class GUIProtos {
        * <code>double diameter = 7;</code>
        */
       public Builder clearDiameter() {
-        
+
         diameter_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -23740,7 +24579,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<NucleusMaskSettings>
         PARSER = new com.google.protobuf.AbstractParser<NucleusMaskSettings>() {
-      public NucleusMaskSettings parsePartialFrom(
+      @Override
+	public NucleusMaskSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -23757,7 +24597,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -24334,7 +25175,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -24346,7 +25188,8 @@ public final class GUIProtos {
     /**
      * <code>int32 mode = 1;</code>
      */
-    public int getMode() {
+    @Override
+	public int getMode() {
       return mode_;
     }
 
@@ -24355,7 +25198,8 @@ public final class GUIProtos {
     /**
      * <code>double radius = 2;</code>
      */
-    public double getRadius() {
+    @Override
+	public double getRadius() {
       return radius_;
     }
 
@@ -24364,7 +25208,8 @@ public final class GUIProtos {
     /**
      * <code>bool interactive_mode = 3;</code>
      */
-    public boolean getInteractiveMode() {
+    @Override
+	public boolean getInteractiveMode() {
       return interactiveMode_;
     }
 
@@ -24373,7 +25218,8 @@ public final class GUIProtos {
     /**
      * <code>double nm_per_slice = 4;</code>
      */
-    public double getNmPerSlice() {
+    @Override
+	public double getNmPerSlice() {
       return nmPerSlice_;
     }
 
@@ -24386,7 +25232,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
      */
-    public boolean hasFitEngineSettings() {
+    @Override
+	public boolean hasFitEngineSettings() {
       return fitEngineSettings_ != null;
     }
     /**
@@ -24396,7 +25243,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
       return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
     }
     /**
@@ -24406,7 +25254,8 @@ public final class GUIProtos {
      *
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
       return getFitEngineSettings();
     }
 
@@ -24415,19 +25264,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
      */
-    public boolean hasPsf() {
+    @Override
+	public boolean hasPsf() {
       return psf_ != null;
     }
     /**
      * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
      */
-    public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
+    @Override
+	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
       return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
     }
     /**
      * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
      */
-    public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
       return getPsf();
     }
 
@@ -24436,7 +25288,8 @@ public final class GUIProtos {
     /**
      * <code>double amplitude_fraction = 7;</code>
      */
-    public double getAmplitudeFraction() {
+    @Override
+	public double getAmplitudeFraction() {
       return amplitudeFraction_;
     }
 
@@ -24445,7 +25298,8 @@ public final class GUIProtos {
     /**
      * <code>int32 start_background_frames = 8;</code>
      */
-    public int getStartBackgroundFrames() {
+    @Override
+	public int getStartBackgroundFrames() {
       return startBackgroundFrames_;
     }
 
@@ -24454,7 +25308,8 @@ public final class GUIProtos {
     /**
      * <code>int32 end_background_frames = 9;</code>
      */
-    public int getEndBackgroundFrames() {
+    @Override
+	public int getEndBackgroundFrames() {
       return endBackgroundFrames_;
     }
 
@@ -24463,7 +25318,8 @@ public final class GUIProtos {
     /**
      * <code>int32 magnification = 10;</code>
      */
-    public int getMagnification() {
+    @Override
+	public int getMagnification() {
       return magnification_;
     }
 
@@ -24472,7 +25328,8 @@ public final class GUIProtos {
     /**
      * <code>double smoothing = 11;</code>
      */
-    public double getSmoothing() {
+    @Override
+	public double getSmoothing() {
       return smoothing_;
     }
 
@@ -24481,7 +25338,8 @@ public final class GUIProtos {
     /**
      * <code>bool centre_each_slice = 12;</code>
      */
-    public boolean getCentreEachSlice() {
+    @Override
+	public boolean getCentreEachSlice() {
       return centreEachSlice_;
     }
 
@@ -24490,7 +25348,8 @@ public final class GUIProtos {
     /**
      * <code>double com_cut_off = 13;</code>
      */
-    public double getComCutOff() {
+    @Override
+	public double getComCutOff() {
       return comCutOff_;
     }
 
@@ -24499,7 +25358,8 @@ public final class GUIProtos {
     /**
      * <code>int32 interpolation_method = 14;</code>
      */
-    public int getInterpolationMethod() {
+    @Override
+	public int getInterpolationMethod() {
       return interpolationMethod_;
     }
 
@@ -24512,7 +25372,8 @@ public final class GUIProtos {
      *
      * <code>int32 psfType = 15;</code>
      */
-    public int getPsfType() {
+    @Override
+	public int getPsfType() {
       return psfType_;
     }
 
@@ -24521,19 +25382,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
      */
-    public boolean hasCalibration() {
+    @Override
+	public boolean hasCalibration() {
       return calibration_ != null;
     }
     /**
      * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
       return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
     }
     /**
      * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
       return getCalibration();
     }
 
@@ -24542,7 +25406,8 @@ public final class GUIProtos {
     /**
      * <code>double analysis_window = 17;</code>
      */
-    public double getAnalysisWindow() {
+    @Override
+	public double getAnalysisWindow() {
       return analysisWindow_;
     }
 
@@ -24551,7 +25416,8 @@ public final class GUIProtos {
     /**
      * <code>int32 com_window = 18;</code>
      */
-    public int getComWindow() {
+    @Override
+	public int getComWindow() {
       return comWindow_;
     }
 
@@ -24560,7 +25426,8 @@ public final class GUIProtos {
     /**
      * <code>int32 alignment_magnification = 19;</code>
      */
-    public int getAlignmentMagnification() {
+    @Override
+	public int getAlignmentMagnification() {
       return alignmentMagnification_;
     }
 
@@ -24569,7 +25436,8 @@ public final class GUIProtos {
     /**
      * <code>int32 maxIterations = 20;</code>
      */
-    public int getMaxIterations() {
+    @Override
+	public int getMaxIterations() {
       return maxIterations_;
     }
 
@@ -24578,7 +25446,8 @@ public final class GUIProtos {
     /**
      * <code>bool check_alignments = 21;</code>
      */
-    public boolean getCheckAlignments() {
+    @Override
+	public boolean getCheckAlignments() {
       return checkAlignments_;
     }
 
@@ -24587,7 +25456,8 @@ public final class GUIProtos {
     /**
      * <code>int32 psf_magnification = 22;</code>
      */
-    public int getPsfMagnification() {
+    @Override
+	public int getPsfMagnification() {
       return psfMagnification_;
     }
 
@@ -24596,7 +25466,8 @@ public final class GUIProtos {
     /**
      * <code>int32 window = 23;</code>
      */
-    public int getWindow() {
+    @Override
+	public int getWindow() {
       return window_;
     }
 
@@ -24605,7 +25476,8 @@ public final class GUIProtos {
     /**
      * <code>bool smooth_stack_signal = 24;</code>
      */
-    public boolean getSmoothStackSignal() {
+    @Override
+	public boolean getSmoothStackSignal() {
       return smoothStackSignal_;
     }
 
@@ -24614,7 +25486,8 @@ public final class GUIProtos {
     /**
      * <code>bool single_precision = 25;</code>
      */
-    public boolean getSinglePrecision() {
+    @Override
+	public boolean getSinglePrecision() {
       return singlePrecision_;
     }
 
@@ -24623,7 +25496,8 @@ public final class GUIProtos {
     /**
      * <code>int32 crop_border = 26;</code>
      */
-    public int getCropBorder() {
+    @Override
+	public int getCropBorder() {
       return cropBorder_;
     }
 
@@ -24632,7 +25506,8 @@ public final class GUIProtos {
     /**
      * <code>int32 crop_start = 27;</code>
      */
-    public int getCropStart() {
+    @Override
+	public int getCropStart() {
       return cropStart_;
     }
 
@@ -24641,7 +25516,8 @@ public final class GUIProtos {
     /**
      * <code>int32 crop_end = 28;</code>
      */
-    public int getCropEnd() {
+    @Override
+	public int getCropEnd() {
       return cropEnd_;
     }
 
@@ -24650,7 +25526,8 @@ public final class GUIProtos {
     /**
      * <code>int32 psf_z_magnification = 29;</code>
      */
-    public int getPsfZMagnification() {
+    @Override
+	public int getPsfZMagnification() {
       return psfZMagnification_;
     }
 
@@ -24659,7 +25536,8 @@ public final class GUIProtos {
     /**
      * <code>double com_border = 30;</code>
      */
-    public double getComBorder() {
+    @Override
+	public double getComBorder() {
       return comBorder_;
     }
 
@@ -24668,7 +25546,8 @@ public final class GUIProtos {
     /**
      * <code>int32 output_type = 31;</code>
      */
-    public int getOutputType() {
+    @Override
+	public int getOutputType() {
       return outputType_;
     }
 
@@ -24677,12 +25556,13 @@ public final class GUIProtos {
     /**
      * <code>string spline_filename = 32;</code>
      */
-    public java.lang.String getSplineFilename() {
+    @Override
+	public java.lang.String getSplineFilename() {
       java.lang.Object ref = splineFilename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         splineFilename_ = s;
@@ -24692,11 +25572,12 @@ public final class GUIProtos {
     /**
      * <code>string spline_filename = 32;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSplineFilenameBytes() {
       java.lang.Object ref = splineFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         splineFilename_ = b;
@@ -24711,7 +25592,8 @@ public final class GUIProtos {
     /**
      * <code>bool crop_to_z_centre = 33;</code>
      */
-    public boolean getCropToZCentre() {
+    @Override
+	public boolean getCropToZCentre() {
       return cropToZCentre_;
     }
 
@@ -24720,7 +25602,8 @@ public final class GUIProtos {
     /**
      * <code>int32 alignment_mode = 34;</code>
      */
-    public int getAlignmentMode() {
+    @Override
+	public int getAlignmentMode() {
       return alignmentMode_;
     }
 
@@ -24729,7 +25612,8 @@ public final class GUIProtos {
     /**
      * <code>double alignment_z_radius = 35;</code>
      */
-    public double getAlignmentZRadius() {
+    @Override
+	public double getAlignmentZRadius() {
       return alignmentZRadius_;
     }
 
@@ -24738,7 +25622,8 @@ public final class GUIProtos {
     /**
      * <code>bool update_roi = 36;</code>
      */
-    public boolean getUpdateRoi() {
+    @Override
+	public boolean getUpdateRoi() {
       return updateRoi_;
     }
 
@@ -24747,7 +25632,8 @@ public final class GUIProtos {
     /**
      * <code>double sub_pixel_precision = 37;</code>
      */
-    public double getSubPixelPrecision() {
+    @Override
+	public double getSubPixelPrecision() {
       return subPixelPrecision_;
     }
 
@@ -24756,7 +25642,8 @@ public final class GUIProtos {
     /**
      * <code>double rmsd_xy_threshold = 38;</code>
      */
-    public double getRmsdXyThreshold() {
+    @Override
+	public double getRmsdXyThreshold() {
       return rmsdXyThreshold_;
     }
 
@@ -24765,7 +25652,8 @@ public final class GUIProtos {
     /**
      * <code>double rmsd_z_threshold = 39;</code>
      */
-    public double getRmsdZThreshold() {
+    @Override
+	public double getRmsdZThreshold() {
       return rmsdZThreshold_;
     }
 
@@ -24774,12 +25662,14 @@ public final class GUIProtos {
     /**
      * <code>double com_shift_threshold = 40;</code>
      */
-    public double getComShiftThreshold() {
+    @Override
+	public double getComShiftThreshold() {
       return comShiftThreshold_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -24788,7 +25678,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (mode_ != 0) {
         output.writeInt32(1, mode_);
@@ -24912,7 +25803,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -25395,14 +26287,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -25429,7 +26323,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -25451,7 +26346,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         mode_ = 0;
 
@@ -25548,16 +26444,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings build() {
         gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -25565,7 +26464,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings(this);
         result.mode_ = mode_;
         result.radius_ = radius_;
@@ -25623,33 +26523,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings)other);
         } else {
@@ -25785,11 +26692,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -25811,14 +26720,15 @@ public final class GUIProtos {
       /**
        * <code>int32 mode = 1;</code>
        */
-      public int getMode() {
+      @Override
+	public int getMode() {
         return mode_;
       }
       /**
        * <code>int32 mode = 1;</code>
        */
       public Builder setMode(int value) {
-        
+
         mode_ = value;
         onChanged();
         return this;
@@ -25827,7 +26737,7 @@ public final class GUIProtos {
        * <code>int32 mode = 1;</code>
        */
       public Builder clearMode() {
-        
+
         mode_ = 0;
         onChanged();
         return this;
@@ -25837,14 +26747,15 @@ public final class GUIProtos {
       /**
        * <code>double radius = 2;</code>
        */
-      public double getRadius() {
+      @Override
+	public double getRadius() {
         return radius_;
       }
       /**
        * <code>double radius = 2;</code>
        */
       public Builder setRadius(double value) {
-        
+
         radius_ = value;
         onChanged();
         return this;
@@ -25853,7 +26764,7 @@ public final class GUIProtos {
        * <code>double radius = 2;</code>
        */
       public Builder clearRadius() {
-        
+
         radius_ = 0D;
         onChanged();
         return this;
@@ -25863,14 +26774,15 @@ public final class GUIProtos {
       /**
        * <code>bool interactive_mode = 3;</code>
        */
-      public boolean getInteractiveMode() {
+      @Override
+	public boolean getInteractiveMode() {
         return interactiveMode_;
       }
       /**
        * <code>bool interactive_mode = 3;</code>
        */
       public Builder setInteractiveMode(boolean value) {
-        
+
         interactiveMode_ = value;
         onChanged();
         return this;
@@ -25879,7 +26791,7 @@ public final class GUIProtos {
        * <code>bool interactive_mode = 3;</code>
        */
       public Builder clearInteractiveMode() {
-        
+
         interactiveMode_ = false;
         onChanged();
         return this;
@@ -25889,14 +26801,15 @@ public final class GUIProtos {
       /**
        * <code>double nm_per_slice = 4;</code>
        */
-      public double getNmPerSlice() {
+      @Override
+	public double getNmPerSlice() {
         return nmPerSlice_;
       }
       /**
        * <code>double nm_per_slice = 4;</code>
        */
       public Builder setNmPerSlice(double value) {
-        
+
         nmPerSlice_ = value;
         onChanged();
         return this;
@@ -25905,7 +26818,7 @@ public final class GUIProtos {
        * <code>double nm_per_slice = 4;</code>
        */
       public Builder clearNmPerSlice() {
-        
+
         nmPerSlice_ = 0D;
         onChanged();
         return this;
@@ -25921,7 +26834,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
        */
-      public boolean hasFitEngineSettings() {
+      @Override
+	public boolean hasFitEngineSettings() {
         return fitEngineSettingsBuilder_ != null || fitEngineSettings_ != null;
       }
       /**
@@ -25931,7 +26845,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
         if (fitEngineSettingsBuilder_ == null) {
           return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
         } else {
@@ -26024,7 +26939,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder getFitEngineSettingsBuilder() {
-        
+
         onChanged();
         return getFitEngineSettingsFieldBuilder().getBuilder();
       }
@@ -26035,7 +26950,8 @@ public final class GUIProtos {
        *
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
         if (fitEngineSettingsBuilder_ != null) {
           return fitEngineSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -26051,11 +26967,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder>
           getFitEngineSettingsFieldBuilder() {
         if (fitEngineSettingsBuilder_ == null) {
-          fitEngineSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder>(
+          fitEngineSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFitEngineSettings(),
                   getParentForChildren(),
                   isClean());
@@ -26070,13 +26985,15 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
        */
-      public boolean hasPsf() {
+      @Override
+	public boolean hasPsf() {
         return psfBuilder_ != null || psf_ != null;
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
        */
-      public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
+      @Override
+	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
         if (psfBuilder_ == null) {
           return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
         } else {
@@ -26149,14 +27066,15 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
        */
       public gdsc.smlm.data.config.PSFProtos.PSF.Builder getPsfBuilder() {
-        
+
         onChanged();
         return getPsfFieldBuilder().getBuilder();
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
        */
-      public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
         if (psfBuilder_ != null) {
           return psfBuilder_.getMessageOrBuilder();
         } else {
@@ -26168,11 +27086,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder> 
+          gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder>
           getPsfFieldBuilder() {
         if (psfBuilder_ == null) {
-          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder>(
+          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getPsf(),
                   getParentForChildren(),
                   isClean());
@@ -26185,14 +27102,15 @@ public final class GUIProtos {
       /**
        * <code>double amplitude_fraction = 7;</code>
        */
-      public double getAmplitudeFraction() {
+      @Override
+	public double getAmplitudeFraction() {
         return amplitudeFraction_;
       }
       /**
        * <code>double amplitude_fraction = 7;</code>
        */
       public Builder setAmplitudeFraction(double value) {
-        
+
         amplitudeFraction_ = value;
         onChanged();
         return this;
@@ -26201,7 +27119,7 @@ public final class GUIProtos {
        * <code>double amplitude_fraction = 7;</code>
        */
       public Builder clearAmplitudeFraction() {
-        
+
         amplitudeFraction_ = 0D;
         onChanged();
         return this;
@@ -26211,14 +27129,15 @@ public final class GUIProtos {
       /**
        * <code>int32 start_background_frames = 8;</code>
        */
-      public int getStartBackgroundFrames() {
+      @Override
+	public int getStartBackgroundFrames() {
         return startBackgroundFrames_;
       }
       /**
        * <code>int32 start_background_frames = 8;</code>
        */
       public Builder setStartBackgroundFrames(int value) {
-        
+
         startBackgroundFrames_ = value;
         onChanged();
         return this;
@@ -26227,7 +27146,7 @@ public final class GUIProtos {
        * <code>int32 start_background_frames = 8;</code>
        */
       public Builder clearStartBackgroundFrames() {
-        
+
         startBackgroundFrames_ = 0;
         onChanged();
         return this;
@@ -26237,14 +27156,15 @@ public final class GUIProtos {
       /**
        * <code>int32 end_background_frames = 9;</code>
        */
-      public int getEndBackgroundFrames() {
+      @Override
+	public int getEndBackgroundFrames() {
         return endBackgroundFrames_;
       }
       /**
        * <code>int32 end_background_frames = 9;</code>
        */
       public Builder setEndBackgroundFrames(int value) {
-        
+
         endBackgroundFrames_ = value;
         onChanged();
         return this;
@@ -26253,7 +27173,7 @@ public final class GUIProtos {
        * <code>int32 end_background_frames = 9;</code>
        */
       public Builder clearEndBackgroundFrames() {
-        
+
         endBackgroundFrames_ = 0;
         onChanged();
         return this;
@@ -26263,14 +27183,15 @@ public final class GUIProtos {
       /**
        * <code>int32 magnification = 10;</code>
        */
-      public int getMagnification() {
+      @Override
+	public int getMagnification() {
         return magnification_;
       }
       /**
        * <code>int32 magnification = 10;</code>
        */
       public Builder setMagnification(int value) {
-        
+
         magnification_ = value;
         onChanged();
         return this;
@@ -26279,7 +27200,7 @@ public final class GUIProtos {
        * <code>int32 magnification = 10;</code>
        */
       public Builder clearMagnification() {
-        
+
         magnification_ = 0;
         onChanged();
         return this;
@@ -26289,14 +27210,15 @@ public final class GUIProtos {
       /**
        * <code>double smoothing = 11;</code>
        */
-      public double getSmoothing() {
+      @Override
+	public double getSmoothing() {
         return smoothing_;
       }
       /**
        * <code>double smoothing = 11;</code>
        */
       public Builder setSmoothing(double value) {
-        
+
         smoothing_ = value;
         onChanged();
         return this;
@@ -26305,7 +27227,7 @@ public final class GUIProtos {
        * <code>double smoothing = 11;</code>
        */
       public Builder clearSmoothing() {
-        
+
         smoothing_ = 0D;
         onChanged();
         return this;
@@ -26315,14 +27237,15 @@ public final class GUIProtos {
       /**
        * <code>bool centre_each_slice = 12;</code>
        */
-      public boolean getCentreEachSlice() {
+      @Override
+	public boolean getCentreEachSlice() {
         return centreEachSlice_;
       }
       /**
        * <code>bool centre_each_slice = 12;</code>
        */
       public Builder setCentreEachSlice(boolean value) {
-        
+
         centreEachSlice_ = value;
         onChanged();
         return this;
@@ -26331,7 +27254,7 @@ public final class GUIProtos {
        * <code>bool centre_each_slice = 12;</code>
        */
       public Builder clearCentreEachSlice() {
-        
+
         centreEachSlice_ = false;
         onChanged();
         return this;
@@ -26341,14 +27264,15 @@ public final class GUIProtos {
       /**
        * <code>double com_cut_off = 13;</code>
        */
-      public double getComCutOff() {
+      @Override
+	public double getComCutOff() {
         return comCutOff_;
       }
       /**
        * <code>double com_cut_off = 13;</code>
        */
       public Builder setComCutOff(double value) {
-        
+
         comCutOff_ = value;
         onChanged();
         return this;
@@ -26357,7 +27281,7 @@ public final class GUIProtos {
        * <code>double com_cut_off = 13;</code>
        */
       public Builder clearComCutOff() {
-        
+
         comCutOff_ = 0D;
         onChanged();
         return this;
@@ -26367,14 +27291,15 @@ public final class GUIProtos {
       /**
        * <code>int32 interpolation_method = 14;</code>
        */
-      public int getInterpolationMethod() {
+      @Override
+	public int getInterpolationMethod() {
         return interpolationMethod_;
       }
       /**
        * <code>int32 interpolation_method = 14;</code>
        */
       public Builder setInterpolationMethod(int value) {
-        
+
         interpolationMethod_ = value;
         onChanged();
         return this;
@@ -26383,7 +27308,7 @@ public final class GUIProtos {
        * <code>int32 interpolation_method = 14;</code>
        */
       public Builder clearInterpolationMethod() {
-        
+
         interpolationMethod_ = 0;
         onChanged();
         return this;
@@ -26397,7 +27322,8 @@ public final class GUIProtos {
        *
        * <code>int32 psfType = 15;</code>
        */
-      public int getPsfType() {
+      @Override
+	public int getPsfType() {
         return psfType_;
       }
       /**
@@ -26408,7 +27334,7 @@ public final class GUIProtos {
        * <code>int32 psfType = 15;</code>
        */
       public Builder setPsfType(int value) {
-        
+
         psfType_ = value;
         onChanged();
         return this;
@@ -26421,7 +27347,7 @@ public final class GUIProtos {
        * <code>int32 psfType = 15;</code>
        */
       public Builder clearPsfType() {
-        
+
         psfType_ = 0;
         onChanged();
         return this;
@@ -26433,13 +27359,15 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
        */
-      public boolean hasCalibration() {
+      @Override
+	public boolean hasCalibration() {
         return calibrationBuilder_ != null || calibration_ != null;
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
         if (calibrationBuilder_ == null) {
           return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
         } else {
@@ -26512,14 +27440,15 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder getCalibrationBuilder() {
-        
+
         onChanged();
         return getCalibrationFieldBuilder().getBuilder();
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
         if (calibrationBuilder_ != null) {
           return calibrationBuilder_.getMessageOrBuilder();
         } else {
@@ -26531,11 +27460,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> 
+          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>
           getCalibrationFieldBuilder() {
         if (calibrationBuilder_ == null) {
-          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>(
+          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getCalibration(),
                   getParentForChildren(),
                   isClean());
@@ -26548,14 +27476,15 @@ public final class GUIProtos {
       /**
        * <code>double analysis_window = 17;</code>
        */
-      public double getAnalysisWindow() {
+      @Override
+	public double getAnalysisWindow() {
         return analysisWindow_;
       }
       /**
        * <code>double analysis_window = 17;</code>
        */
       public Builder setAnalysisWindow(double value) {
-        
+
         analysisWindow_ = value;
         onChanged();
         return this;
@@ -26564,7 +27493,7 @@ public final class GUIProtos {
        * <code>double analysis_window = 17;</code>
        */
       public Builder clearAnalysisWindow() {
-        
+
         analysisWindow_ = 0D;
         onChanged();
         return this;
@@ -26574,14 +27503,15 @@ public final class GUIProtos {
       /**
        * <code>int32 com_window = 18;</code>
        */
-      public int getComWindow() {
+      @Override
+	public int getComWindow() {
         return comWindow_;
       }
       /**
        * <code>int32 com_window = 18;</code>
        */
       public Builder setComWindow(int value) {
-        
+
         comWindow_ = value;
         onChanged();
         return this;
@@ -26590,7 +27520,7 @@ public final class GUIProtos {
        * <code>int32 com_window = 18;</code>
        */
       public Builder clearComWindow() {
-        
+
         comWindow_ = 0;
         onChanged();
         return this;
@@ -26600,14 +27530,15 @@ public final class GUIProtos {
       /**
        * <code>int32 alignment_magnification = 19;</code>
        */
-      public int getAlignmentMagnification() {
+      @Override
+	public int getAlignmentMagnification() {
         return alignmentMagnification_;
       }
       /**
        * <code>int32 alignment_magnification = 19;</code>
        */
       public Builder setAlignmentMagnification(int value) {
-        
+
         alignmentMagnification_ = value;
         onChanged();
         return this;
@@ -26616,7 +27547,7 @@ public final class GUIProtos {
        * <code>int32 alignment_magnification = 19;</code>
        */
       public Builder clearAlignmentMagnification() {
-        
+
         alignmentMagnification_ = 0;
         onChanged();
         return this;
@@ -26626,14 +27557,15 @@ public final class GUIProtos {
       /**
        * <code>int32 maxIterations = 20;</code>
        */
-      public int getMaxIterations() {
+      @Override
+	public int getMaxIterations() {
         return maxIterations_;
       }
       /**
        * <code>int32 maxIterations = 20;</code>
        */
       public Builder setMaxIterations(int value) {
-        
+
         maxIterations_ = value;
         onChanged();
         return this;
@@ -26642,7 +27574,7 @@ public final class GUIProtos {
        * <code>int32 maxIterations = 20;</code>
        */
       public Builder clearMaxIterations() {
-        
+
         maxIterations_ = 0;
         onChanged();
         return this;
@@ -26652,14 +27584,15 @@ public final class GUIProtos {
       /**
        * <code>bool check_alignments = 21;</code>
        */
-      public boolean getCheckAlignments() {
+      @Override
+	public boolean getCheckAlignments() {
         return checkAlignments_;
       }
       /**
        * <code>bool check_alignments = 21;</code>
        */
       public Builder setCheckAlignments(boolean value) {
-        
+
         checkAlignments_ = value;
         onChanged();
         return this;
@@ -26668,7 +27601,7 @@ public final class GUIProtos {
        * <code>bool check_alignments = 21;</code>
        */
       public Builder clearCheckAlignments() {
-        
+
         checkAlignments_ = false;
         onChanged();
         return this;
@@ -26678,14 +27611,15 @@ public final class GUIProtos {
       /**
        * <code>int32 psf_magnification = 22;</code>
        */
-      public int getPsfMagnification() {
+      @Override
+	public int getPsfMagnification() {
         return psfMagnification_;
       }
       /**
        * <code>int32 psf_magnification = 22;</code>
        */
       public Builder setPsfMagnification(int value) {
-        
+
         psfMagnification_ = value;
         onChanged();
         return this;
@@ -26694,7 +27628,7 @@ public final class GUIProtos {
        * <code>int32 psf_magnification = 22;</code>
        */
       public Builder clearPsfMagnification() {
-        
+
         psfMagnification_ = 0;
         onChanged();
         return this;
@@ -26704,14 +27638,15 @@ public final class GUIProtos {
       /**
        * <code>int32 window = 23;</code>
        */
-      public int getWindow() {
+      @Override
+	public int getWindow() {
         return window_;
       }
       /**
        * <code>int32 window = 23;</code>
        */
       public Builder setWindow(int value) {
-        
+
         window_ = value;
         onChanged();
         return this;
@@ -26720,7 +27655,7 @@ public final class GUIProtos {
        * <code>int32 window = 23;</code>
        */
       public Builder clearWindow() {
-        
+
         window_ = 0;
         onChanged();
         return this;
@@ -26730,14 +27665,15 @@ public final class GUIProtos {
       /**
        * <code>bool smooth_stack_signal = 24;</code>
        */
-      public boolean getSmoothStackSignal() {
+      @Override
+	public boolean getSmoothStackSignal() {
         return smoothStackSignal_;
       }
       /**
        * <code>bool smooth_stack_signal = 24;</code>
        */
       public Builder setSmoothStackSignal(boolean value) {
-        
+
         smoothStackSignal_ = value;
         onChanged();
         return this;
@@ -26746,7 +27682,7 @@ public final class GUIProtos {
        * <code>bool smooth_stack_signal = 24;</code>
        */
       public Builder clearSmoothStackSignal() {
-        
+
         smoothStackSignal_ = false;
         onChanged();
         return this;
@@ -26756,14 +27692,15 @@ public final class GUIProtos {
       /**
        * <code>bool single_precision = 25;</code>
        */
-      public boolean getSinglePrecision() {
+      @Override
+	public boolean getSinglePrecision() {
         return singlePrecision_;
       }
       /**
        * <code>bool single_precision = 25;</code>
        */
       public Builder setSinglePrecision(boolean value) {
-        
+
         singlePrecision_ = value;
         onChanged();
         return this;
@@ -26772,7 +27709,7 @@ public final class GUIProtos {
        * <code>bool single_precision = 25;</code>
        */
       public Builder clearSinglePrecision() {
-        
+
         singlePrecision_ = false;
         onChanged();
         return this;
@@ -26782,14 +27719,15 @@ public final class GUIProtos {
       /**
        * <code>int32 crop_border = 26;</code>
        */
-      public int getCropBorder() {
+      @Override
+	public int getCropBorder() {
         return cropBorder_;
       }
       /**
        * <code>int32 crop_border = 26;</code>
        */
       public Builder setCropBorder(int value) {
-        
+
         cropBorder_ = value;
         onChanged();
         return this;
@@ -26798,7 +27736,7 @@ public final class GUIProtos {
        * <code>int32 crop_border = 26;</code>
        */
       public Builder clearCropBorder() {
-        
+
         cropBorder_ = 0;
         onChanged();
         return this;
@@ -26808,14 +27746,15 @@ public final class GUIProtos {
       /**
        * <code>int32 crop_start = 27;</code>
        */
-      public int getCropStart() {
+      @Override
+	public int getCropStart() {
         return cropStart_;
       }
       /**
        * <code>int32 crop_start = 27;</code>
        */
       public Builder setCropStart(int value) {
-        
+
         cropStart_ = value;
         onChanged();
         return this;
@@ -26824,7 +27763,7 @@ public final class GUIProtos {
        * <code>int32 crop_start = 27;</code>
        */
       public Builder clearCropStart() {
-        
+
         cropStart_ = 0;
         onChanged();
         return this;
@@ -26834,14 +27773,15 @@ public final class GUIProtos {
       /**
        * <code>int32 crop_end = 28;</code>
        */
-      public int getCropEnd() {
+      @Override
+	public int getCropEnd() {
         return cropEnd_;
       }
       /**
        * <code>int32 crop_end = 28;</code>
        */
       public Builder setCropEnd(int value) {
-        
+
         cropEnd_ = value;
         onChanged();
         return this;
@@ -26850,7 +27790,7 @@ public final class GUIProtos {
        * <code>int32 crop_end = 28;</code>
        */
       public Builder clearCropEnd() {
-        
+
         cropEnd_ = 0;
         onChanged();
         return this;
@@ -26860,14 +27800,15 @@ public final class GUIProtos {
       /**
        * <code>int32 psf_z_magnification = 29;</code>
        */
-      public int getPsfZMagnification() {
+      @Override
+	public int getPsfZMagnification() {
         return psfZMagnification_;
       }
       /**
        * <code>int32 psf_z_magnification = 29;</code>
        */
       public Builder setPsfZMagnification(int value) {
-        
+
         psfZMagnification_ = value;
         onChanged();
         return this;
@@ -26876,7 +27817,7 @@ public final class GUIProtos {
        * <code>int32 psf_z_magnification = 29;</code>
        */
       public Builder clearPsfZMagnification() {
-        
+
         psfZMagnification_ = 0;
         onChanged();
         return this;
@@ -26886,14 +27827,15 @@ public final class GUIProtos {
       /**
        * <code>double com_border = 30;</code>
        */
-      public double getComBorder() {
+      @Override
+	public double getComBorder() {
         return comBorder_;
       }
       /**
        * <code>double com_border = 30;</code>
        */
       public Builder setComBorder(double value) {
-        
+
         comBorder_ = value;
         onChanged();
         return this;
@@ -26902,7 +27844,7 @@ public final class GUIProtos {
        * <code>double com_border = 30;</code>
        */
       public Builder clearComBorder() {
-        
+
         comBorder_ = 0D;
         onChanged();
         return this;
@@ -26912,14 +27854,15 @@ public final class GUIProtos {
       /**
        * <code>int32 output_type = 31;</code>
        */
-      public int getOutputType() {
+      @Override
+	public int getOutputType() {
         return outputType_;
       }
       /**
        * <code>int32 output_type = 31;</code>
        */
       public Builder setOutputType(int value) {
-        
+
         outputType_ = value;
         onChanged();
         return this;
@@ -26928,7 +27871,7 @@ public final class GUIProtos {
        * <code>int32 output_type = 31;</code>
        */
       public Builder clearOutputType() {
-        
+
         outputType_ = 0;
         onChanged();
         return this;
@@ -26938,7 +27881,8 @@ public final class GUIProtos {
       /**
        * <code>string spline_filename = 32;</code>
        */
-      public java.lang.String getSplineFilename() {
+      @Override
+	public java.lang.String getSplineFilename() {
         java.lang.Object ref = splineFilename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -26953,11 +27897,12 @@ public final class GUIProtos {
       /**
        * <code>string spline_filename = 32;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSplineFilenameBytes() {
         java.lang.Object ref = splineFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           splineFilename_ = b;
@@ -26974,7 +27919,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         splineFilename_ = value;
         onChanged();
         return this;
@@ -26983,7 +27928,7 @@ public final class GUIProtos {
        * <code>string spline_filename = 32;</code>
        */
       public Builder clearSplineFilename() {
-        
+
         splineFilename_ = getDefaultInstance().getSplineFilename();
         onChanged();
         return this;
@@ -26997,7 +27942,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         splineFilename_ = value;
         onChanged();
         return this;
@@ -27007,14 +27952,15 @@ public final class GUIProtos {
       /**
        * <code>bool crop_to_z_centre = 33;</code>
        */
-      public boolean getCropToZCentre() {
+      @Override
+	public boolean getCropToZCentre() {
         return cropToZCentre_;
       }
       /**
        * <code>bool crop_to_z_centre = 33;</code>
        */
       public Builder setCropToZCentre(boolean value) {
-        
+
         cropToZCentre_ = value;
         onChanged();
         return this;
@@ -27023,7 +27969,7 @@ public final class GUIProtos {
        * <code>bool crop_to_z_centre = 33;</code>
        */
       public Builder clearCropToZCentre() {
-        
+
         cropToZCentre_ = false;
         onChanged();
         return this;
@@ -27033,14 +27979,15 @@ public final class GUIProtos {
       /**
        * <code>int32 alignment_mode = 34;</code>
        */
-      public int getAlignmentMode() {
+      @Override
+	public int getAlignmentMode() {
         return alignmentMode_;
       }
       /**
        * <code>int32 alignment_mode = 34;</code>
        */
       public Builder setAlignmentMode(int value) {
-        
+
         alignmentMode_ = value;
         onChanged();
         return this;
@@ -27049,7 +27996,7 @@ public final class GUIProtos {
        * <code>int32 alignment_mode = 34;</code>
        */
       public Builder clearAlignmentMode() {
-        
+
         alignmentMode_ = 0;
         onChanged();
         return this;
@@ -27059,14 +28006,15 @@ public final class GUIProtos {
       /**
        * <code>double alignment_z_radius = 35;</code>
        */
-      public double getAlignmentZRadius() {
+      @Override
+	public double getAlignmentZRadius() {
         return alignmentZRadius_;
       }
       /**
        * <code>double alignment_z_radius = 35;</code>
        */
       public Builder setAlignmentZRadius(double value) {
-        
+
         alignmentZRadius_ = value;
         onChanged();
         return this;
@@ -27075,7 +28023,7 @@ public final class GUIProtos {
        * <code>double alignment_z_radius = 35;</code>
        */
       public Builder clearAlignmentZRadius() {
-        
+
         alignmentZRadius_ = 0D;
         onChanged();
         return this;
@@ -27085,14 +28033,15 @@ public final class GUIProtos {
       /**
        * <code>bool update_roi = 36;</code>
        */
-      public boolean getUpdateRoi() {
+      @Override
+	public boolean getUpdateRoi() {
         return updateRoi_;
       }
       /**
        * <code>bool update_roi = 36;</code>
        */
       public Builder setUpdateRoi(boolean value) {
-        
+
         updateRoi_ = value;
         onChanged();
         return this;
@@ -27101,7 +28050,7 @@ public final class GUIProtos {
        * <code>bool update_roi = 36;</code>
        */
       public Builder clearUpdateRoi() {
-        
+
         updateRoi_ = false;
         onChanged();
         return this;
@@ -27111,14 +28060,15 @@ public final class GUIProtos {
       /**
        * <code>double sub_pixel_precision = 37;</code>
        */
-      public double getSubPixelPrecision() {
+      @Override
+	public double getSubPixelPrecision() {
         return subPixelPrecision_;
       }
       /**
        * <code>double sub_pixel_precision = 37;</code>
        */
       public Builder setSubPixelPrecision(double value) {
-        
+
         subPixelPrecision_ = value;
         onChanged();
         return this;
@@ -27127,7 +28077,7 @@ public final class GUIProtos {
        * <code>double sub_pixel_precision = 37;</code>
        */
       public Builder clearSubPixelPrecision() {
-        
+
         subPixelPrecision_ = 0D;
         onChanged();
         return this;
@@ -27137,14 +28087,15 @@ public final class GUIProtos {
       /**
        * <code>double rmsd_xy_threshold = 38;</code>
        */
-      public double getRmsdXyThreshold() {
+      @Override
+	public double getRmsdXyThreshold() {
         return rmsdXyThreshold_;
       }
       /**
        * <code>double rmsd_xy_threshold = 38;</code>
        */
       public Builder setRmsdXyThreshold(double value) {
-        
+
         rmsdXyThreshold_ = value;
         onChanged();
         return this;
@@ -27153,7 +28104,7 @@ public final class GUIProtos {
        * <code>double rmsd_xy_threshold = 38;</code>
        */
       public Builder clearRmsdXyThreshold() {
-        
+
         rmsdXyThreshold_ = 0D;
         onChanged();
         return this;
@@ -27163,14 +28114,15 @@ public final class GUIProtos {
       /**
        * <code>double rmsd_z_threshold = 39;</code>
        */
-      public double getRmsdZThreshold() {
+      @Override
+	public double getRmsdZThreshold() {
         return rmsdZThreshold_;
       }
       /**
        * <code>double rmsd_z_threshold = 39;</code>
        */
       public Builder setRmsdZThreshold(double value) {
-        
+
         rmsdZThreshold_ = value;
         onChanged();
         return this;
@@ -27179,7 +28131,7 @@ public final class GUIProtos {
        * <code>double rmsd_z_threshold = 39;</code>
        */
       public Builder clearRmsdZThreshold() {
-        
+
         rmsdZThreshold_ = 0D;
         onChanged();
         return this;
@@ -27189,14 +28141,15 @@ public final class GUIProtos {
       /**
        * <code>double com_shift_threshold = 40;</code>
        */
-      public double getComShiftThreshold() {
+      @Override
+	public double getComShiftThreshold() {
         return comShiftThreshold_;
       }
       /**
        * <code>double com_shift_threshold = 40;</code>
        */
       public Builder setComShiftThreshold(double value) {
-        
+
         comShiftThreshold_ = value;
         onChanged();
         return this;
@@ -27205,17 +28158,19 @@ public final class GUIProtos {
        * <code>double com_shift_threshold = 40;</code>
        */
       public Builder clearComShiftThreshold() {
-        
+
         comShiftThreshold_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -27236,7 +28191,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<PSFCreatorSettings>
         PARSER = new com.google.protobuf.AbstractParser<PSFCreatorSettings>() {
-      public PSFCreatorSettings parsePartialFrom(
+      @Override
+	public PSFCreatorSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -27253,7 +28209,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -27389,7 +28346,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -27401,7 +28359,8 @@ public final class GUIProtos {
     /**
      * <code>int32 option = 1;</code>
      */
-    public int getOption() {
+    @Override
+	public int getOption() {
       return option_;
     }
 
@@ -27410,7 +28369,8 @@ public final class GUIProtos {
     /**
      * <code>int32 origin_x = 2;</code>
      */
-    public int getOriginX() {
+    @Override
+	public int getOriginX() {
       return originX_;
     }
 
@@ -27419,7 +28379,8 @@ public final class GUIProtos {
     /**
      * <code>int32 origin_y = 3;</code>
      */
-    public int getOriginY() {
+    @Override
+	public int getOriginY() {
       return originY_;
     }
 
@@ -27428,12 +28389,13 @@ public final class GUIProtos {
     /**
      * <code>string image = 4;</code>
      */
-    public java.lang.String getImage() {
+    @Override
+	public java.lang.String getImage() {
       java.lang.Object ref = image_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         image_ = s;
@@ -27443,11 +28405,12 @@ public final class GUIProtos {
     /**
      * <code>string image = 4;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getImageBytes() {
       java.lang.Object ref = image_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         image_ = b;
@@ -27462,12 +28425,13 @@ public final class GUIProtos {
     /**
      * <code>string selected = 5;</code>
      */
-    public java.lang.String getSelected() {
+    @Override
+	public java.lang.String getSelected() {
       java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         selected_ = s;
@@ -27477,11 +28441,12 @@ public final class GUIProtos {
     /**
      * <code>string selected = 5;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSelectedBytes() {
       java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         selected_ = b;
@@ -27492,7 +28457,8 @@ public final class GUIProtos {
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -27501,7 +28467,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (option_ != 0) {
         output.writeInt32(1, option_);
@@ -27520,7 +28487,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -27664,14 +28632,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -27698,7 +28668,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -27720,7 +28691,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         option_ = 0;
 
@@ -27735,16 +28707,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings build() {
         gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -27752,7 +28727,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings(this);
         result.option_ = option_;
         result.originX_ = originX_;
@@ -27763,33 +28739,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)other);
         } else {
@@ -27821,11 +28804,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -27847,14 +28832,15 @@ public final class GUIProtos {
       /**
        * <code>int32 option = 1;</code>
        */
-      public int getOption() {
+      @Override
+	public int getOption() {
         return option_;
       }
       /**
        * <code>int32 option = 1;</code>
        */
       public Builder setOption(int value) {
-        
+
         option_ = value;
         onChanged();
         return this;
@@ -27863,7 +28849,7 @@ public final class GUIProtos {
        * <code>int32 option = 1;</code>
        */
       public Builder clearOption() {
-        
+
         option_ = 0;
         onChanged();
         return this;
@@ -27873,14 +28859,15 @@ public final class GUIProtos {
       /**
        * <code>int32 origin_x = 2;</code>
        */
-      public int getOriginX() {
+      @Override
+	public int getOriginX() {
         return originX_;
       }
       /**
        * <code>int32 origin_x = 2;</code>
        */
       public Builder setOriginX(int value) {
-        
+
         originX_ = value;
         onChanged();
         return this;
@@ -27889,7 +28876,7 @@ public final class GUIProtos {
        * <code>int32 origin_x = 2;</code>
        */
       public Builder clearOriginX() {
-        
+
         originX_ = 0;
         onChanged();
         return this;
@@ -27899,14 +28886,15 @@ public final class GUIProtos {
       /**
        * <code>int32 origin_y = 3;</code>
        */
-      public int getOriginY() {
+      @Override
+	public int getOriginY() {
         return originY_;
       }
       /**
        * <code>int32 origin_y = 3;</code>
        */
       public Builder setOriginY(int value) {
-        
+
         originY_ = value;
         onChanged();
         return this;
@@ -27915,7 +28903,7 @@ public final class GUIProtos {
        * <code>int32 origin_y = 3;</code>
        */
       public Builder clearOriginY() {
-        
+
         originY_ = 0;
         onChanged();
         return this;
@@ -27925,7 +28913,8 @@ public final class GUIProtos {
       /**
        * <code>string image = 4;</code>
        */
-      public java.lang.String getImage() {
+      @Override
+	public java.lang.String getImage() {
         java.lang.Object ref = image_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -27940,11 +28929,12 @@ public final class GUIProtos {
       /**
        * <code>string image = 4;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getImageBytes() {
         java.lang.Object ref = image_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           image_ = b;
@@ -27961,7 +28951,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         image_ = value;
         onChanged();
         return this;
@@ -27970,7 +28960,7 @@ public final class GUIProtos {
        * <code>string image = 4;</code>
        */
       public Builder clearImage() {
-        
+
         image_ = getDefaultInstance().getImage();
         onChanged();
         return this;
@@ -27984,7 +28974,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         image_ = value;
         onChanged();
         return this;
@@ -27994,7 +28984,8 @@ public final class GUIProtos {
       /**
        * <code>string selected = 5;</code>
        */
-      public java.lang.String getSelected() {
+      @Override
+	public java.lang.String getSelected() {
         java.lang.Object ref = selected_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -28009,11 +29000,12 @@ public final class GUIProtos {
       /**
        * <code>string selected = 5;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSelectedBytes() {
         java.lang.Object ref = selected_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           selected_ = b;
@@ -28030,7 +29022,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         selected_ = value;
         onChanged();
         return this;
@@ -28039,7 +29031,7 @@ public final class GUIProtos {
        * <code>string selected = 5;</code>
        */
       public Builder clearSelected() {
-        
+
         selected_ = getDefaultInstance().getSelected();
         onChanged();
         return this;
@@ -28053,17 +29045,19 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         selected_ = value;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -28084,7 +29078,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<CameraModelManagerSettings>
         PARSER = new com.google.protobuf.AbstractParser<CameraModelManagerSettings>() {
-      public CameraModelManagerSettings parsePartialFrom(
+      @Override
+	public CameraModelManagerSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -28101,7 +29096,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -28335,7 +29331,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -28347,7 +29344,8 @@ public final class GUIProtos {
     /**
      * <code>double photons = 1;</code>
      */
-    public double getPhotons() {
+    @Override
+	public double getPhotons() {
       return photons_;
     }
 
@@ -28356,7 +29354,8 @@ public final class GUIProtos {
     /**
      * <code>int32 mode = 2;</code>
      */
-    public int getMode() {
+    @Override
+	public int getMode() {
       return mode_;
     }
 
@@ -28365,7 +29364,8 @@ public final class GUIProtos {
     /**
      * <code>double gain = 3;</code>
      */
-    public double getGain() {
+    @Override
+	public double getGain() {
       return gain_;
     }
 
@@ -28374,7 +29374,8 @@ public final class GUIProtos {
     /**
      * <code>double noise = 4;</code>
      */
-    public double getNoise() {
+    @Override
+	public double getNoise() {
       return noise_;
     }
 
@@ -28383,7 +29384,8 @@ public final class GUIProtos {
     /**
      * <code>int32 seed = 5;</code>
      */
-    public int getSeed() {
+    @Override
+	public int getSeed() {
       return seed_;
     }
 
@@ -28392,7 +29394,8 @@ public final class GUIProtos {
     /**
      * <code>int32 samples = 6;</code>
      */
-    public int getSamples() {
+    @Override
+	public int getSamples() {
       return samples_;
     }
 
@@ -28401,7 +29404,8 @@ public final class GUIProtos {
     /**
      * <code>int32 noise_samples = 7;</code>
      */
-    public int getNoiseSamples() {
+    @Override
+	public int getNoiseSamples() {
       return noiseSamples_;
     }
 
@@ -28410,7 +29414,8 @@ public final class GUIProtos {
     /**
      * <code>int32 model = 8;</code>
      */
-    public int getModel() {
+    @Override
+	public int getModel() {
       return model_;
     }
 
@@ -28419,7 +29424,8 @@ public final class GUIProtos {
     /**
      * <code>double em_gain = 9;</code>
      */
-    public double getEmGain() {
+    @Override
+	public double getEmGain() {
       return emGain_;
     }
 
@@ -28428,7 +29434,8 @@ public final class GUIProtos {
     /**
      * <code>int32 em_samples = 10;</code>
      */
-    public int getEmSamples() {
+    @Override
+	public int getEmSamples() {
       return emSamples_;
     }
 
@@ -28437,7 +29444,8 @@ public final class GUIProtos {
     /**
      * <code>double em_noise = 11;</code>
      */
-    public double getEmNoise() {
+    @Override
+	public double getEmNoise() {
       return emNoise_;
     }
 
@@ -28446,7 +29454,8 @@ public final class GUIProtos {
     /**
      * <code>double cmos_gain = 12;</code>
      */
-    public double getCmosGain() {
+    @Override
+	public double getCmosGain() {
       return cmosGain_;
     }
 
@@ -28455,7 +29464,8 @@ public final class GUIProtos {
     /**
      * <code>double cmos_noise = 13;</code>
      */
-    public double getCmosNoise() {
+    @Override
+	public double getCmosNoise() {
       return cmosNoise_;
     }
 
@@ -28464,7 +29474,8 @@ public final class GUIProtos {
     /**
      * <code>bool simpson_integration = 14;</code>
      */
-    public boolean getSimpsonIntegration() {
+    @Override
+	public boolean getSimpsonIntegration() {
       return simpsonIntegration_;
     }
 
@@ -28473,12 +29484,14 @@ public final class GUIProtos {
     /**
      * <code>bool round_down = 15;</code>
      */
-    public boolean getRoundDown() {
+    @Override
+	public boolean getRoundDown() {
       return roundDown_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -28487,7 +29500,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (photons_ != 0D) {
         output.writeDouble(1, photons_);
@@ -28536,7 +29550,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -28785,14 +29800,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -28819,7 +29836,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -28841,7 +29859,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         photons_ = 0D;
 
@@ -28876,16 +29895,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings build() {
         gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -28893,7 +29915,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings(this);
         result.photons_ = photons_;
         result.mode_ = mode_;
@@ -28914,33 +29937,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)other);
         } else {
@@ -29000,11 +30030,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -29026,14 +30058,15 @@ public final class GUIProtos {
       /**
        * <code>double photons = 1;</code>
        */
-      public double getPhotons() {
+      @Override
+	public double getPhotons() {
         return photons_;
       }
       /**
        * <code>double photons = 1;</code>
        */
       public Builder setPhotons(double value) {
-        
+
         photons_ = value;
         onChanged();
         return this;
@@ -29042,7 +30075,7 @@ public final class GUIProtos {
        * <code>double photons = 1;</code>
        */
       public Builder clearPhotons() {
-        
+
         photons_ = 0D;
         onChanged();
         return this;
@@ -29052,14 +30085,15 @@ public final class GUIProtos {
       /**
        * <code>int32 mode = 2;</code>
        */
-      public int getMode() {
+      @Override
+	public int getMode() {
         return mode_;
       }
       /**
        * <code>int32 mode = 2;</code>
        */
       public Builder setMode(int value) {
-        
+
         mode_ = value;
         onChanged();
         return this;
@@ -29068,7 +30102,7 @@ public final class GUIProtos {
        * <code>int32 mode = 2;</code>
        */
       public Builder clearMode() {
-        
+
         mode_ = 0;
         onChanged();
         return this;
@@ -29078,14 +30112,15 @@ public final class GUIProtos {
       /**
        * <code>double gain = 3;</code>
        */
-      public double getGain() {
+      @Override
+	public double getGain() {
         return gain_;
       }
       /**
        * <code>double gain = 3;</code>
        */
       public Builder setGain(double value) {
-        
+
         gain_ = value;
         onChanged();
         return this;
@@ -29094,7 +30129,7 @@ public final class GUIProtos {
        * <code>double gain = 3;</code>
        */
       public Builder clearGain() {
-        
+
         gain_ = 0D;
         onChanged();
         return this;
@@ -29104,14 +30139,15 @@ public final class GUIProtos {
       /**
        * <code>double noise = 4;</code>
        */
-      public double getNoise() {
+      @Override
+	public double getNoise() {
         return noise_;
       }
       /**
        * <code>double noise = 4;</code>
        */
       public Builder setNoise(double value) {
-        
+
         noise_ = value;
         onChanged();
         return this;
@@ -29120,7 +30156,7 @@ public final class GUIProtos {
        * <code>double noise = 4;</code>
        */
       public Builder clearNoise() {
-        
+
         noise_ = 0D;
         onChanged();
         return this;
@@ -29130,14 +30166,15 @@ public final class GUIProtos {
       /**
        * <code>int32 seed = 5;</code>
        */
-      public int getSeed() {
+      @Override
+	public int getSeed() {
         return seed_;
       }
       /**
        * <code>int32 seed = 5;</code>
        */
       public Builder setSeed(int value) {
-        
+
         seed_ = value;
         onChanged();
         return this;
@@ -29146,7 +30183,7 @@ public final class GUIProtos {
        * <code>int32 seed = 5;</code>
        */
       public Builder clearSeed() {
-        
+
         seed_ = 0;
         onChanged();
         return this;
@@ -29156,14 +30193,15 @@ public final class GUIProtos {
       /**
        * <code>int32 samples = 6;</code>
        */
-      public int getSamples() {
+      @Override
+	public int getSamples() {
         return samples_;
       }
       /**
        * <code>int32 samples = 6;</code>
        */
       public Builder setSamples(int value) {
-        
+
         samples_ = value;
         onChanged();
         return this;
@@ -29172,7 +30210,7 @@ public final class GUIProtos {
        * <code>int32 samples = 6;</code>
        */
       public Builder clearSamples() {
-        
+
         samples_ = 0;
         onChanged();
         return this;
@@ -29182,14 +30220,15 @@ public final class GUIProtos {
       /**
        * <code>int32 noise_samples = 7;</code>
        */
-      public int getNoiseSamples() {
+      @Override
+	public int getNoiseSamples() {
         return noiseSamples_;
       }
       /**
        * <code>int32 noise_samples = 7;</code>
        */
       public Builder setNoiseSamples(int value) {
-        
+
         noiseSamples_ = value;
         onChanged();
         return this;
@@ -29198,7 +30237,7 @@ public final class GUIProtos {
        * <code>int32 noise_samples = 7;</code>
        */
       public Builder clearNoiseSamples() {
-        
+
         noiseSamples_ = 0;
         onChanged();
         return this;
@@ -29208,14 +30247,15 @@ public final class GUIProtos {
       /**
        * <code>int32 model = 8;</code>
        */
-      public int getModel() {
+      @Override
+	public int getModel() {
         return model_;
       }
       /**
        * <code>int32 model = 8;</code>
        */
       public Builder setModel(int value) {
-        
+
         model_ = value;
         onChanged();
         return this;
@@ -29224,7 +30264,7 @@ public final class GUIProtos {
        * <code>int32 model = 8;</code>
        */
       public Builder clearModel() {
-        
+
         model_ = 0;
         onChanged();
         return this;
@@ -29234,14 +30274,15 @@ public final class GUIProtos {
       /**
        * <code>double em_gain = 9;</code>
        */
-      public double getEmGain() {
+      @Override
+	public double getEmGain() {
         return emGain_;
       }
       /**
        * <code>double em_gain = 9;</code>
        */
       public Builder setEmGain(double value) {
-        
+
         emGain_ = value;
         onChanged();
         return this;
@@ -29250,7 +30291,7 @@ public final class GUIProtos {
        * <code>double em_gain = 9;</code>
        */
       public Builder clearEmGain() {
-        
+
         emGain_ = 0D;
         onChanged();
         return this;
@@ -29260,14 +30301,15 @@ public final class GUIProtos {
       /**
        * <code>int32 em_samples = 10;</code>
        */
-      public int getEmSamples() {
+      @Override
+	public int getEmSamples() {
         return emSamples_;
       }
       /**
        * <code>int32 em_samples = 10;</code>
        */
       public Builder setEmSamples(int value) {
-        
+
         emSamples_ = value;
         onChanged();
         return this;
@@ -29276,7 +30318,7 @@ public final class GUIProtos {
        * <code>int32 em_samples = 10;</code>
        */
       public Builder clearEmSamples() {
-        
+
         emSamples_ = 0;
         onChanged();
         return this;
@@ -29286,14 +30328,15 @@ public final class GUIProtos {
       /**
        * <code>double em_noise = 11;</code>
        */
-      public double getEmNoise() {
+      @Override
+	public double getEmNoise() {
         return emNoise_;
       }
       /**
        * <code>double em_noise = 11;</code>
        */
       public Builder setEmNoise(double value) {
-        
+
         emNoise_ = value;
         onChanged();
         return this;
@@ -29302,7 +30345,7 @@ public final class GUIProtos {
        * <code>double em_noise = 11;</code>
        */
       public Builder clearEmNoise() {
-        
+
         emNoise_ = 0D;
         onChanged();
         return this;
@@ -29312,14 +30355,15 @@ public final class GUIProtos {
       /**
        * <code>double cmos_gain = 12;</code>
        */
-      public double getCmosGain() {
+      @Override
+	public double getCmosGain() {
         return cmosGain_;
       }
       /**
        * <code>double cmos_gain = 12;</code>
        */
       public Builder setCmosGain(double value) {
-        
+
         cmosGain_ = value;
         onChanged();
         return this;
@@ -29328,7 +30372,7 @@ public final class GUIProtos {
        * <code>double cmos_gain = 12;</code>
        */
       public Builder clearCmosGain() {
-        
+
         cmosGain_ = 0D;
         onChanged();
         return this;
@@ -29338,14 +30382,15 @@ public final class GUIProtos {
       /**
        * <code>double cmos_noise = 13;</code>
        */
-      public double getCmosNoise() {
+      @Override
+	public double getCmosNoise() {
         return cmosNoise_;
       }
       /**
        * <code>double cmos_noise = 13;</code>
        */
       public Builder setCmosNoise(double value) {
-        
+
         cmosNoise_ = value;
         onChanged();
         return this;
@@ -29354,7 +30399,7 @@ public final class GUIProtos {
        * <code>double cmos_noise = 13;</code>
        */
       public Builder clearCmosNoise() {
-        
+
         cmosNoise_ = 0D;
         onChanged();
         return this;
@@ -29364,14 +30409,15 @@ public final class GUIProtos {
       /**
        * <code>bool simpson_integration = 14;</code>
        */
-      public boolean getSimpsonIntegration() {
+      @Override
+	public boolean getSimpsonIntegration() {
         return simpsonIntegration_;
       }
       /**
        * <code>bool simpson_integration = 14;</code>
        */
       public Builder setSimpsonIntegration(boolean value) {
-        
+
         simpsonIntegration_ = value;
         onChanged();
         return this;
@@ -29380,7 +30426,7 @@ public final class GUIProtos {
        * <code>bool simpson_integration = 14;</code>
        */
       public Builder clearSimpsonIntegration() {
-        
+
         simpsonIntegration_ = false;
         onChanged();
         return this;
@@ -29390,14 +30436,15 @@ public final class GUIProtos {
       /**
        * <code>bool round_down = 15;</code>
        */
-      public boolean getRoundDown() {
+      @Override
+	public boolean getRoundDown() {
         return roundDown_;
       }
       /**
        * <code>bool round_down = 15;</code>
        */
       public Builder setRoundDown(boolean value) {
-        
+
         roundDown_ = value;
         onChanged();
         return this;
@@ -29406,17 +30453,19 @@ public final class GUIProtos {
        * <code>bool round_down = 15;</code>
        */
       public Builder clearRoundDown() {
-        
+
         roundDown_ = false;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -29437,7 +30486,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<CameraModelAnalysisSettings>
         PARSER = new com.google.protobuf.AbstractParser<CameraModelAnalysisSettings>() {
-      public CameraModelAnalysisSettings parsePartialFrom(
+      @Override
+	public CameraModelAnalysisSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -29454,7 +30504,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -29633,7 +30684,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -29645,7 +30697,8 @@ public final class GUIProtos {
     /**
      * <code>int32 min_exponent = 1;</code>
      */
-    public int getMinExponent() {
+    @Override
+	public int getMinExponent() {
       return minExponent_;
     }
 
@@ -29654,7 +30707,8 @@ public final class GUIProtos {
     /**
      * <code>int32 max_exponent = 2;</code>
      */
-    public int getMaxExponent() {
+    @Override
+	public int getMaxExponent() {
       return maxExponent_;
     }
 
@@ -29663,7 +30717,8 @@ public final class GUIProtos {
     /**
      * <code>int32 sub_divisions = 3;</code>
      */
-    public int getSubDivisions() {
+    @Override
+	public int getSubDivisions() {
       return subDivisions_;
     }
 
@@ -29672,7 +30727,8 @@ public final class GUIProtos {
     /**
      * <code>double camera_1_gain = 4;</code>
      */
-    public double getCamera1Gain() {
+    @Override
+	public double getCamera1Gain() {
       return camera1Gain_;
     }
 
@@ -29681,7 +30737,8 @@ public final class GUIProtos {
     /**
      * <code>double camera_1_noise = 5;</code>
      */
-    public double getCamera1Noise() {
+    @Override
+	public double getCamera1Noise() {
       return camera1Noise_;
     }
 
@@ -29690,7 +30747,8 @@ public final class GUIProtos {
     /**
      * <code>double camera_2_gain = 6;</code>
      */
-    public double getCamera2Gain() {
+    @Override
+	public double getCamera2Gain() {
       return camera2Gain_;
     }
 
@@ -29699,7 +30757,8 @@ public final class GUIProtos {
     /**
      * <code>double camera_2_noise = 7;</code>
      */
-    public double getCamera2Noise() {
+    @Override
+	public double getCamera2Noise() {
       return camera2Noise_;
     }
 
@@ -29708,7 +30767,8 @@ public final class GUIProtos {
     /**
      * <code>int32 point_option = 8;</code>
      */
-    public int getPointOption() {
+    @Override
+	public int getPointOption() {
       return pointOption_;
     }
 
@@ -29717,7 +30777,8 @@ public final class GUIProtos {
     /**
      * <code>int32 camera_1_type = 9;</code>
      */
-    public int getCamera1Type() {
+    @Override
+	public int getCamera1Type() {
       return camera1Type_;
     }
 
@@ -29726,12 +30787,14 @@ public final class GUIProtos {
     /**
      * <code>int32 camera_2_type = 10;</code>
      */
-    public int getCamera2Type() {
+    @Override
+	public int getCamera2Type() {
       return camera2Type_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -29740,7 +30803,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (minExponent_ != 0) {
         output.writeInt32(1, minExponent_);
@@ -29774,7 +30838,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -29972,14 +31037,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -30006,7 +31073,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -30028,7 +31096,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         minExponent_ = 0;
 
@@ -30053,16 +31122,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings build() {
         gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -30070,7 +31142,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings(this);
         result.minExponent_ = minExponent_;
         result.maxExponent_ = maxExponent_;
@@ -30086,33 +31159,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings)other);
         } else {
@@ -30157,11 +31237,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -30183,14 +31265,15 @@ public final class GUIProtos {
       /**
        * <code>int32 min_exponent = 1;</code>
        */
-      public int getMinExponent() {
+      @Override
+	public int getMinExponent() {
         return minExponent_;
       }
       /**
        * <code>int32 min_exponent = 1;</code>
        */
       public Builder setMinExponent(int value) {
-        
+
         minExponent_ = value;
         onChanged();
         return this;
@@ -30199,7 +31282,7 @@ public final class GUIProtos {
        * <code>int32 min_exponent = 1;</code>
        */
       public Builder clearMinExponent() {
-        
+
         minExponent_ = 0;
         onChanged();
         return this;
@@ -30209,14 +31292,15 @@ public final class GUIProtos {
       /**
        * <code>int32 max_exponent = 2;</code>
        */
-      public int getMaxExponent() {
+      @Override
+	public int getMaxExponent() {
         return maxExponent_;
       }
       /**
        * <code>int32 max_exponent = 2;</code>
        */
       public Builder setMaxExponent(int value) {
-        
+
         maxExponent_ = value;
         onChanged();
         return this;
@@ -30225,7 +31309,7 @@ public final class GUIProtos {
        * <code>int32 max_exponent = 2;</code>
        */
       public Builder clearMaxExponent() {
-        
+
         maxExponent_ = 0;
         onChanged();
         return this;
@@ -30235,14 +31319,15 @@ public final class GUIProtos {
       /**
        * <code>int32 sub_divisions = 3;</code>
        */
-      public int getSubDivisions() {
+      @Override
+	public int getSubDivisions() {
         return subDivisions_;
       }
       /**
        * <code>int32 sub_divisions = 3;</code>
        */
       public Builder setSubDivisions(int value) {
-        
+
         subDivisions_ = value;
         onChanged();
         return this;
@@ -30251,7 +31336,7 @@ public final class GUIProtos {
        * <code>int32 sub_divisions = 3;</code>
        */
       public Builder clearSubDivisions() {
-        
+
         subDivisions_ = 0;
         onChanged();
         return this;
@@ -30261,14 +31346,15 @@ public final class GUIProtos {
       /**
        * <code>double camera_1_gain = 4;</code>
        */
-      public double getCamera1Gain() {
+      @Override
+	public double getCamera1Gain() {
         return camera1Gain_;
       }
       /**
        * <code>double camera_1_gain = 4;</code>
        */
       public Builder setCamera1Gain(double value) {
-        
+
         camera1Gain_ = value;
         onChanged();
         return this;
@@ -30277,7 +31363,7 @@ public final class GUIProtos {
        * <code>double camera_1_gain = 4;</code>
        */
       public Builder clearCamera1Gain() {
-        
+
         camera1Gain_ = 0D;
         onChanged();
         return this;
@@ -30287,14 +31373,15 @@ public final class GUIProtos {
       /**
        * <code>double camera_1_noise = 5;</code>
        */
-      public double getCamera1Noise() {
+      @Override
+	public double getCamera1Noise() {
         return camera1Noise_;
       }
       /**
        * <code>double camera_1_noise = 5;</code>
        */
       public Builder setCamera1Noise(double value) {
-        
+
         camera1Noise_ = value;
         onChanged();
         return this;
@@ -30303,7 +31390,7 @@ public final class GUIProtos {
        * <code>double camera_1_noise = 5;</code>
        */
       public Builder clearCamera1Noise() {
-        
+
         camera1Noise_ = 0D;
         onChanged();
         return this;
@@ -30313,14 +31400,15 @@ public final class GUIProtos {
       /**
        * <code>double camera_2_gain = 6;</code>
        */
-      public double getCamera2Gain() {
+      @Override
+	public double getCamera2Gain() {
         return camera2Gain_;
       }
       /**
        * <code>double camera_2_gain = 6;</code>
        */
       public Builder setCamera2Gain(double value) {
-        
+
         camera2Gain_ = value;
         onChanged();
         return this;
@@ -30329,7 +31417,7 @@ public final class GUIProtos {
        * <code>double camera_2_gain = 6;</code>
        */
       public Builder clearCamera2Gain() {
-        
+
         camera2Gain_ = 0D;
         onChanged();
         return this;
@@ -30339,14 +31427,15 @@ public final class GUIProtos {
       /**
        * <code>double camera_2_noise = 7;</code>
        */
-      public double getCamera2Noise() {
+      @Override
+	public double getCamera2Noise() {
         return camera2Noise_;
       }
       /**
        * <code>double camera_2_noise = 7;</code>
        */
       public Builder setCamera2Noise(double value) {
-        
+
         camera2Noise_ = value;
         onChanged();
         return this;
@@ -30355,7 +31444,7 @@ public final class GUIProtos {
        * <code>double camera_2_noise = 7;</code>
        */
       public Builder clearCamera2Noise() {
-        
+
         camera2Noise_ = 0D;
         onChanged();
         return this;
@@ -30365,14 +31454,15 @@ public final class GUIProtos {
       /**
        * <code>int32 point_option = 8;</code>
        */
-      public int getPointOption() {
+      @Override
+	public int getPointOption() {
         return pointOption_;
       }
       /**
        * <code>int32 point_option = 8;</code>
        */
       public Builder setPointOption(int value) {
-        
+
         pointOption_ = value;
         onChanged();
         return this;
@@ -30381,7 +31471,7 @@ public final class GUIProtos {
        * <code>int32 point_option = 8;</code>
        */
       public Builder clearPointOption() {
-        
+
         pointOption_ = 0;
         onChanged();
         return this;
@@ -30391,14 +31481,15 @@ public final class GUIProtos {
       /**
        * <code>int32 camera_1_type = 9;</code>
        */
-      public int getCamera1Type() {
+      @Override
+	public int getCamera1Type() {
         return camera1Type_;
       }
       /**
        * <code>int32 camera_1_type = 9;</code>
        */
       public Builder setCamera1Type(int value) {
-        
+
         camera1Type_ = value;
         onChanged();
         return this;
@@ -30407,7 +31498,7 @@ public final class GUIProtos {
        * <code>int32 camera_1_type = 9;</code>
        */
       public Builder clearCamera1Type() {
-        
+
         camera1Type_ = 0;
         onChanged();
         return this;
@@ -30417,14 +31508,15 @@ public final class GUIProtos {
       /**
        * <code>int32 camera_2_type = 10;</code>
        */
-      public int getCamera2Type() {
+      @Override
+	public int getCamera2Type() {
         return camera2Type_;
       }
       /**
        * <code>int32 camera_2_type = 10;</code>
        */
       public Builder setCamera2Type(int value) {
-        
+
         camera2Type_ = value;
         onChanged();
         return this;
@@ -30433,17 +31525,19 @@ public final class GUIProtos {
        * <code>int32 camera_2_type = 10;</code>
        */
       public Builder clearCamera2Type() {
-        
+
         camera2Type_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -30464,7 +31558,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<CameraModelFisherInformationAnalysisSettings>
         PARSER = new com.google.protobuf.AbstractParser<CameraModelFisherInformationAnalysisSettings>() {
-      public CameraModelFisherInformationAnalysisSettings parsePartialFrom(
+      @Override
+	public CameraModelFisherInformationAnalysisSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -30481,7 +31576,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -30633,7 +31729,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -30645,7 +31742,8 @@ public final class GUIProtos {
     /**
      * <code>int32 option = 1;</code>
      */
-    public int getOption() {
+    @Override
+	public int getOption() {
       return option_;
     }
 
@@ -30654,12 +31752,13 @@ public final class GUIProtos {
     /**
      * <code>string selected = 2;</code>
      */
-    public java.lang.String getSelected() {
+    @Override
+	public java.lang.String getSelected() {
       java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         selected_ = s;
@@ -30669,11 +31768,12 @@ public final class GUIProtos {
     /**
      * <code>string selected = 2;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSelectedBytes() {
       java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         selected_ = b;
@@ -30688,7 +31788,8 @@ public final class GUIProtos {
     /**
      * <code>int32 magnification = 3;</code>
      */
-    public int getMagnification() {
+    @Override
+	public int getMagnification() {
       return magnification_;
     }
 
@@ -30697,7 +31798,8 @@ public final class GUIProtos {
     /**
      * <code>int32 scale = 4;</code>
      */
-    public int getScale() {
+    @Override
+	public int getScale() {
       return scale_;
     }
 
@@ -30706,7 +31808,8 @@ public final class GUIProtos {
     /**
      * <code>double x_shift = 5;</code>
      */
-    public double getXShift() {
+    @Override
+	public double getXShift() {
       return xShift_;
     }
 
@@ -30715,7 +31818,8 @@ public final class GUIProtos {
     /**
      * <code>double y_shift = 6;</code>
      */
-    public double getYShift() {
+    @Override
+	public double getYShift() {
       return yShift_;
     }
 
@@ -30724,12 +31828,14 @@ public final class GUIProtos {
     /**
      * <code>double z_shift = 7;</code>
      */
-    public double getZShift() {
+    @Override
+	public double getZShift() {
       return zShift_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -30738,7 +31844,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (option_ != 0) {
         output.writeInt32(1, option_);
@@ -30763,7 +31870,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -30933,14 +32041,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -30967,7 +32077,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -30989,7 +32100,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         option_ = 0;
 
@@ -31008,16 +32120,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings build() {
         gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -31025,7 +32140,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings(this);
         result.option_ = option_;
         result.selected_ = selected_;
@@ -31038,33 +32154,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)other);
         } else {
@@ -31101,11 +32224,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -31127,14 +32252,15 @@ public final class GUIProtos {
       /**
        * <code>int32 option = 1;</code>
        */
-      public int getOption() {
+      @Override
+	public int getOption() {
         return option_;
       }
       /**
        * <code>int32 option = 1;</code>
        */
       public Builder setOption(int value) {
-        
+
         option_ = value;
         onChanged();
         return this;
@@ -31143,7 +32269,7 @@ public final class GUIProtos {
        * <code>int32 option = 1;</code>
        */
       public Builder clearOption() {
-        
+
         option_ = 0;
         onChanged();
         return this;
@@ -31153,7 +32279,8 @@ public final class GUIProtos {
       /**
        * <code>string selected = 2;</code>
        */
-      public java.lang.String getSelected() {
+      @Override
+	public java.lang.String getSelected() {
         java.lang.Object ref = selected_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -31168,11 +32295,12 @@ public final class GUIProtos {
       /**
        * <code>string selected = 2;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSelectedBytes() {
         java.lang.Object ref = selected_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           selected_ = b;
@@ -31189,7 +32317,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         selected_ = value;
         onChanged();
         return this;
@@ -31198,7 +32326,7 @@ public final class GUIProtos {
        * <code>string selected = 2;</code>
        */
       public Builder clearSelected() {
-        
+
         selected_ = getDefaultInstance().getSelected();
         onChanged();
         return this;
@@ -31212,7 +32340,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         selected_ = value;
         onChanged();
         return this;
@@ -31222,14 +32350,15 @@ public final class GUIProtos {
       /**
        * <code>int32 magnification = 3;</code>
        */
-      public int getMagnification() {
+      @Override
+	public int getMagnification() {
         return magnification_;
       }
       /**
        * <code>int32 magnification = 3;</code>
        */
       public Builder setMagnification(int value) {
-        
+
         magnification_ = value;
         onChanged();
         return this;
@@ -31238,7 +32367,7 @@ public final class GUIProtos {
        * <code>int32 magnification = 3;</code>
        */
       public Builder clearMagnification() {
-        
+
         magnification_ = 0;
         onChanged();
         return this;
@@ -31248,14 +32377,15 @@ public final class GUIProtos {
       /**
        * <code>int32 scale = 4;</code>
        */
-      public int getScale() {
+      @Override
+	public int getScale() {
         return scale_;
       }
       /**
        * <code>int32 scale = 4;</code>
        */
       public Builder setScale(int value) {
-        
+
         scale_ = value;
         onChanged();
         return this;
@@ -31264,7 +32394,7 @@ public final class GUIProtos {
        * <code>int32 scale = 4;</code>
        */
       public Builder clearScale() {
-        
+
         scale_ = 0;
         onChanged();
         return this;
@@ -31274,14 +32404,15 @@ public final class GUIProtos {
       /**
        * <code>double x_shift = 5;</code>
        */
-      public double getXShift() {
+      @Override
+	public double getXShift() {
         return xShift_;
       }
       /**
        * <code>double x_shift = 5;</code>
        */
       public Builder setXShift(double value) {
-        
+
         xShift_ = value;
         onChanged();
         return this;
@@ -31290,7 +32421,7 @@ public final class GUIProtos {
        * <code>double x_shift = 5;</code>
        */
       public Builder clearXShift() {
-        
+
         xShift_ = 0D;
         onChanged();
         return this;
@@ -31300,14 +32431,15 @@ public final class GUIProtos {
       /**
        * <code>double y_shift = 6;</code>
        */
-      public double getYShift() {
+      @Override
+	public double getYShift() {
         return yShift_;
       }
       /**
        * <code>double y_shift = 6;</code>
        */
       public Builder setYShift(double value) {
-        
+
         yShift_ = value;
         onChanged();
         return this;
@@ -31316,7 +32448,7 @@ public final class GUIProtos {
        * <code>double y_shift = 6;</code>
        */
       public Builder clearYShift() {
-        
+
         yShift_ = 0D;
         onChanged();
         return this;
@@ -31326,14 +32458,15 @@ public final class GUIProtos {
       /**
        * <code>double z_shift = 7;</code>
        */
-      public double getZShift() {
+      @Override
+	public double getZShift() {
         return zShift_;
       }
       /**
        * <code>double z_shift = 7;</code>
        */
       public Builder setZShift(double value) {
-        
+
         zShift_ = value;
         onChanged();
         return this;
@@ -31342,17 +32475,19 @@ public final class GUIProtos {
        * <code>double z_shift = 7;</code>
        */
       public Builder clearZShift() {
-        
+
         zShift_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -31373,7 +32508,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<CubicSplineManagerSettings>
         PARSER = new com.google.protobuf.AbstractParser<CubicSplineManagerSettings>() {
-      public CubicSplineManagerSettings parsePartialFrom(
+      @Override
+	public CubicSplineManagerSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -31390,7 +32526,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -31806,7 +32943,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -31818,7 +32956,8 @@ public final class GUIProtos {
     /**
      * <code>int32 option = 1;</code>
      */
-    public int getOption() {
+    @Override
+	public int getOption() {
       return option_;
     }
 
@@ -31827,7 +32966,8 @@ public final class GUIProtos {
     /**
      * <code>int32 max_frames = 2;</code>
      */
-    public int getMaxFrames() {
+    @Override
+	public int getMaxFrames() {
       return maxFrames_;
     }
 
@@ -31836,7 +32976,8 @@ public final class GUIProtos {
     /**
      * <code>int32 fail_count_limit = 3;</code>
      */
-    public int getFailCountLimit() {
+    @Override
+	public int getFailCountLimit() {
       return failCountLimit_;
     }
 
@@ -31845,7 +32986,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_after_fitting = 4;</code>
      */
-    public boolean getSaveAfterFitting() {
+    @Override
+	public boolean getSaveAfterFitting() {
       return saveAfterFitting_;
     }
 
@@ -31854,7 +32996,8 @@ public final class GUIProtos {
     /**
      * <code>double target_pass_fraction = 5;</code>
      */
-    public double getTargetPassFraction() {
+    @Override
+	public double getTargetPassFraction() {
       return targetPassFraction_;
     }
 
@@ -31863,12 +33006,13 @@ public final class GUIProtos {
     /**
      * <code>string filename = 6;</code>
      */
-    public java.lang.String getFilename() {
+    @Override
+	public java.lang.String getFilename() {
       java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         filename_ = s;
@@ -31878,11 +33022,12 @@ public final class GUIProtos {
     /**
      * <code>string filename = 6;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFilenameBytes() {
       java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filename_ = b;
@@ -31897,7 +33042,8 @@ public final class GUIProtos {
     /**
      * <code>int32 plot_item = 7;</code>
      */
-    public int getPlotItem() {
+    @Override
+	public int getPlotItem() {
       return plotItem_;
     }
 
@@ -31906,7 +33052,8 @@ public final class GUIProtos {
     /**
      * <code>int32 plot_rolling_window = 8;</code>
      */
-    public int getPlotRollingWindow() {
+    @Override
+	public int getPlotRollingWindow() {
       return plotRollingWindow_;
     }
 
@@ -31915,7 +33062,8 @@ public final class GUIProtos {
     /**
      * <code>int32 plot_pass_weight = 9;</code>
      */
-    public int getPlotPassWeight() {
+    @Override
+	public int getPlotPassWeight() {
       return plotPassWeight_;
     }
 
@@ -31924,7 +33072,8 @@ public final class GUIProtos {
     /**
      * <code>int32 plot_fail_weight = 10;</code>
      */
-    public int getPlotFailWeight() {
+    @Override
+	public int getPlotFailWeight() {
       return plotFailWeight_;
     }
 
@@ -31933,7 +33082,8 @@ public final class GUIProtos {
     /**
      * <code>double plot_reset_fraction = 11;</code>
      */
-    public double getPlotResetFraction() {
+    @Override
+	public double getPlotResetFraction() {
       return plotResetFraction_;
     }
 
@@ -31942,7 +33092,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_fixed_x_axis = 12;</code>
      */
-    public boolean getPlotFixedXAxis() {
+    @Override
+	public boolean getPlotFixedXAxis() {
       return plotFixedXAxis_;
     }
 
@@ -31951,7 +33102,8 @@ public final class GUIProtos {
     /**
      * <code>int32 table_top_n = 13;</code>
      */
-    public int getTableTopN() {
+    @Override
+	public int getTableTopN() {
       return tableTopN_;
     }
 
@@ -31960,7 +33112,8 @@ public final class GUIProtos {
     /**
      * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
      */
-    public int getRollingCounterMinAllowedFailures() {
+    @Override
+	public int getRollingCounterMinAllowedFailures() {
       return rollingCounterMinAllowedFailures_;
     }
 
@@ -31969,7 +33122,8 @@ public final class GUIProtos {
     /**
      * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
      */
-    public int getRollingCounterMaxAllowedFailures() {
+    @Override
+	public int getRollingCounterMaxAllowedFailures() {
       return rollingCounterMaxAllowedFailures_;
     }
 
@@ -31978,7 +33132,8 @@ public final class GUIProtos {
     /**
      * <code>int32 rolling_counter_min_window = 16;</code>
      */
-    public int getRollingCounterMinWindow() {
+    @Override
+	public int getRollingCounterMinWindow() {
       return rollingCounterMinWindow_;
     }
 
@@ -31987,7 +33142,8 @@ public final class GUIProtos {
     /**
      * <code>int32 rolling_counter_max_window = 17;</code>
      */
-    public int getRollingCounterMaxWindow() {
+    @Override
+	public int getRollingCounterMaxWindow() {
       return rollingCounterMaxWindow_;
     }
 
@@ -31996,7 +33152,8 @@ public final class GUIProtos {
     /**
      * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
      */
-    public int getWeightedCounterMinAllowedFailures() {
+    @Override
+	public int getWeightedCounterMinAllowedFailures() {
       return weightedCounterMinAllowedFailures_;
     }
 
@@ -32005,7 +33162,8 @@ public final class GUIProtos {
     /**
      * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
      */
-    public int getWeightedCounterMaxAllowedFailures() {
+    @Override
+	public int getWeightedCounterMaxAllowedFailures() {
       return weightedCounterMaxAllowedFailures_;
     }
 
@@ -32014,7 +33172,8 @@ public final class GUIProtos {
     /**
      * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
      */
-    public int getWeightedCounterMinPassDecrement() {
+    @Override
+	public int getWeightedCounterMinPassDecrement() {
       return weightedCounterMinPassDecrement_;
     }
 
@@ -32023,7 +33182,8 @@ public final class GUIProtos {
     /**
      * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
      */
-    public int getWeightedCounterMaxPassDecrement() {
+    @Override
+	public int getWeightedCounterMaxPassDecrement() {
       return weightedCounterMaxPassDecrement_;
     }
 
@@ -32032,7 +33192,8 @@ public final class GUIProtos {
     /**
      * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
      */
-    public int getResettingCounterMinAllowedFailures() {
+    @Override
+	public int getResettingCounterMinAllowedFailures() {
       return resettingCounterMinAllowedFailures_;
     }
 
@@ -32041,7 +33202,8 @@ public final class GUIProtos {
     /**
      * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
      */
-    public int getResettingCounterMaxAllowedFailures() {
+    @Override
+	public int getResettingCounterMaxAllowedFailures() {
       return resettingCounterMaxAllowedFailures_;
     }
 
@@ -32050,7 +33212,8 @@ public final class GUIProtos {
     /**
      * <code>double resetting_counter_min_reset_fraction = 24;</code>
      */
-    public double getResettingCounterMinResetFraction() {
+    @Override
+	public double getResettingCounterMinResetFraction() {
       return resettingCounterMinResetFraction_;
     }
 
@@ -32059,7 +33222,8 @@ public final class GUIProtos {
     /**
      * <code>double resetting_counter_max_reset_fraction = 25;</code>
      */
-    public double getResettingCounterMaxResetFraction() {
+    @Override
+	public double getResettingCounterMaxResetFraction() {
       return resettingCounterMaxResetFraction_;
     }
 
@@ -32068,7 +33232,8 @@ public final class GUIProtos {
     /**
      * <code>double resetting_counter_inc_reset_fraction = 26;</code>
      */
-    public double getResettingCounterIncResetFraction() {
+    @Override
+	public double getResettingCounterIncResetFraction() {
       return resettingCounterIncResetFraction_;
     }
 
@@ -32077,7 +33242,8 @@ public final class GUIProtos {
     /**
      * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
      */
-    public int getPassRateCounterMinAllowedCounts() {
+    @Override
+	public int getPassRateCounterMinAllowedCounts() {
       return passRateCounterMinAllowedCounts_;
     }
 
@@ -32086,7 +33252,8 @@ public final class GUIProtos {
     /**
      * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
      */
-    public int getPassRateCounterMaxAllowedCounts() {
+    @Override
+	public int getPassRateCounterMaxAllowedCounts() {
       return passRateCounterMaxAllowedCounts_;
     }
 
@@ -32095,7 +33262,8 @@ public final class GUIProtos {
     /**
      * <code>double pass_rate_counter_min_pass_rate = 29;</code>
      */
-    public double getPassRateCounterMinPassRate() {
+    @Override
+	public double getPassRateCounterMinPassRate() {
       return passRateCounterMinPassRate_;
     }
 
@@ -32104,7 +33272,8 @@ public final class GUIProtos {
     /**
      * <code>double pass_rate_counter_max_pass_rate = 30;</code>
      */
-    public double getPassRateCounterMaxPassRate() {
+    @Override
+	public double getPassRateCounterMaxPassRate() {
       return passRateCounterMaxPassRate_;
     }
 
@@ -32113,12 +33282,14 @@ public final class GUIProtos {
     /**
      * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
      */
-    public double getPassRateCounterIncPassRate() {
+    @Override
+	public double getPassRateCounterIncPassRate() {
       return passRateCounterIncPassRate_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -32127,7 +33298,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (option_ != 0) {
         output.writeInt32(1, option_);
@@ -32224,7 +33396,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -32603,14 +33776,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -32637,7 +33812,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -32659,7 +33835,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         option_ = 0;
 
@@ -32726,16 +33903,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings build() {
         gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -32743,7 +33923,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = new gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings(this);
         result.option_ = option_;
         result.maxFrames_ = maxFrames_;
@@ -32780,33 +33961,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)other);
         } else {
@@ -32915,11 +34103,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -32941,14 +34131,15 @@ public final class GUIProtos {
       /**
        * <code>int32 option = 1;</code>
        */
-      public int getOption() {
+      @Override
+	public int getOption() {
         return option_;
       }
       /**
        * <code>int32 option = 1;</code>
        */
       public Builder setOption(int value) {
-        
+
         option_ = value;
         onChanged();
         return this;
@@ -32957,7 +34148,7 @@ public final class GUIProtos {
        * <code>int32 option = 1;</code>
        */
       public Builder clearOption() {
-        
+
         option_ = 0;
         onChanged();
         return this;
@@ -32967,14 +34158,15 @@ public final class GUIProtos {
       /**
        * <code>int32 max_frames = 2;</code>
        */
-      public int getMaxFrames() {
+      @Override
+	public int getMaxFrames() {
         return maxFrames_;
       }
       /**
        * <code>int32 max_frames = 2;</code>
        */
       public Builder setMaxFrames(int value) {
-        
+
         maxFrames_ = value;
         onChanged();
         return this;
@@ -32983,7 +34175,7 @@ public final class GUIProtos {
        * <code>int32 max_frames = 2;</code>
        */
       public Builder clearMaxFrames() {
-        
+
         maxFrames_ = 0;
         onChanged();
         return this;
@@ -32993,14 +34185,15 @@ public final class GUIProtos {
       /**
        * <code>int32 fail_count_limit = 3;</code>
        */
-      public int getFailCountLimit() {
+      @Override
+	public int getFailCountLimit() {
         return failCountLimit_;
       }
       /**
        * <code>int32 fail_count_limit = 3;</code>
        */
       public Builder setFailCountLimit(int value) {
-        
+
         failCountLimit_ = value;
         onChanged();
         return this;
@@ -33009,7 +34202,7 @@ public final class GUIProtos {
        * <code>int32 fail_count_limit = 3;</code>
        */
       public Builder clearFailCountLimit() {
-        
+
         failCountLimit_ = 0;
         onChanged();
         return this;
@@ -33019,14 +34212,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_after_fitting = 4;</code>
        */
-      public boolean getSaveAfterFitting() {
+      @Override
+	public boolean getSaveAfterFitting() {
         return saveAfterFitting_;
       }
       /**
        * <code>bool save_after_fitting = 4;</code>
        */
       public Builder setSaveAfterFitting(boolean value) {
-        
+
         saveAfterFitting_ = value;
         onChanged();
         return this;
@@ -33035,7 +34229,7 @@ public final class GUIProtos {
        * <code>bool save_after_fitting = 4;</code>
        */
       public Builder clearSaveAfterFitting() {
-        
+
         saveAfterFitting_ = false;
         onChanged();
         return this;
@@ -33045,14 +34239,15 @@ public final class GUIProtos {
       /**
        * <code>double target_pass_fraction = 5;</code>
        */
-      public double getTargetPassFraction() {
+      @Override
+	public double getTargetPassFraction() {
         return targetPassFraction_;
       }
       /**
        * <code>double target_pass_fraction = 5;</code>
        */
       public Builder setTargetPassFraction(double value) {
-        
+
         targetPassFraction_ = value;
         onChanged();
         return this;
@@ -33061,7 +34256,7 @@ public final class GUIProtos {
        * <code>double target_pass_fraction = 5;</code>
        */
       public Builder clearTargetPassFraction() {
-        
+
         targetPassFraction_ = 0D;
         onChanged();
         return this;
@@ -33071,7 +34266,8 @@ public final class GUIProtos {
       /**
        * <code>string filename = 6;</code>
        */
-      public java.lang.String getFilename() {
+      @Override
+	public java.lang.String getFilename() {
         java.lang.Object ref = filename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -33086,11 +34282,12 @@ public final class GUIProtos {
       /**
        * <code>string filename = 6;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFilenameBytes() {
         java.lang.Object ref = filename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filename_ = b;
@@ -33107,7 +34304,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         filename_ = value;
         onChanged();
         return this;
@@ -33116,7 +34313,7 @@ public final class GUIProtos {
        * <code>string filename = 6;</code>
        */
       public Builder clearFilename() {
-        
+
         filename_ = getDefaultInstance().getFilename();
         onChanged();
         return this;
@@ -33130,7 +34327,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         filename_ = value;
         onChanged();
         return this;
@@ -33140,14 +34337,15 @@ public final class GUIProtos {
       /**
        * <code>int32 plot_item = 7;</code>
        */
-      public int getPlotItem() {
+      @Override
+	public int getPlotItem() {
         return plotItem_;
       }
       /**
        * <code>int32 plot_item = 7;</code>
        */
       public Builder setPlotItem(int value) {
-        
+
         plotItem_ = value;
         onChanged();
         return this;
@@ -33156,7 +34354,7 @@ public final class GUIProtos {
        * <code>int32 plot_item = 7;</code>
        */
       public Builder clearPlotItem() {
-        
+
         plotItem_ = 0;
         onChanged();
         return this;
@@ -33166,14 +34364,15 @@ public final class GUIProtos {
       /**
        * <code>int32 plot_rolling_window = 8;</code>
        */
-      public int getPlotRollingWindow() {
+      @Override
+	public int getPlotRollingWindow() {
         return plotRollingWindow_;
       }
       /**
        * <code>int32 plot_rolling_window = 8;</code>
        */
       public Builder setPlotRollingWindow(int value) {
-        
+
         plotRollingWindow_ = value;
         onChanged();
         return this;
@@ -33182,7 +34381,7 @@ public final class GUIProtos {
        * <code>int32 plot_rolling_window = 8;</code>
        */
       public Builder clearPlotRollingWindow() {
-        
+
         plotRollingWindow_ = 0;
         onChanged();
         return this;
@@ -33192,14 +34391,15 @@ public final class GUIProtos {
       /**
        * <code>int32 plot_pass_weight = 9;</code>
        */
-      public int getPlotPassWeight() {
+      @Override
+	public int getPlotPassWeight() {
         return plotPassWeight_;
       }
       /**
        * <code>int32 plot_pass_weight = 9;</code>
        */
       public Builder setPlotPassWeight(int value) {
-        
+
         plotPassWeight_ = value;
         onChanged();
         return this;
@@ -33208,7 +34408,7 @@ public final class GUIProtos {
        * <code>int32 plot_pass_weight = 9;</code>
        */
       public Builder clearPlotPassWeight() {
-        
+
         plotPassWeight_ = 0;
         onChanged();
         return this;
@@ -33218,14 +34418,15 @@ public final class GUIProtos {
       /**
        * <code>int32 plot_fail_weight = 10;</code>
        */
-      public int getPlotFailWeight() {
+      @Override
+	public int getPlotFailWeight() {
         return plotFailWeight_;
       }
       /**
        * <code>int32 plot_fail_weight = 10;</code>
        */
       public Builder setPlotFailWeight(int value) {
-        
+
         plotFailWeight_ = value;
         onChanged();
         return this;
@@ -33234,7 +34435,7 @@ public final class GUIProtos {
        * <code>int32 plot_fail_weight = 10;</code>
        */
       public Builder clearPlotFailWeight() {
-        
+
         plotFailWeight_ = 0;
         onChanged();
         return this;
@@ -33244,14 +34445,15 @@ public final class GUIProtos {
       /**
        * <code>double plot_reset_fraction = 11;</code>
        */
-      public double getPlotResetFraction() {
+      @Override
+	public double getPlotResetFraction() {
         return plotResetFraction_;
       }
       /**
        * <code>double plot_reset_fraction = 11;</code>
        */
       public Builder setPlotResetFraction(double value) {
-        
+
         plotResetFraction_ = value;
         onChanged();
         return this;
@@ -33260,7 +34462,7 @@ public final class GUIProtos {
        * <code>double plot_reset_fraction = 11;</code>
        */
       public Builder clearPlotResetFraction() {
-        
+
         plotResetFraction_ = 0D;
         onChanged();
         return this;
@@ -33270,14 +34472,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_fixed_x_axis = 12;</code>
        */
-      public boolean getPlotFixedXAxis() {
+      @Override
+	public boolean getPlotFixedXAxis() {
         return plotFixedXAxis_;
       }
       /**
        * <code>bool plot_fixed_x_axis = 12;</code>
        */
       public Builder setPlotFixedXAxis(boolean value) {
-        
+
         plotFixedXAxis_ = value;
         onChanged();
         return this;
@@ -33286,7 +34489,7 @@ public final class GUIProtos {
        * <code>bool plot_fixed_x_axis = 12;</code>
        */
       public Builder clearPlotFixedXAxis() {
-        
+
         plotFixedXAxis_ = false;
         onChanged();
         return this;
@@ -33296,14 +34499,15 @@ public final class GUIProtos {
       /**
        * <code>int32 table_top_n = 13;</code>
        */
-      public int getTableTopN() {
+      @Override
+	public int getTableTopN() {
         return tableTopN_;
       }
       /**
        * <code>int32 table_top_n = 13;</code>
        */
       public Builder setTableTopN(int value) {
-        
+
         tableTopN_ = value;
         onChanged();
         return this;
@@ -33312,7 +34516,7 @@ public final class GUIProtos {
        * <code>int32 table_top_n = 13;</code>
        */
       public Builder clearTableTopN() {
-        
+
         tableTopN_ = 0;
         onChanged();
         return this;
@@ -33322,14 +34526,15 @@ public final class GUIProtos {
       /**
        * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
        */
-      public int getRollingCounterMinAllowedFailures() {
+      @Override
+	public int getRollingCounterMinAllowedFailures() {
         return rollingCounterMinAllowedFailures_;
       }
       /**
        * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
        */
       public Builder setRollingCounterMinAllowedFailures(int value) {
-        
+
         rollingCounterMinAllowedFailures_ = value;
         onChanged();
         return this;
@@ -33338,7 +34543,7 @@ public final class GUIProtos {
        * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
        */
       public Builder clearRollingCounterMinAllowedFailures() {
-        
+
         rollingCounterMinAllowedFailures_ = 0;
         onChanged();
         return this;
@@ -33348,14 +34553,15 @@ public final class GUIProtos {
       /**
        * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
        */
-      public int getRollingCounterMaxAllowedFailures() {
+      @Override
+	public int getRollingCounterMaxAllowedFailures() {
         return rollingCounterMaxAllowedFailures_;
       }
       /**
        * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
        */
       public Builder setRollingCounterMaxAllowedFailures(int value) {
-        
+
         rollingCounterMaxAllowedFailures_ = value;
         onChanged();
         return this;
@@ -33364,7 +34570,7 @@ public final class GUIProtos {
        * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
        */
       public Builder clearRollingCounterMaxAllowedFailures() {
-        
+
         rollingCounterMaxAllowedFailures_ = 0;
         onChanged();
         return this;
@@ -33374,14 +34580,15 @@ public final class GUIProtos {
       /**
        * <code>int32 rolling_counter_min_window = 16;</code>
        */
-      public int getRollingCounterMinWindow() {
+      @Override
+	public int getRollingCounterMinWindow() {
         return rollingCounterMinWindow_;
       }
       /**
        * <code>int32 rolling_counter_min_window = 16;</code>
        */
       public Builder setRollingCounterMinWindow(int value) {
-        
+
         rollingCounterMinWindow_ = value;
         onChanged();
         return this;
@@ -33390,7 +34597,7 @@ public final class GUIProtos {
        * <code>int32 rolling_counter_min_window = 16;</code>
        */
       public Builder clearRollingCounterMinWindow() {
-        
+
         rollingCounterMinWindow_ = 0;
         onChanged();
         return this;
@@ -33400,14 +34607,15 @@ public final class GUIProtos {
       /**
        * <code>int32 rolling_counter_max_window = 17;</code>
        */
-      public int getRollingCounterMaxWindow() {
+      @Override
+	public int getRollingCounterMaxWindow() {
         return rollingCounterMaxWindow_;
       }
       /**
        * <code>int32 rolling_counter_max_window = 17;</code>
        */
       public Builder setRollingCounterMaxWindow(int value) {
-        
+
         rollingCounterMaxWindow_ = value;
         onChanged();
         return this;
@@ -33416,7 +34624,7 @@ public final class GUIProtos {
        * <code>int32 rolling_counter_max_window = 17;</code>
        */
       public Builder clearRollingCounterMaxWindow() {
-        
+
         rollingCounterMaxWindow_ = 0;
         onChanged();
         return this;
@@ -33426,14 +34634,15 @@ public final class GUIProtos {
       /**
        * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
        */
-      public int getWeightedCounterMinAllowedFailures() {
+      @Override
+	public int getWeightedCounterMinAllowedFailures() {
         return weightedCounterMinAllowedFailures_;
       }
       /**
        * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
        */
       public Builder setWeightedCounterMinAllowedFailures(int value) {
-        
+
         weightedCounterMinAllowedFailures_ = value;
         onChanged();
         return this;
@@ -33442,7 +34651,7 @@ public final class GUIProtos {
        * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
        */
       public Builder clearWeightedCounterMinAllowedFailures() {
-        
+
         weightedCounterMinAllowedFailures_ = 0;
         onChanged();
         return this;
@@ -33452,14 +34661,15 @@ public final class GUIProtos {
       /**
        * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
        */
-      public int getWeightedCounterMaxAllowedFailures() {
+      @Override
+	public int getWeightedCounterMaxAllowedFailures() {
         return weightedCounterMaxAllowedFailures_;
       }
       /**
        * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
        */
       public Builder setWeightedCounterMaxAllowedFailures(int value) {
-        
+
         weightedCounterMaxAllowedFailures_ = value;
         onChanged();
         return this;
@@ -33468,7 +34678,7 @@ public final class GUIProtos {
        * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
        */
       public Builder clearWeightedCounterMaxAllowedFailures() {
-        
+
         weightedCounterMaxAllowedFailures_ = 0;
         onChanged();
         return this;
@@ -33478,14 +34688,15 @@ public final class GUIProtos {
       /**
        * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
        */
-      public int getWeightedCounterMinPassDecrement() {
+      @Override
+	public int getWeightedCounterMinPassDecrement() {
         return weightedCounterMinPassDecrement_;
       }
       /**
        * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
        */
       public Builder setWeightedCounterMinPassDecrement(int value) {
-        
+
         weightedCounterMinPassDecrement_ = value;
         onChanged();
         return this;
@@ -33494,7 +34705,7 @@ public final class GUIProtos {
        * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
        */
       public Builder clearWeightedCounterMinPassDecrement() {
-        
+
         weightedCounterMinPassDecrement_ = 0;
         onChanged();
         return this;
@@ -33504,14 +34715,15 @@ public final class GUIProtos {
       /**
        * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
        */
-      public int getWeightedCounterMaxPassDecrement() {
+      @Override
+	public int getWeightedCounterMaxPassDecrement() {
         return weightedCounterMaxPassDecrement_;
       }
       /**
        * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
        */
       public Builder setWeightedCounterMaxPassDecrement(int value) {
-        
+
         weightedCounterMaxPassDecrement_ = value;
         onChanged();
         return this;
@@ -33520,7 +34732,7 @@ public final class GUIProtos {
        * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
        */
       public Builder clearWeightedCounterMaxPassDecrement() {
-        
+
         weightedCounterMaxPassDecrement_ = 0;
         onChanged();
         return this;
@@ -33530,14 +34742,15 @@ public final class GUIProtos {
       /**
        * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
        */
-      public int getResettingCounterMinAllowedFailures() {
+      @Override
+	public int getResettingCounterMinAllowedFailures() {
         return resettingCounterMinAllowedFailures_;
       }
       /**
        * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
        */
       public Builder setResettingCounterMinAllowedFailures(int value) {
-        
+
         resettingCounterMinAllowedFailures_ = value;
         onChanged();
         return this;
@@ -33546,7 +34759,7 @@ public final class GUIProtos {
        * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
        */
       public Builder clearResettingCounterMinAllowedFailures() {
-        
+
         resettingCounterMinAllowedFailures_ = 0;
         onChanged();
         return this;
@@ -33556,14 +34769,15 @@ public final class GUIProtos {
       /**
        * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
        */
-      public int getResettingCounterMaxAllowedFailures() {
+      @Override
+	public int getResettingCounterMaxAllowedFailures() {
         return resettingCounterMaxAllowedFailures_;
       }
       /**
        * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
        */
       public Builder setResettingCounterMaxAllowedFailures(int value) {
-        
+
         resettingCounterMaxAllowedFailures_ = value;
         onChanged();
         return this;
@@ -33572,7 +34786,7 @@ public final class GUIProtos {
        * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
        */
       public Builder clearResettingCounterMaxAllowedFailures() {
-        
+
         resettingCounterMaxAllowedFailures_ = 0;
         onChanged();
         return this;
@@ -33582,14 +34796,15 @@ public final class GUIProtos {
       /**
        * <code>double resetting_counter_min_reset_fraction = 24;</code>
        */
-      public double getResettingCounterMinResetFraction() {
+      @Override
+	public double getResettingCounterMinResetFraction() {
         return resettingCounterMinResetFraction_;
       }
       /**
        * <code>double resetting_counter_min_reset_fraction = 24;</code>
        */
       public Builder setResettingCounterMinResetFraction(double value) {
-        
+
         resettingCounterMinResetFraction_ = value;
         onChanged();
         return this;
@@ -33598,7 +34813,7 @@ public final class GUIProtos {
        * <code>double resetting_counter_min_reset_fraction = 24;</code>
        */
       public Builder clearResettingCounterMinResetFraction() {
-        
+
         resettingCounterMinResetFraction_ = 0D;
         onChanged();
         return this;
@@ -33608,14 +34823,15 @@ public final class GUIProtos {
       /**
        * <code>double resetting_counter_max_reset_fraction = 25;</code>
        */
-      public double getResettingCounterMaxResetFraction() {
+      @Override
+	public double getResettingCounterMaxResetFraction() {
         return resettingCounterMaxResetFraction_;
       }
       /**
        * <code>double resetting_counter_max_reset_fraction = 25;</code>
        */
       public Builder setResettingCounterMaxResetFraction(double value) {
-        
+
         resettingCounterMaxResetFraction_ = value;
         onChanged();
         return this;
@@ -33624,7 +34840,7 @@ public final class GUIProtos {
        * <code>double resetting_counter_max_reset_fraction = 25;</code>
        */
       public Builder clearResettingCounterMaxResetFraction() {
-        
+
         resettingCounterMaxResetFraction_ = 0D;
         onChanged();
         return this;
@@ -33634,14 +34850,15 @@ public final class GUIProtos {
       /**
        * <code>double resetting_counter_inc_reset_fraction = 26;</code>
        */
-      public double getResettingCounterIncResetFraction() {
+      @Override
+	public double getResettingCounterIncResetFraction() {
         return resettingCounterIncResetFraction_;
       }
       /**
        * <code>double resetting_counter_inc_reset_fraction = 26;</code>
        */
       public Builder setResettingCounterIncResetFraction(double value) {
-        
+
         resettingCounterIncResetFraction_ = value;
         onChanged();
         return this;
@@ -33650,7 +34867,7 @@ public final class GUIProtos {
        * <code>double resetting_counter_inc_reset_fraction = 26;</code>
        */
       public Builder clearResettingCounterIncResetFraction() {
-        
+
         resettingCounterIncResetFraction_ = 0D;
         onChanged();
         return this;
@@ -33660,14 +34877,15 @@ public final class GUIProtos {
       /**
        * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
        */
-      public int getPassRateCounterMinAllowedCounts() {
+      @Override
+	public int getPassRateCounterMinAllowedCounts() {
         return passRateCounterMinAllowedCounts_;
       }
       /**
        * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
        */
       public Builder setPassRateCounterMinAllowedCounts(int value) {
-        
+
         passRateCounterMinAllowedCounts_ = value;
         onChanged();
         return this;
@@ -33676,7 +34894,7 @@ public final class GUIProtos {
        * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
        */
       public Builder clearPassRateCounterMinAllowedCounts() {
-        
+
         passRateCounterMinAllowedCounts_ = 0;
         onChanged();
         return this;
@@ -33686,14 +34904,15 @@ public final class GUIProtos {
       /**
        * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
        */
-      public int getPassRateCounterMaxAllowedCounts() {
+      @Override
+	public int getPassRateCounterMaxAllowedCounts() {
         return passRateCounterMaxAllowedCounts_;
       }
       /**
        * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
        */
       public Builder setPassRateCounterMaxAllowedCounts(int value) {
-        
+
         passRateCounterMaxAllowedCounts_ = value;
         onChanged();
         return this;
@@ -33702,7 +34921,7 @@ public final class GUIProtos {
        * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
        */
       public Builder clearPassRateCounterMaxAllowedCounts() {
-        
+
         passRateCounterMaxAllowedCounts_ = 0;
         onChanged();
         return this;
@@ -33712,14 +34931,15 @@ public final class GUIProtos {
       /**
        * <code>double pass_rate_counter_min_pass_rate = 29;</code>
        */
-      public double getPassRateCounterMinPassRate() {
+      @Override
+	public double getPassRateCounterMinPassRate() {
         return passRateCounterMinPassRate_;
       }
       /**
        * <code>double pass_rate_counter_min_pass_rate = 29;</code>
        */
       public Builder setPassRateCounterMinPassRate(double value) {
-        
+
         passRateCounterMinPassRate_ = value;
         onChanged();
         return this;
@@ -33728,7 +34948,7 @@ public final class GUIProtos {
        * <code>double pass_rate_counter_min_pass_rate = 29;</code>
        */
       public Builder clearPassRateCounterMinPassRate() {
-        
+
         passRateCounterMinPassRate_ = 0D;
         onChanged();
         return this;
@@ -33738,14 +34958,15 @@ public final class GUIProtos {
       /**
        * <code>double pass_rate_counter_max_pass_rate = 30;</code>
        */
-      public double getPassRateCounterMaxPassRate() {
+      @Override
+	public double getPassRateCounterMaxPassRate() {
         return passRateCounterMaxPassRate_;
       }
       /**
        * <code>double pass_rate_counter_max_pass_rate = 30;</code>
        */
       public Builder setPassRateCounterMaxPassRate(double value) {
-        
+
         passRateCounterMaxPassRate_ = value;
         onChanged();
         return this;
@@ -33754,7 +34975,7 @@ public final class GUIProtos {
        * <code>double pass_rate_counter_max_pass_rate = 30;</code>
        */
       public Builder clearPassRateCounterMaxPassRate() {
-        
+
         passRateCounterMaxPassRate_ = 0D;
         onChanged();
         return this;
@@ -33764,14 +34985,15 @@ public final class GUIProtos {
       /**
        * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
        */
-      public double getPassRateCounterIncPassRate() {
+      @Override
+	public double getPassRateCounterIncPassRate() {
         return passRateCounterIncPassRate_;
       }
       /**
        * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
        */
       public Builder setPassRateCounterIncPassRate(double value) {
-        
+
         passRateCounterIncPassRate_ = value;
         onChanged();
         return this;
@@ -33780,17 +35002,19 @@ public final class GUIProtos {
        * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
        */
       public Builder clearPassRateCounterIncPassRate() {
-        
+
         passRateCounterIncPassRate_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -33811,7 +35035,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<FailCountManagerSettings>
         PARSER = new com.google.protobuf.AbstractParser<FailCountManagerSettings>() {
-      public FailCountManagerSettings parsePartialFrom(
+      @Override
+	public FailCountManagerSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -33828,7 +35053,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -34238,7 +35464,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -34250,7 +35477,8 @@ public final class GUIProtos {
     /**
      * <code>int32 option = 1;</code>
      */
-    public int getOption() {
+    @Override
+	public int getOption() {
       return option_;
     }
 
@@ -34263,7 +35491,8 @@ public final class GUIProtos {
      *
      * <code>double nm_per_slice = 2;</code>
      */
-    public double getNmPerSlice() {
+    @Override
+	public double getNmPerSlice() {
       return nmPerSlice_;
     }
 
@@ -34272,19 +35501,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
-    public boolean hasFitEngineSettings() {
+    @Override
+	public boolean hasFitEngineSettings() {
       return fitEngineSettings_ != null;
     }
     /**
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
       return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
     }
     /**
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
       return getFitEngineSettings();
     }
 
@@ -34293,19 +35525,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
-    public boolean hasPsf() {
+    @Override
+	public boolean hasPsf() {
       return psf_ != null;
     }
     /**
      * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
-    public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
+    @Override
+	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
       return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
     }
     /**
      * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
-    public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
       return getPsf();
     }
 
@@ -34314,19 +35549,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public boolean hasCalibration() {
+    @Override
+	public boolean hasCalibration() {
       return calibration_ != null;
     }
     /**
      * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
       return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
     }
     /**
      * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
       return getCalibration();
     }
 
@@ -34335,7 +35573,8 @@ public final class GUIProtos {
     /**
      * <code>double radius = 6;</code>
      */
-    public double getRadius() {
+    @Override
+	public double getRadius() {
       return radius_;
     }
 
@@ -34344,7 +35583,8 @@ public final class GUIProtos {
     /**
      * <code>bool log_fit_progress = 7;</code>
      */
-    public boolean getLogFitProgress() {
+    @Override
+	public boolean getLogFitProgress() {
       return logFitProgress_;
     }
 
@@ -34353,7 +35593,8 @@ public final class GUIProtos {
     /**
      * <code>double smoothing = 8;</code>
      */
-    public double getSmoothing() {
+    @Override
+	public double getSmoothing() {
       return smoothing_;
     }
 
@@ -34362,7 +35603,8 @@ public final class GUIProtos {
     /**
      * <code>bool weighted_fit = 9;</code>
      */
-    public boolean getWeightedFit() {
+    @Override
+	public boolean getWeightedFit() {
       return weightedFit_;
     }
 
@@ -34371,7 +35613,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_estimated_curve = 10;</code>
      */
-    public boolean getShowEstimatedCurve() {
+    @Override
+	public boolean getShowEstimatedCurve() {
       return showEstimatedCurve_;
     }
 
@@ -34380,12 +35623,13 @@ public final class GUIProtos {
     /**
      * <code>string image = 11;</code>
      */
-    public java.lang.String getImage() {
+    @Override
+	public java.lang.String getImage() {
       java.lang.Object ref = image_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         image_ = s;
@@ -34395,11 +35639,12 @@ public final class GUIProtos {
     /**
      * <code>string image = 11;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getImageBytes() {
       java.lang.Object ref = image_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         image_ = b;
@@ -34414,12 +35659,13 @@ public final class GUIProtos {
     /**
      * <code>string model_name = 12;</code>
      */
-    public java.lang.String getModelName() {
+    @Override
+	public java.lang.String getModelName() {
       java.lang.Object ref = modelName_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         modelName_ = s;
@@ -34429,11 +35675,12 @@ public final class GUIProtos {
     /**
      * <code>string model_name = 12;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getModelNameBytes() {
       java.lang.Object ref = modelName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         modelName_ = b;
@@ -34448,7 +35695,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_model = 14;</code>
      */
-    public boolean getSaveModel() {
+    @Override
+	public boolean getSaveModel() {
       return saveModel_;
     }
 
@@ -34457,7 +35705,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_fit_width = 15;</code>
      */
-    public boolean getSaveFitWidth() {
+    @Override
+	public boolean getSaveFitWidth() {
       return saveFitWidth_;
     }
 
@@ -34470,12 +35719,13 @@ public final class GUIProtos {
      *
      * <code>string selected = 13;</code>
      */
-    public java.lang.String getSelected() {
+    @Override
+	public java.lang.String getSelected() {
       java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         selected_ = s;
@@ -34489,11 +35739,12 @@ public final class GUIProtos {
      *
      * <code>string selected = 13;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSelectedBytes() {
       java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         selected_ = b;
@@ -34508,7 +35759,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_depth_of_focus = 16;</code>
      */
-    public boolean getShowDepthOfFocus() {
+    @Override
+	public boolean getShowDepthOfFocus() {
       return showDepthOfFocus_;
     }
 
@@ -34517,7 +35769,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_combined_width = 22;</code>
      */
-    public boolean getShowCombinedWidth() {
+    @Override
+	public boolean getShowCombinedWidth() {
       return showCombinedWidth_;
     }
 
@@ -34526,7 +35779,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_psf = 18;</code>
      */
-    public boolean getShowPsf() {
+    @Override
+	public boolean getShowPsf() {
       return showPsf_;
     }
 
@@ -34535,13 +35789,15 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 19;</code>
      */
-    public int getZDistanceUnitValue() {
+    @Override
+	public int getZDistanceUnitValue() {
       return zDistanceUnit_;
     }
     /**
      * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 19;</code>
      */
-    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
+    @Override
+	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
       gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
@@ -34551,13 +35807,15 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 20;</code>
      */
-    public int getSDistanceUnitValue() {
+    @Override
+	public int getSDistanceUnitValue() {
       return sDistanceUnit_;
     }
     /**
      * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 20;</code>
      */
-    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
+    @Override
+	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
       gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
@@ -34567,7 +35825,8 @@ public final class GUIProtos {
     /**
      * <code>bool calibrated_image = 21;</code>
      */
-    public boolean getCalibratedImage() {
+    @Override
+	public boolean getCalibratedImage() {
       return calibratedImage_;
     }
 
@@ -34580,12 +35839,13 @@ public final class GUIProtos {
      *
      * <code>string filename = 17;</code>
      */
-    public java.lang.String getFilename() {
+    @Override
+	public java.lang.String getFilename() {
       java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         filename_ = s;
@@ -34599,11 +35859,12 @@ public final class GUIProtos {
      *
      * <code>string filename = 17;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFilenameBytes() {
       java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filename_ = b;
@@ -34614,7 +35875,8 @@ public final class GUIProtos {
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -34623,7 +35885,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (option_ != 0) {
         output.writeInt32(1, option_);
@@ -34693,7 +35956,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -35002,14 +36266,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -35036,7 +36302,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -35058,7 +36325,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         option_ = 0;
 
@@ -35119,16 +36387,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings build() {
         gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -35136,7 +36407,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings(this);
         result.option_ = option_;
         result.nmPerSlice_ = nmPerSlice_;
@@ -35176,33 +36448,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)other);
         } else {
@@ -35287,11 +36566,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -35313,14 +36594,15 @@ public final class GUIProtos {
       /**
        * <code>int32 option = 1;</code>
        */
-      public int getOption() {
+      @Override
+	public int getOption() {
         return option_;
       }
       /**
        * <code>int32 option = 1;</code>
        */
       public Builder setOption(int value) {
-        
+
         option_ = value;
         onChanged();
         return this;
@@ -35329,7 +36611,7 @@ public final class GUIProtos {
        * <code>int32 option = 1;</code>
        */
       public Builder clearOption() {
-        
+
         option_ = 0;
         onChanged();
         return this;
@@ -35343,7 +36625,8 @@ public final class GUIProtos {
        *
        * <code>double nm_per_slice = 2;</code>
        */
-      public double getNmPerSlice() {
+      @Override
+	public double getNmPerSlice() {
         return nmPerSlice_;
       }
       /**
@@ -35354,7 +36637,7 @@ public final class GUIProtos {
        * <code>double nm_per_slice = 2;</code>
        */
       public Builder setNmPerSlice(double value) {
-        
+
         nmPerSlice_ = value;
         onChanged();
         return this;
@@ -35367,7 +36650,7 @@ public final class GUIProtos {
        * <code>double nm_per_slice = 2;</code>
        */
       public Builder clearNmPerSlice() {
-        
+
         nmPerSlice_ = 0D;
         onChanged();
         return this;
@@ -35379,13 +36662,15 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
-      public boolean hasFitEngineSettings() {
+      @Override
+	public boolean hasFitEngineSettings() {
         return fitEngineSettingsBuilder_ != null || fitEngineSettings_ != null;
       }
       /**
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
         if (fitEngineSettingsBuilder_ == null) {
           return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
         } else {
@@ -35458,14 +36743,15 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder getFitEngineSettingsBuilder() {
-        
+
         onChanged();
         return getFitEngineSettingsFieldBuilder().getBuilder();
       }
       /**
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
         if (fitEngineSettingsBuilder_ != null) {
           return fitEngineSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -35477,11 +36763,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder>
           getFitEngineSettingsFieldBuilder() {
         if (fitEngineSettingsBuilder_ == null) {
-          fitEngineSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder>(
+          fitEngineSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFitEngineSettings(),
                   getParentForChildren(),
                   isClean());
@@ -35496,13 +36781,15 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
-      public boolean hasPsf() {
+      @Override
+	public boolean hasPsf() {
         return psfBuilder_ != null || psf_ != null;
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
-      public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
+      @Override
+	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
         if (psfBuilder_ == null) {
           return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
         } else {
@@ -35575,14 +36862,15 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public gdsc.smlm.data.config.PSFProtos.PSF.Builder getPsfBuilder() {
-        
+
         onChanged();
         return getPsfFieldBuilder().getBuilder();
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
-      public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
         if (psfBuilder_ != null) {
           return psfBuilder_.getMessageOrBuilder();
         } else {
@@ -35594,11 +36882,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder> 
+          gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder>
           getPsfFieldBuilder() {
         if (psfBuilder_ == null) {
-          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder>(
+          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getPsf(),
                   getParentForChildren(),
                   isClean());
@@ -35613,13 +36900,15 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public boolean hasCalibration() {
+      @Override
+	public boolean hasCalibration() {
         return calibrationBuilder_ != null || calibration_ != null;
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
         if (calibrationBuilder_ == null) {
           return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
         } else {
@@ -35692,14 +36981,15 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder getCalibrationBuilder() {
-        
+
         onChanged();
         return getCalibrationFieldBuilder().getBuilder();
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
         if (calibrationBuilder_ != null) {
           return calibrationBuilder_.getMessageOrBuilder();
         } else {
@@ -35711,11 +37001,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> 
+          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>
           getCalibrationFieldBuilder() {
         if (calibrationBuilder_ == null) {
-          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>(
+          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getCalibration(),
                   getParentForChildren(),
                   isClean());
@@ -35728,14 +37017,15 @@ public final class GUIProtos {
       /**
        * <code>double radius = 6;</code>
        */
-      public double getRadius() {
+      @Override
+	public double getRadius() {
         return radius_;
       }
       /**
        * <code>double radius = 6;</code>
        */
       public Builder setRadius(double value) {
-        
+
         radius_ = value;
         onChanged();
         return this;
@@ -35744,7 +37034,7 @@ public final class GUIProtos {
        * <code>double radius = 6;</code>
        */
       public Builder clearRadius() {
-        
+
         radius_ = 0D;
         onChanged();
         return this;
@@ -35754,14 +37044,15 @@ public final class GUIProtos {
       /**
        * <code>bool log_fit_progress = 7;</code>
        */
-      public boolean getLogFitProgress() {
+      @Override
+	public boolean getLogFitProgress() {
         return logFitProgress_;
       }
       /**
        * <code>bool log_fit_progress = 7;</code>
        */
       public Builder setLogFitProgress(boolean value) {
-        
+
         logFitProgress_ = value;
         onChanged();
         return this;
@@ -35770,7 +37061,7 @@ public final class GUIProtos {
        * <code>bool log_fit_progress = 7;</code>
        */
       public Builder clearLogFitProgress() {
-        
+
         logFitProgress_ = false;
         onChanged();
         return this;
@@ -35780,14 +37071,15 @@ public final class GUIProtos {
       /**
        * <code>double smoothing = 8;</code>
        */
-      public double getSmoothing() {
+      @Override
+	public double getSmoothing() {
         return smoothing_;
       }
       /**
        * <code>double smoothing = 8;</code>
        */
       public Builder setSmoothing(double value) {
-        
+
         smoothing_ = value;
         onChanged();
         return this;
@@ -35796,7 +37088,7 @@ public final class GUIProtos {
        * <code>double smoothing = 8;</code>
        */
       public Builder clearSmoothing() {
-        
+
         smoothing_ = 0D;
         onChanged();
         return this;
@@ -35806,14 +37098,15 @@ public final class GUIProtos {
       /**
        * <code>bool weighted_fit = 9;</code>
        */
-      public boolean getWeightedFit() {
+      @Override
+	public boolean getWeightedFit() {
         return weightedFit_;
       }
       /**
        * <code>bool weighted_fit = 9;</code>
        */
       public Builder setWeightedFit(boolean value) {
-        
+
         weightedFit_ = value;
         onChanged();
         return this;
@@ -35822,7 +37115,7 @@ public final class GUIProtos {
        * <code>bool weighted_fit = 9;</code>
        */
       public Builder clearWeightedFit() {
-        
+
         weightedFit_ = false;
         onChanged();
         return this;
@@ -35832,14 +37125,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_estimated_curve = 10;</code>
        */
-      public boolean getShowEstimatedCurve() {
+      @Override
+	public boolean getShowEstimatedCurve() {
         return showEstimatedCurve_;
       }
       /**
        * <code>bool show_estimated_curve = 10;</code>
        */
       public Builder setShowEstimatedCurve(boolean value) {
-        
+
         showEstimatedCurve_ = value;
         onChanged();
         return this;
@@ -35848,7 +37142,7 @@ public final class GUIProtos {
        * <code>bool show_estimated_curve = 10;</code>
        */
       public Builder clearShowEstimatedCurve() {
-        
+
         showEstimatedCurve_ = false;
         onChanged();
         return this;
@@ -35858,7 +37152,8 @@ public final class GUIProtos {
       /**
        * <code>string image = 11;</code>
        */
-      public java.lang.String getImage() {
+      @Override
+	public java.lang.String getImage() {
         java.lang.Object ref = image_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -35873,11 +37168,12 @@ public final class GUIProtos {
       /**
        * <code>string image = 11;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getImageBytes() {
         java.lang.Object ref = image_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           image_ = b;
@@ -35894,7 +37190,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         image_ = value;
         onChanged();
         return this;
@@ -35903,7 +37199,7 @@ public final class GUIProtos {
        * <code>string image = 11;</code>
        */
       public Builder clearImage() {
-        
+
         image_ = getDefaultInstance().getImage();
         onChanged();
         return this;
@@ -35917,7 +37213,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         image_ = value;
         onChanged();
         return this;
@@ -35927,7 +37223,8 @@ public final class GUIProtos {
       /**
        * <code>string model_name = 12;</code>
        */
-      public java.lang.String getModelName() {
+      @Override
+	public java.lang.String getModelName() {
         java.lang.Object ref = modelName_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -35942,11 +37239,12 @@ public final class GUIProtos {
       /**
        * <code>string model_name = 12;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getModelNameBytes() {
         java.lang.Object ref = modelName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           modelName_ = b;
@@ -35963,7 +37261,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         modelName_ = value;
         onChanged();
         return this;
@@ -35972,7 +37270,7 @@ public final class GUIProtos {
        * <code>string model_name = 12;</code>
        */
       public Builder clearModelName() {
-        
+
         modelName_ = getDefaultInstance().getModelName();
         onChanged();
         return this;
@@ -35986,7 +37284,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         modelName_ = value;
         onChanged();
         return this;
@@ -35996,14 +37294,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_model = 14;</code>
        */
-      public boolean getSaveModel() {
+      @Override
+	public boolean getSaveModel() {
         return saveModel_;
       }
       /**
        * <code>bool save_model = 14;</code>
        */
       public Builder setSaveModel(boolean value) {
-        
+
         saveModel_ = value;
         onChanged();
         return this;
@@ -36012,7 +37311,7 @@ public final class GUIProtos {
        * <code>bool save_model = 14;</code>
        */
       public Builder clearSaveModel() {
-        
+
         saveModel_ = false;
         onChanged();
         return this;
@@ -36022,14 +37321,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_fit_width = 15;</code>
        */
-      public boolean getSaveFitWidth() {
+      @Override
+	public boolean getSaveFitWidth() {
         return saveFitWidth_;
       }
       /**
        * <code>bool save_fit_width = 15;</code>
        */
       public Builder setSaveFitWidth(boolean value) {
-        
+
         saveFitWidth_ = value;
         onChanged();
         return this;
@@ -36038,7 +37338,7 @@ public final class GUIProtos {
        * <code>bool save_fit_width = 15;</code>
        */
       public Builder clearSaveFitWidth() {
-        
+
         saveFitWidth_ = false;
         onChanged();
         return this;
@@ -36052,7 +37352,8 @@ public final class GUIProtos {
        *
        * <code>string selected = 13;</code>
        */
-      public java.lang.String getSelected() {
+      @Override
+	public java.lang.String getSelected() {
         java.lang.Object ref = selected_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -36071,11 +37372,12 @@ public final class GUIProtos {
        *
        * <code>string selected = 13;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSelectedBytes() {
         java.lang.Object ref = selected_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           selected_ = b;
@@ -36096,7 +37398,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         selected_ = value;
         onChanged();
         return this;
@@ -36109,7 +37411,7 @@ public final class GUIProtos {
        * <code>string selected = 13;</code>
        */
       public Builder clearSelected() {
-        
+
         selected_ = getDefaultInstance().getSelected();
         onChanged();
         return this;
@@ -36127,7 +37429,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         selected_ = value;
         onChanged();
         return this;
@@ -36137,14 +37439,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_depth_of_focus = 16;</code>
        */
-      public boolean getShowDepthOfFocus() {
+      @Override
+	public boolean getShowDepthOfFocus() {
         return showDepthOfFocus_;
       }
       /**
        * <code>bool show_depth_of_focus = 16;</code>
        */
       public Builder setShowDepthOfFocus(boolean value) {
-        
+
         showDepthOfFocus_ = value;
         onChanged();
         return this;
@@ -36153,7 +37456,7 @@ public final class GUIProtos {
        * <code>bool show_depth_of_focus = 16;</code>
        */
       public Builder clearShowDepthOfFocus() {
-        
+
         showDepthOfFocus_ = false;
         onChanged();
         return this;
@@ -36163,14 +37466,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_combined_width = 22;</code>
        */
-      public boolean getShowCombinedWidth() {
+      @Override
+	public boolean getShowCombinedWidth() {
         return showCombinedWidth_;
       }
       /**
        * <code>bool show_combined_width = 22;</code>
        */
       public Builder setShowCombinedWidth(boolean value) {
-        
+
         showCombinedWidth_ = value;
         onChanged();
         return this;
@@ -36179,7 +37483,7 @@ public final class GUIProtos {
        * <code>bool show_combined_width = 22;</code>
        */
       public Builder clearShowCombinedWidth() {
-        
+
         showCombinedWidth_ = false;
         onChanged();
         return this;
@@ -36189,14 +37493,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_psf = 18;</code>
        */
-      public boolean getShowPsf() {
+      @Override
+	public boolean getShowPsf() {
         return showPsf_;
       }
       /**
        * <code>bool show_psf = 18;</code>
        */
       public Builder setShowPsf(boolean value) {
-        
+
         showPsf_ = value;
         onChanged();
         return this;
@@ -36205,7 +37510,7 @@ public final class GUIProtos {
        * <code>bool show_psf = 18;</code>
        */
       public Builder clearShowPsf() {
-        
+
         showPsf_ = false;
         onChanged();
         return this;
@@ -36215,7 +37520,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 19;</code>
        */
-      public int getZDistanceUnitValue() {
+      @Override
+	public int getZDistanceUnitValue() {
         return zDistanceUnit_;
       }
       /**
@@ -36229,7 +37535,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 19;</code>
        */
-      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
+      @Override
+	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
         gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
@@ -36240,7 +37547,7 @@ public final class GUIProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         zDistanceUnit_ = value.getNumber();
         onChanged();
         return this;
@@ -36249,7 +37556,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 19;</code>
        */
       public Builder clearZDistanceUnit() {
-        
+
         zDistanceUnit_ = 0;
         onChanged();
         return this;
@@ -36259,7 +37566,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 20;</code>
        */
-      public int getSDistanceUnitValue() {
+      @Override
+	public int getSDistanceUnitValue() {
         return sDistanceUnit_;
       }
       /**
@@ -36273,7 +37581,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 20;</code>
        */
-      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
+      @Override
+	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
         gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
@@ -36284,7 +37593,7 @@ public final class GUIProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         sDistanceUnit_ = value.getNumber();
         onChanged();
         return this;
@@ -36293,7 +37602,7 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 20;</code>
        */
       public Builder clearSDistanceUnit() {
-        
+
         sDistanceUnit_ = 0;
         onChanged();
         return this;
@@ -36303,14 +37612,15 @@ public final class GUIProtos {
       /**
        * <code>bool calibrated_image = 21;</code>
        */
-      public boolean getCalibratedImage() {
+      @Override
+	public boolean getCalibratedImage() {
         return calibratedImage_;
       }
       /**
        * <code>bool calibrated_image = 21;</code>
        */
       public Builder setCalibratedImage(boolean value) {
-        
+
         calibratedImage_ = value;
         onChanged();
         return this;
@@ -36319,7 +37629,7 @@ public final class GUIProtos {
        * <code>bool calibrated_image = 21;</code>
        */
       public Builder clearCalibratedImage() {
-        
+
         calibratedImage_ = false;
         onChanged();
         return this;
@@ -36333,7 +37643,8 @@ public final class GUIProtos {
        *
        * <code>string filename = 17;</code>
        */
-      public java.lang.String getFilename() {
+      @Override
+	public java.lang.String getFilename() {
         java.lang.Object ref = filename_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -36352,11 +37663,12 @@ public final class GUIProtos {
        *
        * <code>string filename = 17;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getFilenameBytes() {
         java.lang.Object ref = filename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filename_ = b;
@@ -36377,7 +37689,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         filename_ = value;
         onChanged();
         return this;
@@ -36390,7 +37702,7 @@ public final class GUIProtos {
        * <code>string filename = 17;</code>
        */
       public Builder clearFilename() {
-        
+
         filename_ = getDefaultInstance().getFilename();
         onChanged();
         return this;
@@ -36408,17 +37720,19 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         filename_ = value;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -36439,7 +37753,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<AstigmatismModelManagerSettings>
         PARSER = new com.google.protobuf.AbstractParser<AstigmatismModelManagerSettings>() {
-      public AstigmatismModelManagerSettings parsePartialFrom(
+      @Override
+	public AstigmatismModelManagerSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -36456,7 +37771,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -36736,7 +38052,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -36748,12 +38065,13 @@ public final class GUIProtos {
     /**
      * <code>string input_option = 1;</code>
      */
-    public java.lang.String getInputOption() {
+    @Override
+	public java.lang.String getInputOption() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
@@ -36763,11 +38081,12 @@ public final class GUIProtos {
     /**
      * <code>string input_option = 1;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getInputOptionBytes() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
@@ -36782,7 +38101,8 @@ public final class GUIProtos {
     /**
      * <code>double border = 2;</code>
      */
-    public double getBorder() {
+    @Override
+	public double getBorder() {
       return border_;
     }
 
@@ -36791,7 +38111,8 @@ public final class GUIProtos {
     /**
      * <code>double x = 3;</code>
      */
-    public double getX() {
+    @Override
+	public double getX() {
       return x_;
     }
 
@@ -36800,7 +38121,8 @@ public final class GUIProtos {
     /**
      * <code>double y = 4;</code>
      */
-    public double getY() {
+    @Override
+	public double getY() {
       return y_;
     }
 
@@ -36809,7 +38131,8 @@ public final class GUIProtos {
     /**
      * <code>double width = 5;</code>
      */
-    public double getWidth() {
+    @Override
+	public double getWidth() {
       return width_;
     }
 
@@ -36818,7 +38141,8 @@ public final class GUIProtos {
     /**
      * <code>double height = 6;</code>
      */
-    public double getHeight() {
+    @Override
+	public double getHeight() {
       return height_;
     }
 
@@ -36827,7 +38151,8 @@ public final class GUIProtos {
     /**
      * <code>bool select_region = 7;</code>
      */
-    public boolean getSelectRegion() {
+    @Override
+	public boolean getSelectRegion() {
       return selectRegion_;
     }
 
@@ -36836,7 +38161,8 @@ public final class GUIProtos {
     /**
      * <code>bool use_roi = 8;</code>
      */
-    public boolean getUseRoi() {
+    @Override
+	public boolean getUseRoi() {
       return useRoi_;
     }
 
@@ -36845,12 +38171,13 @@ public final class GUIProtos {
     /**
      * <code>string roi_image = 9;</code>
      */
-    public java.lang.String getRoiImage() {
+    @Override
+	public java.lang.String getRoiImage() {
       java.lang.Object ref = roiImage_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         roiImage_ = s;
@@ -36860,11 +38187,12 @@ public final class GUIProtos {
     /**
      * <code>string roi_image = 9;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getRoiImageBytes() {
       java.lang.Object ref = roiImage_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         roiImage_ = b;
@@ -36879,7 +38207,8 @@ public final class GUIProtos {
     /**
      * <code>bool reset_origin = 10;</code>
      */
-    public boolean getResetOrigin() {
+    @Override
+	public boolean getResetOrigin() {
       return resetOrigin_;
     }
 
@@ -36888,12 +38217,13 @@ public final class GUIProtos {
     /**
      * <code>string output_name = 11;</code>
      */
-    public java.lang.String getOutputName() {
+    @Override
+	public java.lang.String getOutputName() {
       java.lang.Object ref = outputName_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         outputName_ = s;
@@ -36903,11 +38233,12 @@ public final class GUIProtos {
     /**
      * <code>string output_name = 11;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getOutputNameBytes() {
       java.lang.Object ref = outputName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         outputName_ = b;
@@ -36922,7 +38253,8 @@ public final class GUIProtos {
     /**
      * <code>int32 name_option = 12;</code>
      */
-    public int getNameOption() {
+    @Override
+	public int getNameOption() {
       return nameOption_;
     }
 
@@ -36931,12 +38263,13 @@ public final class GUIProtos {
     /**
      * <code>string name_suffix = 13;</code>
      */
-    public java.lang.String getNameSuffix() {
+    @Override
+	public java.lang.String getNameSuffix() {
       java.lang.Object ref = nameSuffix_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         nameSuffix_ = s;
@@ -36946,11 +38279,12 @@ public final class GUIProtos {
     /**
      * <code>string name_suffix = 13;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getNameSuffixBytes() {
       java.lang.Object ref = nameSuffix_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         nameSuffix_ = b;
@@ -36965,7 +38299,8 @@ public final class GUIProtos {
     /**
      * <code>int32 name_counter = 14;</code>
      */
-    public int getNameCounter() {
+    @Override
+	public int getNameCounter() {
       return nameCounter_;
     }
 
@@ -36974,7 +38309,8 @@ public final class GUIProtos {
     /**
      * <code>bool limit_z = 15;</code>
      */
-    public boolean getLimitZ() {
+    @Override
+	public boolean getLimitZ() {
       return limitZ_;
     }
 
@@ -36983,7 +38319,8 @@ public final class GUIProtos {
     /**
      * <code>double min_z = 16;</code>
      */
-    public double getMinZ() {
+    @Override
+	public double getMinZ() {
       return minZ_;
     }
 
@@ -36992,12 +38329,14 @@ public final class GUIProtos {
     /**
      * <code>double max_z = 17;</code>
      */
-    public double getMaxZ() {
+    @Override
+	public double getMaxZ() {
       return maxZ_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -37006,7 +38345,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (!getInputOptionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
@@ -37061,7 +38401,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -37324,14 +38665,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CropResultsSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -37358,7 +38701,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -37380,7 +38724,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         inputOption_ = "";
 
@@ -37419,16 +38764,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.CropResultsSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CropResultsSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CropResultsSettings build() {
         gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -37436,7 +38784,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.CropResultsSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.CropResultsSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = new gdsc.smlm.data.config.GUIProtos.CropResultsSettings(this);
         result.inputOption_ = inputOption_;
         result.border_ = border_;
@@ -37459,33 +38808,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.CropResultsSettings)other);
         } else {
@@ -37555,11 +38911,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -37581,7 +38939,8 @@ public final class GUIProtos {
       /**
        * <code>string input_option = 1;</code>
        */
-      public java.lang.String getInputOption() {
+      @Override
+	public java.lang.String getInputOption() {
         java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -37596,11 +38955,12 @@ public final class GUIProtos {
       /**
        * <code>string input_option = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getInputOptionBytes() {
         java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
@@ -37617,7 +38977,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -37626,7 +38986,7 @@ public final class GUIProtos {
        * <code>string input_option = 1;</code>
        */
       public Builder clearInputOption() {
-        
+
         inputOption_ = getDefaultInstance().getInputOption();
         onChanged();
         return this;
@@ -37640,7 +39000,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -37650,14 +39010,15 @@ public final class GUIProtos {
       /**
        * <code>double border = 2;</code>
        */
-      public double getBorder() {
+      @Override
+	public double getBorder() {
         return border_;
       }
       /**
        * <code>double border = 2;</code>
        */
       public Builder setBorder(double value) {
-        
+
         border_ = value;
         onChanged();
         return this;
@@ -37666,7 +39027,7 @@ public final class GUIProtos {
        * <code>double border = 2;</code>
        */
       public Builder clearBorder() {
-        
+
         border_ = 0D;
         onChanged();
         return this;
@@ -37676,14 +39037,15 @@ public final class GUIProtos {
       /**
        * <code>double x = 3;</code>
        */
-      public double getX() {
+      @Override
+	public double getX() {
         return x_;
       }
       /**
        * <code>double x = 3;</code>
        */
       public Builder setX(double value) {
-        
+
         x_ = value;
         onChanged();
         return this;
@@ -37692,7 +39054,7 @@ public final class GUIProtos {
        * <code>double x = 3;</code>
        */
       public Builder clearX() {
-        
+
         x_ = 0D;
         onChanged();
         return this;
@@ -37702,14 +39064,15 @@ public final class GUIProtos {
       /**
        * <code>double y = 4;</code>
        */
-      public double getY() {
+      @Override
+	public double getY() {
         return y_;
       }
       /**
        * <code>double y = 4;</code>
        */
       public Builder setY(double value) {
-        
+
         y_ = value;
         onChanged();
         return this;
@@ -37718,7 +39081,7 @@ public final class GUIProtos {
        * <code>double y = 4;</code>
        */
       public Builder clearY() {
-        
+
         y_ = 0D;
         onChanged();
         return this;
@@ -37728,14 +39091,15 @@ public final class GUIProtos {
       /**
        * <code>double width = 5;</code>
        */
-      public double getWidth() {
+      @Override
+	public double getWidth() {
         return width_;
       }
       /**
        * <code>double width = 5;</code>
        */
       public Builder setWidth(double value) {
-        
+
         width_ = value;
         onChanged();
         return this;
@@ -37744,7 +39108,7 @@ public final class GUIProtos {
        * <code>double width = 5;</code>
        */
       public Builder clearWidth() {
-        
+
         width_ = 0D;
         onChanged();
         return this;
@@ -37754,14 +39118,15 @@ public final class GUIProtos {
       /**
        * <code>double height = 6;</code>
        */
-      public double getHeight() {
+      @Override
+	public double getHeight() {
         return height_;
       }
       /**
        * <code>double height = 6;</code>
        */
       public Builder setHeight(double value) {
-        
+
         height_ = value;
         onChanged();
         return this;
@@ -37770,7 +39135,7 @@ public final class GUIProtos {
        * <code>double height = 6;</code>
        */
       public Builder clearHeight() {
-        
+
         height_ = 0D;
         onChanged();
         return this;
@@ -37780,14 +39145,15 @@ public final class GUIProtos {
       /**
        * <code>bool select_region = 7;</code>
        */
-      public boolean getSelectRegion() {
+      @Override
+	public boolean getSelectRegion() {
         return selectRegion_;
       }
       /**
        * <code>bool select_region = 7;</code>
        */
       public Builder setSelectRegion(boolean value) {
-        
+
         selectRegion_ = value;
         onChanged();
         return this;
@@ -37796,7 +39162,7 @@ public final class GUIProtos {
        * <code>bool select_region = 7;</code>
        */
       public Builder clearSelectRegion() {
-        
+
         selectRegion_ = false;
         onChanged();
         return this;
@@ -37806,14 +39172,15 @@ public final class GUIProtos {
       /**
        * <code>bool use_roi = 8;</code>
        */
-      public boolean getUseRoi() {
+      @Override
+	public boolean getUseRoi() {
         return useRoi_;
       }
       /**
        * <code>bool use_roi = 8;</code>
        */
       public Builder setUseRoi(boolean value) {
-        
+
         useRoi_ = value;
         onChanged();
         return this;
@@ -37822,7 +39189,7 @@ public final class GUIProtos {
        * <code>bool use_roi = 8;</code>
        */
       public Builder clearUseRoi() {
-        
+
         useRoi_ = false;
         onChanged();
         return this;
@@ -37832,7 +39199,8 @@ public final class GUIProtos {
       /**
        * <code>string roi_image = 9;</code>
        */
-      public java.lang.String getRoiImage() {
+      @Override
+	public java.lang.String getRoiImage() {
         java.lang.Object ref = roiImage_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -37847,11 +39215,12 @@ public final class GUIProtos {
       /**
        * <code>string roi_image = 9;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getRoiImageBytes() {
         java.lang.Object ref = roiImage_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           roiImage_ = b;
@@ -37868,7 +39237,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         roiImage_ = value;
         onChanged();
         return this;
@@ -37877,7 +39246,7 @@ public final class GUIProtos {
        * <code>string roi_image = 9;</code>
        */
       public Builder clearRoiImage() {
-        
+
         roiImage_ = getDefaultInstance().getRoiImage();
         onChanged();
         return this;
@@ -37891,7 +39260,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         roiImage_ = value;
         onChanged();
         return this;
@@ -37901,14 +39270,15 @@ public final class GUIProtos {
       /**
        * <code>bool reset_origin = 10;</code>
        */
-      public boolean getResetOrigin() {
+      @Override
+	public boolean getResetOrigin() {
         return resetOrigin_;
       }
       /**
        * <code>bool reset_origin = 10;</code>
        */
       public Builder setResetOrigin(boolean value) {
-        
+
         resetOrigin_ = value;
         onChanged();
         return this;
@@ -37917,7 +39287,7 @@ public final class GUIProtos {
        * <code>bool reset_origin = 10;</code>
        */
       public Builder clearResetOrigin() {
-        
+
         resetOrigin_ = false;
         onChanged();
         return this;
@@ -37927,7 +39297,8 @@ public final class GUIProtos {
       /**
        * <code>string output_name = 11;</code>
        */
-      public java.lang.String getOutputName() {
+      @Override
+	public java.lang.String getOutputName() {
         java.lang.Object ref = outputName_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -37942,11 +39313,12 @@ public final class GUIProtos {
       /**
        * <code>string output_name = 11;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getOutputNameBytes() {
         java.lang.Object ref = outputName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           outputName_ = b;
@@ -37963,7 +39335,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         outputName_ = value;
         onChanged();
         return this;
@@ -37972,7 +39344,7 @@ public final class GUIProtos {
        * <code>string output_name = 11;</code>
        */
       public Builder clearOutputName() {
-        
+
         outputName_ = getDefaultInstance().getOutputName();
         onChanged();
         return this;
@@ -37986,7 +39358,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         outputName_ = value;
         onChanged();
         return this;
@@ -37996,14 +39368,15 @@ public final class GUIProtos {
       /**
        * <code>int32 name_option = 12;</code>
        */
-      public int getNameOption() {
+      @Override
+	public int getNameOption() {
         return nameOption_;
       }
       /**
        * <code>int32 name_option = 12;</code>
        */
       public Builder setNameOption(int value) {
-        
+
         nameOption_ = value;
         onChanged();
         return this;
@@ -38012,7 +39385,7 @@ public final class GUIProtos {
        * <code>int32 name_option = 12;</code>
        */
       public Builder clearNameOption() {
-        
+
         nameOption_ = 0;
         onChanged();
         return this;
@@ -38022,7 +39395,8 @@ public final class GUIProtos {
       /**
        * <code>string name_suffix = 13;</code>
        */
-      public java.lang.String getNameSuffix() {
+      @Override
+	public java.lang.String getNameSuffix() {
         java.lang.Object ref = nameSuffix_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -38037,11 +39411,12 @@ public final class GUIProtos {
       /**
        * <code>string name_suffix = 13;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getNameSuffixBytes() {
         java.lang.Object ref = nameSuffix_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           nameSuffix_ = b;
@@ -38058,7 +39433,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         nameSuffix_ = value;
         onChanged();
         return this;
@@ -38067,7 +39442,7 @@ public final class GUIProtos {
        * <code>string name_suffix = 13;</code>
        */
       public Builder clearNameSuffix() {
-        
+
         nameSuffix_ = getDefaultInstance().getNameSuffix();
         onChanged();
         return this;
@@ -38081,7 +39456,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         nameSuffix_ = value;
         onChanged();
         return this;
@@ -38091,14 +39466,15 @@ public final class GUIProtos {
       /**
        * <code>int32 name_counter = 14;</code>
        */
-      public int getNameCounter() {
+      @Override
+	public int getNameCounter() {
         return nameCounter_;
       }
       /**
        * <code>int32 name_counter = 14;</code>
        */
       public Builder setNameCounter(int value) {
-        
+
         nameCounter_ = value;
         onChanged();
         return this;
@@ -38107,7 +39483,7 @@ public final class GUIProtos {
        * <code>int32 name_counter = 14;</code>
        */
       public Builder clearNameCounter() {
-        
+
         nameCounter_ = 0;
         onChanged();
         return this;
@@ -38117,14 +39493,15 @@ public final class GUIProtos {
       /**
        * <code>bool limit_z = 15;</code>
        */
-      public boolean getLimitZ() {
+      @Override
+	public boolean getLimitZ() {
         return limitZ_;
       }
       /**
        * <code>bool limit_z = 15;</code>
        */
       public Builder setLimitZ(boolean value) {
-        
+
         limitZ_ = value;
         onChanged();
         return this;
@@ -38133,7 +39510,7 @@ public final class GUIProtos {
        * <code>bool limit_z = 15;</code>
        */
       public Builder clearLimitZ() {
-        
+
         limitZ_ = false;
         onChanged();
         return this;
@@ -38143,14 +39520,15 @@ public final class GUIProtos {
       /**
        * <code>double min_z = 16;</code>
        */
-      public double getMinZ() {
+      @Override
+	public double getMinZ() {
         return minZ_;
       }
       /**
        * <code>double min_z = 16;</code>
        */
       public Builder setMinZ(double value) {
-        
+
         minZ_ = value;
         onChanged();
         return this;
@@ -38159,7 +39537,7 @@ public final class GUIProtos {
        * <code>double min_z = 16;</code>
        */
       public Builder clearMinZ() {
-        
+
         minZ_ = 0D;
         onChanged();
         return this;
@@ -38169,14 +39547,15 @@ public final class GUIProtos {
       /**
        * <code>double max_z = 17;</code>
        */
-      public double getMaxZ() {
+      @Override
+	public double getMaxZ() {
         return maxZ_;
       }
       /**
        * <code>double max_z = 17;</code>
        */
       public Builder setMaxZ(double value) {
-        
+
         maxZ_ = value;
         onChanged();
         return this;
@@ -38185,17 +39564,19 @@ public final class GUIProtos {
        * <code>double max_z = 17;</code>
        */
       public Builder clearMaxZ() {
-        
+
         maxZ_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -38216,7 +39597,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<CropResultsSettings>
         PARSER = new com.google.protobuf.AbstractParser<CropResultsSettings>() {
-      public CropResultsSettings parsePartialFrom(
+      @Override
+	public CropResultsSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -38233,7 +39615,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -38412,7 +39795,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -38424,7 +39808,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_background = 1;</code>
      */
-    public boolean getPlotBackground() {
+    @Override
+	public boolean getPlotBackground() {
       return plotBackground_;
     }
 
@@ -38433,7 +39818,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_signal = 2;</code>
      */
-    public boolean getPlotSignal() {
+    @Override
+	public boolean getPlotSignal() {
       return plotSignal_;
     }
 
@@ -38442,7 +39828,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_x = 3;</code>
      */
-    public boolean getPlotX() {
+    @Override
+	public boolean getPlotX() {
       return plotX_;
     }
 
@@ -38451,7 +39838,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_y = 4;</code>
      */
-    public boolean getPlotY() {
+    @Override
+	public boolean getPlotY() {
       return plotY_;
     }
 
@@ -38460,7 +39848,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_z = 5;</code>
      */
-    public boolean getPlotZ() {
+    @Override
+	public boolean getPlotZ() {
       return plotZ_;
     }
 
@@ -38469,7 +39858,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_noise = 6;</code>
      */
-    public boolean getPlotNoise() {
+    @Override
+	public boolean getPlotNoise() {
       return plotNoise_;
     }
 
@@ -38478,7 +39868,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_snr = 7;</code>
      */
-    public boolean getPlotSnr() {
+    @Override
+	public boolean getPlotSnr() {
       return plotSnr_;
     }
 
@@ -38487,7 +39878,8 @@ public final class GUIProtos {
     /**
      * <code>bool plot_precision = 8;</code>
      */
-    public boolean getPlotPrecision() {
+    @Override
+	public boolean getPlotPrecision() {
       return plotPrecision_;
     }
 
@@ -38496,7 +39888,8 @@ public final class GUIProtos {
     /**
      * <code>int32 histgram_bins = 9;</code>
      */
-    public int getHistgramBins() {
+    @Override
+	public int getHistgramBins() {
       return histgramBins_;
     }
 
@@ -38505,12 +39898,14 @@ public final class GUIProtos {
     /**
      * <code>int32 remove_outliers = 10;</code>
      */
-    public int getRemoveOutliers() {
+    @Override
+	public int getRemoveOutliers() {
       return removeOutliers_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -38519,7 +39914,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (plotBackground_ != false) {
         output.writeBool(1, plotBackground_);
@@ -38553,7 +39949,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -38747,14 +40144,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -38781,7 +40180,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -38803,7 +40203,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         plotBackground_ = false;
 
@@ -38828,16 +40229,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings build() {
         gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -38845,7 +40249,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings result = new gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings(this);
         result.plotBackground_ = plotBackground_;
         result.plotSignal_ = plotSignal_;
@@ -38861,33 +40266,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings)other);
         } else {
@@ -38932,11 +40344,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -38958,14 +40372,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_background = 1;</code>
        */
-      public boolean getPlotBackground() {
+      @Override
+	public boolean getPlotBackground() {
         return plotBackground_;
       }
       /**
        * <code>bool plot_background = 1;</code>
        */
       public Builder setPlotBackground(boolean value) {
-        
+
         plotBackground_ = value;
         onChanged();
         return this;
@@ -38974,7 +40389,7 @@ public final class GUIProtos {
        * <code>bool plot_background = 1;</code>
        */
       public Builder clearPlotBackground() {
-        
+
         plotBackground_ = false;
         onChanged();
         return this;
@@ -38984,14 +40399,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_signal = 2;</code>
        */
-      public boolean getPlotSignal() {
+      @Override
+	public boolean getPlotSignal() {
         return plotSignal_;
       }
       /**
        * <code>bool plot_signal = 2;</code>
        */
       public Builder setPlotSignal(boolean value) {
-        
+
         plotSignal_ = value;
         onChanged();
         return this;
@@ -39000,7 +40416,7 @@ public final class GUIProtos {
        * <code>bool plot_signal = 2;</code>
        */
       public Builder clearPlotSignal() {
-        
+
         plotSignal_ = false;
         onChanged();
         return this;
@@ -39010,14 +40426,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_x = 3;</code>
        */
-      public boolean getPlotX() {
+      @Override
+	public boolean getPlotX() {
         return plotX_;
       }
       /**
        * <code>bool plot_x = 3;</code>
        */
       public Builder setPlotX(boolean value) {
-        
+
         plotX_ = value;
         onChanged();
         return this;
@@ -39026,7 +40443,7 @@ public final class GUIProtos {
        * <code>bool plot_x = 3;</code>
        */
       public Builder clearPlotX() {
-        
+
         plotX_ = false;
         onChanged();
         return this;
@@ -39036,14 +40453,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_y = 4;</code>
        */
-      public boolean getPlotY() {
+      @Override
+	public boolean getPlotY() {
         return plotY_;
       }
       /**
        * <code>bool plot_y = 4;</code>
        */
       public Builder setPlotY(boolean value) {
-        
+
         plotY_ = value;
         onChanged();
         return this;
@@ -39052,7 +40470,7 @@ public final class GUIProtos {
        * <code>bool plot_y = 4;</code>
        */
       public Builder clearPlotY() {
-        
+
         plotY_ = false;
         onChanged();
         return this;
@@ -39062,14 +40480,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_z = 5;</code>
        */
-      public boolean getPlotZ() {
+      @Override
+	public boolean getPlotZ() {
         return plotZ_;
       }
       /**
        * <code>bool plot_z = 5;</code>
        */
       public Builder setPlotZ(boolean value) {
-        
+
         plotZ_ = value;
         onChanged();
         return this;
@@ -39078,7 +40497,7 @@ public final class GUIProtos {
        * <code>bool plot_z = 5;</code>
        */
       public Builder clearPlotZ() {
-        
+
         plotZ_ = false;
         onChanged();
         return this;
@@ -39088,14 +40507,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_noise = 6;</code>
        */
-      public boolean getPlotNoise() {
+      @Override
+	public boolean getPlotNoise() {
         return plotNoise_;
       }
       /**
        * <code>bool plot_noise = 6;</code>
        */
       public Builder setPlotNoise(boolean value) {
-        
+
         plotNoise_ = value;
         onChanged();
         return this;
@@ -39104,7 +40524,7 @@ public final class GUIProtos {
        * <code>bool plot_noise = 6;</code>
        */
       public Builder clearPlotNoise() {
-        
+
         plotNoise_ = false;
         onChanged();
         return this;
@@ -39114,14 +40534,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_snr = 7;</code>
        */
-      public boolean getPlotSnr() {
+      @Override
+	public boolean getPlotSnr() {
         return plotSnr_;
       }
       /**
        * <code>bool plot_snr = 7;</code>
        */
       public Builder setPlotSnr(boolean value) {
-        
+
         plotSnr_ = value;
         onChanged();
         return this;
@@ -39130,7 +40551,7 @@ public final class GUIProtos {
        * <code>bool plot_snr = 7;</code>
        */
       public Builder clearPlotSnr() {
-        
+
         plotSnr_ = false;
         onChanged();
         return this;
@@ -39140,14 +40561,15 @@ public final class GUIProtos {
       /**
        * <code>bool plot_precision = 8;</code>
        */
-      public boolean getPlotPrecision() {
+      @Override
+	public boolean getPlotPrecision() {
         return plotPrecision_;
       }
       /**
        * <code>bool plot_precision = 8;</code>
        */
       public Builder setPlotPrecision(boolean value) {
-        
+
         plotPrecision_ = value;
         onChanged();
         return this;
@@ -39156,7 +40578,7 @@ public final class GUIProtos {
        * <code>bool plot_precision = 8;</code>
        */
       public Builder clearPlotPrecision() {
-        
+
         plotPrecision_ = false;
         onChanged();
         return this;
@@ -39166,14 +40588,15 @@ public final class GUIProtos {
       /**
        * <code>int32 histgram_bins = 9;</code>
        */
-      public int getHistgramBins() {
+      @Override
+	public int getHistgramBins() {
         return histgramBins_;
       }
       /**
        * <code>int32 histgram_bins = 9;</code>
        */
       public Builder setHistgramBins(int value) {
-        
+
         histgramBins_ = value;
         onChanged();
         return this;
@@ -39182,7 +40605,7 @@ public final class GUIProtos {
        * <code>int32 histgram_bins = 9;</code>
        */
       public Builder clearHistgramBins() {
-        
+
         histgramBins_ = 0;
         onChanged();
         return this;
@@ -39192,14 +40615,15 @@ public final class GUIProtos {
       /**
        * <code>int32 remove_outliers = 10;</code>
        */
-      public int getRemoveOutliers() {
+      @Override
+	public int getRemoveOutliers() {
         return removeOutliers_;
       }
       /**
        * <code>int32 remove_outliers = 10;</code>
        */
       public Builder setRemoveOutliers(int value) {
-        
+
         removeOutliers_ = value;
         onChanged();
         return this;
@@ -39208,17 +40632,19 @@ public final class GUIProtos {
        * <code>int32 remove_outliers = 10;</code>
        */
       public Builder clearRemoveOutliers() {
-        
+
         removeOutliers_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -39239,7 +40665,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<SummariseResultsSettings>
         PARSER = new com.google.protobuf.AbstractParser<SummariseResultsSettings>() {
-      public SummariseResultsSettings parsePartialFrom(
+      @Override
+	public SummariseResultsSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -39256,7 +40683,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -39716,7 +41144,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -39728,12 +41157,13 @@ public final class GUIProtos {
     /**
      * <code>string input_option = 1;</code>
      */
-    public java.lang.String getInputOption() {
+    @Override
+	public java.lang.String getInputOption() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
@@ -39743,11 +41173,12 @@ public final class GUIProtos {
     /**
      * <code>string input_option = 1;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getInputOptionBytes() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
@@ -39762,7 +41193,8 @@ public final class GUIProtos {
     /**
      * <code>double size = 2;</code>
      */
-    public double getSize() {
+    @Override
+	public double getSize() {
       return size_;
     }
 
@@ -39771,7 +41203,8 @@ public final class GUIProtos {
     /**
      * <code>double transparency = 3;</code>
      */
-    public double getTransparency() {
+    @Override
+	public double getTransparency() {
       return transparency_;
     }
 
@@ -39780,7 +41213,8 @@ public final class GUIProtos {
     /**
      * <code>int32 lut = 4;</code>
      */
-    public int getLut() {
+    @Override
+	public int getLut() {
       return lut_;
     }
 
@@ -39789,7 +41223,8 @@ public final class GUIProtos {
     /**
      * <code>int32 rendering = 5;</code>
      */
-    public int getRendering() {
+    @Override
+	public int getRendering() {
       return rendering_;
     }
 
@@ -39798,7 +41233,8 @@ public final class GUIProtos {
     /**
      * <code>bool shaded = 6;</code>
      */
-    public boolean getShaded() {
+    @Override
+	public boolean getShaded() {
       return shaded_;
     }
 
@@ -39807,7 +41243,8 @@ public final class GUIProtos {
     /**
      * <code>bool newWindow = 7;</code>
      */
-    public boolean getNewWindow() {
+    @Override
+	public boolean getNewWindow() {
       return newWindow_;
     }
 
@@ -39816,7 +41253,8 @@ public final class GUIProtos {
     /**
      * <code>int32 size_mode = 8;</code>
      */
-    public int getSizeMode() {
+    @Override
+	public int getSizeMode() {
       return sizeMode_;
     }
 
@@ -39825,7 +41263,8 @@ public final class GUIProtos {
     /**
      * <code>double pixel_size = 9;</code>
      */
-    public double getPixelSize() {
+    @Override
+	public double getPixelSize() {
       return pixelSize_;
     }
 
@@ -39834,19 +41273,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
      */
-    public boolean hasResultsTableSettings() {
+    @Override
+	public boolean hasResultsTableSettings() {
       return resultsTableSettings_ != null;
     }
     /**
      * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
      */
-    public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
+    @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
       return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
     }
     /**
      * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
      */
-    public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
       return getResultsTableSettings();
     }
 
@@ -39855,7 +41297,8 @@ public final class GUIProtos {
     /**
      * <code>int32 depth_mode = 11;</code>
      */
-    public int getDepthMode() {
+    @Override
+	public int getDepthMode() {
       return depthMode_;
     }
 
@@ -39864,7 +41307,8 @@ public final class GUIProtos {
     /**
      * <code>double depth_range = 12;</code>
      */
-    public double getDepthRange() {
+    @Override
+	public double getDepthRange() {
       return depthRange_;
     }
 
@@ -39873,7 +41317,8 @@ public final class GUIProtos {
     /**
      * <code>int32 dither_seed = 13;</code>
      */
-    public int getDitherSeed() {
+    @Override
+	public int getDitherSeed() {
       return ditherSeed_;
     }
 
@@ -39882,7 +41327,8 @@ public final class GUIProtos {
     /**
      * <code>int32 transparency_mode = 14;</code>
      */
-    public int getTransparencyMode() {
+    @Override
+	public int getTransparencyMode() {
       return transparencyMode_;
     }
 
@@ -39891,7 +41337,8 @@ public final class GUIProtos {
     /**
      * <code>double min_transparency = 15;</code>
      */
-    public double getMinTransparency() {
+    @Override
+	public double getMinTransparency() {
       return minTransparency_;
     }
 
@@ -39900,7 +41347,8 @@ public final class GUIProtos {
     /**
      * <code>double max_transparency = 16;</code>
      */
-    public double getMaxTransparency() {
+    @Override
+	public double getMaxTransparency() {
       return maxTransparency_;
     }
 
@@ -39909,7 +41357,8 @@ public final class GUIProtos {
     /**
      * <code>int32 sort_mode = 17;</code>
      */
-    public int getSortMode() {
+    @Override
+	public int getSortMode() {
       return sortMode_;
     }
 
@@ -39918,7 +41367,8 @@ public final class GUIProtos {
     /**
      * <code>double sort_direction_x = 18;</code>
      */
-    public double getSortDirectionX() {
+    @Override
+	public double getSortDirectionX() {
       return sortDirectionX_;
     }
 
@@ -39927,7 +41377,8 @@ public final class GUIProtos {
     /**
      * <code>double sort_direction_y = 19;</code>
      */
-    public double getSortDirectionY() {
+    @Override
+	public double getSortDirectionY() {
       return sortDirectionY_;
     }
 
@@ -39936,7 +41387,8 @@ public final class GUIProtos {
     /**
      * <code>double sort_direction_z = 20;</code>
      */
-    public double getSortDirectionZ() {
+    @Override
+	public double getSortDirectionZ() {
       return sortDirectionZ_;
     }
 
@@ -39945,7 +41397,8 @@ public final class GUIProtos {
     /**
      * <code>double sort_eye_x = 21;</code>
      */
-    public double getSortEyeX() {
+    @Override
+	public double getSortEyeX() {
       return sortEyeX_;
     }
 
@@ -39954,7 +41407,8 @@ public final class GUIProtos {
     /**
      * <code>double sort_eye_y = 22;</code>
      */
-    public double getSortEyeY() {
+    @Override
+	public double getSortEyeY() {
       return sortEyeY_;
     }
 
@@ -39963,7 +41417,8 @@ public final class GUIProtos {
     /**
      * <code>double sort_eye_z = 23;</code>
      */
-    public double getSortEyeZ() {
+    @Override
+	public double getSortEyeZ() {
       return sortEyeZ_;
     }
 
@@ -39972,7 +41427,8 @@ public final class GUIProtos {
     /**
      * <code>bool save_eye_point = 24;</code>
      */
-    public boolean getSaveEyePoint() {
+    @Override
+	public boolean getSaveEyePoint() {
       return saveEyePoint_;
     }
 
@@ -39981,12 +41437,13 @@ public final class GUIProtos {
     /**
      * <code>string highlight_colour = 25;</code>
      */
-    public java.lang.String getHighlightColour() {
+    @Override
+	public java.lang.String getHighlightColour() {
       java.lang.Object ref = highlightColour_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         highlightColour_ = s;
@@ -39996,11 +41453,12 @@ public final class GUIProtos {
     /**
      * <code>string highlight_colour = 25;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getHighlightColourBytes() {
       java.lang.Object ref = highlightColour_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         highlightColour_ = b;
@@ -40015,12 +41473,13 @@ public final class GUIProtos {
     /**
      * <code>string output_name = 26;</code>
      */
-    public java.lang.String getOutputName() {
+    @Override
+	public java.lang.String getOutputName() {
       java.lang.Object ref = outputName_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         outputName_ = s;
@@ -40030,11 +41489,12 @@ public final class GUIProtos {
     /**
      * <code>string output_name = 26;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getOutputNameBytes() {
       java.lang.Object ref = outputName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         outputName_ = b;
@@ -40049,7 +41509,8 @@ public final class GUIProtos {
     /**
      * <code>int32 name_option = 27;</code>
      */
-    public int getNameOption() {
+    @Override
+	public int getNameOption() {
       return nameOption_;
     }
 
@@ -40058,12 +41519,13 @@ public final class GUIProtos {
     /**
      * <code>string name_suffix = 28;</code>
      */
-    public java.lang.String getNameSuffix() {
+    @Override
+	public java.lang.String getNameSuffix() {
       java.lang.Object ref = nameSuffix_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         nameSuffix_ = s;
@@ -40073,11 +41535,12 @@ public final class GUIProtos {
     /**
      * <code>string name_suffix = 28;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getNameSuffixBytes() {
       java.lang.Object ref = nameSuffix_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         nameSuffix_ = b;
@@ -40092,7 +41555,8 @@ public final class GUIProtos {
     /**
      * <code>int32 name_counter = 29;</code>
      */
-    public int getNameCounter() {
+    @Override
+	public int getNameCounter() {
       return nameCounter_;
     }
 
@@ -40101,7 +41565,8 @@ public final class GUIProtos {
     /**
      * <code>bool support_dynamic_transparency = 30;</code>
      */
-    public boolean getSupportDynamicTransparency() {
+    @Override
+	public boolean getSupportDynamicTransparency() {
       return supportDynamicTransparency_;
     }
 
@@ -40110,7 +41575,8 @@ public final class GUIProtos {
     /**
      * <code>bool enable_dynamic_transparency = 31;</code>
      */
-    public boolean getEnableDynamicTransparency() {
+    @Override
+	public boolean getEnableDynamicTransparency() {
       return enableDynamicTransparency_;
     }
 
@@ -40119,12 +41585,14 @@ public final class GUIProtos {
     /**
      * <code>bool add_to_selection = 32;</code>
      */
-    public boolean getAddToSelection() {
+    @Override
+	public boolean getAddToSelection() {
       return addToSelection_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -40133,7 +41601,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (!getInputOptionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
@@ -40233,7 +41702,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -40638,14 +42108,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -40672,7 +42144,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -40694,7 +42167,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         inputOption_ = "";
 
@@ -40767,16 +42241,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings build() {
         gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -40784,7 +42261,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = new gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings(this);
         result.inputOption_ = inputOption_;
         result.size_ = size_;
@@ -40826,33 +42304,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)other);
         } else {
@@ -40967,11 +42452,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -40993,7 +42480,8 @@ public final class GUIProtos {
       /**
        * <code>string input_option = 1;</code>
        */
-      public java.lang.String getInputOption() {
+      @Override
+	public java.lang.String getInputOption() {
         java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -41008,11 +42496,12 @@ public final class GUIProtos {
       /**
        * <code>string input_option = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getInputOptionBytes() {
         java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
@@ -41029,7 +42518,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -41038,7 +42527,7 @@ public final class GUIProtos {
        * <code>string input_option = 1;</code>
        */
       public Builder clearInputOption() {
-        
+
         inputOption_ = getDefaultInstance().getInputOption();
         onChanged();
         return this;
@@ -41052,7 +42541,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -41062,14 +42551,15 @@ public final class GUIProtos {
       /**
        * <code>double size = 2;</code>
        */
-      public double getSize() {
+      @Override
+	public double getSize() {
         return size_;
       }
       /**
        * <code>double size = 2;</code>
        */
       public Builder setSize(double value) {
-        
+
         size_ = value;
         onChanged();
         return this;
@@ -41078,7 +42568,7 @@ public final class GUIProtos {
        * <code>double size = 2;</code>
        */
       public Builder clearSize() {
-        
+
         size_ = 0D;
         onChanged();
         return this;
@@ -41088,14 +42578,15 @@ public final class GUIProtos {
       /**
        * <code>double transparency = 3;</code>
        */
-      public double getTransparency() {
+      @Override
+	public double getTransparency() {
         return transparency_;
       }
       /**
        * <code>double transparency = 3;</code>
        */
       public Builder setTransparency(double value) {
-        
+
         transparency_ = value;
         onChanged();
         return this;
@@ -41104,7 +42595,7 @@ public final class GUIProtos {
        * <code>double transparency = 3;</code>
        */
       public Builder clearTransparency() {
-        
+
         transparency_ = 0D;
         onChanged();
         return this;
@@ -41114,14 +42605,15 @@ public final class GUIProtos {
       /**
        * <code>int32 lut = 4;</code>
        */
-      public int getLut() {
+      @Override
+	public int getLut() {
         return lut_;
       }
       /**
        * <code>int32 lut = 4;</code>
        */
       public Builder setLut(int value) {
-        
+
         lut_ = value;
         onChanged();
         return this;
@@ -41130,7 +42622,7 @@ public final class GUIProtos {
        * <code>int32 lut = 4;</code>
        */
       public Builder clearLut() {
-        
+
         lut_ = 0;
         onChanged();
         return this;
@@ -41140,14 +42632,15 @@ public final class GUIProtos {
       /**
        * <code>int32 rendering = 5;</code>
        */
-      public int getRendering() {
+      @Override
+	public int getRendering() {
         return rendering_;
       }
       /**
        * <code>int32 rendering = 5;</code>
        */
       public Builder setRendering(int value) {
-        
+
         rendering_ = value;
         onChanged();
         return this;
@@ -41156,7 +42649,7 @@ public final class GUIProtos {
        * <code>int32 rendering = 5;</code>
        */
       public Builder clearRendering() {
-        
+
         rendering_ = 0;
         onChanged();
         return this;
@@ -41166,14 +42659,15 @@ public final class GUIProtos {
       /**
        * <code>bool shaded = 6;</code>
        */
-      public boolean getShaded() {
+      @Override
+	public boolean getShaded() {
         return shaded_;
       }
       /**
        * <code>bool shaded = 6;</code>
        */
       public Builder setShaded(boolean value) {
-        
+
         shaded_ = value;
         onChanged();
         return this;
@@ -41182,7 +42676,7 @@ public final class GUIProtos {
        * <code>bool shaded = 6;</code>
        */
       public Builder clearShaded() {
-        
+
         shaded_ = false;
         onChanged();
         return this;
@@ -41192,14 +42686,15 @@ public final class GUIProtos {
       /**
        * <code>bool newWindow = 7;</code>
        */
-      public boolean getNewWindow() {
+      @Override
+	public boolean getNewWindow() {
         return newWindow_;
       }
       /**
        * <code>bool newWindow = 7;</code>
        */
       public Builder setNewWindow(boolean value) {
-        
+
         newWindow_ = value;
         onChanged();
         return this;
@@ -41208,7 +42703,7 @@ public final class GUIProtos {
        * <code>bool newWindow = 7;</code>
        */
       public Builder clearNewWindow() {
-        
+
         newWindow_ = false;
         onChanged();
         return this;
@@ -41218,14 +42713,15 @@ public final class GUIProtos {
       /**
        * <code>int32 size_mode = 8;</code>
        */
-      public int getSizeMode() {
+      @Override
+	public int getSizeMode() {
         return sizeMode_;
       }
       /**
        * <code>int32 size_mode = 8;</code>
        */
       public Builder setSizeMode(int value) {
-        
+
         sizeMode_ = value;
         onChanged();
         return this;
@@ -41234,7 +42730,7 @@ public final class GUIProtos {
        * <code>int32 size_mode = 8;</code>
        */
       public Builder clearSizeMode() {
-        
+
         sizeMode_ = 0;
         onChanged();
         return this;
@@ -41244,14 +42740,15 @@ public final class GUIProtos {
       /**
        * <code>double pixel_size = 9;</code>
        */
-      public double getPixelSize() {
+      @Override
+	public double getPixelSize() {
         return pixelSize_;
       }
       /**
        * <code>double pixel_size = 9;</code>
        */
       public Builder setPixelSize(double value) {
-        
+
         pixelSize_ = value;
         onChanged();
         return this;
@@ -41260,7 +42757,7 @@ public final class GUIProtos {
        * <code>double pixel_size = 9;</code>
        */
       public Builder clearPixelSize() {
-        
+
         pixelSize_ = 0D;
         onChanged();
         return this;
@@ -41272,13 +42769,15 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
        */
-      public boolean hasResultsTableSettings() {
+      @Override
+	public boolean hasResultsTableSettings() {
         return resultsTableSettingsBuilder_ != null || resultsTableSettings_ != null;
       }
       /**
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
        */
-      public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
+      @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
         if (resultsTableSettingsBuilder_ == null) {
           return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
         } else {
@@ -41351,14 +42850,15 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
        */
       public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder getResultsTableSettingsBuilder() {
-        
+
         onChanged();
         return getResultsTableSettingsFieldBuilder().getBuilder();
       }
       /**
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
        */
-      public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
         if (resultsTableSettingsBuilder_ != null) {
           return resultsTableSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -41370,11 +42870,10 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder> 
+          gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder>
           getResultsTableSettingsFieldBuilder() {
         if (resultsTableSettingsBuilder_ == null) {
-          resultsTableSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder>(
+          resultsTableSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getResultsTableSettings(),
                   getParentForChildren(),
                   isClean());
@@ -41387,14 +42886,15 @@ public final class GUIProtos {
       /**
        * <code>int32 depth_mode = 11;</code>
        */
-      public int getDepthMode() {
+      @Override
+	public int getDepthMode() {
         return depthMode_;
       }
       /**
        * <code>int32 depth_mode = 11;</code>
        */
       public Builder setDepthMode(int value) {
-        
+
         depthMode_ = value;
         onChanged();
         return this;
@@ -41403,7 +42903,7 @@ public final class GUIProtos {
        * <code>int32 depth_mode = 11;</code>
        */
       public Builder clearDepthMode() {
-        
+
         depthMode_ = 0;
         onChanged();
         return this;
@@ -41413,14 +42913,15 @@ public final class GUIProtos {
       /**
        * <code>double depth_range = 12;</code>
        */
-      public double getDepthRange() {
+      @Override
+	public double getDepthRange() {
         return depthRange_;
       }
       /**
        * <code>double depth_range = 12;</code>
        */
       public Builder setDepthRange(double value) {
-        
+
         depthRange_ = value;
         onChanged();
         return this;
@@ -41429,7 +42930,7 @@ public final class GUIProtos {
        * <code>double depth_range = 12;</code>
        */
       public Builder clearDepthRange() {
-        
+
         depthRange_ = 0D;
         onChanged();
         return this;
@@ -41439,14 +42940,15 @@ public final class GUIProtos {
       /**
        * <code>int32 dither_seed = 13;</code>
        */
-      public int getDitherSeed() {
+      @Override
+	public int getDitherSeed() {
         return ditherSeed_;
       }
       /**
        * <code>int32 dither_seed = 13;</code>
        */
       public Builder setDitherSeed(int value) {
-        
+
         ditherSeed_ = value;
         onChanged();
         return this;
@@ -41455,7 +42957,7 @@ public final class GUIProtos {
        * <code>int32 dither_seed = 13;</code>
        */
       public Builder clearDitherSeed() {
-        
+
         ditherSeed_ = 0;
         onChanged();
         return this;
@@ -41465,14 +42967,15 @@ public final class GUIProtos {
       /**
        * <code>int32 transparency_mode = 14;</code>
        */
-      public int getTransparencyMode() {
+      @Override
+	public int getTransparencyMode() {
         return transparencyMode_;
       }
       /**
        * <code>int32 transparency_mode = 14;</code>
        */
       public Builder setTransparencyMode(int value) {
-        
+
         transparencyMode_ = value;
         onChanged();
         return this;
@@ -41481,7 +42984,7 @@ public final class GUIProtos {
        * <code>int32 transparency_mode = 14;</code>
        */
       public Builder clearTransparencyMode() {
-        
+
         transparencyMode_ = 0;
         onChanged();
         return this;
@@ -41491,14 +42994,15 @@ public final class GUIProtos {
       /**
        * <code>double min_transparency = 15;</code>
        */
-      public double getMinTransparency() {
+      @Override
+	public double getMinTransparency() {
         return minTransparency_;
       }
       /**
        * <code>double min_transparency = 15;</code>
        */
       public Builder setMinTransparency(double value) {
-        
+
         minTransparency_ = value;
         onChanged();
         return this;
@@ -41507,7 +43011,7 @@ public final class GUIProtos {
        * <code>double min_transparency = 15;</code>
        */
       public Builder clearMinTransparency() {
-        
+
         minTransparency_ = 0D;
         onChanged();
         return this;
@@ -41517,14 +43021,15 @@ public final class GUIProtos {
       /**
        * <code>double max_transparency = 16;</code>
        */
-      public double getMaxTransparency() {
+      @Override
+	public double getMaxTransparency() {
         return maxTransparency_;
       }
       /**
        * <code>double max_transparency = 16;</code>
        */
       public Builder setMaxTransparency(double value) {
-        
+
         maxTransparency_ = value;
         onChanged();
         return this;
@@ -41533,7 +43038,7 @@ public final class GUIProtos {
        * <code>double max_transparency = 16;</code>
        */
       public Builder clearMaxTransparency() {
-        
+
         maxTransparency_ = 0D;
         onChanged();
         return this;
@@ -41543,14 +43048,15 @@ public final class GUIProtos {
       /**
        * <code>int32 sort_mode = 17;</code>
        */
-      public int getSortMode() {
+      @Override
+	public int getSortMode() {
         return sortMode_;
       }
       /**
        * <code>int32 sort_mode = 17;</code>
        */
       public Builder setSortMode(int value) {
-        
+
         sortMode_ = value;
         onChanged();
         return this;
@@ -41559,7 +43065,7 @@ public final class GUIProtos {
        * <code>int32 sort_mode = 17;</code>
        */
       public Builder clearSortMode() {
-        
+
         sortMode_ = 0;
         onChanged();
         return this;
@@ -41569,14 +43075,15 @@ public final class GUIProtos {
       /**
        * <code>double sort_direction_x = 18;</code>
        */
-      public double getSortDirectionX() {
+      @Override
+	public double getSortDirectionX() {
         return sortDirectionX_;
       }
       /**
        * <code>double sort_direction_x = 18;</code>
        */
       public Builder setSortDirectionX(double value) {
-        
+
         sortDirectionX_ = value;
         onChanged();
         return this;
@@ -41585,7 +43092,7 @@ public final class GUIProtos {
        * <code>double sort_direction_x = 18;</code>
        */
       public Builder clearSortDirectionX() {
-        
+
         sortDirectionX_ = 0D;
         onChanged();
         return this;
@@ -41595,14 +43102,15 @@ public final class GUIProtos {
       /**
        * <code>double sort_direction_y = 19;</code>
        */
-      public double getSortDirectionY() {
+      @Override
+	public double getSortDirectionY() {
         return sortDirectionY_;
       }
       /**
        * <code>double sort_direction_y = 19;</code>
        */
       public Builder setSortDirectionY(double value) {
-        
+
         sortDirectionY_ = value;
         onChanged();
         return this;
@@ -41611,7 +43119,7 @@ public final class GUIProtos {
        * <code>double sort_direction_y = 19;</code>
        */
       public Builder clearSortDirectionY() {
-        
+
         sortDirectionY_ = 0D;
         onChanged();
         return this;
@@ -41621,14 +43129,15 @@ public final class GUIProtos {
       /**
        * <code>double sort_direction_z = 20;</code>
        */
-      public double getSortDirectionZ() {
+      @Override
+	public double getSortDirectionZ() {
         return sortDirectionZ_;
       }
       /**
        * <code>double sort_direction_z = 20;</code>
        */
       public Builder setSortDirectionZ(double value) {
-        
+
         sortDirectionZ_ = value;
         onChanged();
         return this;
@@ -41637,7 +43146,7 @@ public final class GUIProtos {
        * <code>double sort_direction_z = 20;</code>
        */
       public Builder clearSortDirectionZ() {
-        
+
         sortDirectionZ_ = 0D;
         onChanged();
         return this;
@@ -41647,14 +43156,15 @@ public final class GUIProtos {
       /**
        * <code>double sort_eye_x = 21;</code>
        */
-      public double getSortEyeX() {
+      @Override
+	public double getSortEyeX() {
         return sortEyeX_;
       }
       /**
        * <code>double sort_eye_x = 21;</code>
        */
       public Builder setSortEyeX(double value) {
-        
+
         sortEyeX_ = value;
         onChanged();
         return this;
@@ -41663,7 +43173,7 @@ public final class GUIProtos {
        * <code>double sort_eye_x = 21;</code>
        */
       public Builder clearSortEyeX() {
-        
+
         sortEyeX_ = 0D;
         onChanged();
         return this;
@@ -41673,14 +43183,15 @@ public final class GUIProtos {
       /**
        * <code>double sort_eye_y = 22;</code>
        */
-      public double getSortEyeY() {
+      @Override
+	public double getSortEyeY() {
         return sortEyeY_;
       }
       /**
        * <code>double sort_eye_y = 22;</code>
        */
       public Builder setSortEyeY(double value) {
-        
+
         sortEyeY_ = value;
         onChanged();
         return this;
@@ -41689,7 +43200,7 @@ public final class GUIProtos {
        * <code>double sort_eye_y = 22;</code>
        */
       public Builder clearSortEyeY() {
-        
+
         sortEyeY_ = 0D;
         onChanged();
         return this;
@@ -41699,14 +43210,15 @@ public final class GUIProtos {
       /**
        * <code>double sort_eye_z = 23;</code>
        */
-      public double getSortEyeZ() {
+      @Override
+	public double getSortEyeZ() {
         return sortEyeZ_;
       }
       /**
        * <code>double sort_eye_z = 23;</code>
        */
       public Builder setSortEyeZ(double value) {
-        
+
         sortEyeZ_ = value;
         onChanged();
         return this;
@@ -41715,7 +43227,7 @@ public final class GUIProtos {
        * <code>double sort_eye_z = 23;</code>
        */
       public Builder clearSortEyeZ() {
-        
+
         sortEyeZ_ = 0D;
         onChanged();
         return this;
@@ -41725,14 +43237,15 @@ public final class GUIProtos {
       /**
        * <code>bool save_eye_point = 24;</code>
        */
-      public boolean getSaveEyePoint() {
+      @Override
+	public boolean getSaveEyePoint() {
         return saveEyePoint_;
       }
       /**
        * <code>bool save_eye_point = 24;</code>
        */
       public Builder setSaveEyePoint(boolean value) {
-        
+
         saveEyePoint_ = value;
         onChanged();
         return this;
@@ -41741,7 +43254,7 @@ public final class GUIProtos {
        * <code>bool save_eye_point = 24;</code>
        */
       public Builder clearSaveEyePoint() {
-        
+
         saveEyePoint_ = false;
         onChanged();
         return this;
@@ -41751,7 +43264,8 @@ public final class GUIProtos {
       /**
        * <code>string highlight_colour = 25;</code>
        */
-      public java.lang.String getHighlightColour() {
+      @Override
+	public java.lang.String getHighlightColour() {
         java.lang.Object ref = highlightColour_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -41766,11 +43280,12 @@ public final class GUIProtos {
       /**
        * <code>string highlight_colour = 25;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getHighlightColourBytes() {
         java.lang.Object ref = highlightColour_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           highlightColour_ = b;
@@ -41787,7 +43302,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         highlightColour_ = value;
         onChanged();
         return this;
@@ -41796,7 +43311,7 @@ public final class GUIProtos {
        * <code>string highlight_colour = 25;</code>
        */
       public Builder clearHighlightColour() {
-        
+
         highlightColour_ = getDefaultInstance().getHighlightColour();
         onChanged();
         return this;
@@ -41810,7 +43325,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         highlightColour_ = value;
         onChanged();
         return this;
@@ -41820,7 +43335,8 @@ public final class GUIProtos {
       /**
        * <code>string output_name = 26;</code>
        */
-      public java.lang.String getOutputName() {
+      @Override
+	public java.lang.String getOutputName() {
         java.lang.Object ref = outputName_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -41835,11 +43351,12 @@ public final class GUIProtos {
       /**
        * <code>string output_name = 26;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getOutputNameBytes() {
         java.lang.Object ref = outputName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           outputName_ = b;
@@ -41856,7 +43373,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         outputName_ = value;
         onChanged();
         return this;
@@ -41865,7 +43382,7 @@ public final class GUIProtos {
        * <code>string output_name = 26;</code>
        */
       public Builder clearOutputName() {
-        
+
         outputName_ = getDefaultInstance().getOutputName();
         onChanged();
         return this;
@@ -41879,7 +43396,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         outputName_ = value;
         onChanged();
         return this;
@@ -41889,14 +43406,15 @@ public final class GUIProtos {
       /**
        * <code>int32 name_option = 27;</code>
        */
-      public int getNameOption() {
+      @Override
+	public int getNameOption() {
         return nameOption_;
       }
       /**
        * <code>int32 name_option = 27;</code>
        */
       public Builder setNameOption(int value) {
-        
+
         nameOption_ = value;
         onChanged();
         return this;
@@ -41905,7 +43423,7 @@ public final class GUIProtos {
        * <code>int32 name_option = 27;</code>
        */
       public Builder clearNameOption() {
-        
+
         nameOption_ = 0;
         onChanged();
         return this;
@@ -41915,7 +43433,8 @@ public final class GUIProtos {
       /**
        * <code>string name_suffix = 28;</code>
        */
-      public java.lang.String getNameSuffix() {
+      @Override
+	public java.lang.String getNameSuffix() {
         java.lang.Object ref = nameSuffix_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -41930,11 +43449,12 @@ public final class GUIProtos {
       /**
        * <code>string name_suffix = 28;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getNameSuffixBytes() {
         java.lang.Object ref = nameSuffix_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           nameSuffix_ = b;
@@ -41951,7 +43471,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         nameSuffix_ = value;
         onChanged();
         return this;
@@ -41960,7 +43480,7 @@ public final class GUIProtos {
        * <code>string name_suffix = 28;</code>
        */
       public Builder clearNameSuffix() {
-        
+
         nameSuffix_ = getDefaultInstance().getNameSuffix();
         onChanged();
         return this;
@@ -41974,7 +43494,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         nameSuffix_ = value;
         onChanged();
         return this;
@@ -41984,14 +43504,15 @@ public final class GUIProtos {
       /**
        * <code>int32 name_counter = 29;</code>
        */
-      public int getNameCounter() {
+      @Override
+	public int getNameCounter() {
         return nameCounter_;
       }
       /**
        * <code>int32 name_counter = 29;</code>
        */
       public Builder setNameCounter(int value) {
-        
+
         nameCounter_ = value;
         onChanged();
         return this;
@@ -42000,7 +43521,7 @@ public final class GUIProtos {
        * <code>int32 name_counter = 29;</code>
        */
       public Builder clearNameCounter() {
-        
+
         nameCounter_ = 0;
         onChanged();
         return this;
@@ -42010,14 +43531,15 @@ public final class GUIProtos {
       /**
        * <code>bool support_dynamic_transparency = 30;</code>
        */
-      public boolean getSupportDynamicTransparency() {
+      @Override
+	public boolean getSupportDynamicTransparency() {
         return supportDynamicTransparency_;
       }
       /**
        * <code>bool support_dynamic_transparency = 30;</code>
        */
       public Builder setSupportDynamicTransparency(boolean value) {
-        
+
         supportDynamicTransparency_ = value;
         onChanged();
         return this;
@@ -42026,7 +43548,7 @@ public final class GUIProtos {
        * <code>bool support_dynamic_transparency = 30;</code>
        */
       public Builder clearSupportDynamicTransparency() {
-        
+
         supportDynamicTransparency_ = false;
         onChanged();
         return this;
@@ -42036,14 +43558,15 @@ public final class GUIProtos {
       /**
        * <code>bool enable_dynamic_transparency = 31;</code>
        */
-      public boolean getEnableDynamicTransparency() {
+      @Override
+	public boolean getEnableDynamicTransparency() {
         return enableDynamicTransparency_;
       }
       /**
        * <code>bool enable_dynamic_transparency = 31;</code>
        */
       public Builder setEnableDynamicTransparency(boolean value) {
-        
+
         enableDynamicTransparency_ = value;
         onChanged();
         return this;
@@ -42052,7 +43575,7 @@ public final class GUIProtos {
        * <code>bool enable_dynamic_transparency = 31;</code>
        */
       public Builder clearEnableDynamicTransparency() {
-        
+
         enableDynamicTransparency_ = false;
         onChanged();
         return this;
@@ -42062,14 +43585,15 @@ public final class GUIProtos {
       /**
        * <code>bool add_to_selection = 32;</code>
        */
-      public boolean getAddToSelection() {
+      @Override
+	public boolean getAddToSelection() {
         return addToSelection_;
       }
       /**
        * <code>bool add_to_selection = 32;</code>
        */
       public Builder setAddToSelection(boolean value) {
-        
+
         addToSelection_ = value;
         onChanged();
         return this;
@@ -42078,17 +43602,19 @@ public final class GUIProtos {
        * <code>bool add_to_selection = 32;</code>
        */
       public Builder clearAddToSelection() {
-        
+
         addToSelection_ = false;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -42109,7 +43635,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<ImageJ3DResultsViewerSettings>
         PARSER = new com.google.protobuf.AbstractParser<ImageJ3DResultsViewerSettings>() {
-      public ImageJ3DResultsViewerSettings parsePartialFrom(
+      @Override
+	public ImageJ3DResultsViewerSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -42126,7 +43653,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -42261,7 +43789,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -42273,12 +43802,13 @@ public final class GUIProtos {
     /**
      * <code>string input_option = 1;</code>
      */
-    public java.lang.String getInputOption() {
+    @Override
+	public java.lang.String getInputOption() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
@@ -42288,11 +43818,12 @@ public final class GUIProtos {
     /**
      * <code>string input_option = 1;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getInputOptionBytes() {
       java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
@@ -42307,7 +43838,8 @@ public final class GUIProtos {
     /**
      * <code>double dx = 2;</code>
      */
-    public double getDx() {
+    @Override
+	public double getDx() {
       return dx_;
     }
 
@@ -42316,7 +43848,8 @@ public final class GUIProtos {
     /**
      * <code>double dy = 3;</code>
      */
-    public double getDy() {
+    @Override
+	public double getDy() {
       return dy_;
     }
 
@@ -42325,7 +43858,8 @@ public final class GUIProtos {
     /**
      * <code>double dz = 4;</code>
      */
-    public double getDz() {
+    @Override
+	public double getDz() {
       return dz_;
     }
 
@@ -42334,19 +43868,22 @@ public final class GUIProtos {
     /**
      * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
      */
-    public int getDistanceUnitValue() {
+    @Override
+	public int getDistanceUnitValue() {
       return distanceUnit_;
     }
     /**
      * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
      */
-    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
+    @Override
+	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
       gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -42355,7 +43892,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (!getInputOptionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
@@ -42374,7 +43912,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -42527,14 +44066,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -42561,7 +44102,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -42583,7 +44125,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         inputOption_ = "";
 
@@ -42598,16 +44141,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings build() {
         gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -42615,7 +44161,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = new gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings(this);
         result.inputOption_ = inputOption_;
         result.dx_ = dx_;
@@ -42626,33 +44173,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)other);
         } else {
@@ -42683,11 +44237,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -42709,7 +44265,8 @@ public final class GUIProtos {
       /**
        * <code>string input_option = 1;</code>
        */
-      public java.lang.String getInputOption() {
+      @Override
+	public java.lang.String getInputOption() {
         java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -42724,11 +44281,12 @@ public final class GUIProtos {
       /**
        * <code>string input_option = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getInputOptionBytes() {
         java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
@@ -42745,7 +44303,7 @@ public final class GUIProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -42754,7 +44312,7 @@ public final class GUIProtos {
        * <code>string input_option = 1;</code>
        */
       public Builder clearInputOption() {
-        
+
         inputOption_ = getDefaultInstance().getInputOption();
         onChanged();
         return this;
@@ -42768,7 +44326,7 @@ public final class GUIProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         inputOption_ = value;
         onChanged();
         return this;
@@ -42778,14 +44336,15 @@ public final class GUIProtos {
       /**
        * <code>double dx = 2;</code>
        */
-      public double getDx() {
+      @Override
+	public double getDx() {
         return dx_;
       }
       /**
        * <code>double dx = 2;</code>
        */
       public Builder setDx(double value) {
-        
+
         dx_ = value;
         onChanged();
         return this;
@@ -42794,7 +44353,7 @@ public final class GUIProtos {
        * <code>double dx = 2;</code>
        */
       public Builder clearDx() {
-        
+
         dx_ = 0D;
         onChanged();
         return this;
@@ -42804,14 +44363,15 @@ public final class GUIProtos {
       /**
        * <code>double dy = 3;</code>
        */
-      public double getDy() {
+      @Override
+	public double getDy() {
         return dy_;
       }
       /**
        * <code>double dy = 3;</code>
        */
       public Builder setDy(double value) {
-        
+
         dy_ = value;
         onChanged();
         return this;
@@ -42820,7 +44380,7 @@ public final class GUIProtos {
        * <code>double dy = 3;</code>
        */
       public Builder clearDy() {
-        
+
         dy_ = 0D;
         onChanged();
         return this;
@@ -42830,14 +44390,15 @@ public final class GUIProtos {
       /**
        * <code>double dz = 4;</code>
        */
-      public double getDz() {
+      @Override
+	public double getDz() {
         return dz_;
       }
       /**
        * <code>double dz = 4;</code>
        */
       public Builder setDz(double value) {
-        
+
         dz_ = value;
         onChanged();
         return this;
@@ -42846,7 +44407,7 @@ public final class GUIProtos {
        * <code>double dz = 4;</code>
        */
       public Builder clearDz() {
-        
+
         dz_ = 0D;
         onChanged();
         return this;
@@ -42856,7 +44417,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
        */
-      public int getDistanceUnitValue() {
+      @Override
+	public int getDistanceUnitValue() {
         return distanceUnit_;
       }
       /**
@@ -42870,7 +44432,8 @@ public final class GUIProtos {
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
        */
-      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
+      @Override
+	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
         gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
@@ -42881,7 +44444,7 @@ public final class GUIProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         distanceUnit_ = value.getNumber();
         onChanged();
         return this;
@@ -42890,17 +44453,19 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
        */
       public Builder clearDistanceUnit() {
-        
+
         distanceUnit_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -42921,7 +44486,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<TranslateResultsSettings>
         PARSER = new com.google.protobuf.AbstractParser<TranslateResultsSettings>() {
-      public TranslateResultsSettings parsePartialFrom(
+      @Override
+	public TranslateResultsSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -42938,7 +44504,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -43095,7 +44662,8 @@ public final class GUIProtos {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -43107,7 +44675,8 @@ public final class GUIProtos {
     /**
      * <code>int32 channel = 1;</code>
      */
-    public int getChannel() {
+    @Override
+	public int getChannel() {
       return channel_;
     }
 
@@ -43116,7 +44685,8 @@ public final class GUIProtos {
     /**
      * <code>int32 search_radius = 2;</code>
      */
-    public int getSearchRadius() {
+    @Override
+	public int getSearchRadius() {
       return searchRadius_;
     }
 
@@ -43125,7 +44695,8 @@ public final class GUIProtos {
     /**
      * <code>int32 fit_radius = 3;</code>
      */
-    public int getFitRadius() {
+    @Override
+	public int getFitRadius() {
       return fitRadius_;
     }
 
@@ -43134,7 +44705,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_overlay = 4;</code>
      */
-    public boolean getShowOverlay() {
+    @Override
+	public boolean getShowOverlay() {
       return showOverlay_;
     }
 
@@ -43143,7 +44715,8 @@ public final class GUIProtos {
     /**
      * <code>bool attach_to_slice = 5;</code>
      */
-    public boolean getAttachToSlice() {
+    @Override
+	public boolean getAttachToSlice() {
       return attachToSlice_;
     }
 
@@ -43152,7 +44725,8 @@ public final class GUIProtos {
     /**
      * <code>bool log_progress = 6;</code>
      */
-    public boolean getLogProgress() {
+    @Override
+	public boolean getLogProgress() {
       return logProgress_;
     }
 
@@ -43161,7 +44735,8 @@ public final class GUIProtos {
     /**
      * <code>bool show_fit_roi = 7;</code>
      */
-    public boolean getShowFitRoi() {
+    @Override
+	public boolean getShowFitRoi() {
       return showFitRoi_;
     }
 
@@ -43170,12 +44745,14 @@ public final class GUIProtos {
     /**
      * <code>double snr_threshold = 8;</code>
      */
-    public double getSnrThreshold() {
+    @Override
+	public double getSnrThreshold() {
       return snrThreshold_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -43184,7 +44761,8 @@ public final class GUIProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (channel_ != 0) {
         output.writeInt32(1, channel_);
@@ -43212,7 +44790,8 @@ public final class GUIProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -43389,14 +44968,16 @@ public final class GUIProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.SpotFitSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -43423,7 +45004,8 @@ public final class GUIProtos {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -43445,7 +45027,8 @@ public final class GUIProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         channel_ = 0;
 
@@ -43466,16 +45049,19 @@ public final class GUIProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.GUIProtos.SpotFitSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.SpotFitSettings build() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.SpotFitSettings build() {
         gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -43483,7 +45069,8 @@ public final class GUIProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.SpotFitSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.GUIProtos.SpotFitSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = new gdsc.smlm.data.config.GUIProtos.SpotFitSettings(this);
         result.channel_ = channel_;
         result.searchRadius_ = searchRadius_;
@@ -43497,33 +45084,40 @@ public final class GUIProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings) {
           return mergeFrom((gdsc.smlm.data.config.GUIProtos.SpotFitSettings)other);
         } else {
@@ -43562,11 +45156,13 @@ public final class GUIProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -43588,14 +45184,15 @@ public final class GUIProtos {
       /**
        * <code>int32 channel = 1;</code>
        */
-      public int getChannel() {
+      @Override
+	public int getChannel() {
         return channel_;
       }
       /**
        * <code>int32 channel = 1;</code>
        */
       public Builder setChannel(int value) {
-        
+
         channel_ = value;
         onChanged();
         return this;
@@ -43604,7 +45201,7 @@ public final class GUIProtos {
        * <code>int32 channel = 1;</code>
        */
       public Builder clearChannel() {
-        
+
         channel_ = 0;
         onChanged();
         return this;
@@ -43614,14 +45211,15 @@ public final class GUIProtos {
       /**
        * <code>int32 search_radius = 2;</code>
        */
-      public int getSearchRadius() {
+      @Override
+	public int getSearchRadius() {
         return searchRadius_;
       }
       /**
        * <code>int32 search_radius = 2;</code>
        */
       public Builder setSearchRadius(int value) {
-        
+
         searchRadius_ = value;
         onChanged();
         return this;
@@ -43630,7 +45228,7 @@ public final class GUIProtos {
        * <code>int32 search_radius = 2;</code>
        */
       public Builder clearSearchRadius() {
-        
+
         searchRadius_ = 0;
         onChanged();
         return this;
@@ -43640,14 +45238,15 @@ public final class GUIProtos {
       /**
        * <code>int32 fit_radius = 3;</code>
        */
-      public int getFitRadius() {
+      @Override
+	public int getFitRadius() {
         return fitRadius_;
       }
       /**
        * <code>int32 fit_radius = 3;</code>
        */
       public Builder setFitRadius(int value) {
-        
+
         fitRadius_ = value;
         onChanged();
         return this;
@@ -43656,7 +45255,7 @@ public final class GUIProtos {
        * <code>int32 fit_radius = 3;</code>
        */
       public Builder clearFitRadius() {
-        
+
         fitRadius_ = 0;
         onChanged();
         return this;
@@ -43666,14 +45265,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_overlay = 4;</code>
        */
-      public boolean getShowOverlay() {
+      @Override
+	public boolean getShowOverlay() {
         return showOverlay_;
       }
       /**
        * <code>bool show_overlay = 4;</code>
        */
       public Builder setShowOverlay(boolean value) {
-        
+
         showOverlay_ = value;
         onChanged();
         return this;
@@ -43682,7 +45282,7 @@ public final class GUIProtos {
        * <code>bool show_overlay = 4;</code>
        */
       public Builder clearShowOverlay() {
-        
+
         showOverlay_ = false;
         onChanged();
         return this;
@@ -43692,14 +45292,15 @@ public final class GUIProtos {
       /**
        * <code>bool attach_to_slice = 5;</code>
        */
-      public boolean getAttachToSlice() {
+      @Override
+	public boolean getAttachToSlice() {
         return attachToSlice_;
       }
       /**
        * <code>bool attach_to_slice = 5;</code>
        */
       public Builder setAttachToSlice(boolean value) {
-        
+
         attachToSlice_ = value;
         onChanged();
         return this;
@@ -43708,7 +45309,7 @@ public final class GUIProtos {
        * <code>bool attach_to_slice = 5;</code>
        */
       public Builder clearAttachToSlice() {
-        
+
         attachToSlice_ = false;
         onChanged();
         return this;
@@ -43718,14 +45319,15 @@ public final class GUIProtos {
       /**
        * <code>bool log_progress = 6;</code>
        */
-      public boolean getLogProgress() {
+      @Override
+	public boolean getLogProgress() {
         return logProgress_;
       }
       /**
        * <code>bool log_progress = 6;</code>
        */
       public Builder setLogProgress(boolean value) {
-        
+
         logProgress_ = value;
         onChanged();
         return this;
@@ -43734,7 +45336,7 @@ public final class GUIProtos {
        * <code>bool log_progress = 6;</code>
        */
       public Builder clearLogProgress() {
-        
+
         logProgress_ = false;
         onChanged();
         return this;
@@ -43744,14 +45346,15 @@ public final class GUIProtos {
       /**
        * <code>bool show_fit_roi = 7;</code>
        */
-      public boolean getShowFitRoi() {
+      @Override
+	public boolean getShowFitRoi() {
         return showFitRoi_;
       }
       /**
        * <code>bool show_fit_roi = 7;</code>
        */
       public Builder setShowFitRoi(boolean value) {
-        
+
         showFitRoi_ = value;
         onChanged();
         return this;
@@ -43760,7 +45363,7 @@ public final class GUIProtos {
        * <code>bool show_fit_roi = 7;</code>
        */
       public Builder clearShowFitRoi() {
-        
+
         showFitRoi_ = false;
         onChanged();
         return this;
@@ -43770,14 +45373,15 @@ public final class GUIProtos {
       /**
        * <code>double snr_threshold = 8;</code>
        */
-      public double getSnrThreshold() {
+      @Override
+	public double getSnrThreshold() {
         return snrThreshold_;
       }
       /**
        * <code>double snr_threshold = 8;</code>
        */
       public Builder setSnrThreshold(double value) {
-        
+
         snrThreshold_ = value;
         onChanged();
         return this;
@@ -43786,17 +45390,19 @@ public final class GUIProtos {
        * <code>double snr_threshold = 8;</code>
        */
       public Builder clearSnrThreshold() {
-        
+
         snrThreshold_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -43817,7 +45423,8 @@ public final class GUIProtos {
 
     private static final com.google.protobuf.Parser<SpotFitSettings>
         PARSER = new com.google.protobuf.AbstractParser<SpotFitSettings>() {
-      public SpotFitSettings parsePartialFrom(
+      @Override
+	public SpotFitSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -43834,7 +45441,8 @@ public final class GUIProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -43842,122 +45450,122 @@ public final class GUIProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_GUIFilterSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSFCalculatorSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable;
 
@@ -44257,7 +45865,8 @@ public final class GUIProtos {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

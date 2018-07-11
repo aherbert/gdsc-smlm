@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -57,9 +57,9 @@ public class About implements PlugIn, MacroExtension
 	{
 		//@formatter:off
 		INSTALL{ @Override
-		public String getName() { return "Install"; }}, 
+		public String getName() { return "Install"; }},
 		REMOVE{ @Override
-		public String getName() { return "Remove"; }}, 
+		public String getName() { return "Remove"; }},
 		EDIT{ @Override
 		public String getName() { return "Edit & Install"; }};
 		//@formatter:on
@@ -293,7 +293,7 @@ public class About implements PlugIn, MacroExtension
 		}
 
 		// Read the file
-		LinkedList<String> contents = new LinkedList<String>();
+		LinkedList<String> contents = new LinkedList<>();
 		BufferedReader input = null;
 		try
 		{
@@ -393,7 +393,7 @@ public class About implements PlugIn, MacroExtension
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.macro.MacroExtension#handleExtension(java.lang.String, java.lang.Object[])
 	 */
 	@Override
@@ -422,13 +422,13 @@ public class About implements PlugIn, MacroExtension
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.macro.MacroExtension#getExtensionFunctions()
 	 */
 	@Override
 	public ExtensionDescriptor[] getExtensionFunctions()
 	{
-		ArrayList<ExtensionDescriptor> list = new ArrayList<ExtensionDescriptor>(3);
+		ArrayList<ExtensionDescriptor> list = new ArrayList<>(3);
 		list.add(ExtensionDescriptor.newDescriptor("getNumberOfSpecies", this,
 				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
 		list.add(ExtensionDescriptor.newDescriptor("getD", this, MacroExtension.ARG_NUMBER,

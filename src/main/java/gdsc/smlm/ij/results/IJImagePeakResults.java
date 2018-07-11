@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -198,7 +198,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#begin()
 	 */
 	@Override
@@ -226,7 +226,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		}
 
 		// Q. Should this be changed to handle the data in non-pixel distances.
-		// At the moment we hope that the results IO can work out the units and convert them during load. 
+		// At the moment we hope that the results IO can work out the units and convert them during load.
 		boolean validCalibration = isUncalibrated() || (hasCalibration() && getCalibrationReader().hasDistanceUnit() &&
 				getCalibrationReader().getDistanceUnit() == DistanceUnit.PIXEL);
 
@@ -359,7 +359,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	private ImageProcessor createNewProcessor(int imageWidth, int imageHeight)
 	{
-		// Equalised display requires a 16-bit image to allow fast processing of the histogram 
+		// Equalised display requires a 16-bit image to allow fast processing of the histogram
 		if ((displayFlags & DISPLAY_EQUALIZED) != 0)
 		{
 			pixels = new short[data.length];
@@ -408,7 +408,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/**
 	 * Create the image from a clone of the current data. Should only be called by one thread which has the lock so can
 	 * use class variables and the actual pixel buffer.
-	 * 
+	 *
 	 * @return The size when the image data was cloned
 	 */
 	private void createImage()
@@ -501,9 +501,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
 			{
-				// We use NaN to mark the data as empty. 
-				// This cannot be displayed in ImageJ so we use -Infinity in the 
-				// data as a special value. This is ignored by ImageJ for most 
+				// We use NaN to mark the data as empty.
+				// This cannot be displayed in ImageJ so we use -Infinity in the
+				// data as a special value. This is ignored by ImageJ for most
 				// FloatProcessor functionality.
 				int i = findNonNaNIndex(data);
 				if (i == -1)
@@ -561,7 +561,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -736,7 +736,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		// Note: It is very unlikely that dx and dy will be 0.5f so we ignore this case for speed.
 		// It could be added later to test if speed is impacted since we return the number of indices.
-		// If a user wants to add data only to one pixel then they can remove the weighted option. 
+		// If a user wants to add data only to one pixel then they can remove the weighted option.
 
 		indices[4] = 4;
 
@@ -751,7 +751,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Get the 4 neighbours and avoid overrun. In this case the edge pixel will get the entire value.
 		final int xDelta, yDelta;
 
-		// Note: The image width/height could be zero making the deltas invalid. However in this case the 
+		// Note: The image width/height could be zero making the deltas invalid. However in this case the
 		// getValue(...) method will never be called.
 
 		if (dx < 0.5f)
@@ -824,7 +824,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value
-	 * 
+	 *
 	 * @param peak
 	 *            The peak frame
 	 * @param x
@@ -860,7 +860,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value
-	 * 
+	 *
 	 * @param x
 	 *            The X coordinate
 	 * @param y
@@ -892,7 +892,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value
-	 * 
+	 *
 	 * @param allpeak
 	 *            The peak frames
 	 * @param allx
@@ -971,7 +971,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value
-	 * 
+	 *
 	 * @param allx
 	 *            The X coordinates
 	 * @param ally
@@ -1038,7 +1038,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Check if the stack should be updated to move the rolling window to the given peak.
-	 * 
+	 *
 	 * @param peak
 	 * @return True if update is required
 	 */
@@ -1050,7 +1050,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/**
 	 * Add frames to the current stack to ensure the rolling window size is enforced (i.e. batches of N are drawn as a
 	 * frame)
-	 * 
+	 *
 	 * @param peak
 	 */
 	protected void checkAndUpdateToFrame(int peak)
@@ -1062,7 +1062,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/**
 	 * Add frames to the current stack to ensure the rolling window size is enforced (i.e. batches of N are drawn as a
 	 * frame)
-	 * 
+	 *
 	 * @param peak
 	 */
 	protected void updateToFrame(int peak)
@@ -1078,7 +1078,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				if (i++ == 0)
 				{
 					// Draw all current data for first time we move forward.
-					// Force repaint 
+					// Force repaint
 					forceUpdateImage();
 				}
 
@@ -1105,7 +1105,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -1117,7 +1117,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -1271,7 +1271,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
 	@Override
@@ -1282,7 +1282,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
 	@Override
@@ -1323,7 +1323,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Image will be repainted when the size is increased by a fraction of the last size painted.
-	 * 
+	 *
 	 * @param repaintInterval
 	 *            the repaintInterval to set
 	 */
@@ -1384,7 +1384,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	@Override
@@ -1406,7 +1406,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * a window size of 10 will combine 10 consecutive fitting frames into 1 plane.
 	 * <p>
 	 * This setting only applies before the {@link #begin()} method.
-	 * 
+	 *
 	 * @param rollingWindowSize
 	 *            the rollingWindowSize to set
 	 */
@@ -1417,7 +1417,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Over-ridden to ignore any passed in bounds. The bounds must be set when the image is created.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.AbstractPeakResults#setBounds(java.awt.Rectangle)
 	 */
 	@Override
@@ -1436,7 +1436,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	/**
 	 * Set to true if the image should be displayed. Should be called before {@link #begin()}
-	 * 
+	 *
 	 * @param displayImage
 	 *            Set to true if the image should be displayed.
 	 */

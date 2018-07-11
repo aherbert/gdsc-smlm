@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 	 * The arrays must match the fixed size of the Chromosome sequences to be mutated.
 	 * <p>
 	 * All settings are overridden even if null arrays are passed for some arguments.
-	 * 
+	 *
 	 * @param stepSize
 	 *            The mutation step size (must not be null)
 	 * @param lower
@@ -81,7 +81,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 
 	/**
 	 * Determine the positions that have a step size greater than zero, i.e. can be mutated
-	 * 
+	 *
 	 * @param step
 	 *            The step sizes for each sequence position
 	 */
@@ -103,7 +103,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 	 * positions. The positions are then chosen randomly. Note that the same position may be chosen multiple times. The
 	 * random shifts for each mutation are taken from a Gaussian using the chromosome mutation step range as the
 	 * standard deviation. Set step size to zero for no mutation at a position.
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Mutator#mutate(gdsc.smlm.ga.Chromosome)
 	 */
 	@Override

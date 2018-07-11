@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -41,7 +41,7 @@ public class ChiSquaredDistributionTableTest
 	// https://en.wikipedia.org/wiki/Chi-squared_distribution#Table_of_.CF.872_values_vs_p-values
 	//@formatter:off
 	double[] p = {0.95,0.90,0.80,0.70,0.50,0.30,0.20,0.10,0.05,0.01,0.001};
-	double[][] chi2 = new double[][] { 
+	double[][] chi2 = new double[][] {
         {0.004,0.02,0.06,0.15,0.46,1.07,1.64,2.71,3.84,6.64,10.83},
         {0.10,0.21,0.45,0.71,1.39,2.41,3.22,4.60,5.99,9.21,13.82},
         {0.35,0.58,1.01,1.42,2.37,3.66,4.64,6.25,7.82,11.34,16.27},

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -705,7 +705,7 @@ public class ImageSourceTest
 			Assert.assertArrayEquals(all, d, 0);
 		}
 
-		// Check all the data is valid but skipped interlaced points return null 
+		// Check all the data is valid but skipped interlaced points return null
 		for (int i = 0; i < data.length; i++)
 		{
 			int frame = i + 1;
@@ -752,7 +752,7 @@ public class ImageSourceTest
 	/**
 	 * Create data using the specified dimensions and the number of frames. Each frame will have a different base
 	 * number and each index will be unique in the frame.
-	 * 
+	 *
 	 * @param w
 	 *            width
 	 * @param h
@@ -763,7 +763,7 @@ public class ImageSourceTest
 	 */
 	private float[][] createData(int w, int h, int n)
 	{
-		List<float[]> data = new ArrayList<float[]>(n);
+		List<float[]> data = new ArrayList<>(n);
 		float f = 1;
 		for (int i = 0; i < n; i++)
 		{
@@ -775,7 +775,7 @@ public class ImageSourceTest
 
 	/**
 	 * Create data using the specified dimensions and the base number. Each index will be unique in the frame.
-	 * 
+	 *
 	 * @param w
 	 *            width
 	 * @param h
@@ -795,7 +795,7 @@ public class ImageSourceTest
 
 	/**
 	 * Check if the frame is contained in the expected frames array
-	 * 
+	 *
 	 * @param frame
 	 * @param expected
 	 * @return true if within the array
@@ -810,7 +810,7 @@ public class ImageSourceTest
 
 	/**
 	 * Crop the data to the specified bounds
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param bounds
@@ -832,7 +832,7 @@ public class ImageSourceTest
 
 	/**
 	 * Sum all the input arrays
-	 * 
+	 *
 	 * @param f
 	 * @return The summed array
 	 */

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,7 +72,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 		w = new double[n];
 
 		// From Ruisheng, et al (2017):
-		// Total noise = variance + max(di, 0) + 1 
+		// Total noise = variance + max(di, 0) + 1
 
 		if (var != null && var.length == n)
 		{
@@ -89,7 +89,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 
 	/**
 	 * Compute the Fisher information matrix
-	 * 
+	 *
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
@@ -97,23 +97,23 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
-	 * 
+	 *
 	 * Note that this is only a true Fisher information matrix if the function returns the expected value for a
 	 * Poisson process (see Smith, et al (2010)). In this case the equation reduces to:
-	 * 
+	 *
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
-	 * 
+	 *
 	 * In this case Yi refers to the expected value at observation i. This expression was updated (Ruisheng, et al
 	 * (2017)) to use Yi as the observed value at observation i (Oi). To increase stability for zero or small Oi a
 	 * Baysian prior is added using max(0, Oi) + 1. To account for Gaussian noise per observation using the variance
 	 * (vari) the weights can be combined resulting in:
-	 * 
+	 *
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / (max(0, Oi) + 1 + vari)
 	 * </pre>
-	 * 
+	 *
 	 * <p>
 	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
 	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
@@ -121,7 +121,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 * See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras -
 	 * characterisation of a computationally efficient localization approach. Optical Express 25, Issue 10, pp
 	 * 11701-11716.
-	 * 
+	 *
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 *
 	 * @param a
@@ -149,7 +149,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
 	@Override

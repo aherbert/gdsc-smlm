@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -326,7 +326,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		fitConfig = config.getFitConfiguration();
 		// Set some default fit settings here ...
 		fitConfig.setDisableSimpleFilter(false);
-		fitConfig.setMinPhotons(1); // Do not allow negative photons 
+		fitConfig.setMinPhotons(1); // Do not allow negative photons
 		fitConfig.setCoordinateShiftFactor(0);
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setMinWidthFactor(0);
@@ -479,7 +479,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		/**
 		 * Return a score for the difference between the fitted and actual signal. Zero is no difference. Negative is
 		 * the fitted is below the actual. Positive means the fitted is above the actual.
-		 * 
+		 *
 		 * @return The factor difference between the successfully fitted signal and the actual signal.
 		 */
 		public abstract double getSignalFactor();
@@ -487,7 +487,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		/**
 		 * Return a score for the difference between the fitted and actual signal. Zero is no difference.
 		 * Positive means the fitted is difference from the actual.
-		 * 
+		 *
 		 * @return The factor difference between the successfully fitted signal and the actual signal.
 		 */
 		public double getAbsoluteSignalFactor()
@@ -563,7 +563,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		// Integer counts of positives (matches) and negatives
 		final int p, n;
-		// Double sums of the fractions match score and antiscore 
+		// Double sums of the fractions match score and antiscore
 		final double np, nn;
 		final ScoredSpot[] spots;
 		final int maxCandidate;
@@ -591,7 +591,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#clone()
 		 */
 		@Override
@@ -642,7 +642,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final MultiPathFilter multiFilter;
 
 		float[] data = null;
-		List<PointPair> matches = new ArrayList<PointPair>();
+		List<PointPair> matches = new ArrayList<>();
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
 				TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
@@ -657,7 +657,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
-			this.results = new TIntObjectHashMap<FilterCandidates>();
+			this.results = new TIntObjectHashMap<>();
 			bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
 			// Instance copy
 			multiFilter = BenchmarkSpotFit.multiFilter.clone();
@@ -665,7 +665,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -727,7 +727,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			parameters.benchmarkFilter = multiFilter;
 
 			final ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
-			fitWorker.run(job); // Results will be stored in the fit job 
+			fitWorker.run(job); // Results will be stored in the fit job
 
 			for (int i = 0; i < totalCandidates; i++)
 			{
@@ -753,12 +753,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 
 				// Allow for doublets the predicted array
-				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(totalCandidates * 2);
+				final ArrayList<MultiPathPoint> predicted = new ArrayList<>(totalCandidates * 2);
 				matches.clear();
 
 				for (int i = 0; i < totalCandidates; i++)
 				{
-					// Use all the results. 
+					// Use all the results.
 					// Store results using the candidate Id. The best match for each Id will be chosen.
 					final int size = predicted.size();
 
@@ -783,7 +783,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					// Perhaps we should pair up the closest matches using the signal factor as well.
 
 					final double matchDistance = distanceInPixels * distanceInPixels;
-					ArrayList<Assignment> assignments = new ArrayList<Assignment>();
+					ArrayList<Assignment> assignments = new ArrayList<>();
 
 					// Match all the fit results to spots. We want to match all fit results to actual spots.
 					// All remaining candidate spots can then be matched to any remaining actual spots.
@@ -903,7 +903,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 			match = Arrays.copyOf(match, matchCount);
 
-			// Mark the results 
+			// Mark the results
 			double tp = 0;
 			double fp = 0;
 			double tn = 0;
@@ -912,7 +912,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			for (int i = 0; i < match.length; i++)
 			{
 				// Score using just the distance.
-				// The signal has been used only to compute the best match when two spots are close. 
+				// The signal has been used only to compute the best match when two spots are close.
 				final double s = rampedScore.scoreAndFlatten(match[i].d, 256);
 				match[i].score = s;
 
@@ -960,7 +960,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -1124,7 +1124,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		boolean myUseBenchmarkSettings = false;
 		if (benchmarkSettingsCheckbox)
-			//useBenchmarkSettings = 
+			//useBenchmarkSettings =
 			myUseBenchmarkSettings = gd.getNextBoolean();
 
 		// Read dialog settings
@@ -1225,7 +1225,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		if (lowerSignalFactor > signalFactor)
 			lowerSignalFactor = signalFactor;
 
-		// Distances relative to sa (not s) as this is the same as the BenchmarkSpotFilter plugin 
+		// Distances relative to sa (not s) as this is the same as the BenchmarkSpotFilter plugin
 		distanceInPixels = distance * sa / simulationParameters.a;
 		lowerDistanceInPixels = lowerDistance * sa / simulationParameters.a;
 
@@ -1306,9 +1306,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-		List<Worker> workers = new LinkedList<Worker>();
-		List<Thread> threads = new LinkedList<Thread>();
+		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		List<Worker> workers = new LinkedList<>();
+		List<Thread> threads = new LinkedList<>();
 		PeakResults syncResults = SynchronizedPeakResults.create(peakResults, nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
@@ -1369,7 +1369,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		fitResultsId++;
-		fitResults = new TIntObjectHashMap<FilterCandidates>();
+		fitResults = new TIntObjectHashMap<>();
 		for (Worker w : workers)
 		{
 			fitResults.putAll(w.results);
@@ -1453,20 +1453,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	/**
 	 * Extract all the filter candidates in order until the desired number of positives have been reached and the number
 	 * of negatives matches the configured parameters.
-	 * 
+	 *
 	 * @param filterResults
 	 * @return The filter candidates
 	 */
 	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults,
 			int fitting)
 	{
-		// Convert fractions from percent 
+		// Convert fractions from percent
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
 		final int[] counter = new int[2];
 
-		final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<FilterCandidates>();
+		final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<>();
 		fP = fN = 0;
 		nP = nN = 0;
 		final double[] fX = new double[2];
@@ -1622,12 +1622,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		createTable();
 
-		// Summarise the fitting results. N fits, N failures. 
+		// Summarise the fitting results. N fits, N failures.
 		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
 		StoredDataStatistics distanceStats = new StoredDataStatistics();
 		StoredDataStatistics depthStats = new StoredDataStatistics();
 
-		// Get stats for all fitted results and those that match 
+		// Get stats for all fitted results and those that match
 		// Signal, SNR, Width, xShift, yShift, Precision
 		createFilterCriteria();
 		StoredDataStatistics[][] stats = new StoredDataStatistics[3][filterCriteria.length];
@@ -1747,7 +1747,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// We want to compute the Jaccard against the spot metric
 
 		// Filter the results using the multi-path filter
-		ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<MultiPathFitResults>(filterCandidates.size());
+		ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<>(filterCandidates.size());
 		for (int i = 0; i < frames.length; i++)
 		{
 			int frame = frames[i];
@@ -1758,7 +1758,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			multiPathResults.add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));
 		}
 		// Score the results and count the number returned
-		List<FractionalAssignment[]> assignments = new ArrayList<FractionalAssignment[]>();
+		List<FractionalAssignment[]> assignments = new ArrayList<>();
 		final TIntHashSet set = new TIntHashSet(nUniqueIDs);
 		FractionScoreStore scoreStore = new FractionScoreStore()
 		{
@@ -1890,7 +1890,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		sb.append(spotFilter.getDescription());
 
-		// nP and nN is the fractional score of the spot candidates 
+		// nP and nN is the fractional score of the spot candidates
 		addCount(sb, nP + nN);
 		addCount(sb, nP);
 		addCount(sb, nN);
@@ -1973,8 +1973,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		double[] rank = (showCorrelation) ? new double[i1.length] : null;
 		ci = 0;
 		FastCorrelator fastCorrelator = new FastCorrelator();
-		ArrayList<Ranking> pc1 = new ArrayList<Ranking>();
-		ArrayList<Ranking> pc2 = new ArrayList<Ranking>();
+		ArrayList<Ranking> pc1 = new ArrayList<>();
+		ArrayList<Ranking> pc2 = new ArrayList<>();
 		for (int ci2 : indices)
 		{
 			fastCorrelator.add(Math.round(i1[ci2]), Math.round(i2[ci2]));
@@ -2143,7 +2143,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filterSettings = filterSettings.toBuilder().setFilterSetFilename(filename).build();
 
 			// Create a filter set using the ranges
-			ArrayList<Filter> filters = new ArrayList<Filter>(3);
+			ArrayList<Filter> filters = new ArrayList<>(3);
 			MultiFilter2 mf = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 			filters.add(mf.create(lower));
 			filters.add(mf.create(upper));
@@ -2158,7 +2158,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			// Make the 4-set filters the same as the 3-set filters.
 
-			filters = new ArrayList<Filter>(4);
+			filters = new ArrayList<>(4);
 			filters.add(mf.create(min));
 			filters.add(mf.create(lower));
 			filters.add(mf.create(upper));
@@ -2169,8 +2169,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private boolean saveFilters(String filename, ArrayList<Filter> filters)
 	{
-		ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
-		// Add Range keyword to identify as a range filter set 
+		ArrayList<FilterSet> filterList = new ArrayList<>(1);
+		// Add Range keyword to identify as a range filter set
 		filterList.add(new FilterSet("Range", filters));
 		FileOutputStream fos = null;
 		try
@@ -2290,7 +2290,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				stats[0][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
 			}
 
-			// Add to the TP or FP stats 
+			// Add to the TP or FP stats
 			// If it has assignments then it was a match to something
 			isMatch |= result.hasAssignments();
 			final int index = (result.hasAssignments()) ? 1 : 2;
@@ -2499,7 +2499,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			double[] xlimit = Maths.limits(h1[0]);
 			xlimit = Maths.limits(xlimit, h2[0]);
 			xlimit = Maths.limits(xlimit, h3[0]);
-			// Restrict using the inter-quartile range 
+			// Restrict using the inter-quartile range
 			if (filterCriteria[i].restrictRange)
 			{
 				double q1 = d.getPercentile(25);
@@ -2818,7 +2818,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			pFitConfig.setComputeResiduals(false);
 		}
 
-		// We used simple filtering. 
+		// We used simple filtering.
 		pFitConfig.setSmartFilter(false);
 
 		return true;

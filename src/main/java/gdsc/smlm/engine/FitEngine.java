@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -56,7 +56,7 @@ public class FitEngine
 
 	private FitJob sum = null;
 
-	// Used by the FitWorkers 
+	// Used by the FitWorkers
 	private int fitting;
 	private MaximaSpotFilter spotFilter;
 	private Logger logger = null;
@@ -66,7 +66,7 @@ public class FitEngine
 	/**
 	 * Return the fitting window size calculated using the fitting parameter and the configured peak
 	 * widths. The actual window is 2n+1 around the local maxima.
-	 * 
+	 *
 	 * @return The size of the fitting window
 	 */
 	public int getFitting()
@@ -84,7 +84,7 @@ public class FitEngine
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param config
 	 *            The fit configuration
 	 * @param results
@@ -101,7 +101,7 @@ public class FitEngine
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param config
 	 *            The fit configuration
 	 * @param results
@@ -111,7 +111,7 @@ public class FitEngine
 	 * @param queueType
 	 *            Specify the queue behaviour
 	 * @param queueSize
-	 *            The size of the queue ({@link #queueType}
+	 *            The size of the queue
 	 */
 	public FitEngine(FitEngineConfiguration config, PeakResults results, int threads, FitQueue queueType, int queueSize)
 	{
@@ -121,18 +121,18 @@ public class FitEngine
 			queueSize = 3;
 		}
 
-		workers = new ArrayList<FitWorker>(threads);
-		this.threads = new ArrayList<Thread>(threads);
+		workers = new ArrayList<>(threads);
+		this.threads = new ArrayList<>(threads);
 		this.queueType = queueType;
 		switch (queueType)
 		{
 			case BLOCKING:
 			default:
-				this.jobs = new ArrayBlockingQueue<FitJob>(queueSize);
+				this.jobs = new ArrayBlockingQueue<>(queueSize);
 				break;
 			case NON_BLOCKING:
 			case IGNORE:
-				this.jobs = new LinkedBlockingQueue<FitJob>();
+				this.jobs = new LinkedBlockingQueue<>();
 				break;
 		}
 		this.results = results;
@@ -189,7 +189,7 @@ public class FitEngine
 
 	/**
 	 * Locate all the peaks in the given processor. Adds the work to the current queue.
-	 * 
+	 *
 	 * @param job
 	 *            The job
 	 */
@@ -215,7 +215,7 @@ public class FitEngine
 
 	/**
 	 * Adds the work to the current queue.
-	 * 
+	 *
 	 * @param job
 	 *            The job
 	 */
@@ -236,7 +236,7 @@ public class FitEngine
 	 * Signal that no more fitting work will be added to the queue.
 	 * <p>
 	 * Ask all threads to end and wait. Returns when all threads have stopped running.
-	 * 
+	 *
 	 * @param now
 	 *            Stop the work immediately, otherwise finish all work in the queue
 	 */
@@ -256,7 +256,7 @@ public class FitEngine
 			for (FitWorker worker : workers)
 				worker.finish();
 
-			// Workers may be waiting for a job. 
+			// Workers may be waiting for a job.
 			// Add null jobs if the queue is not at capacity so they can be collected by alive workers.
 			// If there are already jobs then the worker will stop due to the finish() signal.
 			for (int i = 0; i < threads.size(); i++)
@@ -341,7 +341,7 @@ public class FitEngine
 
 	/**
 	 * If false then the engine can be shutdown by using {@link #end(boolean)}
-	 * 
+	 *
 	 * @return True if there are no worker threads
 	 */
 	public boolean isThreadsEmpty()

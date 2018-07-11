@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -156,7 +156,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 	 * Gaussian-Gaussian convolution: var1 * var2 => var = var1+var2.
 	 * The Fisher information of Gaussian mean is 1/variance.
 	 * The Poisson-Gaussian Fisher information is therefore 1 / (t + s*s).
-	 * 
+	 *
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
 	@Override
@@ -166,7 +166,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		// Poisson fisher information
 		double I = 1.0 / t;
-		// The Fisher information is returned using the alpha multiplied by the 
+		// The Fisher information is returned using the alpha multiplied by the
 		// Poisson Fisher information.
 		if (I != Double.POSITIVE_INFINITY)
 			I *= getAlpha(t);
@@ -175,7 +175,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.BasePoissonFisherInformation#getAlpha(double)
 	 */
 	@Override
@@ -194,14 +194,14 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 			return getAlphaMax(t);
 
 		// Within the range the poisson mean is converted to a log scale and alpha is
-		// interpolated. Use a fast log for this as the precision is not critical due 
-		// to the assumed error in the interpolation. 
+		// interpolated. Use a fast log for this as the precision is not critical due
+		// to the assumed error in the interpolation.
 		// At this point t is known to be in the bound >0, but it may be NaN or infinity
 		// so allow the checks (i.e. don't use fastLogD(double)).
 		final double x = fastLog.logD(t);
 
-		// Check again as fast log may not be precise. 
-		// This avoids an out-of-range exception in the interpolating function. 
+		// Check again as fast log may not be precise.
+		// This avoids an out-of-range exception in the interpolating function.
 		if (x <= min)
 			return getAlphaMin(t);
 		if (x >= max)
@@ -223,7 +223,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.BasePoissonFisherInformation#postClone()
 	 */
 	@Override

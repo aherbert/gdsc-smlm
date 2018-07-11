@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -161,7 +161,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#preProcess()
 	 */
 	@Override
@@ -173,7 +173,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#prepareFitValue(double[], double[])
 	 */
 	@Override
@@ -198,7 +198,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected double[] prepareY(double[] y)
 	{
 		// We can handle per-observation variances as detailed in
-		// Huang, et al. (2015) by simply adding the variances to the target data. 
+		// Huang, et al. (2015) by simply adding the variances to the target data.
 
 		final int n = y.length;
 		w = getWeights(n);
@@ -237,7 +237,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFitValue(double[])
 	 */
 	@Override
@@ -269,7 +269,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 				if (slope <= 0.0)
 				{
-					// The slope is invalid so update the position by removing bad 
+					// The slope is invalid so update the position by removing bad
 					// search direction components
 
 					switch (lineSearchMethod)
@@ -301,7 +301,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 							break;
 
 						case PARTIAL_IGNORE:
-							// Progressively ignore any search direction that is in the opposite direction to 
+							// Progressively ignore any search direction that is in the opposite direction to
 							// the first derivative gradient. Do this in order of the magnitude of the error
 							double[] slopeComponents = new double[gradient.length];
 							for (int i = 0; i < slopeComponents.length; i++)
@@ -335,7 +335,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 		computeGradients(a);
 
-		// Log-likelihood only needs to be computed if the tolerance checker 
+		// Log-likelihood only needs to be computed if the tolerance checker
 		// is testing the value. Use the Pseudo log-likelihood for speed.
 		if (tc.checkValue)
 		{
@@ -361,7 +361,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeStep(double[])
 	 */
 	@Override
@@ -372,14 +372,14 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 		// Simple Newton-Raphson update step as per Smith et al, (2010), SI Eq. 13:
 		// parameter -> new parameter + delta
-		// => new parameter = parameter - delta  
+		// => new parameter = parameter - delta
 		for (int i = 0; i < step.length; i++)
 			step[i] = -d1[i] / d2[i];
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#accept(double, double[], double, double[])
 	 */
 	@Override
@@ -394,15 +394,15 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
 	@Override
 	protected boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
-		// This is over-ridden since the yFit values are computed 
-		// and stored by the gradient procedure. The super-class SteppingFunctionSolver 
-		// wraps the function with a Gradient1FunctionStore to store the 
+		// This is over-ridden since the yFit values are computed
+		// and stored by the gradient procedure. The super-class SteppingFunctionSolver
+		// wraps the function with a Gradient1FunctionStore to store the
 		// yFit. This is not a gradient 2 function so causes a run-time error
 		// in createGradientProcedure(double[])
 
@@ -416,7 +416,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#prepareFunctionValue(double[], double[])
 	 */
 	@Override
@@ -429,7 +429,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFunctionValue(double[])
 	 */
 	@Override
@@ -464,7 +464,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeValues(double[])
 	 */
 	@Override
@@ -533,20 +533,20 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#getValue()
 	 */
 	@Override
 	public double getValue()
 	{
-		// Override this to return the log likelihood since the value may not 
+		// Override this to return the log likelihood since the value may not
 		// actually be computed during computeFitValue(double[])
 		return getLogLikelihood();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
 	@Override
@@ -567,7 +567,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
 	@Override
@@ -582,7 +582,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
 	@Override

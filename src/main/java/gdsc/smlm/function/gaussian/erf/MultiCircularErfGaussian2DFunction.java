@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -108,14 +108,14 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double s = abs(a[i + Gaussian2DFunction.X_SD]);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
 			final double one_2ss = 0.5 / (s * s);
 			final double I_sSqrt2pi = tI[n] * ONE_OVER_ROOT2PI / s;
 			final double I_ssSqrt2pi = tI[n] * ONE_OVER_ROOT2PI / (s * s);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			createFirstOrderTables(n, maxx, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEx, du_dtx, du_dtsx, tx);
 			createFirstOrderTables(n, maxy, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEy, du_dty, du_dtsy, ty);
@@ -135,7 +135,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double s = abs(a[i + Gaussian2DFunction.X_SD]);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
 			final double ss = s * s;
@@ -147,7 +147,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			final double one_sssSqrt2pi = one_sSqrt2pi / ss;
 			final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			createSecondOrderTables(n, maxx, tI[n], one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss,
 					one_sssSqrt2pi, one_sssssSqrt2pi, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx);
@@ -169,7 +169,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double s = abs(a[i + Gaussian2DFunction.X_SD]);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
 			final double ss = s * s;
@@ -181,7 +181,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			final double one_sssSqrt2pi = one_sSqrt2pi / ss;
 			final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			createExSecondOrderTables(n, maxx, tI[n], one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss,
 					one_sssSqrt2pi, one_sssssSqrt2pi, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx,
@@ -194,7 +194,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
 	 */
 	@Override
@@ -221,7 +221,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	@Override
@@ -247,7 +247,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
 			duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
 			//@formatter:off
-			d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] + 
+			d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] +
 					      d2u_dtsy2[yy] * deltaEx[xx] +
 					      2 * du_dtsx[xx] * du_dtsy[yy] / tI[n];
 			//@formatter:on
@@ -299,7 +299,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
 	@Override
@@ -328,7 +328,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient2Procedure)
 	 */
 	@Override
@@ -355,8 +355,8 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 					d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
 					duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
 					//@formatter:off
-    				d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] + 
-    							  d2u_dtsy2[yy] * deltaEx[xx] + 
+    				d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] +
+    							  d2u_dtsy2[yy] * deltaEx[xx] +
     						      du_dtsx[xx] * two_du_dtsy_tI[n];
     				//@formatter:on
 				}
@@ -367,7 +367,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
 	@Override
@@ -447,8 +447,8 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 					d2udadb[kkkk + 2] = d2udadb[kkk + 3];
 					// X SD,X SD
 					//@formatter:off
-					d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy] + 
-    						            d2u_dtsy2[yy] * deltaEx[xx] + 
+					d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy] +
+    						            d2u_dtsy2[yy] * deltaEx[xx] +
     						            du_dtsx[xx] * two_du_dtsy_tI[n];
     				//@formatter:on
 				}

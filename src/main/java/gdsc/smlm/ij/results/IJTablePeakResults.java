@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -83,7 +83,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	// Store the ROI painters that have been attached to TextPanels so they can be updated
 	// with a new image source
-	private static HashMap<TextPanel, ImageROIPainter> map = new HashMap<TextPanel, ImageROIPainter>();
+	private static HashMap<TextPanel, ImageROIPainter> map = new HashMap<>();
 
 	private boolean showDeviations = false;
 	private boolean showEndFrame = false;
@@ -131,7 +131,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#begin()
 	 */
 	@Override
@@ -139,8 +139,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	{
 		tableActive = false;
 
-		// Set-up unit processing that requires the calibration 
-		toPixelConverter = new IdentityTypeConverter<DistanceUnit>(null);
+		// Set-up unit processing that requires the calibration
+		toPixelConverter = new IdentityTypeConverter<>(null);
 		calculator = null;
 		canComputePrecision = false;
 		rounder = RounderFactory.create(roundingPrecision);
@@ -259,7 +259,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			roiPainter = new ImageROIPainter(resultsWindow.getTextPanel(), "", this);
 
 			// The ROI painter adds itself to the TextPanel as a mouse listener. However
-			// the TextPanel addMouseListener() adds to the private TextCanvas object so it 
+			// the TextPanel addMouseListener() adds to the private TextCanvas object so it
 			// cannot be retrieved. Store the painter in a global lookup table.
 			map.put(resultsWindow.getTextPanel(), roiPainter);
 		}
@@ -273,7 +273,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			// Update the coordinate provider (avoids memory leaks with old objects lying around)
 			roiPainter.setCoordProvider(this);
 
-			// Get the headings for extracting the coordinates 
+			// Get the headings for extracting the coordinates
 			String[] headings = tp.getColumnHeadings().split("\t");
 			indexT = indexX = indexY = -1;
 			for (int i = 0; i < headings.length; i++)
@@ -388,7 +388,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -450,7 +450,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append(size + 1).append('\t');
 		if (sourceText != null)
 			sb.append(sourceText);
-		// Do not calibrate the original values		
+		// Do not calibrate the original values
 		//if (showCalibratedValues)
 		//	sb.append(frame).append(String.format("\t%g", origX)).append(String.format("\t%g", origY));
 		//else
@@ -543,7 +543,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -568,7 +568,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
 	@Override
@@ -579,7 +579,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
 	@Override
@@ -616,7 +616,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	@Override
@@ -636,7 +636,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	/**
 	 * Use to set the title of the table. If an existing table exists with the same title then it will be appended,
 	 * otherwise a new table is created.
-	 * 
+	 *
 	 * @param tableTitle
 	 *            the table title
 	 */
@@ -844,7 +844,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	/**
 	 * Image will be repainted when a fraction of new results have been added.
-	 * 
+	 *
 	 * @param repaintInterval
 	 *            the repaintInterval to set (range 0.001-1)
 	 */
@@ -1061,14 +1061,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	// TODO - Extend the selection functionality so that selectionListeners can be added
-	// to receive notification whan items from the table are selected. 
+	// to receive notification whan items from the table are selected.
 	//	public void addSelectionListener()
 	//	{
-	//		
+	//
 	//	}
-	//	
+	//
 	//	public void removeSelectionListener()
 	//	{
-	//		
+	//
 	//	}
 }

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -276,7 +276,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Get the intensity
-	 * 
+	 *
 	 * @return The intensity of the first peak
 	 */
 	public float getIntensity()
@@ -602,7 +602,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Return the true positive score for use in classification analysis
-	 * 
+	 *
 	 * @return The true positive score
 	 */
 	public double getTruePositiveScore()
@@ -612,7 +612,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Return the false positive score for use in classification analysis
-	 * 
+	 *
 	 * @return The false positive score
 	 */
 	public double getFalsePositiveScore()
@@ -622,7 +622,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Return the true negative score for use in classification analysis
-	 * 
+	 *
 	 * @return The true negative score
 	 */
 	public double getTrueNegativeScore()
@@ -632,7 +632,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Return the false negative score for use in classification analysis
-	 * 
+	 *
 	 * @return The false negative score
 	 */
 	public double getFalseNegativeScore()
@@ -642,7 +642,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Return the squared distance to the other peak result
-	 * 
+	 *
 	 * @param r
 	 *            The result
 	 * @return The squared distance
@@ -656,7 +656,7 @@ public class PeakResult implements Cloneable
 
 	/**
 	 * Return the distance to the other peak result
-	 * 
+	 *
 	 * @param r
 	 *            The result
 	 * @return The distance
@@ -826,7 +826,7 @@ public class PeakResult implements Cloneable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override

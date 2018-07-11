@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -54,7 +54,7 @@ import gdsc.smlm.tsf.TSFProtos.ThetaUnits;
  * <p>
  * Has only limited support for TSF in that only 1 channel, position, slice and fluorophore type can be read into a
  * dataset.
- * 
+ *
  * @author Alex Herbert
  */
 public class TSFPeakResultsReader
@@ -213,7 +213,7 @@ public class TSFPeakResultsReader
 
 	/**
 	 * Read the results from the TSF file into memory
-	 * 
+	 *
 	 * @return The results set (or null if an error occurred)
 	 */
 	public MemoryPeakResults read()
@@ -416,8 +416,8 @@ public class TSFPeakResultsReader
 			System.err.println("Failed to read Spot message");
 			e.printStackTrace();
 
-			// This may just be an error because we ran out of spots to read. 
-			// Only fail if there is a number of expected spots. 
+			// This may just be an error because we ran out of spots to read.
+			// Only fail if there is a number of expected spots.
 			if (expectedSpots != 0)
 			{
 				System.err.println("Unexpected error in reading Spot messages, no results will be returned");
@@ -454,7 +454,7 @@ public class TSFPeakResultsReader
 	private static gdsc.smlm.data.config.UnitProtos.IntensityUnit[] intensityUnitsMap;
 	static
 	{
-		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
+		// These should have 1:1 mapping. We can extends the TSF proto if necessary.
 		cameraTypeMap = new gdsc.smlm.data.config.CalibrationProtos.CameraType[CameraType.values().length];
 		cameraTypeMap[CameraType.CCD.ordinal()] = gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD;
 		cameraTypeMap[CameraType.EMCCD.ordinal()] = gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD;

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -91,7 +91,7 @@ public abstract class ImageSource
 
 	/**
 	 * Create the image source
-	 * 
+	 *
 	 * @param name
 	 *            The name of the image source
 	 */
@@ -165,7 +165,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the width of the image frame. The frame returned by {@link #next()} will be equal to width * height.
-	 * 
+	 *
 	 * @return
 	 */
 	public int getWidth()
@@ -175,7 +175,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the height of the image frame. The frame returned by {@link #next()} will be equal to width * height.
-	 * 
+	 *
 	 * @return
 	 */
 	public int getHeight()
@@ -195,7 +195,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the number of frames that can be extracted from the image source with calls to {@link #next()}
-	 * 
+	 *
 	 * @return The total number of frames
 	 */
 	public int getFrames()
@@ -205,7 +205,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the start frame number of the source returned by the last call to {@link #get(int)} or {@link #next()}.
-	 * 
+	 *
 	 * @return The start frame number of the latest block of data
 	 */
 	public int getStartFrameNumber()
@@ -218,7 +218,7 @@ public abstract class ImageSource
 	 * <p>
 	 * This may be larger than the result returned by {@link #getFrames()} if the ImageSource is selecting a subset of
 	 * the possible frames.
-	 * 
+	 *
 	 * @return The end frame number of the latest block of data
 	 */
 	public int getEndFrameNumber()
@@ -231,7 +231,7 @@ public abstract class ImageSource
 	 * <p>
 	 * This should be called by subclasses that perform more complex frame manipulation than just getting a single
 	 * frame.
-	 * 
+	 *
 	 * @param startFrame
 	 *            the start frame of the current block of data
 	 * @param endFrame
@@ -248,7 +248,7 @@ public abstract class ImageSource
 	 * zero. The data is is packed in yx order: index = y * width + x;
 	 * <p>
 	 * Provides serial access to the data after a successful call to {@link #openSource()}
-	 * 
+	 *
 	 * @return the next frame (or null if at the end)
 	 */
 	public float[] next()
@@ -269,7 +269,7 @@ public abstract class ImageSource
 	 * <p>
 	 * Note: The bounds are relative to the image source origin so that bounds.x + bounds.width must be less or equal to
 	 * than {@link #getWidth()}, similarly for height.
-	 * 
+	 *
 	 * @param bounds
 	 *            The bounding limits of the frame to extract
 	 * @return the next frame (or null if at the end)
@@ -291,7 +291,7 @@ public abstract class ImageSource
 	 * zero. The data is is packed in yx order: index = y * width + x;
 	 * <p>
 	 * Provides serial access to the data after a successful call to {@link #openSource()}
-	 * 
+	 *
 	 * @return the next frame (or null if at the end)
 	 */
 	public Object nextRaw()
@@ -338,7 +338,7 @@ public abstract class ImageSource
 	 * <p>
 	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
 	 * significantly slower than using {@link #next()} to read all the data.
-	 * 
+	 *
 	 * @param frame
 	 * @return the frame (or null)
 	 */
@@ -356,7 +356,7 @@ public abstract class ImageSource
 	 * <p>
 	 * Note: The bounds are relative to the image source origin so that bounds.x + bounds.width must be less or equal to
 	 * than {@link #getWidth()}, similarly for height.
-	 * 
+	 *
 	 * @param frame
 	 * @param bounds
 	 *            The bounding limits of the frame to extract
@@ -382,7 +382,7 @@ public abstract class ImageSource
 	 * <p>
 	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
 	 * significantly slower than using {@link #next()} to read all the data.
-	 * 
+	 *
 	 * @param frame
 	 * @return the frame (or null)
 	 */
@@ -408,7 +408,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the name of the results source
-	 * 
+	 *
 	 * @return
 	 */
 	public String getName()
@@ -418,7 +418,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the parent source upon which this source is based. The default is to return null.
-	 * 
+	 *
 	 * @return The parent source
 	 */
 	public ImageSource getParent()
@@ -428,7 +428,7 @@ public abstract class ImageSource
 
 	/**
 	 * Get the original source for the data provided. The default is to return this object.
-	 * 
+	 *
 	 * @return The original source
 	 */
 	public ImageSource getOriginal()
@@ -438,7 +438,7 @@ public abstract class ImageSource
 
 	/**
 	 * Set the name of the results source
-	 * 
+	 *
 	 * @param name
 	 */
 	public void setName(String name)
@@ -454,7 +454,7 @@ public abstract class ImageSource
 	 * <p>
 	 * Note that the {@link #get(int)} method may still return null. This method can be used to determine if the
 	 * {@link #get(int)} method has skipped data, e.g. if interlaced, or if the data has actually ended.
-	 * 
+	 *
 	 * @param frame
 	 * @return true if valid
 	 */
@@ -462,7 +462,7 @@ public abstract class ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -534,7 +534,7 @@ public abstract class ImageSource
 
 	/**
 	 * Check if the bounds fit inside the image.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @param bounds

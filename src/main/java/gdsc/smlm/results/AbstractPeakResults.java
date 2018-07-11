@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -54,31 +54,31 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(java.util.Collection)
 	 */
 	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
-		// Utility function 
+		// Utility function
 		addAll(results.toArray(new PeakResult[results.size()]));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResultStore)
 	 */
 	@Override
 	public void addAll(PeakResultStore results)
 	{
-		// Utility function 
+		// Utility function
 		addAll(results.toArray());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#setSource(java.lang.String)
 	 */
 	@Override
@@ -89,7 +89,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#getSource()
 	 */
 	@Override
@@ -100,7 +100,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#setBounds(java.lang.String)
 	 */
 	@Override
@@ -111,7 +111,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#getBounds()
 	 */
 	@Override
@@ -131,7 +131,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#setCalibration(java.lang.String)
 	 */
 	@Override
@@ -143,7 +143,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#getCalibration()
 	 */
 	@Override
@@ -200,7 +200,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#getPSF()
 	 */
 	@Override
@@ -211,7 +211,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#setPSF(gdsc.smlm.data.config.SMLMSettings.PSF)
 	 */
 	@Override
@@ -222,7 +222,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#setConfiguration(java.lang.String)
 	 */
 	@Override
@@ -233,7 +233,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#getConfiguration()
 	 */
 	@Override
@@ -268,7 +268,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
-	 * 
+	 *
 	 * @return the nmPerPixel
 	 */
 	public double getNmPerPixel()
@@ -278,7 +278,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}
-	 * 
+	 *
 	 * @return the gain
 	 */
 	public double getGain()
@@ -298,7 +298,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
-	 * 
+	 *
 	 * @return the EMCCD flag
 	 * @deprecated Replaced by the camera type
 	 */
@@ -351,7 +351,7 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#copySettings(gdsc.utils.fitting.results.PeakResults)
 	 */
 	@Override

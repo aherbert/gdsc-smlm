@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -115,7 +115,7 @@ public class DoubleDHT2D extends DoubleImage2D
 
 	/**
 	 * Performs a forward transform, converting this image into the frequency domain.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             If already in the frequency domain
 	 */
@@ -404,7 +404,7 @@ public class DoubleDHT2D extends DoubleImage2D
 				int j = nr_m_r * nc + nc_m_c;
 				double h2e = (h2[i] + h2[j]) / 2.0;
 				double h2o = (h2[i] - h2[j]) / 2.0;
-				// As per multiply but reverse the addition sign for the conjugate  
+				// As per multiply but reverse the addition sign for the conjugate
 				tmp[i] = (h1[i] * h2e - h1[j] * h2o);
 			}
 		}
@@ -520,7 +520,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	 * of this image by the specified image. Both images are assumed to be in
 	 * the frequency domain. Division in the frequency domain is equivalent
 	 * to deconvolution in the space domain.
-	 * 
+	 *
 	 * @param h2e
 	 *            the pre-initialised h2e value
 	 * @param h2o
@@ -679,7 +679,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	/**
 	 * Swap quadrants 1 and 3 and 2 and 4 of image
 	 * so the power spectrum origin is at the center of the image.
-	 * 
+	 *
 	 * <pre>
 	    2 1
 	    3 4
@@ -694,12 +694,12 @@ public class DoubleDHT2D extends DoubleImage2D
 	/**
 	 * Swap quadrants 1 and 3 and 2 and 4 of the specified ImageProcessor
 	 * so the power spectrum origin is at the center of the image.
-	 * 
+	 *
 	 * <pre>
 	    2 1
 	    3 4
 	 * </pre>
-	 * 
+	 *
 	 * @param image
 	 *            The image (must be even dimensions)
 	 * @throws IllegalArgumentException
@@ -707,7 +707,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	public static void swapQuadrants(DoubleImage2D image) throws IllegalArgumentException
 	{
-		// This is a specialised version to allow using a double buffer and 
+		// This is a specialised version to allow using a double buffer and
 		// optimised for even sized images
 
 		int ny = image.getHeight();
@@ -723,7 +723,7 @@ public class DoubleDHT2D extends DoubleImage2D
 
 		//@formatter:off
 		// We swap: 0 <=> nx_2, 0 <=> ny_2
-		// 1 <=> 3 
+		// 1 <=> 3
 		swap(a, a, nx, nx_2,    0,    0, ny_2, nx_2, ny_2, tmp);
 		// 2 <=> 4
 		swap(a, a, nx,    0,    0, nx_2, ny_2, nx_2, ny_2, tmp);

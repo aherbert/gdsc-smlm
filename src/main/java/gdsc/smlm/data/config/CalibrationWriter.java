@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -140,7 +140,7 @@ public class CalibrationWriter extends CalibrationReader
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.data.config.CalibrationReader#getCalibrationOrBuilder()
 	 */
 	@Override
@@ -347,6 +347,6 @@ public class CalibrationWriter extends CalibrationReader
 		setCountPerPhoton(0); // gain
 
 		// This is still relevant to per-pixel camera settings as it is related to the chip sensitivity
-		//b.setQuantumEfficiency(0);   
+		//b.setQuantumEfficiency(0);
 	}
 }

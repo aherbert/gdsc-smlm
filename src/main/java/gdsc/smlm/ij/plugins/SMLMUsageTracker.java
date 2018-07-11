@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,14 +35,14 @@ import ij.plugin.PlugIn;
 public class SMLMUsageTracker implements PlugIn
 {
 	private static final String TITLE = "SMLM Usage Tracker";
-	private static HashMap<String, String[]> map = new HashMap<String, String[]>();
+	private static HashMap<String, String[]> map = new HashMap<>();
 	private static boolean trackerInitialised = false;
 	private static boolean mapInitialised = false;
 
 	/**
 	 * Record the use of the ImageJ plugin using the raw class and argument passed by ImageJ. The plugins config
 	 * file will be used to identify the correct ImageJ plugin path and title.
-	 * 
+	 *
 	 * @param clazz
 	 *            The class
 	 * @param argument
@@ -69,7 +69,7 @@ public class SMLMUsageTracker implements PlugIn
 
 	/**
 	 * Record the use of the ImageJ plugin
-	 * 
+	 *
 	 * @param name
 	 *            The plugin name
 	 * @param argument
@@ -99,7 +99,7 @@ public class SMLMUsageTracker implements PlugIn
 
 		synchronized (SMLMUsageTracker.class)
 		{
-			// Check again since this may be a second thread that was waiting  
+			// Check again since this may be a second thread that was waiting
 			if (trackerInitialised)
 				return;
 
@@ -126,7 +126,7 @@ public class SMLMUsageTracker implements PlugIn
 
 		synchronized (map)
 		{
-			// Check again since this may be a second thread that was waiting  
+			// Check again since this may be a second thread that was waiting
 			if (mapInitialised)
 				return;
 
@@ -137,7 +137,7 @@ public class SMLMUsageTracker implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override

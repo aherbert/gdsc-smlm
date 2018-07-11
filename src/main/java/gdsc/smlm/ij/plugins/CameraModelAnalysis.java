@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -88,7 +88,7 @@ import ij.process.ImageProcessor;
 public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener, OptionCollectedListener
 {
 	// Add mode to compute the distance over a range of photons at a set gain and variance
-	// Compute distance to simulation. Compute distance to another distribution. 
+	// Compute distance to simulation. Compute distance to another distribution.
 
 	private static final String TITLE = "Camera Model Analysis";
 	private static final KolmogorovSmirnovTest kolmogorovSmirnovTest = new KolmogorovSmirnovTest();
@@ -112,9 +112,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private enum Model implements NamedObject
 	{
 		///////////////
-		// CCD / sCMOS 
+		// CCD / sCMOS
 		///////////////
-		
+
 		POISSON_PMF { @Override
 		public String getName() { return "Poisson PMF"; } },
 		POISSON_DISRECTE { @Override
@@ -123,7 +123,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		public String getName() { return "Poisson (Continuous)"; } },
 		POISSON_GAUSSIAN_PDF { @Override
 		public String getName() { return "Poisson+Gaussian PDF integration"; } },
-		
+
 		// Best for CCD/sCMOS
 		POISSON_GAUSSIAN_PMF { @Override
 		public String getName() { return "Poisson+Gaussian PMF integration"; } },
@@ -134,19 +134,19 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		 // Mixed Poisson distribution (Noise is added as a second Poisson)
 		POISSON_POISSON { @Override
 		public String getName() { return "Poisson+Poisson"; } },
-		
+
 		///////////////
-		// EMCCD 
+		// EMCCD
 		///////////////
 		// There is no obvious best for EM-CCD:
 		// This requires a full range test to determine the best function for which
 		// parameters.
-		
+
 		// Good when no noise.
 		// Under-estimates total probability when gain is low (<15) and photons are low (<2).
 		POISSON_GAMMA_PMF { @Override
 		public String getName() { return "Poisson+Gamma PMF"; } },
-		
+
 		// Good but relatively worse as the read noise increases.
 		// Requires full integration when read noise is low (<1) and photons are low (<5).
 		POISSON_GAMMA_GAUSSIAN_APPROX { @Override
@@ -159,7 +159,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Slow
 		POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION { @Override
 		public String getName() { return "Poisson+Gamma+Gaussian PMF integration"; } },
-		// Best for EM-CCD. 
+		// Best for EM-CCD.
 		// Very robust (computes the full convolution
 		// of the Gaussian and the Poisson-Gamma plus the delta function PMF contribution).
 		POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION { @Override
@@ -179,8 +179,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		public String getShortName()
 		{
 			return getName();
-		}		
-		
+		}
+
 		public static Model forNumber(int number)
 		{
 			Model[] values = Model.values();
@@ -189,9 +189,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			return values[number];
 		}
 	}
-	
+
 	private static String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
-	
+
 	private static abstract class Round
 	{
 		abstract int round(double d);
@@ -231,7 +231,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	public void run(String arg)
@@ -242,7 +242,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -253,7 +253,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
@@ -349,7 +349,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -384,7 +384,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			}
 			catch (Exception ex)
 			{
-				// Catch as this is run within a AWT dispatch thread 
+				// Catch as this is run within a AWT dispatch thread
 				Utils.log(TITLE + "Error: " + ex.getMessage());
 			}
 			finally
@@ -397,7 +397,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
 	@Override
@@ -408,7 +408,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	@Override
@@ -548,7 +548,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			lastSimulationSettings = settings;
 			IJ.showStatus("Simulated in " + sw.toString());
 
-			// Convolve 
+			// Convolve
 			//sw.reset();
 			floatHistogram = convolveHistogram(settings);
 			//IJ.log("Computed histogram ... " + sw.toString());
@@ -616,7 +616,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				h = simulatePoissonGammaGaussian(settings, random);
 				break;
 
-			// CCD or sCMOS				
+			// CCD or sCMOS
 			case 2:
 			case 0:
 				h = simulatePoissonGaussian(settings, random);
@@ -648,7 +648,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		final double gain = getGain(settings);
 
 		// Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
-		// is the same as applying the total gain in the gamma distribution and no camera gain 
+		// is the same as applying the total gain in the gamma distribution and no camera gain
 		// later, i.e. the Gamma distribution is just squeezed.
 		CustomGammaDistribution gamma = new CustomGammaDistribution(random.getPseudoRandomGenerator(), 1, gain,
 				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
@@ -674,13 +674,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// Or should the model actually be integrated.
 				// Basically the value of the Poisson-Gamma from 0-0.5 should be
 				// added to the delta function at c=0 for the count at c=0.
-				// This would fix the function. 
+				// This would fix the function.
 
 				// Should we use the Tubb's model which uses:
 				//final double shape = count;
 				//final double scale = gain - 1 + 1 / shape;
 				//final double electrons = random.nextGamma(shape, scale) - 1;
-				//final double output = count + electrons; 
+				//final double output = count + electrons;
 
 				// The Tubb's model is for additional electrons. So a count of 1
 				// can never generate an output of 0. This does not fit the
@@ -698,7 +698,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					// Over-sample the Gaussian
 					for (int j = noiseSamples; j-- > 0;)
 					{
-						// Convert the sample to a count 
+						// Convert the sample to a count
 						sample[count++] = round.round(d2 + noise * random2.nextGaussian());
 					}
 				}
@@ -711,7 +711,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					// Over-sample the Gaussian
 					for (int j = noiseSamples; j-- > 0;)
 					{
-						// Convert the sample to a count 
+						// Convert the sample to a count
 						sample[count++] = round.round(noise * random2.nextGaussian());
 					}
 				}
@@ -762,7 +762,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			// Over-sample the Gaussian
 			for (int j = noiseSamples; j-- > 0;)
 			{
-				// Convert the sample to a count 
+				// Convert the sample to a count
 				sample[count++] = round.round(d + noise * random2.nextGaussian());
 			}
 		}
@@ -805,9 +805,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		boolean debug = false;
 
 		// Build the Probabity Mass/Density Function (PDF) of the distribution:
-		// either a Poisson (PMF) or Poisson-Gamma (PDF). The PDF is 0 at all 
+		// either a Poisson (PMF) or Poisson-Gamma (PDF). The PDF is 0 at all
 		// values apart from the step interval.
-		// Note: The Poisson-Gamm is computed without the Dirac delta contribution 
+		// Note: The Poisson-Gamm is computed without the Dirac delta contribution
 		// at c=0. This allows correct convolution with the Gaussian of the dirac delta
 		// and the rest of the Poisson-Gamma (so matching the simulation).
 		TDoubleArrayList list = new TDoubleArrayList();
@@ -819,7 +819,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Store the Dirac delta value at c=0. This must be convolved separately.
 		double dirac = 0;
 
-		// EM-CCD 
+		// EM-CCD
 		if (settings.getMode() == MODE_EM_CCD)
 		{
 			name = "Poisson-Gamma";
@@ -836,9 +836,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			boolean discrete = false; // noise != 0;
 			if (discrete)
 			{
-				// Note: This is obsolete as the Poisson-Gamma function is continuous. 
+				// Note: This is obsolete as the Poisson-Gamma function is continuous.
 				// Sampling it at integer intervals is not valid, especially for low gain.
-				// The Poisson-Gamma PDF should be integrated to form a discrete PMF. 
+				// The Poisson-Gamma PDF should be integrated to form a discrete PMF.
 
 				step = 1.0;
 
@@ -970,7 +970,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			double[] g = list.toArray();
 			// Number of sub intervals
 			int n = g.length - 1;
-			double h = 1; // h = (a-b) / n = sub-interval width 
+			double h = 1; // h = (a-b) / n = sub-interval width
 			double sum2 = 0, sum4 = 0;
 			for (int j = 1; j <= n / 2 - 1; j++)
 				sum2 += g[2 * j];
@@ -1025,8 +1025,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			}
 			else
 			{
-				// The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT. 
-				// This is a problem if most of the probability is in the Dirac. 
+				// The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT.
+				// This is a problem if most of the probability is in the Dirac.
 				// Otherwise it can be ignored.
 				if (dirac > 0.01)
 					g = Convolution.convolve(kernel, g);
@@ -1083,7 +1083,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					{
 						// Note: zero is the start of the x-axis. This value should be -1.
 						assert (int) zero == -1;
-						// Use as an offset to find the actual zero. 
+						// Use as an offset to find the actual zero.
 						g[-(int) zero] += dirac;
 					}
 				}
@@ -1146,7 +1146,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double offset = (settings.getRoundDown()) ? 0 : -0.5;
 
 		// Note the interpolation of the CDF is good when the step is much smaller than 1.
-		// When the step is above 1 then the gain is likely to be very low and thus 
+		// When the step is above 1 then the gain is likely to be very low and thus
 		// unrealistic for modelling. This case is ignored.
 
 		// Subtract the CDF to the upper bounds from the CDF of the lower bound
@@ -1167,10 +1167,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
 
-		// Q. If the EM-CCD the distribution may have a Dirac delta at c=0 which 
+		// Q. If the EM-CCD the distribution may have a Dirac delta at c=0 which
 		// could break interpolation using a spline?
 		UnivariateInterpolator in =
-				//(settings.getMode() == MODE_EM_CCD) ? new LinearInterpolator() : 
+				//(settings.getMode() == MODE_EM_CCD) ? new LinearInterpolator() :
 				new SplineInterpolator();
 		UnivariateFunction f = in.interpolate(x, pd);
 
@@ -1326,7 +1326,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		for (int i = 0; i < x.length; i++)
 		{
 			// The cumulative histogram represents the probability of all values up to this one.
-			// However the histogram is discrete so this is the probability of all values up to 
+			// However the histogram is discrete so this is the probability of all values up to
 			// but not including the next one.
 
 			x[i] = histogram.getValue(i);
@@ -1371,12 +1371,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private static double[][] cumulativeDistribution(CameraModelAnalysisSettings settings, double[][] cdf,
 			final LikelihoodFunction fun)
 	{
-		// Q. How to match this is the discrete cumulative histogram using the continuous 
+		// Q. How to match this is the discrete cumulative histogram using the continuous
 		// likelihood function:
 		// 1. Compute integral up to the value
 		// 2. Compute integral up to but not including the next value using trapezoid integration
 		// 3. Compute integral up to but not including the next value using flat-top integration
-		// Since the function will be used on continuous float data when fitting PSFs the best 
+		// Since the function will be used on continuous float data when fitting PSFs the best
 		// match for how it will perform in practice is a continuous (trapezoid) integration.
 		// The simplest is a flat-top integration.
 
@@ -1456,13 +1456,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				}
 			}
 
-			// Use Simpson's integration with n=4 to get the integral of the probability 
+			// Use Simpson's integration with n=4 to get the integral of the probability
 			// over the range of each count.
 			int n = 4;
 			int n_2 = n / 2;
 			double h = 1.0 / n;
 
-			// Note the Poisson-Gamma function cannot be integrated with the 
+			// Note the Poisson-Gamma function cannot be integrated with the
 			// Dirac delta function at c==0
 
 			// Compute the extra function points
@@ -1524,7 +1524,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			{
 				if (uf != null)
 				{
-					// Convolved Poisson-Gamma. Fix in the range of the Gaussian around c=0 
+					// Convolved Poisson-Gamma. Fix in the range of the Gaussian around c=0
 					final double relativeAccuracy = 1e-4;
 					final double absoluteAccuracy = 1e-8;
 					CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, 3,
@@ -1585,7 +1585,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		}
 
 		// Check if sum is approximately 1
-		//System.out.printf("gain=%g, sum=%g\n", getGain(settings), sum);		
+		//System.out.printf("gain=%g, sum=%g\n", getGain(settings), sum);
 
 		return new double[][] { x, y };
 	}
@@ -1631,7 +1631,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			area += d;
 
 			// Note: This assumes but distributions are continuous between the values
-			// and computes the actual area, including intersecting lines. 
+			// and computes the actual area, including intersecting lines.
 			//if (i != 0)
 			//{
 			//	area += area(y1[i - 1], y1[i], y2[i], y2[i - 1]);
