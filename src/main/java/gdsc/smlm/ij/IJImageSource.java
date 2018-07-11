@@ -124,7 +124,7 @@ public class IJImageSource extends ImageSource
 	 * Gets the origin from the Image calibration.
 	 *
 	 * @param imp
-	 *            the imp
+*            the image
 	 * @return the origin
 	 * @throws IllegalArgumentException
 	 *             If the origin is not in integer pixel units
@@ -154,7 +154,7 @@ public class IJImageSource extends ImageSource
 	 * Gets the bounds from the Image calibration.
 	 *
 	 * @param imp
-	 *            the imp
+*            the image
 	 * @return the bounds
 	 * @throws IllegalArgumentException
 	 *             If the origin is not in integer pixel units

@@ -69,7 +69,7 @@ import ij.text.TextWindow;
  */
 public class SpotFit implements PlugIn
 {
-	public static final String TITLE = "Spot Fit";
+	private static final String TITLE = "Spot Fit";
 
 	/**
 	 * All the work for this plugin is done with the plugin tool.

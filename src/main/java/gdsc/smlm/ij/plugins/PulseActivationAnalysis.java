@@ -1559,9 +1559,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	 * does something else which makes the image easier to see than the afore mentioned command.
 	 *
 	 * @param imp
-	 *            the imp
+*            the image
 	 * @param ip
-	 *            the ip
+*            the image
 	 */
 	private void autoAdjust(ImagePlus imp, ImageProcessor ip)
 	{

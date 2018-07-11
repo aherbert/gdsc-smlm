@@ -201,7 +201,7 @@ public class ImageROIPainter extends TextPanelMouseListener
 	 * Adds the roi to the specified slice in the image using an overlay.
 	 *
 	 * @param imp
-	 *            the imp
+*            the image
 	 * @param slice
 	 *            the slice
 	 * @param roi

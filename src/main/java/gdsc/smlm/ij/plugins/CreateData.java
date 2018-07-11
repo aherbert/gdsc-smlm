@@ -191,7 +191,7 @@ import ij.text.TextWindow;
  */
 public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
-	public static final String TITLE = "Create Data";
+	private static final String TITLE = "Create Data";
 	private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
 	private static String[] ILLUMINATION = { "Uniform", "Radial" };
@@ -2485,7 +2485,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Extract the image stack using a range of stack indices. The index is 0-based.
 	 *
 	 * @param imp
-	 *            the imp
+*            the image
 	 * @param start
 	 *            the start index
 	 * @param end

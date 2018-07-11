@@ -99,7 +99,7 @@ import ij.text.TextWindow;
  */
 public class BenchmarkSpotFilter implements PlugIn
 {
-	public static final String TITLE = "Filter Spot Data";
+	private static final String TITLE = "Filter Spot Data";
 
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;

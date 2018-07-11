@@ -63,7 +63,7 @@ public class CustomContentHelper
 	 * be calibrated appropriately).
 	 *
 	 * @param imp
-	 *            the imp
+*            the image
 	 */
 	public static void loadSurfaceColorsFromImage2D(ItemShape itemShape, ImagePlus imp)
 	{

@@ -1099,7 +1099,7 @@ public class FRC
 	 * Pad.
 	 *
 	 * @param ip
-	 *            the ip
+*            the image
 	 * @param width
 	 *            the width
 	 * @param height
