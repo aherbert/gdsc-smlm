@@ -89,16 +89,25 @@ public class AttributePeakResult extends PeakResult
 		fields |= FIELD_PRECISION;
 	}
 
+	/**
+	 * Clear has id.
+	 */
 	public void clearHasId()
 	{
 		fields = fields & ~FIELD_ID;
 	}
 
+	/**
+	 * Clear has end frame.
+	 */
 	public void clearHasEndFrame()
 	{
 		fields = fields & ~FIELD_END_FRAME;
 	}
 
+	/**
+	 * Clear has precision.
+	 */
 	public void clearHasPrecision()
 	{
 		fields = fields & ~FIELD_PRECISION;
@@ -117,6 +126,12 @@ public class AttributePeakResult extends PeakResult
 		return super.getId();
 	}
 
+	/**
+	 * Sets the id.
+	 *
+	 * @param id
+	 *            the new id
+	 */
 	public void setId(int id)
 	{
 		// Allow ID to be anything, including zero
@@ -142,6 +157,12 @@ public class AttributePeakResult extends PeakResult
 		return super.getFrame();
 	}
 
+	/**
+	 * Sets the end frame.
+	 *
+	 * @param endFrame
+	 *            the new end frame
+	 */
 	public void setEndFrame(int endFrame)
 	{
 		// End frame must be after the start frame.
@@ -176,6 +197,12 @@ public class AttributePeakResult extends PeakResult
 		return super.getPrecision();
 	}
 
+	/**
+	 * Sets the precision.
+	 *
+	 * @param precision
+	 *            the new precision
+	 */
 	public void setPrecision(double precision)
 	{
 		if (precision >= 0)
@@ -207,7 +234,7 @@ public class AttributePeakResult extends PeakResult
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
-	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 *            the params standard deviations (if not null must match the length of the params array)
 	 * @throws IllegalArgumentException
 	 *             the illegal argument exception if the parameters are invalid
 	 */

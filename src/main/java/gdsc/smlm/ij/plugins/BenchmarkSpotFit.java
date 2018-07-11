@@ -275,8 +275,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	/**
 	 * Gets the min value of the most recent fit data for the given parameter name.
 	 *
-	 * @param name
-	 *            the name
+	 * @param type
+	 *            the type
 	 * @return the min
 	 */
 	public static double getMin(ParameterType type)
@@ -287,8 +287,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	/**
 	 * Gets the max value of the most recent fit data for the given parameter name.
 	 *
-	 * @param name
-	 *            the name
+	 * @param type
+	 *            the type
 	 * @return the max
 	 */
 	public static double getMax(ParameterType type)
@@ -2890,6 +2890,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 * @param duplicateDistance
 	 *            the duplicate distance
 	 * @param duplicateDistanceAbsolute
+	 *            the duplicate distance absolute
 	 */
 	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit, double duplicateDistance,
 			boolean duplicateDistanceAbsolute)

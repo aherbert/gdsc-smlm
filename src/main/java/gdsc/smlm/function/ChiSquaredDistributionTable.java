@@ -35,7 +35,7 @@ import org.apache.commons.math3.special.Gamma;
  * Chi-squared distribution with degrees of freedom equal to the difference in dimensionality of the two models
  * (alternative and null).
  *
- * @see https://en.wikipedia.org/wiki/Likelihood-ratio_test#Wilks.27_theorem
+ * @see <a href="https://en.wikipedia.org/wiki/Likelihood-ratio_test#Distribution:_Wilks%E2%80%99_theorem">Wilks Theorum</a>
  */
 public class ChiSquaredDistributionTable
 {

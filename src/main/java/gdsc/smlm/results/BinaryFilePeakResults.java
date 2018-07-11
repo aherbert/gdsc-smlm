@@ -441,8 +441,10 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * is terminated by the {@value #END_HEADER} tag.
 	 *
 	 * @param input
+	 *            the input
 	 * @return The header
 	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public static String readHeader(DataInputStream input) throws IOException
 	{

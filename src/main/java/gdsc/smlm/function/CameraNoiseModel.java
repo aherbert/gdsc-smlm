@@ -29,14 +29,31 @@ package gdsc.smlm.function;
  */
 public abstract class CameraNoiseModel implements NoiseModel
 {
+	/** The bias. */
 	protected double bias = 0;
+	
+	/** The read noise squared (read variance). */
 	protected double readNoise2 = 0;
 
+	/**
+	 * Instantiates a new camera noise model.
+	 *
+	 * @param readNoise
+	 *            the read noise
+	 */
 	protected CameraNoiseModel(final double readNoise)
 	{
 		setReadNoise(readNoise);
 	}
 
+	/**
+	 * Instantiates a new camera noise model.
+	 *
+	 * @param readNoise
+	 *            the read noise
+	 * @param bias
+	 *            the bias
+	 */
 	protected CameraNoiseModel(final double readNoise, final double bias)
 	{
 		setReadNoise(readNoise);
@@ -44,12 +61,15 @@ public abstract class CameraNoiseModel implements NoiseModel
 	}
 
 	/**
-	 * Factory method for creating camera noise models from the sub-classes
+	 * Factory method for creating camera noise models from the sub-classes.
 	 *
 	 * @param readNoise
+	 *            the read noise
 	 * @param bias
+	 *            the bias
 	 * @param emCCD
-	 * @return
+	 *            the EM-CCD flag
+	 * @return the camera noise model
 	 */
 	public static CameraNoiseModel createNoiseModel(final double readNoise, final double bias, final boolean emCCD)
 	{

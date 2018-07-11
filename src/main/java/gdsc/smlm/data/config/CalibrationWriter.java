@@ -323,8 +323,7 @@ public class CalibrationWriter extends CalibrationReader
 	/**
 	 * Set the precision method used for the results.
 	 *
-	 * @param precision
-	 *            method
+	 * @param precisionMethod
 	 *            The new precision method
 	 */
 	public void setPrecisionMethod(PrecisionMethod precisionMethod)

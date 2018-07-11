@@ -30,6 +30,9 @@ import java.util.List;
 
 /**
  * Sorts chromosome using the fitness, highest fitness first.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class ChromosomeComparator<T extends Comparable<T>> implements Comparator<Chromosome<T>>
 {
@@ -45,9 +48,12 @@ public class ChromosomeComparator<T extends Comparable<T>> implements Comparator
 	}
 
 	/**
-	 * Sort the list (highest fitness first)
+	 * Sort the list (highest fitness first).
 	 *
+	 * @param <T>
+	 *            the generic type
 	 * @param list
+	 *            the list
 	 */
 	public static <T extends Comparable<T>> void sort(List<? extends Chromosome<T>> list)
 	{
@@ -55,9 +61,12 @@ public class ChromosomeComparator<T extends Comparable<T>> implements Comparator
 	}
 
 	/**
-	 * Sort the list (highest fitness first)
+	 * Sort the list (highest fitness first).
 	 *
+	 * @param <T>
+	 *            the generic type
 	 * @param list
+	 *            the list
 	 */
 	public static <T extends Comparable<T>> void sort(Chromosome<T>[] list)
 	{
@@ -65,9 +74,16 @@ public class ChromosomeComparator<T extends Comparable<T>> implements Comparator
 	}
 
 	/**
-	 * Sort the list (highest fitness first)
+	 * Sort the list (highest fitness first).
 	 *
+	 * @param <T>
+	 *            the generic type
 	 * @param list
+	 *            the list
+	 * @param fromIndex
+	 *            the from index
+	 * @param toIndex
+	 *            the to index
 	 */
 	public static <T extends Comparable<T>> void sort(Chromosome<T>[] list, int fromIndex, int toIndex)
 	{

@@ -30,6 +30,14 @@ import gdsc.smlm.results.PeakResult;
  */
 public class AndFilter extends CombinedFilter
 {
+	/**
+	 * Instantiates a new and filter.
+	 *
+	 * @param filter1
+	 *            the filter 1
+	 * @param filter2
+	 *            the filter 2
+	 */
 	public AndFilter(Filter filter1, Filter filter2)
 	{
 		super(filter1, filter2);

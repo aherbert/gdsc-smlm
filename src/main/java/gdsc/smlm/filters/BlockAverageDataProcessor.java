@@ -56,10 +56,10 @@ public class BlockAverageDataProcessor extends DataProcessor
 	 * Convert the smoothing parameter to the value which is used for the BlockMeanFilter.
 	 * We only use int smoothing. Values below zero are set to zero.
 	 *
-	 * @see BlockMeanFilter
-	 *
 	 * @param smooth
+	 *            the smoothing parameter
 	 * @return The adjusted value
+	 * @see BlockMeanFilter
 	 */
 	public static double convert(double smooth)
 	{
@@ -102,12 +102,6 @@ public class BlockAverageDataProcessor extends DataProcessor
 		return filter.hasWeights();
 	}
 
-	/**
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @return
-	 */
 	@Override
 	public float[] process(float[] data, int width, int height)
 	{

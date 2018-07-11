@@ -4789,10 +4789,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	/**
-	 * When the two filters have equal scores, select the filter using the filter parameters
+	 * When the two filters have equal scores, select the filter using the filter parameters.
 	 *
 	 * @param filter1
+	 *            the filter 1
 	 * @param filter2
+	 *            the filter 2
 	 * @return The chosen filter (the one with the strongest parameters)
 	 */
 	public Filter selectFilter(Filter filter1, Filter filter2)

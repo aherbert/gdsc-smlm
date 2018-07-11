@@ -115,9 +115,10 @@ class CandidateList
 	}
 
 	/**
-	 * Add a candidate
+	 * Add a candidate.
 	 *
 	 * @param candidate
+	 *            the candidate
 	 */
 	public void add(Candidate candidate)
 	{

@@ -37,7 +37,7 @@ public class Bessel
 	 * Compute the zero th order Bessel function of the first kind.
 	 *
 	 * @param x
-	 *
+	 *            the x value
 	 * @return the Bessel function J0
 	 */
 	public static double J0(final double x)
@@ -70,7 +70,7 @@ public class Bessel
 	 * Compute the first order Bessel function of the first kind.
 	 *
 	 * @param x
-	 *
+	 *            the x value
 	 * @return the Bessel function J1
 	 */
 	public static double J1(final double x)
@@ -105,7 +105,7 @@ public class Bessel
 	 * This is stable when abs(x) > n.
 	 *
 	 * @param x
-	 *
+	 *            the x value
 	 * @return the Bessel function J2
 	 */
 	public static double J2(double x)
@@ -123,7 +123,7 @@ public class Bessel
 	 * Compute the zero th order modified Bessel function of the first kind.
 	 *
 	 * @param x
-	 *
+	 *            the x value
 	 * @return the modified Bessel function I0
 	 */
 	public static double I0(final double x)
@@ -150,7 +150,7 @@ public class Bessel
 	 * Compute the first order modified Bessel function of the first kind.
 	 *
 	 * @param x
-	 *
+	 *            the x value
 	 * @return the modified Bessel function I1
 	 */
 	public static double I1(final double x)

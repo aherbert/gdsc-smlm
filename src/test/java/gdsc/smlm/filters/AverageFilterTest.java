@@ -43,12 +43,16 @@ public class AverageFilterTest extends AbstractFilterTest
 	private int ITER = 20;
 
 	/**
-	 * Do a simple and stupid mean filter
+	 * Do a simple and stupid mean filter.
 	 *
 	 * @param data
+	 *            the data
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param boxSize
+	 *            the box size
 	 */
 	public static void average(float[] data, int maxx, int maxy, float boxSize)
 	{
@@ -120,7 +124,7 @@ public class AverageFilterTest extends AbstractFilterTest
 		public abstract void filterInternal(float[] data, int width, int height, float boxSize);
 	}
 
-	private void averageIsCorrect(RandomGenerator rg, int width, int height, float boxSize, boolean internal,
+	private static void averageIsCorrect(RandomGenerator rg, int width, int height, float boxSize, boolean internal,
 			DataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -142,7 +146,7 @@ public class AverageFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void checkIsCorrect(DataFilter filter)
+	private static void checkIsCorrect(DataFilter filter)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (int width : primes)

@@ -40,9 +40,10 @@ public class AiryPattern
 	public static final double FACTOR = 1.323;
 
 	/**
-	 * Calculate the intensity of the AiryPattern at distance x from the centre
+	 * Calculate the intensity of the AiryPattern at distance x from the centre.
 	 *
 	 * @param x
+	 *            the x
 	 * @return The intensity
 	 */
 	public static double intensity(final double x)
@@ -57,9 +58,10 @@ public class AiryPattern
 	}
 
 	/**
-	 * Calculate the intensity of the AiryPattern at distance x from the centre using a Gaussian approximation
+	 * Calculate the intensity of the AiryPattern at distance x from the centre using a Gaussian approximation.
 	 *
 	 * @param x
+	 *            the x
 	 * @return The intensity
 	 */
 	public static double intensityGaussian(double x)
@@ -76,6 +78,7 @@ public class AiryPattern
 	 * Appears to be numerically unstable at x<<1.
 	 *
 	 * @param x
+	 *            the x
 	 * @return The total power
 	 */
 	public static double power(final double x)

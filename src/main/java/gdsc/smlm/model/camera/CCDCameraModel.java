@@ -32,6 +32,7 @@ import java.awt.Rectangle;
  */
 public class CCDCameraModel extends FixedPixelCameraModel
 {
+
 	/**
 	 * Instantiates a new CCD camera model.
 	 *
@@ -39,8 +40,6 @@ public class CCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 */
 	public CCDCameraModel(float bias, float gain)
 	{
@@ -54,8 +53,6 @@ public class CCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 */
 	public CCDCameraModel(double bias, double gain)
 	{
@@ -69,8 +66,6 @@ public class CCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 * @param variance
 	 *            the variance (in counts)
 	 */
@@ -86,8 +81,6 @@ public class CCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 * @param variance
 	 *            the variance (in counts)
 	 */

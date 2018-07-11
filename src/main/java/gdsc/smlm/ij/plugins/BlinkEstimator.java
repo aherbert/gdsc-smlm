@@ -78,12 +78,19 @@ public class BlinkEstimator implements PlugIn
 	private double r2;
 	private double adjustedR2;
 
+	/** The milliseconds/frame */
 	public double msPerFrame;
+	/** The max dark time */
 	public int maxDarkTime = s_maxDarkTime;
+	/** The relative distance */
 	public boolean relativeDistance = s_relativeDistance;
+	/** The search distance */
 	public double searchDistance = s_searchDistance;
+	/** The number of fitted points */
 	public int nFittedPoints = s_nFittedPoints;
+	/** The time at lower bound flag */
 	public boolean timeAtLowerBound = s_timeAtLowerBound;
+	/** The show plots flag */
 	public boolean showPlots = false;
 
 	private double[] parameters = null;
@@ -222,9 +229,10 @@ public class BlinkEstimator implements PlugIn
 	 * Remove the first element of the array. Return the rest of the array
 	 *
 	 * @param d
-	 * @return
+	 *            the d
+	 * @return the shifted array
 	 */
-	private double[] shift(double[] d)
+	private static double[] shift(double[] d)
 	{
 		if (fitIntercept)
 			return d;
@@ -233,7 +241,7 @@ public class BlinkEstimator implements PlugIn
 		return d2;
 	}
 
-	private void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y)
+	private static void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y)
 	{
 		String title = TITLE + " " + yAxisTitle;
 		Plot2 plot = new Plot2(title, xAxisTitle, yAxisTitle, x, y);
@@ -304,6 +312,13 @@ public class BlinkEstimator implements PlugIn
 		return blinkingRate;
 	}
 
+	/**
+	 * Compute blinking rate.
+	 *
+	 * @param results
+	 *            the results
+	 * @return the double
+	 */
 	public double computeBlinkingRate(MemoryPeakResults results)
 	{
 		return computeBlinkingRate(results, false);
@@ -318,14 +333,18 @@ public class BlinkEstimator implements PlugIn
 	 * allowed to blink.
 	 *
 	 * @param results
+	 *            the results
 	 * @param maxDarkTime
+	 *            the max dark time
 	 * @param searchDistance
+	 *            the search distance
 	 * @param relativeDistance
+	 *            the relative distance
 	 * @param verbose
 	 *            Output log messages
 	 * @return the counts of molecules
 	 */
-	public double[] calculateCounts(MemoryPeakResults results, int maxDarkTime, double searchDistance,
+	private static double[] calculateCounts(MemoryPeakResults results, int maxDarkTime, double searchDistance,
 			boolean relativeDistance, boolean verbose)
 	{
 		double distanceThreshold;
@@ -370,7 +389,8 @@ public class BlinkEstimator implements PlugIn
 	 * t-threshold 1 equals 1 dark frames (n ms per frame), t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
 	 *
 	 * @param Ntd
-	 * @return
+	 *            the ntd
+	 * @return the dark time
 	 */
 	public double[] calculateTd(double[] Ntd)
 	{
@@ -392,7 +412,7 @@ public class BlinkEstimator implements PlugIn
 		return td;
 	}
 
-	private double calculateAveragePrecision(MemoryPeakResults results, boolean verbose)
+	private static double calculateAveragePrecision(MemoryPeakResults results, boolean verbose)
 	{
 		double fittedAverage = 0;
 
@@ -437,6 +457,7 @@ public class BlinkEstimator implements PlugIn
 	 * @param ntd
 	 *            The counts of molecules
 	 * @param nFittedPoints
+	 *            the number of fitted points
 	 * @param log
 	 *            Write the fitting results to the ImageJ log window
 	 * @return The fitted parameters [N, nBlink, tOff], or null if no fit was possible
@@ -526,6 +547,11 @@ public class BlinkEstimator implements PlugIn
 		}
 	}
 
+	/**
+	 * Gets the n molecules.
+	 *
+	 * @return the n molecules
+	 */
 	public double getNMolecules()
 	{
 		if (parameters != null)
@@ -533,6 +559,11 @@ public class BlinkEstimator implements PlugIn
 		return 0;
 	}
 
+	/**
+	 * Gets the n blinks.
+	 *
+	 * @return the n blinks
+	 */
 	public double getNBlinks()
 	{
 		if (parameters != null)
@@ -540,6 +571,11 @@ public class BlinkEstimator implements PlugIn
 		return 0;
 	}
 
+	/**
+	 * Gets the t off.
+	 *
+	 * @return the t off
+	 */
 	public double getTOff()
 	{
 		if (parameters != null)
@@ -548,6 +584,8 @@ public class BlinkEstimator implements PlugIn
 	}
 
 	/**
+	 * Gets the adjusted coefficient of determination.
+	 *
 	 * @param ssResiduals
 	 *            Sum of squared residuals from the model
 	 * @param ssTotal
@@ -557,9 +595,9 @@ public class BlinkEstimator implements PlugIn
 	 *            Number of observations
 	 * @param d
 	 *            Number of parameters in the model
-	 * @return
+	 * @return the adjusted coefficient of determination
 	 */
-	private double getAdjustedCoefficientOfDetermination(double ssResiduals, double ssTotal, int n, int d)
+	private static double getAdjustedCoefficientOfDetermination(double ssResiduals, double ssTotal, int n, int d)
 	{
 		if (n - d - 1 <= 0)
 			return 1 - (ssResiduals / ssTotal);
@@ -603,8 +641,12 @@ public class BlinkEstimator implements PlugIn
 	 * td = The dark time<br/>
 	 * tOff = The off-time<br/>
 	 */
-	public class BlinkingFunction extends LoggingOptimiserFunction implements MultivariateVectorFunction
+	public class BlinkingFunction extends LoggingOptimiserFunction
+			implements MultivariateVectorFunction //, DifferentiableMultivariateVectorFunction
 	{
+		/**
+		 * Instantiates a new blinking function.
+		 */
 		public BlinkingFunction()
 		{
 			super("Blinking Model");
@@ -697,7 +739,7 @@ public class BlinkEstimator implements PlugIn
 		}
 
 		/**
-		 * Evaluate the function
+		 * Evaluate the function.
 		 *
 		 * @param td
 		 *            The dark time
@@ -707,13 +749,22 @@ public class BlinkEstimator implements PlugIn
 		 *            The blinking rate
 		 * @param tOff
 		 *            The off-time
-		 * @return
+		 * @return the value
 		 */
 		public double evaluate(double td, double N, double nBlink, double tOff)
 		{
 			return N * (1.0 + nBlink * FastMath.exp((1 - td) / tOff));
 		}
 
+		/**
+		 * Evaluate.
+		 *
+		 * @param td
+		 *            the dark time
+		 * @param parameters
+		 *            the parameters
+		 * @return the value
+		 */
 		public double evaluate(double td, double[] parameters)
 		{
 			return evaluate(td, parameters[0], parameters[1], parameters[2]);
@@ -736,10 +787,10 @@ public class BlinkEstimator implements PlugIn
 			return values;
 		}
 
-		/*
-		 * (non-Javadoc)
+		/**
+		 * Compute the Jacobian.
 		 *
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
+		 * @return the multivariate matrix function
 		 */
 		public MultivariateMatrixFunction jacobian()
 		{

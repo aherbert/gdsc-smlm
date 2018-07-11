@@ -38,8 +38,11 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  */
 public abstract class AbstractPeakResults implements PeakResults
 {
+	/** The default for nm/pixel */
 	public static final double DEFAULT_NM_PER_PIXEL = 0;
+	/** The default for gain */
 	public static final double DEFAULT_GAIN = 0;
+	/** The default for emCCD */
 	public static final boolean DEFAULT_EMCCD = true;
 
 	private ImageSource source = null;
@@ -120,6 +123,11 @@ public abstract class AbstractPeakResults implements PeakResults
 		return bounds;
 	}
 
+	/**
+	 * Gets the bounds as a string.
+	 *
+	 * @return the bounds string
+	 */
 	public String getBoundsString()
 	{
 		if (bounds != null)

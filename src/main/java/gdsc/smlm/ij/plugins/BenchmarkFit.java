@@ -1205,9 +1205,10 @@ public class BenchmarkFit implements PlugIn
 	}
 
 	/**
-	 * Sum the intensity above background to estimate the signal
+	 * Sum the intensity above background to estimate the signal.
 	 *
 	 * @param data
+	 *            the data
 	 * @param b
 	 *            background
 	 * @return The signal
@@ -1222,11 +1223,14 @@ public class BenchmarkFit implements PlugIn
 	}
 
 	/**
-	 * Get the centre of mass of the data
+	 * Get the centre of mass of the data.
 	 *
 	 * @param data
+	 *            the data
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param com
 	 *            The centre-of-mass
 	 */

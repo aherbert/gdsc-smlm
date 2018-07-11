@@ -98,6 +98,7 @@ public class AverageDataProcessor extends DataProcessor
 	 * Values below zero are set to zero.
 	 *
 	 * @param smooth
+	 *            the smoothing parameter
 	 * @return The adjusted value
 	 */
 	public static double convert(double smooth)
@@ -143,11 +144,10 @@ public class AverageDataProcessor extends DataProcessor
 		return (f != null) ? f.hasWeights() : false;
 	}
 
-	/**
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
 	public float[] process(float[] data, int width, int height)

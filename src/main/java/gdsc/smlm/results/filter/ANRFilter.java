@@ -42,6 +42,12 @@ public class ANRFilter extends DirectFilter
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
 
+	/**
+	 * Instantiates a new ANR filter.
+	 *
+	 * @param anr
+	 *            the amplitude-to-noise ratio (ANR) threshold
+	 */
 	public ANRFilter(float anr)
 	{
 		this.anr = Math.max(0, anr);

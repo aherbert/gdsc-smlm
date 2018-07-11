@@ -72,8 +72,8 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	/**
 	 * Computes the weighted normaliser within a radius around each point.
 	 *
-	 * @param n
-	 *            The block size
+	 * @param radius
+	 *            the radius
 	 * @return the weighted normaliser
 	 */
 	protected abstract Normaliser computeWeightedNormaliser(final double radius);
@@ -214,8 +214,6 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 		double[] sums = new double[2];
 
-		boolean smallKernel = kRadius < 2;
-
 		int previousY = kHeight / 2 - cacheHeight;
 
 		for (int y = roi.y; y < roi.y + roi.height; y++)
@@ -232,14 +230,13 @@ public abstract class CircularFilter extends BaseWeightedFilter
 						cacheHeight, padLeft, padRight, kHeight, yNew);
 			}
 
-			int cacheLineP = cacheWidth * (y % cacheHeight) + kRadius; //points to pixel (roi.x, y)
-			filterLine(outPixels, width, cache, cachePointers, cacheLineP, roi, y, // F I L T E R
-					sums, smallKernel);
+			filterLine(outPixels, width, cache, cachePointers, roi, y, // F I L T E R
+					sums);
 		}
 	}
 
-	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, int cacheLineP,
-			Rectangle roi, int y, double[] sums, boolean smallKernel)
+	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, Rectangle roi, int y,
+			double[] sums)
 	{
 		int valuesP = roi.x + y * width;
 
@@ -250,7 +247,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 		for (int x = 0; x < roi.width; x++, valuesP++)
 		{ // x is with respect to roi.x
-			  //if (fullCalculation)
+		  //if (fullCalculation)
 		  //{
 			getAreaSums(cache, x, cachePointers, sums);
 			//}
@@ -424,9 +421,10 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	}
 
 	/**
-	 * Count the number of points in the circle mask for the given radius
+	 * Count the number of points in the circle mask for the given radius.
 	 *
 	 * @param radius
+	 *            the radius
 	 * @return The number of points
 	 */
 	public static int getNPoints(double radius)
@@ -447,9 +445,10 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	}
 
 	/**
-	 * Get the diameter of the pixel region used
+	 * Get the diameter of the pixel region used.
 	 *
 	 * @param radius
+	 *            the radius
 	 * @return The diameter
 	 */
 	public static int getDiameter(double radius)
@@ -465,6 +464,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	 * using sqrt(nPoints/pi)
 	 *
 	 * @param radius
+	 *            the radius
 	 * @return The diameter
 	 */
 	public static double getPixelRadius(double radius)
@@ -473,25 +473,25 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	}
 
 	//kernel height
-	private int kHeight(int[] lineRadii)
+	private static int kHeight(int[] lineRadii)
 	{
 		return (lineRadii.length - 2) / 2;
 	}
 
 	//kernel radius in x direction. width is 2+kRadius+1
-	private int kRadius(int[] lineRadii)
+	private static int kRadius(int[] lineRadii)
 	{
 		return lineRadii[lineRadii.length - 1];
 	}
 
 	//number of points in kernal area
-	private int kNPoints(int[] lineRadii)
+	private static int kNPoints(int[] lineRadii)
 	{
 		return lineRadii[lineRadii.length - 2];
 	}
 
 	//cache pointers for a given kernel
-	private int[] makeCachePointers(int[] lineRadii, int cacheWidth)
+	private static int[] makeCachePointers(int[] lineRadii, int cacheWidth)
 	{
 		int kRadius = kRadius(lineRadii);
 		int kHeight = kHeight(lineRadii);

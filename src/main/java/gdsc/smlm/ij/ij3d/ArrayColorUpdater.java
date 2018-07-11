@@ -83,8 +83,8 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Set the colour and alpha value and gets the current color array.
 	 *
-	 * @param alpha
-	 *            the alpha
+	 * @param color4f
+	 *            the color 4 f
 	 * @return the color
 	 */
 	public abstract float[] getColors(Color4f color4f);
@@ -92,6 +92,8 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Set the colour and alpha value and gets the current color array.
 	 *
+	 * @param color
+	 *            the color
 	 * @param alpha
 	 *            the alpha
 	 * @return the color
@@ -101,8 +103,8 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Set the colour value and gets the current color array.
 	 *
-	 * @param alpha
-	 *            the alpha
+	 * @param color
+	 *            the color
 	 * @return the color
 	 */
 	public abstract float[] getColors(Color3f color);
@@ -116,6 +118,9 @@ public abstract class ArrayColorUpdater
 	 */
 	public abstract float[] getColors(float alpha);
 
+	/**
+	 * Class to update single colour coordinates with alpha
+	 */
 	public static class SingleArrayColorUpdater4 extends ArrayColorUpdater
 	{
 		SingleArrayColorUpdater4()
@@ -178,6 +183,9 @@ public abstract class ArrayColorUpdater
 		}
 	}
 
+	/**
+	 * Class to update multiple colour coordinates with alpha
+	 */
 	public static class MultiArrayColorUpdater4 extends ArrayColorUpdater
 	{
 		MultiArrayColorUpdater4(int n)
@@ -253,6 +261,9 @@ public abstract class ArrayColorUpdater
 		}
 	}
 
+	/**
+	 * Class to update single colour coordinates with no alpha
+	 */
 	public static class SingleArrayColorUpdater3 extends ArrayColorUpdater
 	{
 		SingleArrayColorUpdater3()
@@ -315,6 +326,9 @@ public abstract class ArrayColorUpdater
 		}
 	}
 
+	/**
+	 * Class to update multiple colour coordinates with no alpha
+	 */
 	public static class MultiArrayColorUpdater3 extends ArrayColorUpdater
 	{
 		MultiArrayColorUpdater3(int n)

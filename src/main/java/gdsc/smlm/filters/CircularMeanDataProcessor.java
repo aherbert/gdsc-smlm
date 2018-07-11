@@ -54,6 +54,8 @@ public class CircularMeanDataProcessor extends DataProcessor
 	/**
 	 * Get the radius for the desired smoothing distance.
 	 *
+	 * @param smooth
+	 *            the smoothing distance
 	 * @return the radius for the desired smoothing distance.
 	 */
 	public static double getSigma(double smooth)
@@ -96,12 +98,6 @@ public class CircularMeanDataProcessor extends DataProcessor
 		return filter.hasWeights();
 	}
 
-	/**
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @return
-	 */
 	@Override
 	public float[] process(float[] data, int width, int height)
 	{

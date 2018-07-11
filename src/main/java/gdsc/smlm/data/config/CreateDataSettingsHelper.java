@@ -34,6 +34,7 @@ public class CreateDataSettingsHelper
 {
 	CreateDataSettingsOrBuilder createDataSettings;
 
+	/** Set to true if the camera type is {@link CameraType#EMCCD} */
 	final public boolean isEMCCD;
 	private double totalGain = 0;
 
@@ -58,7 +59,7 @@ public class CreateDataSettingsHelper
 	 * Get the amplification (Count/electron). This is equal to the EM-gain multiplied by the camera gain. If either
 	 * gain or QE are disabled then they will be ignored. An amplification of zero means no amplification is applied.
 	 *
-	 * @return
+	 * @return the amplification
 	 */
 	public double getAmplification()
 	{
@@ -133,7 +134,7 @@ public class CreateDataSettingsHelper
 	 * quantum efficiency. If either gain is disabled then they will be ignored. A total gain of zero means no gain is
 	 * applied.
 	 *
-	 * @return
+	 * @return the total gain
 	 */
 	public double getTotalGain()
 	{
@@ -145,7 +146,7 @@ public class CreateDataSettingsHelper
 	 * quantum efficiency. If either gain is disabled then they will be ignored. If the total gain is not above zero
 	 * (due to invalid configuration) then 1 will be returned.
 	 *
-	 * @return
+	 * @return the total gain safe
 	 */
 	public double getTotalGainSafe()
 	{

@@ -28,7 +28,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +49,7 @@ import ij.plugin.PlugIn;
 public class About implements PlugIn, MacroExtension
 {
 	private static String TITLE = "GDSC SMLM ImageJ Plugins";
+	/** The help url for the SMLM plugins. */
 	public static String HELP_URL = "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
 	private static String YEAR = "2016";
 
@@ -78,6 +78,7 @@ public class About implements PlugIn, MacroExtension
 		abstract public String getName();
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void run(String arg)
 	{
@@ -91,7 +92,7 @@ public class About implements PlugIn, MacroExtension
 
 		if (arg.equals("uninstall"))
 		{
-			showUnintallDialog();
+			showUninstallDialog();
 			return;
 		}
 
@@ -128,28 +129,32 @@ public class About implements PlugIn, MacroExtension
 		showAbout();
 	}
 
-	public static void showUnintallDialog()
+	/**
+	 * Show uninstall dialog.
+	 */
+	public static void showUninstallDialog()
 	{
 		IJ.showMessage(TITLE,
 				"To uninstall this plugin, move the SMLM jar out\n" + "of the plugins folder and restart ImageJ.");
 	}
 
+	/**
+	 * Show about dialog.
+	 */
 	public static void showAbout()
 	{
 		// Locate the README.txt file and load that into the dialog. Include revision
 		Class<About> resourceClass = About.class;
-		InputStream readmeStream = resourceClass.getResourceAsStream("/gdsc/smlm/README.txt");
 
 		StringBuilder msg = new StringBuilder();
 		String helpURL = HELP_URL;
 		String version = Version.getVersion();
 		String buildDate = Version.getBuildDate();
 
-		BufferedReader input = null;
-		try
+		try (BufferedReader input = new BufferedReader(
+				new UnicodeReader(resourceClass.getResourceAsStream("/gdsc/smlm/README.txt"), null)))
 		{
 			// Read the contents of the README file
-			input = new BufferedReader(new UnicodeReader(readmeStream, null));
 			String line;
 			while ((line = input.readLine()) != null)
 			{
@@ -174,16 +179,6 @@ public class About implements PlugIn, MacroExtension
 			msg.append("MRC Genome Damage and Stability Centre\n");
 			msg.append("University of Sussex, UK\n");
 		}
-		finally
-		{
-			try
-			{
-				input.close();
-			}
-			catch (IOException e)
-			{
-			}
-		}
 
 		// Build final message
 		msg = new StringBuilder(msg.toString().trim());
@@ -204,21 +199,26 @@ public class About implements PlugIn, MacroExtension
 	}
 
 	/**
+	 * Install resource.
+	 *
 	 * @param resource
+	 *            the resource
 	 * @param ijDirectory
+	 *            the ij directory
 	 * @param destinationName
+	 *            the destination name
 	 * @param resourceTitle
+	 *            the resource title
 	 * @param notes
+	 *            the notes
 	 * @param options
+	 *            the options
 	 * @return -1 on error, 0 if installed, 1 if removed
 	 */
 	private static int installResource(String resource, String ijDirectory, String destinationName,
 			String resourceTitle, String notes, ConfigureOption... options)
 	{
 		Class<About> resourceClass = About.class;
-		InputStream toolsetStream = resourceClass.getResourceAsStream(resource);
-		if (toolsetStream == null)
-			return -1;
 
 		String dir = IJ.getDirectory(ijDirectory);
 		if (dir == null)
@@ -294,11 +294,9 @@ public class About implements PlugIn, MacroExtension
 
 		// Read the file
 		LinkedList<String> contents = new LinkedList<>();
-		BufferedReader input = null;
-		try
+		try (BufferedReader input = new BufferedReader(
+				new UnicodeReader(resourceClass.getResourceAsStream(resource), null)))
 		{
-			// Read
-			input = new BufferedReader(new UnicodeReader(toolsetStream, null));
 			String line;
 			while ((line = input.readLine()) != null)
 			{
@@ -309,10 +307,6 @@ public class About implements PlugIn, MacroExtension
 		{
 			IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
 			return -1;
-		}
-		finally
-		{
-			close(input);
 		}
 
 		if (choice == ConfigureOption.EDIT)
@@ -356,20 +350,6 @@ public class About implements PlugIn, MacroExtension
 			close(output);
 		}
 		return 0;
-	}
-
-	private static void close(BufferedReader input)
-	{
-		if (input != null)
-		{
-			try
-			{
-				input.close();
-			}
-			catch (IOException e)
-			{
-			}
-		}
 	}
 
 	private static void close(BufferedWriter output)

@@ -91,6 +91,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			this.step = step;
 		}
 
+		/**
+		 * Gets the step.
+		 *
+		 * @return the step
+		 */
 		public double[] getStep()
 		{
 			return step;
@@ -115,6 +120,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			this.tolerance = tolerance;
 		}
 
+		/**
+		 * Gets the tolerance.
+		 *
+		 * @return the tolerance
+		 */
 		public double getTolerance()
 		{
 			return tolerance;
@@ -140,6 +150,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			this.restarts = restarts;
 		}
 
+		/**
+		 * Gets the restarts.
+		 *
+		 * @return the restarts
+		 */
 		public int getRestarts()
 		{
 			return restarts;
@@ -188,7 +203,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 *            {@link GradientMultivariateOptimizer#parseOptimizationData(OptimizationData[])
 	 *            GradientMultivariateOptimizer}, this method will register the following data:
 	 *            <ul>
-	 *            <li>{@link MaximumStepLength}</li>
+	 *            <li>{@link PositionChecker}</li>
+	 *            <li>{@link StepLength}</li>
+	 *            <li>{@link GradientTolerance}</li>
+	 *            <li>{@link MaximumRestarts}</li>
+	 *            <li>{@link MaximumRoundoffRestarts}</li>
 	 *            </ul>
 	 * @return {@inheritDoc}
 	 * @throws TooManyEvaluationsException
@@ -287,12 +306,15 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
-	 * Repeat the BFGS algorithm until it converges without roundoff error on the search direction
+	 * Repeat the BFGS algorithm until it converges without roundoff error on the search direction.
 	 *
 	 * @param checker
+	 *            the checker
 	 * @param p
+	 *            the p
 	 * @param lineSearch
-	 * @return
+	 *            the line search
+	 * @return the point value pair at convergence
 	 */
 	protected PointValuePair bfgsWithRoundoffCheck(ConvergenceChecker<PointValuePair> checker, double[] p,
 			LineStepSearch lineSearch)
@@ -321,6 +343,17 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		return result;
 	}
 
+	/**
+	 * Compute the BFGS algorithm until convergence.
+	 *
+	 * @param checker
+	 *            the checker
+	 * @param p
+	 *            the p
+	 * @param lineSearch
+	 *            the line search
+	 * @return the point value pair at convergence
+	 */
 	protected PointValuePair bfgs(ConvergenceChecker<PointValuePair> checker, double[] p, LineStepSearch lineSearch)
 	{
 		final int n = p.length;
@@ -474,9 +507,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 *            Optimization data.
 	 *            The following data will be looked for:
 	 *            <ul>
-	 *            <li>{@link GradientChecker}</li>
 	 *            <li>{@link PositionChecker}</li>
-	 *            <li>{@link MaximumStepLength}</li>
+	 *            <li>{@link StepLength}</li>
+	 *            <li>{@link GradientTolerance}</li>
+	 *            <li>{@link MaximumRestarts}</li>
+	 *            <li>{@link MaximumRoundoffRestarts}</li>
 	 *            </ul>
 	 */
 	@Override
@@ -521,7 +556,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * @return The minimum value between two doubles
-	 * @see http://en.wikipedia.org/wiki/Machine_epsilon#Approximation_using_C.2B.2B
+	 * @see <a href=
+	 *      "http://en.wikipedia.org/wiki/Machine_epsilon#Approximation_using_C.2B.2B">http://en.wikipedia.org/wiki/Machine_epsilon#Approximation_using_C.2B.2B</a>
 	 */
 	private static double calculateMachineEpsilonDouble()
 	{
@@ -536,17 +572,29 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		return machEps;
 	}
 
+	/**
+	 * Class thrown when there is a line search roundoff exception.
+	 */
 	public static class LineSearchRoundoffException extends RuntimeException
 	{
 		private static final long serialVersionUID = -8974644703023090107L;
 		private final double slope;
 
+		/**
+		 * Instantiates a new line search roundoff exception.
+		 *
+		 * @param slope
+		 *            the slope
+		 */
 		public LineSearchRoundoffException(double slope)
 		{
 			super();
 			this.slope = slope;
 		}
 
+		/**
+		 * Instantiates a new line search roundoff exception.
+		 */
 		public LineSearchRoundoffException()
 		{
 			super();
@@ -766,7 +814,14 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		//	gradientTolerance = 1e-6;
 	}
 
-	private Localizable createError(final String message)
+	/**
+	 * Creates the error.
+	 *
+	 * @param message
+	 *            the message
+	 * @return the localizable
+	 */
+	private static Localizable createError(final String message)
 	{
 		return new Localizable()
 		{
@@ -787,13 +842,15 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
-	 * Check if the array contains anything other than value
+	 * Check if the array contains anything other than value.
 	 *
 	 * @param array
+	 *            the array
 	 * @param value
+	 *            the value
 	 * @return True if the array has another value
 	 */
-	private boolean checkArray(double[] array, double value)
+	private static boolean checkArray(double[] array, double value)
 	{
 		if (array == null)
 			return false;

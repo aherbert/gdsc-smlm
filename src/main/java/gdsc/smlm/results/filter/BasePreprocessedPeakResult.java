@@ -32,9 +32,17 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
  */
 public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakResult
 {
+	/**
+	 * The result type.
+	 */
 	public enum ResultType
 	{
-		NEW, EXISTING, CANDIDATE
+		/** A new result. */
+		NEW,
+		/** An existing result. */
+		EXISTING,
+		/** A candidate result. */
+		CANDIDATE
 	}
 
 	private final int frame;
@@ -64,6 +72,8 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final boolean newResult;
 
 	private ResultAssignment[] assignments;
+
+	/** The unique id. */
 	public int uniqueId;
 	private int validationResult = 0;
 	private boolean ignore, notDuplicate;
@@ -75,26 +85,48 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * Note: The candidate Id is usually the spot that was used to initiate the fit process.
 	 * However if neighbour spots were present then the candidate Id should be that of the neighbour.
 	 *
-	 * @param frame The frame
-	 * @param id the id
-	 * @param candidateId the candidate id
-	 * @param signal The signal (in photons)
-	 * @param noise the noise estimate
-	 * @param b The background level (in photons)
-	 * @param angle The angle of the fit
-	 * @param x The x-position
-	 * @param y The y-position
-	 * @param z The z-position
-	 * @param x0 The initial x-position
-	 * @param y0 The initial y-position
-	 * @param xsd The x standard deviation
-	 * @param ysd The y standard deviation
-	 * @param xsd0 The initial x standard deviation
-	 * @param ysd0 The initial y standard deviation
-	 * @param variance The estimate of the localisation variance using the noise
-	 * @param variance2 The estimate of the localisation variance using the local background
-	 * @param varianceCRLB the estimate of the localisation variance using the Cramér–Rao lower bound (CRLB)
-	 * @param resultType The type of result
+	 * @param frame
+	 *            The frame
+	 * @param id
+	 *            the id
+	 * @param candidateId
+	 *            the candidate id
+	 * @param signal
+	 *            The signal (in photons)
+	 * @param meanSignal
+	 *            the mean signal
+	 * @param noise
+	 *            the noise estimate
+	 * @param b
+	 *            The background level (in photons)
+	 * @param angle
+	 *            The angle of the fit
+	 * @param x
+	 *            The x-position
+	 * @param y
+	 *            The y-position
+	 * @param z
+	 *            The z-position
+	 * @param x0
+	 *            The initial x-position
+	 * @param y0
+	 *            The initial y-position
+	 * @param xsd
+	 *            The x standard deviation
+	 * @param ysd
+	 *            The y standard deviation
+	 * @param xsd0
+	 *            The initial x standard deviation
+	 * @param ysd0
+	 *            The initial y standard deviation
+	 * @param variance
+	 *            The estimate of the localisation variance using the noise
+	 * @param variance2
+	 *            The estimate of the localisation variance using the local background
+	 * @param varianceCRLB
+	 *            the estimate of the localisation variance using the Cramér–Rao lower bound (CRLB)
+	 * @param resultType
+	 *            The type of result
 	 */
 	public BasePreprocessedPeakResult(
 			int frame,
@@ -153,156 +185,286 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		return (float) (f * f);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getFrame()
+	 */
 	@Override
 	public int getFrame()
 	{
 		return frame;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getUniqueId()
+	 */
 	@Override
 	public int getUniqueId()
 	{
 		return uniqueId;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getId()
+	 */
 	@Override
 	public int getId()
 	{
 		return id;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getCandidateId()
+	 */
 	@Override
 	public int getCandidateId()
 	{
 		return candidateId;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getSignal()
+	 */
 	@Override
 	public float getSignal()
 	{
 		return signal;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getMeanSignal()
+	 */
 	@Override
 	public float getMeanSignal()
 	{
 		return meanSignal;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getSNR()
+	 */
 	@Override
 	public float getSNR()
 	{
 		return snr;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getNoise()
+	 */
 	@Override
 	public float getNoise()
 	{
 		return noise;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVariance()
+	 */
 	@Override
 	public double getLocationVariance()
 	{
 		return variance;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVariance2()
+	 */
 	@Override
 	public double getLocationVariance2()
 	{
 		return variance2;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVarianceCRLB()
+	 */
 	@Override
 	public double getLocationVarianceCRLB()
 	{
 		return varianceCRLB;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getSD()
+	 */
 	@Override
 	public float getSD()
 	{
 		return sd;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getBackground()
+	 */
 	@Override
 	public float getBackground()
 	{
 		return b;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAmplitude()
+	 */
 	@Override
 	public float getAmplitude()
 	{
 		return amp;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAngle()
+	 */
 	@Override
 	public float getAngle()
 	{
 		return angle;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getX()
+	 */
 	@Override
 	public float getX()
 	{
 		return x;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getY()
+	 */
 	@Override
 	public float getY()
 	{
 		return y;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getZ()
+	 */
 	@Override
 	public float getZ()
 	{
 		return z;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getXRelativeShift2()
+	 */
 	@Override
 	public float getXRelativeShift2()
 	{
 		return xshift2;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getYRelativeShift2()
+	 */
 	@Override
 	public float getYRelativeShift2()
 	{
 		return yshift2;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getXSD()
+	 */
 	@Override
 	public float getXSD()
 	{
 		return xsd;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getYSD()
+	 */
 	@Override
 	public float getYSD()
 	{
 		return ysd;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getXSDFactor()
+	 */
 	@Override
 	public float getXSDFactor()
 	{
 		return xwf;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getYSDFactor()
+	 */
 	@Override
 	public float getYSDFactor()
 	{
 		return ywf;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isExistingResult()
+	 */
 	@Override
 	public boolean isExistingResult()
 	{
 		return existingResult;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNewResult()
+	 */
 	@Override
 	public boolean isNewResult()
 	{
@@ -313,6 +475,9 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * Returns a new array and so is thread-safe (unless another thread updates the assignments concurrently). It should
 	 * be thread safe for use in scoring of the result using a multi-path filter.
 	 *
+	 * @param predictedId
+	 *            the predicted id
+	 * @return the assignments
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
 	 */
 	@Override
@@ -372,7 +537,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	}
 
 	/**
-	 * Convert this to the parameters for a Gaussian2DFunction
+	 * Convert this to the parameters for a Gaussian2DFunction.
 	 *
 	 * @return the parameters
 	 */

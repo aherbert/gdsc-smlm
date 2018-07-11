@@ -53,11 +53,14 @@ class CandidateGridManager
 	}
 
 	/**
-	 * Create a grid for candidates or fittedCandidate results
+	 * Create a grid for candidates or fittedCandidate results.
 	 *
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param resolution
+	 *            the resolution
 	 */
 	public CandidateGridManager(int maxx, int maxy, int resolution)
 	{
@@ -150,6 +153,7 @@ class CandidateGridManager
 	 * Add a candidate to the grid. Assumes that the coordinates are within the size of the grid.
 	 *
 	 * @param candidate
+	 *            the candidate
 	 */
 	public void addCandidateToGrid(Candidate candidate)
 	{
@@ -174,11 +178,12 @@ class CandidateGridManager
 
 	/**
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
-	 * resolution
-	 * distance will be returned, plus there may be others and so distances should be checked.
+	 * resolution distance will be returned, plus there may be others and so distances should be checked.
 	 *
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return the neighbours
 	 */
 	public CandidateList getFittedNeighbours(final int x, final int y)

@@ -66,12 +66,16 @@ public class BinomialFitter
 	private boolean maximumLikelihood = true;
 	private int fitRestarts = 5;
 
+	/**
+	 * Instantiates a new binomial fitter.
+	 */
 	public BinomialFitter()
 	{
-
 	}
 
 	/**
+	 * Instantiates a new binomial fitter.
+	 *
 	 * @param logger
 	 *            Logging interface to report progress messages
 	 */
@@ -85,6 +89,7 @@ public class BinomialFitter
 	 * N = p.length - 1;
 	 *
 	 * @param data
+	 *            the data
 	 * @param cumulative
 	 *            Build a cumulative histogram
 	 * @return The cumulative histogram (p)
@@ -108,6 +113,7 @@ public class BinomialFitter
 	 * N = p.length - 1;
 	 *
 	 * @param data
+	 *            the data
 	 * @param cumulative
 	 *            Build a cumulative histogram
 	 * @return The cumulative histogram (p)
@@ -490,7 +496,14 @@ public class BinomialFitter
 		return null;
 	}
 
-	private double getMean(double[] histogram)
+	/**
+	 * Gets the mean.
+	 *
+	 * @param histogram
+	 *            the histogram
+	 * @return the mean
+	 */
+	private static double getMean(double[] histogram)
 	{
 		double sum = 0;
 		double count = 0;
@@ -531,10 +544,11 @@ public class BinomialFitter
 		}
 
 		/**
-		 * Get the probability function for the input pValue
+		 * Get the probability function for the input pValue.
 		 *
 		 * @param pValue
-		 * @return
+		 *            the value
+		 * @return the probability function
 		 */
 		public double[] getP(double pValue)
 		{
@@ -574,6 +588,16 @@ public class BinomialFitter
 	 */
 	public class BinomialModelFunction extends BinomialModel implements MultivariateFunction
 	{
+		/**
+		 * Instantiates a new binomial model function.
+		 *
+		 * @param p
+		 *            the p
+		 * @param trials
+		 *            the trials
+		 * @param zeroTruncated
+		 *            the zero truncated
+		 */
 		public BinomialModelFunction(double[] p, int trials, boolean zeroTruncated)
 		{
 			super(p, trials, zeroTruncated);
@@ -624,6 +648,16 @@ public class BinomialFitter
 	{
 		long[] nC;
 
+		/**
+		 * Instantiates a new binomial model function gradient.
+		 *
+		 * @param histogram
+		 *            the histogram
+		 * @param trials
+		 *            the trials
+		 * @param zeroTruncated
+		 *            the zero truncated
+		 */
 		public BinomialModelFunctionGradient(double[] histogram, int trials, boolean zeroTruncated)
 		{
 			super(histogram, trials, zeroTruncated);
@@ -641,7 +675,7 @@ public class BinomialFitter
 			}
 		}
 
-		public double[] getWeights()
+		private double[] getWeights()
 		{
 			double[] w = new double[p.length];
 			Arrays.fill(w, 1);
