@@ -191,7 +191,7 @@ import ij.text.TextWindow;
  */
 public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
-	private static final String TITLE = "Create Data";
+	static final String TITLE = "Create Data";
 	private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
 	private static String[] ILLUMINATION = { "Uniform", "Radial" };
@@ -3130,11 +3130,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Check if the localisation, or its neighbours, reach the SNR thresholds. The intensity and noise are after EM-gain
 	 * has been applied.
-	 * 
+	 *
 	 * @param localisationSet
+	 *            the localisation set
 	 * @param intensity
+	 *            the intensity
 	 * @param noise
-	 * @return
+	 *            the noise
+	 * @return true, if successful
 	 */
 	public boolean badLocalisation(LocalisationModelSet localisationSet, double intensity, double noise)
 	{
@@ -4827,9 +4830,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Check if there are any suitable PSF images open. If so add a choice to allow the selection of the Gaussian or
 	 * Image PSF model. If no PSF images are open then add options for the wavelength and NA for the simulated
 	 * microscope.
-	 * 
+	 *
 	 * @param gd
-	 * @return
+	 *            the gd
 	 */
 	private void addPSFOptions(final ExtendedGenericDialog gd)
 	{

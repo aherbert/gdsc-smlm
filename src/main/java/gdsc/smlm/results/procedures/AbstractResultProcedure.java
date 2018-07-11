@@ -42,10 +42,6 @@ public abstract class AbstractResultProcedure
 	 *
 	 * @param results
 	 *            the results
-	 * @param distanceUnit
-	 *            the distance unit
-	 * @param intensityUnit
-	 *            the intensity unit
 	 */
 	public AbstractResultProcedure(MemoryPeakResults results)
 	{

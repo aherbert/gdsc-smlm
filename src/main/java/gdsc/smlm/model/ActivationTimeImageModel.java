@@ -40,14 +40,12 @@ public class ActivationTimeImageModel extends ImageModel
 	 *            Average time for activation
 	 * @param tOn
 	 *            Average on-state time
-	 * @param tOn
-	 *            Average on-state time
 	 * @param tOff
 	 *            Average off-state time for the first dark state
-	 * @param tOff
+	 * @param tOff2
 	 *            Average off-state time for the second dark state
 	 * @param nBlinks
-	 *            Average number of blinks int the first dark state (used for each burst between second dark states)
+	 *            Average number of blinks in the first dark state (used for each burst between second dark states)
 	 * @param nBlinks2
 	 *            Average number of blinks into the second dark state
 	 */

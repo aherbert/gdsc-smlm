@@ -99,7 +99,7 @@ import ij.text.TextWindow;
  */
 public class BenchmarkSpotFilter implements PlugIn
 {
-	private static final String TITLE = "Filter Spot Data";
+	static final String TITLE = "Filter Spot Data";
 
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
@@ -415,6 +415,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
+	/**
+	 * Store a filter result.
+	 */
 	public class FilterResult
 	{
 		final int frame;
@@ -423,6 +426,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		final PSFSpot[] actual;
 		final boolean[] actualAssignment;
 
+		/**
+		 * Instantiates a new filter result.
+		 *
+		 * @param frame
+		 *            the frame
+		 * @param result
+		 *            the result
+		 * @param spots
+		 *            the spots
+		 * @param actual
+		 *            the actual
+		 * @param actualAssignment
+		 *            the actual assignment
+		 */
 		public FilterResult(int frame, FractionClassificationResult result, ScoredSpot[] spots, PSFSpot[] actual,
 				boolean[] actualAssignment)
 		{
@@ -576,9 +593,11 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		/**
 		 * Return an array of PSF spots for the given time point. Returns an empty array if there are no coordinates.
-		 * 
+		 *
 		 * @param coords
+		 *            the coords
 		 * @param t
+		 *            the t
 		 * @return The array list
 		 */
 		public PSFSpot[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t)

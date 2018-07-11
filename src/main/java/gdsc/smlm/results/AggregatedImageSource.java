@@ -367,8 +367,11 @@ public class AggregatedImageSource extends ImageSource
 	}
 
 	/**
+	 * Checks if is valid.
+	 *
 	 * @param frame
-	 * @return
+	 *            the frame
+	 * @return true, if is valid
 	 */
 	@Override
 	public boolean isValid(int frame)

@@ -91,7 +91,10 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new airy PSF model.
+	 *
 	 * @param randomGenerator
+	 *            the random generator
 	 * @param w0
 	 *            The Airy width for dimension 0
 	 * @param w1
@@ -105,7 +108,10 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new airy PSF model.
+	 *
 	 * @param randomGenerator
+	 *            the random generator
 	 * @param w0
 	 *            The Airy width for dimension 0
 	 * @param w1
@@ -122,7 +128,10 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new airy PSF model.
+	 *
 	 * @param randomDataGenerator
+	 *            the random data generator
 	 * @param w0
 	 *            The Airy width for dimension 0
 	 * @param w1
@@ -136,7 +145,10 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new airy PSF model.
+	 *
 	 * @param randomDataGenerator
+	 *            the random data generator
 	 * @param w0
 	 *            The Airy width for dimension 0
 	 * @param w1
@@ -513,7 +525,7 @@ public class AiryPSFModel extends PSFModel
 	 *            The radii
 	 * @return The intensity
 	 */
-	private double intensity(final double d0, final double d1, final double limit, final double samplesPerPixel,
+	private static double intensity(final double d0, final double d1, final double limit, final double samplesPerPixel,
 			final double[] intensity, final double[] radius)
 	{
 		final double distance2 = d0 + d1;
@@ -550,10 +562,11 @@ public class AiryPSFModel extends PSFModel
 	 *            The radii
 	 * @param N
 	 *            The number of subintervals
-	 * @return
+	 * @return the integral
 	 */
-	private double integral(final double ax, final double bx, final double ay, final double by, final double limit,
-			final double samplesPerPixel, final double[] intensity, final double[] radius, final int N)
+	private static double integral(final double ax, final double bx, final double ay, final double by,
+			final double limit, final double samplesPerPixel, final double[] intensity, final double[] radius,
+			final int N)
 	{
 		final double h = (bx - ax) / N;
 		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary 
@@ -591,9 +604,9 @@ public class AiryPSFModel extends PSFModel
 	 *            The radii
 	 * @param N
 	 *            The number of subintervals
-	 * @return
+	 * @return the integral
 	 */
-	private double integral(final double x2, final double ay, final double by, final double limit,
+	private static double integral(final double x2, final double ay, final double by, final double limit,
 			final double samplesPerPixel, final double[] intensity, final double[] radius, final int N)
 	{
 		final double h = (by - ay) / N;
@@ -613,7 +626,7 @@ public class AiryPSFModel extends PSFModel
 		return s * h / 3;
 	}
 
-	private int clip(int x, int max)
+	private static int clip(int x, int max)
 	{
 		if (x < 0)
 			x = 0;
@@ -676,6 +689,8 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Gets the ring.
+	 *
 	 * @return the ring limit for the calculated Airy pattern
 	 */
 	public int getRing()
@@ -696,6 +711,8 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Checks if is single pixel approximation.
+	 *
 	 * @return True if the Airy pattern is evaluated once per pixel, otherwise use Simpson's integration
 	 */
 	public boolean isSinglePixelApproximation()
@@ -704,6 +721,8 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Sets the single pixel approximation.
+	 *
 	 * @param singlePixelApproximation
 	 *            True if the Airy pattern is evaluated once per pixel, otherwise use Simpson's integration
 	 */
@@ -713,6 +732,8 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Gets the min samples per dimension.
+	 *
 	 * @return The minimum number of samples per dimension for Simpson's integration over each pixel
 	 */
 	public int getMinSamplesPerDimension()
@@ -734,6 +755,8 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
+	 * Gets the max samples per dimension.
+	 *
 	 * @return The maximum number of samples per dimension for Simpson's integration over each pixel
 	 */
 	public int getMaxSamplesPerDimension()
