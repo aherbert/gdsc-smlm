@@ -2417,8 +2417,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 		}
 
-		;
-
 		boolean result = saveFitEngineSettings();
 		if (!result)
 			IJ.error(TITLE, "Failed to save settings");
@@ -2433,8 +2431,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *
 	 * @param config
 	 *            the config
-	 * @param flags
-	 *            the flags
 	 * @return true, if successful
 	 */
 	public static boolean configurePSFModel(FitEngineConfiguration config)
@@ -3099,7 +3095,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
 			}
 
-			// The camera model origin must be reset to the be relative to the source bounds origin
+			// The camera model origin must be reset to be relative to the source bounds origin
 			cameraModel = cropCameraModel(cameraModel, sourceBounds, cropBounds, true);
 			if (cameraModel == null)
 				return false;

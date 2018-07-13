@@ -55,9 +55,10 @@ public class IJImageSource extends ImageSource
 	private String path;
 
 	/**
-	 * Create a new image source using the name of the image file
+	 * Create a new image source using the name of the image file.
 	 *
 	 * @param name
+	 *            the name
 	 */
 	public IJImageSource(String name)
 	{
@@ -65,10 +66,12 @@ public class IJImageSource extends ImageSource
 	}
 
 	/**
-	 * Create a new image source using the path to the image file
+	 * Create a new image source using the path to the image file.
 	 *
 	 * @param name
+	 *            the name
 	 * @param path
+	 *            the path
 	 */
 	public IJImageSource(String name, String path)
 	{
@@ -77,9 +80,10 @@ public class IJImageSource extends ImageSource
 	}
 
 	/**
-	 * Create a new image source from an ImagePlus
+	 * Create a new image source from an ImagePlus.
 	 *
 	 * @param imp
+	 *            the imp
 	 */
 	public IJImageSource(ImagePlus imp)
 	{
@@ -124,7 +128,7 @@ public class IJImageSource extends ImageSource
 	 * Gets the origin from the Image calibration.
 	 *
 	 * @param imp
-*            the image
+	 *            the image
 	 * @return the origin
 	 * @throws IllegalArgumentException
 	 *             If the origin is not in integer pixel units
@@ -154,7 +158,7 @@ public class IJImageSource extends ImageSource
 	 * Gets the bounds from the Image calibration.
 	 *
 	 * @param imp
-*            the image
+	 *            the image
 	 * @return the bounds
 	 * @throws IllegalArgumentException
 	 *             If the origin is not in integer pixel units
@@ -166,10 +170,12 @@ public class IJImageSource extends ImageSource
 	}
 
 	/**
-	 * Create a new image source from an ImageProcessor
+	 * Create a new image source from an ImageProcessor.
 	 *
 	 * @param name
+	 *            the name
 	 * @param ip
+	 *            the ip
 	 */
 	public IJImageSource(String name, ImageProcessor ip)
 	{
@@ -184,7 +190,9 @@ public class IJImageSource extends ImageSource
 	 * Create a new image source from an ImagePlus. Specify a single frame for processing.
 	 *
 	 * @param imp
+	 *            the imp
 	 * @param frame
+	 *            the frame
 	 */
 	public IJImageSource(ImagePlus imp, int frame)
 	{
@@ -196,6 +204,7 @@ public class IJImageSource extends ImageSource
 	 * for processing.
 	 *
 	 * @param imp
+	 *            the imp
 	 * @param startFrame
 	 *            The first frame to process
 	 * @param extraFrames

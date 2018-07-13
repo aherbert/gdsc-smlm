@@ -61,6 +61,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.filters.SpotFilterHelper;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import gdsc.smlm.ij.plugins.PeakFit.RelativeParameterProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -327,10 +328,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		// Set a camera model
 		fitConfig.setCameraModelName(gd.getNextChoice());
-		CameraModel model = CameraModelManager.load(fitConfig.getCameraModelName());
-		if (model == null)
-			model = new FakePerPixelCameraModel(0, 1, 1);
-		fitConfig.setCameraModel(model);
+		//CameraModel model = CameraModelManager.load(fitConfig.getCameraModelName());
+		//if (model == null)
+		//	model = new FakePerPixelCameraModel(0, 1, 1);
+		//fitConfig.setCameraModel(model);
 
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 
@@ -412,6 +413,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			else
 			{
 				fitConfig.setCameraType(CameraType.SCMOS);
+
+				// Support cropped origin selection.
+				Rectangle sourceBounds = IJImageSource.getBounds(imp);
+				cameraModel = PeakFit.cropCameraModel(cameraModel, sourceBounds, null, true);
 			}
 			fitConfig.setCameraModel(cameraModel);
 		}
@@ -444,38 +449,36 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		lastFitEngineSettings = fitEngineSettings;
 		lastPSF = psf;
 
-		// Note:
-		// Do not support origin selection when there is a width/height mismatch
-		// as this will break the live preview with multiple pop-ups. Origin
-		// could be added to the input dialog.
-		//cameraModel = PeakFit.cropCameraModel(cameraModel, ip.getWidth(), ip.getHeight(), 0, 0, true);
-
-		// Instead just warn if the roi cannot be extracted from the selected model
-		// or there is a mismatch
-		Rectangle modelBounds = fitConfig.getCameraModel().getBounds();
-		if (modelBounds != null)
+		// This code can probably be removed since the crop is done above.
+		if (fitConfig.getCameraTypeValue() == CameraType.SCMOS_VALUE)
 		{
-			if (!modelBounds.contains(bounds))
+			// Instead just warn if the roi cannot be extracted from the selected model
+			// or there is a mismatch
+			Rectangle modelBounds = fitConfig.getCameraModel().getBounds();
+			if (modelBounds != null)
 			{
+				if (!modelBounds.contains(bounds))
+				{
 			//@formatter:off
 			Utils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
 					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
 					bounds.x, bounds.y, bounds.width, bounds.height
 					);
 			//@formatter:on
-			}
-			else
-			// Warn if the model bounds are mismatched than the image as this may be an incorrect
-			// selection for the camera model
-			if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth() ||
-					modelBounds.height > ip.getHeight())
-			{
+				}
+				else
+				// Warn if the model bounds are mismatched than the image as this may be an incorrect
+				// selection for the camera model
+				if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth() ||
+						modelBounds.height > ip.getHeight())
+				{
 			//@formatter:off
 			Utils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
 					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
 					ip.getWidth(),  ip.getHeight()
 					);
 			//@formatter:on
+				}
 			}
 		}
 
@@ -499,6 +502,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		int width = fp.getWidth();
 		int height = fp.getHeight();
 
+		// Store the mean bias and gain of the region data.
+		// This is used to correctly overlay the filtered data on the original image.
+		double bias = 0;
+		double gain = 1;
+		boolean adjust = false;
+
 		// Set weights
 		CameraModel cameraModel = fitConfig.getCameraModel();
 		if (!(cameraModel instanceof FakePerPixelCameraModel))
@@ -507,7 +516,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			float[] w = cameraModel.getNormalisedWeights(bounds);
 			filter.setWeights(w, width, height);
 			data = data.clone();
-			cameraModel.removeBiasAndGain(data);
+			if (data.length < ip.getPixelCount())
+			{
+				adjust = true;
+				bias = Maths.sum(cameraModel.getBias(bounds)) / data.length;
+				gain = Maths.sum(cameraModel.getGain(bounds)) / data.length;
+			}
+			cameraModel.removeBiasAndGain(bounds, data);
 		}
 
 		Spot[] spots = filter.rank(data, width, height);
@@ -520,6 +535,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		fp = new FloatProcessor(width, height, data);
 		FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
 		out.copyBits(ip, 0, 0, Blitter.COPY);
+		if (adjust)
+		{
+			fp.multiply(gain);
+			fp.add(bias);
+		}
 		out.insert(fp, bounds.x, bounds.y);
 		//ip.resetMinAndMax();
 		double min = fp.getMin();
@@ -541,8 +561,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			}
 
 			// Compute assignments
-			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(
-					3 * predicted.length);
+			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(3 * predicted.length);
 			double matchDistance = distance * fitConfig.getInitialPeakStdDev();
 			final RampedScore score = new RampedScore(matchDistance * lowerDistance / 100, matchDistance);
 			final double dmin = matchDistance * matchDistance;
@@ -754,17 +773,83 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		imp.setOverlay(o);
 	}
 
+	/**
+	 * Adds the roi to the overlay as a circle.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param o
+	 *            the overlay
+	 * @param x
+	 *            the x coordinates
+	 * @param y
+	 *            the y coordinates
+	 * @param n
+	 *            the number of points
+	 * @param colour
+	 *            the colour
+	 * @see PointRoi#setPosition(int)
+	 * @see PointRoi#setFillColor(Color)
+	 * @see PointRoi#setStrokeColor(Color)
+	 */
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour)
 	{
 		// Add as a circle
 		addRoi(frame, o, x, y, n, colour, 3);
 	}
 
+	/**
+	 * Adds the roi to the overlay.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param o
+	 *            the overlay
+	 * @param x
+	 *            the x coordinates
+	 * @param y
+	 *            the y coordinates
+	 * @param n
+	 *            the number of points
+	 * @param colour
+	 *            the colour
+	 * @param pointType
+	 *            the point type
+	 * @see PointRoi#setPosition(int)
+	 * @see PointRoi#setPointType(int)
+	 * @see PointRoi#setFillColor(Color)
+	 * @see PointRoi#setStrokeColor(Color)
+	 */
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour, int pointType)
 	{
 		addRoi(frame, o, x, y, n, colour, pointType, 0);
 	}
 
+	/**
+	 * Adds the roi to the overlay.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param o
+	 *            the overlay
+	 * @param x
+	 *            the x coordinates
+	 * @param y
+	 *            the y coordinates
+	 * @param n
+	 *            the number of points
+	 * @param colour
+	 *            the colour
+	 * @param pointType
+	 *            the point type
+	 * @param size
+	 *            the size
+	 * @see PointRoi#setPosition(int)
+	 * @see PointRoi#setPointType(int)
+	 * @see PointRoi#setFillColor(Color)
+	 * @see PointRoi#setStrokeColor(Color)
+	 * @see PointRoi#setSize(int)
+	 */
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour, int pointType, int size)
 	{
 		if (n == 0)
