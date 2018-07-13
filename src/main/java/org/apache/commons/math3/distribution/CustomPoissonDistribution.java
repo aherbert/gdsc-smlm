@@ -466,74 +466,70 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 			}
 			return n;
 		}
-		else
+		
+		computeFactors();
+
+		y2 = lambdaFractional < Double.MIN_VALUE ? 0 : nextPoisson(lambdaFractional);
+
+		double x = 0;
+		double y = 0;
+		double v = 0;
+		int a = 0;
+		double t = 0;
+		double qr = 0;
+		double qa = 0;
+		for (;;)
 		{
-			computeFactors();
-
-			y2 = lambdaFractional < Double.MIN_VALUE ? 0 : nextPoisson(lambdaFractional);
-
-			double x = 0;
-			double y = 0;
-			double v = 0;
-			int a = 0;
-			double t = 0;
-			double qr = 0;
-			double qa = 0;
-			for (;;)
+			final double u = random.nextDouble();
+			if (u <= p1)
 			{
-				final double u = random.nextDouble();
-				if (u <= p1)
-				{
-					final double n = random.nextGaussian();
-					x = n * FastMath.sqrt(lambda + halfDelta) - 0.5d;
-					if (x > delta || x < -lambda)
-					{
-						continue;
-					}
-					y = x < 0 ? FastMath.floor(x) : FastMath.ceil(x);
-					final double e = exponential.sample();
-					v = -e - (n * n / 2) + c1;
-				}
-				else
-				{
-					if (u > p1 + p2)
-					{
-						y = lambda;
-						break;
-					}
-					else
-					{
-						x = delta + (twolpd / delta) * exponential.sample();
-						y = FastMath.ceil(x);
-						v = -exponential.sample() - delta * (x + 1) / twolpd;
-					}
-				}
-				a = x < 0 ? 1 : 0;
-				t = y * (y + 1) / (2 * lambda);
-				if (v < -t && a == 0)
-				{
-					y = lambda + y;
-					break;
-				}
-				qr = t * ((2 * y + 1) / (6 * lambda) - 1);
-				qa = qr - (t * t) / (3 * (lambda + a * (y + 1)));
-				if (v < qa)
-				{
-					y = lambda + y;
-					break;
-				}
-				if (v > qr)
+				final double n = random.nextGaussian();
+				x = n * FastMath.sqrt(lambda + halfDelta) - 0.5d;
+				if (x > delta || x < -lambda)
 				{
 					continue;
 				}
-				if (v < y * logLambda - CombinatoricsUtils.factorialLog((int) (y + lambda)) + logLambdaFactorial)
+				y = x < 0 ? FastMath.floor(x) : FastMath.ceil(x);
+				final double e = exponential.sample();
+				v = -e - (n * n / 2) + c1;
+			}
+			else
+			{
+				if (u > p1 + p2)
 				{
-					y = lambda + y;
+					y = lambda;
 					break;
 				}
+				
+				x = delta + (twolpd / delta) * exponential.sample();
+				y = FastMath.ceil(x);
+				v = -exponential.sample() - delta * (x + 1) / twolpd;
 			}
-			return y2 + (long) y;
+			a = x < 0 ? 1 : 0;
+			t = y * (y + 1) / (2 * lambda);
+			if (v < -t && a == 0)
+			{
+				y = lambda + y;
+				break;
+			}
+			qr = t * ((2 * y + 1) / (6 * lambda) - 1);
+			qa = qr - (t * t) / (3 * (lambda + a * (y + 1)));
+			if (v < qa)
+			{
+				y = lambda + y;
+				break;
+			}
+			if (v > qr)
+			{
+				continue;
+			}
+			if (v < y * logLambda - CombinatoricsUtils.factorialLog((int) (y + lambda)) + logLambdaFactorial)
+			{
+				y = lambda + y;
+				break;
+			}
 		}
+		return y2 + (long) y;
 	}
 
 	private void computeFactors()
