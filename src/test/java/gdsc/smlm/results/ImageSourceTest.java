@@ -809,12 +809,15 @@ public class ImageSourceTest
 	}
 
 	/**
-	 * Crop the data to the specified bounds
+	 * Crop the data to the specified bounds.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param bounds
-	 * @return
+	 *            the bounds
+	 * @return the cropped data
 	 */
 	float[] crop(float[] data, int width, Rectangle bounds)
 	{
