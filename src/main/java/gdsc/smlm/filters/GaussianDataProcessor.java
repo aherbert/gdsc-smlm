@@ -55,6 +55,8 @@ public class GaussianDataProcessor extends DataProcessor
 	/**
 	 * Get the Gaussian standard deviation for the desired smoothing distance.
 	 *
+	 * @param smooth
+	 *            the smoothing distance
 	 * @return the Gaussian standard deviation for the desired smoothing distance.
 	 */
 	public static double getSigma(double smooth)
@@ -97,11 +99,8 @@ public class GaussianDataProcessor extends DataProcessor
 		return filter.hasWeights();
 	}
 
-	/**
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @return
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
 	public float[] process(float[] data, int width, int height)

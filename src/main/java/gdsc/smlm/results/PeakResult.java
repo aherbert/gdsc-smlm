@@ -96,7 +96,7 @@ public class PeakResult implements Cloneable
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
-	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 *            the params standard deviations (if not null must match the length of the params array)
 	 * @throws IllegalArgumentException
 	 *             the illegal argument exception if the parameters are invalid
 	 */
@@ -699,6 +699,8 @@ public class PeakResult implements Cloneable
 	/**
 	 * This methods return the x-position. To allow filters to use the actual shift requires either off-setting the
 	 * position with the initial fit position, or extending this class so the shift can be stored.
+	 *
+	 * @return the x shift
 	 */
 	public float getXShift()
 	{
@@ -708,6 +710,8 @@ public class PeakResult implements Cloneable
 	/**
 	 * This methods return the y-position. To allow filters to use the actual shift requires either off-setting the
 	 * position with the initial fit position, or extending this class so the shift can be stored.
+	 *
+	 * @return the y shift
 	 */
 	public float getYShift()
 	{
@@ -771,7 +775,8 @@ public class PeakResult implements Cloneable
 	 *
 	 * @param i
 	 *            the index
-	 * @return the parameter
+	 * @param value
+	 *            the value
 	 */
 	public void setParameter(int i, float value)
 	{
@@ -795,7 +800,8 @@ public class PeakResult implements Cloneable
 	 *
 	 * @param i
 	 *            the index
-	 * @return the parameter
+	 * @param value
+	 *            the value
 	 */
 	public void setParameterDeviation(int i, float value)
 	{

@@ -54,10 +54,10 @@ public class MedianDataProcessor extends DataProcessor
 	 * Convert the smoothing parameter to the value which is used for the MedianFilter.
 	 * We only use int smoothing. Values below zero are set to zero.
 	 *
-	 * @see MedianFilter
-	 *
 	 * @param smooth
+	 *            the smoothing parameter
 	 * @return The adjusted value
+	 * @see MedianFilter
 	 */
 	public static int convert(double smooth)
 	{
@@ -85,7 +85,7 @@ public class MedianDataProcessor extends DataProcessor
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
-
+		// Do nothing
 	}
 
 	/*
@@ -99,11 +99,10 @@ public class MedianDataProcessor extends DataProcessor
 		return false;
 	}
 
-	/**
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
 	public float[] process(float[] data, int width, int height)

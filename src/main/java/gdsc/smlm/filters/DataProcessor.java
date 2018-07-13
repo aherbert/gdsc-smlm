@@ -51,7 +51,7 @@ public abstract class DataProcessor implements Cloneable
 	public abstract boolean isWeighted();
 
 	/**
-	 * Sets the weights of the data. This should be called before {@link #process(float[], int, int)} is called with
+	 * Sets the weights of the data. This should be called before {@link #process (float[], int, int)} is called with
 	 * data samples.
 	 * <p>
 	 * Calling this in advance allows efficient caching of pre-computed weightings.
@@ -83,7 +83,7 @@ public abstract class DataProcessor implements Cloneable
 	 *            The height of the data
 	 * @return The new data
 	 */
-	protected abstract float[] process(final float[] data, final int width, final int height);
+	public abstract float[] process(final float[] data, final int width, final int height);
 
 	/**
 	 * @return the border

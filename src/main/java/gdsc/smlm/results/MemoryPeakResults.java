@@ -164,13 +164,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Add all results.
+	 * {@inheritDoc}
 	 * <p>
 	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-	 *
-	 * {@inheritDoc}
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#addCollection(java.util.Collection)
 	 */
 	@Override
 	public void addAll(Collection<PeakResult> results)
@@ -676,7 +672,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * This clears the current results but does not reduce storage allocation. This can be done with
 	 * {@link #trimToSize()}.
 	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#begin()
+	 * @see #trimToSize()
 	 */
 	@Override
 	public void begin()
@@ -846,7 +842,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Shallow copy this set of results. To create new object references use {@link #copy()}.
 	 *
 	 * @return the memory peak results
-	 * @see java.lang.Object#clone()
 	 */
 	@Override
 	public MemoryPeakResults clone()
@@ -1374,7 +1369,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (isEmpty())
 			return;
 		final PeakResult r = getf(0);
-		procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(), r.getYPosition(), r.getZPosition());
+		procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(), r.getYPosition(),
+				r.getZPosition());
 	}
 
 	/**
@@ -2409,8 +2405,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the intensity unit
 	 * @param newBackground
 	 *            the new background
-	 * @param procedure
-	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 * @throws ConfigurationException

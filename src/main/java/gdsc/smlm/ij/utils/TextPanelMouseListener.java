@@ -34,6 +34,7 @@ import ij.text.TextPanel;
  */
 public abstract class TextPanelMouseListener implements MouseListener
 {
+	/** The text panel. */
 	protected TextPanel textPanel;
 
 	/**
@@ -85,12 +86,12 @@ public abstract class TextPanelMouseListener implements MouseListener
 	}
 
 	/**
-	 * Trigger that a single line from the panel has been selected.
+	 * Triggered when a single line from the panel has been selected.
 	 *
 	 * @param selectedIndex
 	 *            the selected index
 	 */
-	protected abstract void selected(int selectedIndex);
+	public abstract void selected(int selectedIndex);
 
 	/*
 	 * (non-Javadoc)
@@ -108,14 +109,14 @@ public abstract class TextPanelMouseListener implements MouseListener
 	}
 
 	/**
-	 * Trigger that multiple lines from the panel have been selected.
+	 * Triggered when multiple lines from the panel have been selected.
 	 *
 	 * @param selectionStart
 	 *            the selection start
 	 * @param selectionEnd
 	 *            the selection end
 	 */
-	protected abstract void selected(int selectionStart, int selectionEnd);
+	public abstract void selected(int selectionStart, int selectionEnd);
 
 	/*
 	 * (non-Javadoc)

@@ -45,10 +45,20 @@ public abstract class ImageSource
 	private int startFrame;
 	@XStreamOmitField
 	private int endFrame;
+	
+	/** The x origin. */
 	protected int xOrigin;
+	
+	/** The y origin. */
 	protected int yOrigin;
+	
+	/** The width. */
 	protected int width;
+	
+	/** The height. */
 	protected int height;
+	
+	/** The frames. */
 	protected int frames;
 	/**
 	 * The instance that does the conversion. This can be manipulated for different RGB colour conversions.
@@ -69,8 +79,9 @@ public abstract class ImageSource
 		RUNNING;
 	}
 
+	/** The sequential read status. */
 	@XStreamOmitField
-	SequentialReadStatus sequentialReadStatus;
+	protected SequentialReadStatus sequentialReadStatus;
 
 	/**
 	 * The hints for how the source will be used. This allows the source to optimise the opening process to prepare the
@@ -101,7 +112,9 @@ public abstract class ImageSource
 	}
 
 	/**
-	 * Opens the source
+	 * Opens the source.
+	 *
+	 * @return true, if successful
 	 */
 	public boolean open()
 	{
@@ -119,7 +132,9 @@ public abstract class ImageSource
 	}
 
 	/**
-	 * Opens the source
+	 * Opens the source.
+	 *
+	 * @return true, if successful
 	 */
 	protected abstract boolean openSource();
 
@@ -166,7 +181,7 @@ public abstract class ImageSource
 	/**
 	 * Get the width of the image frame. The frame returned by {@link #next()} will be equal to width * height.
 	 *
-	 * @return
+	 * @return the width
 	 */
 	public int getWidth()
 	{
@@ -176,7 +191,7 @@ public abstract class ImageSource
 	/**
 	 * Get the height of the image frame. The frame returned by {@link #next()} will be equal to width * height.
 	 *
-	 * @return
+	 * @return the height
 	 */
 	public int getHeight()
 	{
@@ -247,7 +262,7 @@ public abstract class ImageSource
 	 * Get the next frame. Return null if the frame is not available and set the current frame to
 	 * zero. The data is is packed in yx order: index = y * width + x;
 	 * <p>
-	 * Provides serial access to the data after a successful call to {@link #openSource()}
+	 * Provides serial access to the data after a successful call to {@link #open()}.
 	 *
 	 * @return the next frame (or null if at the end)
 	 */
@@ -265,7 +280,7 @@ public abstract class ImageSource
 	 * Get the next frame. Return null if the frame is not available and set the current frame to
 	 * zero. The data is is packed in yx order: index = y * width + x;
 	 * <p>
-	 * Provides serial access to the data after a successful call to {@link #openSource()}
+	 * Provides serial access to the data after a successful call to {@link #open()}
 	 * <p>
 	 * Note: The bounds are relative to the image source origin so that bounds.x + bounds.width must be less or equal to
 	 * than {@link #getWidth()}, similarly for height.
@@ -290,7 +305,7 @@ public abstract class ImageSource
 	 * Get the next frame of raw pixels. Return null if the frame is not available and set the current frame to
 	 * zero. The data is is packed in yx order: index = y * width + x;
 	 * <p>
-	 * Provides serial access to the data after a successful call to {@link #openSource()}
+	 * Provides serial access to the data after a successful call to {@link #open()}
 	 *
 	 * @return the next frame (or null if at the end)
 	 */
@@ -336,10 +351,11 @@ public abstract class ImageSource
 	 * Get a specific frame from the results. Return null if the frame is not available and set the current frame to
 	 * zero.
 	 * <p>
-	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
+	 * Provides random access to the data after a successful call to {@link #open()}. This operation may be
 	 * significantly slower than using {@link #next()} to read all the data.
 	 *
 	 * @param frame
+	 *            the frame
 	 * @return the frame (or null)
 	 */
 	public float[] get(int frame)
@@ -351,13 +367,14 @@ public abstract class ImageSource
 	 * Get a specific frame from the results. Return null if the frame is not available and set the current frame to
 	 * zero.
 	 * <p>
-	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
+	 * Provides random access to the data after a successful call to {@link #open()}. This operation may be
 	 * significantly slower than using {@link #next()} to read all the data.
 	 * <p>
 	 * Note: The bounds are relative to the image source origin so that bounds.x + bounds.width must be less or equal to
 	 * than {@link #getWidth()}, similarly for height.
 	 *
 	 * @param frame
+	 *            the frame
 	 * @param bounds
 	 *            The bounding limits of the frame to extract
 	 * @return the frame (or null)
@@ -380,10 +397,11 @@ public abstract class ImageSource
 	 * Get a specific frame of raw pixels from the results. Return null if the frame is not available and set the
 	 * current frame to zero.
 	 * <p>
-	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
+	 * Provides random access to the data after a successful call to {@link #open()}. This operation may be
 	 * significantly slower than using {@link #next()} to read all the data.
 	 *
 	 * @param frame
+	 *            the frame
 	 * @return the frame (or null)
 	 */
 	public Object getRaw(int frame)
@@ -407,9 +425,9 @@ public abstract class ImageSource
 	protected abstract Object getRawFrame(int frame);
 
 	/**
-	 * Get the name of the results source
+	 * Get the name of the results source.
 	 *
-	 * @return
+	 * @return the name
 	 */
 	public String getName()
 	{
@@ -437,9 +455,10 @@ public abstract class ImageSource
 	}
 
 	/**
-	 * Set the name of the results source
+	 * Set the name of the results source.
 	 *
 	 * @param name
+	 *            the new name
 	 */
 	public void setName(String name)
 	{
@@ -456,6 +475,7 @@ public abstract class ImageSource
 	 * {@link #get(int)} method has skipped data, e.g. if interlaced, or if the data has actually ended.
 	 *
 	 * @param frame
+	 *            the frame
 	 * @return true if valid
 	 */
 	public abstract boolean isValid(int frame);
@@ -473,7 +493,10 @@ public abstract class ImageSource
 	}
 
 	/**
+	 * Serialise to XML.
+	 * 
 	 * @return An XML representation of this object
+	 * @see #fromXML(String)
 	 */
 	public String toXML()
 	{
@@ -492,6 +515,14 @@ public abstract class ImageSource
 		return "";
 	}
 
+	/**
+	 * Create the image source from serialised XML.
+	 *
+	 * @param xml
+	 *            the xml
+	 * @return the image source
+	 * @see #toXML()
+	 */
 	public static ImageSource fromXML(String xml)
 	{
 		XStream xs = new XStream(new DomDriver());
@@ -536,12 +567,15 @@ public abstract class ImageSource
 	 * Check if the bounds fit inside the image.
 	 *
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param bounds
-	 * @throws RuntimeException
-	 *             if the bounds do not fit in the image
+	 *            the bounds
 	 * @return True if the bounds are not null and are within the image, false if null or the bounds fit the image
 	 *         exactly
+	 * @throws RuntimeException
+	 *             if the bounds do not fit in the image
 	 */
 	public static boolean checkBounds(int width, int height, Rectangle bounds)
 	{

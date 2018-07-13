@@ -52,7 +52,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	private FilterScore fitness;
 
 	/**
-	 * Generate the name of the filter using the filter settings (defaults to the first parameter)
+	 * Generate the name of the filter using the filter settings (defaults to the first parameter).
 	 *
 	 * @return The name of the filter
 	 */
@@ -62,7 +62,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Generate the type of the filter using the filter settings (default to the class name with 'Filter' removed)
+	 * Generate the type of the filter using the filter settings (default to the class name with 'Filter' removed).
 	 *
 	 * @return The type of the filter
 	 */
@@ -72,9 +72,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Filter the results
+	 * Filter the results.
 	 *
 	 * @param results
+	 *            the results
 	 * @return the filtered results
 	 */
 	public MemoryPeakResults filter(MemoryPeakResults results)
@@ -102,6 +103,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 *
 	 * @param results
+	 *            the results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the filtered results
@@ -157,6 +159,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * this to zero and the results should be identical to {@link #filter(MemoryPeakResults, int)}
 	 *
 	 * @param results
+	 *            the results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the filtered results
@@ -219,6 +222,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 *
 	 * @param results
+	 *            the results
 	 * @param score
 	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
 	 * @return the filtered results
@@ -298,6 +302,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 *
 	 * @param results
+	 *            the results
 	 * @param score
 	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
 	 * @return the filtered results
@@ -375,6 +380,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 *
 	 * @param results
+	 *            the results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param score
@@ -463,6 +469,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 *
 	 * @param results
+	 *            the results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param score
@@ -593,7 +600,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            The initial true negatives (used when the results have been pre-filtered)
 	 * @param fn
 	 *            The initial false negatives (used when the results have been pre-filtered)
-	 * @return
+	 * @return the classification result
 	 */
 	public ClassificationResult score(List<MemoryPeakResults> resultsList, int tn, int fn)
 	{
@@ -717,7 +724,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
 	 * Note that this method is to be used to score a subset that was generated using
-	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
+	 * {@link #filterSubset(MemoryPeakResults, int, double[])} since the number of consecutive failures before each peak
+	 * are
 	 * expected to be stored in the origX property.
 	 *
 	 * @param resultsList
@@ -964,7 +972,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
 	 * Note that this method is to be used to score a subset that was generated using
-	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
+	 * {@link #filterSubset(MemoryPeakResults, int, double[])} since the number of consecutive failures before each peak
+	 * are
 	 * expected to be stored in the origX property.
 	 *
 	 * @param resultsList
@@ -1046,6 +1055,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Called before the accept method is called for each peak in the results. Allows pre-processing of the results.
 	 *
 	 * @param peakResults
+	 *            the new up
 	 */
 	public abstract void setup(MemoryPeakResults peakResults);
 
@@ -1053,6 +1063,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Called for each peak in the results that are filtered.
 	 *
 	 * @param peak
+	 *            the peak
 	 * @return true if the peak should be accepted, otherwise false to reject.
 	 */
 	public abstract boolean accept(PeakResult peak);
@@ -1063,10 +1074,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	public void end()
 	{
+		// Do nothing
 	}
 
 	/**
-	 * The numerical value of the filter (defaults to the first parameter)
+	 * The numerical value of the filter (defaults to the first parameter).
 	 *
 	 * @return The numerical value of the filter. Used for plotting value against performance score.
 	 */
@@ -1076,7 +1088,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * The name of the numerical value of the filter (defaults to the first parameter)
+	 * The name of the numerical value of the filter (defaults to the first parameter).
 	 *
 	 * @return The name of the numerical value of the filter. Used for plotting value against performance score.
 	 */
@@ -1086,6 +1098,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the name.
+	 *
 	 * @return the name (including any parameter values)
 	 */
 	public String getName()
@@ -1096,6 +1110,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the type.
+	 *
 	 * @return the type (excluding any parameter values)
 	 */
 	public String getType()
@@ -1106,6 +1122,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the description.
+	 *
 	 * @return Describes the functionality of the filter
 	 */
 	public abstract String getDescription();
@@ -1122,6 +1140,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * To XML.
+	 *
 	 * @return An XML representation of this object
 	 */
 	public String toXML()
@@ -1130,9 +1150,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Create the filter from the XML representation
+	 * Create the filter from the XML representation.
 	 *
 	 * @param xml
+	 *            the xml
 	 * @return the filter
 	 */
 	public static Filter fromXML(String xml)
@@ -1156,7 +1177,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	protected void initialiseState()
 	{
-
+		// Do nothing
 	}
 
 	/*
@@ -1279,10 +1300,18 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the number of parameters.
+	 *
 	 * @return The number of parameters for the filter
 	 */
 	public abstract int getNumberOfParameters();
 
+	/**
+	 * Check index.
+	 *
+	 * @param index
+	 *            the index
+	 */
 	protected void checkIndex(final int index)
 	{
 		if (index < 0 || index >= getNumberOfParameters())
@@ -1293,6 +1322,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Get the parameter value.
 	 *
 	 * @param index
+	 *            the index
 	 * @return The value of the specified parameter
 	 */
 	public double getParameterValue(int index)
@@ -1305,6 +1335,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Get the parameter value. The index should always be between 0 and {@link #getNumberOfParameters()}
 	 *
 	 * @param index
+	 *            the index
 	 * @return The value of the specified parameter
 	 */
 	protected abstract double getParameterValueInternal(int index);
@@ -1324,9 +1355,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Get the recommended minimum amount by which to increment the parameter
+	 * Get the recommended minimum amount by which to increment the parameter.
 	 *
 	 * @param index
+	 *            the index
 	 * @return The increment value of the specified parameter
 	 */
 	public abstract double getParameterIncrement(int index);
@@ -1334,9 +1366,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	/**
 	 * Return a value to use to disable the parameter
 	 * <p>
-	 * Override this method if zero does not disable the parameter
+	 * Override this method if zero does not disable the parameter.
 	 *
 	 * @param index
+	 *            the index
 	 * @return The disabled value of the specified parameter
 	 */
 	public double getDisabledParameterValue(int index)
@@ -1346,7 +1379,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the parameter name.
+	 *
 	 * @param index
+	 *            the index
 	 * @return The name of the specified parameter
 	 */
 	public String getParameterName(int index)
@@ -1355,7 +1391,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the parameter type.
+	 *
 	 * @param index
+	 *            the index
 	 * @return The type of the specified parameter
 	 */
 	public abstract ParameterType getParameterType(int index);
@@ -1385,11 +1424,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
 	 *
 	 * @param value
+	 *            the value
 	 * @param delta
+	 *            the delta
 	 * @param defaultRange
 	 *            The default range to apply the delta to in the case where the value is zero and no relative adjustment
 	 *            is possible.
-	 * @return
+	 * @return the double
 	 */
 	protected double updateParameter(double value, double delta, double defaultRange)
 	{
@@ -1405,11 +1446,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
 	 *
 	 * @param value
+	 *            the value
 	 * @param delta
+	 *            the delta
 	 * @param defaultRange
 	 *            The default range to apply the delta to in the case where the value is zero and no relative adjustment
 	 *            is possible.
-	 * @return
+	 * @return the float
 	 */
 	protected float updateParameter(float value, double delta, double defaultRange)
 	{
@@ -1426,11 +1469,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * next valid integer to ensure a new parameter value is created.
 	 *
 	 * @param value
+	 *            the value
 	 * @param delta
+	 *            the delta
 	 * @param defaultRange
 	 *            The default range to apply the delta to in the case where the value is zero and no relative adjustment
 	 *            is possible.
-	 * @return
+	 * @return the int
 	 */
 	protected int updateParameter(int value, double delta, int defaultRange)
 	{
@@ -1444,12 +1489,32 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		return value + update;
 	}
 
+	/**
+	 * Sets the min.
+	 *
+	 * @param parameters
+	 *            the parameters
+	 * @param index
+	 *            the index
+	 * @param value
+	 *            the value
+	 */
 	protected void setMin(double[] parameters, int index, double value)
 	{
 		if (parameters[index] > value)
 			parameters[index] = value;
 	}
 
+	/**
+	 * Sets the max.
+	 *
+	 * @param parameters
+	 *            the parameters
+	 * @param index
+	 *            the index
+	 * @param value
+	 *            the value
+	 */
 	protected void setMax(double[] parameters, int index, double value)
 	{
 		if (parameters[index] < value)
@@ -1457,9 +1522,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Create a new filter with the specified parameters
+	 * Create a new filter with the specified parameters.
 	 *
 	 * @param parameters
+	 *            the parameters
 	 * @return A new filter
 	 */
 	public abstract Filter create(double... parameters);
@@ -1493,7 +1559,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public abstract void weakestParameters(double[] parameters);
 
 	/**
-	 * Compare the two values and return a sort result for the minimum of the two
+	 * Compare the two values and return a sort result for the minimum of the two.
 	 *
 	 * @param value1
 	 *            the value 1
@@ -1511,7 +1577,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Compare the two values and return a sort result for the maximum of the two
+	 * Compare the two values and return a sort result for the maximum of the two.
 	 *
 	 * @param value1
 	 *            the value 1
@@ -1677,56 +1743,56 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * Return the value or Float.POSITIVE_INFINITY if value is not positive
 	 *
 	 * @param value
+	 *            the value
 	 * @return The limit
 	 */
 	public static float getUpperLimit(double value)
 	{
 		if (value > 0)
 			return (float) value;
-		else
-			return Float.POSITIVE_INFINITY;
+		return Float.POSITIVE_INFINITY;
 	}
 
 	/**
 	 * Return the value squared or Float.POSITIVE_INFINITY if value is not positive
 	 *
 	 * @param value
+	 *            the value
 	 * @return The squared limit
 	 */
 	public static float getUpperSquaredLimit(double value)
 	{
 		if (value > 0)
 			return (float) (value * value);
-		else
-			return Float.POSITIVE_INFINITY;
+		return Float.POSITIVE_INFINITY;
 	}
 
 	/**
 	 * Return the value or Double.POSITIVE_INFINITY if value is not positive
 	 *
 	 * @param value
+	 *            the value
 	 * @return The limit
 	 */
 	public static double getDUpperLimit(double value)
 	{
 		if (value > 0)
 			return value;
-		else
-			return Double.POSITIVE_INFINITY;
+		return Double.POSITIVE_INFINITY;
 	}
 
 	/**
 	 * Return the value squared or Double.POSITIVE_INFINITY if value is not positive
 	 *
 	 * @param value
+	 *            the value
 	 * @return The squared limit
 	 */
 	public static double getDUpperSquaredLimit(double value)
 	{
 		if (value > 0)
 			return value * value;
-		else
-			return Double.POSITIVE_INFINITY;
+		return Double.POSITIVE_INFINITY;
 	}
 
 	/**
@@ -1754,6 +1820,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * Gets the filter type.
+	 *
 	 * @return The filter type
 	 */
 	public FilterType getFilterType()
@@ -1815,5 +1883,19 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				return false;
 		}
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		// This is done to avoid compiler warning about not implementing 
+		// java.lang.Object#hashCode() when overriding
+		// java.lang.Object#equals(java.lang.Object)
+		return super.hashCode();
 	}
 }

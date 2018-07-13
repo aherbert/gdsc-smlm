@@ -172,17 +172,24 @@ public class ImageROIPainter extends TextPanelMouseListener
 	}
 
 	/**
-	 * Adds a new ROI to the overlay using the coordinates from start to end (non-inclusive)
+	 * Adds a new ROI to the overlay using the coordinates from start to end (non-inclusive).
 	 *
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param slice
+	 *            the slice
 	 * @param indices
+	 *            the indices
 	 * @param o
+	 *            the o
 	 * @param start
+	 *            the start
 	 * @param end
+	 *            the end
 	 */
-	private void appendRoi(float[] x, float[] y, int[] slice, int[] indices, Overlay o, int start, int end)
+	private static void appendRoi(float[] x, float[] y, int[] slice, int[] indices, Overlay o, int start, int end)
 	{
 		int p = end - start;
 		float[] x2 = new float[p];
@@ -201,7 +208,7 @@ public class ImageROIPainter extends TextPanelMouseListener
 	 * Adds the roi to the specified slice in the image using an overlay.
 	 *
 	 * @param imp
-*            the image
+	 *            the image
 	 * @param slice
 	 *            the slice
 	 * @param roi

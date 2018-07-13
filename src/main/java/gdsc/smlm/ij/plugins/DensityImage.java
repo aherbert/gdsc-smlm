@@ -154,7 +154,7 @@ public class DensityImage implements PlugIn
 		IJ.showStatus(TITLE + " complete : " + seconds + "s");
 	}
 
-	private DensityManager createDensityManager(MemoryPeakResults results)
+	private static DensityManager createDensityManager(MemoryPeakResults results)
 	{
 		if (results == null || results.size() == 0)
 			throw new IllegalArgumentException("Results are null or empty");
@@ -198,25 +198,26 @@ public class DensityImage implements PlugIn
 		}
 	}
 
-	interface ScoreCalculator
+	private interface ScoreCalculator
 	{
 		/**
-		 * Get the density score for the input density counts
+		 * Get the density score for the input density counts.
 		 *
 		 * @param density
-		 * @return
+		 *            the density
+		 * @return the float[]
 		 */
 		float[] calculate(int[] density);
 
 		/**
-		 * Get the score threshold for filtering results using the configured filter threshold
+		 * Get the score threshold for filtering results using the configured filter threshold.
 		 *
-		 * @return
+		 * @return the threshold
 		 */
 		float getThreshold();
 	}
 
-	class DensityScoreCalculator implements ScoreCalculator
+	private class DensityScoreCalculator implements ScoreCalculator
 	{
 		MemoryPeakResults results;
 
@@ -254,7 +255,7 @@ public class DensityImage implements PlugIn
 		}
 	}
 
-	class KScoreCalculator extends DensityScoreCalculator
+	private class KScoreCalculator extends DensityScoreCalculator
 	{
 		int mode;
 
@@ -294,7 +295,7 @@ public class DensityImage implements PlugIn
 		}
 	}
 
-	class LScoreCalculator extends KScoreCalculator
+	private class LScoreCalculator extends KScoreCalculator
 	{
 		public LScoreCalculator(MemoryPeakResults results, int mode)
 		{
@@ -462,12 +463,17 @@ public class DensityImage implements PlugIn
 	 * Output a log message of the results including the average density for localisations and the expected average.
 	 *
 	 * @param results
+	 *            the results
 	 * @param density
+	 *            the density
 	 * @param radius
+	 *            the radius
 	 * @param filtered
-	 * @return
+	 *            the filtered
+	 * @return the summary statistics
 	 */
-	private SummaryStatistics logDensityResults(MemoryPeakResults results, int[] density, float radius, int filtered)
+	private static SummaryStatistics logDensityResults(MemoryPeakResults results, int[] density, float radius,
+			int filtered)
 	{
 		float region = (float) (radius * radius * ((useSquareApproximation) ? 4 : Math.PI));
 
@@ -496,7 +502,7 @@ public class DensityImage implements PlugIn
 		return summary;
 	}
 
-	private String rounded(double d)
+	private static String rounded(double d)
 	{
 		return Utils.rounded(d, 3);
 	}
@@ -505,11 +511,14 @@ public class DensityImage implements PlugIn
 	 * Draw an image of the density for each localisation. Optionally filter results below a threshold.
 	 *
 	 * @param results
+	 *            the results
 	 * @param density
+	 *            the density
 	 * @param scoreCalculator
-	 * @return
+	 *            the score calculator
+	 * @return the number of localisations drawn
 	 */
-	private int plotResults(MemoryPeakResults results, float[] density, ScoreCalculator scoreCalculator)
+	private static int plotResults(MemoryPeakResults results, float[] density, ScoreCalculator scoreCalculator)
 	{
 		// Filter results using 5x higher than average density of the sample in a 150nm radius:
 		// Annibale, et al (2011). Identification of clustering artifacts in photoactivated localization microscopy.
@@ -712,11 +721,10 @@ public class DensityImage implements PlugIn
 				y[j] = (float) (d[1] * bounds.height);
 			}
 			double[][] values2 = calculateLScores(new DensityManager(x, y, bounds));
-			if (upper == null)
+			if (upper == null || lower == null)
 			{
 				upper = values2[1];
-				lower = new double[upper.length];
-				System.arraycopy(upper, 0, lower, 0, upper.length);
+				lower = upper.clone();
 			}
 			else
 			{
@@ -752,7 +760,7 @@ public class DensityImage implements PlugIn
 		Utils.display(title, plot);
 	}
 
-	private double min(double min, double[] data)
+	private static double min(double min, double[] data)
 	{
 		for (double d : data)
 			if (min > d)
@@ -760,7 +768,7 @@ public class DensityImage implements PlugIn
 		return min;
 	}
 
-	private double max(double max, double[] data)
+	private static double max(double max, double[] data)
 	{
 		for (double d : data)
 			if (max < d)
@@ -768,7 +776,7 @@ public class DensityImage implements PlugIn
 		return max;
 	}
 
-	private double[][] calculateLScores(DensityManager dm)
+	private static double[][] calculateLScores(DensityManager dm)
 	{
 		TDoubleArrayList x = new TDoubleArrayList();
 		TDoubleArrayList y = new TDoubleArrayList();

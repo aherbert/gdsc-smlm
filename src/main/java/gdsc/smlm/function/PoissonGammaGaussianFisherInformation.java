@@ -478,8 +478,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// and the extent of the kernel must change. Just increase the range
 		// for the kernel for each power of 2 the number is below 1.
 		int range1 = minRange;
-		for (int e = exp; range1 < maxRange && e <= 0; e++, range1++)
-			;
+		for (int e = exp; range1 < maxRange && e <= 0; e++)
+			range1++;
 
 		if (noGaussian || s * range1 < 1)
 		{
@@ -622,7 +622,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 *            the t
 	 * @return the double
 	 */
-	private double extremeLimit(double t)
+	private static double extremeLimit(double t)
 	{
 		// Infinite sum occurs when at the upper limit or lower limit
 		return (t > 1) ? largeApproximation(t) : Double.POSITIVE_INFINITY;
@@ -1009,7 +1009,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		this.minRange = checkRange(minRange);
 	}
 
-	private int checkRange(int range)
+	private static int checkRange(int range)
 	{
 		// Gaussian = Math.exp(-0.5 * x^2)
 		// FastMath.exp(-746) == 0

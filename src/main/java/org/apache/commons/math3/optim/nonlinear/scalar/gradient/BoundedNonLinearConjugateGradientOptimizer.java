@@ -50,12 +50,17 @@ import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.univariate.BracketFinder;
 import org.apache.commons.math3.optim.univariate.BrentOptimizer;
 import org.apache.commons.math3.optim.univariate.SearchInterval;
@@ -211,10 +216,15 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	 * {@inheritDoc}
 	 *
 	 * @param optData
-	 *            Optimization data. In addition to those documented in
-	 *            {@link GradientMultivariateOptimizer#parseOptimizationData(OptimizationData[])
-	 *            GradientMultivariateOptimizer}, this method will register the following data:
+	 *            Optimization data. This method will register the following data:
 	 *            <ul>
+	 *            <li>{@link MaxEval}</li>
+	 *            <li>{@link MaxIter}</li>
+	 *            <li>{@link InitialGuess}</li>
+	 *            <li>{@link SimpleBounds}</li>
+	 *            <li>{@link ObjectiveFunction}</li>
+	 *            <li>{@link GoalType}</li>
+	 *            <li>{@link ObjectiveFunctionGradient}</li>
 	 *            <li>{@link BracketingStep}</li>
 	 *            </ul>
 	 * @return {@inheritDoc}
@@ -452,7 +462,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	 * @throws MathIllegalStateException
 	 *             if no bracket can be found.
 	 */
-	private double findUpperBound(final UnivariateFunction f, final double a, final double h)
+	private static double findUpperBound(final UnivariateFunction f, final double a, final double h)
 	{
 		final double yA = f.value(a);
 		double yB = yA;
@@ -716,13 +726,15 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	}
 
 	/**
-	 * Check if the array contains anything other than value
+	 * Check if the array contains anything other than value.
 	 *
 	 * @param array
+	 *            the array
 	 * @param value
+	 *            the value
 	 * @return True if the array has another value
 	 */
-	private boolean checkArray(double[] array, double value)
+	private static boolean checkArray(double[] array, double value)
 	{
 		if (array == null)
 			return false;

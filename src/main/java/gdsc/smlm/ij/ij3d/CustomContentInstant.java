@@ -98,12 +98,26 @@ public class CustomContentInstant extends ContentInstant
 
 	// Copy the entire contents of the super class
 
+	/**
+	 * Instantiates a new custom content instant.
+	 *
+	 * @param name
+	 *            the name
+	 */
 	public CustomContentInstant(final String name)
 	{
 		// Default is to be ordered
 		this(name, true);
 	}
 
+	/**
+	 * Instantiates a new custom content instant.
+	 *
+	 * @param name
+	 *            the name
+	 * @param isOrdered
+	 *            Set to true to use an {@link OrderedGroup} for the children, the default is {@link Group}.
+	 */
 	public CustomContentInstant(final String name, boolean isOrdered)
 	{
 		super(name);
@@ -495,11 +509,14 @@ public class CustomContentInstant extends ContentInstant
 	}
 
 	/**
-	 * @deprecated
+	 * Adds the point list point.
+	 *
 	 * @param p
+	 *            the point
+	 * @deprecated To be removed
 	 */
-	@Override
 	@Deprecated
+	@Override
 	public void addPointListPoint(final Point3d p)
 	{
 		points.add(p.x, p.y, p.z);
@@ -508,15 +525,19 @@ public class CustomContentInstant extends ContentInstant
 	}
 
 	/**
-	 * @deprecated
+	 * Sets the list point point.
+	 *
 	 * @param i
-	 * @param pos
+	 *            the index
+	 * @param p
+	 *            the point
+	 * @deprecated To be removed
 	 */
 	@Override
 	@Deprecated
-	public void setListPointPos(final int i, final Point3d pos)
+	public void setListPointPos(final int i, final Point3d p)
 	{
-		points.placePoint(points.get(i), pos.x, pos.y, pos.z);
+		points.placePoint(points.get(i), p.x, p.y, p.z);
 	}
 
 	@Override
@@ -550,8 +571,11 @@ public class CustomContentInstant extends ContentInstant
 	}
 
 	/**
-	 * @deprecated
+	 * Delete point list point.
+	 *
 	 * @param i
+	 *            the index
+	 * @deprecated To be removed
 	 */
 	@Override
 	@Deprecated
@@ -759,11 +783,13 @@ public class CustomContentInstant extends ContentInstant
 	@Override
 	public void transformationStarted(final View view)
 	{
+		// Do nothing
 	}
 
 	@Override
 	public void contentAdded(final Content c)
 	{
+		// Do nothing
 	}
 
 	@Override
@@ -776,16 +802,19 @@ public class CustomContentInstant extends ContentInstant
 	@Override
 	public void canvasResized()
 	{
+		// Do nothing
 	}
 
 	@Override
 	public void contentSelected(final Content c)
 	{
+		// Do nothing
 	}
 
 	@Override
 	public void contentChanged(final Content c)
 	{
+		// Do nothing
 	}
 
 	@Override

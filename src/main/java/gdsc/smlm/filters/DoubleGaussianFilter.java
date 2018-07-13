@@ -641,6 +641,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	 * size is 2N + 1
 	 *
 	 * @param sigma
+	 *            the sigma
 	 * @return The half width
 	 */
 	public int getHalfWidth(double sigma)

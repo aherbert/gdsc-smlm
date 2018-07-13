@@ -30,10 +30,16 @@ import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.util.Localizable;
 import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PositionChecker;
+import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -199,10 +205,14 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 * {@inheritDoc}
 	 *
 	 * @param optData
-	 *            Optimization data. In addition to those documented in
-	 *            {@link GradientMultivariateOptimizer#parseOptimizationData(OptimizationData[])
-	 *            GradientMultivariateOptimizer}, this method will register the following data:
+	 *            Optimization data. This method will register the following data:
 	 *            <ul>
+	 *            <li>{@link MaxEval}</li>
+	 *            <li>{@link MaxIter}</li>
+	 *            <li>{@link InitialGuess}</li>
+	 *            <li>{@link SimpleBounds}</li>
+	 *            <li>{@link ObjectiveFunction}</li>
+	 *            <li>{@link ObjectiveFunctionGradient}</li>
 	 *            <li>{@link PositionChecker}</li>
 	 *            <li>{@link StepLength}</li>
 	 *            <li>{@link GradientTolerance}</li>
@@ -718,58 +728,56 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 					//System.out.printf("f=%f < %f\n", f, fOld + ALF * alam * slope);
 					return x;
 				}
+				
+				// Check for bad function evaluation
+				if (f == Double.POSITIVE_INFINITY)
+				{
+					// Reset backtracking
+					backtracking = 0;
+
+					alam *= 0.1;
+					continue;
+				}
+
+				// Backtrack
+				double tmplam;
+				if (backtracking++ == 0)
+				{
+					// First backtrack iteration
+					tmplam = -slope / (2.0 * (f - fOld - slope));
+					// Ensure the lambda is reduced, i.e. we take a step smaller than last time
+					if (tmplam > 0.9 * alam)
+						tmplam = 0.9 * alam;
+				}
 				else
 				{
-					// Check for bad function evaluation
-					if (f == Double.POSITIVE_INFINITY)
-					{
-						// Reset backtracking
-						backtracking = 0;
-
-						alam *= 0.1;
-						continue;
-					}
-
-					// Backtrack
-					double tmplam;
-					if (backtracking++ == 0)
-					{
-						// First backtrack iteration
-						tmplam = -slope / (2.0 * (f - fOld - slope));
-						// Ensure the lambda is reduced, i.e. we take a step smaller than last time
-						if (tmplam > 0.9 * alam)
-							tmplam = 0.9 * alam;
-					}
+					// Subsequent backtracks
+					final double rhs1 = f - fOld - alam * slope;
+					final double rhs2 = f2 - fOld - alam2 * slope;
+					final double a = (rhs1 / (alam * alam) - rhs2 / (alam2 * alam2)) / (alam - alam2);
+					final double b = (-alam2 * rhs1 / (alam * alam) + alam * rhs2 / (alam2 * alam2)) /
+							(alam - alam2);
+					if (a == 0.0)
+						tmplam = -slope / (2.0 * b);
 					else
 					{
-						// Subsequent backtracks
-						final double rhs1 = f - fOld - alam * slope;
-						final double rhs2 = f2 - fOld - alam2 * slope;
-						final double a = (rhs1 / (alam * alam) - rhs2 / (alam2 * alam2)) / (alam - alam2);
-						final double b = (-alam2 * rhs1 / (alam * alam) + alam * rhs2 / (alam2 * alam2)) /
-								(alam - alam2);
-						if (a == 0.0)
-							tmplam = -slope / (2.0 * b);
-						else
-						{
-							final double disc = b * b - 3.0 * a * slope;
-							if (disc < 0.0)
-								tmplam = 0.5 * alam;
-							else if (b <= 0.0)
-								tmplam = (-b + Math.sqrt(disc)) / (3.0 * a);
-							else
-								tmplam = -slope / (b + Math.sqrt(disc));
-						}
-						// Ensure the lambda is <= 0.5 lamda1, i.e. we take a step smaller than last time
-						if (tmplam > 0.5 * alam)
+						final double disc = b * b - 3.0 * a * slope;
+						if (disc < 0.0)
 							tmplam = 0.5 * alam;
+						else if (b <= 0.0)
+							tmplam = (-b + Math.sqrt(disc)) / (3.0 * a);
+						else
+							tmplam = -slope / (b + Math.sqrt(disc));
 					}
-
-					alam2 = alam;
-					f2 = f;
-					// Ensure the lambda is >= 0.1 lamda1, i.e. we take reasonable step
-					alam = FastMath.max(tmplam, 0.1 * alam);
+					// Ensure the lambda is <= 0.5 lamda1, i.e. we take a step smaller than last time
+					if (tmplam > 0.5 * alam)
+						tmplam = 0.5 * alam;
 				}
+
+				alam2 = alam;
+				f2 = f;
+				// Ensure the lambda is >= 0.1 lamda1, i.e. we take reasonable step
+				alam = FastMath.max(tmplam, 0.1 * alam);
 			}
 		}
 	}
