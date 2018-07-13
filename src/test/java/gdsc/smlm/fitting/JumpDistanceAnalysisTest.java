@@ -76,8 +76,6 @@ public class JumpDistanceAnalysisTest
 	// For proteins with mass 823 and 347 kDa the
 	// difference using predicted diffusion coefficients is 3:1
 	double[] D = new double[] { 3, 1 };
-	RandomGenerator random = TestSettings
-			.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Commented out as this test always passes
 	//@Test
@@ -159,6 +157,7 @@ public class JumpDistanceAnalysisTest
 
 	private void fitSinglePopulation(boolean mle)
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
 		AssertionError error = null;
 		NEXT_D: for (double d : D)
@@ -167,7 +166,7 @@ public class JumpDistanceAnalysisTest
 			{
 				try
 				{
-					fit(title, samples, 0, new double[] { d }, new double[] { 1 }, mle);
+					fit(rg, title, samples, 0, new double[] { d }, new double[] { 1 }, mle);
 					error = null;
 					continue NEXT_D;
 				}
@@ -223,6 +222,7 @@ public class JumpDistanceAnalysisTest
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
 		TestSettings.assumeMaximumComplexity();
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
 		AssertionError error = null;
@@ -234,7 +234,7 @@ public class JumpDistanceAnalysisTest
 				{
 					try
 					{
-						fit(title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction, 1 - fraction },
+						fit(rg, title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction, 1 - fraction },
 								mle);
 						error = null;
 						continue NEXT_D;
@@ -260,6 +260,7 @@ public class JumpDistanceAnalysisTest
 	{
 		// Skip this as it is slow
 		Assume.assumeTrue(false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		out = null;
 		try
@@ -287,7 +288,7 @@ public class JumpDistanceAnalysisTest
 								{
 									try
 									{
-										fit(title, samples, 0, new double[] { D[i], D[j] },
+										fit(rg, title, samples, 0, new double[] { D[i], D[j] },
 												new double[] { fraction, 1 - fraction }, mle);
 									}
 									catch (AssertionError e)
@@ -298,7 +299,7 @@ public class JumpDistanceAnalysisTest
 										continue;
 									try
 									{
-										fit(title + " Fixed", samples, n, new double[] { D[i], D[j] },
+										fit(rg, title + " Fixed", samples, n, new double[] { D[i], D[j] },
 												new double[] { fraction, 1 - fraction }, mle);
 									}
 									catch (AssertionError e)
@@ -342,7 +343,7 @@ public class JumpDistanceAnalysisTest
 	// Store the fitted N to allow repeat in the benchmark with fixed N if necessary
 	int fitN = 0;
 
-	private void fit(String title, int samples, int n, double[] d, double[] f, boolean mle)
+	private void fit(RandomGenerator rg, String title, int samples, int n, double[] d, double[] f, boolean mle)
 	{
 		// Used for testing
 		// @formatter:off
@@ -354,7 +355,7 @@ public class JumpDistanceAnalysisTest
 		// @formatter:on
 
 		JumpDistanceAnalysis.sort(d, f);
-		double[] jumpDistances = createData(samples, d, f);
+		double[] jumpDistances = createData(rg, samples, d, f);
 		Logger logger = null;
 		//logger = new gdsc.smlm.utils.logging.ConsoleLogger();
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
@@ -489,7 +490,7 @@ public class JumpDistanceAnalysisTest
 		}
 	}
 
-	private double[] getPercentError(double[] e, double[] o)
+	private static double[] getPercentError(double[] e, double[] o)
 	{
 		double[] error = new double[Math.min(e.length, o.length)];
 		for (int i = 0; i < error.length; i++)
@@ -497,7 +498,7 @@ public class JumpDistanceAnalysisTest
 		return error;
 	}
 
-	private double[] getRelativeError(double[] e, double[] o)
+	private static double[] getRelativeError(double[] e, double[] o)
 	{
 		double[] error = new double[Math.min(e.length, o.length)];
 		for (int i = 0; i < error.length; i++)
@@ -510,7 +511,7 @@ public class JumpDistanceAnalysisTest
 		return error;
 	}
 
-	private String toString(double[] d)
+	private static String toString(double[] d)
 	{
 		if (d.length == 0)
 			return "";
@@ -523,7 +524,7 @@ public class JumpDistanceAnalysisTest
 		return sb.toString();
 	}
 
-	private String format(double d)
+	private static String format(double d)
 	{
 		return String.format("%.3f", d);
 	}
@@ -593,7 +594,7 @@ public class JumpDistanceAnalysisTest
 			return (data == null) ? 0 : data.length;
 		}
 
-		double[][] getSample(int size)
+		double[][] getSample(RandomGenerator random, int size)
 		{
 			if (size > getSize())
 			{
@@ -652,6 +653,17 @@ public class JumpDistanceAnalysisTest
 
 			return new double[][] { data, d, f };
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			return super.hashCode();
+		}
 	}
 
 	static ArrayList<DataSample> samples = new ArrayList<>();
@@ -675,7 +687,7 @@ public class JumpDistanceAnalysisTest
 	 *            Fraction of population (will be updated with the actual fractions, normalised to sum to 1)
 	 * @return The jump distances
 	 */
-	private double[] createData(int n, double[] d, double[] f)
+	private double[] createData(RandomGenerator rg, int n, double[] d, double[] f)
 	{
 		// Cache the data so that if we run a second test with
 		// the same d and f we use the same data
@@ -686,7 +698,7 @@ public class JumpDistanceAnalysisTest
 		else
 			samples.add(sample);
 
-		double[][] dataSample = sample.getSample(n);
+		double[][] dataSample = sample.getSample(rg, n);
 		double[] data = dataSample[0];
 		double[] d2 = dataSample[1];
 		double[] f2 = dataSample[2];
@@ -714,7 +726,7 @@ public class JumpDistanceAnalysisTest
 		return data;
 	}
 
-	private int pick(double[] f, double nextDouble)
+	private static int pick(double[] f, double nextDouble)
 	{
 		for (int i = 0; i < f.length; i++)
 			if (nextDouble < f[i])

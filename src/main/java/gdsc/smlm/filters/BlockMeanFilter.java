@@ -64,7 +64,14 @@ public class BlockMeanFilter extends BlockFilter
 		return new FixedNormaliser(pow2(2 * n + 1));
 	}
 
-	private float pow2(float f)
+	/**
+	 * Get the value squared
+	 *
+	 * @param f
+	 *            the value
+	 * @return the value squared
+	 */
+	private static float pow2(float f)
 	{
 		return f * f;
 	}

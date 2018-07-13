@@ -128,7 +128,7 @@ public class RampedSelectionStrategyTest
 		speedTest(5000, true, 1);
 	}
 
-	private void speedTest(final int size, boolean faster, int runs)
+	private static void speedTest(final int size, boolean faster, int runs)
 	{
 		final long[] sum = RampedSelectionStrategy.createSum(size);
 
@@ -209,6 +209,6 @@ public class RampedSelectionStrategyTest
 
 		TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
 		TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);
-		Assert.assertTrue(slow.getMin() > fast.getMin());
+		TestSettings.logSpeedTestResult(slow, fast);
 	}
 }

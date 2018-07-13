@@ -218,7 +218,7 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -279,9 +279,8 @@ public class WPoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.info("Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
-				(1.0 * time1) / time2);
-		Assert.assertTrue(time2 < time1);
+		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
+				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
 	@Test
@@ -436,7 +435,7 @@ public class WPoissonGradientProcedureTest
 		return params2List;
 	}
 
-	private double[] copydouble(double[] d)
+	private static double[] copydouble(double[] d)
 	{
 		double[] d2 = new double[d.length];
 		for (int i = 0; i < d.length; i++)

@@ -530,7 +530,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Crop to the ROI
 		cc = new CoordinateConverter(job.bounds);
 		// Note if the bounds change for efficient caching.
-		if (newBounds = !cc.dataBounds.equals(lastBounds))
+		newBounds = !cc.dataBounds.equals(lastBounds);
+		if (newBounds)
 			lastBounds = cc.dataBounds;
 		final int width = cc.dataBounds.width;
 		final int height = cc.dataBounds.height;

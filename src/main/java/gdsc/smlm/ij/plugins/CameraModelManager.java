@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.ExtendedStatistics;
 import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
@@ -44,6 +44,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.PerPixelCameraModel;
 import gdsc.smlm.results.ImageSource;
+import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -417,7 +418,7 @@ public class CameraModelManager implements PlugIn
 		Utils.log("Deleted camera model: %s\n%s", name, resource);
 	}
 
-	private void loadFromDirectory()
+	private static void loadFromDirectory()
 	{
 		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 		egd.addMessage("Load camera models from a directory.");
@@ -443,7 +444,7 @@ public class CameraModelManager implements PlugIn
 		}
 	}
 
-	private void loadFromFile()
+	private static void loadFromFile()
 	{
 		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 		egd.addMessage("Load a camera model from file.");
@@ -494,75 +495,87 @@ public class CameraModelManager implements PlugIn
 			IJ.error(TITLE, "Failed to load camera data for model: " + name);
 			return;
 		}
-		Utils.log("Camera model: %s\n%s", name, resource);
 		ImageStack stack = imp.getImageStack();
+		if (stack.getSize() != 3)
+		{
+			IJ.error(TITLE, "Failed to load camera data for model: " + name +
+					".\nExpecting stack of size 3 but it was " + stack.getSize());
+			return;
+		}
+		Utils.log("Camera model: %s\n%s", name, resource);
 		for (int n = 1; n <= stack.getSize(); n++)
 			logStats(stack.getSliceLabel(n), stack.getProcessor(n));
 
-		// Show normalised variance: sqrt(var/g^2)
+		// Show normalised variance: var/g^2
+		float[] var_g2 = new float[stack.getWidth() * stack.getHeight()];
 		try
 		{
-			//float[] bias = (float[]) stack.getPixels(1);
 			float[] gain = (float[]) stack.getPixels(2);
 			float[] variance = (float[]) stack.getPixels(3);
 
-			Statistics stats = new Statistics();
-			double min = Math.sqrt(variance[0] / Maths.pow2(gain[0]));
-			double max = min;
-			for (int i = 1; i < gain.length; i++)
+			ExtendedStatistics stats1 = new ExtendedStatistics();
+			ExtendedStatistics stats2 = new ExtendedStatistics();
+			for (int i = 0; i < gain.length; i++)
 			{
-				double f = Math.sqrt(variance[i] / Maths.pow2(gain[i]));
-				stats.add(f);
-				if (min > f)
-					min = f;
-				else if (max < f)
-					max = f;
+				double v1 = variance[i] / Maths.pow2(gain[i]);
+				var_g2[i] = (float) v1;
+				stats1.add(Math.sqrt(v1));
+				stats2.add(v1);
 			}
-			logStats("sqrt(var/g^2)", stats, min, max);
+			logStats("var/g^2", stats2);
+			logStats("sqrt(var/g^2)", stats1);
 		}
 		catch (Exception e)
 		{
 			Utils.log("Failed to load camera model %s from file: %s. %s", name, resource.getFilename(), e.getMessage());
 		}
+		stack.addSlice("var/g^2", var_g2);
 
-		Utils.display(name, stack);
+		// Create as a hyper stack
+		imp = new ImagePlus(name, stack);
+		imp.setDimensions(4, 1, 1);
+		imp.setOpenAsHyperStack(true);
+		CompositeImage cimp = new CompositeImage(imp, CompositeImage.GRAYSCALE);
+		cimp.resetDisplayRanges();
+		for (int n = 1; n <= 4; n++)
+		{
+			cimp.setSliceWithoutUpdate(n);
+			Utils.autoAdjust(cimp, true);
+		}
+		cimp.setSliceWithoutUpdate(1);
+
+		imp = WindowManager.getImage(name);
+		if (imp != null)
+			imp.setImage(cimp);
+		else
+			cimp.show();
 	}
 
-	private void logStats(String name, ImageProcessor ip)
+	private static void logStats(String name, ImageProcessor ip)
 	{
-		Statistics stats = new Statistics();
-		float min, max;
+		ExtendedStatistics stats = new ExtendedStatistics();
 		if (ip instanceof FloatProcessor)
 		{
-			float[] f = (float[]) ip.getPixels();
-			stats.add(f);
-			float[] limits = Maths.limits(f);
-			min = limits[0];
-			max = limits[1];
+			stats.add((float[]) ip.getPixels());
 		}
 		else
 		{
-			min = max = ip.getf(0);
 			for (int i = ip.getPixelCount(); i-- > 0;)
 			{
-				final float f = ip.getf(i);
-				stats.add(f);
-				if (min > f)
-					min = f;
-				else if (max < f)
-					max = f;
+				stats.add(ip.getf(i));
 			}
 		}
-		logStats(name, stats, min, max);
+		logStats(name, stats);
 	}
 
-	private static void logStats(String name, Statistics stats, double min, double max)
+	private static void logStats(String name, ExtendedStatistics stats)
 	{
 		Utils.log("%s : %s += %s : [%s to %s]", name, Utils.rounded(stats.getMean()),
-				Utils.rounded(stats.getStandardDeviation()), Utils.rounded(min), Utils.rounded(max));
+				Utils.rounded(stats.getStandardDeviation()), Utils.rounded(stats.getMin()),
+				Utils.rounded(stats.getMax()));
 	}
 
-	private void printCameraModels()
+	private static void printCameraModels()
 	{
 		IJ.log(settings.toString());
 	}

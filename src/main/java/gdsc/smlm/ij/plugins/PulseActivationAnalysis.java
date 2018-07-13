@@ -1553,15 +1553,15 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	}
 
 	/**
-	 * Auto adjust. Copied from ij.plgin.frame.ContrastAdjuster
+	 * Auto adjust. Copied from {@link ij.plugin.frame.ContrastAdjuster }.
 	 * <p>
 	 * Although the ContrastAdjuster records its actions as 'run("Enhance Contrast", "saturated=0.35");' it actually
 	 * does something else which makes the image easier to see than the afore mentioned command.
 	 *
 	 * @param imp
-*            the image
+	 *            the image
 	 * @param ip
-*            the image
+	 *            the image
 	 */
 	private void autoAdjust(ImagePlus imp, ImageProcessor ip)
 	{

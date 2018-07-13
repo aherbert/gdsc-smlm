@@ -76,7 +76,7 @@ public abstract class SpotFilter implements Cloneable
 	/**
 	 * Get the pre-processed data produced by the find method
 	 *
-	 * @return The pre-processed data produced by the {@link #find(float[], float[], int, int)} method
+	 * @return The pre-processed data produced by the {@link #find(float[], int, int)} method
 	 */
 	public abstract float[] getPreprocessedData();
 

@@ -528,7 +528,7 @@ public class PeakResultsReaderTest
 		canReadIntoPreferredUnits(ResultsFileFormat.TSF);
 	}
 
-	private void canReadIntoPreferredUnits(ResultsFileFormat fileFormat)
+	private static void canReadIntoPreferredUnits(ResultsFileFormat fileFormat)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
@@ -575,7 +575,7 @@ public class PeakResultsReaderTest
 		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.TSF);
 	}
 
-	private void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
+	private static void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
@@ -655,7 +655,7 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, false, false, false, false, false, out, in);
 	}
 
-	private void readWith2IsFasterThan1(boolean showDeviations, boolean showEndFrame, boolean showId,
+	private static void readWith2IsFasterThan1(boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision, ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2,
 			int loops)
 	{
@@ -681,7 +681,7 @@ public class PeakResultsReaderTest
 
 	// -=-=-=-=-
 
-	private void writeMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
+	private static void writeMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
@@ -700,6 +700,25 @@ public class PeakResultsReaderTest
 			// For now just support using the native float TSF datatype
 			cal.setNmPerPixel((float) cal.getNmPerPixel());
 			out.setCalibration(cal.getCalibration());
+			// TSF converts the width parameters so make sure they are not zero
+			out.forEach(new PeakResultProcedure()
+			{
+
+				@Override
+				public void execute(PeakResult peakResult)
+				{
+					check(peakResult.getParameters());
+					if (showDeviations)
+						check(peakResult.getParameterDeviations());
+				}
+
+				private void check(float[] parameters)
+				{
+					for (int i = 0; i < parameters.length; i++)
+						if (parameters[i] == 0)
+							parameters[i] = 0.1f;
+				}
+			});
 		}
 
 		//		System.out.println(out.getCalibration());
@@ -730,7 +749,7 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, in);
 	}
 
-	private void writeWithCombinationsMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean sort)
+	private static void writeWithCombinationsMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean sort)
 	{
 		for (boolean showDeviations : onOff)
 		{
@@ -750,7 +769,7 @@ public class PeakResultsReaderTest
 		}
 	}
 
-	private int count(boolean... flags)
+	private static int count(boolean... flags)
 	{
 		int c = 0;
 		for (boolean flag : flags)
@@ -759,15 +778,15 @@ public class PeakResultsReaderTest
 		return c;
 	}
 
-	private void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
+	private static void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision, boolean sort)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
 	}
 
-	private void readWithScannerMatchesNonScanner(RandomGenerator rg, boolean showDeviations, boolean showEndFrame,
-			boolean showId, boolean showPrecision, boolean sort)
+	private static void readWithScannerMatchesNonScanner(RandomGenerator rg, boolean showDeviations,
+			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
 	{
 		MemoryPeakResults out = createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision);
 		String filename = createFile();
@@ -781,7 +800,7 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, in, in2);
 	}
 
-	private void readWithScannerMatchesNonScannerWithCombinations(boolean sort)
+	private static void readWithScannerMatchesNonScannerWithCombinations(boolean sort)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (boolean showDeviations : onOff)
@@ -801,9 +820,9 @@ public class PeakResultsReaderTest
 		}
 	}
 
-	private void checkEqual(ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean showPrecision, boolean sort, MemoryPeakResults expectedResults, MemoryPeakResults actualResults)
-			throws ArrayComparisonFailure
+	private static void checkEqual(ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame,
+			boolean showId, boolean showPrecision, boolean sort, MemoryPeakResults expectedResults,
+			MemoryPeakResults actualResults) throws ArrayComparisonFailure
 	{
 		Assert.assertNotNull("Input results are null", actualResults);
 		Assert.assertEquals("Size differ", expectedResults.size(), actualResults.size());
@@ -852,6 +871,14 @@ public class PeakResultsReaderTest
 			TestAssert.assertEqualsRelative(p1.getMeanIntensity(), p2.getMeanIntensity(), delta,
 					"Mean intensity mismatch @ [%d]", i);
 			TestAssert.assertNotNull(p2.getParameters(), "Params is null @ [%d]", i);
+
+			float[] p = p2.getParameters();
+			for (float f : p)
+			{
+				if (Float.isNaN(f))
+					System.out.println(Arrays.toString(p1.getParameters()));
+			}
+
 			TestAssert.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
 					"Params mismatch @ [%d]", i);
 			if (showDeviations)
@@ -932,8 +959,8 @@ public class PeakResultsReaderTest
 		}
 	}
 
-	private MemoryPeakResults createResults(RandomGenerator rg, int i, boolean showDeviations, boolean showEndFrame,
-			boolean showId, boolean showPrecision)
+	private static MemoryPeakResults createResults(RandomGenerator rg, int i, boolean showDeviations,
+			boolean showEndFrame, boolean showId, boolean showPrecision)
 	{
 		double bias = rg.nextDouble();
 
@@ -985,13 +1012,13 @@ public class PeakResultsReaderTest
 		return results;
 	}
 
-	private float[] createData(RandomGenerator rg)
+	private static float[] createData(RandomGenerator rg)
 	{
 		return Gaussian2DPeakResultHelper.createTwoAxisAndAngleParams(rg.nextFloat(), rg.nextFloat(), rg.nextFloat(),
 				rg.nextFloat(), rg.nextFloat(), rg.nextFloat(), rg.nextFloat(), rg.nextFloat());
 	}
 
-	private String createFile()
+	private static String createFile()
 	{
 		File file;
 		try
@@ -1008,7 +1035,7 @@ public class PeakResultsReaderTest
 		return null; // Allow compilation but the assert will stop the code
 	}
 
-	private void writeFile(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
+	private static void writeFile(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort, MemoryPeakResults results,
 			String filename)
 	{
@@ -1061,12 +1088,12 @@ public class PeakResultsReaderTest
 		out.end();
 	}
 
-	private MemoryPeakResults readFile(String filename, boolean useScanner)
+	private static MemoryPeakResults readFile(String filename, boolean useScanner)
 	{
 		return readFile(filename, useScanner, true);
 	}
 
-	private MemoryPeakResults readFile(String filename, boolean useScanner, boolean rawResults)
+	private static MemoryPeakResults readFile(String filename, boolean useScanner, boolean rawResults)
 	{
 		PeakResultsReader reader = new PeakResultsReader(filename);
 		reader.setUseScanner(useScanner);
@@ -1075,7 +1102,7 @@ public class PeakResultsReaderTest
 		return in;
 	}
 
-	private long getReadTime(String filename, final boolean useScanner, final int loops)
+	private static long getReadTime(String filename, final boolean useScanner, final int loops)
 	{
 		// Initialise reading code
 		readFile(filename, useScanner);

@@ -50,7 +50,6 @@ import ij.process.ImageProcessor;
 @SuppressWarnings({ "javadoc" })
 public class IJImagePeakResultsTest
 {
-	//private RandomGenerator rand = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 	static Calibration calibration;
 	static PSF psf;
 	static
