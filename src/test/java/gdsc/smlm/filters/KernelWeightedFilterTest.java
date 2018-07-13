@@ -72,6 +72,12 @@ public class KernelWeightedFilterTest extends WeightedFilterTest
 				this.width = width;
 				this.height = height;
 			}
+			
+			@Override
+			public boolean isSumFilter()
+			{
+				return false;
+			}
 		};
 	}
 }

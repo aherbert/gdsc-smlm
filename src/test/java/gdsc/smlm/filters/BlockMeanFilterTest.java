@@ -209,6 +209,12 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		{
 			f.setWeights(w, width, height);
 		}
+		
+		@Override
+		public boolean isSumFilter()
+		{
+			return false;
+		}
 	}
 
 	private void meanIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,

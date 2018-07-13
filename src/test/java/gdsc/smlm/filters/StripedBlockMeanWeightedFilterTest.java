@@ -50,6 +50,12 @@ public class StripedBlockMeanWeightedFilterTest extends WeightedFilterTest
 			{
 				f.setWeights(w, width, height);
 			}
+			
+			@Override
+			public boolean isSumFilter()
+			{
+				return false;
+			}
 		};
 	}
 }

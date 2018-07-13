@@ -50,6 +50,12 @@ public class BlockSumWeightedFilterTest extends WeightedFilterTest
 			{
 				f.setWeights(w, width, height);
 			}
+			
+			@Override
+			public boolean isSumFilter()
+			{
+				return true;
+			}
 		};
 	}
 }

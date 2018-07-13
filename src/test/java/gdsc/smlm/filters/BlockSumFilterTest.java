@@ -206,6 +206,12 @@ public class BlockSumFilterTest extends AbstractFilterTest
 		{
 			f.setWeights(w, width, height);
 		}
+		
+		@Override
+		public boolean isSumFilter()
+		{
+			return true;
+		}
 	}
 
 	private void sumIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
