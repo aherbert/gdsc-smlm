@@ -401,16 +401,14 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 						x = newPoint(x, d, optimum.getPoint());
 						continue;
 					}
-					else
-					{
-						final double[][] result = newPointAndDirection(x, d, optimum.getPoint());
-						x = result[0];
+					
+					final double[][] result = newPointAndDirection(x, d, optimum.getPoint());
+					x = result[0];
 
-						final int lastInd = n - 1;
-						direc[bigInd] = direc[lastInd];
-						direc[lastInd] = result[1];
-						nonBasis = true;
-					}
+					final int lastInd = n - 1;
+					direc[bigInd] = direc[lastInd];
+					direc[lastInd] = result[1];
+					nonBasis = true;
 				}
 			}
 		}
@@ -654,13 +652,15 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	}
 
 	/**
-	 * Check if the array contains anything other than value
+	 * Check if the array contains anything other than value.
 	 *
 	 * @param array
+	 *            the array
 	 * @param value
+	 *            the value
 	 * @return True if the array has another value
 	 */
-	private boolean checkArray(double[] array, double value)
+	private static boolean checkArray(double[] array, double value)
 	{
 		if (array == null)
 			return false;

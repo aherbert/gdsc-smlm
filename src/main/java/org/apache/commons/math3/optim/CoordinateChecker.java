@@ -31,7 +31,10 @@ import org.apache.commons.math3.util.FastMath;
  */
 public abstract class CoordinateChecker implements OptimizationData, ConvergenceChecker<PointValuePair>
 {
-	final double relative, absolute;
+	/** Relative tolerance threshold */
+	final double relative;
+	/** Absolute tolerance threshold */
+	final double absolute;
 
 	/**
 	 * Build an instance with specified thresholds.
@@ -40,9 +43,9 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
 	 * must be set to a negative value. In order to perform only absolute
 	 * checks, the relative tolerance must be set to a negative value.
 	 *
-	 * @param relativeThreshold
+	 * @param relative
 	 *            relative tolerance threshold
-	 * @param absoluteThreshold
+	 * @param absolute
 	 *            absolute tolerance threshold
 	 */
 	public CoordinateChecker(double relative, double absolute)

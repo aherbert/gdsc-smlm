@@ -196,9 +196,10 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	}
 
 	/**
-	 * Set the shape parameter
+	 * Set the shape parameter.
 	 *
 	 * @param shape
+	 *            the new shape
 	 * @throws NotStrictlyPositiveException
 	 *             if {@code shape <= 0}
 	 */
@@ -214,9 +215,10 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	/**
 	 * Set the shape parameter
 	 * <p>
-	 * Does not throw an exception if shape is not strictly positive
+	 * Does not throw an exception if shape is not strictly positive.
 	 *
 	 * @param shape
+	 *            the new shape unsafe
 	 */
 	public void setShapeUnsafe(double shape)
 	{
@@ -249,9 +251,10 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	}
 
 	/**
-	 * Set the scale parameter
+	 * Set the scale parameter.
 	 *
 	 * @param scale
+	 *            the new scale
 	 * @throws NotStrictlyPositiveException
 	 *             if {@code scale <= 0}
 	 */
@@ -267,9 +270,10 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	/**
 	 * Set the scale parameter
 	 * <p>
-	 * Does not throw an exception if scale is not strictly positive
+	 * Does not throw an exception if scale is not strictly positive.
 	 *
 	 * @param scale
+	 *            the new scale unsafe
 	 */
 	public void setScaleUnsafe(double scale)
 	{
@@ -517,28 +521,19 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 						// Reject
 						continue;
 					}
-					else
-					{
-						return scale * x;
-					}
+					return scale * x;
 				}
-				else
+				
+				final double x = -1 * FastMath.log((bGS - p) / shape);
+				final double u2 = random.nextDouble();
+
+				if (u2 > FastMath.pow(x, shape - 1))
 				{
-					// Step 3:
-
-					final double x = -1 * FastMath.log((bGS - p) / shape);
-					final double u2 = random.nextDouble();
-
-					if (u2 > FastMath.pow(x, shape - 1))
-					{
-						// Reject
-						continue;
-					}
-					else
-					{
-						return scale * x;
-					}
+					// Reject
+					continue;
 				}
+				
+				return scale * x;
 			}
 		}
 

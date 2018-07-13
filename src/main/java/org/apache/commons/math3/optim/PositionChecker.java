@@ -36,9 +36,9 @@ public class PositionChecker extends SimplePointChecker<PointValuePair> implemen
 	 * must be set to a negative value. In order to perform only absolute
 	 * checks, the relative tolerance must be set to a negative value.
 	 *
-	 * @param relativeThreshold
+	 * @param relative
 	 *            relative tolerance threshold
-	 * @param absoluteThreshold
+	 * @param absolute
 	 *            absolute tolerance threshold
 	 */
 	public PositionChecker(double relative, double absolute)
