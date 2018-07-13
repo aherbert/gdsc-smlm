@@ -398,7 +398,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
 		PSF psf = fitConfig.getPSF();
 
-		boolean newCameraModel = false;
+		boolean newCameraModel = filter == null;
 		if (!calibration.equals(lastCalibration))
 		{
 			newCameraModel = true;
