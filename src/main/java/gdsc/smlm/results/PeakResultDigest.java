@@ -72,7 +72,6 @@ public class PeakResultDigest
 	 *
 	 * @param peakResult
 	 *            the peak result
-	 * @return the string
 	 */
 	public void update(PeakResult peakResult)
 	{

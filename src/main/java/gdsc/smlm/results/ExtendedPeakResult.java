@@ -50,7 +50,7 @@ public class ExtendedPeakResult extends IdPeakResult
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
-	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 *            the params standard deviations (if not null must match the length of the params array)
 	 * @param endFrame
 	 *            the end frame
 	 * @param id

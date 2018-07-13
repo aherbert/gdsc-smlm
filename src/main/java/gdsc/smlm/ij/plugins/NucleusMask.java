@@ -255,12 +255,12 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	/**
 	 * Create an ellipsoid using the given dimensions.
 	 *
-	 * @param width
-	 *            the width
-	 * @param height
-	 *            the height
-	 * @param depth
-	 *            the depth
+	 * @param widthX
+	 *            the width X
+	 * @param heightX
+	 *            the height X
+	 * @param depthX
+	 *            the depth X
 	 * @return An ellipsoid
 	 */
 	public static ImageStack createEllipsoid(double widthX, double heightX, double depthX)
@@ -303,7 +303,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	 *
 	 * @param size
 	 *            the size of the axis
-	 * @param norm
+	 * @param reference
 	 *            the size of the reference axis
 	 * @return the scaled square distances
 	 */
@@ -355,21 +355,25 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	/*

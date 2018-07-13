@@ -600,7 +600,9 @@ public class PCPALMMolecules implements PlugIn
 	 * Calculate the average precision by fitting a skewed Gaussian to the histogram of the precision distribution.
 	 *
 	 * @param molecules
+	 *            the molecules
 	 * @param subTitle
+	 *            the sub title
 	 * @return The average precision
 	 */
 	private double calculateAveragePrecision(ArrayList<Molecule> molecules, String subTitle)
@@ -616,9 +618,11 @@ public class PCPALMMolecules implements PlugIn
 	 * of the simple mean then the simple mean is returned.
 	 *
 	 * @param molecules
+	 *            the molecules
 	 * @param title
 	 *            the plot title (null if no plot should be displayed)
 	 * @param histogramBins
+	 *            the histogram bins
 	 * @param logFitParameters
 	 *            Record the fit parameters to the ImageJ log
 	 * @param removeOutliers
@@ -865,14 +869,16 @@ public class PCPALMMolecules implements PlugIn
 	}
 
 	/**
-	 * Add the skewed gaussian to the histogram plot
+	 * Add the skewed gaussian to the histogram plot.
 	 *
 	 * @param plot
+	 *            the plot
 	 * @param x
+	 *            the x
 	 * @param parameters
 	 *            Gaussian parameters
-	 * @param alpha
 	 * @param shape
+	 *            the shape
 	 */
 	private void addToPlot(Plot2 plot, float[] x, double[] parameters, int shape)
 	{
@@ -954,12 +960,13 @@ public class PCPALMMolecules implements PlugIn
 	}
 
 	/**
-	 * Return a new list, removing all molecules with a precision over 3x of the precision estimate
+	 * Return a new list, removing all molecules with a precision over 3x of the precision estimate.
 	 *
 	 * @param molecules
+	 *            the molecules
 	 * @param sigmaS
 	 *            The precision estimate
-	 * @return
+	 * @return the array list
 	 */
 	private ArrayList<Molecule> filterMolecules(ArrayList<Molecule> molecules, double sigmaS)
 	{
@@ -1600,14 +1607,20 @@ public class PCPALMMolecules implements PlugIn
 	}
 
 	/**
-	 * Fill the given mask with the fill value using a circle with the specified centre and radius
+	 * Fill the given mask with the fill value using a circle with the specified centre and radius.
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param maskSize
+	 *            the mask size
 	 * @param cx
+	 *            the cx
 	 * @param cy
+	 *            the cy
 	 * @param roiRadius
+	 *            the roi radius
 	 * @param fill
+	 *            the fill
 	 */
 	private void fillMask(int[] mask, final int maskSize, final int cx, final int cy, final int roiRadius,
 			final int fill)
@@ -2166,10 +2179,12 @@ public class PCPALMMolecules implements PlugIn
 	}
 
 	/**
-	 * Log a message to the IJ log window
+	 * Log a message to the IJ log window.
 	 *
 	 * @param format
+	 *            the format
 	 * @param args
+	 *            the args
 	 */
 	private static void log(String format, Object... args)
 	{

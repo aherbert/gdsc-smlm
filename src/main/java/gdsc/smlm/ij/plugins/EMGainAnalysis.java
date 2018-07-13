@@ -298,7 +298,7 @@ public class EMGainAnalysis implements PlugInFilter
 	/**
 	 * Build a histogram using pixels within the image ROI
 	 *
-	 * @param image
+	 * @param imp
 	 *            The image
 	 * @return The image histogram
 	 */

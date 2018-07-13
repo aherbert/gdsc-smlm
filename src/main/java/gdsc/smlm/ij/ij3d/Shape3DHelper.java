@@ -250,7 +250,7 @@ public class Shape3DHelper
 	 * Creates the object used to draw a single localisation.
 	 *
 	 * @param rendering
-	 *
+	 *            the rendering
 	 * @return the list of triangle vertices for the object
 	 */
 	public static List<Point3f> createLocalisationObject(Rendering rendering)
@@ -509,7 +509,7 @@ public class Shape3DHelper
 	 * Creates the object used to outline a single localisation.
 	 *
 	 * @param rendering
-	 *
+	 *            the rendering
 	 * @return the list of triangle vertices for the object
 	 */
 	public static List<Point3f> createLocalisationObjectOutline(Rendering rendering)
@@ -558,8 +558,6 @@ public class Shape3DHelper
 	 *
 	 * @param vertices
 	 *            the vertices
-	 * @param faces
-	 *            the faces
 	 * @param normalise
 	 *            the normalise
 	 * @return the list of vertices for the triangles

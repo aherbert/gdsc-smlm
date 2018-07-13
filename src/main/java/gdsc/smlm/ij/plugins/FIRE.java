@@ -266,6 +266,9 @@ public class FIRE implements PlugIn
 	// Stored in setCorrectionParameters
 	private double correctionQValue, correctionMean, correctionSigma;
 
+	/**
+	 * Store images for FIRE analysis
+	 */
 	public class FireImages
 	{
 		/** The first super-resolution image. */
@@ -275,6 +278,16 @@ public class FIRE implements PlugIn
 		/** The nm per pixel in the super-resolution images */
 		final double nmPerPixel;
 
+		/**
+		 * Instantiates a new fire images.
+		 *
+		 * @param ip1
+		 *            the first image
+		 * @param ip2
+		 *            the second image
+		 * @param nmPerPixel
+		 *            the nm per pixel
+		 */
 		FireImages(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel)
 		{
 			this.ip1 = ip1;
@@ -432,7 +445,7 @@ public class FIRE implements PlugIn
 
 		if (this.results2 != null)
 		{
-			name += " vs " + results2.getName();
+			name += " vs " + this.results2.getName();
 
 			FireResult result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, fourierImageScale,
 					imageSize);
@@ -944,7 +957,7 @@ public class FIRE implements PlugIn
 	 *            the results
 	 * @return the memory peak results
 	 */
-	private MemoryPeakResults verify(MemoryPeakResults results)
+	private static MemoryPeakResults verify(MemoryPeakResults results)
 	{
 		if (results == null || results.size() < 2)
 			return null;
@@ -1346,7 +1359,7 @@ public class FIRE implements PlugIn
 
 	/**
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
-	 * {@link #initialise(MemoryPeakResults)}
+	 * {@link #initialise(MemoryPeakResults, MemoryPeakResults)}.
 	 *
 	 * @param fourierMethod
 	 *            the fourier method
@@ -1411,7 +1424,7 @@ public class FIRE implements PlugIn
 
 	/**
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
-	 * {@link #initialise(MemoryPeakResults)}
+	 * {@link #initialise(MemoryPeakResults, MemoryPeakResults)}.
 	 *
 	 * @param fourierMethod
 	 *            the fourier method
@@ -1464,6 +1477,7 @@ public class FIRE implements PlugIn
 		return new FireResult(fireNumber, result.correlation, frcCurve, originalCorrelationCurve);
 	}
 
+	@SuppressWarnings("null")
 	private void runQEstimation()
 	{
 		IJ.showStatus(TITLE + " ...");
@@ -1792,12 +1806,12 @@ public class FIRE implements PlugIn
 
 		// Interactive dialog to estimate Q (blinking events per flourophore) using
 		// sliders for the mean and standard deviation of the localisation precision.
-		showQEstimationDialog(histogram, qplot, frcCurve, images.nmPerPixel);
+		showQEstimationDialog(histogram, qplot, images.nmPerPixel);
 
 		IJ.showStatus(TITLE + " complete");
 	}
 
-	private double[] scale(double[] a, double f)
+	private static double[] scale(double[] a, double f)
 	{
 		a = a.clone();
 		for (int i = 0; i < a.length; i++)
@@ -1805,7 +1819,7 @@ public class FIRE implements PlugIn
 		return a;
 	}
 
-	private double[] computeExpDecay(double mean, double sigma, double[] q)
+	private static double[] computeExpDecay(double mean, double sigma, double[] q)
 	{
 		double[] hq = FRC.computeHq(q, mean, sigma);
 		double[] exp_decay = new double[q.length];
@@ -1845,7 +1859,7 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private UnivariatePointValuePair findMin(UnivariatePointValuePair current, UnivariateOptimizer o,
+	private static UnivariatePointValuePair findMin(UnivariatePointValuePair current, UnivariateOptimizer o,
 			UnivariateFunction f, double qValue, double factor)
 	{
 		try
@@ -1868,7 +1882,7 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private UnivariatePointValuePair findMin(UnivariatePointValuePair current, SimplexOptimizer o,
+	private static UnivariatePointValuePair findMin(UnivariatePointValuePair current, SimplexOptimizer o,
 			MultivariateFunction f, double qValue)
 	{
 		try
@@ -1892,7 +1906,7 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private PointValuePair findMin(PointValuePair current, SimplexOptimizer o, MultivariateFunction f,
+	private static PointValuePair findMin(PointValuePair current, SimplexOptimizer o, MultivariateFunction f,
 			double[] initialSolution)
 	{
 		try
@@ -1991,7 +2005,7 @@ public class FIRE implements PlugIn
 		 *
 		 * @param frcnum
 		 *            the scaled FRC numerator
-		 * @param exp_decay
+		 * @param q
 		 *            the precomputed exponential decay (hq)
 		 * @param low
 		 *            the lower bound of the array for optimisation
@@ -2187,6 +2201,9 @@ public class FIRE implements PlugIn
 		return true;
 	}
 
+	/**
+	 * Represent the Q-plot data
+	 */
 	public class QPlot
 	{
 		final FRCCurve frcCurve;
@@ -2387,6 +2404,9 @@ public class FIRE implements PlugIn
 		}
 	}
 
+	/**
+	 * Represent the precision histogram.
+	 */
 	public class PrecisionHistogram
 	{
 		final float[] x, y;
@@ -2430,6 +2450,12 @@ public class FIRE implements PlugIn
 				x2[i] = (float) (min + i * dx);
 		}
 
+		/**
+		 * Instantiates a new precision histogram.
+		 *
+		 * @param title
+		 *            the title
+		 */
 		public PrecisionHistogram(String title)
 		{
 			this.title = title;
@@ -2507,8 +2533,6 @@ public class FIRE implements PlugIn
 	 * Mortensen formula. If the precision method for Q estimation is not fixed then the histogram is fitted with a
 	 * Gaussian to create an initial estimate.
 	 *
-	 * @param precisionMethod
-	 *            the precision method
 	 * @return The precision histogram
 	 */
 	private PrecisionHistogram calculatePrecisionHistogram()
@@ -2721,7 +2745,7 @@ public class FIRE implements PlugIn
 		return false;
 	}
 
-	private boolean canUseStoredPrecision(MemoryPeakResults results)
+	private static boolean canUseStoredPrecision(MemoryPeakResults results)
 	{
 		return results.hasPrecision();
 	}
@@ -2735,7 +2759,7 @@ public class FIRE implements PlugIn
 	 *            the y
 	 * @return new double[] { norm, mean, sigma }
 	 */
-	private double[] fitGaussian(float[] x, float[] y)
+	private static double[] fitGaussian(float[] x, float[] y)
 	{
 		WeightedObservedPoints obs = new WeightedObservedPoints();
 		for (int i = 0; i < x.length; i++)
@@ -2897,7 +2921,7 @@ public class FIRE implements PlugIn
 	}
 
 	private boolean showQEstimationDialog(final PrecisionHistogram histogram, final QPlot qplot,
-			final FRCCurve frcCurve, final double nmPerPixel)
+			final double nmPerPixel)
 	{
 		// This is used for the initial layout of windows
 		final MyWindowOrganiser wo = new MyWindowOrganiser();

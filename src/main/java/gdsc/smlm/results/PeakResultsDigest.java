@@ -223,7 +223,8 @@ public class PeakResultsDigest
 	}
 
 	/**
-	 * Take a digest of the results asynchronously. Call {@link #waitForDigest(long)} to determine if a digest was
+	 * Take a digest of the results asynchronously. Call {@link #waitForDigest(Future, long)} to determine if a digest
+	 * was
 	 * taken.
 	 *
 	 * @param executorService
@@ -246,7 +247,7 @@ public class PeakResultsDigest
 	}
 
 	/**
-	 * Wait for the result of {@link #digestLater(PeakResult...)} for the given time in milliseconds.
+	 * Wait for the result of {@link #digestLater(ExecutorService, PeakResult...)} for the given time in milliseconds.
 	 *
 	 * @param future
 	 *            the future
@@ -261,11 +262,11 @@ public class PeakResultsDigest
 		{
 			if (timeout > 0)
 				return future.get(timeout, TimeUnit.MILLISECONDS);
-			else
-				return future.get();
+			return future.get();
 		}
 		catch (final InterruptedException ie)
 		{
+			// Ignore
 		}
 		catch (final Exception e)
 		{

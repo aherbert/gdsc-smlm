@@ -40,7 +40,10 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 {
 	private double delta = 0.01;
 
+	/** The number of peaks. */
 	protected int peaks;
+	
+	/** The function. */
 	protected Gaussian2DFunction func;
 
 	private double minimumSignal = Float.NEGATIVE_INFINITY;
@@ -114,10 +117,12 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	}
 
 	/**
-	 * Creates a string representation of the peak parameters if logging
+	 * Creates a string representation of the peak parameters if logging.
 	 *
 	 * @param oldError
+	 *            the old error
 	 * @param newError
+	 *            the new error
 	 * @param a
 	 *            The parameters
 	 * @return The string
@@ -149,6 +154,13 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 		return null;
 	}
 
+	/**
+	 * Check if there was no coordinate change.
+	 *
+	 * @param a
+	 *            the parameters
+	 * @return true, if successful
+	 */
 	protected boolean noCoordinateChange(double[] a)
 	{
 		for (int i = 0; i < peaks; i++)
@@ -196,14 +208,17 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	}
 
 	/**
-	 * Check if any dimension is below the threshold
+	 * Check if any dimension is below the threshold.
 	 *
 	 * @param threshold
+	 *            the threshold
 	 * @param params
+	 *            the params
 	 * @param paramIndex
-	 * @return
+	 *            the param index
+	 * @return true, if is below
 	 */
-	private boolean isBelow(double[] threshold, double[] params, int paramIndex)
+	private static boolean isBelow(double[] threshold, double[] params, int paramIndex)
 	{
 		if (threshold != null)
 		{
@@ -217,14 +232,17 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	}
 
 	/**
-	 * Check if any dimension is above the threshold
+	 * Check if any dimension is above the threshold.
 	 *
 	 * @param threshold
+	 *            the threshold
 	 * @param params
+	 *            the params
 	 * @param paramIndex
-	 * @return
+	 *            the param index
+	 * @return true, if is above
 	 */
-	private boolean isAbove(double[] threshold, double[] params, int paramIndex)
+	private static boolean isAbove(double[] threshold, double[] params, int paramIndex)
 	{
 		if (threshold != null)
 		{
@@ -346,7 +364,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 		return maximumSD;
 	}
 
-	private double[] checkArray(double[] array)
+	private static double[] checkArray(double[] array)
 	{
 		return (array == null || array.length != 2) ? null : array;
 	}

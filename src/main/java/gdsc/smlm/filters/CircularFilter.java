@@ -55,8 +55,8 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	/**
 	 * Updates the weighted normaliser within a radius around each point.
 	 *
-	 * @param n
-	 *            The block size
+	 * @param radius
+	 *            the radius
 	 */
 	private void updateWeightedNormaliser(final double radius)
 	{

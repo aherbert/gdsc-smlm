@@ -37,6 +37,7 @@ import gdsc.smlm.function.NonLinearFunction;
  */
 public class GradientCalculator
 {
+	/** The number of params. */
 	public final int nparams;
 	private boolean badGradients;
 
@@ -341,9 +342,9 @@ public class GradientCalculator
 	 *            (size m)
 	 * @param func
 	 *            Non-linear fitting function
-	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[])},
-	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[], double[])},
-	 * @see {@link gdsc.smlm.function.NonLinearFunction#canComputeWeights()}
+	 * @see NonLinearFunction#eval(int, double[])
+	 * @see NonLinearFunction#eval(int, double[], double[])
+	 * @see NonLinearFunction#canComputeWeights()
 	 * @return The sum-of-squares value for the fit.
 	 */
 	public double findLinearised(final int n, final double[] y, final double[] a, final double[][] alpha,
@@ -447,9 +448,9 @@ public class GradientCalculator
 	 * @param ignore
 	 *            An array of size beta.length. Set the index to true to ignore the gradients.
 	 * @return The sum-of-squares value for the fit.
-	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[])},
-	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[], double[])},
-	 * @see {@link gdsc.smlm.function.NonLinearFunction#canComputeWeights()}
+	 * @see NonLinearFunction#eval(int, double[])
+	 * @see NonLinearFunction#eval(int, double[], double[])
+	 * @see NonLinearFunction#canComputeWeights()
 	 */
 	public double findLinearised(final int n, final double[] y, final double[] a, final double[][] alpha,
 			final double[] beta, final NonLinearFunction func, boolean[] ignore)
@@ -619,13 +620,26 @@ public class GradientCalculator
 		return (w < 1) ? 1 : 1.0 / w;
 	}
 
+	/**
+	 * Check gradients for NaN values.
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param beta
+	 *            the beta
+	 * @param nparams
+	 *            the number of params
+	 * @param ssx
+	 *            the sum of squares
+	 * @return the sum of squares
+	 */
 	protected double checkGradients(final double[][] alpha, final double[] beta, int nparams, final double ssx)
 	{
 		badGradients = checkIsNaN(alpha, beta, nparams);
 		return ssx;
 	}
 
-	private boolean checkIsNaN(final double[][] alpha, final double[] beta, final int nparams)
+	private static boolean checkIsNaN(final double[][] alpha, final double[] beta, final int nparams)
 	{
 		for (int i = 0; i < nparams; i++)
 		{
@@ -635,16 +649,31 @@ public class GradientCalculator
 				if (Double.isNaN(alpha[i][j]))
 					return true;
 		}
-
 		return false;
 	}
 
+	/**
+	 * Check gradients for NaN values.
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param nparams
+	 *            the number of params
+	 */
 	protected void checkGradients(double[][] alpha, int nparams)
 	{
 		badGradients = checkIsNaN(alpha, nparams);
 	}
 
-	private boolean checkIsNaN(final double[][] alpha, final int nparams)
+	/**
+	 * Check gradients for NaN values.
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param nparams
+	 *            the number of params
+	 */
+	private static boolean checkIsNaN(final double[][] alpha, final int nparams)
 	{
 		for (int i = 0; i < nparams; i++)
 		{
@@ -652,23 +681,38 @@ public class GradientCalculator
 				if (Double.isNaN(alpha[i][j]))
 					return true;
 		}
-
 		return false;
 	}
 
+	/**
+	 * Check gradients for NaN values.
+	 *
+	 * @param beta
+	 *            the beta
+	 * @param nparams
+	 *            the number of params
+	 */
 	protected void checkGradients(final double[] beta, final int nparams)
 	{
 		badGradients = checkIsNaN(beta, nparams);
 	}
 
-	private boolean checkIsNaN(final double[] beta, final int nparams)
+	/**
+	 * Check gradients for NaN values.
+	 *
+	 * @param beta
+	 *            the beta
+	 * @param nparams
+	 *            the number of params
+	 * @return true, if successful
+	 */
+	private static boolean checkIsNaN(final double[] beta, final int nparams)
 	{
 		for (int i = 0; i < nparams; i++)
 		{
 			if (Double.isNaN(beta[i]))
 				return true;
 		}
-
 		return false;
 	}
 

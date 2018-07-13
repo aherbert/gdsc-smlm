@@ -41,8 +41,8 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	 *            The search width for non-maximum suppression
 	 * @param border
 	 *            The border to ignore for maxima
-	 * @param processor
-	 *            The data processor
+	 * @param processors
+	 *            The data processors
 	 * @throws IllegalArgumentException
 	 *             if processor is null
 	 */

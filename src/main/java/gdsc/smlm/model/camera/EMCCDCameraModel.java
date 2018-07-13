@@ -39,8 +39,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 */
 	public EMCCDCameraModel(float bias, float gain)
 	{
@@ -54,8 +52,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 */
 	public EMCCDCameraModel(double bias, double gain)
 	{
@@ -69,8 +65,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 * @param variance
 	 *            the variance (in counts)
 	 */
@@ -86,8 +80,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the total gain (count/photon)
-	 * @param emGain
-	 *            the EM-gain
 	 * @param variance
 	 *            the variance (in counts)
 	 */

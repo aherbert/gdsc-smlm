@@ -103,7 +103,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 	 *            the source
 	 * @param peakResults
 	 *            the peak results
-	 * @see {@link #isCheckDuplicates()}
+	 * @see #isCheckDuplicates()
 	 */
 	public void add(Object source, PeakResult... peakResults)
 	{
@@ -142,12 +142,12 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 	}
 
 	/**
-	 * Removes the result
+	 * Removes the result.
 	 *
 	 * @param source
 	 *            the source
-	 * @param peakResult
-	 *            the peak result
+	 * @param index
+	 *            the index
 	 */
 	public void remove(Object source, int index)
 	{

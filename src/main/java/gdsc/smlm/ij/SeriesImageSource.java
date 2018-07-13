@@ -332,9 +332,10 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		/**
-		 * Check the file info are all the same size and type and have just 1 image
+		 * Check the file info are all the same size and type and have just 1 image.
 		 *
 		 * @param info
+		 *            the info
 		 * @return True if all the same size and type
 		 */
 		boolean allSameSizeAndType(ExtendedFileInfo[] info)
@@ -358,9 +359,10 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		/**
-		 * Check the file info is the same size and type as the first file info
+		 * Check the file info is the same size and type as the first file info.
 		 *
 		 * @param info
+		 *            the info
 		 * @return True if the same size and type
 		 */
 		boolean sameSizeAndType(ExtendedFileInfo info)
@@ -372,8 +374,6 @@ public class SeriesImageSource extends ImageSource
 		/**
 		 * Check if the index map has only a single plane. This is all we support at the moment.
 		 *
-		 * @param indexMap2
-		 *            the index map 2
 		 * @return true, if successful
 		 */
 		private boolean singlePlane()
@@ -640,6 +640,7 @@ public class SeriesImageSource extends ImageSource
 		 * Reset for sequential reading.
 		 *
 		 * @throws IOException
+		 *             Signals that an I/O exception has occurred.
 		 */
 		public void reset() throws IOException
 		{
@@ -1487,10 +1488,12 @@ public class SeriesImageSource extends ImageSource
 	private DataException error = null;
 
 	/**
-	 * Create a new image source using the given image series
+	 * Create a new image source using the given image series.
 	 *
 	 * @param name
-	 * @param path
+	 *            the name
+	 * @param series
+	 *            the series
 	 */
 	public SeriesImageSource(String name, SeriesOpener series)
 	{
@@ -1516,7 +1519,9 @@ public class SeriesImageSource extends ImageSource
 	 * The directory is opened using {@link gdsc.core.ij.SeriesOpener }
 	 *
 	 * @param name
-	 * @param path
+	 *            the name
+	 * @param directory
+	 *            the directory
 	 */
 	public SeriesImageSource(String name, String directory)
 	{
@@ -1524,9 +1529,10 @@ public class SeriesImageSource extends ImageSource
 	}
 
 	/**
-	 * Create a new image source using the paths to the images
+	 * Create a new image source using the paths to the images.
 	 *
 	 * @param name
+	 *            the name
 	 * @param filenames
 	 *            the full path names of the image files
 	 */

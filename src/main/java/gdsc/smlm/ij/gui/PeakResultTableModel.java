@@ -200,7 +200,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 *            the t2
 	 * @return true, if successful
 	 */
-	private boolean equals(ResultsTableSettings t1, ResultsTableSettings t2)
+	private static boolean equals(ResultsTableSettings t1, ResultsTableSettings t2)
 	{
 		// Adapted from ResultsTableSettings.equals() to only use the settings of interest
 		boolean result = true;
@@ -254,8 +254,9 @@ public class PeakResultTableModel extends AbstractTableModel
 		// This is done as per the IJTablePeakResults for consistency
 		TurboList<PeakResultData<?>> valuesList = new TurboList<>();
 		TurboList<String> namesList = new TurboList<>();
-
-		if (rowCounter = tableSettings.getShowRowCounter())
+		
+		rowCounter = tableSettings.getShowRowCounter();
+		if (rowCounter)
 		{
 			valuesList.add(new PeakResultDataFrame());
 			namesList.add("#");
@@ -352,9 +353,11 @@ public class PeakResultTableModel extends AbstractTableModel
 			}
 			catch (ConfigurationException e)
 			{
+				// Ignore
 			}
 			catch (ConversionException e)
 			{
+				// Ignore
 			}
 			if (p == null)
 				p = new PeakResultDataPrecision();
@@ -511,7 +514,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 *            the source
 	 * @param peakResults
 	 *            the peak results
-	 * @see {@link #isCheckDuplicates()}
+	 * @see #isCheckDuplicates()
 	 */
 	public void add(Object source, PeakResult... peakResults)
 	{

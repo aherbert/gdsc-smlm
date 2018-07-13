@@ -4959,10 +4959,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *
 	 * @param filter
 	 *            the filter
-	 * @param resultsList
-	 *            the results list
-	 * @param allAssignments
-	 *            all the assignments
 	 * @return The score
 	 */
 	private ArrayList<FractionalAssignment[]> getAssignments(DirectFilter filter)
@@ -4975,12 +4971,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return allAssignments;
 	}
 
-	public StringBuilder createResult(DirectFilter filter, FractionClassificationResult r)
+	private StringBuilder createResult(DirectFilter filter, FractionClassificationResult r)
 	{
 		return createResult(filter, r, resultsPrefix2);
 	}
 
-	public StringBuilder createResult(DirectFilter filter, FractionClassificationResult r, String resultsPrefix2)
+	private StringBuilder createResult(DirectFilter filter, FractionClassificationResult r, String resultsPrefix2)
 	{
 		StringBuilder sb = new StringBuilder(resultsPrefix);
 		sb.append(filter.getName()).append(resultsPrefix2).append(resultsPrefix3);
@@ -7005,9 +7001,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	/**
 	 * Finish scoring and reset the subset
-	 *
-	 * @param filterSet
-	 *            the filter set
 	 */
 	private void finishScoring()
 	{

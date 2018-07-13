@@ -45,10 +45,15 @@ public class ParameterisedFitJob extends FitJob
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
 	 *
 	 * @param id
+	 *            the id
 	 * @param parameters
+	 *            the parameters
 	 * @param slice
+	 *            the slice
 	 * @param data
+	 *            the data
 	 * @param bounds
+	 *            the bounds
 	 */
 	public ParameterisedFitJob(int id, FitParameters parameters, int slice, float[] data, Rectangle bounds)
 	{
@@ -60,9 +65,13 @@ public class ParameterisedFitJob extends FitJob
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
 	 *
 	 * @param parameters
+	 *            the parameters
 	 * @param slice
+	 *            the slice
 	 * @param data
+	 *            the data
 	 * @param bounds
+	 *            the bounds
 	 */
 	public ParameterisedFitJob(FitParameters parameters, int slice, float[] data, Rectangle bounds)
 	{
@@ -138,10 +147,11 @@ public class ParameterisedFitJob extends FitJob
 	}
 
 	/**
-	 * The fit result of the specified index in the array of fitted indices
+	 * The fit result of the specified index in the array of fitted indices.
 	 *
 	 * @param n
-	 * @return
+	 *            the index
+	 * @return the fit result
 	 */
 	public FitResult getFitResult(int n)
 	{
@@ -149,10 +159,11 @@ public class ParameterisedFitJob extends FitJob
 	}
 
 	/**
-	 * The fit result of the specified index in the array of fitted indices
+	 * The fit result of the specified index in the array of fitted indices.
 	 *
 	 * @param n
-	 * @return
+	 *            the index
+	 * @return the multi path fit result
 	 */
 	public MultiPathFitResult getMultiPathFitResult(int n)
 	{

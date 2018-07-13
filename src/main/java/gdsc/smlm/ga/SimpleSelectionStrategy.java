@@ -31,7 +31,10 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import gdsc.core.logging.TrackProgress;
 
 /**
- * Selects the top individuals
+ * Selects the top individuals.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser implements SelectionStrategy<T>
 {
@@ -65,6 +68,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	 * the input is smaller or there are not enough valid individuals (fitness not null)).
 	 *
 	 * @param individuals
+	 *            the individuals
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
 	 */

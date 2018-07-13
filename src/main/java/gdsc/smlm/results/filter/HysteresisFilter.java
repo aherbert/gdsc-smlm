@@ -50,36 +50,65 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
  */
 public abstract class HysteresisFilter extends Filter
 {
+	/** The default absolute distance increment */
 	public static final double DEFAULT_ABSOLUTE_DISTANCE_INCREMENT = 5;
+	/** The default relative distance increment */
 	public static final double DEFAULT_RELATIVE_DISTANCE_INCREMENT = 0.05;
+	/** The default time increment (in seconds) */
 	public static final double DEFAULT_SECONDS_TIME_INCREMENT = 0.05;
+	/** The default time increment (in frames) */
 	public static final double DEFAULT_FRAMES_TIME_INCREMENT = 1;
+	/** The default range for absolute distance */
 	public static final double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
+	/** The default range for relative distance */
 	public static final double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
+	/** The default range for time (in seconds) */
 	public static final double DEFAULT_SECONDS_TIME_RANGE = 5;
+	/** The default range for time (in frames) */
 	public static final double DEFAULT_FRAMES_TIME_RANGE = 10;
 
+	/** The search distance. */
 	@XStreamAsAttribute
 	final double searchDistance;
+
+	/** The search distance mode. */
 	@XStreamAsAttribute
 	final int searchDistanceMode;
+
+	/** The time threshold. */
 	@XStreamAsAttribute
 	final double timeThreshold;
+
+	/** The time threshold mode. */
 	@XStreamAsAttribute
 	final int timeThresholdMode;
+
+	/** The ok. */
 	@XStreamOmitField
 	Set<PeakResult> ok;
 
+	/**
+	 * The peak status.
+	 */
 	protected enum PeakStatus
 	{
-		OK, CANDIDATE, REJECT
+		/** A valid peak. */
+		OK,
+		/** A candidate peak. */
+		CANDIDATE,
+		/** Marked for rejection. */
+		REJECT
 	}
 
 	/**
+	 * Instantiates a new hysteresis filter.
+	 *
 	 * @param searchDistance
+	 *            the search distance
 	 * @param searchDistanceMode
 	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
 	 * @param timeThreshold
+	 *            the time threshold
 	 * @param timeThresholdMode
 	 *            0 = frames; 1 = seconds
 	 */
@@ -92,6 +121,8 @@ public abstract class HysteresisFilter extends Filter
 	}
 
 	/**
+	 * Gets the search name.
+	 *
 	 * @return The name of the configured search distance mode
 	 */
 	public String getSearchName()
@@ -107,6 +138,11 @@ public abstract class HysteresisFilter extends Filter
 		}
 	}
 
+	/**
+	 * Gets the default search range.
+	 *
+	 * @return the default search range
+	 */
 	protected double getDefaultSearchRange()
 	{
 		switch (searchDistanceMode)
@@ -121,6 +157,8 @@ public abstract class HysteresisFilter extends Filter
 	}
 
 	/**
+	 * Gets the time name.
+	 *
 	 * @return The name of the configured time threshold mode
 	 */
 	public String getTimeName()
@@ -136,6 +174,11 @@ public abstract class HysteresisFilter extends Filter
 		}
 	}
 
+	/**
+	 * Gets the default time range.
+	 *
+	 * @return the default time range
+	 */
 	protected double getDefaultTimeRange()
 	{
 		switch (timeThresholdMode)
@@ -149,6 +192,11 @@ public abstract class HysteresisFilter extends Filter
 		}
 	}
 
+	/**
+	 * Gets the trace parameters.
+	 *
+	 * @return the trace parameters
+	 */
 	protected String getTraceParameters()
 	{
 		return String.format("@%.2f %s, %.2f %s", searchDistance, getSearchName(), timeThreshold, getTimeName());
@@ -364,11 +412,13 @@ public abstract class HysteresisFilter extends Filter
 
 	/**
 	 * Find average precision of the candidates and use it for the search
-	 * distance
+	 * distance.
 	 *
 	 * @param peakResults
+	 *            the peak results
 	 * @param candidates
-	 * @return
+	 *            the candidates
+	 * @return the search distance using candidates
 	 */
 	private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults, LinkedList<PeakResult> candidates)
 	{
@@ -384,6 +434,13 @@ public abstract class HysteresisFilter extends Filter
 		return distanceThreshold;
 	}
 
+	/**
+	 * Gets the status.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the status
+	 */
 	protected abstract PeakStatus getStatus(PeakResult result);
 
 	/**

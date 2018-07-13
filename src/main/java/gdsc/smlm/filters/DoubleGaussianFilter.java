@@ -227,7 +227,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	/**
 	 * Blur an image in one direction (x or y) by a Gaussian.
 	 *
-	 * @param data
+	 * @param pixels
 	 *            The input/output data (packed in YX order)
 	 * @param roi
 	 *            The region to blur

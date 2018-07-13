@@ -108,7 +108,6 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 	 *             If the Fisher information is infinite for a function value
 	 *
 	 * @see gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
-	 * @see #setIgnoreBadFunctionValues(boolean)
 	 */
 	@Override
 	public FisherInformationMatrix compute(double[] parameters) throws DataException

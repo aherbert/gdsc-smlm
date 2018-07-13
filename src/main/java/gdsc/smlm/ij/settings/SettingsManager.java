@@ -569,6 +569,7 @@ public class SettingsManager
 	 * Used to convert the settings enumerations into names used with dialogs.
 	 *
 	 * @param objects
+	 *            the objects
 	 * @return the names
 	 */
 	public static String[] getNames(Object... objects)
@@ -1343,8 +1344,8 @@ public class SettingsManager
 	 *            the parser
 	 * @param input
 	 *            the input
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return the message
 	 */
 	public static Message readMessage(Parser<? extends Message> parser, InputStream input, int flags)

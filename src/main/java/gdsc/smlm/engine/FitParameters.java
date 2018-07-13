@@ -118,8 +118,6 @@ public class FitParameters
 
 	/**
 	 * The distance to an existing result to be declared a duplicate
-	 *
-	 * @return The duplicate distance
 	 */
 	public double duplicateDistance = 0;
 

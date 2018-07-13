@@ -745,9 +745,10 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	}
 
 	/**
-	 * Check the point falls within the configured bounds truncating if necessary
+	 * Check the point falls within the configured bounds truncating if necessary.
 	 *
 	 * @param point
+	 *            the point
 	 */
 	private void applyBounds(double[] point)
 	{
@@ -767,10 +768,12 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 	/**
 	 * Check if the point falls outside configured bounds truncating the gradient to zero
-	 * if it is moving further outside the bounds
+	 * if it is moving further outside the bounds.
 	 *
 	 * @param r
+	 *            the r
 	 * @param point
+	 *            the point
 	 * @return true if NaN gradients
 	 */
 	private boolean checkGradients(double[] r, double[] point)
@@ -780,11 +783,14 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 	/**
 	 * Check if the point falls outside configured bounds truncating the gradient to zero
-	 * if it is moving further outside the bounds (defined by the sign of the search direction)
+	 * if it is moving further outside the bounds (defined by the sign of the search direction).
 	 *
 	 * @param r
+	 *            the r
 	 * @param point
+	 *            the point
 	 * @param sign
+	 *            the sign
 	 * @return true if NaN gradients
 	 */
 	private boolean checkGradients(double[] r, double[] point, final double sign)

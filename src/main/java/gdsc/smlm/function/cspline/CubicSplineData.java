@@ -290,16 +290,31 @@ public class CubicSplineData
 		return new CubicSplineData(maxx, maxy, splines, false);
 	}
 
+	/**
+	 * Gets the max X.
+	 *
+	 * @return the max X
+	 */
 	public int getMaxX()
 	{
 		return maxx;
 	}
 
+	/**
+	 * Gets the max Y.
+	 *
+	 * @return the max Y
+	 */
 	public int getMaxY()
 	{
 		return maxy;
 	}
 
+	/**
+	 * Gets the max Z.
+	 *
+	 * @return the max Z
+	 */
 	public int getMaxZ()
 	{
 		return splines.length;
@@ -315,11 +330,7 @@ public class CubicSplineData
 	 *
 	 * @param n
 	 *            the number of samples per spline node
-	 * @param ny
-	 *            the number of samples per spline node in the y dimension
-	 * @param ny
-	 *            the number of samples per spline node in the z dimension
-	 * @param procedure
+	 * @param p
 	 *            the procedure
 	 * @param progress
 	 *            the progress
@@ -343,7 +354,7 @@ public class CubicSplineData
 	 *            the number of samples per spline node in the x dimension
 	 * @param ny
 	 *            the number of samples per spline node in the y dimension
-	 * @param ny
+	 * @param nz
 	 *            the number of samples per spline node in the z dimension
 	 * @param procedure
 	 *            the procedure

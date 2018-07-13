@@ -65,7 +65,7 @@ public class YeastMask implements PlugIn
 		createMask();
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -108,7 +108,7 @@ public class YeastMask implements PlugIn
 		return true;
 	}
 
-	private void createMask()
+	private static void createMask()
 	{
 		// Create the dimensions
 		final int hw = (int) Math.ceil(radius * 1000 / nmPerPixel);
@@ -227,13 +227,15 @@ public class YeastMask implements PlugIn
 	}
 
 	/**
-	 * Create a sphere using the given pixel width and stack depth using a fraction of the original cell radius
+	 * Create a sphere using the given pixel width and stack depth using a fraction of the original cell radius.
 	 *
 	 * @param width
+	 *            the width
 	 * @param depth
+	 *            the depth
 	 * @return A sphere
 	 */
-	private ImageStack createNucleusSphere(int width, int depth)
+	private static ImageStack createNucleusSphere(int width, int depth)
 	{
 		// Create a sphere. This could be done exploiting symmetry to be more efficient
 		// but is left as a simple implementation
@@ -274,13 +276,15 @@ public class YeastMask implements PlugIn
 	}
 
 	/**
-	 * Create a hemi-sphere using the given pixel width and stack depth using the original cell radius
+	 * Create a hemi-sphere using the given pixel width and stack depth using the original cell radius.
 	 *
 	 * @param width
+	 *            the width
 	 * @param depth
+	 *            the depth
 	 * @return A hemi-sphere
 	 */
-	private ImageStack createHemiSphere(int width, int depth)
+	private static ImageStack createHemiSphere(int width, int depth)
 	{
 		// Create a sphere. This could be done exploiting symmetry to be more efficient
 		// but is left as a simple implementation

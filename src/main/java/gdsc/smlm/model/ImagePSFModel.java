@@ -218,8 +218,11 @@ public class ImagePSFModel extends PSFModel
 	 * normalised to 1 to create a PDF for the image.
 	 *
 	 * @param image
+	 *            the image
 	 * @param scratch
+	 *            the scratch
 	 * @param noiseFraction
+	 *            the noise fraction
 	 */
 	@SuppressWarnings("unused")
 	private void subtractNoise(double[] image, double[] scratch, double noiseFraction)
@@ -267,7 +270,9 @@ public class ImagePSFModel extends PSFModel
 	 * set to zero. The remaining pixels are adjusted by the height of the first pixel below the cutoff.
 	 *
 	 * @param image
+	 *            the image
 	 * @param noiseFraction
+	 *            the noise fraction
 	 */
 	private void subtractNoise(double[] image, double noiseFraction)
 	{
@@ -319,9 +324,10 @@ public class ImagePSFModel extends PSFModel
 	}
 
 	/**
-	 * Normalise the image so that the brightest frame has a sum of 1
+	 * Normalise the image so that the brightest frame has a sum of 1.
 	 *
 	 * @param image
+	 *            the image
 	 */
 	private void normalise(double[][] image)
 	{
@@ -422,7 +428,10 @@ public class ImagePSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new image PSF model.
+	 *
 	 * @param randomGenerator
+	 *            the random generator
 	 * @param image
 	 *            The image consisting of a stack of square pixel buffers. The buffers are stored in YX order.
 	 * @param zCentre
@@ -442,7 +451,10 @@ public class ImagePSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new image PSF model.
+	 *
 	 * @param randomDataGenerator
+	 *            the random data generator
 	 * @param image
 	 *            The image consisting of a stack of square pixel buffers. The buffers are stored in YX order.
 	 * @param zCentre
@@ -596,7 +608,6 @@ public class ImagePSFModel extends PSFModel
 	 *            Compute bilinear interpolation. Not using this option can result in artifacts if the PSF and image
 	 *            pixels are similar sizes (i.e. unitsPerPixel is close to 1)
 	 * @return The data (packed in yx order, length = x0range * x1range)
-	 * @return
 	 */
 	public double[] drawPSF(int x0range, int x1range, double sum, double x0, double x1, double x2, boolean interpolate)
 	{
@@ -824,10 +835,15 @@ public class ImagePSFModel extends PSFModel
 	 * Find the sum to the point x,y. x,y is assumed to be within the range x0,y0 to x0+1,y0+1.
 	 *
 	 * @param sum
+	 *            the sum
 	 * @param x0
+	 *            the x 0
 	 * @param y0
+	 *            the y 0
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return The sum
 	 */
 	private double interpolate(double[] sum, int x0, int y0, double x, double y)
@@ -842,7 +858,7 @@ public class ImagePSFModel extends PSFModel
 		return x * (sum_00_x1y0 - sum_00_x0y0) + y * (sum_00_x0y1 - sum_00_x0y0) + sum_00_x0y0 + x * y * sum_x0y0_x1y1;
 	}
 
-	private int clip(int x, int max)
+	private static int clip(int x, int max)
 	{
 		if (x < 0)
 			x = 0;
@@ -1003,10 +1019,12 @@ public class ImagePSFModel extends PSFModel
 	}
 
 	/**
-	 * Find the index such that sum[index] <= p < sum[index+1]
+	 * Find the index such that sum[index] <= p < sum[index+1].
 	 *
 	 * @param sum
+	 *            the sum
 	 * @param p
+	 *            the p
 	 * @return the index (or -1)
 	 */
 	private int findIndex(double[] sum, double p)
@@ -1046,8 +1064,11 @@ public class ImagePSFModel extends PSFModel
 	 * Set the PSF centre for the given slice. The centre must be within the width/size of the PSF.
 	 *
 	 * @param slice
+	 *            the slice
 	 * @param x0
+	 *            the x 0
 	 * @param x1
+	 *            the x 1
 	 * @return True if set
 	 */
 	public boolean setCentre(int slice, double x0, double x1)
@@ -1066,8 +1087,11 @@ public class ImagePSFModel extends PSFModel
 	 * Set the PSF centre for the given slice. The centre is relative to 0,0.
 	 *
 	 * @param slice
+	 *            the slice
 	 * @param x0
+	 *            the x 0
 	 * @param x1
+	 *            the x 1
 	 * @return True if set
 	 */
 	public boolean setRelativeCentre(int slice, double x0, double x1)

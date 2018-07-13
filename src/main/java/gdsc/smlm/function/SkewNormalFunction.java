@@ -31,11 +31,21 @@ import gdsc.core.utils.Maths;
 /**
  * Calculate the value of the Skew Normal distribution
  * <p>
- * See http://en.wikipedia.org/wiki/Skew_normal_distribution
+ * @see <a href="http://en.wikipedia.org/wiki/Skew_normal_distribution">http://en.wikipedia.org/wiki/Skew_normal_distribution</a>
  */
 public class SkewNormalFunction
 {
-	protected double amplitude, location, scale, alpha;
+	/** The amplitude. */
+	protected double amplitude;
+	
+	/** The location. */
+	protected double location;
+	
+	/** The scale. */
+	protected double scale;
+	
+	/** The alpha. */
+	protected double alpha;
 
 	/**
 	 * Create a function with the given parameters
@@ -63,6 +73,8 @@ public class SkewNormalFunction
 	}
 
 	/**
+	 * Gets the mean.
+	 *
 	 * @return The mean of the function
 	 */
 	public double getMean()
@@ -71,6 +83,8 @@ public class SkewNormalFunction
 	}
 
 	/**
+	 * Gets the variance.
+	 *
 	 * @return The variance of the function
 	 */
 	public double getVariance()
@@ -79,6 +93,11 @@ public class SkewNormalFunction
 		return scale * scale * (1.0 - (2.0 * sigma * sigma / Math.PI));
 	}
 
+	/**
+	 * Gets the skewness.
+	 *
+	 * @return the skewness
+	 */
 	public double getSkewness()
 	{
 		final double sigma = getSigma();
@@ -86,15 +105,22 @@ public class SkewNormalFunction
 				(Maths.pow3((sigma * Math.sqrt(2.0 / Math.PI))) / Math.pow(1 - 2 * sigma * sigma / Math.PI, 1.5));
 	}
 
+	/**
+	 * Gets the sigma.
+	 *
+	 * @return the sigma
+	 */
 	private double getSigma()
 	{
 		return alpha / Math.sqrt(1 + alpha * alpha);
 	}
 
 	/**
-	 * Evaluates the skewed Gaussian at the given point * @param x
+	 * Evaluates the skewed Gaussian at the given point * @param x.
 	 *
-	 * @return
+	 * @param x
+	 *            the x
+	 * @return the value
 	 */
 	public double evaluate(double x)
 	{
@@ -102,12 +128,13 @@ public class SkewNormalFunction
 	}
 
 	/**
-	 * Evaluates the skewed Gaussian at the given point
+	 * Evaluates the skewed Gaussian at the given point.
 	 *
 	 * @param x
+	 *            the x
 	 * @param parameters
 	 *            [amplitude, location, scale, alpha]
-	 * @return
+	 * @return the value
 	 */
 	public static double evaluate(double x, double[] parameters)
 	{
@@ -115,14 +142,19 @@ public class SkewNormalFunction
 	}
 
 	/**
-	 * Evaluates the skewed Gaussian at the given point
+	 * Evaluates the skewed Gaussian at the given point.
 	 *
 	 * @param x
+	 *            the x
 	 * @param amplitude
+	 *            the amplitude
 	 * @param location
+	 *            the location
 	 * @param scale
+	 *            the scale
 	 * @param alpha
-	 * @return
+	 *            the alpha
+	 * @return the value
 	 */
 	public static double evaluate(double x, double amplitude, double location, double scale, double alpha)
 	{
@@ -133,10 +165,11 @@ public class SkewNormalFunction
 	}
 
 	/**
-	 * Probability density function of the Gaussian
+	 * Probability density function of the Gaussian.
 	 *
 	 * @param x
-	 * @return
+	 *            the x
+	 * @return the probability density
 	 */
 	private static double normal(double x)
 	{
@@ -148,10 +181,11 @@ public class SkewNormalFunction
 	}
 
 	/**
-	 * Cumulative distribution function of the gaussian
+	 * Cumulative distribution function of the gaussian.
 	 *
 	 * @param x
-	 * @return
+	 *            the x
+	 * @return the cumulative
 	 */
 	private static double cumul(double x)
 	{

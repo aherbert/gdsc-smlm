@@ -1185,9 +1185,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		return fitSolverSettings.getFixedPsf();
 	}
 
-	/**
-	 * @return True if fit should be validated with {@link #validatePeak(int, double[], double[])}
-	 */
 	@Override
 	public boolean isFitValidation()
 	{
@@ -1283,10 +1280,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Set the size of the fit region. Any coordinate outside the region will fail fit validation (see
-	 * {@link #validatePeak(int, double[], double[])}). Set to zero to disable.
+	 * {@link #validatePeak(int, double[], double[], double[])}). Set to zero to disable.
 	 * <p>
 	 * Note: it is assumed that the coordinates of the peak are relative to the fit region of size NxN. Coordinates are
-	 * offset by the amount defined by {@link #setCoordinateOffset(double)}.
+	 * offset by the amount defined by the coordinate offset, e.g. 0.5 pixels.
 	 *
 	 * @param fitRegionWidth
 	 *            the fit region width
@@ -2478,7 +2475,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd)
 							: xsd;
 					final double localBackground = isPrecisionUsingBackground() && peakResultValidationData != null
-							? peakResultValidationData.getLocalBackground() : params[Gaussian2DFunction.BACKGROUND];
+							? peakResultValidationData.getLocalBackground()
+							: params[Gaussian2DFunction.BACKGROUND];
 					variance = getVariance(localBackground,
 							params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd,
 							isPrecisionUsingBackground());
@@ -2676,10 +2674,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 *            The fitted peak parameters
 		 * @param paramsDev
 		 *            the parameter variances (can be null)
-		 * @param localBackground
-		 *            the local background
-		 * @param noise
-		 *            the noise
+		 * @param peakResultValidationData
+		 *            the peak result validation data
 		 * @param resultType
 		 *            the result type
 		 * @param offsetx
@@ -3539,6 +3535,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Checks if simple filtering is disabled
+	 *
 	 * @return True if simple filtering is disabled
 	 */
 	public boolean isDisableSimpleFilter()
@@ -3547,8 +3545,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * @param Set
-	 *            to true to diable simple filtering during validation
+	 * Sets to true to disable simple filtering during validation
+	 *
+	 * @param disableSimpleFilter
+	 *            Set to true to disable simple filtering during validation
 	 */
 	public void setDisableSimpleFilter(boolean disableSimpleFilter)
 	{
@@ -3556,6 +3556,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Checks if filtering should use the configured smart filter
+	 *
 	 * @return True if filtering should use the configured smart filter
 	 */
 	public boolean isSmartFilter()
@@ -3564,6 +3566,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets if filtering should use the configured smart filter
+	 *
 	 * @param smartFilter
 	 *            True if filtering should use the configured smart filter
 	 */

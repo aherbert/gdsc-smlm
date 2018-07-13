@@ -58,6 +58,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	private NoiseModel noiseModel = null;
 
+	/** Constant for 1/2*pi */
 	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
 
 	/** Index of the background in the parameters array */
@@ -148,7 +149,10 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		return peak * PARAMETERS_PER_PEAK + parameterIndex;
 	}
 
-	protected final int maxx, maxy;
+	/** The maxx. */
+	protected final int maxx;
+	/** The maxy. */
+	protected final int maxy;
 
 	/**
 	 * Instantiates a new gaussian 2 D function.
@@ -283,11 +287,10 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public abstract double eval(final int x, final double[] dyda);
 
 	/**
-	 * Execute the {@link #eval(int, float[])} method and set the expected variance using the noise model
+	 * Execute the {@link #eval(int, double[])} method and set the expected variance using the noise model
 	 *
 	 * @throws NullPointerException
 	 *             if the noise model is null
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, float[], float[])
 	 */
 	@Override
 	public double eval(final int x, final double[] dyda, final double[] w) throws NullPointerException
@@ -325,7 +328,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	}
 
 	/**
-	 * Set the noise model used in {@link #eval(int, float[], float[])}.
+	 * Set the noise model used in {@link #eval(int, double[], double[])}.
 	 *
 	 * @param noiseModel
 	 *            the noise model to set
@@ -351,6 +354,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * a[indices[i]] += dy_da[i]
 	 *
 	 * @param nPeaks
+	 *            the number of peaks
 	 * @return The indices
 	 */
 	protected int[] createGradientIndices(int nPeaks)
@@ -358,6 +362,15 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		return createGradientIndices(nPeaks, this);
 	}
 
+	/**
+	 * Creates the gradient indices.
+	 *
+	 * @param nPeaks
+	 *            the number of peaks
+	 * @param gf
+	 *            the gradient function
+	 * @return the gradient indices.
+	 */
 	protected static int[] createGradientIndices(int nPeaks, Gaussian2DFunction gf)
 	{
 		// Parameters are:
@@ -401,9 +414,10 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	}
 
 	/**
-	 * Locate the index within the gradient indices for the specified parameter
+	 * Locate the index within the gradient indices for the specified parameter.
 	 *
 	 * @param parameterIndex
+	 *            the parameter index
 	 * @return the gradient index (or -1 if not present)
 	 */
 	public int findGradientIndex(int parameterIndex)

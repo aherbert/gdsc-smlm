@@ -408,8 +408,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/**
 	 * Create the image from a clone of the current data. Should only be called by one thread which has the lock so can
 	 * use class variables and the actual pixel buffer.
-	 *
-	 * @return The size when the image data was cloned
 	 */
 	private void createImage()
 	{
@@ -668,7 +666,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 *            the indices
 	 * @param value
 	 *            the values for the indices
-	 * @return the value
 	 */
 	private void getValue(int peak, float[] params, double error, float x, float y, int[] indices, float[] value)
 	{

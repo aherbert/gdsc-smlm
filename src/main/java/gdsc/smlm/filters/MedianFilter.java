@@ -233,8 +233,6 @@ public class MedianFilter extends BaseFilter
 	/**
 	 * Get median of values
 	 *
-	 * @param half
-	 *            Half of the size of values (round to int).
 	 * @return The median
 	 */
 	private float getMedian()

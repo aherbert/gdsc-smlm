@@ -33,7 +33,7 @@ package gdsc.smlm.function;
  * <p>
  * The negative log-likelihood can be evaluated over the entire set of observed values or for a chosen observed value.
  * The sum uses a non-normalised Poisson-Gaussian distribution for speed (see
- * {@link PoissonGaussianFunction#pseudoLikelihood(double)} ).
+ * {@link PoissonGaussianFunction#pseudoLikelihood(double, double, double, boolean)} ).
  */
 public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 {

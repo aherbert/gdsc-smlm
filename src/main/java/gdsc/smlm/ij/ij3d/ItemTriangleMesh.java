@@ -363,7 +363,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 *            the new transparency mode
 	 * @throws IllegalArgumentException
 	 *             If the mode is not valid
-	 * @see org.scijava.java3d.TransparencyAttributes.setTransparencyMode(int)
+	 * @see TransparencyAttributes#setTransparencyMode(int)
 	 */
 	public static void setTransparencyMode(int mode) throws IllegalArgumentException
 	{
@@ -378,7 +378,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * Gets the transparency mode.
 	 *
 	 * @return the transparency mode
-	 * @see org.scijava.java3d.TransparencyAttributes.setTransparencyMode(int)
+	 * @see TransparencyAttributes#setTransparencyMode(int)
 	 */
 	public static int getTransparencyMode()
 	{

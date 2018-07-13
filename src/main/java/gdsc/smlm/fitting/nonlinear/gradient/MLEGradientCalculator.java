@@ -616,8 +616,10 @@ public class MLEGradientCalculator extends GradientCalculator
 	 *            the function value at index i
 	 * @param xi
 	 *            the data value at index i
-	 * @param ignore
-	 *            An array of size beta.length. Set the index to true to ignore the gradients.
+	 * @param indices
+	 *            the indices
+	 * @param nnparams
+	 *            the nnparams
 	 */
 	protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
 			final double xi, int[] indices, int nnparams)

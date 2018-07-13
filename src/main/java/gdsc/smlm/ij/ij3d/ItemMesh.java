@@ -612,7 +612,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 *            the new transparency mode
 	 * @throws IllegalArgumentException
 	 *             If the mode is not valid
-	 * @see org.scijava.java3d.TransparencyAttributes.setTransparencyMode(int)
+	 * @see TransparencyAttributes#setTransparencyMode(int)
 	 */
 	public static void setTransparencyMode(int mode) throws IllegalArgumentException
 	{
@@ -627,7 +627,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * Gets the transparency mode.
 	 *
 	 * @return the transparency mode
-	 * @see org.scijava.java3d.TransparencyAttributes.setTransparencyMode(int)
+	 * @see TransparencyAttributes#setTransparencyMode(int)
 	 */
 	public static int getTransparencyMode()
 	{

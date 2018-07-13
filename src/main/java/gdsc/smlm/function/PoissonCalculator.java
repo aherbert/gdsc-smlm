@@ -342,8 +342,6 @@ public class PoissonCalculator
 	 *
 	 * @param x
 	 *            the value x
-	 * @param n
-	 *            the number of terms
 	 * @return x!
 	 */
 	public static double logFactorial(double x)

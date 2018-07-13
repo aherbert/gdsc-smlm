@@ -2438,8 +2438,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * Creates the SMLM menu bar.
 	 *
 	 * @param univ
-	 *
-	 * @return the menu bar
+	 *            the universe
 	 */
 	private void createSMLMMenuBar(Image3DUniverse univ)
 	{

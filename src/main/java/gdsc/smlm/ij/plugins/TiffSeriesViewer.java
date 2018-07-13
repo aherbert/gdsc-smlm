@@ -186,20 +186,17 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 					// Nothing to do
 					return false;
 				}
-				else
-				{
-					ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
-					egd.addNumericField("Slices_per_image", nImages, 0);
-					egd.addDirectoryField("Output_directory", outputDirectory);
-					egd.setSilent(silent);
-					egd.showDialog(true, gd);
-					if (egd.wasCanceled())
-						return false;
-					nImages = (int) egd.getNextNumber();
-					outputDirectory = egd.getNextString();
-					updateLabel2();
-					return true;
-				}
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
+				egd.addNumericField("Slices_per_image", nImages, 0);
+				egd.addDirectoryField("Output_directory", outputDirectory);
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				nImages = (int) egd.getNextNumber();
+				outputDirectory = egd.getNextString();
+				updateLabel2();
+				return true;
 			}
 		});
 		gd.addMessage("");
@@ -334,30 +331,15 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		}
 	}
 
-	private void saveAsTiff(ImagePlus imp, String path) throws IOException
+	private static void saveAsTiff(ImagePlus imp, String path) throws IOException
 	{
 		//IJ.saveAsTiff(imp, path);
 
 		FileInfo fi = imp.getFileInfo();
 		fi.nImages = imp.getStackSize();
-		DataOutputStream out = null;
-		try
+		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path))))
 		{
-			TiffEncoder file = new TiffEncoder(fi);
-			out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
-			file.write(out);
-			out.close();
-		}
-		finally
-		{
-			if (out != null)
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-				}
+			new TiffEncoder(fi).write(out);
 		}
 	}
 
@@ -460,16 +442,18 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		@Override
 		public void addSlice(String name)
 		{
+			// Do nothing
 		}
 
 		/**
 		 * Does nothing
 		 *
-		 * @see ij.VirtualStack#deleteSlice()
+		 * @see ij.VirtualStack#deleteSlice(int)
 		 */
 		@Override
 		public void deleteSlice(int n)
 		{
+			// Do nothing
 		}
 
 		@Override

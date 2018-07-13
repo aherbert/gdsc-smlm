@@ -322,6 +322,18 @@ public class BenchmarkSpotFilter implements PlugIn
 			add(score, intensity);
 		}
 
+		/**
+		 * Instantiates a new scored spot.
+		 *
+		 * @param match
+		 *            the match
+		 * @param spot
+		 *            the spot
+		 * @param background
+		 *            the background
+		 * @param fails
+		 *            the fails
+		 */
 		public ScoredSpot(boolean match, Spot spot, float background, int fails)
 		{
 			this.match = match;
@@ -331,10 +343,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		/**
-		 * Adds the result to the scored spot
+		 * Adds the result to the scored spot.
 		 *
-		 * @param d
-		 *            the d
 		 * @param score
 		 *            the score
 		 * @param intensity
@@ -1949,9 +1959,10 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	/**
-	 * Add all the true-positives to memory as a new results set
+	 * Add all the true-positives to memory as a new results set.
 	 *
 	 * @param filterResults
+	 *            the filter results
 	 */
 	void addSpotsToMemory(TIntObjectHashMap<FilterResult> filterResults)
 	{
@@ -1978,11 +1989,11 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	/**
-	 * Histogram the number of negatives preceeding each positive.
+	 * Histogram the number of negatives preceding each positive.
 	 *
 	 * @param filterResult
 	 *            the filter result
-	 * @return
+	 * @return the cumulative histogram
 	 */
 	private double[][] histogramFailures(BenchmarkFilterResult filterResult)
 	{

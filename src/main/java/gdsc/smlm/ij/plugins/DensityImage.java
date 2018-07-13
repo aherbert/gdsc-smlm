@@ -374,10 +374,11 @@ public class DensityImage implements PlugIn
 	 * in place.
 	 *
 	 * @param results
+	 *            the results
 	 * @param isWithin
 	 *            Set to true if the added border is within the original bounds (i.e. no adjustment for missing counts
 	 *            is required)
-	 * @return
+	 * @return the cropped results
 	 */
 	private MemoryPeakResults cropWithBorder(MemoryPeakResults results, boolean[] isWithin)
 	{
@@ -429,8 +430,10 @@ public class DensityImage implements PlugIn
 	 * density array is returned.
 	 *
 	 * @param results
+	 *            the results
 	 * @param density
-	 * @return
+	 *            the density
+	 * @return the density array
 	 */
 	private int[] cropBorder(MemoryPeakResults results, int[] density)
 	{
@@ -671,6 +674,7 @@ public class DensityImage implements PlugIn
 	 * Compute the Ripley's L-function for user selected radii and show it on a plot.
 	 *
 	 * @param results
+	 *            the results
 	 */
 	private void computeRipleysPlot(MemoryPeakResults results)
 	{

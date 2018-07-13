@@ -31,9 +31,10 @@ import org.apache.commons.math3.util.FastMath;
  * Methods in this class are ordered by speed, not accuracy. The default call to {@link #erf(double)} is a good
  * compromise between both.
  *
- * @see https://en.wikipedia.org/wiki/Error_function#Approximation_with_elementary_functions
- * @see Winitzki, Sergei (6 February 2008). "A handy approximation for the error function and its inverse".
- *      http://sites.google.com/site/winitzki/sergei-winitzkis-files/erf-approx.pdf
+ * @see <a href=
+ *      "https://en.wikipedia.org/wiki/Error_function#Approximation_with_elementary_functions">https://en.wikipedia.org/wiki/Error_function#Approximation_with_elementary_functions</a>
+ * @see <a href="http://sites.google.com/site/winitzki/sergei-winitzkis-files/erf-approx.pdf">
+ *      Winitzki, Sergei (6 February 2008). "A handy approximation for the error function and its inverse"</a>
  */
 public class Erf
 {
@@ -217,7 +218,7 @@ public class Erf
 	/**
 	 * Compute the first derivative of the Error function = (2 / sqrt(pi)) * exp(-x*x)
 	 *
-	 * @see http://mathworld.wolfram.com/Erf.html
+	 * @see <a href="http://mathworld.wolfram.com/Erf.html">http://mathworld.wolfram.com/Erf.html</a>
 	 *
 	 * @param x
 	 *            the x

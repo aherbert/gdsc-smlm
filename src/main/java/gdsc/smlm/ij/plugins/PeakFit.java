@@ -238,16 +238,33 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private Choice textFileFormat;
 	private Checkbox textResultsInMemory;
 
+	/**
+	 * Instantiates a new peak fit.
+	 */
 	public PeakFit()
 	{
 		init(null, null);
 	}
 
+	/**
+	 * Instantiates a new peak fit.
+	 *
+	 * @param config
+	 *            the config
+	 */
 	public PeakFit(FitEngineConfiguration config)
 	{
 		init(config, null);
 	}
 
+	/**
+	 * Instantiates a new peak fit.
+	 *
+	 * @param config
+	 *            the config
+	 * @param resultsSettings
+	 *            the results settings
+	 */
 	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings)
 	{
 		init(config, resultsSettings);
@@ -471,7 +488,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return "Series " + name;
 	}
 
-	private Rectangle getBounds(ImagePlus imp)
+	private static Rectangle getBounds(ImagePlus imp)
 	{
 		if (imp == null)
 			return null;
@@ -487,7 +504,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * @return An input directory containing a series of images
 	 */
 	@SuppressWarnings("unused")
-	private String getInputDirectory(String title)
+	private static String getInputDirectory(String title)
 	{
 		final JFileChooser chooser = new JFileChooser()
 		{
@@ -500,8 +517,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				{
 					return;
 				}
-				else
-					super.approveSelection();
+				super.approveSelection();
 			}
 		};
 		if (System.getProperty("os.name").startsWith("Mac OS X"))
@@ -524,7 +540,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Initialise a new image for fitting and prepare the output results.
 	 * <p>
-	 * Calls {@link #initialise(ImageSource, Rectangle)} then {@link #initialiseFitting()}.
+	 * Calls {@link #initialise(ImageSource, Rectangle, boolean)} then {@link #initialiseFitting()}.
 	 *
 	 * @param imageSource
 	 *            The image source
@@ -619,6 +635,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Set-up the fitting using all the configured properties. Prepare the output results.
+	 *
+	 * @return true, if successful
 	 */
 	public boolean initialiseFitting()
 	{
@@ -688,6 +706,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return getSolverName(config.getFitConfiguration());
 	}
 
+	/**
+	 * Gets the solver name.
+	 *
+	 * @param fitConfig
+	 *            the fit config
+	 * @return the solver name
+	 */
 	public static String getSolverName(FitConfiguration fitConfig)
 	{
 		FitSolver solver = fitConfig.getFitSolver();
@@ -697,6 +722,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return name;
 	}
 
+	/**
+	 * Show results.
+	 */
 	protected void showResults()
 	{
 		IJ.showProgress(1.0);
@@ -737,7 +765,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	private boolean showMaximaDialog()
+	private static boolean showMaximaDialog()
 	{
 		int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
@@ -764,6 +792,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static PSFType[] _PSFTypeValues;
 
+	/**
+	 * Gets the PSF type values.
+	 *
+	 * @return the PSF type values
+	 */
 	public static PSFType[] getPSFTypeValues()
 	{
 		if (_PSFTypeValues == null)
@@ -773,6 +806,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static String[] _PSFTypeNames;
 
+	/**
+	 * Gets the PSF type names.
+	 *
+	 * @return the PSF type names
+	 */
 	public static String[] getPSFTypeNames()
 	{
 		if (_PSFTypeNames == null)
@@ -797,7 +835,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private int showDialog(ImagePlus imp)
 	{
 		// Executing as an ImageJ plugin.
@@ -1336,6 +1373,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		public FitConfiguration getFitConfiguration();
 	}
 
+	/**
+	 * Simple implementation of {@link FitEngineConfigurationProvider}.
+	 */
 	public static class SimpleFitEngineConfigurationProvider implements FitEngineConfigurationProvider
 	{
 		FitEngineConfiguration c;
@@ -1352,6 +1392,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
+	/**
+	 * Simple implementation of {@link FitConfigurationProvider}.
+	 */
 	public static class SimpleFitConfigurationProvider implements FitConfigurationProvider
 	{
 		FitConfiguration c;
@@ -1457,23 +1500,21 @@ public class PeakFit implements PlugInFilter, ItemListener
 							fitConfig.setPSFModelName(egd.getNextChoice());
 							return true;
 						}
-						else
+						@SuppressWarnings("null")
+						PSF.Builder b = oldPsf.toBuilder();
+						int n = b.getParametersCount();
+						for (int i = 0; i < n; i++)
+							b.getParametersBuilder(i).setValue(egd.getNextNumber());
+						PSF newPsf = b.build();
+						fitConfig.setPSF(newPsf);
+						boolean changed = !oldPsf.equals(newPsf);
+						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 						{
-							PSF.Builder b = oldPsf.toBuilder();
-							int n = b.getParametersCount();
-							for (int i = 0; i < n; i++)
-								b.getParametersBuilder(i).setValue(egd.getNextNumber());
-							PSF newPsf = b.build();
-							fitConfig.setPSF(newPsf);
-							boolean changed = !oldPsf.equals(newPsf);
-							if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
-							{
-								boolean newFixed = egd.getNextBoolean();
-								changed = changed || (newFixed != fitConfig.isFixedPSF());
-								fitConfig.setFixedPSF(newFixed);
-							}
-							return changed;
+							boolean newFixed = egd.getNextBoolean();
+							changed = changed || (newFixed != fitConfig.isFixedPSF());
+							fitConfig.setFixedPSF(newFixed);
 						}
+						return changed;
 					}
 				});
 	}
@@ -2004,7 +2045,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private ExtendedGenericDialog newWizardDialog(String... messages)
+	private static ExtendedGenericDialog newWizardDialog(String... messages)
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -2015,7 +2056,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return gd;
 	}
 
-	private boolean getCameraType(CalibrationWriter calibration)
+	private static boolean getCameraType(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog("Enter the type of camera.");
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
@@ -2034,7 +2075,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private boolean getPixelPitch(CalibrationWriter calibration)
+	private static boolean getPixelPitch(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
@@ -2048,7 +2089,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private boolean getGain(CalibrationWriter calibration)
+	private static boolean getGain(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
 				"This is usually supplied with your camera certificate. The bias is a fixed offset added to the camera counts. The gain indicates how many Analogue-to-Digital-Units (Count) are recorded at the pixel for each photon registered on the sensor.",
@@ -2065,7 +2106,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private boolean getExposureTime(CalibrationWriter calibration)
+	private static boolean getExposureTime(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
@@ -2192,13 +2233,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	private void disableEditing(TextField textField)
+	private static void disableEditing(TextField textField)
 	{
 		textField.setEditable(false);
 		textField.setBackground(SystemColor.control);
 	}
 
-	private void enableEditing(TextField textField)
+	private static void enableEditing(TextField textField)
 	{
 		textField.setEditable(true);
 		textField.setBackground(Color.white);
@@ -3239,10 +3280,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Add a result output.
 	 * <p>
-	 * This can be called after {@link #initialiseImage(ImagePlus)} and before {@link #initialiseFitting()} to add to
+	 * This can be called after {@link #initialiseImage(ImageSource, Rectangle, boolean)} and before
+	 * {@link #initialiseFitting()} to add to
 	 * the configured result outputs.
 	 *
 	 * @param peakResults
+	 *            the peak results
 	 */
 	public void addPeakResults(PeakResults peakResults)
 	{
@@ -3401,6 +3444,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * the entire frame or the ROI region.
 	 *
 	 * @param imp
+	 *            the imp
 	 * @param ignoreBoundsForNoise
 	 *            If true estimate the noise from the entire frame, otherwise use only the ROI bounds
 	 */
@@ -3410,11 +3454,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 	}
 
 	/**
-	 * Process the image
+	 * Process the image.
 	 *
 	 * @param imageSource
+	 *            the image source
 	 * @param bounds
+	 *            the bounds
 	 * @param ignoreBoundsForNoise
+	 *            the ignore bounds for noise
 	 */
 	public void run(ImageSource imageSource, Rectangle bounds, boolean ignoreBoundsForNoise)
 	{
@@ -3428,6 +3475,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * This must be called after initialisation with an image source. Note that each call to this method must be
 	 * preceded with initialisation to prepare the image and output options.
 	 */
+	@SuppressWarnings("null")
 	public void run()
 	{
 		if (source == null)
@@ -3520,16 +3568,24 @@ public class PeakFit implements PlugInFilter, ItemListener
 		source.close();
 	}
 
-	private int getNumberOfThreads(int totalFrames)
+	/**
+	 * Gets the number of threads.
+	 *
+	 * @param totalFrames
+	 *            the total frames
+	 * @return the number of threads
+	 */
+	private static int getNumberOfThreads(int totalFrames)
 	{
 		final int t = Math.max(1, (int) (fractionOfThreads * Prefs.getThreads()));
 		return FastMath.min(totalFrames, t);
 	}
 
 	/**
-	 * Check if the frame should be ignored (relevant when using interlaced data)
+	 * Check if the frame should be ignored (relevant when using interlaced data).
 	 *
 	 * @param frame
+	 *            the frame
 	 * @return True if the frame should be ignored
 	 */
 	private boolean ignoreFrame(int frame)
@@ -3582,11 +3638,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		if (fitParams != null)
 			return new ParameterisedFitJob(fitParams, startFrame, data, bounds);
-		else
-			return new FitJob(startFrame, data, bounds);
+		return new FitJob(startFrame, data, bounds);
 	}
 
-	private boolean escapePressed()
+	private static boolean escapePressed()
 	{
 		if (IJ.escapePressed())
 		{
@@ -3611,6 +3666,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Creates a fitting engine using the current configuration.
 	 *
 	 * @param numberOfThreads
+	 *            the number of threads
 	 * @return The fitting engine
 	 */
 	public FitEngine createFitEngine(int numberOfThreads)
@@ -3624,8 +3680,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Creates a fitting engine using the current configuration.
 	 *
 	 * @param numberOfThreads
+	 *            the number of threads
 	 * @param queue
+	 *            the queue
 	 * @param queueSize
+	 *            the queue size
 	 * @return The fiting engine
 	 */
 	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue, int queueSize)
@@ -3673,7 +3732,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Updates the configuration for peak fitting. Configures the calculation of residuals, logging and peak validation.
 	 *
-	 * @return
+	 * @param config
+	 *            the config
+	 * @return true, if successful
 	 */
 	private boolean updateFitConfiguration(FitEngineConfiguration config)
 	{

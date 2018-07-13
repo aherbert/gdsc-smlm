@@ -150,9 +150,6 @@ public class LogFactorial
 
 	/**
 	 * Instantiates a new log factorial using the current static table.
-	 *
-	 * @param n
-	 *            the n
 	 */
 	public LogFactorial()
 	{

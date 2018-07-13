@@ -46,9 +46,10 @@ public class Gaussian2DFitter
 	protected double[] lower, upper;
 
 	/**
-	 * Constructor
+	 * Instantiates a new gaussian 2D fitter.
 	 *
 	 * @param fitConfiguration
+	 *            the fit configuration
 	 */
 	public Gaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration)
 	{
@@ -216,9 +217,13 @@ public class Gaussian2DFitter
 	 * that all peaks are away from the edge of the data.
 	 *
 	 * @param data
+	 *            the data
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param npeaks
+	 *            the number of peaks
 	 * @return The background estimate
 	 */
 	public static double getBackground(final double[] data, final int maxx, final int maxy, final int npeaks)
@@ -326,7 +331,7 @@ public class Gaussian2DFitter
 	 *            parameters that are zero will be estimated.
 	 * @param amplitudeEstimate
 	 *            Set to true if the peak has amplitude estimated in the
-	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
+	 *            {@link Gaussian2DFunction#SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
@@ -371,7 +376,7 @@ public class Gaussian2DFitter
 	 *            Set to true if a zero value for the background parameter is the estimate
 	 * @param amplitudeEstimate
 	 *            Set to true if the peak has amplitude estimated in the
-	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
+	 *            {@link Gaussian2DFunction#SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
@@ -1060,7 +1065,9 @@ public class Gaussian2DFitter
 	 * @param i
 	 *            The angle position within the parameter array
 	 * @param params
+	 *            the params
 	 * @param paramsDev
+	 *            the params deveations
 	 */
 	protected void correctAngle(final int i, final double[] params, final double[] paramsDev)
 	{
@@ -1115,9 +1122,10 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * Convert the Full-Width at Half-Maximum to the Standard Deviation
+	 * Convert the Full-Width at Half-Maximum to the Standard Deviation.
 	 *
 	 * @param fwhm
+	 *            the fwhm
 	 * @return sd
 	 */
 	public static double fwhm2sd(double fwhm)
@@ -1126,9 +1134,10 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * Convert the Standard Deviation to the Full-Width at Half-Maximum
+	 * Convert the Standard Deviation to the Full-Width at Half-Maximum.
 	 *
 	 * @param sd
+	 *            the sd
 	 * @return fwhm
 	 */
 	public static double sd2fwhm(final double sd)
@@ -1188,8 +1197,6 @@ public class Gaussian2DFitter
 	 * <p>
 	 * The bounds are set using the initial estimate w in the range w*min to w*max.
 	 *
-	 * @param minimumWidthFactor
-	 *            the minimum width factor to use to set the bounds for width parameter fitting (must be 0-1)
 	 * @param maximumWidthFactor
 	 *            the maximum width factor to use to set the bounds for width parameter fitting (must be above 1)
 	 * @throws IllegalArgumentException

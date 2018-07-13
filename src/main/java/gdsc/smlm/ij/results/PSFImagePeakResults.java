@@ -56,12 +56,15 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	private double[] fixedParams = null;
 
 	/**
+	 * Instantiates a new PSF image peak results.
+	 *
 	 * @param title
 	 *            Title of the image (appended with a suffix)
 	 * @param bounds
 	 *            Define the bounding rectangle of the image coordinates. Any results outside this will not be
 	 *            displayed.
 	 * @param scale
+	 *            the scale
 	 */
 	public PSFImagePeakResults(String title, Rectangle bounds, float scale)
 	{
@@ -416,6 +419,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	}
 
 	/**
+	 * Checks if is calculated precision.
+	 *
 	 * @return if true plot the width of the PSF using the calculated precision
 	 */
 	public boolean isCalculatedPrecision()
@@ -424,9 +429,10 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	}
 
 	/**
-	 * Set to true to plot the width of the PSF using the calculated precision
+	 * Set to true to plot the width of the PSF using the calculated precision.
 	 *
 	 * @param calculatedPrecision
+	 *            the new calculated precision
 	 */
 	public void setCalculatedPrecision(boolean calculatedPrecision)
 	{

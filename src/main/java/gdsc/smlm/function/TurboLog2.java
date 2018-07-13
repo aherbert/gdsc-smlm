@@ -64,9 +64,6 @@ public class TurboLog2 extends TurboLog
 	 * Create a new natural logarithm calculation instance. This will
 	 * hold the pre-calculated log values for base E
 	 * and the default table size.
-	 *
-	 * @param dataType
-	 *            the data type
 	 */
 	public TurboLog2()
 	{
@@ -82,8 +79,6 @@ public class TurboLog2 extends TurboLog
 	 * @param n
 	 *            The number of bits to keep from the mantissa.
 	 *            Table storage = 2^n * 4 bytes, e.g. 32Kb for n=13.
-	 * @param dataType
-	 *            the data type
 	 */
 	public TurboLog2(int n)
 	{

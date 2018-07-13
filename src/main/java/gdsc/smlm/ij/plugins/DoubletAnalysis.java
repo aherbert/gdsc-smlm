@@ -481,10 +481,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 *            the actual coordinates
 		 * @param fitConfig
 		 *            the fit config
-		 * @param maxCount
-		 *            the max count
 		 * @param o
-		 *            the o
+		 *            the overlay
 		 */
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
 				TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, Overlay o)
@@ -2043,8 +2041,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @param results
 	 *            the results
+	 * @param density
+	 *            the density
 	 * @param runTime
-	 * @param density2
+	 *            the run time
 	 */
 	private void summariseResults(ArrayList<DoubletResult> results, double density, long runTime)
 	{

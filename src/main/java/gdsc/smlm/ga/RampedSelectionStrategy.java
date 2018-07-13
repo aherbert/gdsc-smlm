@@ -33,6 +33,9 @@ import org.apache.commons.math3.random.RandomDataGenerator;
  * Selects the individuals using a linear ramp from the highest rank to the lowest to set the probability of selection.
  * Selection of breeding couples is uniform from the top n (n is incremented from 1 each selection) crossed with a
  * sample from the entire population using a linear ramped weighting.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSelectionStrategy<T>
 		implements SelectionStrategy<T>
@@ -62,6 +65,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	 * at least size 2 (unless the input is smaller or there are not enough valid individuals (fitness not null)).
 	 *
 	 * @param individuals
+	 *            the individuals
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
 	 */
@@ -155,7 +159,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
 	{
 		sorted = null;
-		if (individuals != null && individuals.size() < 2)
+		if (individuals == null || individuals.size() < 2)
 		{
 			return;
 		}
@@ -177,28 +181,25 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 				super.initialiseBreeding(individuals);
 				return;
 			}
-			else
+			// A mixed population, some of which we can sort and some we cannot.
+			list = new ArrayList<>(toSort);
+			ArrayList<Chromosome<T>> subset = new ArrayList<>(count);
+			for (Chromosome<T> c : individuals)
 			{
-				// A mixed population, some of which we can sort and some we cannot.
-				list = new ArrayList<>(toSort);
-				ArrayList<Chromosome<T>> subset = new ArrayList<>(count);
-				for (Chromosome<T> c : individuals)
-				{
-					if (c.getFitness() == null)
-						subset.add(c);
-					else
-						list.add(c);
-				}
-
-				ChromosomeComparator.sort(list);
-
-				// Create a ramped sum for all those we can sort
-				sum = createSum(list.size());
-				// Extend the sum linearly for those we cannot sort (i.e. they have the same selection chance)
-				sum = extendSum(sum, subset.size());
-
-				list.addAll(subset);
+				if (c.getFitness() == null)
+					subset.add(c);
+				else
+					list.add(c);
 			}
+
+			ChromosomeComparator.sort(list);
+
+			// Create a ramped sum for all those we can sort
+			sum = createSum(list.size());
+			// Extend the sum linearly for those we cannot sort (i.e. they have the same selection chance)
+			sum = extendSum(sum, subset.size());
+
+			list.addAll(subset);
 		}
 		else
 		{
@@ -217,6 +218,13 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		upper = sum[sum.length - 1] - 1;
 	}
 
+	/**
+	 * Creates the sum.
+	 *
+	 * @param size
+	 *            the size
+	 * @return the sum
+	 */
 	public static long[] createSum(int size)
 	{
 		long[] sum = new long[size];
@@ -227,6 +235,15 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		return sum;
 	}
 
+	/**
+	 * Extend the sum.
+	 *
+	 * @param sum
+	 *            the sum
+	 * @param size
+	 *            the size
+	 * @return the new sum
+	 */
 	public static long[] extendSum(long[] sum, int size)
 	{
 		long[] sum2 = Arrays.copyOf(sum, sum.length + size);
@@ -285,15 +302,16 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		// JUnit test shows that the simple scan through the array is faster for small arrays
 		if (sum.length < 100)
 			return search(sum, next);
-		else
-			return binarySearch(sum, next);
+		return binarySearch(sum, next);
 	}
 
 	/**
-	 * Find the index such that sum[index-1] <= key < sum[index]
+	 * Find the index such that sum[index-1] <= key < sum[index].
 	 *
 	 * @param sum
-	 * @param p
+	 *            the sum
+	 * @param key
+	 *            the key
 	 * @return the index (or -1)
 	 */
 	public static int search(final long[] sum, final long key)
@@ -305,10 +323,12 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	}
 
 	/**
-	 * Find the index such that sum[index-1] <= key < sum[index]
+	 * Find the index such that sum[index-1] <= key < sum[index].
 	 *
 	 * @param sum
-	 * @param p
+	 *            the sum
+	 * @param key
+	 *            the key
 	 * @return the index (or -1)
 	 */
 	public static int binarySearch(final long[] sum, final long key)

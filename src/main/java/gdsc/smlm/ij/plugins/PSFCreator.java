@@ -836,9 +836,10 @@ public class PSFCreator implements PlugInFilter
 	 * Get the limits of the array ignoring outliers more than 1.5x the inter quartile range
 	 *
 	 * @param data
-	 * @return
+	 *            the data
+	 * @return the limits
 	 */
-	private double[] getLimits(double[] data)
+	private static double[] getLimits(double[] data)
 	{
 		double[] limits = Maths.limits(data);
 		DescriptiveStatistics stats = new DescriptiveStatistics(data);
@@ -850,7 +851,7 @@ public class PSFCreator implements PlugInFilter
 		return limits;
 	}
 
-	private double getAverage(StoredDataStatistics averageSd, StoredDataStatistics averageA, int averageMethod)
+	private static double getAverage(StoredDataStatistics averageSd, StoredDataStatistics averageA, int averageMethod)
 	{
 		if (averageMethod == 0)
 			return averageSd.getMean();
@@ -1194,12 +1195,15 @@ public class PSFCreator implements PlugInFilter
 	 * using a Tukey window function.
 	 *
 	 * @param spot
+	 *            the spot
 	 * @param background
 	 *            The minimum level, all below this is background and set to zero
 	 * @param spotWidth
+	 *            the spot width
 	 * @param spotHeight
-	 * @param n
-	 *            The spot number
+	 *            the spot height
+	 * @param centre
+	 *            the centre
 	 * @param loess
 	 *            The smoothing interpolator
 	 * @return True if accepted
@@ -1508,9 +1512,10 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Normalise the PSF using a given denominator
+	 * Normalise the PSF using a given denominator.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param n
 	 *            The denominator
 	 */
@@ -1535,6 +1540,7 @@ public class PSFCreator implements PlugInFilter
 	 * are foreground pixels.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param n
 	 *            The frame number
 	 * @param sigma
@@ -1617,6 +1623,7 @@ public class PSFCreator implements PlugInFilter
 	 * Normalise the PSF so the sum of specified frame is 1.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param n
 	 *            The frame number
 	 */
@@ -1636,11 +1643,14 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Calculate the centre of mass and express it relative to the average centre
+	 * Calculate the centre of mass and express it relative to the average centre.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param fitCom
+	 *            the fit com
 	 * @param nmPerPixel
+	 *            the nm per pixel
 	 * @return The centre of mass
 	 */
 	private double[][] calculateCentreOfMass(ImageStack psf, double[][] fitCom, double nmPerPixel)
@@ -1785,8 +1795,8 @@ public class PSFCreator implements PlugInFilter
 	/**
 	 * Get all the ROI points that have a box region not overlapping with any other spot.
 	 *
-	 * @param offset
-	 *            the offset
+	 * @param roiPoints
+	 *            the roi points
 	 * @return the spots
 	 */
 	private BasePoint[] checkSpotOverlap(BasePoint[] roiPoints)
@@ -1797,8 +1807,10 @@ public class PSFCreator implements PlugInFilter
 	/**
 	 * Find all the ROI points that have a box region overlapping with any other spot.
 	 *
-	 * @param offset
-	 *            the offset
+	 * @param roiPoints
+	 *            the roi points
+	 * @param excluded
+	 *            the excluded
 	 * @return the overlap array
 	 */
 	private boolean[] findSpotOverlap(BasePoint[] roiPoints, boolean[] excluded)
@@ -1904,12 +1916,18 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Fit the new PSF image and show a graph of the amplitude/width
+	 * Fit the new PSF image and show a graph of the amplitude/width.
 	 *
 	 * @param psfStack
+	 *            the psf stack
 	 * @param loess
+	 *            the loess
+	 * @param cz
+	 *            the cz
 	 * @param averageRange
+	 *            the average range
 	 * @param fitCom
+	 *            the fit com
 	 * @return The width of the PSF in the z-centre
 	 */
 	private double fitPSF(ImageStack psfStack, LoessInterpolator loess, int cz, double averageRange,

@@ -161,9 +161,8 @@ public class DoubleDHT3D extends DoubleImage3D
 	}
 
 	/**
-	 * Initialise fast operations for {@link #multiply(DoubleDHT2D)} and {@link #conjugateMultiply(DoubleDHT2D)}. This
-	 * pre-computes
-	 * the values needed for the operations.
+	 * Initialise fast operations for {@link #multiply(DoubleDHT3D)} and {@link #conjugateMultiply(DoubleDHT3D)}. This
+	 * pre-computes the values needed for the operations.
 	 * <p>
 	 * Note: This initialises the DHT object for use as the argument to the operation, for example if a convolution
 	 * kernel is to be applied to many DHT objects.
@@ -198,8 +197,8 @@ public class DoubleDHT3D extends DoubleImage3D
 	}
 
 	/**
-	 * Initialise fast operations for {@link #multiply(DoubleDHT2D)}, {@link #conjugateMultiply(DoubleDHT2D)} and
-	 * {@link #divide(DoubleDHT2D)}. This pre-computes the values needed for the operations.
+	 * Initialise fast operations for {@link #multiply(DoubleDHT3D)}, {@link #conjugateMultiply(DoubleDHT3D)} and
+	 * {@link #divide(DoubleDHT3D)}. This pre-computes the values needed for the operations.
 	 * <p>
 	 * Note: This initialises the DHT object for use as the argument to the operation, for example if a deconvolution
 	 * kernel is to be applied to many DHT objects.
@@ -544,7 +543,7 @@ public class DoubleDHT3D extends DoubleImage3D
 	 *            the pre-initialised h2o value
 	 * @param jj
 	 *            the pre-initialised j index
-	 * @param h2o
+	 * @param mag
 	 *            the pre-initialised magnitude value
 	 * @param tmp
 	 *            the buffer for the result (can be null)
@@ -718,7 +717,8 @@ public class DoubleDHT3D extends DoubleImage3D
 	 *
 	 * @throws IllegalArgumentException
 	 *             If not even dimensions
-	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 * @see <a href=
+	 *      "https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
 	 */
 	public void swapOctants() throws IllegalArgumentException
 	{
@@ -741,7 +741,8 @@ public class DoubleDHT3D extends DoubleImage3D
 	 *            the image
 	 * @throws IllegalArgumentException
 	 *             If not even dimensions
-	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 * @see <a href=
+	 *      "https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
 	 */
 	public static void swapOctants(DoubleImage3D image) throws IllegalArgumentException
 	{

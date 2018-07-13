@@ -548,7 +548,7 @@ public class FloatDHT3D extends FloatImage3D
 	 *            the pre-initialised h2o value
 	 * @param jj
 	 *            the pre-initialised j index
-	 * @param h2o
+	 * @param mag
 	 *            the pre-initialised magnitude value
 	 * @param tmp
 	 *            the buffer for the result (can be null)
@@ -722,7 +722,7 @@ public class FloatDHT3D extends FloatImage3D
 	 *
 	 * @throws IllegalArgumentException
 	 *             If not even dimensions
-	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 * @see <a href="https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
 	 */
 	public void swapOctants() throws IllegalArgumentException
 	{
@@ -745,7 +745,7 @@ public class FloatDHT3D extends FloatImage3D
 	 *            the image
 	 * @throws IllegalArgumentException
 	 *             If not even dimensions
-	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 * @see <a href="https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
 	 */
 	public static void swapOctants(FloatImage3D image) throws IllegalArgumentException
 	{
@@ -844,7 +844,7 @@ public class FloatDHT3D extends FloatImage3D
 	 *            the stack
 	 * @throws IllegalArgumentException
 	 *             If not a float stack with even dimensions
-	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 * @see <a href="https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
 	 */
 	public static void swapOctants(ImageStack stack) throws IllegalArgumentException
 	{

@@ -334,8 +334,6 @@ public class TraceMolecules implements PlugIn
 	/**
 	 * Limit the time threshold to the pulse interval duration.
 	 *
-	 * @param settings
-	 *            the settings
 	 * @param pulseInterval
 	 *            the pulse interval
 	 */
@@ -368,10 +366,11 @@ public class TraceMolecules implements PlugIn
 	}
 
 	/**
-	 * Convert a list of peak results into points for the clustering engine
+	 * Convert a list of peak results into points for the clustering engine.
 	 *
 	 * @param results
-	 * @return
+	 *            the results
+	 * @return the list of clusters
 	 */
 	public static List<ClusterPoint> convertToClusterPoints(MemoryPeakResults results)
 	{
@@ -395,11 +394,13 @@ public class TraceMolecules implements PlugIn
 	}
 
 	/**
-	 * Convert the clusters from the clustering engine into traces composed of the original list of peak results
+	 * Convert the clusters from the clustering engine into traces composed of the original list of peak results.
 	 *
 	 * @param results
+	 *            the results
 	 * @param clusters
-	 * @return
+	 *            the clusters
+	 * @return the traces
 	 */
 	public static Trace[] convertToTraces(MemoryPeakResults results, ArrayList<Cluster> clusters)
 	{
@@ -420,9 +421,10 @@ public class TraceMolecules implements PlugIn
 	}
 
 	/**
-	 * Sort traces by time
+	 * Sort traces by time.
 	 *
 	 * @param traces
+	 *            the traces
 	 */
 	static void sortByTime(Trace[] traces)
 	{
@@ -484,8 +486,11 @@ public class TraceMolecules implements PlugIn
 	 * for .[0-9]+. and it is replaced with .id.
 	 *
 	 * @param sourceResults
+	 *            the source results
 	 * @param traces
+	 *            the traces
 	 * @param comment
+	 *            the comment
 	 * @param filename
 	 *            The initial filename
 	 * @param id
@@ -1127,11 +1132,17 @@ public class TraceMolecules implements PlugIn
 	 * Returns a list of [distance,time,N traces]
 	 *
 	 * @param peakResults
+	 *            the peak results
 	 * @param minDistanceThreshold
+	 *            the min distance threshold
 	 * @param maxDistanceThreshold
+	 *            the max distance threshold
 	 * @param minTimeThreshold
+	 *            the min time threshold
 	 * @param maxTimeThreshold
+	 *            the max time threshold
 	 * @param optimiserSteps
+	 *            the optimiser steps
 	 * @return a list of [distance,time,N traces,blinking rate]
 	 */
 	public List<double[]> runTracing(MemoryPeakResults peakResults, double minDistanceThreshold,
@@ -1148,11 +1159,17 @@ public class TraceMolecules implements PlugIn
 	 * Returns a list of [distance,time,N traces]
 	 *
 	 * @param manager
+	 *            the manager
 	 * @param minDistanceThreshold
+	 *            the min distance threshold
 	 * @param maxDistanceThreshold
+	 *            the max distance threshold
 	 * @param minTimeThreshold
+	 *            the min time threshold
 	 * @param maxTimeThreshold
+	 *            the max time threshold
 	 * @param optimiserSteps
+	 *            the optimiser steps
 	 * @return a list of [distance,time,N traces,blinking rate]
 	 */
 	public List<double[]> runTracing(TraceManager manager, double minDistanceThreshold, double maxDistanceThreshold,
@@ -1257,6 +1274,8 @@ public class TraceMolecules implements PlugIn
 	 * Find the point on the contour nearest the origin.
 	 *
 	 * @param results
+	 *            the results
+	 * @return true, if successful
 	 */
 	private boolean findOptimalParameters(List<double[]> results)
 	{
@@ -1465,9 +1484,10 @@ public class TraceMolecules implements PlugIn
 	}
 
 	/**
-	 * Build an image using the values within the results to set X,Y and value
+	 * Build an image using the values within the results to set X,Y and value.
 	 *
 	 * @param results
+	 *            the results
 	 */
 	private void createPlotResults(List<double[]> results)
 	{

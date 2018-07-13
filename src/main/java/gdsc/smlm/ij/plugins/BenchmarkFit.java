@@ -377,11 +377,14 @@ public class BenchmarkFit implements PlugIn
 		}
 
 		/**
-		 * Set background using the average value of the edge in the data
+		 * Set background using the average value of the edge in the data.
 		 *
 		 * @param data
+		 *            the data
 		 * @param maxx
+		 *            the maxx
 		 * @param maxy
+		 *            the maxy
 		 * @return The background
 		 */
 		private double getBackground(double[] data, int maxx, int maxy)
@@ -524,14 +527,20 @@ public class BenchmarkFit implements PlugIn
 	}
 
 	/**
-	 * Add the results to the statistics
+	 * Add the results to the statistics.
 	 *
 	 * @param stats
+	 *            the stats
 	 * @param answer
+	 *            the answer
 	 * @param photons
+	 *            the photons
 	 * @param sa
+	 *            the sa
 	 * @param time
+	 *            the time
 	 * @param result
+	 *            the result
 	 * @param c
 	 *            Count of the number of results
 	 */
@@ -546,14 +555,20 @@ public class BenchmarkFit implements PlugIn
 	}
 
 	/**
-	 * Add the given results to the statistics
+	 * Add the given results to the statistics.
 	 *
 	 * @param stats
+	 *            the stats
 	 * @param answer
+	 *            the answer
 	 * @param photons
+	 *            the photons
 	 * @param sa
+	 *            the sa
 	 * @param result
+	 *            the result
 	 * @param time
+	 *            the time
 	 */
 	private static void addResult(Statistics[] stats, double[] answer, double photons, double sa, double[] result,
 			long time)
@@ -1134,7 +1149,10 @@ public class BenchmarkFit implements PlugIn
 	private double[][] startPoints = null;
 
 	/**
+	 * Gets the start points.
+	 *
 	 * @param is3D
+	 *            Set to true if 3D
 	 * @return The starting points for the fitting
 	 */
 	private double[][] getStartPoints(boolean is3D)

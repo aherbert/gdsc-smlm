@@ -32,6 +32,9 @@ import gdsc.core.utils.SimpleArrayUtils;
 
 /**
  * Recombine sequence by selecting random positions for crossover.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implements Recombiner<T>
 {
@@ -39,7 +42,10 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 	final double meanChildren;
 
 	/**
+	 * Instantiates a new simple recombiner.
+	 *
 	 * @param random
+	 *            the random
 	 * @param fraction
 	 *            The fraction of the sequence positions to recombine on average
 	 * @param meanChildren
@@ -63,7 +69,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 	 * <p>
 	 * The positions are then chosen randomly and the new chromosome generated.
 	 *
-	 * @see gdsc.smlm.ga.Recombiner#cross(gdsc.smlm.ga.Chromosome<T>, gdsc.smlm.ga.Chromosome<T>)
+	 * @see gdsc.smlm.ga.Recombiner#cross(Chromosome, Chromosome)
 	 */
 	@Override
 	public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2)
