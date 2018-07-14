@@ -486,8 +486,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		// and the extent of the kernel must change. Just increase the range
 		// for the kernel for each power of 2 the number is below 1.
 		int range = minRange;
-		for (int e = exp; range < maxRange && e <= 0; e++, range++)
-			;
+		for (int e = exp; range < maxRange && e <= 0; e++)
+			range++;
 		// Ensure the kernel range covers multiple values of the Poisson distribution.
 		// Only applicable to small kernels
 		while (range < maxRange && range * s < 1)
