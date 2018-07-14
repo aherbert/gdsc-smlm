@@ -2266,7 +2266,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (Utils.isShowGenericDialog())
 		{
 			final Checkbox cb = (Checkbox) (gd.getCheckboxes().get(0));
-			@SuppressWarnings("unchecked")
 			final Vector<TextField> v = gd.getNumericFields();
 			final TextArea ta = gd.getTextArea1();
 			cb.addItemListener(new ItemListener()
@@ -6027,7 +6026,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
-	public class ComplexFilterScore extends SimpleFilterScore
+	private class ComplexFilterScore extends SimpleFilterScore
 	{
 		final static char WITHIN = '-';
 		final static char BELOW = '<';

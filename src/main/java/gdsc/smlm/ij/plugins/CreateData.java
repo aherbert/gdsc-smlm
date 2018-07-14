@@ -5004,7 +5004,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return collectOptions(true);
 			}
 
-			private boolean collectOptions(@SuppressWarnings("unused") boolean silent)
+			private boolean collectOptions(boolean silent)
 			{
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 				egd.addMessage("Configure the " + settings.getPsfModel() + " PSF model");
@@ -5037,6 +5037,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					egd.addNumericField("Wavelength (nm)", settings.getWavelength(), 2);
 					egd.addNumericField("Numerical_aperture", settings.getNumericalAperture(), 2);
 				}
+				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;

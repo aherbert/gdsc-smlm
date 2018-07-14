@@ -2119,9 +2119,9 @@ public class PSFCreator implements PlugInFilter
 		return smoothSd[smoothCzIndex];
 	}
 
-	private PlotWindow getPlot(String title)
+	private static PlotWindow getPlot(String title)
 	{
-		Frame f = WindowManager.getFrame(TITLE_AMPLITUDE);
+		Frame f = WindowManager.getFrame(title);
 		if (f != null && f instanceof PlotWindow)
 			return (PlotWindow) f;
 		return null;
@@ -2391,17 +2391,14 @@ public class PSFCreator implements PlugInFilter
 
 		if (alignWindows && plotWindow != null)
 		{
-			if (alignWindows && plotWindow != null)
+			PlotWindow otherWindow = getPlot(TITLE_AMPLITUDE);
+			if (otherWindow != null)
 			{
-				PlotWindow otherWindow = getPlot(TITLE_AMPLITUDE);
-				if (otherWindow != null)
-				{
-					// Put the two plots tiled together so both are visible
-					Point l = plotWindow.getLocation();
-					l.x = otherWindow.getLocation().x + otherWindow.getWidth();
-					l.y = otherWindow.getLocation().y;
-					plotWindow.setLocation(l);
-				}
+				// Put the two plots tiled together so both are visible
+				Point l = plotWindow.getLocation();
+				l.x = otherWindow.getLocation().x + otherWindow.getWidth();
+				l.y = otherWindow.getLocation().y;
+				plotWindow.setLocation(l);
 			}
 		}
 	}
@@ -2605,11 +2602,10 @@ public class PSFCreator implements PlugInFilter
 
 		// Find the FWHM for each line profile.
 		// Diagonals need to be scaled to the appropriate distance.
-		return (getFWHM(p0, p1) + getFWHM(p0, p2) + Math.sqrt(2) * getFWHM(p0, p3) + Math.sqrt(2) * getFWHM(p0, p4)) /
-				4.0;
+		return (getFWHM(p1) + getFWHM(p2) + Math.sqrt(2) * getFWHM(p3) + Math.sqrt(2) * getFWHM(p4)) / 4.0;
 	}
 
-	private double getFWHM(double[] x, double[] y)
+	private static double getFWHM(double[] y)
 	{
 		// Find half max of original data
 		double max = 0;
@@ -5226,6 +5222,7 @@ public class PSFCreator implements PlugInFilter
 		 *
 		 * @param zCentre
 		 *            the z centre (1-based index)
+		 * @return the extracted PSF
 		 */
 		public ExtractedPSF cropToZCentre(int zCentre)
 		{
@@ -5631,6 +5628,8 @@ public class PSFCreator implements PlugInFilter
 		 * Compute the centre of mass and then the shift of the CoM from the centre of the
 		 * image.
 		 *
+		 * @param zCentre
+		 *            the z centre
 		 * @return the centre of mass shift
 		 */
 		public double[] getCentreOfMassXYShift(int zCentre)
@@ -5898,7 +5897,8 @@ public class PSFCreator implements PlugInFilter
 		return results;
 	}
 
-	private BasePoint[] updateUsingCentreOfMassXYShift(double[] shift, double shiftd, ExtractedPSF combined,
+	@SuppressWarnings("unused")
+	private static BasePoint[] updateUsingCentreOfMassXYShift(double[] shift, double shiftd, ExtractedPSF combined,
 			BasePoint[] centres)
 	{
 		// The shift is the centre of mass of the image minus the pixel centre.

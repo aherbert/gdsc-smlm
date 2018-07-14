@@ -424,6 +424,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		throw new NotImplementedException();
 	}
 
+	/**
+	 * Creates the geometry.
+	 *
+	 * @param coords
+	 *            the coords
+	 * @param sourceGA
+	 *            the source geometry array
+	 * @return the geometry array
+	 */
 	protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGA)
 	{
 		final GeometryArray ga = createGeometryArray(sourceGA, 0);
@@ -667,6 +676,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		throw new NotImplementedException();
 	}
 
+	/**
+	 * Creates the appearance.
+	 *
+	 * @param appearance
+	 *            the appearance
+	 * @param ga
+	 *            the geometry array
+	 * @return the appearance
+	 */
 	protected Appearance createAppearance(Appearance appearance, GeometryArray ga)
 	{
 		// Create a suitable appearance for points or 3D shapes.

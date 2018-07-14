@@ -1584,7 +1584,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @return true, if successful
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -3080,7 +3079,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @return true, if successful
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean showAnalysisDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -3147,7 +3145,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
 			textPrecisionMethod = choices.get(2);
-			;
 		}
 
 		gd.showDialog();

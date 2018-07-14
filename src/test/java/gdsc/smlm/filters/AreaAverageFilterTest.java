@@ -274,10 +274,10 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 			count++;
 		}
 
-		checkInterpolation(max, n, w, results, count);
+		checkInterpolation(max, n, results, count);
 	}
 
-	public void checkInterpolation(int max, int n, double[] w, float[][] results, int count)
+	public void checkInterpolation(int max, int n, float[][] results, int count)
 	{
 		// Pick some points and see if they are monototically interpolated between integer blocks
 		int[] p = new int[] { 10, 20, 30, 40 };
@@ -339,7 +339,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 			count++;
 		}
 
-		checkInterpolation(max, n, w, results, count);
+		checkInterpolation(max, n, results, count);
 	}
 
 	@Test
@@ -362,7 +362,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 			count++;
 		}
 
-		checkInterpolation(max, n, w, results, count);
+		checkInterpolation(max, n, results, count);
 	}
 
 	@Test
@@ -385,6 +385,6 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 			count++;
 		}
 
-		checkInterpolation(max, n, w, results, count);
+		checkInterpolation(max, n, results, count);
 	}
 }

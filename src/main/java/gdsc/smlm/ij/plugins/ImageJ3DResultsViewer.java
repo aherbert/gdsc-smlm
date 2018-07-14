@@ -1363,7 +1363,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		switch (mode)
 		{
 			case INTENSITY:
-				return createAlphaFromIntensity(results, settings, minA, maxA, sphereSize);
+				return createAlphaFromIntensity(results, minA, maxA);
 			case XYZ_DEVIATIONS:
 				if (sizeMode != SizeMode.XYZ_DEVIATIONS)
 					sphereSize = createSphereSizeFromDeviations(results);
@@ -1379,8 +1379,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static float[] createAlphaFromIntensity(MemoryPeakResults results, Builder settings, double minA,
-			double maxA, Point3f[] sphereSize)
+	private static float[] createAlphaFromIntensity(MemoryPeakResults results, double minA,
+			double maxA)
 	{
 		RawResultProcedure p = new RawResultProcedure(results);
 		p.getI();
@@ -2321,8 +2321,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static long getTotalTransparentObjects(Image3DUniverse univ, String ignoreName)
 	{
 		long size = 0;
-		for (@SuppressWarnings("unchecked")
-		Iterator<Content> it = univ.contents(); it.hasNext();)
+		for (Iterator<Content> it = univ.contents(); it.hasNext();)
 		{
 			Content c = it.next();
 			if (ignoreName.equals(c.getName()))
@@ -3301,7 +3300,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void actionPerformed(ActionEvent e)
 	{
 		final Object src = e.getSource();

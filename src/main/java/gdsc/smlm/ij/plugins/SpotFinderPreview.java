@@ -183,7 +183,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		this.o = imp.getOverlay();

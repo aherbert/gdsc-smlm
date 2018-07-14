@@ -33,6 +33,12 @@ public class MultiFilterComponentSet4 extends MultiFilterComponentSet
 	private MultiFilterComponent component2;
 	private MultiFilterComponent component3;
 
+	/**
+	 * Instantiates a new multi filter component set for 4 components.
+	 *
+	 * @param components
+	 *            the components
+	 */
 	public MultiFilterComponentSet4(MultiFilterComponent[] components)
 	{
 		this.component0 = components[0];

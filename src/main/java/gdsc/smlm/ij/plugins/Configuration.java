@@ -116,7 +116,6 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	/**
 	 * Show the current properties
 	 */
-	@SuppressWarnings("unchecked")
 	public boolean showDialog(FitEngineConfiguration fitEngineConfiguration, boolean save)
 	{
 		this.config = fitEngineConfiguration;

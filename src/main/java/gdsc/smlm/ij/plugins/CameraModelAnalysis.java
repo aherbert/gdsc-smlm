@@ -232,22 +232,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	public void run(String arg)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		extraOptions = Utils.isExtraOptions();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+		extraOptions = Utils.isExtraOptions();
 		return NO_IMAGE_REQUIRED;
 	}
 
@@ -305,6 +296,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				}
 				else
 					throw new IllegalStateException();
+				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;

@@ -64,19 +64,19 @@ public class InterpolatedPoissonFisherInformationTest
 		InterpolatedPoissonFisherInformation fi = new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
 
 		// No check for beyond the range since a separate test does this.
-		check(f, fi, min, 1e-2);
+		check(f, fi, min, 5e-3);
 
 		// Within
 		for (int exp = min; exp < max; exp++)
 		{
-			check(f, fi, exp + 0.5, 1e-2);
+			check(f, fi, exp + 0.5, 5e-3);
 		}
 
 		// Upper bound
-		check(f, fi, max, 1e-2);
+		check(f, fi, max, 5e-3);
 
 		// Beyond upper bound
-		check(f, fi, max + 1, 1e-2);
+		check(f, fi, max + 1, 5e-3);
 	}
 
 	private void check(BasePoissonFisherInformation f, InterpolatedPoissonFisherInformation fi, double logU, double tol)
@@ -87,7 +87,8 @@ public class InterpolatedPoissonFisherInformationTest
 		//System.out.printf("logU=%g  u=%g  e=%g  o=%g  error=%g\n", logU, u, e, o, DoubleEquality.relativeError(o, e));
 
 		// Small numbers may have a large relative error but the absolute error is small
-		Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, 5e-3, 1e-20));
+		//Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, 5e-3, 1e-20));
+		Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, tol, 1e-20));
 	}
 
 	@Test
