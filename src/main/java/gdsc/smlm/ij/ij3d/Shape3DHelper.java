@@ -110,7 +110,7 @@ public class Shape3DHelper
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 	//@formatter:on
 
 	private static int[] numberOfTriangles = new int[Rendering.values().length];

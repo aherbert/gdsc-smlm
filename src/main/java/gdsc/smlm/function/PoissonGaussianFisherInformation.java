@@ -751,7 +751,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		this.minRange = checkRange(minRange);
 	}
 
-	private int checkRange(int range)
+	private static int checkRange(int range)
 	{
 		// Gaussian = Math.exp(-0.5 * x^2)
 		// FastMath.exp(-746) == 0

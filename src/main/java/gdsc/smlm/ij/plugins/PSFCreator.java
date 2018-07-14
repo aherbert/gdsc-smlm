@@ -347,7 +347,7 @@ public class PSFCreator implements PlugInFilter
 
 	private class InteractiveInputListener implements DialogListener
 	{
-		final boolean draw;;
+		final boolean draw;
 
 		InteractiveInputListener()
 		{

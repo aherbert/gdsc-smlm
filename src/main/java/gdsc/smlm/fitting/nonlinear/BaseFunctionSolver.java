@@ -401,7 +401,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 				// Leave this as disabled by default
 				return false;
 		}
-	};
+	}
 
 	/*
 	 * (non-Javadoc)

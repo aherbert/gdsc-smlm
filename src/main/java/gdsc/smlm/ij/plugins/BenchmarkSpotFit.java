@@ -318,7 +318,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static MultiPathFilter multiFilter;
 	private static final MultiPathFilter defaultMultiFilter;
 	private static final double[] defaultParameters;
-	private static IDirectFilter minimalFilter;;
+	private static IDirectFilter minimalFilter;
 
 	static
 	{

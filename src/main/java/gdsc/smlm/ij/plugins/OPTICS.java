@@ -135,7 +135,7 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		CLUSTER_ID {
 			@Override
-			public String getName() { return "Cluster Id"; };
+			public String getName() { return "Cluster Id"; }
 			@Override
 			public float getValue(float value, int clusterId, int order) { return clusterId; }
 			@Override
@@ -145,7 +145,7 @@ public class OPTICS implements PlugIn
 		},
 		CLUSTER_DEPTH {
 			@Override
-			public String getName() { return "Cluster Depth"; };
+			public String getName() { return "Cluster Depth"; }
 			@Override
 			public float getValue(float value, int clusterId, int order) { return clusterId; }
 			@Override
@@ -155,7 +155,7 @@ public class OPTICS implements PlugIn
 		},
 		CLUSTER_ORDER {
 			@Override
-			public String getName() { return "Cluster Order"; };
+			public String getName() { return "Cluster Order"; }
 			@Override
 			public float getValue(float value, int clusterId, int order) { return order; }
 			@Override
@@ -165,7 +165,7 @@ public class OPTICS implements PlugIn
 		},
 		VALUE {
 			@Override
-			public String getName() { return "Value"; };
+			public String getName() { return "Value"; }
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
@@ -173,7 +173,7 @@ public class OPTICS implements PlugIn
 		},
 		COUNT {
 			@Override
-			public String getName() { return "Count"; };
+			public String getName() { return "Count"; }
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
@@ -181,7 +181,7 @@ public class OPTICS implements PlugIn
 		},
 		LOOP {
 			@Override
-			public String getName() { return "Local Outlier Probability (LoOP)"; };
+			public String getName() { return "Local Outlier Probability (LoOP)"; }
 			@Override
 			public float getValue(float value, int clusterId, int order) { return order; }
 			@Override
@@ -189,7 +189,7 @@ public class OPTICS implements PlugIn
 		},
 		NONE {
 			@Override
-			public String getName() { return "None"; };
+			public String getName() { return "None"; }
 			@Override
 			public float getValue(float value, int clusterId, int order) { return 0; }
 		};
@@ -267,11 +267,11 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		FAST_OPTICS {
 			@Override
-			public String getName() { return "FastOPTICS"; };
+			public String getName() { return "FastOPTICS"; }
 		},
 		OPTICS {
 			@Override
-			public String getName() { return "OPTICS"; };
+			public String getName() { return "OPTICS"; }
 		};
 		//@formatter:on
 
@@ -304,11 +304,11 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		XI {
 			@Override
-			public String getName() { return "Xi"; };
+			public String getName() { return "Xi"; }
 		},
 		DBSCAN {
 			@Override
-			public String getName() { return "pseudo-DBSCAN"; };
+			public String getName() { return "pseudo-DBSCAN"; }
 		};
 		//@formatter:on
 
@@ -341,41 +341,41 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		ON {
 			@Override
-			public String getName() { return "On"; };
+			public String getName() { return "On"; }
 		},
 		HIGHLIGHTED {
 			@Override
-			public String getName() { return "Highlighted"; };
+			public String getName() { return "Highlighted"; }
 			@Override
 			public boolean isHighlightProfile() { return true; }
 		},
 		COLOURED_BY_ID {
 			@Override
-			public String getName() { return "Coloured by Id"; };
+			public String getName() { return "Coloured by Id"; }
 			@Override
 			public boolean isColourProfileById() { return true; }
 		},
 		COLOURED_BY_DEPTH {
 			@Override
-			public String getName() { return "Coloured by depth"; };
+			public String getName() { return "Coloured by depth"; }
 			@Override
 			public boolean isColourProfileByDepth() { return true; }
 		},
 		COLOURED_BY_ORDER {
 			@Override
-			public String getName() { return "Coloured by order"; };
+			public String getName() { return "Coloured by order"; }
 			@Override
 			public boolean isColourProfileByOrder() { return true; }
 		},
 		WITH_CLUSTERS {
 			@Override
-			public String getName() { return "With clusters"; };
+			public String getName() { return "With clusters"; }
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
 		HIGHLIGHTED_WITH_CLUSTERS {
 			@Override
-			public String getName() { return "Highlighted with clusters"; };
+			public String getName() { return "Highlighted with clusters"; }
 			@Override
 			public boolean isHighlightProfile() { return true; }
 			@Override
@@ -383,7 +383,7 @@ public class OPTICS implements PlugIn
 		},
 		COLOURED_BY_ID_WITH_CLUSTERS {
 			@Override
-			public String getName() { return "Coloured by Id with clusters"; };
+			public String getName() { return "Coloured by Id with clusters"; }
 			@Override
 			public boolean isColourProfileById() { return true; }
 			@Override
@@ -391,7 +391,7 @@ public class OPTICS implements PlugIn
 		},
 		COLOURED_BY_DEPTH_WITH_CLUSTERS {
 			@Override
-			public String getName() { return "Coloured by depth with clusters"; };
+			public String getName() { return "Coloured by depth with clusters"; }
 			@Override
 			public boolean isColourProfileByDepth() { return true; }
 			@Override
@@ -399,7 +399,7 @@ public class OPTICS implements PlugIn
 		},
 		COLOURED_BY_ORDER_WITH_CLUSTERS {
 			@Override
-			public String getName() { return "Coloured by order with clusters"; };
+			public String getName() { return "Coloured by order with clusters"; }
 			@Override
 			public boolean isColourProfileByOrder() { return true; }
 			@Override
@@ -407,7 +407,7 @@ public class OPTICS implements PlugIn
 		},
 		OFF {
 			@Override
-			public String getName() { return "Off"; };
+			public String getName() { return "Off"; }
 		};
 		//@formatter:on
 
@@ -496,17 +496,17 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		COLOURED_BY_CLUSTER {
 			@Override
-			public String getName() { return "Coloured by cluster"; };
+			public String getName() { return "Coloured by cluster"; }
 		},
 		COLOURED_BY_DEPTH {
 			@Override
-			public String getName() { return "Coloured by depth"; };
+			public String getName() { return "Coloured by depth"; }
 			@Override
 			public boolean isColourByDepth() { return true; }
 		},
 		OFF {
 			@Override
-			public String getName() { return "Off"; };
+			public String getName() { return "Off"; }
 			@Override
 			public boolean isOutline() { return false; }
 		};
@@ -557,23 +557,23 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		COLOURED_BY_CLUSTER {
 			@Override
-			public String getName() { return "Coloured by cluster"; };
+			public String getName() { return "Coloured by cluster"; }
 		},
 		COLOURED_BY_DEPTH {
 			@Override
-			public String getName() { return "Coloured by depth"; };
+			public String getName() { return "Coloured by depth"; }
 		},
 		COLOURED_BY_ORDER {
 			@Override
-			public String getName() { return "Coloured by order"; };
+			public String getName() { return "Coloured by order"; }
 		},
 		COLOURED_BY_LOOP {
 			@Override
-			public String getName() { return "Coloured by LoOP"; };
+			public String getName() { return "Coloured by LoOP"; }
 		},
 		OFF {
 			@Override
-			public String getName() { return "Off"; };
+			public String getName() { return "Off"; }
 			@Override
 			public boolean isSpanningTree() { return false; }
 		};
@@ -616,23 +616,23 @@ public class OPTICS implements PlugIn
 		//@formatter:off
 		ID {
 			@Override
-			public String getName() { return "Id"; };
+			public String getName() { return "Id"; }
 		},
 		SIZE {
 			@Override
-			public String getName() { return "Size"; };
+			public String getName() { return "Size"; }
 		},
 		LEVEL {
 			@Override
-			public String getName() { return "Level"; };
+			public String getName() { return "Level"; }
 		},
 		AREA {
 			@Override
-			public String getName() { return "Area"; };
+			public String getName() { return "Area"; }
 		},
 		DENSITY {
 			@Override
-			public String getName() { return "Density"; };
+			public String getName() { return "Density"; }
 		};
 		//@formatter:on
 
@@ -1544,6 +1544,7 @@ public class OPTICS implements PlugIn
 			clusteringResult = null;
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work)
 		{
@@ -2004,6 +2005,12 @@ public class OPTICS implements PlugIn
 	{
 		float[] values;
 
+		/**
+		 * Instantiates a new value LUT mapper.
+		 *
+		 * @param values
+		 *            the values
+		 */
 		public ValueLUTMapper(float[] values)
 		{
 			this.values = values;
@@ -2114,6 +2121,7 @@ public class OPTICS implements PlugIn
 			clusteringResult = null;
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work)
 		{
@@ -3455,11 +3463,8 @@ public class OPTICS implements PlugIn
 				// Updated settings
 				return new Pair<>(settings, resultList);
 			}
-			else
-			{
-				// We have not created anything new so return the current object
-				return work;
-			}
+			// We have not created anything new so return the current object
+			return work;
 		}
 	}
 

@@ -49,7 +49,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		SimpleValueProcedure(double[] yFit)
 		{
 			this.yFit = yFit;
-		};
+		}
 
 		@Override
 		public void execute(double value)

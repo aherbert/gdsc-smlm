@@ -117,7 +117,7 @@ public class FailCountManager implements PlugIn
 					ordinal = 0;
 			return values[ordinal];
 		}
-	};
+	}
 	//@formatter:on
 	private static String[] OPTIONS = SettingsManager.getNames((Object[]) FailCountOption.values());
 

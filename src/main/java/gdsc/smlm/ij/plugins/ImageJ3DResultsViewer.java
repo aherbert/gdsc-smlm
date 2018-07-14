@@ -203,7 +203,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 
 	private final static String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
 
@@ -232,7 +232,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 
 	private final static String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
 
@@ -263,7 +263,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 
 	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());
 
@@ -307,7 +307,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			return getName() + ": " + getDescription();
 		}
-	};
+	}
 
 	private final static String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
 	//@formatter:on

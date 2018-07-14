@@ -23,8 +23,6 @@
  */
 package gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import gdsc.core.logging.Logger;
 
 /**
@@ -58,10 +56,14 @@ import gdsc.core.logging.Logger;
  */
 public abstract class StoppingCriteria
 {
+	/** The logger. */
 	protected Logger log = null;
 	private int iteration;
+	/** Set to true if iteration should continue (no reason to stop) */
 	protected boolean notSatisfied;
+	/** Set to true if the stopping criteria are achieved. */
 	protected boolean areAchieved;
+	/** The best parameters. */
 	protected double[] bestA;
 	private int minimumIterations = 0;
 	private int maximumIterations = 20;

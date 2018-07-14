@@ -36,7 +36,7 @@ import org.junit.Test;
 import gdsc.core.utils.Random;
 import gdsc.test.TestSettings;
 
-@SuppressWarnings({ "javadoc" })
+@SuppressWarnings({ "javadoc", "unused" })
 public class ImageSourceTest
 {
 	@Test
@@ -118,7 +118,7 @@ public class ImageSourceTest
 		Assert.assertEquals(0, ok);
 	}
 
-	private boolean canConstruct(int w, int h, float[][] data)
+	private static boolean canConstruct(int w, int h, float[][] data)
 	{
 		try
 		{
@@ -784,7 +784,7 @@ public class ImageSourceTest
 	 *            the base number
 	 * @return The data
 	 */
-	private float[] createData(int w, int h, float f)
+	private static float[] createData(int w, int h, float f)
 	{
 		float[] data = new float[w * h];
 		Arrays.fill(data, f);

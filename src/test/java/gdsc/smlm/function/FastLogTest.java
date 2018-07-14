@@ -102,7 +102,7 @@ public class FastLogTest
 			this.fl=fl; }
 		abstract float log(float x);
 		abstract double log(double x);
-		int getN() { return fl.getN(); };
+		int getN() { return fl.getN(); }
 	}
 	private class TestLog extends BaseTestLog
 	{
@@ -483,7 +483,7 @@ public class FastLogTest
 		double getMean()
 		{
 			return s / n;
-		};
+		}
 
 		double getSD()
 		{
