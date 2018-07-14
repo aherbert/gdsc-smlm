@@ -39,22 +39,34 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	private double[] data = null;
 	private int label;
 
+	/** A single localisation. */
 	public static final int SINGLE = 0;
+	/** A localisation with a localisation in the previous frame. */
 	public static final int PREVIOUS = 1;
+	/** A localisation with a localisation in the next frame. */
 	public static final int NEXT = 2;
+	/** A localisation with a localisation in the previous or next frame. */
 	public static final int NEIGHBOUR = PREVIOUS | NEXT;
+	/** A localisation with a localisation in both the previous and next frame. */
 	public static final int CONTINUOUS = 4 | PREVIOUS | NEXT;
 
 	/**
-	 * Create a new localisation
+	 * Create a new localisation.
 	 *
 	 * @param id
+	 *            the id
 	 * @param time
+	 *            the time
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 * @param intensity
+	 *            the intensity
 	 * @param state
+	 *            the state
 	 */
 	public LocalisationModel(int id, int time, double x, double y, double z, double intensity, int state)
 	{
@@ -62,14 +74,18 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
-	 * Create a new localisation
+	 * Create a new localisation.
 	 *
 	 * @param id
+	 *            the id
 	 * @param time
+	 *            the time
 	 * @param xyz
 	 *            Coordinates (will be deep copied)
 	 * @param intensity
+	 *            the intensity
 	 * @param state
+	 *            the state
 	 */
 	public LocalisationModel(int id, int time, double[] xyz, double intensity, int state)
 	{
@@ -77,15 +93,22 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
-	 * Create a new localisation
+	 * Create a new localisation.
 	 *
 	 * @param id
+	 *            the id
 	 * @param time
+	 *            the time
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 * @param intensity
+	 *            the intensity
 	 * @param state
+	 *            the state
 	 * @param previous
 	 *            The previous localisation in this pulse (should be continuous time points)
 	 * @param next
@@ -98,14 +121,18 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
-	 * Create a new localisation
+	 * Create a new localisation.
 	 *
 	 * @param id
+	 *            the id
 	 * @param time
+	 *            the time
 	 * @param xyz
 	 *            Coordinates (will be deep copied)
 	 * @param intensity
+	 *            the intensity
 	 * @param state
+	 *            the state
 	 * @param previous
 	 *            The previous localisation in this pulse (should be continuous time points)
 	 * @param next
@@ -129,22 +156,39 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 		this.next = next;
 	}
 
+	/**
+	 * Gets the x.
+	 *
+	 * @return the x
+	 */
 	public double getX()
 	{
 		return xyz[0];
 	}
 
+	/**
+	 * Gets the y.
+	 *
+	 * @return the y
+	 */
 	public double getY()
 	{
 		return xyz[1];
 	}
 
+	/**
+	 * Gets the z.
+	 *
+	 * @return the z
+	 */
 	public double getZ()
 	{
 		return xyz[2];
 	}
 
 	/**
+	 * Gets the coordinates.
+	 *
 	 * @return The coordinates (x,y,z)
 	 */
 	public double[] getCoordinates()
@@ -153,6 +197,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Gets the id.
+	 *
 	 * @return The Id
 	 */
 	public int getId()
@@ -172,6 +218,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Gets the time.
+	 *
 	 * @return The time
 	 */
 	public int getTime()
@@ -180,6 +228,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Gets the intensity.
+	 *
 	 * @return the intensity
 	 */
 	public double getIntensity()
@@ -188,6 +238,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Sets the intensity.
+	 *
 	 * @param intensity
 	 *            The new intensity
 	 */
@@ -212,6 +264,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Checks for previous.
+	 *
 	 * @return True if this localisation is on in the previous time interval
 	 */
 	public boolean hasPrevious()
@@ -220,6 +274,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Checks for next.
+	 *
 	 * @return True if this localisation is on in the next time interval
 	 */
 	public boolean hasNext()
@@ -228,6 +284,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Checks for neighbour.
+	 *
 	 * @return True if this localisation is on in the previous or next time interval
 	 */
 	public boolean hasNeighbour()
@@ -236,6 +294,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Checks if is continuous.
+	 *
 	 * @return True if this localisation is on for the entire duration of the time interval
 	 */
 	public boolean isContinuous()
@@ -244,6 +304,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Gets the previous.
+	 *
 	 * @return the previous
 	 */
 	public LocalisationModel getPrevious()
@@ -252,6 +314,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Sets the previous.
+	 *
 	 * @param previous
 	 *            the previous to set
 	 */
@@ -263,6 +327,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Gets the next.
+	 *
 	 * @return the next
 	 */
 	public LocalisationModel getNext()
@@ -271,6 +337,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Sets the next.
+	 *
 	 * @param next
 	 *            the next to set
 	 */
@@ -282,6 +350,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Gets the data.
+	 *
 	 * @return the data
 	 */
 	public double[] getData()
@@ -290,6 +360,8 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	}
 
 	/**
+	 * Sets the data.
+	 *
 	 * @param data
 	 *            the data to set
 	 */

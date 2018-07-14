@@ -2857,6 +2857,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 * Save PeakFit configuration template using the current benchmark settings.
 	 *
 	 * @param summary
+	 *            the summary
 	 */
 	private void saveTemplate(String summary)
 	{

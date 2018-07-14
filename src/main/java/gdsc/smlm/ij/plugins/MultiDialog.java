@@ -445,6 +445,7 @@ public class MultiDialog extends Dialog
 	 * Get a value from the macro options. Adapted from ij.gui.GenericDialog.
 	 *
 	 * @param label
+	 *            the label
 	 * @return The value (or null)
 	 */
 	private String getValue(String label)

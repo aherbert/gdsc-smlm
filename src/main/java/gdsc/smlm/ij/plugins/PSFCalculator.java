@@ -98,6 +98,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * provided settings.
 	 *
 	 * @param settings
+	 *            the settings
 	 * @param simpleMode
 	 *            Only present a wavelength, NA and proportionality factor fields.
 	 * @return the PSF standard deviation
@@ -189,7 +190,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 				settings.getAdjustForSquarePixels());
 	}
 
-	private void disableEditing(TextField textField)
+	private static void disableEditing(TextField textField)
 	{
 		textField.setEditable(false);
 		textField.setBackground(SystemColor.control);
@@ -481,9 +482,10 @@ public class PSFCalculator implements PlugIn, DialogListener
 	}
 
 	/**
-	 * Calculate the intensity of the Gaussian at distance x from the centre
+	 * Calculate the intensity of the Gaussian at distance x from the centre.
 	 *
 	 * @param x
+	 *            the x
 	 * @return The intensity
 	 */
 	public static double intensityGaussian(double x)
@@ -493,7 +495,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		return FastMath.exp(-0.5 * (x * x));
 	}
 
-	private String getPixelPitchLabel(double pixelPitch)
+	private static String getPixelPitchLabel(double pixelPitch)
 	{
 		return "Pixel pitch (nm) = " + IJ.d2s(pixelPitch, 3);
 	}
@@ -508,7 +510,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		return settings.getPixelPitch() * 1000 / (settings.getMagnification() * settings.getBeamExpander());
 	}
 
-	private String getAbbeLimitLabel(double abbeLimit)
+	private static String getAbbeLimitLabel(double abbeLimit)
 	{
 		return "Abbe limit (nm) = " + IJ.d2s(abbeLimit, 3);
 	}

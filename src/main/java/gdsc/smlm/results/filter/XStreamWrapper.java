@@ -117,6 +117,10 @@ public abstract class XStreamWrapper
 	}
 
 	/**
+	 * Create an XML representation of this object
+	 *
+	 * @param object
+	 *            the object
 	 * @return An XML representation of this object
 	 */
 	public static String toXML(Object object)
@@ -140,9 +144,10 @@ public abstract class XStreamWrapper
 	}
 
 	/**
-	 * Create the filter from the XML representation
+	 * Create the filter from the XML representation.
 	 *
 	 * @param xml
+	 *            the xml
 	 * @return the filter
 	 */
 	public static Object fromXML(String xml)

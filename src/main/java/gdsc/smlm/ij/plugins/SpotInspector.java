@@ -468,11 +468,13 @@ public class SpotInspector implements PlugIn, MouseListener
 	}
 
 	/**
-	 * Get the relative change factor between f and g
+	 * Get the relative change factor between f and g.
 	 *
 	 * @param f
+	 *            the f
 	 * @param g
-	 * @return
+	 *            the g
+	 * @return the factor
 	 */
 	private static float getFactor(float f, float g)
 	{

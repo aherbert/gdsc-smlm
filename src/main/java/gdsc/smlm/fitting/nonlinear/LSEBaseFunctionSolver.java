@@ -34,11 +34,14 @@ import gdsc.smlm.function.GradientFunction;
  */
 public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implements LSEFunctionSolver
 {
+	/** The total sum of squares. */
 	protected double totalSumOfSquares = Double.NaN;
 
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 *
+	 * @param f
+	 *            the function
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
@@ -73,12 +76,16 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	}
 
 	/**
-	 * Compute the error
+	 * Compute the error.
 	 *
 	 * @param value
+	 *            the value
 	 * @param noise
+	 *            the noise
 	 * @param numberOfFittedPoints
+	 *            the number of fitted points
 	 * @param numberOfFittedParameters
+	 *            the number of fitted parameters
 	 * @return the error
 	 */
 	public static double getError(double value, double noise, int numberOfFittedPoints, int numberOfFittedParameters)

@@ -2643,8 +2643,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						.setInitialParameters(initialParams)
 						.setParameters(params)
 						.setParameterDeviations(paramDevs)
-						.setnPeaks(npeaks)
-						.setnFittedParameters(nFittedParameters)
+						.setNumberOfPeaks(npeaks)
+						.setNumberOfFittedParameters(nFittedParameters)
 						.setIterations(doubletFitResult.getIterations())
 						.setEvaluations(doubletFitResult.getEvaluations())
 						.build();

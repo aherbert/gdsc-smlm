@@ -51,9 +51,10 @@ public class MaskDistribution implements SpatialDistribution
 	private final double scaleX, scaleY;
 
 	/**
-	 * Create a distribution from the mask image (packed in YX order)
+	 * Create a distribution from the mask image (packed in YX order).
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -71,9 +72,10 @@ public class MaskDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution from the mask image (packed in YX order)
+	 * Create a distribution from the mask image (packed in YX order).
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -91,9 +93,10 @@ public class MaskDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution from the mask image (packed in YX order)
+	 * Create a distribution from the mask image (packed in YX order).
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -127,9 +130,10 @@ public class MaskDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution from the mask image (packed in YX order)
+	 * Create a distribution from the mask image (packed in YX order).
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -150,9 +154,10 @@ public class MaskDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution from the mask image (packed in YX order)
+	 * Create a distribution from the mask image (packed in YX order).
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -180,6 +185,7 @@ public class MaskDistribution implements SpatialDistribution
 	 * This is a package scope constructor allowing the mask to be created with all zero pixels.
 	 *
 	 * @param mask
+	 *            the mask
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height

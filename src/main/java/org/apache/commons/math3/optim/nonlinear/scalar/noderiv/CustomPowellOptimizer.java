@@ -671,9 +671,10 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	}
 
 	/**
-	 * Check the point falls within the configured bounds truncating if necessary
+	 * Check the point falls within the configured bounds truncating if necessary.
 	 *
 	 * @param point
+	 *            the point
 	 */
 	private void applyBounds(double[] point)
 	{

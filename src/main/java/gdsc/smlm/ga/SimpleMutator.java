@@ -27,6 +27,9 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 /**
  * Mutates the sequence by selecting random positions and random shifts.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class SimpleMutator<T extends Comparable<T>> extends Randomiser implements Mutator<T>
 {
@@ -38,7 +41,10 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 	private int positionsCount;
 
 	/**
+	 * Instantiates a new simple mutator.
+	 *
 	 * @param random
+	 *            the random data generator
 	 * @param fraction
 	 *            The fraction of the sequence positions to mutate on average
 	 */

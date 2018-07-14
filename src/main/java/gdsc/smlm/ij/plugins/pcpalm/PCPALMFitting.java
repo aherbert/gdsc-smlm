@@ -77,7 +77,6 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
-import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
 /**
@@ -177,16 +176,6 @@ public class PCPALMFitting implements PlugIn
 			log(TITLE);
 			PCPALMMolecules.logSpacer();
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-	 */
-	public void run(ImageProcessor ip)
-	{
-		// Nothing to do
 	}
 
 	private boolean showDialog()
@@ -350,7 +339,9 @@ public class PCPALMFitting implements PlugIn
 		try
 		{
 			while (selectNextCorrelation(results))
-				;
+			{
+				// All processing done in selectNextCorrelation
+			}
 		}
 		catch (Exception e)
 		{
@@ -391,7 +382,7 @@ public class PCPALMFitting implements PlugIn
 		return !results.isEmpty();
 	}
 
-	private boolean selectNextCorrelation(ArrayList<CorrelationResult> results)
+	private static boolean selectNextCorrelation(ArrayList<CorrelationResult> results)
 	{
 		ArrayList<String> titles = buildTitlesList(results);
 
@@ -442,11 +433,12 @@ public class PCPALMFitting implements PlugIn
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore
 		}
 		return false;
 	}
 
-	private ArrayList<String> buildTitlesList(ArrayList<CorrelationResult> results)
+	private static ArrayList<String> buildTitlesList(ArrayList<CorrelationResult> results)
 	{
 		// Make all subsequent results match the same nmPerPixel limit
 		double nmPerPixel = 0;
@@ -471,7 +463,7 @@ public class PCPALMFitting implements PlugIn
 		return titles;
 	}
 
-	private boolean alreadySelected(ArrayList<CorrelationResult> results, CorrelationResult r)
+	private static boolean alreadySelected(ArrayList<CorrelationResult> results, CorrelationResult r)
 	{
 		for (CorrelationResult r2 : results)
 			if (r.id == r2.id)
@@ -480,10 +472,12 @@ public class PCPALMFitting implements PlugIn
 	}
 
 	/**
-	 * Log a message to the IJ log window
+	 * Log a message to the IJ log window.
 	 *
 	 * @param format
+	 *            the format
 	 * @param args
+	 *            the args
 	 */
 	private static void log(String format, Object... args)
 	{
@@ -633,7 +627,7 @@ public class PCPALMFitting implements PlugIn
 		return y;
 	}
 
-	private double[][] combineCurves(ArrayList<CorrelationResult> results, int maxSize)
+	private static double[][] combineCurves(ArrayList<CorrelationResult> results, int maxSize)
 	{
 		double[][] gr = new double[3][maxSize];
 		Statistics[] gr_ = new Statistics[maxSize];
@@ -671,10 +665,8 @@ public class PCPALMFitting implements PlugIn
 		{
 			outputFilename = Utils.replaceExtension(outputFilename, "xls");
 
-			BufferedWriter output = null;
-			try
+			try (BufferedWriter output = new BufferedWriter(new FileWriter(outputFilename)))
 			{
-				output = new BufferedWriter(new FileWriter(outputFilename));
 				writeHeader(output, HEADER_PEAK_DENSITY, Double.toString(previous_peakDensity));
 				writeHeader(output, HEADER_SPATIAL_DOMAIN, Boolean.toString(previous_spatialDomain));
 				output.write("#r\tg(r)\tS.E.");
@@ -696,24 +688,10 @@ public class PCPALMFitting implements PlugIn
 				e.printStackTrace();
 				IJ.log("Failed to save correlation curve to file: " + outputFilename);
 			}
-			finally
-			{
-				if (output != null)
-				{
-					try
-					{
-						output.close();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
 		}
 	}
 
-	private void writeHeader(BufferedWriter output, String header, String value) throws IOException
+	private static void writeHeader(BufferedWriter output, String header, String value) throws IOException
 	{
 		output.write("#");
 		output.write(header);
@@ -738,12 +716,8 @@ public class PCPALMFitting implements PlugIn
 		boolean spatialDomainSet = false;
 		boolean peakDensitySet = false;
 
-		BufferedReader input = null;
-		try
+		try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(inputFilename), null)))
 		{
-			FileInputStream fis = new FileInputStream(inputFilename);
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
 			String line;
 			int count = 0;
 
@@ -815,41 +789,42 @@ public class PCPALMFitting implements PlugIn
 					continue;
 
 				// Extract the first 3 fields
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("[\t ,]+");
+				try (Scanner scanner = new Scanner(line))
+				{
+					scanner.useDelimiter("[\t ,]+");
 
-				double r, g;
-				try
-				{
-					r = scanner.nextDouble();
-					g = scanner.nextDouble();
+					double r, g;
+					try
+					{
+						r = scanner.nextDouble();
+						g = scanner.nextDouble();
+					}
+					catch (InputMismatchException e)
+					{
+						IJ.error(TITLE, "Incorrect fields on line " + count);
+						return false;
+					}
+					catch (NoSuchElementException e)
+					{
+						IJ.error(TITLE, "Incorrect fields on line " + count);
+						return false;
+					}
+					// Allow the file to be missing the curve error. This is only used for plotting anyway.
+					double error = 0;
+					try
+					{
+						error = scanner.nextDouble();
+					}
+					catch (InputMismatchException e)
+					{
+						// Ignore
+					}
+					catch (NoSuchElementException e)
+					{
+						// Ignore
+					}
+					data.add(new double[] { r, g, error });
 				}
-				catch (InputMismatchException e)
-				{
-					IJ.error(TITLE, "Incorrect fields on line " + count);
-					scanner.close();
-					return false;
-				}
-				catch (NoSuchElementException e)
-				{
-					IJ.error(TITLE, "Incorrect fields on line " + count);
-					scanner.close();
-					return false;
-				}
-				// Allow the file to be missing the curve error. This is only used for plotting anyway.
-				double error = 0;
-				try
-				{
-					error = scanner.nextDouble();
-				}
-				catch (InputMismatchException e)
-				{
-				}
-				catch (NoSuchElementException e)
-				{
-				}
-				scanner.close();
-				data.add(new double[] { r, g, error });
 
 				// Read the next line
 				line = input.readLine();
@@ -877,18 +852,6 @@ public class PCPALMFitting implements PlugIn
 			IJ.error(TITLE, "Unable to read from file " + inputFilename);
 			return false;
 		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
-		}
 
 		return true;
 	}
@@ -898,10 +861,13 @@ public class PCPALMFitting implements PlugIn
 	 * must be fit within a tolerance of the starting values.
 	 *
 	 * @param gr
+	 *            the correlation curve
 	 * @param sigmaS
 	 *            The estimated precision
 	 * @param proteinDensity
 	 *            The estimate protein density
+	 * @param resultColour
+	 *            the result colour
 	 * @return The fitted parameters [precision, density]
 	 */
 	private double[] fitRandomModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
@@ -1030,7 +996,7 @@ public class PCPALMFitting implements PlugIn
 		return parameters;
 	}
 
-	private double parameterDrift(double start, double end)
+	private static double parameterDrift(double start, double end)
 	{
 		if (end < start)
 		{
@@ -1044,10 +1010,13 @@ public class PCPALMFitting implements PlugIn
 	 * must be fit within a tolerance of the starting values.
 	 *
 	 * @param gr
+	 *            the correlation curve
 	 * @param sigmaS
 	 *            The estimated precision
 	 * @param proteinDensity
 	 *            The estimated protein density
+	 * @param resultColour
+	 *            the result colour
 	 * @return The fitted parameters [precision, density, clusterRadius, clusterDensity]
 	 */
 	private double[] fitClusteredModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
@@ -1085,7 +1054,7 @@ public class PCPALMFitting implements PlugIn
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
 
-		PointValuePair constrainedSolution = runBoundedOptimiser(gr, initialSolution, lB, uB, clusteredModelMulti);
+		PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, clusteredModelMulti);
 
 		if (constrainedSolution == null)
 			return null;
@@ -1210,7 +1179,7 @@ public class PCPALMFitting implements PlugIn
 		return parameters;
 	}
 
-	private PointValuePair runBoundedOptimiser(double[][] gr, double[] initialSolution, double[] lB, double[] uB,
+	private PointValuePair runBoundedOptimiser(double[] initialSolution, double[] lB, double[] uB,
 			SumOfSquaresModelFunction function)
 	{
 		// Create the functions to optimise
@@ -1255,7 +1224,8 @@ public class PCPALMFitting implements PlugIn
 			}
 			finally
 			{
-				boundedEvaluations += opt.getEvaluations();
+				if (opt != null)
+					boundedEvaluations += opt.getEvaluations();
 			}
 		}
 
@@ -1301,9 +1271,11 @@ public class PCPALMFitting implements PlugIn
 			}
 			catch (TooManyEvaluationsException e)
 			{
+				// Ignore
 			}
 			catch (TooManyIterationsException e)
 			{
+				// Ignore
 			}
 			finally
 			{
@@ -1326,9 +1298,11 @@ public class PCPALMFitting implements PlugIn
 			}
 			catch (TooManyEvaluationsException e)
 			{
+				// Ignore
 			}
 			catch (TooManyIterationsException e)
 			{
+				// Ignore
 			}
 			finally
 			{
@@ -1343,10 +1317,13 @@ public class PCPALMFitting implements PlugIn
 	 * must be fit within a tolerance of the starting values.
 	 *
 	 * @param gr
+	 *            the correlation curve
 	 * @param sigmaS
 	 *            The estimated precision
 	 * @param proteinDensity
 	 *            The estimated protein density
+	 * @param resultColour
+	 *            the result colour
 	 * @return The fitted parameters [precision, density, clusterRadius, clusterDensity]
 	 */
 	private double[] fitEmulsionModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
@@ -1394,7 +1371,7 @@ public class PCPALMFitting implements PlugIn
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
 
-		PointValuePair constrainedSolution = runBoundedOptimiser(gr, initialSolution, lB, uB, emulsionModelMulti);
+		PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, emulsionModelMulti);
 
 		if (constrainedSolution == null)
 			return null;
@@ -1523,7 +1500,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Abstract base model function class for common functionality.
 	 */
-	public abstract class BaseModelFunction extends LoggingOptimiserFunction
+	private abstract class BaseModelFunction extends LoggingOptimiserFunction
 	{
 		public BaseModelFunction(String name)
 		{
@@ -1531,21 +1508,22 @@ public class PCPALMFitting implements PlugIn
 		}
 
 		/**
-		 * Evaluate the correlation function
+		 * Evaluate the correlation function.
 		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param parameters
 		 *            The parameters
-		 * @return
+		 * @return the value
 		 */
 		public abstract double evaluate(double r, final double[] parameters);
 
 		/**
 		 * Evaluate the jacobian of the correlation function for all data points (see
-		 * {@link #addData(double[], double[])})
+		 * {@link #addData(double[], double[])}).
 		 *
 		 * @param parameters
+		 *            the parameters
 		 * @return The jacobian
 		 */
 		public abstract double[][] jacobian(double[] parameters);
@@ -1572,7 +1550,7 @@ public class PCPALMFitting implements PlugIn
 	 * <p>
 	 * p = average protein density
 	 */
-	public class RandomModelFunction extends BaseModelFunction implements MultivariateVectorFunction
+	private class RandomModelFunction extends BaseModelFunction implements MultivariateVectorFunction
 	{
 		double[] lastValue = null;
 
@@ -1662,7 +1640,7 @@ public class PCPALMFitting implements PlugIn
 		}
 
 		/**
-		 * Evaluate the correlation function
+		 * Evaluate the correlation function.
 		 *
 		 * @param r
 		 *            The correlation radius
@@ -1670,7 +1648,7 @@ public class PCPALMFitting implements PlugIn
 		 *            Average precision
 		 * @param density
 		 *            Average protein density
-		 * @return
+		 * @return the value
 		 */
 		public double evaluate(double r, final double sigma, final double density)
 		{
@@ -1684,7 +1662,7 @@ public class PCPALMFitting implements PlugIn
 		 *            The correlation radius
 		 * @param parameters
 		 *            The parameters
-		 * @return
+		 * @return the value
 		 */
 		@Override
 		public double evaluate(double r, final double[] parameters)
@@ -1734,7 +1712,7 @@ public class PCPALMFitting implements PlugIn
 	 * Note: The clustered model described in the PLoS One paper models g(r)protein using the exponential directly, i.e.
 	 * there is no convolution !!!
 	 */
-	public abstract class ClusteredModelFunction extends BaseModelFunction
+	private abstract class ClusteredModelFunction extends BaseModelFunction
 	{
 		double[] lastValue = null;
 
@@ -1815,6 +1793,7 @@ public class PCPALMFitting implements PlugIn
 			return jacobian;
 		}
 
+		@SuppressWarnings("unused")
 		double[][] jacobian2(double[] variables)
 		{
 			// Compute the gradients using numerical differentiation
@@ -1856,7 +1835,7 @@ public class PCPALMFitting implements PlugIn
 		 *            Range of the cluster
 		 * @param amplitude
 		 *            Amplitude of the cluster
-		 * @return
+		 * @return the value
 		 */
 		public double evaluate(double r, final double sigma, final double density, final double range,
 				final double amplitude)
@@ -1874,7 +1853,7 @@ public class PCPALMFitting implements PlugIn
 		 *            The correlation radius
 		 * @param parameters
 		 *            The parameters
-		 * @return
+		 * @return the value
 		 */
 		@Override
 		public double evaluate(double r, final double[] parameters)
@@ -1886,7 +1865,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	public class ClusteredModelFunctionGradient extends ClusteredModelFunction implements MultivariateVectorFunction
+	private class ClusteredModelFunctionGradient extends ClusteredModelFunction implements MultivariateVectorFunction
 	{
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
@@ -1909,7 +1888,7 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	public class SumOfSquaresModelFunction
+	private class SumOfSquaresModelFunction
 	{
 		BaseModelFunction f;
 		double[] x, y;
@@ -1942,9 +1921,10 @@ public class PCPALMFitting implements PlugIn
 		}
 
 		/**
-		 * Check if the variable match those last used for computation of the value
+		 * Check if the variable match those last used for computation of the value.
 		 *
 		 * @param parameters
+		 *            the parameters
 		 * @return True if the variables are the same
 		 */
 		private boolean sameVariables(double[] parameters)
@@ -1959,6 +1939,13 @@ public class PCPALMFitting implements PlugIn
 			return false;
 		}
 
+		/**
+		 * Compute the gradient.
+		 *
+		 * @param parameters
+		 *            the parameters
+		 * @return the gradient
+		 */
 		public double[] gradient(double[] parameters)
 		{
 			// We can compute the jacobian for all the functions.
@@ -2003,7 +1990,7 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	public class SumOfSquaresMultivariateFunction implements MultivariateFunction
+	private class SumOfSquaresMultivariateFunction implements MultivariateFunction
 	{
 		SumOfSquaresModelFunction f;
 
@@ -2019,7 +2006,7 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	public class SumOfSquaresMultivariateVectorFunction implements MultivariateVectorFunction
+	private class SumOfSquaresMultivariateVectorFunction implements MultivariateVectorFunction
 	{
 		SumOfSquaresModelFunction f;
 
@@ -2056,7 +2043,7 @@ public class PCPALMFitting implements PlugIn
 	 * <p>
 	 * Note: Described in figure 3 of Veatch, et al (2012) Plos One, e31457
 	 */
-	public abstract class EmulsionModelFunction extends BaseModelFunction
+	private abstract class EmulsionModelFunction extends BaseModelFunction
 	{
 		double[] lastValue = null;
 
@@ -2148,6 +2135,7 @@ public class PCPALMFitting implements PlugIn
 			return jacobian;
 		}
 
+		@SuppressWarnings("unused")
 		double[][] jacobian2(double[] variables)
 		{
 			// Compute the gradients using numerical differentiation
@@ -2192,7 +2180,7 @@ public class PCPALMFitting implements PlugIn
 		 *            Amplitude of the cluster
 		 * @param alpha
 		 *            Measure of the coherence length between circles
-		 * @return
+		 * @return the value
 		 */
 		public double evaluate(double r, final double sigma, final double density, final double range,
 				final double amplitude, final double alpha)
@@ -2210,7 +2198,7 @@ public class PCPALMFitting implements PlugIn
 		 *            The correlation radius
 		 * @param parameters
 		 *            The parameters
-		 * @return
+		 * @return the value
 		 */
 		@Override
 		public double evaluate(double r, final double[] parameters)
@@ -2222,7 +2210,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	public class EmulsionModelFunctionGradient extends EmulsionModelFunction implements MultivariateVectorFunction
+	private class EmulsionModelFunctionGradient extends EmulsionModelFunction implements MultivariateVectorFunction
 	{
 		/*
 		 * (non-Javadoc)
@@ -2242,7 +2230,7 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	private void createResultsTable()
+	private static void createResultsTable()
 	{
 		if (resultsTable == null || !resultsTable.isVisible())
 		{
@@ -2262,7 +2250,7 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	private void addResult(String model, String resultColour, boolean valid, double precision, double density,
+	private static void addResult(String model, String resultColour, boolean valid, double precision, double density,
 			double domainRadius, double domainDensity, double nCluster, double coherence, double ic)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -2279,7 +2267,7 @@ public class PCPALMFitting implements PlugIn
 		resultsTable.append(sb.toString());
 	}
 
-	private String getString(double value)
+	private static String getString(double value)
 	{
 		return (value == 0) ? "-" : Utils.rounded(value, 4);
 	}

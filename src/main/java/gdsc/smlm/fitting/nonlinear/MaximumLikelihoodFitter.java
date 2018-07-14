@@ -147,6 +147,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		 * This is done by square rooting the value of the mapped indices.
 		 *
 		 * @param point
+		 *            the point
 		 * @return The mapped point
 		 */
 		public double[] map(double[] point)
@@ -165,6 +166,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		 * This is done by squaring the value of the mapped indices.
 		 *
 		 * @param point
+		 *            the point
 		 * @return The unmapped point
 		 */
 		public double[] unmap(double[] point)

@@ -94,24 +94,40 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	Gaussian2DPeakResultCalculator calculator;
 
 	/**
+	 * Instantiates a new multi hysteresis filter.
+	 *
 	 * @param searchDistance
+	 *            the search distance
 	 * @param searchDistanceMode
 	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
 	 * @param timeThreshold
+	 *            the time threshold
 	 * @param timeThresholdMode
 	 *            0 = frames; 1 = seconds
 	 * @param strictSignal
+	 *            the strict signal
 	 * @param rangeSignal
+	 *            the range signal
 	 * @param strictSnr
+	 *            the strict snr
 	 * @param rangeSnr
+	 *            the range snr
 	 * @param strictMinWidth
+	 *            the strict min width
 	 * @param rangeMinWidth
+	 *            the range min width
 	 * @param strictMaxWidth
+	 *            the strict max width
 	 * @param rangeMaxWidth
+	 *            the range max width
 	 * @param strictShift
+	 *            the strict shift
 	 * @param rangeShift
+	 *            the range shift
 	 * @param strictPrecision
+	 *            the strict precision
 	 * @param rangePrecision
+	 *            the range precision
 	 */
 	public MultiHysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
 			int timeThresholdMode, double strictSignal, double rangeSignal, float strictSnr, float rangeSnr,
@@ -175,6 +191,12 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		super.setup(peakResults);
 	}
 
+	/**
+	 * Set up the calculator.
+	 *
+	 * @param peakResults
+	 *            the results
+	 */
 	protected void setupCalculator(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
@@ -214,6 +236,13 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		return PeakStatus.OK;
 	}
 
+	/**
+	 * Gets the variance.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the variance
+	 */
 	protected double getVariance(PeakResult result)
 	{
 		return calculator.getLSEVariance(result.getParameters(), result.getNoise());
@@ -372,11 +401,21 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		}
 	}
 
+	/**
+	 * Gets the precision paramater type.
+	 *
+	 * @return the precision paramater type
+	 */
 	protected ParameterType getPrecisionParamaterType()
 	{
 		return ParameterType.PRECISION;
 	}
 
+	/**
+	 * Gets the precision range paramater type.
+	 *
+	 * @return the precision range paramater type
+	 */
 	protected ParameterType getPrecisionRangeParamaterType()
 	{
 		return ParameterType.PRECISION_RANGE;

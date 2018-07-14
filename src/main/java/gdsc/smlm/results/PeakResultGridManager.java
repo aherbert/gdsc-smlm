@@ -67,11 +67,14 @@ public class PeakResultGridManager
 	}
 
 	/**
-	 * Create a grid for candidates or peak results
+	 * Create a grid for candidates or peak results.
 	 *
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param resolution
+	 *            the resolution
 	 */
 	public PeakResultGridManager(int maxx, int maxy, int resolution)
 	{
@@ -99,7 +102,9 @@ public class PeakResultGridManager
 	 * Create a grid only of peak results. No candidates can be added to the grid.
 	 *
 	 * @param results
+	 *            the results
 	 * @param resolution
+	 *            the resolution
 	 */
 	public PeakResultGridManager(PeakResult[] results, double resolution)
 	{
@@ -129,6 +134,7 @@ public class PeakResultGridManager
 	 * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
 	 *
 	 * @param peak
+	 *            the peak
 	 */
 	public void addToGrid(PeakResult peak)
 	{
@@ -157,7 +163,9 @@ public class PeakResultGridManager
 	 * distance will be returned, plus there may be others and so distances should be checked.
 	 *
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return the neighbours
 	 */
 	public PeakResult[] getPeakResultNeighbours(final int x, final int y)

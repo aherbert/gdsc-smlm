@@ -34,6 +34,9 @@ public class FitTypeCounter
 {
 	private AtomicInteger[] count;
 
+	/**
+	 * Instantiates a new fit type counter.
+	 */
 	public FitTypeCounter()
 	{
 		this.count = new AtomicInteger[(int) FastMath.pow(2, FitType.NO_OF_FLAGS)];
@@ -50,9 +53,10 @@ public class FitTypeCounter
 	}
 
 	/**
-	 * Add a single count of the given type
+	 * Add a single count of the given type.
 	 *
 	 * @param fitType
+	 *            the fit type
 	 */
 	public void add(FitType fitType)
 	{
@@ -60,10 +64,12 @@ public class FitTypeCounter
 	}
 
 	/**
-	 * Add a value of the given type to the count
+	 * Add a value of the given type to the count.
 	 *
 	 * @param fitType
+	 *            the fit type
 	 * @param value
+	 *            the value
 	 */
 	public void add(FitType fitType, int value)
 	{
@@ -71,9 +77,10 @@ public class FitTypeCounter
 	}
 
 	/**
-	 * Get the count of the given type
+	 * Get the count of the given type.
 	 *
 	 * @param fitType
+	 *            the fit type
 	 * @return The count
 	 */
 	public int get(FitType fitType)

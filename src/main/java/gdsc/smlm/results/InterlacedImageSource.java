@@ -187,11 +187,8 @@ public class InterlacedImageSource extends ImageSource
 			counter = -initialSkip;
 			return true;
 		}
-		else
-		{
-			imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
-			return false;
-		}
+		imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
+		return false;
 
 	}
 
@@ -256,8 +253,11 @@ public class InterlacedImageSource extends ImageSource
 	}
 
 	/**
+	 * Checks if is valid.
+	 *
 	 * @param frame
-	 * @return
+	 *            the frame
+	 * @return true, if is valid
 	 */
 	@Override
 	public boolean isValid(int frame)

@@ -240,7 +240,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		MemoryPeakResults.addResults(out);
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Analyse the track length of traced data");
@@ -321,7 +321,10 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	 * x-positions to allow plotting a square line profile using the ImageJ plot command.
 	 *
 	 * @param length
-	 * @return
+	 *            the length
+	 * @param offset
+	 *            the offset
+	 * @return the x-axis
 	 */
 	public static float[] createHistogramAxis(int length, float offset)
 	{

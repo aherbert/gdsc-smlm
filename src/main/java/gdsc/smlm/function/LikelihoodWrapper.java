@@ -34,9 +34,19 @@ import gdsc.smlm.fitting.FisherInformationMatrix;
  */
 public abstract class LikelihoodWrapper
 {
+	/** The function. */
 	final protected NonLinearFunction f;
-	final protected double[] a, data;
+
+	/** The parameters. */
+	final protected double[] a;
+
+	/** The observed values */
+	final protected double[] data;
+
+	/** The number of observed values */
 	final protected int n;
+
+	/** The number of variables. */
 	final protected int nVariables;
 
 	private double lastScore;
@@ -67,9 +77,10 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Copy the variables into the appropriate parameter positions for the NonLinearFunction
+	 * Copy the variables into the appropriate parameter positions for the NonLinearFunction.
 	 *
 	 * @param variables
+	 *            the variables
 	 */
 	protected void initialiseFunction(double[] variables)
 	{
@@ -80,9 +91,10 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Check if the variable match those last used for computation of the value
+	 * Check if the variable match those last used for computation of the value.
 	 *
 	 * @param variables
+	 *            the variables
 	 * @return True if the variables are the same
 	 */
 	private boolean sameVariables(double[] variables)

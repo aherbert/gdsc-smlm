@@ -794,6 +794,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	 * of negatives matches the configured parameters.
 	 *
 	 * @param filterResults
+	 *            the filter results
 	 * @return The filter candidates
 	 */
 	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults)

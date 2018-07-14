@@ -5173,6 +5173,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * Save PeakFit configuration template using the current benchmark settings.
 	 *
 	 * @param topFilterSummary
+	 *            the top filter summary
 	 */
 	private void saveTemplate(String topFilterSummary)
 	{

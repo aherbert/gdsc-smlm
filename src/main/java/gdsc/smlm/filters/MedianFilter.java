@@ -214,9 +214,10 @@ public class MedianFilter extends BaseFilter
 	}
 
 	/**
-	 * Add a value
+	 * Add a value.
 	 *
 	 * @param v
+	 *            the vakue
 	 */
 	private void add(float v)
 	{
@@ -305,7 +306,7 @@ public class MedianFilter extends BaseFilter
 		return med;
 	}
 
-	private float[] floatBuffer(float[] buffer, int size)
+	private static float[] floatBuffer(float[] buffer, int size)
 	{
 		if (buffer == null || buffer.length < size)
 		{

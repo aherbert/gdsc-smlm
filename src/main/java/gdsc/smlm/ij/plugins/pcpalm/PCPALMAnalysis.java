@@ -128,8 +128,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		spatialDomain = "spatial".equalsIgnoreCase(arg);
 
-		boolean noAreaRoi = (imp.getRoi() == null || !imp.getRoi().isArea());
-		if (imp == null || (!spatialDomain && noAreaRoi))
+		if (imp == null || (!spatialDomain && (imp.getRoi() == null || !imp.getRoi().isArea())))
 		{
 			error("Require an input image with an area ROI.\n" + "Please create a binary molecule image using " +
 					PCPALMMolecules.TITLE);
@@ -173,7 +172,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *
 	 * @return True if a directory was selected
 	 */
-	private boolean getDirectory()
+	private static boolean getDirectory()
 	{
 		resultsDirectory = Utils.getDirectory("Results_directory", resultsDirectory);
 		return resultsDirectory != null;
@@ -432,7 +431,8 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * Set the area property to the region covered by the molecules.
 	 *
 	 * @param imp
-	 * @return
+	 *            the imageage
+	 * @return the array list
 	 */
 	ArrayList<Molecule> cropToRoi(ImagePlus imp)
 	{
@@ -526,7 +526,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return new MaskDistribution(mask, w, h, 0, scaleX, scaleY);
 	}
 
-	private int[] extractMask(ImageProcessor ip)
+	private static int[] extractMask(ImageProcessor ip)
 	{
 		int[] mask = new int[ip.getPixelCount()];
 		for (int i = 0; i < mask.length; i++)
@@ -537,10 +537,12 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
-	 * Log a message to the IJ log window
+	 * Log a message to the IJ log window.
 	 *
 	 * @param format
+	 *            the format
 	 * @param args
+	 *            the args
 	 */
 	private static void log(String format, Object... args)
 	{
@@ -548,9 +550,10 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
-	 * Perform the PC Analysis
+	 * Perform the PC Analysis.
 	 *
 	 * @param molecules
+	 *            the molecules
 	 */
 	private void analyse(ArrayList<Molecule> molecules)
 	{
@@ -812,11 +815,13 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
-	 * Pad the image by the specified number of pixels
+	 * Pad the image by the specified number of pixels.
 	 *
 	 * @param im
+	 *            the image
 	 * @param pad
-	 * @return
+	 *            the pad
+	 * @return the padded image
 	 */
 	private ImageProcessor padImage(ImageProcessor im, int pad)
 	{
@@ -836,7 +841,9 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * are set to 1. A window function is optionally applied.
 	 *
 	 * @param im
+	 *            the image
 	 * @param applyWindow
+	 *            the apply window flag
 	 * @return The weight image
 	 */
 	private ImageProcessor createWeightImage(ImageProcessor im, boolean applyWindow)
@@ -857,10 +864,15 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * correlation at a given radius.
 	 *
 	 * @param im
+	 *            the image
 	 * @param w
+	 *            the w
 	 * @param maxRadius
+	 *            the max radius
 	 * @param nmPerPixel
+	 *            the nm per pixel
 	 * @param density
+	 *            the density
 	 * @return { distances[], gr[], gr_se[] }
 	 */
 	private double[][] computeAutoCorrelationCurveFHT(ImageProcessor im, ImageProcessor w, int maxRadius,
@@ -902,6 +914,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * Gets the density of peaks in the image. The density is in squared pixels
 	 *
 	 * @param im
+	 *            the image
 	 * @return The density (in pixels^-2)
 	 */
 	private double getDensity(ImageProcessor im)
@@ -936,9 +949,15 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * radius.
 	 *
 	 * @param im
+	 *            the image
 	 * @param w
+	 *            the w
 	 * @param maxRadius
+	 *            the max radius
 	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @param density
+	 *            the density
 	 * @return { distances[], gr[], gr_se[] }
 	 */
 	private double[][] computeAutoCorrelationCurveFFT(ImageProcessor im, ImageProcessor w, int maxRadius,
@@ -1051,11 +1070,13 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
+	 * Compute auto correlation FHT.
+	 *
 	 * @param fftIm
 	 *            in frequency domain
-	 * @return
+	 * @return the auto correlation FHT.
 	 */
-	private FloatProcessor computeAutoCorrelationFHT(FHT2 fftIm)
+	private static FloatProcessor computeAutoCorrelationFHT(FHT2 fftIm)
 	{
 		FHT2 FHT2 = fftIm.conjugateMultiply(fftIm);
 		FHT2.inverseTransform();
@@ -1063,7 +1084,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return FHT2;
 	}
 
-	private FloatProcessor normaliseCorrelation(FloatProcessor corrIm, FloatProcessor corrW, double density)
+	private static FloatProcessor normaliseCorrelation(FloatProcessor corrIm, FloatProcessor corrW, double density)
 	{
 		float[] data = new float[corrIm.getWidth() * corrIm.getHeight()];
 		float[] dataIm = (float[]) corrIm.getPixels();
@@ -1081,9 +1102,10 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
-	 * Pads the image to the next power of two and transforms into the frequency domain
+	 * Pads the image to the next power of two and transforms into the frequency domain.
 	 *
 	 * @param ip
+	 *            the image
 	 * @return An FHT2 image in the frequency domain
 	 */
 	private FHT2 padToFHT2(ImageProcessor ip)
@@ -1097,9 +1119,10 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
-	 * Pads the image to the next power of two
+	 * Pads the image to the next power of two.
 	 *
 	 * @param ip
+	 *            the image
 	 * @return padded image
 	 */
 	private FloatProcessor pad(ImageProcessor ip)
@@ -1135,10 +1158,11 @@ public class PCPALMAnalysis implements PlugInFilter
 	}
 
 	/**
-	 * Compute the auto-correlation using the JTransforms FFT library
+	 * Compute the auto-correlation using the JTransforms FFT library.
 	 *
 	 * @param ip
-	 * @return
+	 *            the image
+	 * @return the auto correlation.
 	 */
 	private FloatProcessor computeAutoCorrelationFFT(ImageProcessor ip)
 	{

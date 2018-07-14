@@ -1037,6 +1037,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * Check if the stack should be updated to move the rolling window to the given peak.
 	 *
 	 * @param peak
+	 *            the peak
 	 * @return True if update is required
 	 */
 	protected boolean shouldUpdate(int peak)
@@ -1049,6 +1050,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * frame)
 	 *
 	 * @param peak
+	 *            the peak
 	 */
 	protected void checkAndUpdateToFrame(int peak)
 	{
@@ -1061,6 +1063,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * frame)
 	 *
 	 * @param peak
+	 *            the peak
 	 */
 	protected void updateToFrame(int peak)
 	{

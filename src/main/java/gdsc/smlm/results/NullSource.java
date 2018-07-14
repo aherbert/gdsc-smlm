@@ -28,10 +28,12 @@ package gdsc.smlm.results;
  */
 public class NullSource extends ImageSource
 {
+	
 	/**
-	 * Create a new image source
+	 * Create a new image source.
 	 *
 	 * @param name
+	 *            the name
 	 */
 	public NullSource(String name)
 	{

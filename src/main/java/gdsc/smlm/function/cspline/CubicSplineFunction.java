@@ -116,9 +116,10 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	}
 
 	/**
-	 * Locate the index within the gradient indices for the specified parameter
+	 * Locate the index within the gradient indices for the specified parameter.
 	 *
 	 * @param parameterIndex
+	 *            the parameter index
 	 * @return the gradient index (or -1 if not present)
 	 */
 	public int findGradientIndex(int parameterIndex)
@@ -433,15 +434,12 @@ public abstract class CubicSplineFunction implements Gradient2Function
 				df_da[offset + 3] = neg_tI_by_s3 * -dfda[2];
 				return tI_by_s2 * v;
 			}
-			else
-			{
-				// Zero gradients
-				df_da[offset] = 0;
-				df_da[offset + 1] = 0;
-				df_da[offset + 2] = 0;
-				df_da[offset + 3] = 0;
-				return 0;
-			}
+			// Zero gradients
+			df_da[offset] = 0;
+			df_da[offset + 1] = 0;
+			df_da[offset + 2] = 0;
+			df_da[offset + 3] = 0;
+			return 0;
 		}
 
 		/**
@@ -484,18 +482,15 @@ public abstract class CubicSplineFunction implements Gradient2Function
 				d2f_da2[offset + 3] = tI_by_s4 * d2fda2[2];
 				return tI_by_s2 * v;
 			}
-			else
-			{
-				// Zero gradients
-				df_da[offset] = 0;
-				df_da[offset + 1] = 0;
-				df_da[offset + 2] = 0;
-				df_da[offset + 3] = 0;
-				d2f_da2[offset + 1] = 0;
-				d2f_da2[offset + 2] = 0;
-				d2f_da2[offset + 3] = 0;
-				return 0;
-			}
+			// Zero gradients
+			df_da[offset] = 0;
+			df_da[offset + 1] = 0;
+			df_da[offset + 2] = 0;
+			df_da[offset + 3] = 0;
+			d2f_da2[offset + 1] = 0;
+			d2f_da2[offset + 2] = 0;
+			d2f_da2[offset + 3] = 0;
+			return 0;
 		}
 
 		/**
@@ -512,7 +507,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		 * Checks if the power table is at the boundary of the cubic polynomial.
 		 *
 		 * @param dimension
-		 *
+		 *            the dimension
 		 * @return true, if is node boundary
 		 */
 		abstract public boolean isNodeBoundary(int dimension);

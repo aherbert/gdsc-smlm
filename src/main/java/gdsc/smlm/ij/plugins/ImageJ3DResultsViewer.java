@@ -2396,8 +2396,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * <p>
 	 * Adapted from Picker.getPickedContent(...).
 	 *
+	 * @param canvas
+	 *            the canvas
+	 * @param scene
+	 *            the scene
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return the Content and closest intersection point
 	 */
 	private static Pair<Content, IntersectionInfo> getPickedContent(Canvas3D canvas, BranchGroup scene, final int x,

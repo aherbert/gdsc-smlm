@@ -616,10 +616,7 @@ public class Gaussian2DPeakResultHelper
 			// Since this has been squared then divide by 2.
 			return getPrecisionX(a, s, N, b2 / 2.0, 2);
 		}
-		else
-		{
-			return getPrecisionX(a, s, N, b2, 1);
-		}
+		return getPrecisionX(a, s, N, b2, 1);
 	}
 
 	/**
@@ -653,10 +650,7 @@ public class Gaussian2DPeakResultHelper
 			// Since this has been squared then divide by 2.
 			return getVarianceX(a, s, N, b2 / 2.0, 2);
 		}
-		else
-		{
-			return getVarianceX(a, s, N, b2, 1);
-		}
+		return getVarianceX(a, s, N, b2, 1);
 	}
 
 	/**
@@ -690,10 +684,7 @@ public class Gaussian2DPeakResultHelper
 			// Since this has been squared then divide by 2.
 			return getMLPrecisionX(a, s, N, b2 / 2.0, true);
 		}
-		else
-		{
-			return getMLPrecisionX(a, s, N, b2, false);
-		}
+		return getMLPrecisionX(a, s, N, b2, false);
 	}
 
 	/**
@@ -727,10 +718,7 @@ public class Gaussian2DPeakResultHelper
 			// Since this has been squared then divide by 2.
 			return getMLVarianceX(a, s, N, b2 / 2.0, true);
 		}
-		else
-		{
-			return getMLVarianceX(a, s, N, b2, false);
-		}
+		return getMLVarianceX(a, s, N, b2, false);
 	}
 
 	/**
@@ -975,7 +963,7 @@ public class Gaussian2DPeakResultHelper
 		}
 		catch (TooManyEvaluationsException e)
 		{
-
+			// Ignore
 		}
 		return getVarianceX(a, s, N, b2, emCCD);
 	}
@@ -983,15 +971,16 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Compute the function I1 using numerical integration. See Mortensen, et al (2010) Nature Methods 7, 377-383), SI
 	 * equation 43.
-	 *
+	 * 
 	 * <pre>
 	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
 	 *    = - sum [ t * ln(t) / (t + rho) ] dt
 	 * </pre>
-	 *
+	 * 
 	 * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
 	 *
 	 * @param rho
+	 *            the rho
 	 * @param integrationPoints
 	 *            the number of integration points for the LegendreGaussIntegrator
 	 * @return the I1 value
@@ -1049,6 +1038,7 @@ public class Gaussian2DPeakResultHelper
 	 *            the sx
 	 * @param sy
 	 *            the sy
+	 * @return the amplitude
 	 */
 	public static double getAmplitude(double intensity, double sx, double sy)
 	{
@@ -1327,7 +1317,7 @@ public class Gaussian2DPeakResultHelper
 	 * Gets the average signal value within a range r standard deviations of the centre.
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
-	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double)} and
 	 * the area would be pi * sx * sy * r * r.
 	 * <p>
 	 * Note: Argument sx and sy are not checked that they are positive.
@@ -1351,7 +1341,7 @@ public class Gaussian2DPeakResultHelper
 	 * Gets the average signal value within 1 standard deviations of the centre.
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
-	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double)} and
 	 * the area would be pi * sx * sy.
 	 * <p>
 	 * Note: Argument sx and sy are not checked that they are positive.
@@ -1373,7 +1363,7 @@ public class Gaussian2DPeakResultHelper
 	 * Gets the average signal value within 2 standard deviations of the centre.
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
-	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double)} and
 	 * the area would be pi * sx * sy * 2 * 2.
 	 * <p>
 	 * As an alternative definition, the standard deviation of the background can be computed using the standard
@@ -1399,7 +1389,7 @@ public class Gaussian2DPeakResultHelper
 	 * cumulative 2D normal distribution F(r).
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
-	 * elliptical area of the same range. The expected range is computed using {@link #inverseCumulative2D(double); }
+	 * elliptical area of the same range. The expected range is computed using {@link #inverseCumulative2D(double)}
 	 * and the area would be pi * sx * sy * r * r.
 	 * <p>
 	 * Note: Argument sx and sy are not checked that they are positive.
@@ -1428,7 +1418,7 @@ public class Gaussian2DPeakResultHelper
 	 * 2D Gaussian (cumulative 2D normal distribution F(r)=0.5).
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
-	 * elliptical area of the same range. The expected range is computed using {@link #inverseCumulative2D(double); }
+	 * elliptical area of the same range. The expected range is computed using {@link #inverseCumulative2D(double)}
 	 * and the area would be pi * sx * sy * r * r.
 	 * <p>
 	 * Note: When F(r)=0.5 then the inverseCumulative2D function computes the factor to convert a standard deviation of

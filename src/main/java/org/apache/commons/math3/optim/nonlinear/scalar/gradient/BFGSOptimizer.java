@@ -869,9 +869,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
-	 * Check the point falls within the configured bounds truncating if necessary
+	 * Check the point falls within the configured bounds truncating if necessary.
 	 *
 	 * @param point
+	 *            the point
 	 * @return true if the point was truncated
 	 */
 	private boolean applyBounds(double[] point)
@@ -900,10 +901,12 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * Check if the point falls on or outside configured bounds truncating the gradient to zero
-	 * if it is moving further outside the bounds
+	 * if it is moving further outside the bounds.
 	 *
 	 * @param r
+	 *            the r
 	 * @param point
+	 *            the point
 	 */
 	private void checkGradients(double[] r, double[] point)
 	{
@@ -912,11 +915,14 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * Check if the point falls on or outside configured bounds truncating the gradient to zero
-	 * if it is moving further outside the bounds (defined by the sign of the search direction)
+	 * if it is moving further outside the bounds (defined by the sign of the search direction).
 	 *
 	 * @param r
+	 *            the r
 	 * @param point
+	 *            the point
 	 * @param sign
+	 *            the sign
 	 */
 	private void checkGradients(double[] r, double[] point, final double sign)
 	{

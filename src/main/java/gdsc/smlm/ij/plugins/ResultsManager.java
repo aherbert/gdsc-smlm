@@ -93,24 +93,41 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.util.Java2;
 
+// TODO: Auto-generated Javadoc
 /**
- * Opens peaks results and displays/converts them
+ * Opens peaks results and displays/converts them.
  */
 public class ResultsManager implements PlugIn
 {
+	
+	/**
+	 * The Enum InputSource.
+	 */
 	public enum InputSource
 	{
+		
+		/** The file. */
 		//@formatter:off
 		FILE{ @Override
 		public String getName() { return "File"; }},
+		
+		/** The memory. */
 		MEMORY{ @Override
 		public String getName() { return "Memory"; }},
+		
+		/** The memory multi frame. */
 		MEMORY_MULTI_FRAME{ @Override
 		public String getName() { return "Memory (Multi-Frame)"; }},
+		
+		/** The memory single frame. */
 		MEMORY_SINGLE_FRAME{ @Override
 		public String getName() { return "Memory (Single-Frame)"; }},
+		
+		/** The memory clustered. */
 		MEMORY_CLUSTERED{ @Override
 		public String getName() { return "Memory (Clustered)"; }},
+		
+		/** The none. */
 		NONE{ @Override
 		public String getName() { return "None"; }};
 		//@formatter:on
@@ -131,8 +148,13 @@ public class ResultsManager implements PlugIn
 
 	private static String TITLE = "Peak Results Manager";
 
+	/** The input file. */
 	static String INPUT_FILE = "File";
+	
+	/** The input memory. */
 	static String INPUT_MEMORY = "Memory";
+	
+	/** The input none. */
 	static String INPUT_NONE = "[None]";
 
 	private static String inputOption = "";
@@ -352,21 +374,38 @@ public class ResultsManager implements PlugIn
 			IJ.showStatus(String.format("A %d/%s", output.size(), TextUtils.pleural(results.size(), "result")));
 	}
 
-	private boolean canShowDeviations(MemoryPeakResults results)
+	private static boolean canShowDeviations(MemoryPeakResults results)
 	{
 		return results.hasDeviations();
 	}
 
-	private boolean canShowEndFrame(MemoryPeakResults results)
+	private static boolean canShowEndFrame(MemoryPeakResults results)
 	{
 		return results.hasEndFrame();
 	}
 
-	private boolean canShowId(MemoryPeakResults results)
+	private static boolean canShowId(MemoryPeakResults results)
 	{
 		return results.hasId();
 	}
 
+	/**
+	 * Adds the table results.
+	 *
+	 * @param resultsList
+	 *            the results list
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param showDeviations
+	 *            the show deviations
+	 * @param showEndFrame
+	 *            the show end frame
+	 * @param showZ
+	 *            the show Z
+	 * @param showId
+	 *            the show id
+	 * @return the IJ table peak results
+	 */
 	public static IJTablePeakResults addTableResults(PeakResultsList resultsList, ResultsTableSettings resultsSettings,
 			boolean showDeviations, boolean showEndFrame, boolean showZ, boolean showId)
 	{
@@ -398,6 +437,14 @@ public class ResultsManager implements PlugIn
 		return r;
 	}
 
+	/**
+	 * Show interactive table.
+	 *
+	 * @param results
+	 *            the results
+	 * @param resultsTableSettings
+	 *            the results table settings
+	 */
 	public static void showInteractiveTable(MemoryPeakResults results, ResultsTableSettings resultsTableSettings)
 	{
 		PeakResultTableModel model = new PeakResultTableModel(results, true, resultsTableSettings);
@@ -406,6 +453,18 @@ public class ResultsManager implements PlugIn
 		frame.setVisible(true);
 	}
 
+	/**
+	 * Adds the image results.
+	 *
+	 * @param resultsList
+	 *            the results list
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param bounds
+	 *            the bounds
+	 * @param flags
+	 *            the flags
+	 */
 	public static void addImageResults(PeakResultsList resultsList, ResultsImageSettings resultsSettings,
 			Rectangle bounds, int flags)
 	{
@@ -456,6 +515,23 @@ public class ResultsManager implements PlugIn
 		}
 	}
 
+	/**
+	 * Adds the file results.
+	 *
+	 * @param resultsList
+	 *            the results list
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param resultsFilename
+	 *            the results filename
+	 * @param showDeviations
+	 *            the show deviations
+	 * @param showEndFrame
+	 *            the show end frame
+	 * @param showId
+	 *            the show id
+	 * @return the peak results
+	 */
 	public static PeakResults addFileResults(PeakResultsList resultsList, ResultsFileSettings resultsSettings,
 			String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
@@ -597,11 +673,29 @@ public class ResultsManager implements PlugIn
 	/** Use this to add a choice of table format to the dialog. */
 	public static final int FLAG_TABLE_FORMAT = 0x00000010;
 
+	/**
+	 * Adds the table results options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param resultsSettings
+	 *            the results settings
+	 */
 	public static void addTableResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
 	{
 		addTableResultsOptions(gd, resultsSettings, 0);
 	}
 
+	/**
+	 * Adds the table results options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param flags
+	 *            the flags
+	 */
 	public static void addTableResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
 			final int flags)
 	{
@@ -716,6 +810,16 @@ public class ResultsManager implements PlugIn
 		addImageResultsOptions(gd, resultsSettings, (extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
 	}
 
+	/**
+	 * Adds the image results options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param flags
+	 *            the flags
+	 */
 	public static void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
 			final int flags)
 	{
@@ -778,6 +882,16 @@ public class ResultsManager implements PlugIn
 				});
 	}
 
+	/**
+	 * Adds the file results options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param flags
+	 *            the flags
+	 */
 	public static void addFileResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
 			final int flags)
 	{
@@ -850,11 +964,29 @@ public class ResultsManager implements PlugIn
 		}
 	}
 
+	/**
+	 * Adds the in memory results options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param resultsSettings
+	 *            the results settings
+	 */
 	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
 	{
 		addInMemoryResultsOptions(gd, resultsSettings, 0);
 	}
 
+	/**
+	 * Adds the in memory results options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param resultsSettings
+	 *            the results settings
+	 * @param flags
+	 *            the flags
+	 */
 	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
 			int flags)
 	{
@@ -872,8 +1004,11 @@ public class ResultsManager implements PlugIn
 	 * number of localisation is added as a message to the dialog.
 	 *
 	 * @param gd
+	 *            the dialog
 	 * @param inputOption
+	 *            the input option
 	 * @param inputs
+	 *            the inputs
 	 */
 	public static void addInput(ExtendedGenericDialog gd, String inputOption, InputSource... inputs)
 	{
@@ -882,16 +1017,19 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If a file input
-	 * option
-	 * is selected then a field will be added name 'Input_file'.
+	 * option is selected then a field will be added name 'Input_file'.
 	 * <p>
 	 * If the source is a memory source then it will not be added if it is empty. If not empty then a summary of the
 	 * number of localisation is added as a message to the dialog.
 	 *
 	 * @param gd
+	 *            the dialog
 	 * @param inputName
+	 *            the input name
 	 * @param inputOption
+	 *            the input option
 	 * @param inputs
+	 *            the inputs
 	 */
 	public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption, InputSource... inputs)
 	{
@@ -915,11 +1053,15 @@ public class ResultsManager implements PlugIn
 	 * is true then a field will be added name 'Input_file'.
 	 *
 	 * @param gd
+	 *            the dialog
 	 * @param inputName
+	 *            the input name
 	 * @param inputOption
 	 *            The option to select by default
 	 * @param source
+	 *            the source
 	 * @param fileInput
+	 *            the file input
 	 */
 	@SuppressWarnings("unused")
 	public static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName, String inputOption,
@@ -979,7 +1121,7 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Remove the extra information added to a name for use in dialogs
+	 * Remove the extra information added to a name for use in dialogs.
 	 *
 	 * @param name
 	 *            the formatted name
@@ -998,7 +1140,9 @@ public class ResultsManager implements PlugIn
 	 * empty. If not empty then a summary of the number of localisation is added as a message to the dialog.
 	 *
 	 * @param source
+	 *            the source
 	 * @param input
+	 *            the input
 	 */
 	public static void addInputSource(ArrayList<String> source, InputSource input)
 	{
@@ -1025,10 +1169,12 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Add a memory input source to the list
+	 * Add a memory input source to the list.
 	 *
 	 * @param source
+	 *            the source
 	 * @param memoryResults
+	 *            the memory results
 	 * @param input
 	 *            MEMORY_MULTI_FRAME : Select only those results with at least one result spanning frames,
 	 *            MEMORY_CLUSTERED : Select only those results which have at least some IDs above zero (allowing zero to
@@ -1059,9 +1205,10 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Get the name of the results for use in dialogs
+	 * Get the name of the results for use in dialogs.
 	 *
 	 * @param memoryResults
+	 *            the memory results
 	 * @return The name
 	 */
 	public static String getName(MemoryPeakResults memoryResults)
@@ -1070,9 +1217,10 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Load results from memory using a name from a dialog
+	 * Load results from memory using a name from a dialog.
 	 *
 	 * @param name
+	 *            the name
 	 * @return The results
 	 */
 	public static MemoryPeakResults loadMemoryResults(String name)
@@ -1084,6 +1232,7 @@ public class ResultsManager implements PlugIn
 	 * Check for multi-frame results.
 	 *
 	 * @param memoryResults
+	 *            the memory results
 	 * @return True if at least one result spanning frames
 	 */
 	public static boolean isMultiFrame(MemoryPeakResults memoryResults)
@@ -1102,6 +1251,7 @@ public class ResultsManager implements PlugIn
 	 * Check for any IDs above zero.
 	 *
 	 * @param memoryResults
+	 *            the memory results
 	 * @return True if any results have IDs above zero
 	 */
 	public static boolean hasID(MemoryPeakResults memoryResults)
@@ -1120,6 +1270,7 @@ public class ResultsManager implements PlugIn
 	 * Check for all IDs above zero.
 	 *
 	 * @param memoryResults
+	 *            the memory results
 	 * @return True if all results have IDs above zero
 	 */
 	public static boolean isID(MemoryPeakResults memoryResults)
@@ -1138,6 +1289,7 @@ public class ResultsManager implements PlugIn
 	 * All results must be an ExtendedPeakResult.
 	 *
 	 * @param memoryResults
+	 *            the memory results
 	 * @return True if all are an ExtendedPeakResult
 	 */
 	public static boolean isExtended(MemoryPeakResults memoryResults)
@@ -1153,9 +1305,11 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Gets the name of the next input source from the dialog
+	 * Gets the name of the next input source from the dialog.
 	 *
 	 * @param gd
+	 *            the dialog
+	 * @return the input source
 	 */
 	public static String getInputSource(GenericDialog gd)
 	{
@@ -1242,7 +1396,7 @@ public class ResultsManager implements PlugIn
 		PeakResultsReader reader = null;
 		if (inputOption.equals(INPUT_NONE))
 		{
-
+			// Do nothing
 		}
 		else if (inputOption.equals(INPUT_FILE))
 		{
@@ -1398,7 +1552,7 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Check the calibration of the results exists, if not then prompt for it with a dialog
+	 * Check the calibration of the results exists, if not then prompt for it with a dialog.
 	 *
 	 * @param results
 	 *            The results
@@ -1520,10 +1674,11 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Load the results from the named input option
+	 * Load the results from the named input option.
 	 *
 	 * @param inputOption
-	 * @return
+	 *            the input option
+	 * @return the memory peak results
 	 */
 	private MemoryPeakResults loadResults(String inputOption)
 	{
@@ -1599,6 +1754,7 @@ public class ResultsManager implements PlugIn
 		}
 		catch (Exception e)
 		{
+			// Ignore
 		}
 		if (omDirectory == null)
 			return;
@@ -1612,7 +1768,7 @@ public class ResultsManager implements PlugIn
 		inputFilename = resetInputFilename;
 	}
 
-	private void load(String path)
+	private static void load(String path)
 	{
 		inputFilename = path;
 		// Record this as a single load of the results manager.
@@ -1692,7 +1848,7 @@ public class ResultsManager implements PlugIn
 		IJ.showStatus("Saved " + TextUtils.pleural(c, "dataset"));
 	}
 
-	private boolean save(ResultsFileSettings resultsSettings, MemoryPeakResults source)
+	private static boolean save(ResultsFileSettings resultsSettings, MemoryPeakResults source)
 	{
 		// Assume the directory exists
 		String resultsFilename;

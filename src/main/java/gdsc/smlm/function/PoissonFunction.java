@@ -100,8 +100,6 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			pd.setMeanUnsafe(e);
 			return pd.probability(imin);
 		}
-		else
-		{
 			// The PMF was contracted so 1 or more values fall in this range
 
 			int imax = (int) Math.floor(max);
@@ -118,19 +116,19 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			for (int i = imin; i <= imax; i++)
 				p += pd.probability(i);
 			return p;
-		}
 	}
 
-	private int getX(double o)
+	private static int getX(double o)
 	{
 		// This could throw an exception if o is not an integer
 		return (int) Math.round(o);
 	}
 
 	/**
-	 * Return the log of the factorial for the given real number, using the gamma function
+	 * Return the log of the factorial for the given real number, using the gamma function.
 	 *
 	 * @param k
+	 *            the number
 	 * @return the log factorial
 	 */
 	public static double logFactorial(double k)
@@ -143,7 +141,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 	/**
 	 * Return the factorial for the given real number, using the gamma function
 	 *
-	 * @param k
+	 * @param k the number
 	 * @return the factorial
 	 */
 	public static double factorial(double k)
@@ -184,20 +182,18 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			pd.setMeanUnsafe(e);
 			return pd.logProbability(imin);
 		}
-		else
-		{
-			int imax = (int) Math.floor(max);
-			if (imax == max)
-				imax--;
+		
+		int imax = (int) Math.floor(max);
+		if (imax == max)
+			imax--;
 
-			pd.setMeanUnsafe(e);
-			if (imin == imax)
-				return pd.logProbability(imin);
+		pd.setMeanUnsafe(e);
+		if (imin == imax)
+			return pd.logProbability(imin);
 
-			double p = 0;
-			for (int i = imin; i <= imax; i++)
-				p += pd.probability(i);
-			return Math.log(p);
-		}
+		double p = 0;
+		for (int i = imin; i <= imax; i++)
+			p += pd.probability(i);
+		return Math.log(p);
 	}
 }

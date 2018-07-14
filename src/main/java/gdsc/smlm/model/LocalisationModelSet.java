@@ -40,10 +40,12 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 	private LocalisationModelSet previous, next;
 
 	/**
-	 * Create a new localisation
+	 * Create a new localisation.
 	 *
 	 * @param id
+	 *            the id
 	 * @param time
+	 *            the time
 	 */
 	public LocalisationModelSet(int id, int time)
 	{
@@ -51,16 +53,32 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 		this.time = time;
 	}
 
+	/**
+	 * Adds the localisation
+	 *
+	 * @param l
+	 *            the localisation
+	 */
 	public void add(LocalisationModel l)
 	{
 		localisations.add(l);
 	}
 
+	/**
+	 * Get the size.
+	 *
+	 * @return the size
+	 */
 	public int size()
 	{
 		return localisations.size();
 	}
 
+	/**
+	 * Gets the localisations.
+	 *
+	 * @return the localisations
+	 */
 	public List<LocalisationModel> getLocalisations()
 	{
 		return localisations;
@@ -153,7 +171,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 	 * Convert the set of localisations to a single localisation with the combined signal and the centroid location
 	 * (centre-of-mass weighted by intensity).
 	 *
-	 * @return
+	 * @return the localisation model
 	 */
 	public LocalisationModel toLocalisation()
 	{

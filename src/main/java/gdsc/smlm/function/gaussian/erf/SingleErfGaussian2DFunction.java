@@ -64,8 +64,6 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 * @param i
 	 *            Input predictor
 	 * @return The Gaussian value
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
 	@Override
 	public double eval(final int i)

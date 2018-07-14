@@ -82,13 +82,14 @@ public abstract class StoppingCriteria
 	}
 
 	/**
-	 * Perform a deep copy of the fit coefficients array and store in a variable for later comparison
+	 * Perform a deep copy of the fit coefficients array and store in a variable for later comparison.
 	 *
 	 * @param a
+	 *            the a
 	 */
 	protected void copyCoefficients(double[] a)
 	{
-		this.bestA = Arrays.copyOf(a, a.length); // Deep copy
+		this.bestA = a.clone();
 	}
 
 	/**

@@ -147,7 +147,7 @@ public class ConvolutionTest
 		}
 	}
 
-	private void speedTest(RandomGenerator rg, int size, double s)
+	private static void speedTest(RandomGenerator rg, int size, double s)
 	{
 		final int RUNS = 1000;
 
@@ -193,7 +193,7 @@ public class ConvolutionTest
 		}
 	}
 
-	private void doubleSpeedTest(RandomGenerator rg, int size, double s)
+	private static void doubleSpeedTest(RandomGenerator rg, int size, double s)
 	{
 		final int RUNS = 1000;
 
@@ -239,7 +239,7 @@ public class ConvolutionTest
 		}
 	}
 
-	private void singleVsDoubleSpeedTest(int size, double s)
+	private static void singleVsDoubleSpeedTest(int size, double s)
 	{
 		RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 1000;
@@ -291,7 +291,7 @@ public class ConvolutionTest
 		}
 	}
 
-	private void singleVsDoubleFFTSpeedTest(int size, double s)
+	private static void singleVsDoubleFFTSpeedTest(int size, double s)
 	{
 		RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 1000;
@@ -325,7 +325,7 @@ public class ConvolutionTest
 				t2, t1 / (double) t2);
 	}
 
-	private double[] randomData(RandomGenerator random, int size)
+	private static double[] randomData(RandomGenerator random, int size)
 	{
 		double[] data = new double[size];
 		for (int i = 0; i < size; i++)
@@ -334,12 +334,13 @@ public class ConvolutionTest
 	}
 
 	/**
-	 * Create a Gaussian kernel of standard deviation s
+	 * Create a Gaussian kernel of standard deviation s.
 	 *
 	 * @param s
+	 *            the standard deviation
 	 * @return the kernel
 	 */
-	private double[] createKernel(double s)
+	private static double[] createKernel(double s)
 	{
 		final int radius = (int) Math.ceil(Math.abs(s) * 4) + 1;
 		double[] kernel = new double[2 * radius + 1];
@@ -583,7 +584,7 @@ public class ConvolutionTest
 		}
 	}
 
-	private void doScaledSpeedTest(int size, double s, int scale)
+	private static void doScaledSpeedTest(int size, double s, int scale)
 	{
 		RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 100;

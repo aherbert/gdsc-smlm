@@ -32,6 +32,9 @@ import gdsc.core.logging.TrackProgress;
  * Contains a population of individuals that may crossover and mutate to evolve.
  * <p>
  * For simplicity the individuals have one chromosome sequence.
+ *
+ * @param <T>
+ *            the generic type
  */
 /*
  * An extension would be to have an Individual class that has many Chromosomes, each is allowed to crossover with its
@@ -62,7 +65,7 @@ public class Population<T extends Comparable<T>>
 		this.individuals = individuals;
 	}
 
-	private void checkSize(int size)
+	private static void checkSize(int size)
 	{
 		if (size < 1)
 			throw new InvalidPopulationSize(0, 1);
@@ -90,11 +93,18 @@ public class Population<T extends Comparable<T>>
 	 * (i.e. no mutation). This allows the fittest individuals to remain unchanged.
 	 *
 	 * @param mutator
+	 *            the mutator
 	 * @param recombiner
+	 *            the recombiner
+	 * @param fitnessFunction
+	 *            the fitness function
+	 * @param selectionStrategy
+	 *            the selection strategy
 	 * @param checker
+	 *            the checker
+	 * @return The best individual
 	 * @throws InvalidPopulationSize
 	 *             if the population is less than 2 (this can occur after selection)
-	 * @return The best individual
 	 */
 	public Chromosome<T> evolve(Mutator<T> mutator, Recombiner<T> recombiner, FitnessFunction<T> fitnessFunction,
 			SelectionStrategy<T> selectionStrategy, ConvergenceChecker<T> checker)
@@ -263,9 +273,10 @@ public class Population<T extends Comparable<T>>
 	}
 
 	/**
-	 * Calculate the fitness of the population
+	 * Calculate the fitness of the population.
 	 *
 	 * @param fitnessFunction
+	 *            the fitness function
 	 * @return The fittest individual
 	 */
 	private Chromosome<T> evaluateFitness(FitnessFunction<T> fitnessFunction)

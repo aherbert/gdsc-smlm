@@ -46,6 +46,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	 * Sets the settings (source and configuration) of the child to the same as this list
 	 *
 	 * @param peakResults
+	 *            the peak results
 	 */
 	public void addOutput(PeakResults peakResults)
 	{

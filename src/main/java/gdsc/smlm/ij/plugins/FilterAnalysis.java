@@ -587,7 +587,9 @@ public class FilterAnalysis implements PlugIn
 	 * in ascending numerical order otherwise they are sorted.
 	 *
 	 * @param resultsList
+	 *            the results list
 	 * @param filterSets
+	 *            the filter sets
 	 */
 	public void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{

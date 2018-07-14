@@ -1455,6 +1455,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 * of negatives matches the configured parameters.
 	 *
 	 * @param filterResults
+	 *            the filter results
+	 * @param fitting
+	 *            the fitting
 	 * @return The filter candidates
 	 */
 	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults,

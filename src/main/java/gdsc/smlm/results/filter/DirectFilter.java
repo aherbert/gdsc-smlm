@@ -46,6 +46,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	@Override
 	public void setup()
 	{
+		// Do nothing
 	}
 
 	/*
@@ -56,6 +57,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	@Override
 	public void setup(final int flags)
 	{
+		// Do nothing
 	}
 
 	/*
@@ -66,6 +68,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	@Override
 	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
+		// Do nothing
 	}
 
 	/*
@@ -103,10 +106,12 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	}
 
 	/**
-	 * Check if all of the given bits are set in the flags
+	 * Check if all of the given bits are set in the flags.
 	 *
 	 * @param flags
+	 *            the flags
 	 * @param bits
+	 *            the bits
 	 * @return True if all are set
 	 */
 	public static boolean areSet(final int flags, final int bits)
@@ -115,10 +120,12 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	}
 
 	/**
-	 * Check if any of the given bits are set in the flags
+	 * Check if any of the given bits are set in the flags.
 	 *
 	 * @param flags
+	 *            the flags
 	 * @param bits
+	 *            the bits
 	 * @return True if any are set
 	 */
 	public static boolean anySet(final int flags, final int bits)

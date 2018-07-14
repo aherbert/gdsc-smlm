@@ -151,8 +151,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	}
 
 	/**
+	 * Show dialog.
+	 *
 	 * @param imp
-	 * @return
+	 *            the imp
+	 * @return the int
 	 */
 	private int showDialog(ImagePlus imp)
 	{

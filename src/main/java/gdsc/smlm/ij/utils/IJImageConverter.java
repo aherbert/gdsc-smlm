@@ -39,9 +39,10 @@ public class IJImageConverter
 	public static final ImageConverter IMAGE_CONVERTER = new ImageConverter();
 
 	/**
-	 * Get the data from the image processor as a float array (include cropping to the ROI)
+	 * Get the data from the image processor as a float array (include cropping to the ROI).
 	 *
 	 * @param ip
+	 *            the image
 	 * @return The float array data
 	 */
 	public static float[] getData(ImageProcessor ip)
@@ -57,7 +58,9 @@ public class IJImageConverter
 	 * ImageProcessor ROI bounds. If smaller then a new buffer will be created.
 	 *
 	 * @param ip
+	 *            the image
 	 * @param buffer
+	 *            the buffer
 	 * @return The float array data
 	 */
 	public static float[] getData(ImageProcessor ip, float[] buffer)
@@ -78,10 +81,15 @@ public class IJImageConverter
 	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned.
 	 *
 	 * @param oPixels
+	 *            the pixels object
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param bounds
+	 *            the bounds
 	 * @param buffer
+	 *            the buffer
 	 * @return The float array data
 	 */
 	public static float[] getData(final Object oPixels, final int width, final int height, final Rectangle bounds,
@@ -98,7 +106,9 @@ public class IJImageConverter
 	 * ImageProcessor ROI bounds. If smaller then a new buffer will be created.
 	 *
 	 * @param ip
+	 *            the image
 	 * @param buffer
+	 *            the buffer
 	 * @return The double array data
 	 */
 	public static double[] getDoubleData(ImageProcessor ip, double[] buffer)
@@ -119,10 +129,15 @@ public class IJImageConverter
 	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned.
 	 *
 	 * @param oPixels
+	 *            the pixels object
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param bounds
+	 *            the bounds
 	 * @param buffer
+	 *            the buffer
 	 * @return The double array data
 	 */
 	public static double[] getDoubleData(final Object oPixels, final int width, final int height,
