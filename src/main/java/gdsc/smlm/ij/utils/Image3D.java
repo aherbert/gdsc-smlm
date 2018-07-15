@@ -479,6 +479,8 @@ public abstract class Image3D
 	/**
 	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
+	 * @param stack
+	 *            the stack
 	 * @param x
 	 *            the x index
 	 * @param y
@@ -1137,20 +1139,17 @@ public abstract class Image3D
 				sum = table[xw_yh_z - w] - table[xw_yh_zd - w];
 			return sum + table[xw_yh_zd] - table[xw_yh_z];
 		}
-		else
+		double sum = 0;
+		if (y_1 >= 0)
 		{
-			double sum = 0;
-			if (y_1 >= 0)
-			{
-				int h_ = h * nc;
-				if (x_1 >= 0)
-					sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
-				sum -= table[xw_yh_zd - h_];
-			}
-			else if (x_1 >= 0)
-				sum = -table[xw_yh_zd - w];
-			return sum + table[xw_yh_zd];
+			int h_ = h * nc;
+			if (x_1 >= 0)
+				sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
+			sum -= table[xw_yh_zd - h_];
 		}
+		else if (x_1 >= 0)
+			sum = -table[xw_yh_zd - w];
+		return sum + table[xw_yh_zd];
 	}
 
 	/**
@@ -1261,20 +1260,17 @@ public abstract class Image3D
 				sum = table[xw_yh_z - w] - table[xw_yh_zd - w];
 			return sum + table[xw_yh_zd] - table[xw_yh_z];
 		}
-		else
+		double sum = 0;
+		if (y_1 >= 0)
 		{
-			double sum = 0;
-			if (y_1 >= 0)
-			{
-				int h_ = h * nc;
-				if (x_1 >= 0)
-					sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
-				sum -= table[xw_yh_zd - h_];
-			}
-			else if (x_1 >= 0)
-				sum = -table[xw_yh_zd - w];
-			return sum + table[xw_yh_zd];
+			int h_ = h * nc;
+			if (x_1 >= 0)
+				sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
+			sum -= table[xw_yh_zd - h_];
 		}
+		else if (x_1 >= 0)
+			sum = -table[xw_yh_zd - w];
+		return sum + table[xw_yh_zd];
 	}
 
 	/**

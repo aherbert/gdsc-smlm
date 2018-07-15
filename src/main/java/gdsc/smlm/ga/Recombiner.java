@@ -24,7 +24,10 @@
 package gdsc.smlm.ga;
 
 /**
- * Defines recombination crossover of a chromosome pair
+ * Defines recombination crossover of a chromosome pair.
+ *
+ * @param <T>
+ *            the generic type
  */
 public interface Recombiner<T extends Comparable<T>>
 {

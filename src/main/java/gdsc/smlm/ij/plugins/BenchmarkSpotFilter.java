@@ -824,15 +824,15 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Use the distance to the true location to score the candidate
 				final RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
 				final RampedScore signalScore = (upperSignalFactor > 0)
-						? new RampedScore(lowerSignalFactor, upperSignalFactor) : null;
+						? new RampedScore(lowerSignalFactor, upperSignalFactor)
+						: null;
 
 				// Candidates may be close to many localisations. In order to compute the signal
 				// factor correctly we have computed the signal offset for each spot with overlapping PSFs.
 				// This is used to raise the spot intensity when computing the signal factor.
 
 				// Compute assignments
-				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(
-						predicted.length * 3);
+				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(predicted.length * 3);
 
 				final double dmin = matchDistance * matchDistance;
 				final int nPredicted = predicted.length;
@@ -1078,7 +1078,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			SpotCoordinate[] coords = new SpotCoordinate[spots.length];
 			for (int i = 0; i < spots.length; i++)
-				coords[i] = new SpotCoordinate(i, spots[i]);
+				coords[i] = new SpotCoordinate(spots[i]);
 			return coords;
 		}
 
@@ -1086,7 +1086,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			Spot spot;
 
-			public SpotCoordinate(int id, Spot spot)
+			public SpotCoordinate(Spot spot)
 			{
 				// Centre on the middle of the pixel
 				super(spot.x + 0.5f, spot.y + 0.5f);

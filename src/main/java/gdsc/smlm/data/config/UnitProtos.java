@@ -3,6 +3,7 @@
 
 package gdsc.smlm.data.config;
 
+@SuppressWarnings({"javadoc"})
 public final class UnitProtos {
   private UnitProtos() {}
   public static void registerAllExtensions(

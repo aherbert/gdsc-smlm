@@ -172,6 +172,13 @@ public class FitProtosHelper
 		defaultFitEngineSettings = builder.build();
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the name
+	 */
 	public static String getName(FitSolver value)
 	{
 		switch (value)
@@ -195,6 +202,13 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the name
+	 */
 	public static String getName(SearchMethod value)
 	{
 		switch (value)
@@ -222,6 +236,13 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the name
+	 */
 	public static String getName(DataFilterType value)
 	{
 		switch (value)
@@ -239,6 +260,13 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the name
+	 */
 	public static String getName(DataFilterMethod value)
 	{
 		switch (value)
@@ -260,6 +288,13 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the name
+	 */
 	public static String getName(NoiseEstimatorMethod value)
 	{
 		switch (value)
@@ -287,6 +322,13 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the name
+	 */
 	public static String getName(PrecisionMethod value)
 	{
 		switch (value)
@@ -306,6 +348,13 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Convert noise estimator method to the {@link gdsc.core.utils.NoiseEstimator.Method }.
+	 *
+	 * @param method
+	 *            the method
+	 * @return the method
+	 */
 	public static Method convertNoiseEstimatorMethod(NoiseEstimatorMethod method)
 	{
 		switch (method)
@@ -334,6 +383,13 @@ public class FitProtosHelper
 		throw new IllegalStateException("Unknown method: " + method);
 	}
 
+	/**
+	 * Convert search method to the {@link gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod}.
+	 *
+	 * @param searchMethod
+	 *            the search method
+	 * @return the search method
+	 */
 	public static gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod(
 			SearchMethod searchMethod)
 	{
@@ -361,6 +417,14 @@ public class FitProtosHelper
 		}
 	}
 
+	/**
+	 * Convert line search method to the
+	 * {@link gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod}.
+	 *
+	 * @param lineSearchMethod
+	 *            the line search method
+	 * @return the line search method
+	 */
 	public static gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(
 			LineSearchMethod lineSearchMethod)
 	{

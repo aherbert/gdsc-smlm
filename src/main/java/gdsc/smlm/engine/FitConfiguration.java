@@ -1481,6 +1481,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	// Enable caching the location variance selection
 	private class BaseVarianceSelector
 	{
+		/**
+		 * Gets the location variance.
+		 *
+		 * @param peak
+		 *            the peak
+		 * @return the location variance
+		 */
 		double getLocationVariance(PreprocessedPeakResult peak)
 		{
 			return 0;
@@ -1727,6 +1734,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the lambda.
+	 *
 	 * @param lambda
 	 *            the lambda to start the Levenberg-Marquardt fitting process
 	 */
@@ -1737,6 +1746,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the lambda.
+	 *
 	 * @return the lambda
 	 */
 	public double getLambda()
@@ -1745,6 +1756,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Checks if computing the residuals.
+	 *
 	 * @return the computeResiduals
 	 */
 	@Override
@@ -1754,6 +1767,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Set to true to compute the residuals.
+	 *
 	 * @param computeResiduals
 	 *            Set to true to compute the residuals
 	 */
@@ -1763,6 +1778,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the nm per pixel scale to use when evaluating a fitted peak's localisation precision
+	 *
 	 * @param nmPerPixel
 	 *            the nm per pixel scale to use when evaluating a fitted peak's localisation precision
 	 */
@@ -1773,6 +1790,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the gain (or 1 if the gain is invalid).
+	 *
 	 * @return the gain (or 1 if the gain is invalid)
 	 */
 	public double getGainSafe()
@@ -1781,6 +1800,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the camera gain to use when evaluating a fitted peak's localisation precision.
+	 *
 	 * @param gain
 	 *            the camera gain to use when evaluating a fitted peak's localisation precision.
 	 */
@@ -1830,6 +1851,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Checks if modelling the camera noise during maximum likelihood fitting.
+	 *
 	 * @return True if modelling the camera noise during maximum likelihood fitting
 	 */
 	public boolean isModelCamera()
@@ -1851,9 +1874,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the bias (used for maximum likelihood estimation to evaluate the correct value of the
+	 * observed count).
+	 *
 	 * @param bias
-	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the
-	 *            observed count)
+	 *            the camera bias
 	 */
 	public void setBias(double bias)
 	{
@@ -1862,6 +1887,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the camera read noise (used for maximum likelihood estimation).
+	 *
 	 * @param readNoise
 	 *            the camera read noise (used for maximum likelihood estimation)
 	 */
@@ -1885,6 +1912,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets maximum number of function evaluations for the Maximum Likelihood Estimator.
+	 *
 	 * @return the maximum number of function evaluations for the Maximum Likelihood Estimator
 	 */
 	public int getMaxFunctionEvaluations()
@@ -1893,6 +1922,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the maximum number of function evaluations for the Maximum Likelihood Estimator.
+	 *
 	 * @param maxFunctionEvaluations
 	 *            the maximum number of function evaluations for the Maximum Likelihood Estimator
 	 */
@@ -1903,6 +1934,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the search method for the Maximum Likelihood Estimator.
+	 *
 	 * @return the search for the Maximum Likelihood Estimator
 	 */
 	public SearchMethod getSearchMethod()
@@ -1911,6 +1944,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the search method value for the Maximum Likelihood Estimator.
+	 *
 	 * @return the search for the Maximum Likelihood Estimator
 	 */
 	public int getSearchMethodValue()
@@ -1919,6 +1954,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the search method for the Maximum Likelihood Estimator.
+	 *
 	 * @param searchMethod
 	 *            the search for the Maximum Likelihood Estimator
 	 */
@@ -1932,8 +1969,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the search method for the Maximum Likelihood Estimator.
+	 *
 	 * @param searchMethod
-	 *            the search for the Maximum Likelihood Estimator
+	 *            the search method for the Maximum Likelihood Estimator
 	 */
 	public void setSearchMethod(SearchMethod searchMethod)
 	{
@@ -1942,6 +1981,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the line search method for the Fast MLE.
+	 *
 	 * @return the line search for the Fast MLE
 	 */
 	public LineSearchMethod getLineSearchMethod()
@@ -1950,6 +1991,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the line search method value for the Fast MLE.
+	 *
 	 * @return the line search for the Fast MLE
 	 */
 	public int getLineSearchMethodValue()
@@ -1958,6 +2001,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the line search method for the Fast MLE.
+	 *
 	 * @param lineSearchMethod
 	 *            the line search for the Fast MLE
 	 */
@@ -1971,6 +2016,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the line search method for the Fast MLE.
+	 *
 	 * @param lineSearchMethod
 	 *            the line search for the Fast MLE
 	 */
@@ -2003,6 +2050,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the relative threshold for convergence.
+	 *
 	 * @return the relative threshold for convergence
 	 */
 	public double getRelativeThreshold()
@@ -2011,6 +2060,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the relative threshold for convergence.
+	 *
 	 * @param relativeThreshold
 	 *            the relative threshold for convergence
 	 */
@@ -2021,6 +2072,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the absolute threshold for convergence.
+	 *
 	 * @return the absolute threshold for convergence
 	 */
 	public double getAbsoluteThreshold()
@@ -2029,6 +2082,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the absolute threshold for convergence.
+	 *
 	 * @param absoluteThreshold
 	 *            the absolute threshold for convergence
 	 */
@@ -2039,7 +2094,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * @retParameterurn the parameter relative threshold for convergence
+	 * Gets the parameter relative threshold for convergence.
+	 *
+	 * @return the parameter relative threshold for convergence
 	 */
 	public double getParameterRelativeThreshold()
 	{
@@ -2047,6 +2104,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the parameter relative threshold for convergence.
+	 *
 	 * @param relativeThreshold
 	 *            the parameter relative threshold for convergence
 	 */
@@ -2057,6 +2116,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the parameter absolute threshold for convergence.
+	 *
+	 * @return the parameter absolute threshold
 	 * @retParameterurn the parameter absolute threshold for convergence
 	 */
 	public double getParameterAbsoluteThreshold()
@@ -2065,6 +2127,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the parameter absolute threshold for convergence.
+	 *
 	 * @param absoluteThreshold
 	 *            the parameter absolute threshold for convergence
 	 */
@@ -2075,6 +2139,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the tolerance checker.
+	 *
 	 * @return the toleranceChecker
 	 */
 	public ToleranceChecker getToleranceChecker()
@@ -2132,7 +2198,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            the value
 	 * @return the value if positive, or -1
 	 */
-	private double getIfStrictlyPositive(double value)
+	private static double getIfStrictlyPositive(double value)
 	{
 		return (value > 0) ? value : -1.0;
 	}

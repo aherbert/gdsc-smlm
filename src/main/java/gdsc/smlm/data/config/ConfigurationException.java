@@ -26,27 +26,50 @@ package gdsc.smlm.data.config;
 import gdsc.core.data.DataException;
 
 /**
- * Exception to throw if configuration is invalid
+ * Exception to throw if configuration is invalid.
  */
 public class ConfigurationException extends DataException
 {
 	private static final long serialVersionUID = 1048790767265799169L;
 
+	/**
+	 * Instantiates a new configuration exception.
+	 */
 	public ConfigurationException()
 	{
 		super();
 	}
 
+	/**
+	 * Instantiates a new configuration exception.
+	 *
+	 * @param message
+	 *            the message
+	 */
 	public ConfigurationException(String message)
 	{
 		super(message);
 	}
 
+	/**
+	 * Instantiates a new configuration exception.
+	 *
+	 * @param message
+	 *            the message
+	 * @param cause
+	 *            the cause
+	 */
 	public ConfigurationException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}
 
+	/**
+	 * Instantiates a new configuration exception.
+	 *
+	 * @param cause
+	 *            the cause
+	 */
 	public ConfigurationException(Throwable cause)
 	{
 		super(cause);

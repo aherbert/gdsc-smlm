@@ -155,6 +155,8 @@ public class CubicSplineManager implements PlugIn
 	 *            the image PSF details
 	 * @param image
 	 *            the image
+	 * @param singlePrecision
+	 *            Set to true to use single precision (float values) to store the cubic spline coefficients
 	 * @return the cubic spline PSF
 	 */
 	public static CubicSplinePSF createCubicSpline(ImagePSFOrBuilder imagePSF, ImageStack image,

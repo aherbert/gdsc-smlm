@@ -729,7 +729,8 @@ public class PSFCreator implements PlugInFilter
 		boolean ok = true;
 		for (int i = 0; ok && i < centres.size(); i++)
 		{
-			double progress = (double) i / centres.size();
+			//double 
+			progress = (double) i / centres.size();
 			final double increment = 1.0 / (stack.getSize() * centres.size());
 			IJ.showProgress(progress);
 			double[] centre = centres.get(i);
@@ -744,6 +745,9 @@ public class PSFCreator implements PlugInFilter
 					regionBounds = ie.getBoxRegionBounds((int) centre[0], (int) centre[1], boxRadius);
 				spot[slice - 1] = ie.crop(regionBounds);
 			}
+			
+			if (regionBounds == null)
+				continue; // Empty stack
 
 			int n = (int) centre[4];
 			final float b = getBackground(n, spot);
@@ -760,7 +764,7 @@ public class PSFCreator implements PlugInFilter
 			centre[1] -= regionBounds.y;
 
 			// This takes a long time so this should track progress
-			ok = addToPSF(maxz, settings.getMagnification(), psf, centre, spot, regionBounds, progress, increment,
+			ok = addToPSF(maxz, settings.getMagnification(), psf, centre, spot, regionBounds, increment,
 					settings.getCentreEachSlice());
 		}
 
@@ -1327,7 +1331,7 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, final double[] centre,
-			final float[][] spot, final Rectangle regionBounds, double progress, final double increment,
+			final float[][] spot, final Rectangle regionBounds, final double increment,
 			final boolean centreEachSlice)
 	{
 		// Calculate insert point in enlargement

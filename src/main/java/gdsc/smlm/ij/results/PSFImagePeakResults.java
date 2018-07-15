@@ -208,20 +208,20 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsDev)
+	@Override
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsDev)
 	{
 		if (!imageActive)
 			return;
-		addPeak(peak, origX, origY, origValue, error, noise, params, paramsDev);
+		addPeak(peak, noise, params);
 		updateImage();
 	}
 
-	private void addPeak(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
-			float[] params, float[] paramsDev)
+	private void addPeak(int peak, float noise, float[] params)
 	{
 		float x = mapX(params[PeakResult.X]);
 		float y = mapY(params[PeakResult.Y]);
@@ -259,7 +259,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 				sy = params[isy];
 				t = (ia != 0) ? params[ia] : 0;
 			}
-			psfParams = setPSFParameters(t, sx, sy, new double[5]);
+			psfParams = getPSFParameters(t, sx, sy);
 		}
 
 		final double a = psfParams[0];
@@ -309,7 +309,19 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		}
 	}
 
-	public double[] setPSFParameters(double t, double sx, double sy, double[] params)
+	/**
+	 * Gets the PSF parameters.
+	 *
+	 * @param t
+	 *            the rotation angle
+	 * @param sx
+	 *            the standard deviation in the x dimension
+	 * @param sy
+	 *            the standard deviation in the y dimension
+	 * @return
+	 * 		the parameters
+	 */
+	private static double[] getPSFParameters(double t, double sx, double sy)
 	{
 		double a, b, c;
 		double height, width;
@@ -352,6 +364,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			height = Math.abs(3.0 * (sx * Math.cos(t2) * Math.sin(phi) + sy * Math.sin(t2) * Math.cos(phi)));
 		}
 
+		final double[] params = new double[5];
 		params[0] = a;
 		params[1] = b;
 		params[2] = c;
@@ -375,8 +388,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		int i = 0;
 		for (PeakResult result : results)
 		{
-			addPeak(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-					result.getNoise(), result.getParameters(), result.getParameterDeviations());
+			addPeak(result.getFrame(), result.getNoise(), result.getParameters());
 			if (++i % 64 == 0)
 			{
 				updateImage();
@@ -409,7 +421,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		if (width > 0)
 		{
 			fixedWidth = true;
-			fixedParams = setPSFParameters(0.0, width, width, new double[5]);
+			fixedParams = getPSFParameters(0.0, width, width);
 		}
 		else
 		{

@@ -26,7 +26,10 @@ package gdsc.smlm.ga;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Check if converged using a tolerance on the fitness and/or sequence change, and the number of iterations
+ * Check if converged using a tolerance on the fitness and/or sequence change, and the number of iterations.
+ *
+ * @param <T>
+ *            the generic type
  */
 public abstract class ToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {

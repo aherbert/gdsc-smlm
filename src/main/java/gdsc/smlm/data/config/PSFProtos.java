@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "deprecation"})
+@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc"})
 public final class PSFProtos {
   private PSFProtos() {}
   public static void registerAllExtensions(

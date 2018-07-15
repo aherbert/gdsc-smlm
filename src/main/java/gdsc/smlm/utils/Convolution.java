@@ -811,7 +811,9 @@ public class Convolution
 	 * @param x
 	 *            First sequence.
 	 * @param h1
-	 *            Second sequence.
+	 *            Second sequence 1.
+	 * @param h2
+	 *            Second sequence 2.
 	 * @param scale
 	 *            the scale
 	 * @param v

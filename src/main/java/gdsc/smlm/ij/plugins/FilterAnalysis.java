@@ -828,7 +828,7 @@ public class FilterAnalysis implements PlugIn
 				allSameType = false;
 
 			final double jaccard = s.getJaccard();
-			if (filter == null || maxScore < jaccard)
+			if (maxScore < jaccard)
 			{
 				maxScore = jaccard;
 				maxFilter = filter;

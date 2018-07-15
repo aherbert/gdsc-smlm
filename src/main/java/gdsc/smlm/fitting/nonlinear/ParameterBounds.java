@@ -46,6 +46,12 @@ public class ParameterBounds
 	private int[] dir;
 	private boolean dynamicClamp = false;
 
+	/**
+	 * Instantiates a new parameter bounds.
+	 *
+	 * @param f
+	 *            the function
+	 */
 	public ParameterBounds(GradientFunction f)
 	{
 		setGradientFunction(f);
@@ -399,6 +405,9 @@ public class ParameterBounds
 	 * different function in the same parameter space.
 	 * <p>
 	 * Setting a new function removes the current bounds.
+	 *
+	 * @param f
+	 *            the new gradient function
 	 */
 	public void setGradientFunction(GradientFunction f)
 	{

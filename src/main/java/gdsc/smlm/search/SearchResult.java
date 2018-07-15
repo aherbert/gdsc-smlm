@@ -25,12 +25,23 @@ package gdsc.smlm.search;
 
 /**
  * Store the result of scoring a point within a search space. Allows the scores to be compared.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class SearchResult<T extends Comparable<T>> implements Comparable<SearchResult<T>>
 {
-	public final double[] point;
-	public final T score;
+	private final double[] point;
+	private final T score;
 
+	/**
+	 * Instantiates a new search result.
+	 *
+	 * @param point
+	 *            the point
+	 * @param score
+	 *            the score
+	 */
 	public SearchResult(double[] point, T score)
 	{
 		if (point == null)
@@ -51,6 +62,26 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
 	{
 		if (o == null)
 			return -1;
-		return score.compareTo(o.score);
+		return getScore().compareTo(o.getScore());
+	}
+
+	/**
+	 * Gets the point.
+	 *
+	 * @return the point
+	 */
+	public double[] getPoint()
+	{
+		return point;
+	}
+
+	/**
+	 * Gets the score.
+	 *
+	 * @return the score
+	 */
+	public T getScore()
+	{
+		return score;
 	}
 }

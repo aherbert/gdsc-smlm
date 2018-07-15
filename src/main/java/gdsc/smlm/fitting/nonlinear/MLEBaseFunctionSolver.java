@@ -33,11 +33,14 @@ import gdsc.smlm.function.GradientFunction;
  */
 public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implements MLEFunctionSolver
 {
+	/** The log-likelihood ratio. */
 	protected double llr = Double.NaN;
 
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 *
+	 * @param f
+	 *            the function
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */

@@ -1081,6 +1081,19 @@ public class EMGainAnalysis implements PlugInFilter
 		}
 	}
 
+	/**
+	 * Gets the step size.
+	 * <p>
+	 * Note: Currently this just returns 1 as it should be a PMF so only uses discrete values.
+	 *
+	 * @param photons
+	 *            the photons
+	 * @param gain
+	 *            the gain
+	 * @param noise
+	 *            the noise
+	 * @return the step size
+	 */
 	private static double getStepSize(double photons, double gain, double noise)
 	{
 		// Note: This is not valid as the PMF should only accept integer input.

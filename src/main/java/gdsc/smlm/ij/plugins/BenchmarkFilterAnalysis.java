@@ -320,7 +320,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
 
-	public class CustomFractionalAssignment extends PeakFractionalAssignment
+	private class CustomFractionalAssignment extends PeakFractionalAssignment
 	{
 		public final double d;
 		public final PeakResult peak;
@@ -339,7 +339,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
-	public class CustomResultAssignment extends ResultAssignment
+	private class CustomResultAssignment extends ResultAssignment
 	{
 		public final double d;
 		public final PeakResult peak;
@@ -719,6 +719,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private MemoryPeakResults results;
 	private boolean extraOptions;
 
+	/**
+	 * Instantiates a new benchmark filter analysis.
+	 */
 	public BenchmarkFilterAnalysis()
 	{
 		isHeadless = java.awt.GraphicsEnvironment.isHeadless();
@@ -922,7 +925,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// Re-use the filters as the user may be loading a custom set.
 					current = analyse(filterSets, current, innerRangeReduction);
 					if (current == null)
-						break;
+						return;
 					double[] previousParameters = createParameters();
 					current = analyseParameters(current, innerRangeReduction);
 					if (current == null)
@@ -990,7 +993,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
 		duplicateDistanceAbsolute = BenchmarkSpotFit.config.getDuplicateDistanceAbsolute();
 		residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
-				? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
+				? BenchmarkSpotFit.multiFilter.residualsThreshold
+				: 1;
 	}
 
 	private double[] createParameters()
@@ -1155,7 +1159,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				gd.showDialog();
 				if (!gd.wasCanceled())
 				{
-					if ((reUseFilters = gd.getNextBoolean()))
+					reUseFilters = gd.getNextBoolean();
+					if (reUseFilters)
 					{
 						SettingsManager.writeSettings(filterSettings);
 						return filterList;
@@ -1163,57 +1168,57 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 
-			BufferedReader input = null;
 			setLastFile(null);
-			try
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(filename), null)))
 			{
-				FileInputStream fis = new FileInputStream(filename);
-				input = new BufferedReader(new UnicodeReader(fis, null));
 				Object o = XStreamWrapper.getInstance().fromXML(input);
-				if (o != null && o instanceof List<?>)
+				input.close();
+
+				if (o == null || !(o instanceof List<?>))
 				{
-					SettingsManager.writeSettings(filterSettings);
-					List<FilterSet> filterSets = (List<FilterSet>) o;
-
-					if (containsStandardFilters(filterSets))
-					{
-						IJ.log("Filter sets must contain 'Direct' filters");
-						return null;
-					}
-
-					// Check they are not empty lists
-					List<FilterSet> filterSets2 = new LinkedList<>();
-					for (FilterSet filterSet : filterSets)
-					{
-						if (filterSet.size() != 0)
-						{
-							filterSets2.add(filterSet);
-						}
-						else
-						{
-							IJ.log("Filter set empty: " + filterSet.getName());
-						}
-					}
-
-					if (filterSets2.isEmpty())
-					{
-						IJ.log("All Filter sets are empty");
-						return null;
-					}
-
-					// Maintain the same list type
-					filterSets.clear();
-					filterSets.addAll(filterSets2);
-
-					filterList = filterSets;
-
-					// Option to enumerate filters
-					expandFilters();
-
-					setLastFile(filename);
-					return filterList;
+					IJ.log("No filter sets defined in the specified file: " + filename);
+					return null;
 				}
-				IJ.log("No filter sets defined in the specified file: " + filename);
+				SettingsManager.writeSettings(filterSettings);
+				List<FilterSet> filterSets = (List<FilterSet>) o;
+
+				if (containsStandardFilters(filterSets))
+				{
+					IJ.log("Filter sets must contain 'Direct' filters");
+					return null;
+				}
+
+				// Check they are not empty lists
+				List<FilterSet> filterSets2 = new LinkedList<>();
+				for (FilterSet filterSet : filterSets)
+				{
+					if (filterSet.size() != 0)
+					{
+						filterSets2.add(filterSet);
+					}
+					else
+					{
+						IJ.log("Filter set empty: " + filterSet.getName());
+					}
+				}
+
+				if (filterSets2.isEmpty())
+				{
+					IJ.log("All Filter sets are empty");
+					return null;
+				}
+
+				// Maintain the same list type
+				filterSets.clear();
+				filterSets.addAll(filterSets2);
+
+				filterList = filterSets;
+
+				// Option to enumerate filters
+				expandFilters();
+
+				setLastFile(filename);
+				return filterList;
 			}
 			catch (Exception e)
 			{
@@ -1221,24 +1226,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			finally
 			{
-				if (input != null)
-				{
-					try
-					{
-						input.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
-				}
 				IJ.showStatus("");
 			}
 		}
 		return null;
 	}
 
-	private boolean containsStandardFilters(List<FilterSet> filterSets)
+	private static boolean containsStandardFilters(List<FilterSet> filterSets)
 	{
 		for (FilterSet filterSet : filterSets)
 		{
@@ -1447,7 +1441,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (increment[i] == 0)
 				// Disable if Infinite increment, otherwise use the weakest parameter
 				parameters[i] = parameters2[i] = (Double.isInfinite(increment2[i]))
-						? baseFilter.getDisabledParameterValue(i) : p[i];
+						? baseFilter.getDisabledParameterValue(i)
+						: p[i];
 		}
 		f1 = baseFilter.create(parameters);
 
@@ -1495,6 +1490,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return list;
 	}
 
+	/**
+	 * Checks if is same file.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @return true, if is same file
+	 */
 	public boolean isSameFile(String filename)
 	{
 		if (filterList == null)
@@ -1511,12 +1513,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			catch (Exception e)
 			{
+				// Ignore
 			}
 		}
 		return false;
 	}
 
-	private void setLastFile(String filename)
+	private static void setLastFile(String filename)
 	{
 		oldFilename = filename;
 		if (oldFilename != null)
@@ -1549,7 +1552,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
 				duplicateDistanceAbsolute = BenchmarkSpotFit.config.getDuplicateDistanceAbsolute();
 				sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
-						? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
+						? BenchmarkSpotFit.multiFilter.residualsThreshold
+						: 1;
 			}
 			lastId = BenchmarkSpotFit.fitResultsId;
 			update = true;
@@ -1677,8 +1681,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 
 			// Store all the results
-			final ArrayList<MultiPathFitResults> results = new ArrayList<>(
-					BenchmarkSpotFit.fitResults.size());
+			final ArrayList<MultiPathFitResults> results = new ArrayList<>(BenchmarkSpotFit.fitResults.size());
 			final List<MultiPathFitResults> syncResults = Collections.synchronizedList(results);
 
 			// This could be multi-threaded ...
@@ -2593,8 +2596,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			for (ComplexFilterScore fs : filters)
 			{
-				final ArrayList<FractionalAssignment[]> list = new ArrayList<>(
-						resultsList.length);
+				final ArrayList<FractionalAssignment[]> list = new ArrayList<>(resultsList.length);
 				final FractionClassificationResult r = scoreFilter(fs.getFilter(), minimalFilter, resultsList, list,
 						coordinateStore);
 				final StringBuilder sb = createResult(fs.getFilter(), r);
@@ -2707,7 +2709,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		calculateSensitivity();
 		topFilterResults = depthAnalysis(topFilterResults, bestFilter);
 		topFilterResults = scoreAnalysis(topFilterResults, bestFilter);
-		componentAnalysis(topFilterClassificationResult, filters.get(0));
+		componentAnalysis( filters.get(0));
 		PreprocessedPeakResult[] filterResults = null;
 		if (isShowOverlay())
 			filterResults = showOverlay(topFilterResults, bestFilter);
@@ -3397,6 +3399,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				FixedDimension[] dimensions = Arrays.copyOf(originalDimensions, originalDimensions.length);
 				if (!nonInteractive)
 				{
+					if (gd == null)
+						throw new RuntimeException("The dialog has no been shown");
 					populationSize = (int) Math.abs(gd.getNextNumber());
 					if (populationSize < 10)
 						populationSize = 10;
@@ -3418,6 +3422,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					stepSizeMap.put(setNumber, stepSize);
 				}
 
+				if (disabled == null)
+					disabled = new boolean[originalDimensions.length];
 				for (int j = 0; j < indices.length; j++)
 				{
 					// Disable values with a negative step size.
@@ -3441,17 +3447,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Override the settings with the step length, a min of zero and the configured upper
 				double[] upper = ss_filter.upperLimit();
 				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
-				Recombiner<FilterScore> recombiner = new SimpleRecombiner<>(random, crossoverRate,
-						meanChildren);
+				Recombiner<FilterScore> recombiner = new SimpleRecombiner<>(random, crossoverRate, meanChildren);
 				SelectionStrategy<FilterScore> selectionStrategy;
 				// If the initial population is huge ensure that the first selection culls to the correct size
 				final int selectionMax = (int) (selectionFraction * populationSize);
 				if (rampedSelection)
-					selectionStrategy = new RampedSelectionStrategy<>(random, selectionFraction,
-							selectionMax);
+					selectionStrategy = new RampedSelectionStrategy<>(random, selectionFraction, selectionMax);
 				else
-					selectionStrategy = new SimpleSelectionStrategy<>(random, selectionFraction,
-							selectionMax);
+					selectionStrategy = new SimpleSelectionStrategy<>(random, selectionFraction, selectionMax);
 				ToleranceChecker<FilterScore> ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3,
 						convergedCount);
 
@@ -3567,6 +3570,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				SearchDimension[] dimensions = new SearchDimension[n];
 				if (!nonInteractive)
 				{
+					if (gd == null)
+						throw new RuntimeException("The dialog has no been shown");
 					rangeSearchWidth = (int) gd.getNextNumber();
 					if (!isStepSearch)
 					{
@@ -3610,6 +3615,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						dimensions[i] = new SearchDimension(ss_filter.getDisabledParameterValue(i));
 					}
 				}
+				if (disabled == null)
+					disabled = new boolean[originalDimensions.length];
 				for (int i = 0; i < disabled.length; i++)
 					disabled[i] = !dimensions[i].active;
 
@@ -3673,7 +3680,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						// In case optimisation was stopped
 						IJ.resetEscape();
 
-						best = ((SimpleFilterScore) optimum.score).r.filter;
+						best = ((SimpleFilterScore) optimum.getScore()).r.filter;
 
 						if (seedSize > 0)
 						{
@@ -3795,7 +3802,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// In case optimisation was stopped
 					IJ.resetEscape();
 
-					best = ((SimpleFilterScore) optimum.score).r.filter;
+					best = ((SimpleFilterScore) optimum.getScore()).r.filter;
 
 					// Not required as the search now respects the min interval
 					// Enumerate on the min interval to produce the final filter
@@ -3856,6 +3863,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				max = result;
 			}
 		}
+		
+		if (max == null)
+			return -1;
 
 		if (showResultsTable)
 		{
@@ -4168,7 +4178,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (optimum != null)
 			{
-				best = ((SimpleFilterScore) optimum.score).r.filter;
+				best = ((SimpleFilterScore) optimum.getScore()).r.filter;
 			}
 		}
 		return best;
@@ -4212,7 +4222,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (optimum != null)
 			{
-				point = optimum.point;
+				point = optimum.getPoint();
 			}
 		}
 		return point;
@@ -4432,7 +4442,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						IJ.resetEscape();
 
 						// Now update the parameters for final assessment
-						point = optimum.point;
+						point = optimum.getPoint();
 
 						// Not required as the seed in now rounded
 						//if (pSeedSize > 0)
@@ -4506,7 +4516,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// In case optimisation was stopped
 					IJ.resetEscape();
 
-					point = optimum.point;
+					point = optimum.getPoint();
 
 					// Not required as the search now respects the min interval
 					// Enumerate on the min interval to produce the final filter
@@ -4585,7 +4595,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					IJ.resetEscape();
 
 					// Now update the parameters for final assessment
-					point = optimum.point;
+					point = optimum.getPoint();
 				}
 			}
 		}
@@ -4616,13 +4626,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		FilterScoreResult scoreResult = scoreFilter(ss_filter);
 		if (optimum != null)
 		{
-			if (scoreResult.score != optimum.score.score && scoreResult.criteria != optimum.score.criteria)
+			if (scoreResult.score != optimum.getScore().score && scoreResult.criteria != optimum.getScore().criteria)
 			{
 				ParameterScoreResult r = scoreFilter((DirectFilter) ss_filter.clone(), minimalFilter, failCount,
 						residualsThreshold, duplicateDistance, createCoordinateStore(duplicateDistance), false);
 
 				System.out.printf("Weird re- score of the filter: %f!=%f or %f!=%f (%f:%f)\n", scoreResult.score,
-						optimum.score.score, scoreResult.criteria, optimum.score.criteria, r.score, r.criteria);
+						optimum.getScore().score, scoreResult.criteria, optimum.getScore().criteria, r.score, r.criteria);
 
 			}
 		}
@@ -5011,12 +5021,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return sb;
 	}
 
-	private ClassificationResult createIntegerResult(FractionClassificationResult r)
+	private static ClassificationResult createIntegerResult(FractionClassificationResult r)
 	{
 		return new ClassificationResult(r.getPositives(), r.getNegatives(), 0, nActual - r.getPositives());
 	}
 
-	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
+	private static FractionClassificationResult getOriginalScore(FractionClassificationResult r)
 	{
 		throw new RuntimeException("fix this");
 
@@ -5721,7 +5731,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return allAssignments;
 	}
 
-	private void componentAnalysis(FractionClassificationResult bestResult, ComplexFilterScore bestFilterScore)
+	private void componentAnalysis( ComplexFilterScore bestFilterScore)
 	{
 		if (componentAnalysis == 0)
 			return;
@@ -6130,7 +6140,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
-	public class NamedPlot implements Comparable<NamedPlot>
+	private class NamedPlot implements Comparable<NamedPlot>
 	{
 		String name, xAxisName;
 		double[] xValues, yValues;
@@ -6359,7 +6369,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				return true;
 			}
 			// Directly call the method with the scores
-			if (scoreChecker.converged(p.score, c.score))
+			if (scoreChecker.converged(p.getScore(), c.getScore()))
 			{
 				logConvergence(prefix, "score");
 				return true;
@@ -7363,9 +7373,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		for (int i = 0; i < scores.length; i++)
 		{
 			// Ignore this
-			if (scores[i].score.score == 0)
+			if (scores[i].getScore().score == 0)
 				continue;
-			if (scores[i].score.criteriaPassed)
+			if (scores[i].getScore().criteriaPassed)
 				passList[pass++] = scores[i];
 			else
 				failList[fail++] = scores[i];
@@ -7672,6 +7682,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *            the filter
 	 * @return The results from running the filter (or null)
 	 */
+	@SuppressWarnings("null")
 	private PreprocessedPeakResult[] showOverlay(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
 	{
 		ImagePlus imp = CreateData.getImage();

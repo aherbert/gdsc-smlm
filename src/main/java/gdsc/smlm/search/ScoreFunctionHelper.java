@@ -26,10 +26,14 @@ package gdsc.smlm.search;
 import java.util.Arrays;
 
 /**
- * Calculate the score of points within a search space
+ * Calculate the score of points within a search space.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class ScoreFunctionHelper<T extends Comparable<T>>
 {
+	
 	/**
 	 * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
 	 * sorted. The results should contain the best result at position 0 in the output array.
@@ -37,6 +41,8 @@ public class ScoreFunctionHelper<T extends Comparable<T>>
 	 * Helper implementation of the FullScoreFunction.cut(...) method. Uses a full sort then truncation to the given
 	 * size.
 	 *
+	 * @param <T>
+	 *            the generic type
 	 * @param scores
 	 *            The scores
 	 * @param size

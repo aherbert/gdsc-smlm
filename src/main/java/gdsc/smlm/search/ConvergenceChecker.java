@@ -24,7 +24,10 @@
 package gdsc.smlm.search;
 
 /**
- * Defines convergence of a point in space
+ * Defines convergence of a point in space.
+ *
+ * @param <T>
+ *            the generic type
  */
 public interface ConvergenceChecker<T extends Comparable<T>>
 {

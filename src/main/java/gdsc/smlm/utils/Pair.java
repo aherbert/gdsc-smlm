@@ -27,12 +27,26 @@ package gdsc.smlm.utils;
  * A generic pair.
  *
  * @author Alex Herbert
+ * @param <A>
+ *            the generic type
+ * @param <B>
+ *            the generic type
  */
 public class Pair<A, B>
 {
+	/** First item of the pair */
 	public final A a;
+	/** Second item of the pair */
 	public final B b;
 
+	/**
+	 * Instantiates a new pair.
+	 *
+	 * @param a
+	 *            the first item of the pair
+	 * @param b
+	 *            the second item of the pair
+	 */
 	public Pair(A a, B b)
 	{
 		this.a = a;

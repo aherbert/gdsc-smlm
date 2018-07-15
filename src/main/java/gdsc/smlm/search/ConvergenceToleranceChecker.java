@@ -170,9 +170,9 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 		iterations++;
 		if (maxIterations != 0 && iterations >= maxIterations)
 			return true;
-		if (checkScore && converged(previous.score, current.score))
+		if (checkScore && converged(previous.getScore(), current.getScore()))
 			return true;
-		if (checkSequence && converged(previous.point, current.point))
+		if (checkSequence && converged(previous.getPoint(), current.getPoint()))
 			return true;
 		return false;
 	}

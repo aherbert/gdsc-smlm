@@ -1252,28 +1252,28 @@ public class PeakResultsReader
 		}
 	}
 	private class LineReaderV2 extends LineReader {
-		LineReaderV2(MemoryPeakResults results, int nFields) { super(results); }
+		LineReaderV2(MemoryPeakResults results) { super(results); }
 		@Override
 		PeakResult read(String line) {
 			return createPeakResultV2(line);
 		}
 	}
 	private class LineReaderDV2 extends LineReader {
-		LineReaderDV2(MemoryPeakResults results, int nFields) { super(results); }
+		LineReaderDV2(MemoryPeakResults results) { super(results); }
 		@Override
 		PeakResult read(String line) {
 			return createPeakResultDeviationsV2(line);
 		}
 	}
 	private class LineReaderV1 extends LineReader {
-		LineReaderV1(MemoryPeakResults results, int nFields) { super(results); }
+		LineReaderV1(MemoryPeakResults results) { super(results); }
 		@Override
 		PeakResult read(String line) {
 			return createPeakResultV1(line);
 		}
 	}
 	private class LineReaderDV1 extends LineReader {
-		LineReaderDV1(MemoryPeakResults results, int nFields) { super(results); }
+		LineReaderDV1(MemoryPeakResults results) { super(results); }
 		@Override
 		PeakResult read(String line) {
 			return createPeakResultDeviationsV1(line);
@@ -1292,11 +1292,11 @@ public class PeakResultsReader
 				return (deviations) ? new LineReaderDV3(results, nFields) : new LineReaderV3(results, nFields);
 
 			case 2:
-				return (deviations) ? new LineReaderDV2(results, nFields) : new LineReaderV2(results, nFields);
+				return (deviations) ? new LineReaderDV2(results) : new LineReaderV2(results);
 
 			case 1:
 			default:
-				return (deviations) ? new LineReaderDV1(results, nFields) : new LineReaderV1(results, nFields);
+				return (deviations) ? new LineReaderDV1(results) : new LineReaderV1(results);
 		}
 	}
 

@@ -882,6 +882,10 @@ public abstract class Image2D
 	 *            the x index
 	 * @param y
 	 *            the y index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
 	 * @return the sum
 	 */
 	public double computeSumFast(double[] table, int x, int y, int w, int h)

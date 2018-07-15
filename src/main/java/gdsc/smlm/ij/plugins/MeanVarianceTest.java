@@ -623,6 +623,10 @@ public class MeanVarianceTest implements PlugIn
 	 * Returns a sorted list of indices of the specified double array.
 	 * Modified from: http://stackoverflow.com/questions/951848 by N.Vischer.
 	 * Copied from ImageJ 1.48 for backwards compatibility
+	 *
+	 * @param values
+	 *            the values
+	 * @return the indices
 	 */
 	public static int[] rank(double[] values)
 	{
@@ -648,7 +652,7 @@ public class MeanVarianceTest implements PlugIn
 		return indexes2;
 	}
 
-	private double[] reorder(double[] data, int[] indices)
+	private static double[] reorder(double[] data, int[] indices)
 	{
 		double[] array = new double[indices.length];
 		for (int i = 0; i < array.length; i++)

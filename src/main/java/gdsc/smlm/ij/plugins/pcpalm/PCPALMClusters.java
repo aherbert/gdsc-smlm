@@ -642,16 +642,6 @@ public class PCPALMClusters implements PlugIn
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-	 */
-	public void run(ImageProcessor ip)
-	{
-		// Do nothing
-	}
-
 	private boolean showDialog()
 	{
 		if (PCPALMMolecules.molecules == null || PCPALMMolecules.molecules.size() < 2)

@@ -63,6 +63,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 *            the number of allowed failures
 	 * @param window
 	 *            the window size
+	 * @return the rolling window fail counter
 	 * @throws IllegalArgumentException
 	 *             If the window is not strictly positive, or the window is smaller that the allowed failures
 	 */

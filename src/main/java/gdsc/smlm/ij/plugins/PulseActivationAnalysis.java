@@ -569,6 +569,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	 * last localisation. The start frame for the activation defines the channel the activation is assigned to (this may
 	 * be channel 0 if the start frame is not in a pulse start frame).
 	 */
+	@SuppressWarnings("null")
 	private void createActivations()
 	{
 		TurboList<Activation> activations = new TurboList<>(traces.length);
@@ -1102,7 +1103,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		gd.addMessage("Plot molecules activated after a pulse");
 		String[] correctionNames = null;
-		String[] assigmentNames = null;
+		String[] assignmentNames = null;
 
 		if (channels > 1)
 		{
@@ -1123,8 +1124,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			gd.addChoice("Crosstalk_correction", correctionNames, correctionNames[specificCorrectionIndex]);
 			for (int c = 1; c <= channels; c++)
 				gd.addSlider("Crosstalk_correction_cutoff_C" + c + "(%)", 0, 100, specificCorrectionCutoff[c - 1]);
-			assigmentNames = SettingsManager.getNames((Object[]) nonSpecificCorrection);
-			gd.addChoice("Nonspecific_assigment", assigmentNames, assigmentNames[nonSpecificCorrectionIndex]);
+			assignmentNames = SettingsManager.getNames((Object[]) nonSpecificCorrection);
+			gd.addChoice("Nonspecific_assigment", assignmentNames, assignmentNames[nonSpecificCorrectionIndex]);
 			gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificCorrectionCutoff);
 		}
 
@@ -1165,6 +1166,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		{
 			if (channels > 1)
 			{
+				// Suppress null warnings
+				if (correctionNames == null || assignmentNames == null)
+					throw new RuntimeException();
+
 				if (channels == 2)
 				{
 					Recorder.recordOption("Crosstalk_21", Double.toString(ct[C21]));
@@ -1184,7 +1189,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 					Recorder.recordOption("Crosstalk_correction_cutoff_C" + c,
 							Double.toString(specificCorrectionCutoff[c - 1]));
 
-				Recorder.recordOption("Nonspecific_assigment", assigmentNames[nonSpecificCorrectionIndex]);
+				Recorder.recordOption("Nonspecific_assigment", assignmentNames[nonSpecificCorrectionIndex]);
 				Recorder.recordOption("Nonspecific_assignment_cutoff (%)",
 						Double.toString(nonSpecificCorrectionCutoff));
 			}
@@ -1612,12 +1617,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		}
 		else
 		{
-			reset(imp, ip);
+			reset(imp);
 			return;
 		}
 	}
 
-	void reset(ImagePlus imp, ImageProcessor ip)
+	private static void reset(ImagePlus imp)
 	{
 		int bitDepth = imp.getBitDepth();
 		double defaultMin, defaultMax;
@@ -2183,7 +2188,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		// Assume 10 frames after each channel pulse => 30 frames per cycle
 		double precision = sim_precision[c] / sim_nmPerPixel;
-		int id = c + 1;
 
 		RandomGenerator rand = rdg.getRandomGenerator();
 		BinomialDistribution[] bd = new BinomialDistribution[4];
@@ -2205,14 +2209,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		for (int i = 0, t = 1; i < sim_cycles; i++, t += 30)
 		{
-			count[0] += simulateActivations(rdg, bd[0], molecules[c], results[c], t, precision, id);
-			count[1] += simulateActivations(rdg, bd[1], molecules[c], results[c], t + 10, precision, id);
-			count[2] += simulateActivations(rdg, bd[2], molecules[c], results[c], t + 20, precision, id);
+			count[0] += simulateActivations(rdg, bd[0], molecules[c], results[c], t, precision);
+			count[1] += simulateActivations(rdg, bd[1], molecules[c], results[c], t + 10, precision);
+			count[2] += simulateActivations(rdg, bd[2], molecules[c], results[c], t + 20, precision);
 			// Add non-specific activations
 			if (bd[3] != null)
 			{
 				for (int t2 : frames)
-					simulateActivations(rdg, bd[3], molecules[c], results[c], t2, precision, id);
+					simulateActivations(rdg, bd[3], molecules[c], results[c], t2, precision);
 			}
 		}
 
@@ -2230,7 +2234,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	}
 
 	private int simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd, float[][] molecules,
-			MemoryPeakResults results, int t, double precision, int id)
+			MemoryPeakResults results, int t, double precision)
 	{
 		if (bd == null)
 			return 0;

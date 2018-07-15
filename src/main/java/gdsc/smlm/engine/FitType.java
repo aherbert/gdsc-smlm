@@ -23,37 +23,74 @@
  */
 package gdsc.smlm.engine;
 
+// TODO: Auto-generated Javadoc
 /**
- * Define the type of fit that was performed
+ * Define the type of fit that was performed.
  */
 public class FitType implements Cloneable
 {
+	/** Flag used for a single candidate fit with neighbours */
 	public static final int MULTI = 1;
+
+	/** Flag used for a single candidate fit with neighbours was OK */
 	public static final int MULTI_OK = 2;
+
+	/** Flag used for a double candidate fit */
 	public static final int DOUBLET = 4;
+
+	/** Flag used for a double candidate fit was OK */
 	public static final int DOUBLET_OK = 8;
+
+	/** Flag used for a double candidate fit with neighbours */
 	public static final int MULTI_DOUBLET = 16;
+
+	/** Flag used for a double candidate fit with neighbours was OK */
 	public static final int MULTI_DOUBLET_OK = 32;
+
+	/** Flag used when a fit was OK */
 	public static final int OK = 64;
 
+	/** The number of flags */
 	public static final int NO_OF_FLAGS = 7;
 
 	private int flags;
 
+	/**
+	 * Instantiates a new fit type.
+	 */
 	public FitType()
 	{
 	}
 
+	/**
+	 * Instantiates a new fit type.
+	 *
+	 * @param flags
+	 *            the flags
+	 */
 	public FitType(int flags)
 	{
 		this.flags = flags;
 	}
 
+	/**
+	 * Gets the flags.
+	 *
+	 * @return the flags
+	 */
 	public int getFlags()
 	{
 		return flags;
 	}
 
+	/**
+	 * Sets the flag to enabled/disabled.
+	 *
+	 * @param flag
+	 *            the flag
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setFlag(int flag, boolean enabled)
 	{
 		if (enabled)
@@ -63,76 +100,160 @@ public class FitType implements Cloneable
 			flags &= flag;
 	}
 
+	/**
+	 * Gets whether the flag is set to enabled/disabled.
+	 *
+	 * @param flag
+	 *            the flag
+	 * @return True if the flag is set to enabled
+	 */
 	public boolean getFlag(int flag)
 	{
 		return (flags & flag) == flag;
 	}
 
+	/**
+	 * Sets the {@link #MULTI} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setMulti(boolean enabled)
 	{
 		setFlag(MULTI, enabled);
 	}
 
+	/**
+	 * Sets the {@link #MULTI_OK} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setMultiOK(boolean enabled)
 	{
 		setFlag(MULTI_OK, enabled);
 	}
 
+	/**
+	 * Sets the {@link #MULTI_DOUBLET} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setMultiDoublet(boolean enabled)
 	{
 		setFlag(MULTI_DOUBLET, enabled);
 	}
 
+	/**
+	 * Sets the {@link #MULTI_DOUBLET_OK} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setMultiDoubletOK(boolean enabled)
 	{
 		setFlag(MULTI_DOUBLET_OK, enabled);
 	}
 
+	/**
+	 * Sets the {@link #DOUBLET} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setDoublet(boolean enabled)
 	{
 		setFlag(DOUBLET, enabled);
 	}
 
+	/**
+	 * Sets the {@link #DOUBLET_OK} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setDoubletOK(boolean enabled)
 	{
 		setFlag(DOUBLET_OK, enabled);
 	}
 
+	/**
+	 * Sets the {@link #OK} flag to enabled/disabled.
+	 *
+	 * @param enabled
+	 *            Set to true to enable
+	 */
 	public void setOK(boolean enabled)
 	{
 		setFlag(OK, enabled);
 	}
 
+	/**
+	 * Gets whether the {@link #MULTI} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getMulti()
 	{
 		return getFlag(MULTI);
 	}
 
+	/**
+	 * Gets whether the {@link #MULTI_OK} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getMultiOK()
 	{
 		return getFlag(MULTI_OK);
 	}
 
+	/**
+	 * Gets whether the {@link #MULTI_DOUBLET} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getMultiDoublet()
 	{
 		return getFlag(MULTI_DOUBLET);
 	}
 
+	/**
+	 * Gets whether the {@link #MULTI_DOUBLET_OK} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getMultiDoubletOK()
 	{
 		return getFlag(MULTI_DOUBLET_OK);
 	}
 
+	/**
+	 * Gets whether the {@link #DOUBLET} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getDoublet()
 	{
 		return getFlag(DOUBLET);
 	}
 
+	/**
+	 * Gets whether the {@link #DOUBLET_OK} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getDoubletOK()
 	{
 		return getFlag(DOUBLET_OK);
 	}
 
+	/**
+	 * Gets whether the {@link #OK} flag is set to enabled/disabled.
+	 * 
+	 * @return Set to true if enabled
+	 */
 	public boolean getOK()
 	{
 		return getFlag(OK);
@@ -157,7 +278,7 @@ public class FitType implements Cloneable
 		return sb.toString();
 	}
 
-	private void append(StringBuilder sb, boolean enabled, String name)
+	private static void append(StringBuilder sb, boolean enabled, String name)
 	{
 		if (enabled)
 		{

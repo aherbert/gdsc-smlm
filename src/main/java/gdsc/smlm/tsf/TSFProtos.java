@@ -26,7 +26,7 @@
 
 package gdsc.smlm.tsf;
 
-@SuppressWarnings({ "unchecked", "unused" })
+@SuppressWarnings({ "unchecked", "unused", "javadoc" })
 public final class TSFProtos
 {
 	private TSFProtos()

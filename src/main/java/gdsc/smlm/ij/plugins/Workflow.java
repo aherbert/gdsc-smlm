@@ -34,6 +34,10 @@ import gdsc.smlm.utils.Pair;
  * worker threads.
  *
  * @author Alex Herbert
+ * @param <S>
+ *            the generic type
+ * @param <R>
+ *            the generic type
  */
 public class Workflow<S, R>
 {

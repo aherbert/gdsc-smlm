@@ -105,7 +105,11 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	}
 
 	/**
-	 * Show the current properties
+	 * Show the current properties.
+	 *
+	 * @param save
+	 *            the save
+	 * @return true, if successful
 	 */
 	public boolean showDialog(boolean save)
 	{
@@ -114,7 +118,13 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	}
 
 	/**
-	 * Show the current properties
+	 * Show the current properties.
+	 *
+	 * @param fitEngineConfiguration
+	 *            the fit engine configuration
+	 * @param save
+	 *            the save
+	 * @return true, if successful
 	 */
 	public boolean showDialog(FitEngineConfiguration fitEngineConfiguration, boolean save)
 	{
