@@ -36,19 +36,24 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class Gaussian2DFitter
 {
+	/** The fit configuration. */
 	protected Gaussian2DFitConfiguration fitConfiguration;
+	/** The solver. */
 	protected FunctionSolver solver;
-
-	// The last successful fit. Used to compute the residuals.
+	/** The last successful fit. Used to compute the residuals. */
 	protected double[] residuals = null;
-	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
+	/** Allow calculation of residuals to be turned off (overwrite constructor fit configuration) */
 	protected boolean computeResiduals = true;
-	protected double[] lower, upper;
+	/** The lower bounds for function solvers. */
+	protected double[] lower; 
+	/** The upper bounds for function solvers. */
+	protected double[] upper;
 
 	/**
-	 * Constructor
+	 * Instantiates a new gaussian 2D fitter.
 	 *
 	 * @param fitConfiguration
+	 *            the fit configuration
 	 */
 	public Gaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration)
 	{
@@ -60,7 +65,7 @@ public class Gaussian2DFitter
 		computeResiduals = fitConfiguration.isComputeResiduals();
 	}
 
-	static double half_max_position(double[] data, int index, int[] point, int[] dim, int dimension, int[] cumul_region,
+	private static double half_max_position(double[] data, int index, int[] point, int[] dim, int dimension, int[] cumul_region,
 			int dirn, double background)
 	{
 		int i, i_start, i_end, i_step;
@@ -98,10 +103,28 @@ public class Gaussian2DFitter
 		// Not reached the half-max point. Return the dimension limit.
 		if (dirn == 1)
 			return dim[dimension];
-		else
 			return 0f;
 	}
 
+	/**
+	 * Compute the full-width at half-maximum (FWHM) using a line profile through 2D data.
+	 *
+	 * @param data
+	 *            the data
+	 * @param index
+	 *            the index
+	 * @param point
+	 *            the point
+	 * @param dim
+	 *            the maximum size of each dimension
+	 * @param dimension
+	 *            the dimension (0 or 1)
+	 * @param cumul_region
+	 *            the cumulative region sizes (1, dim[0], dim[0] * dim[1])
+	 * @param background
+	 *            the background
+	 * @return the FWHM
+	 */
 	public static double half_max_linewidth(double[] data, int index, int[] point, int[] dim, int dimension,
 			int[] cumul_region, double background)
 	{
@@ -216,9 +239,13 @@ public class Gaussian2DFitter
 	 * that all peaks are away from the edge of the data.
 	 *
 	 * @param data
+	 *            the data
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param npeaks
+	 *            the number of peaks
 	 * @return The background estimate
 	 */
 	public static double getBackground(final double[] data, final int maxx, final int maxy, final int npeaks)
@@ -326,7 +353,7 @@ public class Gaussian2DFitter
 	 *            parameters that are zero will be estimated.
 	 * @param amplitudeEstimate
 	 *            Set to true if the peak has amplitude estimated in the
-	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
+	 *            {@link Gaussian2DFunction#SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
@@ -371,7 +398,7 @@ public class Gaussian2DFitter
 	 *            Set to true if a zero value for the background parameter is the estimate
 	 * @param amplitudeEstimate
 	 *            Set to true if the peak has amplitude estimated in the
-	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
+	 *            {@link Gaussian2DFunction#SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
@@ -578,14 +605,36 @@ public class Gaussian2DFitter
 					solver.getValue(), initialParams, params, paramsDev, npeaks, solver.getNumberOfFittedParameters(),
 					statusData, solver.getIterations(), solver.getEvaluations());
 		}
-		else
-		{
-			residuals = null;
-			return new FitResult(result, 0, Double.NaN, initialParams, null, null, npeaks,
-					solver.getNumberOfFittedParameters(), null, solver.getIterations(), solver.getEvaluations());
-		}
+		residuals = null;
+		return new FitResult(result, 0, Double.NaN, initialParams, null, null, npeaks,
+				solver.getNumberOfFittedParameters(), null, solver.getIterations(), solver.getEvaluations());
 	}
 
+	/**
+	 * Check parameters.
+	 *
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param npeaks
+	 *            the npeaks
+	 * @param params
+	 *            the params
+	 * @param amplitudeEstimate
+	 *            the amplitude estimate
+	 * @param ySize
+	 *            the y size
+	 * @param y
+	 *            the y
+	 * @param paramsPerPeak
+	 *            the params per peak
+	 * @param background
+	 *            the background
+	 * @param initialParams
+	 *            the initial params
+	 * @return true, if successful
+	 */
 	protected boolean checkParameters(final int maxx, final int maxy, final int npeaks, double[] params,
 			final boolean[] amplitudeEstimate, final int ySize, final double[] y, final int paramsPerPeak,
 			double background, double[] initialParams)
@@ -1060,7 +1109,9 @@ public class Gaussian2DFitter
 	 * @param i
 	 *            The angle position within the parameter array
 	 * @param params
+	 *            the params
 	 * @param paramsDev
+	 *            the params deveations
 	 */
 	protected void correctAngle(final int i, final double[] params, final double[] paramsDev)
 	{
@@ -1107,7 +1158,7 @@ public class Gaussian2DFitter
 		params[i] = (angle < 0) ? angle + Math.PI : angle;
 	}
 
-	private void swap(final int i, final int j, final double[] params)
+	private static void swap(final int i, final int j, final double[] params)
 	{
 		double tmp = params[i];
 		params[i] = params[j];
@@ -1115,9 +1166,10 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * Convert the Full-Width at Half-Maximum to the Standard Deviation
+	 * Convert the Full-Width at Half-Maximum to the Standard Deviation.
 	 *
 	 * @param fwhm
+	 *            the fwhm
 	 * @return sd
 	 */
 	public static double fwhm2sd(double fwhm)
@@ -1126,9 +1178,10 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * Convert the Standard Deviation to the Full-Width at Half-Maximum
+	 * Convert the Standard Deviation to the Full-Width at Half-Maximum.
 	 *
 	 * @param sd
+	 *            the sd
 	 * @return fwhm
 	 */
 	public static double sd2fwhm(final double sd)
@@ -1188,8 +1241,6 @@ public class Gaussian2DFitter
 	 * <p>
 	 * The bounds are set using the initial estimate w in the range w*min to w*max.
 	 *
-	 * @param minimumWidthFactor
-	 *            the minimum width factor to use to set the bounds for width parameter fitting (must be 0-1)
 	 * @param maximumWidthFactor
 	 *            the maximum width factor to use to set the bounds for width parameter fitting (must be above 1)
 	 * @throws IllegalArgumentException

@@ -391,11 +391,13 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	/**
-	 * Create a new combined filter from the two input filters
+	 * Create a new combined filter from the two input filters.
 	 *
 	 * @param f1
+	 *            the first filter
 	 * @param f2
-	 * @return
+	 *            the  second filter 
+	 * @return the filter
 	 */
 	protected abstract Filter createFilter(Filter f1, Filter f2);
 

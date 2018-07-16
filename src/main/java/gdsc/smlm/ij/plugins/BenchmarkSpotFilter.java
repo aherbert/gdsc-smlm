@@ -322,6 +322,18 @@ public class BenchmarkSpotFilter implements PlugIn
 			add(score, intensity);
 		}
 
+		/**
+		 * Instantiates a new scored spot.
+		 *
+		 * @param match
+		 *            the match
+		 * @param spot
+		 *            the spot
+		 * @param background
+		 *            the background
+		 * @param fails
+		 *            the fails
+		 */
 		public ScoredSpot(boolean match, Spot spot, float background, int fails)
 		{
 			this.match = match;
@@ -331,10 +343,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		/**
-		 * Adds the result to the scored spot
+		 * Adds the result to the scored spot.
 		 *
-		 * @param d
-		 *            the d
 		 * @param score
 		 *            the score
 		 * @param intensity
@@ -814,15 +824,15 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Use the distance to the true location to score the candidate
 				final RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
 				final RampedScore signalScore = (upperSignalFactor > 0)
-						? new RampedScore(lowerSignalFactor, upperSignalFactor) : null;
+						? new RampedScore(lowerSignalFactor, upperSignalFactor)
+						: null;
 
 				// Candidates may be close to many localisations. In order to compute the signal
 				// factor correctly we have computed the signal offset for each spot with overlapping PSFs.
 				// This is used to raise the spot intensity when computing the signal factor.
 
 				// Compute assignments
-				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(
-						predicted.length * 3);
+				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(predicted.length * 3);
 
 				final double dmin = matchDistance * matchDistance;
 				final int nPredicted = predicted.length;
@@ -1068,7 +1078,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			SpotCoordinate[] coords = new SpotCoordinate[spots.length];
 			for (int i = 0; i < spots.length; i++)
-				coords[i] = new SpotCoordinate(i, spots[i]);
+				coords[i] = new SpotCoordinate(spots[i]);
 			return coords;
 		}
 
@@ -1076,7 +1086,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			Spot spot;
 
-			public SpotCoordinate(int id, Spot spot)
+			public SpotCoordinate(Spot spot)
 			{
 				// Centre on the middle of the pixel
 				super(spot.x + 0.5f, spot.y + 0.5f);
@@ -1949,9 +1959,10 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	/**
-	 * Add all the true-positives to memory as a new results set
+	 * Add all the true-positives to memory as a new results set.
 	 *
 	 * @param filterResults
+	 *            the filter results
 	 */
 	void addSpotsToMemory(TIntObjectHashMap<FilterResult> filterResults)
 	{
@@ -1978,11 +1989,11 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	/**
-	 * Histogram the number of negatives preceeding each positive.
+	 * Histogram the number of negatives preceding each positive.
 	 *
 	 * @param filterResult
 	 *            the filter result
-	 * @return
+	 * @return the cumulative histogram
 	 */
 	private double[][] histogramFailures(BenchmarkFilterResult filterResult)
 	{

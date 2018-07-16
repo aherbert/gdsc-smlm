@@ -587,7 +587,9 @@ public class FilterAnalysis implements PlugIn
 	 * in ascending numerical order otherwise they are sorted.
 	 *
 	 * @param resultsList
+	 *            the results list
 	 * @param filterSets
+	 *            the filter sets
 	 */
 	public void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
@@ -826,7 +828,7 @@ public class FilterAnalysis implements PlugIn
 				allSameType = false;
 
 			final double jaccard = s.getJaccard();
-			if (filter == null || maxScore < jaccard)
+			if (maxScore < jaccard)
 			{
 				maxScore = jaccard;
 				maxFilter = filter;

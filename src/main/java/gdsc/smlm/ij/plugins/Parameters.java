@@ -46,11 +46,14 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter value greater than zero
+	 * Check if the named parameter value is greater than zero.
 	 *
 	 * @param name
+	 *            the name
 	 * @param value
+	 *            the value
 	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
 	public static void isAboveZero(String name, double value)
 	{
@@ -59,12 +62,16 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter value greater than the given limit
+	 * Check if the named parameter value is greater than the given limit.
 	 *
 	 * @param name
+	 *            the name
 	 * @param value
+	 *            the value
 	 * @param limit
+	 *            the limit
 	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
 	public static void isAbove(String name, double value, double limit)
 	{
@@ -73,12 +80,16 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter value greater than or equal to the given limit
+	 * Check if the named parameter value is greater than or equal to the given limit.
 	 *
 	 * @param name
+	 *            the name
 	 * @param value
+	 *            the value
 	 * @param limit
+	 *            the limit
 	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
 	public static void isEqualOrAbove(String name, double value, double limit)
 	{
@@ -87,12 +98,16 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter value is less than the given limit
+	 * Check if the named parameter value is less than the given limit.
 	 *
 	 * @param name
+	 *            the name
 	 * @param value
+	 *            the value
 	 * @param limit
+	 *            the limit
 	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
 	public static void isBelow(String name, double value, double limit)
 	{
@@ -101,12 +116,16 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter value is less then or equal to the given limit
+	 * Check if the named parameter value is less then or equal to the given limit.
 	 *
 	 * @param name
+	 *            the name
 	 * @param value
+	 *            the value
 	 * @param limit
+	 *            the limit
 	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
 	public static void isEqualOrBelow(String name, double value, double limit)
 	{
@@ -115,11 +134,14 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter value is zero or greater
+	 * Check if the named parameter value is zero or greater.
 	 *
 	 * @param name
+	 *            the name
 	 * @param value
+	 *            the value
 	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
 	public static void isPositive(String name, double value)
 	{
@@ -128,10 +150,14 @@ public class Parameters
 	}
 
 	/**
-	 * Check if the named parameter meets the requirements
+	 * Check if the named parameter meets the requirements.
 	 *
 	 * @param name
+	 *            the name
+	 * @param value
+	 *            the value
 	 * @param requirements
+	 *            the requirements
 	 */
 	public static void isValid(String name, double value, EnumSet<Requirement> requirements)
 	{

@@ -234,170 +234,164 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		{
 			return mortensenApproximation(o, e);
 		}
+		
+		ConvolutionMode mode = convolutionMode;
+
+		// Integrate to infinity is not necessary. The convolution of the function with the
+		// Gaussian should be adequately sampled using a nxSD around the function value.
+		// Find a bracket around the value.
+		double range = 5 * sigma;
+		double upperu = o + range;
+		if (upperu < 0)
+			return 0;
+		double loweru = o - range;
+		if (loweru < 0)
+		{
+			loweru = 0;
+			// Edge case
+			if (upperu == 0)
+				mode = ConvolutionMode.DISCRETE_PMF;
+		}
+
+		double p = 0;
+
+		// PDF method does not work for small sigma
+		if (mode == ConvolutionMode.DISCRETE_PDF && sigma < 1)
+			mode = ConvolutionMode.DISCRETE_PMF;
+
+		if (mode == ConvolutionMode.DISCRETE_PDF)
+		{
+			// Check
+			if (loweru == upperu)
+				throw new IllegalStateException();
+
+			// Use a cached kernel using a range of 5
+			double[] g = createKernel(5);
+
+			// Perform a simple convolution at point o with the kernel
+			for (int i = 0, j = -g.length / 2; i < g.length; i++, j++)
+			{
+				double u = o - j;
+				if (u >= 0.5)
+					// This approximates [u-0.5 to u+0.5] as a single point
+					p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i];
+				else if (u >= 0)
+					// Only count [0 to u+0.5] as a single point as the Poisson-Gamma
+					// function is a step at x=0
+					p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i] * (0.5 + u);
+			}
+		}
+		else if (mode == ConvolutionMode.DISCRETE_PMF)
+		{
+			// Integrate the Poisson-Gamma to a PMF.
+			// Convolve with the Gaussian CDF over the range (i.e. a discrete Gaussian PMF).
+
+			// Use a simple integration by adding the points in the range.
+			// Use the error function to obtain the integral of the Gaussian
+			int upper = (int) Math.ceil(upperu);
+			int lower = (int) Math.floor(loweru);
+
+			// Do an integration of the Poisson-Gamma PMF.
+			// Trapezoid integration underestimates the total probability when the
+			// Poisson-Gamma curve has no roots on the gradient (e.g. p<1).
+			// (Since the trapezoid lines always miss part of the curve as it decays to zero.)
+			// Simpson integration could be used to improve this.
+			// Make this an option. For now just set to true as this mode should not be used
+			// anyway. The Simpson integrator should be faster.
+			boolean doSimpson = true;
+
+			double pg;
+			// This is the CDF of the Gaussian
+			double g;
+
+			// If at zero then the Poisson-Gamma PMF approximation for u=0
+			// is the integral from 0 to 0.5
+			if (lower == 0)
+			{
+				// Lower = -0.5
+				final double prevPG = PoissonGammaFunction.poissonGammaN(0, e, m);
+				final double prevG = gaussianErf(-0.5 - o);
+				// Upper = 0.5
+				pg = PoissonGammaFunction.poissonGammaN(0.5, p, m);
+				g = gaussianErf(0.5 - o);
+				double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
+						: (prevPG + pg) / 4;
+				p += sum * (g - prevG) / 2;
+				lower++;
+			}
+			else
+			{
+				pg = PoissonGammaFunction.poissonGammaN(lower - 0.5, e, m);
+				g = gaussianErf(lower - 0.5 - o);
+			}
+
+			// For the rest of the range the Poisson-Gamma PMF approximation for u
+			// is the integral from u-0.5 to u+0.5
+			for (int u = lower; u <= upper; u++)
+			{
+				final double prevPG = pg;
+				final double prevG = g;
+				pg = PoissonGammaFunction.poissonGammaN(u + 0.5, e, m);
+				g = gaussianErf(u + 0.5 - o);
+				double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
+						: (prevPG + pg) / 2;
+				p += sum * (g - prevG) / 2;
+			}
+		}
 		else
 		{
-			// Full evaluation of a Poisson-Gamma-Gaussian convolution PMF.
-			// Note: Convolution uses the Poisson-Gamma without the dirac
-			// delta function. This is added later.
+			// Use integrator
 
-			ConvolutionMode mode = convolutionMode;
+			// Note that the Poisson-Gamma function has a delta function at u=0.
+			// This prevents integration close to the zero boundary as the function
+			// is not smooth.
+			// So integration is done using the non-delta function version.
 
-			// Integrate to infinity is not necessary. The convolution of the function with the
-			// Gaussian should be adequately sampled using a nxSD around the function value.
-			// Find a bracket around the value.
-			double range = 5 * sigma;
-			double upperu = o + range;
-			if (upperu < 0)
-				return 0;
-			double loweru = o - range;
-			if (loweru < 0)
+			// The integrator may be the fastest method when the range (upper-lower)
+			// is large as it uses fewer points.
+
+			// Specify the function to integrate.
+			PGGFunction f = new PGGFunction(o, e);
+
+			try
 			{
-				loweru = 0;
-				// Edge case
-				if (upperu == 0)
-					mode = ConvolutionMode.DISCRETE_PMF;
+				p += createIntegrator().integrate(2000, f, loweru, upperu);
 			}
-
-			double p = 0;
-
-			// PDF method does not work for small sigma
-			if (mode == ConvolutionMode.DISCRETE_PDF && sigma < 1)
-				mode = ConvolutionMode.DISCRETE_PMF;
-
-			if (mode == ConvolutionMode.DISCRETE_PDF)
+			catch (TooManyEvaluationsException ex)
 			{
-				// Check
-				if (loweru == upperu)
-					throw new IllegalStateException();
-
-				// Use a cached kernel using a range of 5
-				double[] g = createKernel(5);
-
-				// Perform a simple convolution at point o with the kernel
-				for (int i = 0, j = -g.length / 2; i < g.length; i++, j++)
-				{
-					double u = o - j;
-					if (u >= 0.5)
-						// This approximates [u-0.5 to u+0.5] as a single point
-						p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i];
-					else if (u >= 0)
-						// Only count [0 to u+0.5] as a single point as the Poisson-Gamma
-						// function is a step at x=0
-						p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i] * (0.5 + u);
-				}
+				System.out.printf("Integration failed: o=%g, e=%g, eval=%d\n", o, e, f.i);
+				return mortensenApproximation(o, e);
 			}
-			else if (mode == ConvolutionMode.DISCRETE_PMF)
-			{
-				// Integrate the Poisson-Gamma to a PMF.
-				// Convolve with the Gaussian CDF over the range (i.e. a discrete Gaussian PMF).
-
-				// Use a simple integration by adding the points in the range.
-				// Use the error function to obtain the integral of the Gaussian
-				int upper = (int) Math.ceil(upperu);
-				int lower = (int) Math.floor(loweru);
-
-				// Do an integration of the Poisson-Gamma PMF.
-				// Trapezoid integration underestimates the total probability when the
-				// Poisson-Gamma curve has no roots on the gradient (e.g. p<1).
-				// (Since the trapezoid lines always miss part of the curve as it decays to zero.)
-				// Simpson integration could be used to improve this.
-				// Make this an option. For now just set to true as this mode should not be used
-				// anyway. The Simpson integrator should be faster.
-				boolean doSimpson = true;
-
-				double pg;
-				// This is the CDF of the Gaussian
-				double g;
-
-				// If at zero then the Poisson-Gamma PMF approximation for u=0
-				// is the integral from 0 to 0.5
-				if (lower == 0)
-				{
-					// Lower = -0.5
-					final double prevPG = PoissonGammaFunction.poissonGammaN(0, e, m);
-					final double prevG = gaussianErf(-0.5 - o);
-					// Upper = 0.5
-					pg = PoissonGammaFunction.poissonGammaN(0.5, p, m);
-					g = gaussianErf(0.5 - o);
-					double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
-							: (prevPG + pg) / 4;
-					p += sum * (g - prevG) / 2;
-					lower++;
-				}
-				else
-				{
-					pg = PoissonGammaFunction.poissonGammaN(lower - 0.5, e, m);
-					g = gaussianErf(lower - 0.5 - o);
-				}
-
-				// For the rest of the range the Poisson-Gamma PMF approximation for u
-				// is the integral from u-0.5 to u+0.5
-				for (int u = lower; u <= upper; u++)
-				{
-					final double prevPG = pg;
-					final double prevG = g;
-					pg = PoissonGammaFunction.poissonGammaN(u + 0.5, e, m);
-					g = gaussianErf(u + 0.5 - o);
-					double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
-							: (prevPG + pg) / 2;
-					p += sum * (g - prevG) / 2;
-				}
-			}
-			else
-			{
-				// Use integrator
-
-				// Note that the Poisson-Gamma function has a delta function at u=0.
-				// This prevents integration close to the zero boundary as the function
-				// is not smooth.
-				// So integration is done using the non-delta function version.
-
-				// The integrator may be the fastest method when the range (upper-lower)
-				// is large as it uses fewer points.
-
-				// Specify the function to integrate.
-				PGGFunction f = new PGGFunction(o, e);
-
-				try
-				{
-					p += createIntegrator().integrate(2000, f, loweru, upperu);
-				}
-				catch (TooManyEvaluationsException ex)
-				{
-					System.out.printf("Integration failed: o=%g, e=%g, eval=%d\n", o, e, f.i);
-					return mortensenApproximation(o, e);
-				}
-				//System.out.printf("Integration eval=%d\n", f.i);
-			}
-
-			// Special case:
-			// Due to the Poisson-Gamma function delta function at u=0
-			// The probability at u=0 may be very large compared to the rest of
-			// the Poisson-Gamma when e is low. To compensate always compute the
-			// at u=0.
-
-			// If this function is to be used as a PMF (with discrete integer observed values)
-			// then use the Gaussian CDF convolution. This is the best option for
-			// EM-CCD data fitting.
-			// If this function is to be used as a PDF (e.g. for integration routines)
-			// then use the Gaussian PDF convolution.
-
-			if (pmfMode)
-			{
-				double erf2 = gaussianErf(-o + 0.5);
-				if (erf2 != -1)
-				{
-					// Assume u==0
-					p += PoissonGammaFunction.dirac(e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
-				}
-			}
-			else
-			{
-				p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
-			}
-
-			return checkMinProbability(p);
+			//System.out.printf("Integration eval=%d\n", f.i);
 		}
+
+		// Special case:
+		// Due to the Poisson-Gamma function delta function at u=0
+		// The probability at u=0 may be very large compared to the rest of
+		// the Poisson-Gamma when e is low. To compensate always compute the
+		// at u=0.
+
+		// If this function is to be used as a PMF (with discrete integer observed values)
+		// then use the Gaussian CDF convolution. This is the best option for
+		// EM-CCD data fitting.
+		// If this function is to be used as a PDF (e.g. for integration routines)
+		// then use the Gaussian PDF convolution.
+
+		if (pmfMode)
+		{
+			double erf2 = gaussianErf(-o + 0.5);
+			if (erf2 != -1)
+			{
+				// Assume u==0
+				p += PoissonGammaFunction.dirac(e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
+			}
+		}
+		else
+		{
+			p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
+		}
+
+		return checkMinProbability(p);
 	}
 
 	private double checkMinProbability(double p)
@@ -617,17 +611,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 	/**
 	 * Sets the convolution mode.
-	 * <p>
-	 * WARNING:
-	 * Currently the integration modes do not work when the Gaussian kernel will sample
-	 * across x=0. The delta contribution of the Poisson-Gamma at x=0 only
-	 * makes sense as part of a PMF. Using the Poisson-Gamma approximation
-	 * as a PDF is incorrect when the Gaussian will cross the x=0 boundary.
-	 * A different mode can be specified for use at the boundary.
 	 *
 	 * @param convolutionMode
 	 *            the new convolution mode
-	 * @see #setBoundaryConvolutionMode(ConvolutionMode)
 	 */
 	public void setConvolutionMode(ConvolutionMode convolutionMode)
 	{

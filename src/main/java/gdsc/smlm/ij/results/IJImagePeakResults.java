@@ -408,8 +408,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/**
 	 * Create the image from a clone of the current data. Should only be called by one thread which has the lock so can
 	 * use class variables and the actual pixel buffer.
-	 *
-	 * @return The size when the image data was cloned
 	 */
 	private void createImage()
 	{
@@ -668,7 +666,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 *            the indices
 	 * @param value
 	 *            the values for the indices
-	 * @return the value
 	 */
 	private void getValue(int peak, float[] params, double error, float x, float y, int[] indices, float[] value)
 	{
@@ -1040,6 +1037,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * Check if the stack should be updated to move the rolling window to the given peak.
 	 *
 	 * @param peak
+	 *            the peak
 	 * @return True if update is required
 	 */
 	protected boolean shouldUpdate(int peak)
@@ -1052,6 +1050,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * frame)
 	 *
 	 * @param peak
+	 *            the peak
 	 */
 	protected void checkAndUpdateToFrame(int peak)
 	{
@@ -1064,6 +1063,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * frame)
 	 *
 	 * @param peak
+	 *            the peak
 	 */
 	protected void updateToFrame(int peak)
 	{

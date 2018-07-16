@@ -61,8 +61,7 @@ import gdsc.core.utils.Maths;
  * when true signal readout from the sCMOS camera is low enough to be negated by readout noise. In this case the noise
  * can be ignored.
  *
- * @see Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms.
- *      Nature Methods 10, 653–658. *
+ * @see "Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658."
  */
 public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
@@ -162,9 +161,10 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 	}
 
 	/**
-	 * Return the log of the factorial for the given real number, using the gamma function
+	 * Return the log of the factorial for the given real number, using the gamma function.
 	 *
 	 * @param k
+	 *            the number
 	 * @return the log factorial
 	 */
 	public static double logFactorial(double k)
@@ -178,6 +178,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 	 * Return the factorial for the given real number, using the gamma function
 	 *
 	 * @param k
+	 *            the number
 	 * @return the factorial
 	 */
 	public static double factorial(double k)

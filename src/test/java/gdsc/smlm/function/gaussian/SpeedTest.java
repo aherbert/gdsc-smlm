@@ -359,9 +359,11 @@ public class SpeedTest
 	 * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude, angle, xpos,
 	 * ypos, xwidth, ywidth }
 	 *
+	 * @param npeaks
+	 *            the npeaks
 	 * @param params
 	 *            set on output
-	 * @return
+	 * @return the data
 	 */
 	private static double[] doubleCreateGaussianData(int npeaks, double[] params)
 	{

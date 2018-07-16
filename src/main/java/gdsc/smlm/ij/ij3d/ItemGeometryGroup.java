@@ -473,6 +473,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * @param appearance
 	 *            the appearance
 	 * @param ga
+	 *            the geometry array
 	 * @return the appearance
 	 */
 	private Appearance createDefaultAppearance(Appearance appearance, GeometryArray ga)

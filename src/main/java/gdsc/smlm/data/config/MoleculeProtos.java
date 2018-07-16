@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused","javadoc"})
 public final class MoleculeProtos {
   private MoleculeProtos() {}
   public static void registerAllExtensions(

@@ -104,7 +104,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	/**
 	 * Return the log of the factorial for the given real number, using the gamma function
 	 *
-	 * @param k
+	 * @param k the number
 	 * @return the log factorial
 	 */
 	public static double logFactorial(double k)
@@ -117,7 +117,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	/**
 	 * Return the factorial for the given real number, using the gamma function
 	 *
-	 * @param k
+	 * @param k the number
 	 * @return the factorial
 	 */
 	public static double factorial(double k)

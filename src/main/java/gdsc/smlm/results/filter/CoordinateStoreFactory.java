@@ -42,7 +42,7 @@ public class CoordinateStoreFactory
 	 * @param xyResolution
 	 *            the xy resolution (if negative then nothing is stored)
 	 * @return the coordinate store
-	 * @deprecated The z resolution should be specified using {@link #create(int, int, double, double)}
+	 * @deprecated The z resolution should be specified using {@link #create(int, int, int, int, double, double)}
 	 */
 	@Deprecated
 	public static CoordinateStore create(int minx, int miny, int width, int height, double xyResolution)

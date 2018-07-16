@@ -218,6 +218,10 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 	/**
 	 * Returns unbiased exponent of a <code>double</code>.
+	 *
+	 * @param d
+	 *            the double
+	 * @return the exponent
 	 */
 	public static int getExponent(double d)
 	{

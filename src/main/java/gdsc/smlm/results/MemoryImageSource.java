@@ -36,7 +36,14 @@ public class MemoryImageSource extends ImageSource
 	private boolean freeMemoryOnClose;
 
 	/**
-	 * Create a new image source
+	 * Create a new image source.
+	 *
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
+	 * @param data
+	 *            the data
 	 */
 	public MemoryImageSource(int width, int height, float[]... data)
 	{
@@ -44,7 +51,18 @@ public class MemoryImageSource extends ImageSource
 	}
 
 	/**
-	 * Create a new image source
+	 * Create a new image source.
+	 *
+	 * @param xOrigin
+	 *            the x origin
+	 * @param yOrigin
+	 *            the y origin
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
+	 * @param data
+	 *            the data
 	 */
 	public MemoryImageSource(int xOrigin, int yOrigin, int width, int height, float[]... data)
 	{

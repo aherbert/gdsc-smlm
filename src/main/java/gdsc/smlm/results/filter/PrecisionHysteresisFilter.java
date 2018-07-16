@@ -50,14 +50,20 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	private Gaussian2DPeakResultCalculator calculator;
 
 	/**
+	 * Instantiates a new precision hysteresis filter.
+	 *
 	 * @param searchDistance
+	 *            the search distance
 	 * @param searchDistanceMode
 	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
 	 * @param timeThreshold
+	 *            the time threshold
 	 * @param timeThresholdMode
 	 *            0 = frames; 1 = seconds
 	 * @param strictPrecision
+	 *            the strict precision
 	 * @param range
+	 *            the range
 	 */
 	public PrecisionHysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
 			int timeThresholdMode, double strictPrecision, double range)

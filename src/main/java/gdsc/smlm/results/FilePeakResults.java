@@ -39,14 +39,22 @@ import gdsc.core.utils.TextUtils;
  */
 public abstract class FilePeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
-	// Only write to a single results file
+	/** Only write to a single results file */
 	protected FileOutputStream fos = null;
 
+	/** The filename. */
 	protected String filename;
 	private boolean sortAfterEnd = false;
 
+	/** The size of the results. */
 	protected int size = 0;
 
+	/**
+	 * Instantiates a new file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public FilePeakResults(String filename)
 	{
 		this.filename = filename;
@@ -108,6 +116,11 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		write(result);
 	}
 
+	/**
+	 * Creates the results header.
+	 *
+	 * @return the header
+	 */
 	protected String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -159,7 +172,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		return sb.toString();
 	}
 
-	private Printer addMessage(StringBuilder sb, Printer printer, String name, MessageOrBuilder msg)
+	private static Printer addMessage(StringBuilder sb, Printer printer, String name, MessageOrBuilder msg)
 	{
 		try
 		{
@@ -177,7 +190,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		return printer;
 	}
 
-	private void addComment(StringBuilder sb, String comment)
+	private static void addComment(StringBuilder sb, String comment)
 	{
 		if (comment != null)
 			sb.append("#").append(comment).append('\n');
@@ -217,11 +230,21 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 */
 	protected abstract String[] getFieldNames();
 
-	protected String singleLine(String text)
+	/**
+	 * Convert the text to a single line.
+	 *
+	 * @param text
+	 *            the text
+	 * @return the new text
+	 */
+	protected static String singleLine(String text)
 	{
 		return text.replaceAll("\n *", "");
 	}
 
+	/**
+	 * Close the output.
+	 */
 	protected void closeOutput()
 	{
 		if (fos == null)

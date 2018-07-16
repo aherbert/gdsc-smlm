@@ -82,10 +82,11 @@ public class RadialFalloffIllumination implements SpatialIllumination
 	}
 
 	/**
-	 * Get the intensity of the illumination given the distance from the centre
+	 * Get the intensity of the illumination given the distance from the centre.
 	 *
 	 * @param xyz
-	 * @return
+	 *            the xyz
+	 * @return the intensity
 	 */
 	private double getIntensity(double[] xyz)
 	{

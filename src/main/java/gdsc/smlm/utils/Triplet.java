@@ -27,13 +27,32 @@ package gdsc.smlm.utils;
  * A generic triplet.
  *
  * @author Alex Herbert
+ * @param <A>
+ *            the generic type
+ * @param <B>
+ *            the generic type
+ * @param <C>
+ *            the generic type
  */
 public class Triplet<A, B, C>
 {
+	/** First item of the triplet */
 	public final A a;
+	/** Second item of the triplet */
 	public final B b;
+	/** Third item of the triplet */
 	public final C c;
 
+	/**
+	 * Instantiates a new triplet.
+	 *
+	 * @param a
+	 *            the first item of the triplet
+	 * @param b
+	 *            the second item of the triplet
+	 * @param c
+	 *            the third item of the triplet
+	 */
 	public Triplet(A a, B b, C c)
 	{
 		this.a = a;

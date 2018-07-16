@@ -35,9 +35,10 @@ public class XmlUtils extends gdsc.core.utils.XmlUtils
 	private static XStream xs = null;
 
 	/**
-	 * Convert an object to XML
+	 * Convert an object to XML.
 	 *
 	 * @param obj
+	 *            the object
 	 * @return XML string representation
 	 */
 	public static String toXML(Object obj)
@@ -58,9 +59,10 @@ public class XmlUtils extends gdsc.core.utils.XmlUtils
 	}
 
 	/**
-	 * Load an object from the XML string representation
+	 * Load an object from the XML string representation.
 	 *
 	 * @param xml
+	 *            the xml
 	 * @return the object
 	 */
 	public static Object fromXML(String xml)

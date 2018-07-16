@@ -56,6 +56,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
+	 * @return the consecutive fail counter
 	 */
 	public static ConsecutiveFailCounter create(int allowedFailures)
 	{

@@ -75,7 +75,7 @@ public class ResequenceResults implements PlugIn
 			IJ.showStatus("Resequenced " + results.getName());
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -176,6 +176,7 @@ public class ResequenceResults implements PlugIn
 	 * Resequence the results for the original imaging sequence provided. Results are assumed to be continuous from 1.
 	 *
 	 * @param results
+	 *            the results
 	 * @param start
 	 *            The first frame that contained the data
 	 * @param block
@@ -184,7 +185,7 @@ public class ResequenceResults implements PlugIn
 	 *            The number of continuous frames to ignore before the next data
 	 * @param tracker
 	 *            Used to report the mapping
-	 * @return
+	 * @return true, if successful
 	 */
 	private static boolean resequenceResults(MemoryPeakResults results, final int start, final int block,
 			final int skip, final TrackProgress tracker)

@@ -142,7 +142,8 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	{
 		filter1 = gd.getNextChoiceIndex();
 		smooth1 = gd.getNextNumber();
-		if (differenceFilter = gd.getNextBoolean())
+		differenceFilter = gd.getNextBoolean();
+		if (differenceFilter)
 		{
 			filter2 = gd.getNextChoiceIndex();
 			smooth2 = gd.getNextNumber();
@@ -178,7 +179,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		ip.setMinAndMax(fp.getMin(), fp.getMax());
 	}
 
-	private MaximaSpotFilter createSpotFilter()
+	private static MaximaSpotFilter createSpotFilter()
 	{
 		final int search = 1;
 		final int border = 0;

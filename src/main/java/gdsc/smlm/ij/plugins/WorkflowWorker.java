@@ -29,6 +29,10 @@ import gdsc.smlm.utils.Pair;
  * A worker to update results based on new settings.
  *
  * @author Alex Herbert
+ * @param <S>
+ *            the generic type
+ * @param <R>
+ *            the generic type
  */
 public abstract class WorkflowWorker<S, R>
 {
@@ -69,9 +73,10 @@ public abstract class WorkflowWorker<S, R>
 
 	/**
 	 * Called when there are new results in the current work. This can be used to reset the worker before
-	 * {@link #doWork(Object, Object)} is called.
+	 * {@link #doWork(Pair)} is called.
 	 */
 	protected void newResults()
 	{
+		// Do nothing
 	}
 }

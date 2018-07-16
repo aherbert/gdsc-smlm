@@ -63,6 +63,8 @@ public class ImageConverter
 
 	/**
 	 * Returns the three weighting factors used to do colour conversions.
+	 *
+	 * @return the weighting factors
 	 */
 	public double[] getWeightingFactors()
 	{
@@ -99,10 +101,15 @@ public class ImageConverter
 	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned.
 	 *
 	 * @param oPixels
+	 *            the pixels object
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param bounds
+	 *            the bounds
 	 * @param buffer
+	 *            the buffer
 	 * @return The float array data
 	 */
 	public float[] getData(final Object oPixels, final int width, final int height, final Rectangle bounds,
@@ -128,12 +135,9 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				float[] pixels2 = allocate(buffer, pixels.length);
-				System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
-				return pixels2;
-			}
+			float[] pixels2 = allocate(buffer, pixels.length);
+			System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
+			return pixels2;
 		}
 		else if (oPixels instanceof short[])
 		{
@@ -150,13 +154,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				float[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = pixels[i] & 0xffff;
-				return pixels2;
-			}
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i] & 0xffff;
+			return pixels2;
 		}
 		else if (oPixels instanceof byte[])
 		{
@@ -173,13 +174,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				float[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = pixels[i] & 0xff;
-				return pixels2;
-			}
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i] & 0xff;
+			return pixels2;
 		}
 		else if (oPixels instanceof double[])
 		{
@@ -196,13 +194,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				float[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = (float) pixels[i];
-				return pixels2;
-			}
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = (float) pixels[i];
+			return pixels2;
 		}
 		else if (oPixels instanceof int[])
 		{
@@ -220,13 +215,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				float[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = rgbToGreyscale(pixels[i]);
-				return pixels2;
-			}
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = rgbToGreyscale(pixels[i]);
+			return pixels2;
 		}
 		return null;
 	}
@@ -253,10 +245,15 @@ public class ImageConverter
 	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned.
 	 *
 	 * @param oPixels
+	 *            the pixels object
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param bounds
+	 *            the bounds
 	 * @param buffer
+	 *            the buffer
 	 * @return The double array data
 	 */
 	public double[] getDoubleData(final Object oPixels, final int width, final int height, final Rectangle bounds,
@@ -282,13 +279,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				double[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = pixels[i];
-				return pixels2;
-			}
+			double[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i];
+			return pixels2;
 		}
 		else if (oPixels instanceof short[])
 		{
@@ -305,13 +299,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				double[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = pixels[i] & 0xffff;
-				return pixels2;
-			}
+			double[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i] & 0xffff;
+			return pixels2;
 		}
 		else if (oPixels instanceof byte[])
 		{
@@ -328,13 +319,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				double[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = pixels[i] & 0xff;
-				return pixels2;
-			}
+			double[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i] & 0xff;
+			return pixels2;
 		}
 		if (oPixels instanceof double[])
 		{
@@ -351,12 +339,9 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				double[] pixels2 = allocate(buffer, pixels.length);
-				System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
-				return pixels2;
-			}
+			double[] pixels2 = allocate(buffer, pixels.length);
+			System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
+			return pixels2;
 		}
 		else if (oPixels instanceof int[])
 		{
@@ -374,13 +359,10 @@ public class ImageConverter
 				}
 				return pixels2;
 			}
-			else
-			{
-				double[] pixels2 = allocate(buffer, pixels.length);
-				for (int i = 0; i < pixels.length; i++)
-					pixels2[i] = rgbToGreyscale(pixels[i]);
-				return pixels2;
-			}
+			double[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = rgbToGreyscale(pixels[i]);
+			return pixels2;
 		}
 		return null;
 	}

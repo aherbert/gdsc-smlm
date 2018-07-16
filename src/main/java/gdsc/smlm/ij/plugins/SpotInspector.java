@@ -274,7 +274,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			}
 
 			plotScore(xValues, yValues, yMin, yMax);
-			plotHistogram(yValues, yMin, yMax);
+			plotHistogram(yValues);
 		}
 
 		// Extract spots into a stack
@@ -381,7 +381,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private void plotHistogram(float[] data, double yMin, double yMax)
+	private static void plotHistogram(float[] data)
 	{
 		if (plotHistogram)
 		{
@@ -391,7 +391,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private float[] getScore(PeakResult r, int i, PrecisionResultProcedure pp, StandardResultProcedure sp,
+	private static float[] getScore(PeakResult r, int i, PrecisionResultProcedure pp, StandardResultProcedure sp,
 			WidthResultProcedure wp, HeightResultProcedure hp, float stdDevMax)
 	{
 		// Return score so high is better
@@ -468,11 +468,13 @@ public class SpotInspector implements PlugIn, MouseListener
 	}
 
 	/**
-	 * Get the relative change factor between f and g
+	 * Get the relative change factor between f and g.
 	 *
 	 * @param f
+	 *            the f
 	 * @param g
-	 * @return
+	 *            the g
+	 * @return the factor
 	 */
 	private static float getFactor(float f, float g)
 	{

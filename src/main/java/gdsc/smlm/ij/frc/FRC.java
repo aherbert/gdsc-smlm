@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.frc;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
@@ -126,7 +125,7 @@ public class FRC
 		 * @return the name
 		 */
 		abstract public String getName();
-	};
+	}
 
 	/**
 	 * Specify the sampling method to compute the Fourier Ring Correlation.
@@ -599,13 +598,13 @@ public class FRC
 		this.fourierMethod = fourierMethod;
 	}
 
-	/** Used to track the progress within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
+	/** Used to track the progress within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor, double)}. */
 	private TrackProgress progress = null;
 
 	/**
 	 * Sets the track progress.
 	 * <p>
-	 * Used to track the progress within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}.
+	 * Used to track the progress within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor, double)}.
 	 *
 	 * @param progress
 	 *            the new track progress
@@ -1099,14 +1098,14 @@ public class FRC
 	 * Pad.
 	 *
 	 * @param ip
-*            the image
+	 *            the image
 	 * @param width
 	 *            the width
 	 * @param height
 	 *            the height
 	 * @return the image processor
 	 */
-	private ImageProcessor pad(ImageProcessor ip, int width, int height)
+	private static ImageProcessor pad(ImageProcessor ip, int width, int height)
 	{
 		if (ip.getWidth() != width || ip.getHeight() != height)
 		{
@@ -1354,7 +1353,7 @@ public class FRC
 	 *            the maxx
 	 * @return the interpolated values
 	 */
-	private double[] getInterpolatedValues(final double x, final double y, float[][] images, final int maxx)
+	private static double[] getInterpolatedValues(final double x, final double y, float[][] images, final int maxx)
 	{
 		final int xbase = (int) x;
 		final int ybase = (int) y;
@@ -1587,7 +1586,7 @@ public class FRC
 
 	/**
 	 * Computes the crossing points of the FRC curve and the threshold curve. The intersections can be used to
-	 * determine the image resolution using {@link #getCorrectIntersection(ArrayList, ThresholdMethod)}
+	 * determine the image resolution using {@link #getCorrectIntersection(double[][], ThresholdMethod)}
 	 *
 	 * @param frcCurve
 	 *            the FRC curve
@@ -1677,7 +1676,7 @@ public class FRC
 
 	/**
 	 * Get the correction intersection representing the image resolution. The intersection chosen depends on the
-	 * method used to calculate the threshold curve using {@link #calculateThresholdCurve(double[][], ThresholdMethod)}
+	 * method used to calculate the threshold curve using {@link #calculateThresholdCurve(FRCCurve, ThresholdMethod)}
 	 * <p>
 	 * The intersection corresponds the lowest spatial frequency at which there is no significant correlation
 	 * between the images.
@@ -1801,13 +1800,10 @@ public class FRC
 			double fireNumber = frcCurve.fieldOfView / intersection[0];
 			return new FIREResult(frcCurve.nmPerPixel * fireNumber, intersection[1]);
 		}
-		else
-		{
-			// Edge case where the entire curve has a correlation of 1.
-			// This happens when the two split images are the same, e.g. comparing a dataset to itself.
-			if (perfect(frcCurve))
-				return new FIREResult(0, 1);
-		}
+		// Edge case where the entire curve has a correlation of 1.
+		// This happens when the two split images are the same, e.g. comparing a dataset to itself.
+		if (perfect(frcCurve))
+			return new FIREResult(0, 1);
 		return null;
 	}
 

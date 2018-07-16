@@ -55,5 +55,5 @@ public class MultiAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunc
 		// Test with different X and Y SD
 		testw1 = new double[][] { { 1.1, 1.1 }, { 1.1, 1.2 }, { 1.1, 1.4 } };
 		testw2 = new double[][] { { 1.2, 1.2 }, { 1.2, 1.3 }, { 1.2, 1.5 } };
-	};
+	}
 }

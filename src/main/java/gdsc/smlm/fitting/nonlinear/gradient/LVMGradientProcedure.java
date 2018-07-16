@@ -38,7 +38,10 @@ import gdsc.smlm.function.ValueProcedure;
  */
 public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueProcedure
 {
+	/** The y. */
 	protected final double[] y;
+
+	/** The function. */
 	protected final Gradient1Function func;
 
 	/**
@@ -55,6 +58,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	 */
 	public double value;
 
+	/** The y index counter. */
 	protected int yi;
 
 	/**
@@ -172,9 +176,9 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	}
 
 	/**
-	 * Get the scaled Hessian curvature matrix (size n*n) into the provided storage
+	 * Get the scaled Hessian curvature matrix (size n*n) into the provided storage.
 	 *
-	 * @param a
+	 * @param alpha
 	 *            the alpha
 	 */
 	public abstract void getAlphaMatrix(double[][] alpha);
@@ -192,9 +196,9 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	}
 
 	/**
-	 * Get the scaled Hessian curvature matrix (size n*n) into the provided storage
+	 * Get the scaled Hessian curvature matrix (size n*n) into the provided storage.
 	 *
-	 * @param a
+	 * @param alpha
 	 *            the alpha
 	 */
 	public abstract void getAlphaLinear(double[] alpha);

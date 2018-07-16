@@ -41,9 +41,10 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 	private final double angle, sx, sy;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param fitConfiguration
+	 *            the fit configuration
 	 * @throws IllegalArgumentException
 	 *             If the configuration is missing information, e.g. initial widths
 	 */

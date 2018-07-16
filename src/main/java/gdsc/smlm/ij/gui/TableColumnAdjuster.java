@@ -59,7 +59,8 @@ import javax.swing.table.TableModel;
  * of RESIZE_ALL_COLUMNS will work the best.
  *
  * @see <a
- *      href=https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/>https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/</a>
+ *      href=
+ *      "https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/">https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/</a>
  */
 public class TableColumnAdjuster implements PropertyChangeListener, TableModelListener
 {
@@ -73,24 +74,39 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
 	private int maxRows = 0;
 
-	/*
-	 * Specify the table and use default spacing
+	/**
+	 * Instantiates a new table column adjuster and use default spacing
+	 *
+	 * @param table
+	 *            the table
 	 */
 	public TableColumnAdjuster(JTable table)
 	{
 		this(table, 6);
 	}
 
-	/*
-	 * Specify the table and spacing
+	/**
+	 * Instantiates a new table column adjuster.
+	 *
+	 * @param table
+	 *            the table
+	 * @param spacing
+	 *            the spacing
 	 */
 	public TableColumnAdjuster(JTable table, int spacing)
 	{
 		this(table, 6, true);
 	}
 
-	/*
-	 * Specify the table and spacing
+	/**
+	 * Instantiates a new table column adjuster.
+	 *
+	 * @param table
+	 *            the table
+	 * @param spacing
+	 *            the spacing
+	 * @param installActions
+	 *            the install actions flag
 	 */
 	public TableColumnAdjuster(JTable table, int spacing, boolean installActions)
 	{
@@ -104,7 +120,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 			installActions();
 	}
 
-	/*
+	/**
 	 * Adjust the widths of all the columns in the table
 	 */
 	public void adjustColumns()
@@ -117,8 +133,11 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		}
 	}
 
-	/*
-	 * Adjust the width of the specified column in the table
+	/**
+	 * Adjust the width of the specified column in the table.
+	 *
+	 * @param column
+	 *            the column
 	 */
 	public void adjustColumn(final int column)
 	{
@@ -203,11 +222,22 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		return table.getRowCount();
 	}
 
+	/**
+	 * Sets the max rows.
+	 *
+	 * @param maxRows
+	 *            the new max rows
+	 */
 	public void setMaxRows(int maxRows)
 	{
 		this.maxRows = maxRows;
 	}
 
+	/**
+	 * Gets the max rows.
+	 *
+	 * @return the max rows
+	 */
 	public int getMaxRows()
 	{
 		return maxRows;
@@ -252,7 +282,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		tableColumn.setWidth(width);
 	}
 
-	/*
+	/**
 	 * Restore the widths of the columns in the table to its previous width
 	 */
 	public void restoreColumns()
@@ -265,8 +295,11 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		}
 	}
 
-	/*
-	 * Restore the width of the specified column to its previous width
+	/**
+	 * Restore the width of the specified column to its previous width.
+	 *
+	 * @param column
+	 *            the column
 	 */
 	private void restoreColumn(int column)
 	{
@@ -280,33 +313,45 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		}
 	}
 
-	/*
-	 * Indicates whether to include the header in the width calculation
+	/**
+	 * Indicates whether to include the header in the width calculation.
+	 *
+	 * @param isColumnHeaderIncluded
+	 *            the new column header included
 	 */
 	public void setColumnHeaderIncluded(boolean isColumnHeaderIncluded)
 	{
 		this.isColumnHeaderIncluded = isColumnHeaderIncluded;
 	}
 
-	/*
-	 * Indicates whether to include the model data in the width calculation
+	/**
+	 * Indicates whether to include the model data in the width calculation.
+	 *
+	 * @param isColumnDataIncluded
+	 *            the new column data included
 	 */
 	public void setColumnDataIncluded(boolean isColumnDataIncluded)
 	{
 		this.isColumnDataIncluded = isColumnDataIncluded;
 	}
 
-	/*
-	 * Indicates whether columns can only be increased in size
+	/**
+	 * Indicates whether columns can only be increased in size.
+	 *
+	 * @param isOnlyAdjustLarger
+	 *            the new only adjust larger
 	 */
 	public void setOnlyAdjustLarger(boolean isOnlyAdjustLarger)
 	{
 		this.isOnlyAdjustLarger = isOnlyAdjustLarger;
 	}
 
-	/*
+	/**
 	 * Indicate whether changes to the model should cause the width to be
 	 * dynamically recalculated.
+	 *
+	 * @param isDynamicAdjustment
+	 *            the new dynamic adjustment
 	 */
 	public void setDynamicAdjustment(boolean isDynamicAdjustment)
 	{

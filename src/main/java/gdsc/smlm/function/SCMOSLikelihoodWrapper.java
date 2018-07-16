@@ -52,8 +52,7 @@ import org.apache.commons.math3.util.FastMath;
  * when true signal readout from the sCMOS camera is low enough to be negated by readout noise. In this case the noise
  * can be ignored.
  *
- * @see Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms.
- *      Nature Methods 10, 653–658.
+ * @see "Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658."
  */
 public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 {

@@ -481,10 +481,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 *            the actual coordinates
 		 * @param fitConfig
 		 *            the fit config
-		 * @param maxCount
-		 *            the max count
 		 * @param o
-		 *            the o
+		 *            the overlay
 		 */
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
 				TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, Overlay o)
@@ -1586,7 +1584,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @return true, if successful
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -2043,8 +2040,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @param results
 	 *            the results
+	 * @param density
+	 *            the density
 	 * @param runTime
-	 * @param density2
+	 *            the run time
 	 */
 	private void summariseResults(ArrayList<DoubletResult> results, double density, long runTime)
 	{
@@ -2857,6 +2856,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 * Save PeakFit configuration template using the current benchmark settings.
 	 *
 	 * @param summary
+	 *            the summary
 	 */
 	private void saveTemplate(String summary)
 	{
@@ -3079,7 +3079,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @return true, if successful
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean showAnalysisDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -3146,7 +3145,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
 			textPrecisionMethod = choices.get(2);
-			;
 		}
 
 		gd.showDialog();

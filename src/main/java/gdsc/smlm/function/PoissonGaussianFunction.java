@@ -102,12 +102,15 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	}
 
 	/**
+	 * Creates the with standard deviation.
+	 *
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution before gain
 	 * @param s
 	 *            The standard deviation of the Gaussian distribution at readout
+	 * @return the poisson gaussian function
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
@@ -118,12 +121,15 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	}
 
 	/**
+	 * Creates the with variance.
+	 *
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution before gain
 	 * @param var
 	 *            The variance of the Gaussian distribution at readout (must be positive)
+	 * @return the poisson gaussian function
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
@@ -344,11 +350,14 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	}
 
 	/**
-	 * Return the initial saddle point estimated by the Pade approximation
+	 * Return the initial saddle point estimated by the Pade approximation.
 	 *
 	 * @param x
+	 *            the x
 	 * @param mu
+	 *            the mu
 	 * @param sigmasquared
+	 *            the sigma squared
 	 * @return The saddle point
 	 */
 	static double pade(final double x, final double mu, final double sigmasquared)
@@ -374,11 +383,14 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	}
 
 	/**
-	 * Return the initial saddle point estimated by the Picard approximation
+	 * Return the initial saddle point estimated by the Picard approximation.
 	 *
 	 * @param x
+	 *            the x
 	 * @param mu
+	 *            the mu
 	 * @param sigmasquared
+	 *            the sigma squared
 	 * @return The saddle point
 	 */
 	static double picard(final double x, final double mu, final double sigmasquared)
@@ -399,12 +411,16 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Returns the saddlepoint found by Newton iteration for a given x, mu, sigmasquared and an initial estimate of the
-	 * saddle point (found with either the Pade or Picard approach)
+	 * saddle point (found with either the Pade or Picard approach).
 	 *
 	 * @param x
+	 *            the x
 	 * @param mu
+	 *            the mu
 	 * @param sigmasquared
+	 *            the sigma squared
 	 * @param initial_saddlepoint
+	 *            the initial saddlepoint
 	 * @return The saddle point
 	 */
 	static double newton_iteration(final double x, final double mu, final double sigmasquared,
@@ -445,9 +461,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * Newton iteration. Remember the sqrt(2*PI) factor has been left out.
 	 *
 	 * @param x
+	 *            the x
 	 * @param mu
+	 *            the mu
 	 * @param sigmasquared
+	 *            the sigma squared
 	 * @param saddlepoint
+	 *            the saddlepoint
 	 * @return The saddlepoint approximation
 	 */
 	static double sp_approx(final double x, final double mu, final double sigmasquared, final double saddlepoint)

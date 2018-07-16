@@ -318,7 +318,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static MultiPathFilter multiFilter;
 	private static final MultiPathFilter defaultMultiFilter;
 	private static final double[] defaultParameters;
-	private static IDirectFilter minimalFilter;;
+	private static IDirectFilter minimalFilter;
 
 	static
 	{
@@ -1455,6 +1455,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 * of negatives matches the configured parameters.
 	 *
 	 * @param filterResults
+	 *            the filter results
+	 * @param fitting
+	 *            the fitting
 	 * @return The filter candidates
 	 */
 	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults,
@@ -2055,7 +2058,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		max = new double[lower.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
-			double[] limits = showDoubleHistogram(stats, i, wo, matchScores, nPredicted);
+			double[] limits = showDoubleHistogram(stats, i, wo, matchScores);
 			lower[i] = limits[0];
 			upper[i] = limits[1];
 			min[i] = limits[2];
@@ -2359,7 +2362,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	}
 
 	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, final int i, WindowOrganiser wo,
-			double[][] matchScores, double nPredicted)
+			double[][] matchScores)
 	{
 		String xLabel = filterCriteria[i].name;
 		LowerLimit lower = filterCriteria[i].lower;

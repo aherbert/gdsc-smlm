@@ -308,6 +308,9 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 
 	/**
 	 * Gets the T data in the configured units.
+	 *
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
 	 */
 	public void getT() throws DataException
 	{

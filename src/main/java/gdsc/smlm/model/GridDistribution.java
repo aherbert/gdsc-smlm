@@ -51,13 +51,18 @@ public class GridDistribution implements SpatialDistribution
 	private double[] previous = null;
 
 	/**
-	 * Create a distribution with the binary spots placed from 0 - distance
+	 * Create a distribution with the binary spots placed from 0 - distance.
 	 *
 	 * @param size
+	 *            the size
 	 * @param depth
+	 *            the depth
 	 * @param cellSize
+	 *            the cell size
 	 * @param pBinary
+	 *            the probability of a binary spot
 	 * @param binaryDistance
+	 *            the probability of a binary spot distance
 	 */
 	public GridDistribution(int size, double depth, int cellSize, double pBinary, double binaryDistance)
 	{
@@ -65,14 +70,20 @@ public class GridDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution with the binary spots placed from min - max distance
+	 * Create a distribution with the binary spots placed from min - max distance.
 	 *
 	 * @param size
+	 *            the size
 	 * @param depth
+	 *            the depth
 	 * @param cellSize
+	 *            the cell size
 	 * @param pBinary
+	 *            the probability of a binary spot
 	 * @param minBinaryDistance
+	 *            the min binary distance
 	 * @param maxBinaryDistance
+	 *            the max binary distance
 	 */
 	public GridDistribution(int size, double depth, int cellSize, double pBinary, double minBinaryDistance,
 			double maxBinaryDistance)
@@ -81,15 +92,22 @@ public class GridDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution with the binary spots placed from min - max distance
+	 * Create a distribution with the binary spots placed from min - max distance.
 	 *
 	 * @param size
+	 *            the size
 	 * @param depth
+	 *            the depth
 	 * @param cellSize
+	 *            the cell size
 	 * @param pBinary
+	 *            the probability of a binary spot
 	 * @param minBinaryDistance
+	 *            the min binary distance
 	 * @param maxBinaryDistance
+	 *            the max binary distance
 	 * @param randomGenerator
+	 *            the random generator
 	 */
 	public GridDistribution(int size, double depth, int cellSize, double pBinary, double minBinaryDistance,
 			double maxBinaryDistance, RandomGenerator randomGenerator)

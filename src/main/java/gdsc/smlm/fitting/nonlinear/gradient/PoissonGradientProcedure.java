@@ -36,6 +36,7 @@ import gdsc.smlm.function.Gradient1Procedure;
  */
 public class PoissonGradientProcedure implements Gradient1Procedure
 {
+	/** The function. */
 	protected final Gradient1Function func;
 
 	/**
@@ -138,6 +139,11 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 		}
 	}
 
+	/**
+	 * Check the gradients are NaN
+	 *
+	 * @return true, if NaN
+	 */
 	protected boolean checkGradients()
 	{
 		for (int i = 0, len = data.length; i < len; i++)
@@ -163,7 +169,6 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 *
 	 * @param matrix
 	 *            the matrix
-	 * @return the matrix
 	 */
 	public void getMatrix(double[][] matrix)
 	{
@@ -187,7 +192,6 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 *
 	 * @param matrix
 	 *            the matrix
-	 * @return the linear matrix
 	 */
 	public void getLinear(double[] matrix)
 	{

@@ -588,7 +588,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 		else if (calculateNoise)
 		{
-			noise = estimateNoise(width, height);
+			noise = estimateNoise();
 			fitConfig.setNoise(noise);
 		}
 
@@ -956,7 +956,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		gridManager.clearCache();
 	}
 
-	private Candidate[] allocateArray(Candidate[] array, int length)
+	private static Candidate[] allocateArray(Candidate[] array, int length)
 	{
 		if (array == null || array.length < length)
 			array = new Candidate[length];
@@ -1085,8 +1085,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	/**
+	 * Inside border.
+	 *
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return True if the fitted position is inside the border
 	 */
 	private boolean insideBorder(float x, float y)
@@ -1095,12 +1099,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	/**
+	 * Get the squared distance.
+	 *
 	 * @param params1
+	 *            the params 1
 	 * @param params2
+	 *            the params 2
 	 * @return The squared distance between the two points
 	 */
 	@SuppressWarnings("unused")
-	private float distance2(float[] params1, float[] params2)
+	private static float distance2(float[] params1, float[] params2)
 	{
 		final float dx = params1[Gaussian2DFunction.X_POSITION] - params2[Gaussian2DFunction.X_POSITION];
 		final float dy = params1[Gaussian2DFunction.Y_POSITION] - params2[Gaussian2DFunction.Y_POSITION];
@@ -2263,15 +2271,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
 				return false;
 			}
-			else
-			{
-				// Amplitude estimate
-				params[j + Gaussian2DFunction.SIGNAL] = candidate.intensity -
-						((relativeIntensity) ? 0 : params[Gaussian2DFunction.BACKGROUND]);
-				params[j + Gaussian2DFunction.X_POSITION] = candidate.x - regionBounds.x;
-				params[j + Gaussian2DFunction.Y_POSITION] = candidate.y - regionBounds.y;
-				return true;
-			}
+			// Amplitude estimate
+			params[j + Gaussian2DFunction.SIGNAL] = candidate.intensity -
+					((relativeIntensity) ? 0 : params[Gaussian2DFunction.BACKGROUND]);
+			params[j + Gaussian2DFunction.X_POSITION] = candidate.x - regionBounds.x;
+			params[j + Gaussian2DFunction.Y_POSITION] = candidate.y - regionBounds.y;
+			return true;
 		}
 
 		/**
@@ -2638,8 +2643,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						.setInitialParameters(initialParams)
 						.setParameters(params)
 						.setParameterDeviations(paramDevs)
-						.setnPeaks(npeaks)
-						.setnFittedParameters(nFittedParameters)
+						.setNumberOfPeaks(npeaks)
+						.setNumberOfFittedParameters(nFittedParameters)
 						.setIterations(doubletFitResult.getIterations())
 						.setEvaluations(doubletFitResult.getEvaluations())
 						.build();
@@ -3605,35 +3610,32 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				return createResult(newFitResult, results);
 			}
-			else
+			if (logger != null)
+				logger.info("Unable to fit 2-kernel model : %s", newFitResult.getStatus());
+
+			if (logger2 != null)
 			{
-				if (logger != null)
-					logger.info("Unable to fit 2-kernel model : %s", newFitResult.getStatus());
-
-				if (logger2 != null)
+				double[] peakParams = newFitResult.getParameters();
+				if (peakParams != null)
 				{
-					double[] peakParams = newFitResult.getParameters();
-					if (peakParams != null)
+					peakParams = Arrays.copyOf(peakParams, peakParams.length);
+					int npeaks = peakParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+					for (int i = 0; i < npeaks; i++)
 					{
-						peakParams = Arrays.copyOf(peakParams, peakParams.length);
-						int npeaks = peakParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
-						for (int i = 0; i < npeaks; i++)
-						{
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
-									Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
-									Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
-						}
+						peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+								Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+						peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+								Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 					}
-					String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cc.fromRegionToGlobalX(cx),
-							cc.fromRegionToGlobalY(cy), newFitResult.getStatus(), newFitResult.getStatusData(),
-							Arrays.toString(peakParams));
-					logger2.debug(msg);
 				}
-
-				return createResult(newFitResult, null);
-				//return null;
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cc.fromRegionToGlobalX(cx),
+						cc.fromRegionToGlobalY(cy), newFitResult.getStatus(), newFitResult.getStatusData(),
+						Arrays.toString(peakParams));
+				logger2.debug(msg);
 			}
+
+			return createResult(newFitResult, null);
+			//return null;
 		}
 
 		private float distance2(float cx, float cy, Spot spot)
@@ -3962,8 +3964,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/**
 	 * Copied from java.awt.geom.Rectangle2D and modified assuming width and height is non-zero
 	 *
-	 * @param r1
-	 * @param r2
+	 * @param x0min
+	 *            the x 0 min
+	 * @param y0min
+	 *            the y 0 min
+	 * @param x0max
+	 *            the x 0 max
+	 * @param y0max
+	 *            the y 0 max
+	 * @param x1min
+	 *            the x 1 min
+	 * @param y1min
+	 *            the y 1 min
+	 * @param x1max
+	 *            the x 1 max
+	 * @param y1max
+	 *            the y 1 max
 	 * @return true if they intersect
 	 */
 	public boolean intersects(double x0min, double y0min, double x0max, double y0max, double x1min, double y1min,
@@ -3972,18 +3988,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		return (x1max > x0min && y1max > y0min && x1min < x0max && y1min < y0max);
 	}
 
-	private boolean canIgnore(int x, int y, int xmin, int xmax, int ymin, int ymax, float height, float heightThreshold)
+	private static boolean canIgnore(int x, int y, int xmin, int xmax, int ymin, int ymax, float height, float heightThreshold)
 	{
 		return (x < xmin || x > xmax || y < ymin || y > ymax || height < heightThreshold);
 	}
 
 	@SuppressWarnings("unused")
-	private boolean canIgnore(float x, float y, float xmin, float xmax, float ymin, float ymax)
+	private static boolean canIgnore(float x, float y, float xmin, float xmax, float ymin, float ymax)
 	{
 		return (x < xmin || x > xmax || y < ymin || y > ymax);
 	}
 
 	/**
+	 * Gets the adjusted coefficient of determination.
+	 *
 	 * @param SSresid
 	 *            Sum of squared residuals from the model
 	 * @param SStotal
@@ -3993,10 +4011,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            Number of observations
 	 * @param d
 	 *            Number of parameters in the model
-	 * @return
+	 * @return the adjusted coefficient of determination
 	 */
 	@SuppressWarnings("unused")
-	private double getAdjustedCoefficientOfDetermination(double SSresid, double SStotal, int n, int d)
+	private static double getAdjustedCoefficientOfDetermination(double SSresid, double SStotal, int n, int d)
 	{
 		return 1 - (SSresid / SStotal) * ((n - 1) / (n - d - 1));
 	}
@@ -4018,9 +4036,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * using mean of image.
 	 *
 	 * @param peakResults
+	 *            the peak results
 	 * @param width
+	 *            the width
 	 * @param height
-	 * @return
+	 *            the height
+	 * @return the float
 	 */
 	@SuppressWarnings("unused")
 	private float estimateBackground(LinkedList<PeakResult> peakResults, int width, int height)
@@ -4036,20 +4057,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				logger.info("Average background %f", av);
 			return av;
 		}
-		else
-		{
-			// Compute average of the entire image
-			double sum = 0;
-			for (int i = width * height; i-- > 0;)
-				sum += data[i];
-			float av = (float) sum / (width * height);
-			if (logger != null)
-				logger.info("Image background %f", av);
-			return av;
-		}
+		// Compute average of the entire image
+		double sum = 0;
+		for (int i = width * height; i-- > 0;)
+			sum += data[i];
+		float av = (float) sum / (width * height);
+		if (logger != null)
+			logger.info("Image background %f", av);
+		return av;
 	}
 
-	private float estimateNoise(int width, int height)
+	private float estimateNoise()
 	{
 		createDataEstimator();
 		return estimateNoise(dataEstimator, FitProtosHelper.convertNoiseEstimatorMethod(config.getNoiseMethod()));
@@ -4106,15 +4124,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * Updates the input failed array to contain the candidates.
 	 *
 	 * @param failed
+	 *            the failed
 	 * @param failedCount
+	 *            the failed count
 	 * @param background
+	 *            the background
 	 * @param noise
+	 *            the noise
 	 * @param maxIndices
+	 *            the max indices
 	 * @param smoothData
+	 *            the smooth data
 	 * @return The number of re-fit candidates
 	 */
 	@SuppressWarnings("unused")
-	private int identifyRefitCandidates(int[] failed, int failedCount, float background, float noise, int[] maxIndices,
+	private static int identifyRefitCandidates(int[] failed, int failedCount, float background, float noise, int[] maxIndices,
 			float[] smoothData)
 	{
 		int candidates = 0;
@@ -4193,8 +4217,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * Set to true to use the average fitted background as the background estimate for new fits. The default is to use
 	 * the image average as the background for all fits.
 	 *
-	 * @param Use
-	 *            the average fitted background as the background estimate for new fits
+	 * @param useFittedBackground
+	 *            the new use fitted background
 	 */
 	public void setUseFittedBackground(boolean useFittedBackground)
 	{
@@ -4758,8 +4782,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	/**
-	 * Create a minimum filter to use for storing estimates
+	 * Create a minimum filter to use for storing estimates.
 	 *
+	 * @param precisionMethod
+	 *            the precision method
 	 * @return The minimal filter
 	 */
 	public static IDirectFilter createMinimalFilter(PrecisionMethod precisionMethod)

@@ -119,7 +119,9 @@ public interface FunctionSolver
 	 * The bounds can be used to set the expected range for a parameter.
 	 *
 	 * @param lower
+	 *            the lower bounds
 	 * @param upper
+	 *            the upper bounds
 	 */
 	public void setBounds(double[] lower, double[] upper);
 
@@ -128,7 +130,9 @@ public interface FunctionSolver
 	 * ignored for the fixed parameters.
 	 *
 	 * @param lower
+	 *            the lower bounds
 	 * @param upper
+	 *            the upper bounds
 	 */
 	public void setConstraints(double[] lower, double[] upper);
 

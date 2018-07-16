@@ -62,8 +62,10 @@ public class CustomContentHelper
 	 * onto the image pixel coordinates by dividing by the input image pixel width / height (i.e. the input image must
 	 * be calibrated appropriately).
 	 *
+	 * @param itemShape
+	 *            the item shape
 	 * @param imp
-*            the image
+	 *            the image
 	 */
 	public static void loadSurfaceColorsFromImage2D(ItemShape itemShape, ImagePlus imp)
 	{

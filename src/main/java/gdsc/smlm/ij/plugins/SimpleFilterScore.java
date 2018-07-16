@@ -33,6 +33,16 @@ public class SimpleFilterScore extends FilterScore
 {
 	final FilterScoreResult r;
 
+	/**
+	 * Instantiates a new simple filter score.
+	 *
+	 * @param r
+	 *            the r
+	 * @param allSameType
+	 *            the all same type
+	 * @param criteriaPassed
+	 *            the criteria passed
+	 */
 	public SimpleFilterScore(FilterScoreResult r, boolean allSameType, boolean criteriaPassed)
 	{
 		super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);

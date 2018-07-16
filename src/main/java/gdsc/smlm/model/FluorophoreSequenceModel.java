@@ -262,6 +262,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 * Scale the times using the specified factor. Allows adjusting the relative time of the sequence.
 	 *
 	 * @param scale
+	 *            the scale
 	 */
 	public void adjustTime(double scale)
 	{

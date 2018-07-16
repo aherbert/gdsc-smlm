@@ -227,7 +227,7 @@ public class SearchSpace
 		// Re-centre on the seed
 		if (optimum != null)
 		{
-			final double[] p = optimum.point;
+			final double[] p = optimum.getPoint();
 			for (int i = 0; i < dimensions.length; i++)
 			{
 				dimensions[i].setCentre(p[i]);
@@ -384,9 +384,9 @@ public class SearchSpace
 	{
 		start("Create Search Space");
 		if (searchMode == RefinementMode.SINGLE_DIMENSION && current != null)
-			searchSpace = createRefineSpace(dimensions, current.point);
+			searchSpace = createRefineSpace(dimensions, current.getPoint());
 		else if (searchMode == RefinementMode.MULTI_DIMENSION && current != null)
-			searchSpace = createBoundedSearchSpace(dimensions, current.point);
+			searchSpace = createBoundedSearchSpace(dimensions, current.getPoint());
 		else
 			// Enumerate
 			searchSpace = createSearchSpace(dimensions);
@@ -626,7 +626,7 @@ public class SearchSpace
 		start("Update search space");
 		boolean changed = false;
 
-		final double[] p = current.point;
+		final double[] p = current.getPoint();
 		//		System.out.printf("[%d] Before:", iteration);
 		//		for (int i = 0; i < dimensions.length; i++)
 		//		{
@@ -1212,11 +1212,11 @@ public class SearchSpace
 			SearchResult<T>[] scores, double padding)
 	{
 		// Find the limits in the current scores
-		final double[] lower = current.point.clone();
-		final double[] upper = current.point.clone();
+		final double[] lower = current.getPoint().clone();
+		final double[] upper = current.getPoint().clone();
 		for (int i = 0; i < scores.length; i++)
 		{
-			final double[] point = scores[i].point;
+			final double[] point = scores[i].getPoint();
 			for (int j = 0; j < lower.length; j++)
 			{
 				if (lower[j] > point[j])

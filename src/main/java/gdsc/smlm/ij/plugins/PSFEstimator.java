@@ -106,6 +106,9 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
 	boolean[] ignore = new boolean[3];
 
+	/**
+	 * Instantiates a new PSF estimator.
+	 */
 	public PSFEstimator()
 	{
 	}
@@ -151,8 +154,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	}
 
 	/**
+	 * Show dialog.
+	 *
 	 * @param imp
-	 * @return
+	 *            the imp
+	 * @return the int
 	 */
 	private int showDialog(ImagePlus imp)
 	{
@@ -904,11 +910,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	public boolean isActive()
 	{
 		return true;
-	}
-
-	public void setSource(String source)
-	{
-		// Ignored
 	}
 
 	@Override

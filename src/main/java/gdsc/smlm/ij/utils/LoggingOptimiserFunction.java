@@ -33,17 +33,26 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction
 {
 	private boolean logging = false;
 	private int evalCount = 0;
+	
+	/** The name. */
 	protected String name = "Optimiser";
 
+	/**
+	 * Instantiates a new logging optimiser function.
+	 *
+	 * @param name
+	 *            the name
+	 */
 	public LoggingOptimiserFunction(String name)
 	{
 		this.name = name;
 	}
 
 	/**
-	 * Log the count of evaluations to the ImageJ status bar
+	 * Log the count of evaluations to the ImageJ status bar.
 	 *
 	 * @param b
+	 *            the new logging
 	 */
 	public void setLogging(boolean b)
 	{
@@ -52,6 +61,9 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction
 			evalCount = 0;
 	}
 
+	/**
+	 * Increment the evaluations count
+	 */
 	public void increment()
 	{
 		evalCount++;

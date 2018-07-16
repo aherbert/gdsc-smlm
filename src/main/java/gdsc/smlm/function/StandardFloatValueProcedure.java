@@ -29,7 +29,7 @@ package gdsc.smlm.function;
 public class StandardFloatValueProcedure implements ValueProcedure
 {
 	private int i;
-	/** The values from the last call to {@link #getValues(ValueFunction, float[])}. */
+	/** The values from the last call to {@link #getValues(ValueFunction, double[])}. */
 	public float[] values;
 
 	/**

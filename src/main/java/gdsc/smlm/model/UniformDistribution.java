@@ -58,8 +58,8 @@ public class UniformDistribution implements SpatialDistribution
 			return rng;
 		}
 
-		/**
-		 * @return
+		/* (non-Javadoc)
+		 * @see org.apache.commons.math3.random.RandomVectorGenerator#nextVector()
 		 */
 		@Override
 		public double[] nextVector()

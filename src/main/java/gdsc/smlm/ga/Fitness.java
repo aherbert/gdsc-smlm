@@ -24,7 +24,10 @@
 package gdsc.smlm.ga;
 
 /**
- * Defines the fitness of a chromosome
+ * Defines the fitness of a chromosome.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>>
 {

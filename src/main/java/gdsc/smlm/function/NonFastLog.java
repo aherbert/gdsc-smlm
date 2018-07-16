@@ -28,6 +28,7 @@ package gdsc.smlm.function;
  */
 public class NonFastLog extends FastLog
 {
+	/** An instance of the class */
 	public static final NonFastLog INSTANCE = new NonFastLog();
 
 	@Override

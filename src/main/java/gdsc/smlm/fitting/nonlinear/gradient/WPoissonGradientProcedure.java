@@ -40,7 +40,10 @@ import gdsc.smlm.function.Gradient1Procedure;
  */
 public class WPoissonGradientProcedure implements Gradient1Procedure
 {
+	/** The weights. */
 	protected final double[] w;
+	
+	/** The function. */
 	protected final Gradient1Function func;
 
 	/**
@@ -53,6 +56,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 */
 	protected double[] data;
 
+	/** The y index counter */
 	protected int yi;
 
 	/**
@@ -167,6 +171,11 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 		}
 	}
 
+	/**
+	 * Check the gradients are NaN.
+	 *
+	 * @return true, if NaN
+	 */
 	protected boolean checkGradients()
 	{
 		for (int i = 0, len = data.length; i < len; i++)
@@ -192,7 +201,6 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 *
 	 * @param matrix
 	 *            the matrix
-	 * @return the matrix
 	 */
 	public void getMatrix(double[][] matrix)
 	{
@@ -216,7 +224,6 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 *
 	 * @param matrix
 	 *            the matrix
-	 * @return the linear matrix
 	 */
 	public void getLinear(double[] matrix)
 	{

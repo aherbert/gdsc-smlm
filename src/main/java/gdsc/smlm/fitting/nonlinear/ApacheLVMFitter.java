@@ -56,7 +56,10 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 public class ApacheLVMFitter extends LSEBaseFunctionSolver
 {
 	/**
-	 * Default constructor
+	 * Default constructor.
+	 *
+	 * @param gf
+	 *            the Gaussian function
 	 */
 	public ApacheLVMFitter(Gaussian2DFunction gf)
 	{

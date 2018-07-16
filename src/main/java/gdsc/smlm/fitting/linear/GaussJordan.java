@@ -131,6 +131,10 @@ public class GaussJordan
 	 * <p>
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
 	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(float[][] a, float[] b)
@@ -148,9 +152,19 @@ public class GaussJordan
 	 * <p>
 	 * piv[n], row[n], col[n] (all ints) are used for storage
 	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
+	 * @param piv
+	 *            the pivot storage
+	 * @param row
+	 *            the row storage
+	 * @param col
+	 *            the column storage
 	 * @return False if the equation is singular (no solution)
 	 */
-	public boolean solve(float[][] a, float[] b, int[] piv, int[] row, int[] col)
+	private boolean solve(float[][] a, float[] b, int[] piv, int[] row, int[] col)
 	{
 		max_row = 0;
 		max_col = 0;
@@ -261,7 +275,7 @@ public class GaussJordan
 		return true;
 	}
 
-	private void unscramble_vector(double[][] a, int[] row, int[] col)
+	private static void unscramble_vector(double[][] a, int[] row, int[] col)
 	{
 		for (int j = row.length; j-- > 0;)
 		{
@@ -282,6 +296,10 @@ public class GaussJordan
 	 * <p>
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
 	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(double[][] a, double[] b)
@@ -299,6 +317,16 @@ public class GaussJordan
 	 * <p>
 	 * piv[n], row[n], col[n] (all ints) are used for storage
 	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
+	 * @param piv
+	 *            the pivot storage
+	 * @param row
+	 *            the row storage
+	 * @param col
+	 *            the column storage
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(double[][] a, double[] b, int[] piv, int[] row, int[] col)

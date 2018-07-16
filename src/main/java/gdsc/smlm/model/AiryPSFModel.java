@@ -223,6 +223,7 @@ public class AiryPSFModel extends PSFModel
 	 * Generate a scale so that at the configured zDepth the scale is sqrt(2).
 	 *
 	 * @param z
+	 *            the z
 	 * @return The scale
 	 */
 	private double createWidthScale(double z)

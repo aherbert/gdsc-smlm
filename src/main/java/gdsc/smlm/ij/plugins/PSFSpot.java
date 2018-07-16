@@ -32,7 +32,10 @@ import gdsc.smlm.results.PeakResult;
  */
 public class PSFSpot extends BasePoint
 {
+	/** The time. */
 	public final int t;
+	
+	/** The peak result. */
 	public final PeakResult peakResult;
 	/**
 	 * The amount of total intensity contributed within the region of this spot from overlapping PSFs, i.e. how much
@@ -48,6 +51,18 @@ public class PSFSpot extends BasePoint
 	/** The amplitude. */
 	public double amplitude = 0;
 
+	/**
+	 * Instantiates a new PSF spot.
+	 *
+	 * @param t
+	 *            the time
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param peakResult
+	 *            the peak result
+	 */
 	public PSFSpot(int t, float x, float y, PeakResult peakResult)
 	{
 		super(x, y);
@@ -55,6 +70,11 @@ public class PSFSpot extends BasePoint
 		this.peakResult = peakResult;
 	}
 
+	/**
+	 * Gets the time.
+	 *
+	 * @return the time
+	 */
 	public int getTime()
 	{
 		return t;

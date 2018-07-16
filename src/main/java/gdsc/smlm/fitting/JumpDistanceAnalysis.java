@@ -176,7 +176,7 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 *
-	 * @param jumpDistances
+	 * @param meanJumpDistance
 	 *            The mean jump distance (in um^2)
 	 * @param jdHistogram
 	 *            The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative probability. Must be
@@ -290,11 +290,11 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
 	 *
-	 * @param jumpDistances
+	 * @param meanJumpDistance
 	 *            The mean jump distance (in um^2)
 	 * @param jdHistogram
 	 *            The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative probability. Must be
-	 *            monototic ascending.
+	 *            Monotonic ascending.
 	 * @param n
 	 *            The number of species in the mixed population
 	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
@@ -1104,9 +1104,10 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
-	 * Format the diffusion coefficients for reporting using the calibration if present
+	 * Format the diffusion coefficients for reporting using the calibration if present.
 	 *
 	 * @param jumpD
+	 *            the jump Distances
 	 * @return The formatted D
 	 */
 	private String formatD(double... jumpD)
@@ -1991,8 +1992,10 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
-	 * @param the
-	 *            curve logger used to store the best fit curves
+	 * Sets the curve logger.
+	 *
+	 * @param curveLogger
+	 *            the new curve logger
 	 */
 	public void setCurveLogger(CurveLogger curveLogger)
 	{
@@ -2012,7 +2015,10 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Gets the d.
+	 *
 	 * @param d
+	 *            the d
 	 * @return Return d or minD whichever is larger
 	 */
 	public double getD(double d)
@@ -2021,7 +2027,10 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Gets the f.
+	 *
 	 * @param f
+	 *            the f
 	 * @return Return f or minFraction whichever is larger
 	 */
 	public double getF(double f)
@@ -2066,16 +2075,17 @@ public class JumpDistanceAnalysis
 	 * the effect of reducing the effective time that diffusion occurred in the start and end frame. The observed MSD
 	 * can
 	 * be converted to the corrected MSD by applying a factor:
-	 *
+	 * 
 	 * <pre>
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * </pre>
-	 *
+	 * 
 	 * Note this is only valid for n>=1
 	 *
 	 * @param n
-	 * @return
+	 *            the n
+	 * @return the conversion factor
 	 */
 	public static double getConversionfactor(int n)
 	{
@@ -2100,21 +2110,22 @@ public class JumpDistanceAnalysis
 	 * separation intervals. These curves were compared to the expected MSD for the simulated diffusion coefficient to
 	 * produce a correction factor curve. This was fitted for n>=1 and n<1. The observed MSD can be converted to the
 	 * corrected MSD by applying a factor:
-	 *
+	 * 
 	 * <pre>
 	 * n>=1:
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
-	 *
+	 * 
 	 * n<1:
 	 * observed = actual * (n - n*n / 3)
 	 * actual = observed / (n - n*n / 3)
 	 * </pre>
-	 *
+	 * 
 	 * Note this is valid for n>=0
 	 *
 	 * @param n
-	 * @return
+	 *            the n
+	 * @return the conversion factor
 	 */
 	public static double getConversionfactor(double n)
 	{
@@ -2133,15 +2144,16 @@ public class JumpDistanceAnalysis
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
 	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3.
-	 *
+	 * 
 	 * <pre>
 	 * corrected frames = n - 1/3
 	 * </pre>
-	 *
+	 * 
 	 * Note this is only valid for n>=1
 	 *
 	 * @param n
-	 * @return
+	 *            the n
+	 * @return the corrected time
 	 */
 	public static double getCorrectedTime(int n)
 	{

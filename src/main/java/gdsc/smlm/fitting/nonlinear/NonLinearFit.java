@@ -127,6 +127,19 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
 	}
 
+	/**
+	 * Compute a step for the LVM non linear model.
+	 *
+	 * @param n
+	 *            the number of data points
+	 * @param y
+	 *            the data
+	 * @param a
+	 *            the parameters
+	 * @param initialStage
+	 *            the initial stage flag
+	 * @return true, if successful
+	 */
 	protected boolean nonLinearModel(int n, double[] y, double[] a, boolean initialStage)
 	{
 		// The NonLinearFunction evaluates a function with parameters a but only computes the gradient
@@ -211,11 +224,17 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = sumOfSquaresWorking[SUM_OF_SQUARES_NEW];
 	}
 
+	/**
+	 * Decrease lambda. Call this when the solution to the matrix improved the score.
+	 */
 	protected void decreaseLambda()
 	{
 		lambda *= 0.1;
 	}
 
+	/**
+	 * Increase lambda. Call this when the solution to the matrix do not improve the score, or the matrix had no solution.
+	 */
 	protected void increaseLambda()
 	{
 		lambda *= 10.0;
@@ -273,6 +292,10 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * <p>
 	 * Note: Any zero elements in b are not solved.
 	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
 	 * @return False if the equation is singular (no solution)
 	 */
 	protected boolean solve(double[][] a, double[] b)
@@ -364,12 +387,14 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	}
 
 	/**
-	 * Compute the parameter deviations using the covariance matrix of the solution
+	 * Compute the parameter deviations using the covariance matrix of the solution.
 	 *
 	 * @param n
-	 *
+	 *            the n
+	 * @param y
+	 *            the y
 	 * @param aDev
-	 *            the a dev
+	 *            the parameter deviations
 	 * @return true, if successful
 	 */
 	private boolean computeDeviations(int n, double[] y, double[] aDev)
@@ -475,10 +500,12 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	}
 
 	/**
-	 * Used for debugging
+	 * Used for debugging.
 	 *
 	 * @param format
+	 *            the format
 	 * @param o
+	 *            the o
 	 */
 	void printf(String format, Object... o)
 	{
@@ -525,10 +552,11 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	}
 
 	/**
-	 * Set the stopping criteria for the {@link #fit(int, double[], double[], double[], double[], double[], double)}
-	 * method
+	 * Set the stopping criteria for the {@link #fit(double[], double[], double[], double[])}
+	 * method.
 	 *
 	 * @param sc
+	 *            the new stopping criteria
 	 */
 	public void setStoppingCriteria(StoppingCriteria sc)
 	{

@@ -58,6 +58,8 @@ public class LSQVarianceGradientProcedureFactory
 	 *
 	 * @param func
 	 *            Gradient function
+	 * @param solver
+	 *            the solver
 	 * @return the gradient procedure
 	 */
 	public static LSQVarianceGradientProcedure create(final Gradient1Function func, EJMLLinearSolver solver)

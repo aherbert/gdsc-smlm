@@ -120,6 +120,7 @@ public class BatchPeakFit implements PlugIn
 	 * fit engine on each input image using each configuration.
 	 *
 	 * @param configurationFilename
+	 *            the configuration filename
 	 */
 	private void runBatch(String configurationFilename)
 	{

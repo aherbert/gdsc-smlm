@@ -62,7 +62,7 @@ import gdsc.smlm.results.count.NullFailCounter;
 import gdsc.smlm.results.count.PassRateFailCounter;
 
 /**
- * Specifies the configuration for the fit engine
+ * Specifies the configuration for the fit engine.
  */
 public class FitEngineConfiguration implements Cloneable
 {
@@ -172,6 +172,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the search parameter.
+	 *
 	 * @return the size of the region to search for local maxima. The actual window is calculated dynamically
 	 *         in conjunction with the peak widths using {@link #getHWHMMax()}.
 	 */
@@ -181,6 +183,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the size of the region to search for local maxima
+	 *
 	 * @return the size of the region to search for local maxima. The actual window is calculated dynamically
 	 *         in conjunction with the peak widths using {@link #getHWHMMax()}.
 	 */
@@ -190,6 +194,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the size of the region to search for local maxima
+	 *
 	 * @param search
 	 *            the size of the region to search for local maxima. The actual window is calculated dynamically
 	 *            in conjunction with the peak widths using {@link #getHWHMMax()}.
@@ -200,7 +206,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Sets the search.
+	 * Sets the size of the region to search for local maxima
 	 *
 	 * @param search
 	 *            the size of the region to search for local maxima. The actual window is calculated dynamically
@@ -214,6 +220,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets if the Search parameter is absolute
+	 *
 	 * @return True if the Search parameter is absolute
 	 */
 	public boolean getSearchAbsolute()
@@ -222,6 +230,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets if the Search parameter is absolute
+	 *
 	 * @param absolute
 	 *            True if the Search parameter is absolute
 	 */
@@ -231,6 +241,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the size of the border region to ignore.
+	 *
 	 * @return the border
 	 *         the size of the border region to ignore. The actual window is calculated dynamically
 	 *         in conjunction with the peak widths using {@link #getHWHMMax()}.
@@ -241,6 +253,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the size of the border region to ignore.
+	 *
 	 * @return the border
 	 *         the size of the border region to ignore. The actual window is calculated dynamically
 	 *         in conjunction with the peak widths using {@link #getHWHMMax()}.
@@ -251,6 +265,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the size of the border region to ignore.
+	 *
 	 * @param border
 	 *            the size of the border region to ignore. The actual window is calculated dynamically
 	 *            in conjunction with the peak widths using {@link #getHWHMMax()}.
@@ -261,7 +277,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Sets the border.
+	 * Sets the size of the border region to ignore.
 	 *
 	 * @param border
 	 *            the size of the border region to ignore. The actual window is calculated dynamically
@@ -275,6 +291,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets if the Border parameter is absolute
+	 *
 	 * @return True if the Border parameter is absolute
 	 */
 	public boolean getBorderAbsolute()
@@ -283,6 +301,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets if the Border parameter is absolute
+	 *
 	 * @param absolute
 	 *            True if the Border parameter is absolute
 	 */
@@ -292,6 +312,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the size of the window used for fitting around a maxima.
+	 *
 	 * @return the size of the window used for fitting around a maxima. The actual window is calculated dynamically
 	 *         in conjunction with the peak widths using {@link #getSDMax()}.
 	 */
@@ -301,6 +323,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the size of the window used for fitting around a maxima.
+	 *
 	 * @return the size of the window used for fitting around a maxima. The actual window is calculated dynamically
 	 *         in conjunction with the peak widths using {@link #getSDMax()}.
 	 */
@@ -310,6 +334,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the size of the window used for fitting around a maxima.
+	 *
 	 * @param fitting
 	 *            the size of the window used for fitting around a maxima. The actual window is calculated dynamically
 	 *            in conjunction with the peak widths using {@link #getSDMax()}.
@@ -320,7 +346,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Sets the fitting.
+	 * Sets the size of the window used for fitting around a maxima.
 	 *
 	 * @param fitting
 	 *            the size of the window used for fitting around a maxima. The actual window is calculated dynamically
@@ -334,6 +360,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets if the Fitting parameter is absolute
+	 *
 	 * @return True if the Fitting parameter is absolute
 	 */
 	public boolean getFittingAbsolute()
@@ -342,6 +370,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets if the Fitting parameter is absolute
+	 *
 	 * @param absolute
 	 *            True if the Fitting parameter is absolute
 	 */
@@ -439,7 +469,9 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * @return the includeNeighbours
+	 * Checks if is include neighbours.
+	 *
+	 * @return true, if is include neighbours
 	 */
 	public boolean isIncludeNeighbours()
 	{
@@ -453,6 +485,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * within the region used for fitting.
 	 *
 	 * @param includeNeighbours
+	 *            the new include neighbours
 	 */
 	public void setIncludeNeighbours(boolean includeNeighbours)
 	{
@@ -460,7 +493,9 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * @return the neighbourHeightThreshold
+	 * Gets the neighbour height threshold.
+	 *
+	 * @return the neighbour height threshold
 	 */
 	public double getNeighbourHeightThreshold()
 	{
@@ -468,6 +503,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the neighbour height threshold.
+	 *
 	 * @param neighbourHeightThreshold
 	 *            Set the height threshold that determines if a neighbour peak should be fitted (specified as a fraction
 	 *            of the central peak relative to the background)
@@ -478,6 +515,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the residuals threshold.
+	 *
 	 * @return the residuals threshold
 	 */
 	public double getResidualsThreshold()
@@ -486,6 +525,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the residuals threshold.
+	 *
 	 * @param residualsThreshold
 	 *            Set the threshold for the residuals analysis that determines if a two-kernel model should be fitted
 	 */
@@ -495,6 +536,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the noise method used to estimate the image noise
+	 *
 	 * @return the method used to estimate the image noise
 	 */
 	public NoiseEstimatorMethod getNoiseMethod()
@@ -503,6 +546,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the noise method used to estimate the image noise
+	 *
 	 * @param noiseMethod
 	 *            Set the method used to estimate the image noise
 	 */
@@ -512,6 +557,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the noise method used to estimate the image noise
+	 *
 	 * @param noiseMethod
 	 *            Set the method used to estimate the image noise
 	 */
@@ -521,6 +568,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the duplicate distance within which spots are considered duplicates
+	 *
 	 * @param duplicateDistance
 	 *            The distance within which spots are considered duplicates
 	 */
@@ -530,7 +579,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Sets the duplicate distance absolute flas.
+	 * Sets if the duplicate distance is absolute
 	 *
 	 * @param absolute
 	 *            True if the duplicate distance is absolute
@@ -541,6 +590,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the duplicate distance parameter.
+	 *
 	 * @return The distance within which spots are considered duplicates
 	 */
 	public RelativeParameter getDuplicateDistanceParameter()
@@ -549,6 +600,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the duplicate distance.
+	 *
 	 * @return The distance within which spots are considered duplicates
 	 */
 	public double getDuplicateDistance()
@@ -557,6 +610,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets if the duplicate distance is absolute
+	 *
 	 * @return True if the duplicate distance is absolute
 	 */
 	public boolean getDuplicateDistanceAbsolute()
@@ -597,6 +652,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the type of filter to apply to the data before identifying local maxima
+	 *
 	 * @return the type of filter to apply to the data before identifying local maxima
 	 */
 	public DataFilterType getDataFilterType()
@@ -605,7 +662,9 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param DataFilterType
+	 * Sets the type of filter to apply to the data before identifying local maxima
+	 *
+	 * @param dataFilterType
 	 *            the type of filter to apply to the data before identifying local maxima
 	 */
 	public void setDataFilterType(DataFilterType dataFilterType)
@@ -631,14 +690,16 @@ public class FitEngineConfiguration implements Cloneable
 		truncateFilters(b, n);
 	}
 
-	private void truncateFilters(DataFilterSettings.Builder b, int n)
+	private static void truncateFilters(DataFilterSettings.Builder b, int n)
 	{
 		while (b.getDataFiltersCount() > n)
 			b.removeDataFilters(b.getDataFiltersCount() - 1);
 	}
 
 	/**
-	 * @param DataFilterType
+	 * Sets the type of filter to apply to the data before identifying local maxima
+	 *
+	 * @param dataFilterType
 	 *            the type of filter to apply to the data before identifying local maxima
 	 */
 	public void setDataFilterType(int dataFilterType)
@@ -673,6 +734,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the data filter method.
+	 *
 	 * @param n
 	 *            The filter number
 	 * @return the filter to apply to the data before identifying local maxima
@@ -701,6 +764,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the data filter parameter.
+	 *
 	 * @param n
 	 *            The filter number
 	 * @return the filter parameter
@@ -713,6 +778,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets if the smoothing parameter is absolute
+	 *
 	 * @param n
 	 *            The filter number
 	 * @return if the smoothing parameter is absolute
@@ -725,7 +792,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Gets the data filter absolute.
+	 * Gets if the smoothing parameter is absolute
 	 *
 	 * @param n
 	 *            The filter number
@@ -741,6 +808,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the data filter parameter value.
+	 *
 	 * @param n
 	 *            The filter number
 	 * @return the smoothing window size
@@ -753,7 +822,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Gets the smooth.
+	 * Gets smoothing window size
 	 *
 	 * @param n
 	 *            The filter number
@@ -802,8 +871,6 @@ public class FitEngineConfiguration implements Cloneable
 	 * @param smooth
 	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
 	 *            peak widths.
-	 * @param absolute
-	 *            the absolute
 	 * @param n
 	 *            The filter number
 	 */
@@ -819,7 +886,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Sets the data filter
+	 * Sets the data filter.
 	 *
 	 * @param dataFilter
 	 *            the data filter
@@ -863,8 +930,7 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * Set the number of filters to use. Call this method when all the filters have been set to clear any other stored
-	 * filters from memory. This allows the user to call {@link #setDataFilter(DataFilter, double, int)} 3 times when
-	 * then configuration has more than 3 filters already stored.
+	 * filters from memory.
 	 *
 	 * @param n
 	 *            The number of filters
@@ -1149,7 +1215,7 @@ public class FitEngineConfiguration implements Cloneable
 		}
 	}
 
-	private double getSmoothingWindow(DataFilter f, double hwhmMin)
+	private static double getSmoothingWindow(DataFilter f, double hwhmMin)
 	{
 		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
 		RelativeParameter rp = f.getParameters(0);
@@ -1169,11 +1235,14 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Create a data processor for the spot filter
+	 * Create a data processor for the spot filter.
 	 *
 	 * @param border
+	 *            the border
 	 * @param dataFilter
+	 *            the data filter
 	 * @param parameter
+	 *            the parameter
 	 * @return the data processor
 	 */
 	public static DataProcessor createDataProcessor(int border, DataFilterMethod dataFilter, double parameter)

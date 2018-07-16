@@ -137,6 +137,7 @@ public class BinomialFitter
 	 * N = p.length - 1;
 	 *
 	 * @param data
+	 *            the data
 	 * @param cumulative
 	 *            Build a cumulative histogram
 	 * @return The histogram (p)

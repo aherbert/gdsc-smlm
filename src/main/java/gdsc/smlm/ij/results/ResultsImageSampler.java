@@ -401,7 +401,9 @@ public class ResultsImageSampler
 	 * Convert the single index into x,y,z coords, Input array must be length >= 3.
 	 *
 	 * @param index
+	 *            the index
 	 * @param xyz
+	 *            the xyz
 	 * @return The xyz array
 	 */
 	private int[] getXYZ(long index, int[] xyz)

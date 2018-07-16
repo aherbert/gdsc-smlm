@@ -73,7 +73,7 @@ public class PeakResultTableModelJTable extends JTable
 
 		super.tableChanged(e);
 
-		if (e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW)
+		if (e.getFirstRow() == TableModelEvent.HEADER_ROW)
 		{
 			// The whole thing changed so resize the columns
 			SwingUtilities.invokeLater(new Runnable()

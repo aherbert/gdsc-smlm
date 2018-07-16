@@ -727,8 +727,11 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	/**
+	 * Gets the coordinates.
+	 *
 	 * @param line
-	 * @return
+	 *            the line
+	 * @return the coordinates
 	 */
 	@Override
 	public double[] getCoordinates(String line)

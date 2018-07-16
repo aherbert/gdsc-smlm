@@ -345,7 +345,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/**
 	 * Note: This does not check that the x,y coordinates are within the correct bounds. Use
-	 * {@link #safeAdd(double, double)} to do a bounds check.
+	 * {@link #safeAdd(double, double, double)} to do a bounds check.
 	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
 	 */

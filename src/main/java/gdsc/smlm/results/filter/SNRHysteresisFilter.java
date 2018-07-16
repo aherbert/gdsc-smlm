@@ -44,14 +44,20 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	float weakSnr;
 
 	/**
+	 * Instantiates a new SNR hysteresis filter.
+	 *
 	 * @param searchDistance
+	 *            the search distance
 	 * @param searchDistanceMode
 	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
 	 * @param timeThreshold
+	 *            the time threshold
 	 * @param timeThresholdMode
 	 *            0 = frames; 1 = seconds
 	 * @param strictSnr
+	 *            the strict snr
 	 * @param range
+	 *            the range
 	 */
 	public SNRHysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
 			int timeThresholdMode, float strictSnr, float range)

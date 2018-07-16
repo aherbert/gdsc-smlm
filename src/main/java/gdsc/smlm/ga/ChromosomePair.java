@@ -24,7 +24,10 @@
 package gdsc.smlm.ga;
 
 /**
- * Define a pair of chromosomes
+ * Define a pair of chromosomes.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class ChromosomePair<T extends Comparable<T>>
 {

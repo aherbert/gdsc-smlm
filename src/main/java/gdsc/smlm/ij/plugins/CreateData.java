@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -319,7 +318,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	// Compute the CRLB for the PSF using the fisher information
 	private BasePoissonFisherInformation[] fiFunction = null;
 
-	// Store the parameters
+	/** Store the parameters */
 	public static class BaseParameters
 	{
 		private static int nextId = 1;
@@ -388,6 +387,40 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		/** The best approximation of the PSF used to fit the simulation data. */
 		final PSF psf;
 
+		/**
+		 * Instantiates a new base parameters.
+		 *
+		 * @param s
+		 *            the s
+		 * @param a
+		 *            the a
+		 * @param minSignal
+		 *            the min signal
+		 * @param maxSignal
+		 *            the max signal
+		 * @param averageSignal
+		 *            the average signal
+		 * @param bias
+		 *            the bias
+		 * @param gain
+		 *            the gain
+		 * @param qe
+		 *            the qe
+		 * @param readNoise
+		 *            the read noise
+		 * @param cameraType
+		 *            the camera type
+		 * @param cameraModelName
+		 *            the camera model name
+		 * @param cameraBounds
+		 *            the camera bounds
+		 * @param b
+		 *            the b
+		 * @param noise
+		 *            the noise
+		 * @param psf
+		 *            the psf
+		 */
 		public BaseParameters(double s, double a, double minSignal, double maxSignal, double averageSignal, double bias,
 				double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
 				Rectangle cameraBounds, double b, double noise, PSF psf)
@@ -421,7 +454,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	// Store the parameters for the last simulation for spot data
+	/** Store the parameters for the last simulation for spot data */
 	public static class SimulationParameters extends BaseParameters
 	{
 		/**
@@ -444,6 +477,48 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		private boolean loaded;
 
+		/**
+		 * Instantiates a new simulation parameters.
+		 *
+		 * @param molecules
+		 *            the molecules
+		 * @param fullSimulation
+		 *            the full simulation
+		 * @param s
+		 *            the s
+		 * @param a
+		 *            the a
+		 * @param minSignal
+		 *            the min signal
+		 * @param maxSignal
+		 *            the max signal
+		 * @param averageSignal
+		 *            the average signal
+		 * @param depth
+		 *            the depth
+		 * @param fixedDepth
+		 *            the fixed depth
+		 * @param bias
+		 *            the bias
+		 * @param gain
+		 *            the gain
+		 * @param qe
+		 *            the qe
+		 * @param readNoise
+		 *            the read noise
+		 * @param cameraType
+		 *            the camera type
+		 * @param cameraModelName
+		 *            the camera model name
+		 * @param cameraBounds
+		 *            the camera bounds
+		 * @param b
+		 *            the b
+		 * @param noise
+		 *            the noise
+		 * @param psf
+		 *            the psf
+		 */
 		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
 				double maxSignal, double averageSignal, double depth, boolean fixedDepth, double bias, double gain,
 				double qe, double readNoise, CameraType cameraType, String cameraModelName, Rectangle cameraBounds,
@@ -469,7 +544,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	// Store the parameters for the last benchmark
+	/** Store the parameters for the last benchmark */
 	public static class BenchmarkParameters extends BaseParameters
 	{
 		/**
@@ -503,6 +578,52 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		final double precisionN, precisionX, precisionXML;
 
+		/**
+		 * Instantiates a new benchmark parameters.
+		 *
+		 * @param frames
+		 *            the frames
+		 * @param s
+		 *            the s
+		 * @param a
+		 *            the a
+		 * @param signal
+		 *            the signal
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param z
+		 *            the z
+		 * @param bias
+		 *            the bias
+		 * @param gain
+		 *            the gain
+		 * @param qe
+		 *            the qe
+		 * @param readNoise
+		 *            the read noise
+		 * @param cameraType
+		 *            the camera type
+		 * @param cameraModelName
+		 *            the camera model name
+		 * @param cameraBounds
+		 *            the camera bounds
+		 * @param b
+		 *            the b
+		 * @param noise
+		 *            the noise
+		 * @param precisionN
+		 *            the precision N
+		 * @param precisionX
+		 *            the precision X
+		 * @param precisionXML
+		 *            the precision XML
+		 * @param psf
+		 *            the psf
+		 * @param crlb
+		 *            the crlb
+		 */
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
 				double bias, double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
 				Rectangle cameraBounds, double b, double noise, double precisionN, double precisionX,
@@ -523,6 +644,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.crlb = crlb;
 		}
 
+		/**
+		 * Sets the photons.
+		 *
+		 * @param results
+		 *            the new photons
+		 */
 		public void setPhotons(MemoryPeakResults results)
 		{
 			molecules = results.size();
@@ -937,7 +1064,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		IJ.showStatus("Done");
 	}
 
-	private void resetMemory()
+	private static void resetMemory()
 	{
 		benchmarkParameters = null;
 		simulationParameters = null;
@@ -1162,9 +1289,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Store the simulation settings
+	 * Store the simulation settings.
 	 *
 	 * @param particles
+	 *            the particles
+	 * @param fullSimulation
+	 *            the full simulation
+	 * @param signalPerFrame
+	 *            the signal per frame
 	 */
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
@@ -1248,7 +1380,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * frames. Return the total steps to simulate (either the original steps or a larger number to fit all the data).
 	 *
 	 * @param totalSteps
+	 *            the total steps
 	 * @param fluorophores
+	 *            the fluorophores
 	 * @return The new total steps to simulate
 	 */
 	private int checkTotalSteps(int totalSteps, List<? extends FluorophoreSequenceModel> fluorophores)
@@ -1342,14 +1476,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return new MaskDistribution3D(masks, w, h, sliceDepth / settings.getPixelPitch(), scaleX, scaleY,
 					createRandomGenerator());
 		}
-		else
-		{
-			int[] mask = extractMask(imp.getProcessor());
-			if (updateArea)
-				updateArea(mask, w, h);
-			return new MaskDistribution(mask, w, h, settings.getDepth() / settings.getPixelPitch(), scaleX, scaleY,
-					createRandomGenerator());
-		}
+		int[] mask = extractMask(imp.getProcessor());
+		if (updateArea)
+			updateArea(mask, w, h);
+		return new MaskDistribution(mask, w, h, settings.getDepth() / settings.getPixelPitch(), scaleX, scaleY,
+				createRandomGenerator());
 	}
 
 	private void updateArea(int[] mask, int w, int h)
@@ -1414,7 +1545,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.getPixelPitch() / 1e6;
 	}
 
-	private int[] extractMask(ImageProcessor ip)
+	/**
+	 * Extract mask.
+	 *
+	 * @param ip
+	 *            the ip
+	 * @return the mask
+	 */
+	private static int[] extractMask(ImageProcessor ip)
 	{
 		//ip = ip.duplicate();
 		//ip.setInterpolationMethod(ImageProcessor.BILINEAR);
@@ -1464,6 +1602,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			@Override
 			public void initialise(double[] xyz)
 			{
+				// Do nothing
 			}
 		};
 		return dist;
@@ -1472,7 +1611,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Get the PSF half-width at half-maxima
 	 *
-	 * @return
+	 * @return the PSF half-width at half-maxima
 	 */
 	private double getHWHM()
 	{
@@ -1552,7 +1691,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Get the PSF standard deviation for a Gaussian using the PSF half-width at half-maxima
 	 *
-	 * @return
+	 * @return the PSF standard deviation for a Gaussian
 	 */
 	private double getPsfSD()
 	{
@@ -1562,7 +1701,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Get the PSF half-width at half-maxima from the Image PSF
 	 *
-	 * @return
+	 * @return the PSF half-width at half-maxima
 	 */
 	private double getImageHWHM()
 	{
@@ -1621,10 +1760,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Create distribution within an XY border
+	 * Create distribution within an XY border.
 	 *
 	 * @param border
-	 * @return
+	 *            the border
+	 * @return the uniform distribution
 	 */
 	private UniformDistribution createUniformDistribution(double border)
 	{
@@ -1709,7 +1849,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return null;
 	}
 
-	private void checkConfiguration(String message) throws ConfigurationException
+	private static void checkConfiguration(String message) throws ConfigurationException
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage(TextUtils.wrap("Warning: " + message, 80));
@@ -1727,20 +1867,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return new RadialFalloffIllumination(1, settings.getSize() / 2, intensity, pulseInterval);
 			return new RadialFalloffIllumination(intensity, settings.getSize() / 2);
 		}
-		else
-		{
-			uniformBackground = true;
-			if (pulseInterval > 1)
-				return new UniformIllumination(1, intensity, pulseInterval);
-			return new UniformIllumination(intensity);
-		}
+		uniformBackground = true;
+		if (pulseInterval > 1)
+			return new UniformIllumination(1, intensity, pulseInterval);
+		return new UniformIllumination(intensity);
 	}
 
 	/**
-	 * Filter those not in the distribution
+	 * Filter those not in the bounds of the distribution.
 	 *
 	 * @param localisationSets
-	 * @return
+	 *            the localisation sets
+	 * @return the list
 	 */
 	private List<LocalisationModelSet> filterToImageBounds(List<LocalisationModelSet> localisationSets)
 	{
@@ -1766,10 +1904,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (filename != null)
 			{
 				settings.setPhotonDistributionFile(filename);
-				try
+				try (BufferedReader in = new BufferedReader(
+						new UnicodeReader(new FileInputStream(new File(settings.getPhotonDistributionFile())), null)))
 				{
-					InputStream is = new FileInputStream(new File(settings.getPhotonDistributionFile()));
-					BufferedReader in = new BufferedReader(new UnicodeReader(is, null));
 					StoredDataStatistics stats = new StoredDataStatistics();
 					try
 					{
@@ -2005,12 +2142,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Check if any of the coordinates for the subset are different
+	 * Check if any of the coordinates for the subset are different.
 	 *
 	 * @param subset
+	 *            the subset
 	 * @return True if the coordinates move
 	 */
-	private boolean isMoving(List<LocalisationModel> subset)
+	private static boolean isMoving(List<LocalisationModel> subset)
 	{
 		if (subset.size() < 2)
 			return false;
@@ -2026,26 +2164,30 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Get the simulation frame start point for the localisation
+	 * Get the simulation frame start point for the localisation.
 	 *
 	 * @param localisationModel
+	 *            the localisation model
 	 * @param simulationStepsPerFrame
-	 * @return
+	 *            the simulation steps per frame
+	 * @return the start frame
 	 */
-	private double getStartFrame(LocalisationModel localisationModel, double simulationStepsPerFrame)
+	private static double getStartFrame(LocalisationModel localisationModel, double simulationStepsPerFrame)
 	{
 		// Time is 1-based (not 0)
 		return (localisationModel.getTime() - 1) / simulationStepsPerFrame + 1;
 	}
 
 	/**
-	 * Get the simulation frame end point for the localisation
+	 * Get the simulation frame end point for the localisation.
 	 *
 	 * @param localisationModel
+	 *            the localisation model
 	 * @param simulationStepsPerFrame
-	 * @return
+	 *            the simulation steps per frame
+	 * @return the end frame
 	 */
-	private double getEndFrame(LocalisationModel localisationModel, double simulationStepsPerFrame)
+	private static double getEndFrame(LocalisationModel localisationModel, double simulationStepsPerFrame)
 	{
 		// Time is 1-based (not 0)
 		return (localisationModel.getTime()) / simulationStepsPerFrame + 1;
@@ -2053,14 +2195,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Create a new localisation model with the same id and position but with a fraction of the intensity and the
-	 * specified state
+	 * specified state.
 	 *
 	 * @param l
+	 *            the localisation model
 	 * @param fraction
+	 *            the fraction
 	 * @param state
-	 * @return
+	 *            the state
+	 * @return new localisation model
 	 */
-	private LocalisationModel getFraction(LocalisationModel l, double fraction, int state)
+	private static LocalisationModel getFraction(LocalisationModel l, double fraction, int state)
 	{
 		return new LocalisationModel(l.getId(), l.getTime(), l.getCoordinates(), l.getIntensity() * fraction, state);
 	}
@@ -2104,6 +2249,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Note that the localisations are filtered using the signal. The input list of localisations will be updated.
 	 *
 	 * @param localisationSets
+	 *            the localisation sets
 	 * @return The localisations
 	 */
 	private List<LocalisationModel> drawImage(final List<LocalisationModelSet> localisationSets)
@@ -2221,7 +2367,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		Utils.waitForCompletion(futures);
 		threadPool.shutdown();
 		IJ.showProgress(1);
-		if (Utils.isInterrupted())
+		if (Utils.isInterrupted() || limits == null)
 		{
 			return null;
 		}
@@ -2354,12 +2500,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		List<LocalisationModel> localisations = toLocalisations(localisationSets);
 
-		savePulses(localisations, results, CREATE_DATA_IMAGE_TITLE);
+		savePulses(localisations, results);
 
 		// Saved the fixed and moving localisations into different datasets
-		saveFixedAndMoving(results, CREATE_DATA_IMAGE_TITLE);
+		saveFixedAndMoving(results);
 
-		saveCompoundMolecules(results, CREATE_DATA_IMAGE_TITLE);
+		saveCompoundMolecules(results);
 
 		return localisations;
 	}
@@ -2370,10 +2516,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Create a PSF model from the image that contains all the z-slices needed to draw the given localisations
+	 * Create a PSF model from the image that contains all the z-slices needed to draw the given localisations.
 	 *
 	 * @param localisationSets
-	 * @return
+	 *            the localisation sets
+	 * @return the image PSF model
 	 */
 	private ImagePSFModel createImagePSF(List<LocalisationModelSet> localisationSets)
 	{
@@ -2485,7 +2632,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Extract the image stack using a range of stack indices. The index is 0-based.
 	 *
 	 * @param imp
-*            the image
+	 *            the image
 	 * @param start
 	 *            the start index
 	 * @param end
@@ -2656,7 +2803,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		readNoise = nullIf(readNoise, 0f);
 	}
 
-	private float[] nullIf(float[] data, float f)
+	private static float[] nullIf(float[] data, float f)
 	{
 		for (int i = 0; i < data.length; i++)
 			if (data[i] != f)
@@ -3069,9 +3216,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * The region is defined by an area around the origin.
 		 *
 		 * @param image1
+		 *            the image 1
 		 * @param image2
-		 * @param origY
+		 *            the image 2
 		 * @param origX
+		 *            the origin X
+		 * @param origY
+		 *            the origin Y
 		 * @return [mean1, variance1, mean2, variance2]
 		 */
 		private double[] getStatistics(float[] image1, float[] image2, int origX, int origY)
@@ -3167,7 +3318,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return false;
 	}
 
-	private double getIntensity(LocalisationModelSet localisationSet)
+	private static double getIntensity(LocalisationModelSet localisationSet)
 	{
 		if (localisationSet != null)
 			return localisationSet.getData()[4];
@@ -3280,16 +3431,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Find the first index from the starting index where the localisation matches the time
+	 * Find the first index from the starting index where the localisation matches the time.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 * @param fromIndex
 	 *            start index
 	 * @param t
 	 *            time
 	 * @return the index (or -1)
 	 */
-	private int findIndexByTime(List<LocalisationModelSet> localisations, int fromIndex, int t)
+	private static int findIndexByTime(List<LocalisationModelSet> localisations, int fromIndex, int t)
 	{
 		while (fromIndex < localisations.size() && localisations.get(fromIndex).getTime() != t)
 			fromIndex++;
@@ -3297,16 +3449,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Find the last index from the starting index where the localisation matches the time
+	 * Find the last index from the starting index where the localisation matches the time.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 * @param fromIndex
 	 *            start index
 	 * @param t
 	 *            time
 	 * @return the index (or -1)
 	 */
-	private int findLastIndexByTime(List<LocalisationModelSet> localisations, int fromIndex, int t)
+	private static int findLastIndexByTime(List<LocalisationModelSet> localisations, int fromIndex, int t)
 	{
 		// Check the start point is valid
 		if (localisations.get(fromIndex).getTime() != t)
@@ -3321,15 +3474,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Find the first index from the starting index where the localisation matches the id
+	 * Find the first index from the starting index where the localisation matches the id.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 * @param fromIndex
 	 *            start index
 	 * @param id
+	 *            the id
 	 * @return the index (or -1)
 	 */
-	private int findIndexById(List<LocalisationModel> localisations, int fromIndex, int id)
+	private static int findIndexById(List<LocalisationModel> localisations, int fromIndex, int id)
 	{
 		while (fromIndex < localisations.size() && localisations.get(fromIndex).getId() != id)
 			fromIndex++;
@@ -3337,15 +3492,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Find the last index from the starting index where the localisation matches the Id
+	 * Find the last index from the starting index where the localisation matches the Id.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 * @param fromIndex
 	 *            start index
 	 * @param id
+	 *            the id
 	 * @return the index (or -1)
 	 */
-	private int findLastIndexById(List<LocalisationModel> localisations, int fromIndex, int id)
+	private static int findLastIndexById(List<LocalisationModel> localisations, int fromIndex, int id)
 	{
 		// Check the start point is valid
 		if (localisations.get(fromIndex).getId() != id)
@@ -3359,7 +3516,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return fromIndex - 1;
 	}
 
-	private List<LocalisationModel> toLocalisations(List<LocalisationModelSet> localisationSets)
+	private static List<LocalisationModel> toLocalisations(List<LocalisationModelSet> localisationSets)
 	{
 		ArrayList<LocalisationModel> localisations = new ArrayList<>(localisationSets.size());
 		for (LocalisationModelSet s : localisationSets)
@@ -3368,11 +3525,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Remove all fluorophores which were not drawn
+	 * Remove all fluorophores which were not drawn.
 	 *
 	 * @param fluorophores
+	 *            the fluorophores
 	 * @param localisations
-	 * @return
+	 *            the localisations
+	 * @return the filtered list
 	 */
 	private List<? extends FluorophoreSequenceModel> removeFilteredFluorophores(
 			List<? extends FluorophoreSequenceModel> fluorophores, List<LocalisationModel> localisations)
@@ -3694,7 +3853,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
-					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
+					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
+					: stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -3702,10 +3862,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.log(sb.toString());
 			return stats[SIGNAL].getMean();
 		}
-		else
-		{
-			summaryTable.append(sb.toString());
-		}
+		summaryTable.append(sb.toString());
 
 		// Show histograms
 		if (settings.getShowHistograms())
@@ -3769,15 +3926,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		IJ.showProgress(currentIndex, finalIndex);
 	}
 
-	private synchronized void addDensity(Statistics stats, int[] density)
+	private synchronized static void addDensity(Statistics stats, int[] density)
 	{
 		stats.add(density);
 	}
 
 	/**
-	 * Copy all the settings from the results into a new results set labelled with the name suffix
+	 * Copy all the settings from the results into a new results set labelled with the name suffix.
 	 *
 	 * @param nameSuffix
+	 *            the name suffix
 	 * @return The new results set
 	 */
 	private MemoryPeakResults copyMemoryPeakResults(String nameSuffix)
@@ -3802,7 +3960,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return all;
 	}
 
-	private void sortLocalisationsByIdThenTime(List<LocalisationModel> localisations)
+	private static void sortLocalisationsByIdThenTime(List<LocalisationModel> localisations)
 	{
 		Collections.sort(localisations, new Comparator<LocalisationModel>()
 		{
@@ -3823,7 +3981,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		});
 	}
 
-	private void sortLocalisationsByTime(List<LocalisationModel> localisations)
+	private static void sortLocalisationsByTime(List<LocalisationModel> localisations)
 	{
 		Collections.sort(localisations, new Comparator<LocalisationModel>()
 		{
@@ -3844,8 +4002,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Sort by id then time, then rebuild the neighbour pointers.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 */
-	private void rebuildNeighbours(List<LocalisationModel> localisations)
+	private static void rebuildNeighbours(List<LocalisationModel> localisations)
 	{
 		sortLocalisationsByIdThenTime(localisations);
 
@@ -3873,7 +4032,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private void createSummaryTable()
+	private static void createSummaryTable()
 	{
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
@@ -3893,7 +4052,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private String createHeader()
+	private static String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
 				"Dataset\tCamera\tPSF\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
@@ -3907,9 +4066,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Save the image to a TIFF file
+	 * Save the image to a TIFF file.
 	 *
 	 * @param imp
+	 *            the imp
 	 */
 	private void saveImage(ImagePlus imp)
 	{
@@ -3956,13 +4116,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Create a set of results that represent the molecule continuous on-times (pulses)
+	 * Create a set of results that represent the molecule continuous on-times (pulses).
 	 *
 	 * @param localisations
+	 *            the localisations
 	 * @param results
-	 * @param title
+	 *            the results
 	 */
-	private void savePulses(List<LocalisationModel> localisations, MemoryPeakResults results, String title)
+	@SuppressWarnings("null")
+	private void savePulses(List<LocalisationModel> localisations, MemoryPeakResults results)
 	{
 		sortLocalisationsByIdThenTime(localisations);
 
@@ -4032,7 +4194,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		traceResults.end();
 	}
 
-	private void saveFixedAndMoving(MemoryPeakResults results, String title)
+	private void saveFixedAndMoving(MemoryPeakResults results)
 	{
 		if (simpleMode || benchmarkMode || spotMode)
 			return;
@@ -4068,7 +4230,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		fixedResults.end();
 	}
 
-	private void saveCompoundMolecules(MemoryPeakResults results, String title)
+	@SuppressWarnings("null")
+	private void saveCompoundMolecules(MemoryPeakResults results)
 	{
 		if (idToCompound == null)
 			return;
@@ -4104,12 +4267,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Update the fluorophores relative coordinates to absolute
+	 * Update the fluorophores relative coordinates to absolute.
 	 *
 	 * @param molecules
+	 *            the molecules
 	 */
 	@SuppressWarnings("unused")
-	private void convertRelativeToAbsolute(List<CompoundMoleculeModel> molecules)
+	private static void convertRelativeToAbsolute(List<CompoundMoleculeModel> molecules)
 	{
 		for (CompoundMoleculeModel c : molecules)
 		{
@@ -4125,9 +4289,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Save the fluorophores to a text file
+	 * Save the fluorophores to a text file.
 	 *
 	 * @param fluorophores
+	 *            the fluorophores
 	 */
 	private void saveFluorophores(List<? extends FluorophoreSequenceModel> fluorophores)
 	{
@@ -4141,10 +4306,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			settings.setFluorophoresFilename(chooser.getDirectory() + chooser.getFileName());
 			settings.setFluorophoresFilename(Utils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
 
-			BufferedWriter output = null;
-			try
+			try (BufferedWriter output = new BufferedWriter(new FileWriter(settings.getFluorophoresFilename())))
 			{
-				output = new BufferedWriter(new FileWriter(settings.getFluorophoresFilename()));
 				output.write(createResultsFileHeader());
 				output.write("#Id\tn-Blinks\tStart\tStop\t...");
 				output.newLine();
@@ -4169,27 +4332,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				e.printStackTrace();
 				IJ.log("Failed to save fluorophores to file: " + settings.getFluorophoresFilename());
 			}
-			finally
-			{
-				if (output != null)
-				{
-					try
-					{
-						output.close();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
 		}
 	}
 
 	/**
-	 * Save the localisations to a text file
+	 * Save the localisations to a text file.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 */
 	private void saveLocalisations(List<LocalisationModel> localisations)
 	{
@@ -4225,10 +4375,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					Utils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls"));
 			SettingsManager.writeSettings(settings.build());
 
-			BufferedWriter output = null;
-			try
+			try (BufferedWriter output = new BufferedWriter(new FileWriter(settings.getLocalisationsFilename())))
 			{
-				output = new BufferedWriter(new FileWriter(settings.getLocalisationsFilename()));
 				output.write(createResultsFileHeader());
 				output.write("#T\tId\tX\tY\tZ\tIntensity");
 				output.newLine();
@@ -4250,20 +4398,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Q. Add better handling of errors?
 				e.printStackTrace();
 				IJ.log("Failed to save localisations to file: " + settings.getLocalisationsFilename());
-			}
-			finally
-			{
-				if (output != null)
-				{
-					try
-					{
-						output.close();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
 			}
 		}
 	}
@@ -4409,7 +4543,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return resultsFileHeader;
 	}
 
-	private void addHeaderLine(StringBuilder sb, String name, Object o)
+	private static void addHeaderLine(StringBuilder sb, String name, Object o)
 	{
 		sb.append(String.format("# %-20s = %s\n", name, o.toString()));
 	}
@@ -4903,6 +5037,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					egd.addNumericField("Wavelength (nm)", settings.getWavelength(), 2);
 					egd.addNumericField("Numerical_aperture", settings.getNumericalAperture(), 2);
 				}
+				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
@@ -5391,9 +5526,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Build a list of suitable background images. Images must be greyscale.
 	 *
-	 * @return
+	 * @return the list of image titles
 	 */
-	private String[] createBackgroundImageList()
+	private static String[] createBackgroundImageList()
 	{
 		int[] idList = WindowManager.getIDList();
 		if (idList != null)
@@ -5421,7 +5556,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Build a list of suitable distribution images. Images must be square.
 	 *
-	 * @return
+	 * @return the list of image titles
 	 */
 	private String[] createDistributionImageList()
 	{
@@ -5462,7 +5597,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private void logExampleCompounds()
+	private static void logExampleCompounds()
 	{
 		comment(TITLE + " example compounds");
 		IJ.log("");
@@ -5513,7 +5648,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		demo(m1, m2);
 	}
 
-	private void addAtom(Molecule.Builder mb, double mass, double x, double y, double z)
+	private static void addAtom(Molecule.Builder mb, double mass, double x, double y, double z)
 	{
 		Atom.Builder ab = mb.addAtomBuilder();
 		ab.setMass(mass);
@@ -5522,7 +5657,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		ab.setZ(z);
 	}
 
-	private void demo(Molecule... molecules)
+	private static void demo(Molecule... molecules)
 	{
 		Mixture.Builder builder = Mixture.newBuilder();
 		for (Molecule m : molecules)
@@ -5533,7 +5668,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		IJ.log("");
 	}
 
-	private void comment(String text)
+	private static void comment(String text)
 	{
 		IJ.log(TextUtils.wrap("# " + text, 80, "\n# ", false));
 	}
@@ -5777,7 +5912,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * @param results
 	 *            the results
 	 */
-	private void setBackground(MemoryPeakResults results)
+	private static void setBackground(MemoryPeakResults results)
 	{
 		// Loaded results do not have a local background.
 		if (results.hasBackground())
@@ -5795,8 +5930,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 *
 	 * @param results
 	 *            the results
+	 * @param imp
+	 *            the imp
 	 */
-	private void setNoise(MemoryPeakResults results, ImagePlus imp)
+	private static void setNoise(MemoryPeakResults results, ImagePlus imp)
 	{
 		// Loaded results do not have noise
 		if (results.hasNoise())
@@ -5839,7 +5976,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		});
 	}
 
-	private MemoryPeakResults getSimulationResults()
+	private static MemoryPeakResults getSimulationResults()
 	{
 		if (benchmarkAuto)
 		{
@@ -6143,7 +6280,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 *
 	 * @return True if the parameters were collected
 	 */
-	private boolean showLoadDialog()
+	private static boolean showLoadDialog()
 	{
 		String[] images = Utils.getImageList(Utils.GREY_SCALE);
 		if (images.length == 0)
@@ -6214,6 +6351,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
+	/**
+	 * Adds the camera description.
+	 *
+	 * @param sb
+	 *            the string builder
+	 * @param parameters
+	 *            the parameters
+	 * @return the string builder
+	 * @throws ConfigurationException
+	 *             the configuration exception
+	 */
 	public static StringBuilder addCameraDescription(StringBuilder sb, BaseParameters parameters)
 			throws ConfigurationException
 	{

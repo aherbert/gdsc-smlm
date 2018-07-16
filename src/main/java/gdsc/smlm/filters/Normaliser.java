@@ -91,6 +91,8 @@ public interface Normaliser
 	 *
 	 * @param data
 	 *            the data
+	 * @param out
+	 *            the out data
 	 * @param maxx
 	 *            the maxx
 	 * @param maxy
@@ -117,6 +119,8 @@ public interface Normaliser
 	 *
 	 * @param data
 	 *            the data
+	 * @param out
+	 *            the out data
 	 * @param maxx
 	 *            the maxx
 	 * @param maxy

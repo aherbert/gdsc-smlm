@@ -202,7 +202,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	{
 		final JMenu menu = new JMenu("File");
 		menu.setMnemonic(KeyEvent.VK_F);
-		menu.add(fileSave = add(menu, "Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+		menu.add(fileSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
 		return menu;
 	}
 
@@ -210,15 +210,15 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	{
 		final JMenu menu = new JMenu("Edit");
 		menu.setMnemonic(KeyEvent.VK_E);
-		menu.add(editReadOnly = addToggle(menu, "Read-only", KeyEvent.VK_R, null, false));
-		menu.add(editDelete = add(menu, "Delete", KeyEvent.VK_D, "DELETE"));
-		menu.add(editDeleteAll = add(menu, "Delete All", KeyEvent.VK_A, null));
+		menu.add(editReadOnly = addToggle("Read-only", KeyEvent.VK_R, null, false));
+		menu.add(editDelete = add("Delete", KeyEvent.VK_D, "DELETE"));
+		menu.add(editDeleteAll = add("Delete All", KeyEvent.VK_A, null));
 		menu.addSeparator();
-		menu.add(editSelectNone = add(menu, "Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
-		menu.add(editSelectAll = add(menu, "Select All", KeyEvent.VK_S, null));
-		menu.add(editUnsort = add(menu, "Unsort", KeyEvent.VK_U, null));
+		menu.add(editSelectNone = add("Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
+		menu.add(editSelectAll = add("Select All", KeyEvent.VK_S, null));
+		menu.add(editUnsort = add("Unsort", KeyEvent.VK_U, null));
 		menu.addSeparator();
-		menu.add(editTableSettings = add(menu, "Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
+		menu.add(editTableSettings = add("Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
 
 		// Read-only by default
 		editReadOnly.setSelected(true);
@@ -242,12 +242,12 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	{
 		final JMenu menu = new JMenu("Source");
 		menu.setMnemonic(KeyEvent.VK_S);
-		menu.add(sourceShow = add(menu, "Show", KeyEvent.VK_DELETE, "ctrl pressed I"));
-		menu.add(sourceOverlay = add(menu, "Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
+		menu.add(sourceShow = add("Show", KeyEvent.VK_DELETE, "ctrl pressed I"));
+		menu.add(sourceOverlay = add("Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
 		return menu;
 	}
 
-	private JMenuItem add(JMenu menu, String text, int mnemonic, String keyStroke)
+	private JMenuItem add(String text, int mnemonic, String keyStroke)
 	{
 		JMenuItem item = new JMenuItem(text, mnemonic);
 		if (keyStroke != null)
@@ -256,7 +256,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		return item;
 	}
 
-	private JCheckBoxMenuItem addToggle(JMenu menu, String text, int mnemonic, String keyStroke, boolean selected)
+	private JCheckBoxMenuItem addToggle(String text, int mnemonic, String keyStroke, boolean selected)
 	{
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem(text, selected);
 		item.setMnemonic(mnemonic);
@@ -522,7 +522,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	 *             index outside the range of the <code>JTable</code> as
 	 *             determined by the method <code>getRowCount</code>
 	 * @see javax.swing.table.TableRowSorter
-	 * @see #getRowCount
+	 * @see javax.swing.JTable#getRowCount()
 	 * @since 1.6
 	 */
 	public int convertRowIndexToModel(int viewRowIndex)
@@ -545,9 +545,9 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	 * @see javax.swing.table.TableRowSorter
 	 * @since 1.6
 	 */
-	public int convertRowIndexToView(int viewRowIndex)
+	public int convertRowIndexToView(int modelRowIndex)
 	{
-		return table.convertRowIndexToView(viewRowIndex);
+		return table.convertRowIndexToView(modelRowIndex);
 	}
 
 	/**
@@ -587,7 +587,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	/**
 	 * Launch the application.
 	 *
+	 * @param args
+	 *            the arguments
 	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	public static void main(String[] args) throws InterruptedException
 	{

@@ -36,7 +36,7 @@ import org.junit.Test;
 import gdsc.core.utils.Random;
 import gdsc.test.TestSettings;
 
-@SuppressWarnings({ "javadoc" })
+@SuppressWarnings({ "javadoc", "unused" })
 public class ImageSourceTest
 {
 	@Test
@@ -118,7 +118,7 @@ public class ImageSourceTest
 		Assert.assertEquals(0, ok);
 	}
 
-	private boolean canConstruct(int w, int h, float[][] data)
+	private static boolean canConstruct(int w, int h, float[][] data)
 	{
 		try
 		{
@@ -784,7 +784,7 @@ public class ImageSourceTest
 	 *            the base number
 	 * @return The data
 	 */
-	private float[] createData(int w, int h, float f)
+	private static float[] createData(int w, int h, float f)
 	{
 		float[] data = new float[w * h];
 		Arrays.fill(data, f);
@@ -794,13 +794,15 @@ public class ImageSourceTest
 	}
 
 	/**
-	 * Check if the frame is contained in the expected frames array
+	 * Check if the frame is contained in the expected frames array.
 	 *
 	 * @param frame
+	 *            the frame
 	 * @param expected
+	 *            the expected frames
 	 * @return true if within the array
 	 */
-	private boolean isExpected(int frame, int[] expected)
+	private static boolean isExpected(int frame, int[] expected)
 	{
 		for (int e : expected)
 			if (e == frame)
@@ -834,12 +836,13 @@ public class ImageSourceTest
 	}
 
 	/**
-	 * Sum all the input arrays
+	 * Sum all the input arrays.
 	 *
 	 * @param f
+	 *            the arrays
 	 * @return The summed array
 	 */
-	private float[] combine(float[]... f)
+	private static float[] combine(float[]... f)
 	{
 		float[] all = Arrays.copyOf(f[0], f[0].length);
 		for (int i = 1; i < f.length; i++)

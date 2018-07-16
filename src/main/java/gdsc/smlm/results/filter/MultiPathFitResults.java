@@ -73,6 +73,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * @param totalCandidates
 	 *            the total candidates
 	 * @param nActual
+	 *            the number of actual results in the frame
 	 */
 	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates, int nActual)
 	{

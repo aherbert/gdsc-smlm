@@ -36,10 +36,13 @@ import gdsc.smlm.function.ValueProcedure;
  */
 public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 {
+	/** The number of peaks. */
 	protected final int nPeaks;
+	
+	/** The gradient indices. */
 	protected final int[] gradientIndices;
 
-	// Required for the PSF
+	/** The target intensity for each peak. */
 	protected final double[] tI;
 
 	/**
@@ -83,6 +86,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 	 *
 	 * @param singleGradientIndices
 	 *            the single gradient indices
+	 * @return the multi gradient indices
 	 */
 	protected int[] replicateGradientIndices(int[] singleGradientIndices)
 	{
@@ -128,8 +132,6 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 	 * @param i
 	 *            Input predictor
 	 * @return The Gaussian value
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
 	@Override
 	public double eval(final int i)

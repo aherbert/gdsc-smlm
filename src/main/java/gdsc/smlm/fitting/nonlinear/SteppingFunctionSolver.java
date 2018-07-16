@@ -49,7 +49,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		SimpleValueProcedure(double[] yFit)
 		{
 			this.yFit = yFit;
-		};
+		}
 
 		@Override
 		public void execute(double value)
@@ -288,7 +288,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/**
 	 * Compute the deviations for the parameters a from the last call to
-	 * {@link #computeFitValue(double[], double[])}. Optionally store the function values.
+	 * {@link #computeFitValue(double[])}. Optionally store the function values.
 	 *
 	 * @param aDev
 	 *            the parameter deviations
@@ -306,7 +306,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/**
 	 * Compute the Fisher Information matrix for the parameters a from the last call to
-	 * {@link #computeFitValue(double[], double[])}. This can be used to set the covariances for each of the fitted
+	 * {@link #computeFitValue(double[])}. This can be used to set the covariances for each of the fitted
 	 * parameters.
 	 * <p>
 	 * Alternatively a sub-class can override {@link #computeDeviationsAndValues(double[], double[])} directly and
@@ -320,7 +320,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/**
 	 * Compute the function y-values using the y and parameters a from the last call to
-	 * {@link #computeFitValue(double[], double[])}.
+	 * {@link #computeFitValue(double[])}.
 	 * <p>
 	 * Utility method to compute the function values using the preinitialised function.
 	 * Sub-classes may override this if they have cached the function values from the

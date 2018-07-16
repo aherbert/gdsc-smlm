@@ -129,7 +129,10 @@ public class PeakResultListModelFrame extends JFrame
 	/**
 	 * Launch the application.
 	 *
+	 * @param args
+	 *            the arguments
 	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	public static void main(String[] args) throws InterruptedException
 	{

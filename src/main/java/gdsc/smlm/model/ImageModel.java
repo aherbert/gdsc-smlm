@@ -45,9 +45,16 @@ import gdsc.core.utils.StoredDataStatistics;
  */
 public abstract class ImageModel
 {
+	/** Average on-state time */
 	protected double tOn;
-	protected double tOff, tOff2;
-	protected double nBlinks, nBlinks2;
+	/** Average off-state time for the first dark state */
+	protected double tOff;
+	/** Average off-state time for the second dark state */
+	protected double tOff2;
+	/** Average number of blinks int the first dark state (used for each burst between second dark states) */
+	protected double nBlinks;
+	/** Average number of blinks into the second dark state */
+	protected double nBlinks2;
 
 	/**
 	 * Specifies the maximum number of frames that will be simulated in {@link #createFluorophores(List, int)}. Any
@@ -101,6 +108,14 @@ public abstract class ImageModel
 		setRandomGenerator(rand);
 	}
 
+	/**
+	 * Check the parameter is not less than zero
+	 *
+	 * @param param
+	 *            the parameter name
+	 * @param value
+	 *            the value
+	 */
 	protected void checkParameter(String param, double value)
 	{
 		if (value < 0)
@@ -162,10 +177,14 @@ public abstract class ImageModel
 	 * The compound's molecule coordinates will be updated by calling {@link CompoundMoleculeModel#centre()}.
 	 *
 	 * @param compounds
+	 *            the compounds
 	 * @param particles
+	 *            the particles
 	 * @param distribution
+	 *            the distribution
 	 * @param rotate
-	 * @return
+	 *            the rotate
+	 * @return the list
 	 */
 	public List<CompoundMoleculeModel> createMolecules(List<CompoundMoleculeModel> compounds, int particles,
 			SpatialDistribution distribution, boolean rotate)
@@ -216,7 +235,7 @@ public abstract class ImageModel
 		return molecules;
 	}
 
-	private List<MoleculeModel> copyMolecules(CompoundMoleculeModel c)
+	private static List<MoleculeModel> copyMolecules(CompoundMoleculeModel c)
 	{
 		int n = c.getSize();
 		List<MoleculeModel> list = new ArrayList<>(n);
@@ -272,8 +291,10 @@ public abstract class ImageModel
 	 * approximation of the energy the molecule would receive if it were moving.
 	 *
 	 * @param molecules
+	 *            the molecules
 	 * @param frames
-	 * @return
+	 *            the frames
+	 * @return the fluorophores
 	 */
 	public List<? extends FluorophoreSequenceModel> createFluorophores(List<CompoundMoleculeModel> molecules,
 			int frames)
@@ -348,6 +369,7 @@ public abstract class ImageModel
 	 * generate fluorophores.
 	 *
 	 * @param xyz
+	 *            the xyz
 	 * @return the activation time
 	 */
 	protected abstract double createActivationTime(double[] xyz);
@@ -366,12 +388,14 @@ public abstract class ImageModel
 	protected abstract FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct);
 
 	/**
-	 * Add to the list but link up the continuous pulses with previous/next pointers
+	 * Add to the list but link up the continuous pulses with previous/next pointers.
 	 *
 	 * @param localisations
+	 *            the localisations
 	 * @param models
+	 *            the models
 	 */
-	private void linkLocalisations(List<LocalisationModel> localisations, LocalisationModel[] models)
+	private static void linkLocalisations(List<LocalisationModel> localisations, LocalisationModel[] models)
 	{
 		LocalisationModel previous = null;
 		for (int i = 0; i < models.length; i++)
@@ -385,8 +409,8 @@ public abstract class ImageModel
 		}
 	}
 
-	private void generateOnTimes(int maxFrames, final double frameInterval, List<double[]> bursts, int sequenceStartT,
-			double[] onTime, int[] state)
+	private static void generateOnTimes(int maxFrames, final double frameInterval, List<double[]> bursts,
+			int sequenceStartT, double[] onTime, int[] state)
 	{
 		for (int i = 0; i < bursts.size(); i++)
 		{
@@ -452,7 +476,7 @@ public abstract class ImageModel
 		}
 	}
 
-	private void sortByTime(List<LocalisationModel> localisations)
+	private static void sortByTime(List<LocalisationModel> localisations)
 	{
 		// Sort by time-only (not signal as well which is the default).
 		// This means the localisations are in the same order as the input
@@ -517,8 +541,7 @@ public abstract class ImageModel
 	{
 		List<LocalisationModel> localisations = new ArrayList<>();
 		// Extract the fluorophores in all the compounds
-		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>(
-				compoundFluorophores.size());
+		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>(compoundFluorophores.size());
 		for (CompoundMoleculeModel c : compoundFluorophores)
 		{
 			for (int i = c.getSize(); i-- > 0;)
@@ -663,7 +686,7 @@ public abstract class ImageModel
 		return localisations;
 	}
 
-	private double getTotalOnTime(FluorophoreSequenceModel f)
+	private static double getTotalOnTime(FluorophoreSequenceModel f)
 	{
 		return Maths.sum(f.getOnTimes());
 	}
@@ -677,6 +700,7 @@ public abstract class ImageModel
 	 * @param localisations
 	 *            Output list to put all localisations
 	 * @param fixed
+	 *            the fixed flag
 	 * @param maxFrames
 	 *            The maximum number of frames. Fluorophores still active beyond this frame will not be represented
 	 * @param photons
@@ -879,9 +903,10 @@ public abstract class ImageModel
 	}
 
 	/**
-	 * Set the random generator for creating the image
+	 * Set the random generator for creating the image.
 	 *
 	 * @param random
+	 *            the new random generator
 	 */
 	public void setRandomGenerator(RandomGenerator random)
 	{
@@ -895,10 +920,11 @@ public abstract class ImageModel
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * per dimension.
 	 *
-	 * @see {@link gdsc.smlm.model.MoleculeModel#move(double, RandomGenerator) }
-	 * @see {@link gdsc.smlm.model.MoleculeModel#walk(double, RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
+	 *            the diffusion rate in pixels per step
 	 * @return The step size
+	 * @see MoleculeModel#move(double, RandomGenerator)
+	 * @see MoleculeModel#walk(double, RandomGenerator)
 	 */
 	public static double getRandomMoveDistance(double diffusionRateInPixelsPerStep)
 	{
@@ -912,9 +938,10 @@ public abstract class ImageModel
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * for a movement along a random unit vector in the XY plane, i.e. 2 dimensions together.
 	 *
-	 * @see {@link gdsc.smlm.model.MoleculeModel#slide(double, double[], RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
+	 *            the diffusion rate in pixels per step
 	 * @return The step size
+	 * @see MoleculeModel#slide(double, double[], RandomGenerator)
 	 */
 	public static double getRandomMoveDistance2D(double diffusionRateInPixelsPerStep)
 	{
@@ -928,9 +955,10 @@ public abstract class ImageModel
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * for a movement along a random unit vector, i.e. all 3 dimensions together.
 	 *
-	 * @see {@link gdsc.smlm.model.MoleculeModel#slide(double, double[], RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
+	 *            the diffusion rate in pixels per step
 	 * @return The step size
+	 * @see MoleculeModel#slide(double, double[], RandomGenerator)
 	 */
 	public static double getRandomMoveDistance3D(double diffusionRateInPixelsPerStep)
 	{
@@ -996,9 +1024,10 @@ public abstract class ImageModel
 	}
 
 	/**
-	 * Set the distribution used to confine any diffusing molecules
+	 * Set the distribution used to confine any diffusing molecules.
 	 *
 	 * @param confinementDistribution
+	 *            the new confinement distribution
 	 */
 	public void setConfinementDistribution(SpatialDistribution confinementDistribution)
 	{

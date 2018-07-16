@@ -148,7 +148,10 @@ public class TraceManager
 	}
 
 	/**
+	 * Instantiates a new trace manager.
+	 *
 	 * @param results
+	 *            the results
 	 * @throws IllegalArgumentException
 	 *             if results are null or empty
 	 */
@@ -468,13 +471,10 @@ public class TraceManager
 				}
 				return traces.toArray(new Trace[traces.size()]);
 			}
-			else
-			{
-				Trace[] traces = new Trace[localisations.length];
-				for (int index = 0; index < traces.length; index++)
-					traces[index] = new Trace(peakResults[localisations[index].id]);
-				return traces;
-			}
+			Trace[] traces = new Trace[localisations.length];
+			for (int index = 0; index < traces.length; index++)
+				traces[index] = new Trace(peakResults[localisations[index].id]);
+			return traces;
 		}
 
 		if (tracker != null)
@@ -561,6 +561,7 @@ public class TraceManager
 	 * the peaks in the trace.
 	 *
 	 * @param traces
+	 *            the traces
 	 * @return the peak results
 	 */
 	public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces)
@@ -595,6 +596,9 @@ public class TraceManager
 	 * If the trace is empty it is ignored.
 	 *
 	 * @param traces
+	 *            the traces
+	 * @param calibration
+	 *            the calibration
 	 * @return the peak results
 	 */
 	public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces, final Calibration calibration)
@@ -612,6 +616,7 @@ public class TraceManager
 				}
 				catch (ConversionException e)
 				{
+					// Ignore
 				}
 
 			// Ensure all results are added as extended peak results with their trace ID.
@@ -674,8 +679,9 @@ public class TraceManager
 	 * If the trace is empty it is ignored.
 	 *
 	 * @param traces
+	 *            the traces
 	 * @param calibration
-	 * @param b
+	 *            the calibration
 	 * @return the peak results
 	 */
 	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration)
@@ -689,7 +695,9 @@ public class TraceManager
 	 * If the trace is empty it is ignored.
 	 *
 	 * @param traces
+	 *            the traces
 	 * @param calibration
+	 *            the calibration
 	 * @param newId
 	 *            Set to true to use a new ID for each trace
 	 * @return the peak results
@@ -733,6 +741,7 @@ public class TraceManager
 	 * Uses the title and bounds from the constructor peak results. The title has the word 'Traced Centroids' appended.
 	 *
 	 * @param traces
+	 *            the traces
 	 * @return the peak results
 	 */
 	public MemoryPeakResults convertToCentroidPeakResults(final Trace[] traces)
@@ -748,7 +757,9 @@ public class TraceManager
 	 * Uses the title and bounds from the provided peak results. The title has the word 'Traced Centroids' appended.
 	 *
 	 * @param source
+	 *            the source
 	 * @param traces
+	 *            the traces
 	 * @return the peak results
 	 */
 	public static MemoryPeakResults convertToCentroidPeakResults(MemoryPeakResults source, final Trace[] traces)
@@ -767,6 +778,7 @@ public class TraceManager
 	 * Uses the title and bounds from the constructor peak results. The title has the word 'Traced' appended.
 	 *
 	 * @param traces
+	 *            the traces
 	 * @return the peak results
 	 */
 	public MemoryPeakResults convertToPeakResults(final Trace[] traces)
@@ -780,7 +792,9 @@ public class TraceManager
 	 * Uses the title and bounds from the provided peak results. The title has the word 'Traced' appended.
 	 *
 	 * @param source
+	 *            the source
 	 * @param traces
+	 *            the traces
 	 * @return the peak results
 	 */
 	public static MemoryPeakResults convertToPeakResults(MemoryPeakResults source, final Trace[] traces)
@@ -798,6 +812,7 @@ public class TraceManager
 	 * the number of localisations.
 	 *
 	 * @param index
+	 *            the index
 	 * @return The index of the next time frame
 	 */
 	@SuppressWarnings("unused")
@@ -816,6 +831,9 @@ public class TraceManager
 	 * frames return the number of localisations.
 	 *
 	 * @param index
+	 *            the index
+	 * @param timeThreshold
+	 *            the time threshold
 	 * @return The index of the next time frame
 	 */
 	@SuppressWarnings("unused")
@@ -830,10 +848,12 @@ public class TraceManager
 	}
 
 	/**
-	 * From the given index, move backward to the earliest localisations within the time threshold
+	 * From the given index, move backward to the earliest localisations within the time threshold.
 	 *
 	 * @param index
+	 *            the index
 	 * @param timeThreshold
+	 *            the time threshold
 	 * @return The index of the earliest localisation within the time threshold
 	 */
 	@SuppressWarnings("unused")
@@ -883,7 +903,7 @@ public class TraceManager
 	 *            The index of the earliest forerunner spot
 	 * @param currentIndex
 	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
-	 * @return
+	 * @return The assigned trace
 	 */
 	private int findForerunnerNoExclusion(final int index, final int pastIndex, final int currentIndex)
 	{
@@ -988,7 +1008,7 @@ public class TraceManager
 	 *            The index of the earliest forerunner spot
 	 * @param currentIndex
 	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
-	 * @return
+	 * @return The assigned trace
 	 */
 	private int findForerunnerWithExclusion(final int index, final int pastIndex, final int currentIndex)
 	{
@@ -1177,7 +1197,7 @@ public class TraceManager
 	 *            The count of traces to ignore
 	 * @param ignore
 	 *            The traces to ignore
-	 * @return
+	 * @return The assigned trace
 	 */
 	private int findAlternativeForerunnerNoExclusion(final int index, final int pastIndex, final int currentIndex,
 			final int ignoreCount, final int[] ignore)
@@ -1312,7 +1332,7 @@ public class TraceManager
 	 *            The count of traces to ignore
 	 * @param ignore
 	 *            The traces to ignore
-	 * @return
+	 * @return The assigned trace
 	 */
 	private int findAlternativeForerunnerWithExclusion(final int index, final int pastIndex, final int currentIndex,
 			final int ignoreCount, final int[] ignore)
@@ -1564,6 +1584,7 @@ public class TraceManager
 	 * Filter the traces that start during an activation frame.
 	 *
 	 * @param traces
+	 *            the traces
 	 * @param activationFrameInterval
 	 *            the interval at which the activation laser is used
 	 * @return the filtered traces
@@ -1763,6 +1784,7 @@ public class TraceManager
 	 * Collect all peak results with the same ID into traces. IDs of zero are ignored.
 	 *
 	 * @param results
+	 *            the results
 	 * @return The traces
 	 */
 	public static Trace[] convert(MemoryPeakResults results)
@@ -1804,33 +1826,30 @@ public class TraceManager
 					traces[count++] = traces[i];
 			return Arrays.copyOf(traces, count);
 		}
-		else
+		// Use a map when the size is potentially large
+		TIntObjectHashMap<Trace> map = new TIntObjectHashMap<>();
+		Trace next = new Trace();
+		for (PeakResult result : list)
 		{
-			// Use a map when the size is potentially large
-			TIntObjectHashMap<Trace> map = new TIntObjectHashMap<>();
-			Trace next = new Trace();
-			for (PeakResult result : list)
+			final int id = result.getId();
+			if (id > 0)
 			{
-				final int id = result.getId();
-				if (id > 0)
+				Trace trace = map.putIfAbsent(id, next);
+				if (trace == null)
 				{
-					Trace trace = map.putIfAbsent(id, next);
-					if (trace == null)
-					{
-						// This was a new key
-						trace = next;
-						trace.setId(id);
-						// Prepare for next absent key
-						next = new Trace();
-					}
-					trace.add(result);
+					// This was a new key
+					trace = next;
+					trace.setId(id);
+					// Prepare for next absent key
+					next = new Trace();
 				}
+				trace.add(result);
 			}
-
-			// Extract the traces
-			Trace[] traces = map.values(new Trace[map.size()]);
-			Arrays.sort(traces);
-			return traces;
 		}
+
+		// Extract the traces
+		Trace[] traces = map.values(new Trace[map.size()]);
+		Arrays.sort(traces);
+		return traces;
 	}
 }

@@ -34,6 +34,10 @@ import gdsc.smlm.utils.Pair;
  * worker threads.
  *
  * @author Alex Herbert
+ * @param <S>
+ *            the generic type
+ * @param <R>
+ *            the generic type
  */
 public class Workflow<S, R>
 {
@@ -311,7 +315,7 @@ public class Workflow<S, R>
 	/**
 	 * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input.
 	 *
-	 * @param worker
+	 * @param inputWorker
 	 *            the worker
 	 * @param previous
 	 *            the previous worker from which to take work

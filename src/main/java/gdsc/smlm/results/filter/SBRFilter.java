@@ -42,6 +42,12 @@ public class SBRFilter extends DirectFilter
 	@XStreamAsAttribute
 	final float sbr;
 
+	/**
+	 * Instantiates a new signal-to-background ratio (SBR) filter.
+	 *
+	 * @param sbr
+	 *            the signal-to-background ratio (SBR)
+	 */
 	public SBRFilter(float sbr)
 	{
 		this.sbr = Math.max(0, sbr);

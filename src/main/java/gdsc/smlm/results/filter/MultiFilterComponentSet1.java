@@ -30,6 +30,12 @@ public class MultiFilterComponentSet1 extends MultiFilterComponentSet
 {
 	private MultiFilterComponent component0;
 
+	/**
+	 * Instantiates a new multi filter component set for 1 component.
+	 *
+	 * @param components
+	 *            the components
+	 */
 	public MultiFilterComponentSet1(MultiFilterComponent[] components)
 	{
 		this.component0 = components[0];

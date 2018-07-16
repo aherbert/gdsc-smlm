@@ -118,8 +118,6 @@ public class FisherInformationMatrix
 	 *
 	 * @param m
 	 *            the fisher information matrix
-	 * @param n
-	 *            the number of columns/rows
 	 */
 	public FisherInformationMatrix(DenseMatrix64F m)
 	{

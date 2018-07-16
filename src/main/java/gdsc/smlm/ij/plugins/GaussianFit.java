@@ -142,6 +142,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	private static PSFType[] _PSFTypeValues;
 
+	/**
+	 * Gets the PSF type values.
+	 *
+	 * @return the PSF type values
+	 */
 	public static PSFType[] getPSFTypeValues()
 	{
 		if (_PSFTypeValues == null)
@@ -151,6 +156,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	private static String[] _PSFTypeNames;
 
+	/**
+	 * Gets the PSF type names.
+	 *
+	 * @return the PSF type names
+	 */
 	public static String[] getPSFTypeNames()
 	{
 		if (_PSFTypeNames == null)
@@ -249,9 +259,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Calculate the min/max limits for the image. The max is set at the 99th percentile of the data.
 	 *
 	 * @param ip
+	 *            the ip
 	 * @return The limits
 	 */
-	private double[] getLimits(ImageProcessor ip)
+	private static double[] getLimits(ImageProcessor ip)
 	{
 		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.MIN_MAX, null);
 		double[] limits = new double[] { stats.min, stats.max };
@@ -427,11 +438,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	}
 
 	/**
-	 * Show the points as an overlay
+	 * Show the points as an overlay.
 	 *
 	 * @param nMaxima
+	 *            the number of maxima
 	 * @param xpoints
+	 *            the xpoints
 	 * @param ypoints
+	 *            the ypoints
 	 */
 	private void setOverlay(int nMaxima, float[] xpoints, float[] ypoints)
 	{
@@ -576,7 +590,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					double[] peakParams = extractParams(params, i);
 					double[] peakParamsDev = extractParams(paramsDev, i);
 
-					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, nMaxima, x, y,
+					addResult(bounds, regionBounds, peakParams, peakParamsDev, nMaxima, x, y,
 							data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
@@ -657,7 +671,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 						peakParamsDev = convertParameters(fitResult.getParameterDeviations());
 					}
 
-					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
+					addResult(bounds, regionBounds, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
 					double xf = peakParams[Gaussian2DFunction.X_POSITION];
@@ -688,7 +702,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			IJ.log("Time = " + (ellapsed / 1000000.0) + "ms");
 	}
 
-	private String getReason(FitResult fitResult)
+	/**
+	 * Gets the reason.
+	 *
+	 * @param fitResult
+	 *            the fit result
+	 * @return the reason
+	 */
+	private static String getReason(FitResult fitResult)
 	{
 		if (fitResult == null || fitResult.getStatus() == null)
 			return "";
@@ -708,7 +729,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return p;
 	}
 
-	private void addResult(Rectangle bounds, Rectangle regionBounds, float[] data, double[] params, double[] paramsDev,
+	private void addResult(Rectangle bounds, Rectangle regionBounds,  double[] params, double[] paramsDev,
 			int n, int x, int y, float value)
 	{
 		x += bounds.x;
@@ -725,8 +746,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Data must be arranged in yx block order, i.e. height rows of width.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @return Indices of the maxima
 	 */
 	public int[] getMaxima(float[] data, int width, int height)
@@ -765,8 +789,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param maxIndices
 	 *            Indices of the data to fit
 	 * @return Array containing the fitted curve data: The first value is the Background. The remaining values are
@@ -788,8 +815,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param maxIndices
 	 *            Indices of the data to fit
 	 * @param estimatedHeights
@@ -862,9 +892,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * <p>
 	 * Data must be arranged in yx block order, i.e. height rows of width.
 	 *
+	 * @param gf
+	 *            the gf
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param index
 	 *            Index of the data to fit
 	 * @param estimatedHeight
@@ -926,7 +961,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return new Gaussian2DFitter(config);
 	}
 
-	protected void setupPeakFiltering(FitConfiguration config)
+	/**
+	 * Sets up peak filtering.
+	 *
+	 * @param config
+	 *            the configuration
+	 */
+	protected  void setupPeakFiltering(FitConfiguration config)
 	{
 		double Mk = getSmooth() * 2 + 1;
 		double halfMk = 0.5f * Mk;
@@ -947,6 +988,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Note: The fitted coordinates are offset by 0.5, i.e. using the middle of the pixel. This equates to input data
 	 * 0,0 representing 0.5,0.5.
 	 *
+	 * @param ip
+	 *            the ip
 	 * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX, StdDevY, Angle.
 	 *         Null if no fit is possible.
 	 */
@@ -975,6 +1018,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * <p>
 	 * Note: The returned fit coordinates should be offset by 0.5 if the input data represents pixels
 	 *
+	 * @param data
+	 *            the data
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
 	 * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX, StdDevY, Angle. Null
 	 *         if no fit is possible.
 	 */

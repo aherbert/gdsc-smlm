@@ -37,7 +37,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 {
 	/**
-	 * Construct a new flourophore
+	 * Construct a new flourophore.
 	 *
 	 * @param tAct
 	 *            Average time for activation
@@ -49,12 +49,14 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	 *            Average on-state time
 	 * @param tOff
 	 *            Average off-state time for the first dark state
-	 * @param tOff
+	 * @param tOff2
 	 *            Average off-state time for the second dark state
 	 * @param nBlinks
 	 *            Average number of blinks int the first dark state (used for each burst between second dark states)
 	 * @param nBlinks2
 	 *            Average number of blinks into the second dark state
+	 * @param useGeometricBlinkingDistribution
+	 *            Set to true to use the geometric distribution (default is Poisson)
 	 */
 	public StandardFluorophoreSequenceModel(double tAct, int id, double[] xyz, double tOn, double tOff, double tOff2,
 			double nBlinks, double nBlinks2, boolean useGeometricBlinkingDistribution)
@@ -64,7 +66,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	}
 
 	/**
-	 * Construct a new flourophore
+	 * Construct a new flourophore.
 	 *
 	 * @param tAct
 	 *            Average time for activation
@@ -76,13 +78,16 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	 *            Average on-state time
 	 * @param tOff
 	 *            Average off-state time for the first dark state
-	 * @param tOff
+	 * @param tOff2
 	 *            Average off-state time for the second dark state
 	 * @param nBlinks
 	 *            Average number of blinks int the first dark state (used for each burst between second dark states)
 	 * @param nBlinks2
 	 *            Average number of blinks into the second dark state
+	 * @param useGeometricBlinkingDistribution
+	 *            Set to true to use the geometric distribution (default is Poisson)
 	 * @param randomGenerator
+	 *            the random generator
 	 */
 	public StandardFluorophoreSequenceModel(double tAct, int id, double[] xyz, double tOn, double tOff, double tOff2,
 			double nBlinks, double nBlinks2, boolean useGeometricBlinkingDistribution,
@@ -94,7 +99,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	}
 
 	/**
-	 * Construct a new flourophore
+	 * Construct a new flourophore.
 	 *
 	 * @param id
 	 *            The identifier
@@ -106,12 +111,14 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	 *            Average on-state time
 	 * @param tOff
 	 *            Average off-state time for the first dark state
-	 * @param tOff
+	 * @param tOff2
 	 *            Average off-state time for the second dark state
 	 * @param nBlinks
 	 *            Average number of blinks int the first dark state (used for each burst between second dark states)
 	 * @param nBlinks2
 	 *            Average number of blinks into the second dark state
+	 * @param useGeometricBlinkingDistribution
+	 *            Set to true to use the geometric distribution (default is Poisson)
 	 */
 	public StandardFluorophoreSequenceModel(int id, double[] xyz, double startT, double tOn, double tOff, double tOff2,
 			double nBlinks, double nBlinks2, boolean useGeometricBlinkingDistribution)
@@ -121,7 +128,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	}
 
 	/**
-	 * Construct a new flourophore
+	 * Construct a new flourophore.
 	 *
 	 * @param id
 	 *            The identifier
@@ -133,13 +140,16 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	 *            Average on-state time
 	 * @param tOff
 	 *            Average off-state time for the first dark state
-	 * @param tOff
+	 * @param tOff2
 	 *            Average off-state time for the second dark state
 	 * @param nBlinks
 	 *            Average number of blinks int the first dark state (used for each burst between second dark states)
 	 * @param nBlinks2
 	 *            Average number of blinks into the second dark state
+	 * @param useGeometricBlinkingDistribution
+	 *            Set to true to use the geometric distribution (default is Poisson)
 	 * @param randomGenerator
+	 *            the random generator
 	 */
 	public StandardFluorophoreSequenceModel(int id, double[] xyz, double startT, double tOn, double tOff, double tOff2,
 			double nBlinks, double nBlinks2, boolean useGeometricBlinkingDistribution,
@@ -200,16 +210,17 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 	 * Get the number of blinks using the specified random data generator using a Poisson or Geometric distribution.
 	 *
 	 * @param useGeometricBlinkingDistribution
+	 *            Set to true to use the geometric distribution (default is Poisson)
 	 * @param rand
+	 *            the random generator
 	 * @param mean
+	 *            the mean
 	 * @return The number of blinks
 	 */
 	public static int getBlinks(boolean useGeometricBlinkingDistribution, RandomDataGenerator rand, double mean)
 	{
 		if (mean > 0)
-		{
 			return (useGeometricBlinkingDistribution) ? nextGeometric(rand, mean) : (int) rand.nextPoisson(mean);
-		}
 		return 0;
 	}
 

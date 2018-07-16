@@ -235,7 +235,7 @@ public class Image3DAligner implements Cloneable
 			reference.dht.initialiseFastMultiply();
 	}
 
-	private void check3D(ImageStack image)
+	private static void check3D(ImageStack image)
 	{
 		if (image.getWidth() < 2 || image.getHeight() < 2 || image.getSize() < 2)
 			throw new IllegalArgumentException("Require a 3D image");
@@ -436,7 +436,7 @@ public class Image3DAligner implements Cloneable
 	 *            the dht data
 	 * @return the DHT data
 	 */
-	private DHTData prepareDHT(DHTData dhtData)
+	private static DHTData prepareDHT(DHTData dhtData)
 	{
 		DoubleDHT3D dht = dhtData.dht;
 		double[] s_ = dhtData.s_;
@@ -595,7 +595,7 @@ public class Image3DAligner implements Cloneable
 		setReference(createDHT(image, reference));
 	}
 
-	private void check3D(Image3D image)
+	private static void check3D(Image3D image)
 	{
 		if (image.getWidth() < 2 || image.getHeight() < 2 || image.getSize() < 2)
 			throw new IllegalArgumentException("Require a 3D image");
@@ -705,8 +705,6 @@ public class Image3DAligner implements Cloneable
 	 *            the image
 	 * @param refinements
 	 *            the refinements for sub-pixel accuracy
-	 * @param error
-	 *            the error for sub-pixel accuracy (i.e. stop when improvements are less than this error)
 	 * @return [x,y,z,value]
 	 * @throws IllegalArgumentException
 	 *             If any dimension is less than 2, or if larger than the initialised reference

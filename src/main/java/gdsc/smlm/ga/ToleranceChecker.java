@@ -26,7 +26,10 @@ package gdsc.smlm.ga;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Check if converged using a tolerance on the fitness and/or sequence change, and the number of iterations
+ * Check if converged using a tolerance on the fitness and/or sequence change, and the number of iterations.
+ *
+ * @param <T>
+ *            the generic type
  */
 public abstract class ToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {
@@ -43,9 +46,9 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
 	 * must be set to a negative value. In order to perform only absolute
 	 * checks, the relative tolerance must be set to a negative value.
 	 *
-	 * @param relativeThreshold
+	 * @param relative
 	 *            relative tolerance threshold
-	 * @param absoluteThreshold
+	 * @param absolute
 	 *            absolute tolerance threshold
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid
@@ -62,17 +65,16 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
 	 * must be set to a negative value. In order to perform only absolute
 	 * checks, the relative tolerance must be set to a negative value.
 	 *
-	 * @param relativeThreshold
+	 * @param relative
 	 *            relative tolerance threshold
-	 * @param absoluteThreshold
+	 * @param absolute
 	 *            absolute tolerance threshold
 	 * @param checkFitness
 	 *            Set to true to check the fitness
 	 * @param checkSequence
 	 *            Set to true to check the sequence
 	 * @param maxIterations
-	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome<T>,
-	 *            Chromosome<T>)} is
+	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome, Chromosome)} is
 	 *            called)
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid

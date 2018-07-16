@@ -25,15 +25,23 @@ package gdsc.smlm.search;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.smlm.ga.Chromosome;
-
 /**
- * Check if converged using a tolerance on the score and/or position change, and the number of iterations
+ * Check if converged using a tolerance on the score and/or position change, and the number of iterations.
+ *
+ * @param <T>
+ *            the generic type
  */
 public class ConvergenceToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {
-	final public double relative, absolute;
-	final public boolean checkScore, checkSequence;
+	/** The relative tolerance threshold. */
+	final public double relative;
+	/** The absolute tolerance threshold. */
+	final public double absolute;
+	/** The check score flag. */
+	final public boolean checkScore;
+	/** The check sequence flag. */
+	final public boolean checkSequence;
+	/** The max iterations. */
 	final public int maxIterations;
 
 	private int iterations = 0;
@@ -45,9 +53,9 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 	 * must be set to a negative value. In order to perform only absolute
 	 * checks, the relative tolerance must be set to a negative value.
 	 *
-	 * @param relativeThreshold
+	 * @param relative
 	 *            relative tolerance threshold
-	 * @param absoluteThreshold
+	 * @param absolute
 	 *            absolute tolerance threshold
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid
@@ -64,16 +72,16 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 	 * must be set to a negative value. In order to perform only absolute
 	 * checks, the relative tolerance must be set to a negative value.
 	 *
-	 * @param relativeThreshold
+	 * @param relative
 	 *            relative tolerance threshold
-	 * @param absoluteThreshold
+	 * @param absolute
 	 *            absolute tolerance threshold
 	 * @param checkScore
 	 *            Set to true to check the score
 	 * @param checkSequence
 	 *            Set to true to check the position
 	 * @param maxIterations
-	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome, Chromosome)} is
+	 *            Set above zero to check the iterations (number of time {@link #converged(double[], double[])} is
 	 *            called)
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid
@@ -162,9 +170,9 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 		iterations++;
 		if (maxIterations != 0 && iterations >= maxIterations)
 			return true;
-		if (checkScore && converged(previous.score, current.score))
+		if (checkScore && converged(previous.getScore(), current.getScore()))
 			return true;
-		if (checkSequence && converged(previous.point, current.point))
+		if (checkSequence && converged(previous.getPoint(), current.getPoint()))
 			return true;
 		return false;
 	}

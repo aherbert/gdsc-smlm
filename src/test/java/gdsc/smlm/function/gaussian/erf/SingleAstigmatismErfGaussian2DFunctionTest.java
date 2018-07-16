@@ -53,5 +53,5 @@ public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFun
 		// to construct independent widths.
 		// Test with different X and Y SD
 		testw1 = new double[][] { { 1.1, 1.1 }, { 1.1, 1.2 }, { 1.1, 1.5 } };
-	};
+	}
 }

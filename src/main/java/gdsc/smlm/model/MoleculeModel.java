@@ -30,15 +30,23 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public class MoleculeModel
 {
+	/** The id. */
 	private int id;
+	
+	/** The xyz. */
 	protected double[] xyz;
+	
+	/** The mass. */
 	protected double mass;
+	
+	/** The label. */
 	private int label;
 
 	/**
-	 * Create a new molecule
+	 * Create a new molecule.
 	 *
 	 * @param id
+	 *            the id
 	 * @param xyz
 	 *            [x,y,z]
 	 */
@@ -49,12 +57,16 @@ public class MoleculeModel
 	}
 
 	/**
-	 * Create a new molecule
+	 * Create a new molecule.
 	 *
 	 * @param id
+	 *            the id
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 */
 	public MoleculeModel(int id, double x, double y, double z)
 	{
@@ -63,9 +75,10 @@ public class MoleculeModel
 	}
 
 	/**
-	 * Create a new molecule
+	 * Create a new molecule.
 	 *
 	 * @param mass
+	 *            the mass
 	 * @param xyz
 	 *            [x,y,z]
 	 */
@@ -76,12 +89,16 @@ public class MoleculeModel
 	}
 
 	/**
-	 * Create a new molecule
+	 * Create a new molecule.
 	 *
 	 * @param mass
+	 *            the mass
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 */
 	public MoleculeModel(double mass, double x, double y, double z)
 	{
@@ -90,10 +107,12 @@ public class MoleculeModel
 	}
 
 	/**
-	 * Create a new molecule
+	 * Create a new molecule.
 	 *
 	 * @param id
+	 *            the id
 	 * @param mass
+	 *            the mass
 	 * @param xyz
 	 *            [x,y,z]
 	 */
@@ -105,13 +124,18 @@ public class MoleculeModel
 	}
 
 	/**
-	 * Create a new molecule
+	 * Create a new molecule.
 	 *
 	 * @param id
+	 *            the id
 	 * @param mass
+	 *            the mass
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 */
 	public MoleculeModel(int id, double mass, double x, double y, double z)
 	{
@@ -121,6 +145,8 @@ public class MoleculeModel
 	}
 
 	/**
+	 * Gets the x.
+	 *
 	 * @return the x
 	 */
 	public double getX()
@@ -129,6 +155,8 @@ public class MoleculeModel
 	}
 
 	/**
+	 * Gets the y.
+	 *
 	 * @return the y
 	 */
 	public double getY()
@@ -137,6 +165,8 @@ public class MoleculeModel
 	}
 
 	/**
+	 * Gets the z.
+	 *
 	 * @return the z
 	 */
 	public double getZ()
@@ -145,6 +175,8 @@ public class MoleculeModel
 	}
 
 	/**
+	 * Gets the id.
+	 *
 	 * @return the id
 	 */
 	public int getId()
@@ -153,9 +185,10 @@ public class MoleculeModel
 	}
 
 	/**
-	 * Package level set method to allow renumbering
+	 * Package level set method to allow renumbering.
 	 *
 	 * @param id
+	 *            the new id
 	 */
 	void setId(int id)
 	{
@@ -163,6 +196,8 @@ public class MoleculeModel
 	}
 
 	/**
+	 * Gets the mass.
+	 *
 	 * @return the mass
 	 */
 	public double getMass()
@@ -171,6 +206,8 @@ public class MoleculeModel
 	}
 
 	/**
+	 * Gets the coordinates.
+	 *
 	 * @return The coordinates (x,y,z)
 	 */
 	public double[] getCoordinates()

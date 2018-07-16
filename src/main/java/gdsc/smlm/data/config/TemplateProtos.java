@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "javadoc"})
 public final class TemplateProtos {
   private TemplateProtos() {}
   public static void registerAllExtensions(

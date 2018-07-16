@@ -344,7 +344,9 @@ public class GaussianKernel implements Cloneable
 		if (kernel[kRadius - 1] == 0)
 		{
 			while (kernel[--kRadius] == 0)
-				;
+			{
+				/* decrement */
+			}
 			if (kRadius == 1)
 				return new double[] { 1 };
 			kernel = Arrays.copyOf(kernel, 2 * kRadius - 1);

@@ -38,8 +38,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 public class CompoundMoleculeModel extends MoleculeModel
 {
 	static final double DEGREES_TO_RADIANS = 180.0 / Math.PI;
-	public static final double[] X_AXIS = new double[] { 1, 0, 0 };
-	public static final double[] Y_AXIS = new double[] { 0, 1, 0 };
+
+	/** Define the Z-axis */
 	public static final double[] Z_AXIS = new double[] { 0, 0, 1 };
 
 	private int label;
@@ -71,12 +71,14 @@ public class CompoundMoleculeModel extends MoleculeModel
 	/**
 	 * Create a new molecule
 	 * <p>
-	 * Note: molecules mass may be updated, see {@link #getMass()}
+	 * Note: molecules mass may be updated, see {@link #getMass()}.
 	 *
 	 * @param id
+	 *            the id
 	 * @param xyz
 	 *            [x,y,z]
 	 * @param molecules
+	 *            the molecules
 	 * @throws IllegalArgumentException
 	 *             If the input list contains nulls
 	 */
@@ -89,13 +91,18 @@ public class CompoundMoleculeModel extends MoleculeModel
 	/**
 	 * Create a new molecule
 	 * <p>
-	 * Note: molecules mass may be updated, see {@link #getMass()}
+	 * Note: molecules mass may be updated, see {@link #getMass()}.
 	 *
 	 * @param id
+	 *            the id
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 * @param molecules
+	 *            the molecules
 	 * @throws IllegalArgumentException
 	 *             If the input list contains nulls
 	 */
@@ -108,12 +115,14 @@ public class CompoundMoleculeModel extends MoleculeModel
 	/**
 	 * Create a new molecule
 	 * <p>
-	 * Note: molecules mass may be updated, see {@link #getMass()}
+	 * Note: molecules mass may be updated, see {@link #getMass()}.
 	 *
 	 * @param id
+	 *            the id
 	 * @param xyz
 	 *            [x,y,z]
 	 * @param molecules
+	 *            the molecules
 	 * @param centre
 	 *            Shift molecules to have a centre-of-mass at 0,0,0.
 	 * @throws IllegalArgumentException
@@ -129,13 +138,18 @@ public class CompoundMoleculeModel extends MoleculeModel
 	/**
 	 * Create a new molecule
 	 * <p>
-	 * Note: molecules mass may be updated, see {@link #getMass()}
+	 * Note: molecules mass may be updated, see {@link #getMass()}.
 	 *
 	 * @param id
+	 *            the id
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 * @param molecules
+	 *            the molecules
 	 * @param centre
 	 *            Shift molecules to have a centre-of-mass at 0,0,0.
 	 * @throws IllegalArgumentException
@@ -236,6 +250,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * @param maxAngle
 	 *            The maximum angle to rotate (in either direction) in degrees
 	 * @param random
+	 *            the random
 	 */
 	public void rotateRandom(double maxAngle, RandomGenerator random)
 	{
@@ -266,6 +281,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * @param maxAngle
 	 *            The maximum angle to rotate (in either direction) in degrees
 	 * @param random
+	 *            the random
 	 */
 	public void rotateRandomAngle(double[] axis, double maxAngle, RandomGenerator random)
 	{
@@ -285,11 +301,10 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * Rotate the molecule using a random axis and a specified rotation angle. The rotation is around the
 	 * centre-of-mass.
 	 *
-	 * @param axis
-	 *            The axis to rotate around
-	 * @param maxAngle
-	 *            The maximum angle to rotate (in either direction) in degrees
+	 * @param angle
+	 *            The angle to rotate (in either direction) in degrees
 	 * @param random
+	 *            the random
 	 */
 	public void rotateRandomAxis(double angle, RandomGenerator random)
 	{
@@ -373,7 +388,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 *            angle (in degrees)
 	 * @return The rotation matrix
 	 */
-	private double[] getRotationMatrix(double[] axis, double angle)
+	private static double[] getRotationMatrix(double[] axis, double angle)
 	{
 		/* Set to unit length */
 		double length = 0;
@@ -526,9 +541,10 @@ public class CompoundMoleculeModel extends MoleculeModel
 	}
 
 	/**
-	 * Scale the molecules relative coordinates by the given factor
+	 * Scale the molecules relative coordinates by the given factor.
 	 *
 	 * @param factor
+	 *            the factor
 	 */
 	public void scale(double factor)
 	{

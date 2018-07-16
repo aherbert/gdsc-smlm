@@ -31,10 +31,11 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Precision;
 
 /**
- * Contains methods for generating models of a Point Spread Function
+ * Contains methods for generating models of a Point Spread Function.
  */
 public abstract class PSFModel
 {
+	/** The rand.om data generator */
 	protected RandomDataGenerator rand;
 	private double[] psf;
 	private int x0min;
@@ -43,16 +44,31 @@ public abstract class PSFModel
 	private int x1max;
 	private int[] samplePositions;
 
+	/**
+	 * Instantiates a new PSF model.
+	 */
 	public PSFModel()
 	{
 		setRandomGenerator(new RandomDataGenerator());
 	}
 
+	/**
+	 * Instantiates a new PSF model.
+	 *
+	 * @param randomGenerator
+	 *            the random generator
+	 */
 	public PSFModel(RandomGenerator randomGenerator)
 	{
 		setRandomGenerator(randomGenerator);
 	}
 
+	/**
+	 * Instantiates a new PSF model.
+	 *
+	 * @param randomDataGenerator
+	 *            the random data generator
+	 */
 	public PSFModel(RandomDataGenerator randomDataGenerator)
 	{
 		setRandomGenerator(randomDataGenerator);
@@ -157,6 +173,8 @@ public abstract class PSFModel
 	}
 
 	/**
+	 * Gets the last drawn PSF.
+	 *
 	 * @return The last drawn PSF
 	 */
 	public double[] getPSF()
@@ -165,6 +183,8 @@ public abstract class PSFModel
 	}
 
 	/**
+	 * Gets the minimum position in dimension 0 for the last drawn/sampled PSF
+	 *
 	 * @return The minimum position in dimension 0 for the last drawn/sampled PSF
 	 */
 	public int getX0min()
@@ -173,6 +193,8 @@ public abstract class PSFModel
 	}
 
 	/**
+	 * Gets the maximum position in dimension 0 for the last drawn/sampled PSF
+	 *
 	 * @return The maximum position in dimension 0 for the last drawn/sampled PSF
 	 */
 	public int getX0max()
@@ -181,6 +203,8 @@ public abstract class PSFModel
 	}
 
 	/**
+	 * Gets the minimum position in dimension 1 for the last drawn/sampled PSF
+	 *
 	 * @return The minimum position in dimension 1 for the last drawn/sampled PSF
 	 */
 	public int getX1min()
@@ -189,6 +213,8 @@ public abstract class PSFModel
 	}
 
 	/**
+	 * Gets the maximum position in dimension 1 for the last drawn/sampled PSF
+	 *
 	 * @return The maximum position in dimension 1 for the last drawn/sampled PSF
 	 */
 	public int getX1max()
@@ -197,7 +223,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Insert the psf into the data
+	 * Insert the psf into the data.
 	 *
 	 * @param data
 	 *            The input data (width*height)
@@ -269,7 +295,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Insert the psf into the data
+	 * Insert the psf into the data.
 	 *
 	 * @param data
 	 *            The input data (width*height)
@@ -345,8 +371,11 @@ public abstract class PSFModel
 	 * PSF into an input data array.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 */
 	public void erase(float[] data, int width, int height)
 	{
@@ -358,8 +387,11 @@ public abstract class PSFModel
 	 * PSF into an input data array.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 */
 	public void erase(double[] data, int width, int height)
 	{
@@ -371,13 +403,21 @@ public abstract class PSFModel
 	 * from the appropriate get() methods.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param psf
+	 *            the psf
 	 * @param x0min
+	 *            the minimum position in dimension 0 for the last drawn/sampled PSF
 	 * @param x0max
+	 *            the maximum position in dimension 0 for the last drawn/sampled PSF
 	 * @param x1min
+	 *            the minimum position in dimension 1 for the last drawn/sampled PSF
 	 * @param x1max
+	 *            the maximum position in dimension 1 for the last drawn/sampled PSF
 	 */
 	public void erase(float[] data, int width, int height, double[] psf, int x0min, int x0max, int x1min, int x1max)
 	{
@@ -411,13 +451,21 @@ public abstract class PSFModel
 	 * from the appropriate get() methods.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param psf
+	 *            the psf
 	 * @param x0min
+	 *            the minimum position in dimension 0 for the last drawn/sampled PSF
 	 * @param x0max
+	 *            the maximum position in dimension 0 for the last drawn/sampled PSF
 	 * @param x1min
+	 *            the minimum position in dimension 1 for the last drawn/sampled PSF
 	 * @param x1max
+	 *            the maximum position in dimension 1 for the last drawn/sampled PSF
 	 */
 	public void erase(double[] data, int width, int height, double[] psf, int x0min, int x0max, int x1min, int x1max)
 	{
@@ -543,7 +591,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Insert a set of sampled XY positions into the data
+	 * Insert a set of sampled XY positions into the data.
 	 *
 	 * @param data
 	 *            The data
@@ -557,6 +605,7 @@ public abstract class PSFModel
 	 *            The y-positions
 	 * @return The number of samples that were inside the data bounds
 	 */
+	@SuppressWarnings("null")
 	protected int insertSample(double[] data, final int width, final int height, double[] x, double[] y)
 	{
 		int n = 0;
@@ -589,7 +638,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Insert a set of sampled XY positions into the data
+	 * Insert a set of sampled XY positions into the data.
 	 *
 	 * @param data
 	 *            The data
@@ -603,6 +652,7 @@ public abstract class PSFModel
 	 *            The y-positions
 	 * @return The number of samples that were inside the data bounds
 	 */
+	@SuppressWarnings("null")
 	protected int insertSample(float[] data, final int width, final int height, double[] x, double[] y)
 	{
 		int n = 0;
@@ -650,8 +700,11 @@ public abstract class PSFModel
 	 * PSF into an input data array.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 */
 	public void eraseSample(float[] data, int width, int height)
 	{
@@ -663,8 +716,11 @@ public abstract class PSFModel
 	 * PSF into an input data array.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 */
 	public void eraseSample(double[] data, int width, int height)
 	{
@@ -676,9 +732,13 @@ public abstract class PSFModel
 	 * from the appropriate get() methods.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param samplePositions
+	 *            the sample positions
 	 */
 	public void eraseSample(double[] data, int width, int height, int[] samplePositions)
 	{
@@ -697,9 +757,13 @@ public abstract class PSFModel
 	 * from the appropriate get() methods.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @param samplePositions
+	 *            the sample positions
 	 */
 	public void eraseSample(float[] data, int width, int height, int[] samplePositions)
 	{
@@ -714,9 +778,10 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Set the random generator used for the random data generator to create data
+	 * Set the random generator used for the random data generator to create data.
 	 *
 	 * @param randomGenerator
+	 *            the new random generator
 	 */
 	public void setRandomGenerator(RandomGenerator randomGenerator)
 	{
@@ -726,9 +791,10 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Set the random data generator used to create data
+	 * Set the random data generator used to create data.
 	 *
-	 * @param randomGenerator
+	 * @param randomDataGenerator
+	 *            the new random generator
 	 */
 	public void setRandomGenerator(RandomDataGenerator randomDataGenerator)
 	{
@@ -752,11 +818,9 @@ public abstract class PSFModel
 	 *            The centre in dimension 2
 	 * @param value
 	 *            the value
-	 * @throws IllegalArgumentException
-	 *             If width or height are not strictly positive
+	 * @return true, if successful; false, if no value was computed
 	 * @throws IllegalArgumentException
 	 *             If value or gradient are not length [width*height]
-	 * @return true, if successful; false, if no value was computed
 	 */
 	public boolean getValue(final int width, final int height, double x0, double x1, double x2, double[] value)
 			throws IllegalArgumentException
@@ -776,8 +840,6 @@ public abstract class PSFModel
 	 *            the width
 	 * @param height
 	 *            the height
-	 * @throws IllegalArgumentException
-	 *             If width or height are not strictly positive
 	 * @throws IllegalArgumentException
 	 *             If width * height is too large for an array
 	 */
@@ -839,11 +901,9 @@ public abstract class PSFModel
 	 * @param gradient
 	 *            the partial gradient at each point for each dimension
 	 * @return the value and gradient
-	 * @throws IllegalArgumentException
-	 *             If width or height are not strictly positive
+	 *         true, if successful; false, if no value was computed
 	 * @throws IllegalArgumentException
 	 *             If value or gradient are not length [width*height]
-	 * @return true, if successful; false, if no value was computed
 	 */
 	public boolean getValueAndGradient(final int width, final int height, double x0, double x1, double x2,
 			double[] value, double[][] gradient) throws IllegalArgumentException

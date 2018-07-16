@@ -203,7 +203,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 
 	private final static String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
 
@@ -232,7 +232,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 
 	private final static String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
 
@@ -263,7 +263,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				throw new IllegalArgumentException();
 			return values[number];
 		}
-	};
+	}
 
 	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());
 
@@ -307,7 +307,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			return getName() + ": " + getDescription();
 		}
-	};
+	}
 
 	private final static String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
 	//@formatter:on
@@ -1363,7 +1363,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		switch (mode)
 		{
 			case INTENSITY:
-				return createAlphaFromIntensity(results, settings, minA, maxA, sphereSize);
+				return createAlphaFromIntensity(results, minA, maxA);
 			case XYZ_DEVIATIONS:
 				if (sizeMode != SizeMode.XYZ_DEVIATIONS)
 					sphereSize = createSphereSizeFromDeviations(results);
@@ -1379,8 +1379,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static float[] createAlphaFromIntensity(MemoryPeakResults results, Builder settings, double minA,
-			double maxA, Point3f[] sphereSize)
+	private static float[] createAlphaFromIntensity(MemoryPeakResults results, double minA,
+			double maxA)
 	{
 		RawResultProcedure p = new RawResultProcedure(results);
 		p.getI();
@@ -2321,8 +2321,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static long getTotalTransparentObjects(Image3DUniverse univ, String ignoreName)
 	{
 		long size = 0;
-		for (@SuppressWarnings("unchecked")
-		Iterator<Content> it = univ.contents(); it.hasNext();)
+		for (Iterator<Content> it = univ.contents(); it.hasNext();)
 		{
 			Content c = it.next();
 			if (ignoreName.equals(c.getName()))
@@ -2396,8 +2395,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * <p>
 	 * Adapted from Picker.getPickedContent(...).
 	 *
+	 * @param canvas
+	 *            the canvas
+	 * @param scene
+	 *            the scene
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return the Content and closest intersection point
 	 */
 	private static Pair<Content, IntersectionInfo> getPickedContent(Canvas3D canvas, BranchGroup scene, final int x,
@@ -2438,8 +2443,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * Creates the SMLM menu bar.
 	 *
 	 * @param univ
-	 *
-	 * @return the menu bar
+	 *            the universe
 	 */
 	private void createSMLMMenuBar(Image3DUniverse univ)
 	{
@@ -3296,7 +3300,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void actionPerformed(ActionEvent e)
 	{
 		final Object src = e.getSource();

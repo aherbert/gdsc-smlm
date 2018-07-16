@@ -102,11 +102,14 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	}
 
 	/**
-	 * Pre-process the data before finding local maxima
+	 * Pre-process the data before finding local maxima.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @return The pre-processed data
 	 */
 	public abstract float[] preprocessData(final float[] data, final int width, final int height);
@@ -117,8 +120,11 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	 * Data must be arranged in yx block order, i.e. height rows of width.
 	 *
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 * @return Indices of the maxima
 	 */
 	protected int[] getMaxima(float[] data, int width, int height)

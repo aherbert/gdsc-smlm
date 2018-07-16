@@ -45,24 +45,40 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 	boolean useBackground = false;
 
 	/**
+	 * Instantiates a new multi hysteresis filter 2.
+	 *
 	 * @param searchDistance
+	 *            the search distance
 	 * @param searchDistanceMode
 	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
 	 * @param timeThreshold
+	 *            the time threshold
 	 * @param timeThresholdMode
 	 *            0 = frames; 1 = seconds
 	 * @param strictSignal
+	 *            the strict signal
 	 * @param rangeSignal
+	 *            the range signal
 	 * @param strictSnr
+	 *            the strict snr
 	 * @param rangeSnr
+	 *            the range snr
 	 * @param strictMinWidth
+	 *            the strict min width
 	 * @param rangeMinWidth
+	 *            the range min width
 	 * @param strictMaxWidth
+	 *            the strict max width
 	 * @param rangeMaxWidth
+	 *            the range max width
 	 * @param strictShift
+	 *            the strict shift
 	 * @param rangeShift
+	 *            the range shift
 	 * @param strictPrecision
+	 *            the strict precision
 	 * @param rangePrecision
+	 *            the range precision
 	 */
 	public MultiHysteresisFilter2(double searchDistance, int searchDistanceMode, double timeThreshold,
 			int timeThresholdMode, double strictSignal, double rangeSignal, float strictSnr, float rangeSnr,
@@ -107,10 +123,7 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 		{
 			return calculator.getLSEVariance(result.getParameters());
 		}
-		else
-		{
-			return calculator.getLSEVariance(result.getParameters(), result.getNoise());
-		}
+		return calculator.getLSEVariance(result.getParameters(), result.getNoise());
 	}
 
 	@Override

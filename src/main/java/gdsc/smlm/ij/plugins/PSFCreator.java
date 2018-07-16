@@ -347,7 +347,7 @@ public class PSFCreator implements PlugInFilter
 
 	private class InteractiveInputListener implements DialogListener
 	{
-		final boolean draw;;
+		final boolean draw;
 
 		InteractiveInputListener()
 		{
@@ -729,7 +729,8 @@ public class PSFCreator implements PlugInFilter
 		boolean ok = true;
 		for (int i = 0; ok && i < centres.size(); i++)
 		{
-			double progress = (double) i / centres.size();
+			//double 
+			progress = (double) i / centres.size();
 			final double increment = 1.0 / (stack.getSize() * centres.size());
 			IJ.showProgress(progress);
 			double[] centre = centres.get(i);
@@ -744,6 +745,9 @@ public class PSFCreator implements PlugInFilter
 					regionBounds = ie.getBoxRegionBounds((int) centre[0], (int) centre[1], boxRadius);
 				spot[slice - 1] = ie.crop(regionBounds);
 			}
+			
+			if (regionBounds == null)
+				continue; // Empty stack
 
 			int n = (int) centre[4];
 			final float b = getBackground(n, spot);
@@ -760,7 +764,7 @@ public class PSFCreator implements PlugInFilter
 			centre[1] -= regionBounds.y;
 
 			// This takes a long time so this should track progress
-			ok = addToPSF(maxz, settings.getMagnification(), psf, centre, spot, regionBounds, progress, increment,
+			ok = addToPSF(maxz, settings.getMagnification(), psf, centre, spot, regionBounds, increment,
 					settings.getCentreEachSlice());
 		}
 
@@ -836,9 +840,10 @@ public class PSFCreator implements PlugInFilter
 	 * Get the limits of the array ignoring outliers more than 1.5x the inter quartile range
 	 *
 	 * @param data
-	 * @return
+	 *            the data
+	 * @return the limits
 	 */
-	private double[] getLimits(double[] data)
+	private static double[] getLimits(double[] data)
 	{
 		double[] limits = Maths.limits(data);
 		DescriptiveStatistics stats = new DescriptiveStatistics(data);
@@ -850,7 +855,7 @@ public class PSFCreator implements PlugInFilter
 		return limits;
 	}
 
-	private double getAverage(StoredDataStatistics averageSd, StoredDataStatistics averageA, int averageMethod)
+	private static double getAverage(StoredDataStatistics averageSd, StoredDataStatistics averageA, int averageMethod)
 	{
 		if (averageMethod == 0)
 			return averageSd.getMean();
@@ -1194,12 +1199,15 @@ public class PSFCreator implements PlugInFilter
 	 * using a Tukey window function.
 	 *
 	 * @param spot
+	 *            the spot
 	 * @param background
 	 *            The minimum level, all below this is background and set to zero
 	 * @param spotWidth
+	 *            the spot width
 	 * @param spotHeight
-	 * @param n
-	 *            The spot number
+	 *            the spot height
+	 * @param centre
+	 *            the centre
 	 * @param loess
 	 *            The smoothing interpolator
 	 * @return True if accepted
@@ -1323,7 +1331,7 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, final double[] centre,
-			final float[][] spot, final Rectangle regionBounds, double progress, final double increment,
+			final float[][] spot, final Rectangle regionBounds, final double increment,
 			final boolean centreEachSlice)
 	{
 		// Calculate insert point in enlargement
@@ -1508,9 +1516,10 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Normalise the PSF using a given denominator
+	 * Normalise the PSF using a given denominator.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param n
 	 *            The denominator
 	 */
@@ -1535,6 +1544,7 @@ public class PSFCreator implements PlugInFilter
 	 * are foreground pixels.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param n
 	 *            The frame number
 	 * @param sigma
@@ -1617,6 +1627,7 @@ public class PSFCreator implements PlugInFilter
 	 * Normalise the PSF so the sum of specified frame is 1.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param n
 	 *            The frame number
 	 */
@@ -1636,11 +1647,14 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Calculate the centre of mass and express it relative to the average centre
+	 * Calculate the centre of mass and express it relative to the average centre.
 	 *
 	 * @param psf
+	 *            the psf
 	 * @param fitCom
+	 *            the fit com
 	 * @param nmPerPixel
+	 *            the nm per pixel
 	 * @return The centre of mass
 	 */
 	private double[][] calculateCentreOfMass(ImageStack psf, double[][] fitCom, double nmPerPixel)
@@ -1785,8 +1799,8 @@ public class PSFCreator implements PlugInFilter
 	/**
 	 * Get all the ROI points that have a box region not overlapping with any other spot.
 	 *
-	 * @param offset
-	 *            the offset
+	 * @param roiPoints
+	 *            the roi points
 	 * @return the spots
 	 */
 	private BasePoint[] checkSpotOverlap(BasePoint[] roiPoints)
@@ -1797,8 +1811,10 @@ public class PSFCreator implements PlugInFilter
 	/**
 	 * Find all the ROI points that have a box region overlapping with any other spot.
 	 *
-	 * @param offset
-	 *            the offset
+	 * @param roiPoints
+	 *            the roi points
+	 * @param excluded
+	 *            the excluded
 	 * @return the overlap array
 	 */
 	private boolean[] findSpotOverlap(BasePoint[] roiPoints, boolean[] excluded)
@@ -1904,12 +1920,18 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Fit the new PSF image and show a graph of the amplitude/width
+	 * Fit the new PSF image and show a graph of the amplitude/width.
 	 *
 	 * @param psfStack
+	 *            the psf stack
 	 * @param loess
+	 *            the loess
+	 * @param cz
+	 *            the cz
 	 * @param averageRange
+	 *            the average range
 	 * @param fitCom
+	 *            the fit com
 	 * @return The width of the PSF in the z-centre
 	 */
 	private double fitPSF(ImageStack psfStack, LoessInterpolator loess, int cz, double averageRange,
@@ -2101,9 +2123,9 @@ public class PSFCreator implements PlugInFilter
 		return smoothSd[smoothCzIndex];
 	}
 
-	private PlotWindow getPlot(String title)
+	private static PlotWindow getPlot(String title)
 	{
-		Frame f = WindowManager.getFrame(TITLE_AMPLITUDE);
+		Frame f = WindowManager.getFrame(title);
 		if (f != null && f instanceof PlotWindow)
 			return (PlotWindow) f;
 		return null;
@@ -2373,17 +2395,14 @@ public class PSFCreator implements PlugInFilter
 
 		if (alignWindows && plotWindow != null)
 		{
-			if (alignWindows && plotWindow != null)
+			PlotWindow otherWindow = getPlot(TITLE_AMPLITUDE);
+			if (otherWindow != null)
 			{
-				PlotWindow otherWindow = getPlot(TITLE_AMPLITUDE);
-				if (otherWindow != null)
-				{
-					// Put the two plots tiled together so both are visible
-					Point l = plotWindow.getLocation();
-					l.x = otherWindow.getLocation().x + otherWindow.getWidth();
-					l.y = otherWindow.getLocation().y;
-					plotWindow.setLocation(l);
-				}
+				// Put the two plots tiled together so both are visible
+				Point l = plotWindow.getLocation();
+				l.x = otherWindow.getLocation().x + otherWindow.getWidth();
+				l.y = otherWindow.getLocation().y;
+				plotWindow.setLocation(l);
 			}
 		}
 	}
@@ -2587,11 +2606,10 @@ public class PSFCreator implements PlugInFilter
 
 		// Find the FWHM for each line profile.
 		// Diagonals need to be scaled to the appropriate distance.
-		return (getFWHM(p0, p1) + getFWHM(p0, p2) + Math.sqrt(2) * getFWHM(p0, p3) + Math.sqrt(2) * getFWHM(p0, p4)) /
-				4.0;
+		return (getFWHM(p1) + getFWHM(p2) + Math.sqrt(2) * getFWHM(p3) + Math.sqrt(2) * getFWHM(p4)) / 4.0;
 	}
 
-	private double getFWHM(double[] x, double[] y)
+	private static double getFWHM(double[] y)
 	{
 		// Find half max of original data
 		double max = 0;
@@ -5208,6 +5226,7 @@ public class PSFCreator implements PlugInFilter
 		 *
 		 * @param zCentre
 		 *            the z centre (1-based index)
+		 * @return the extracted PSF
 		 */
 		public ExtractedPSF cropToZCentre(int zCentre)
 		{
@@ -5613,6 +5632,8 @@ public class PSFCreator implements PlugInFilter
 		 * Compute the centre of mass and then the shift of the CoM from the centre of the
 		 * image.
 		 *
+		 * @param zCentre
+		 *            the z centre
 		 * @return the centre of mass shift
 		 */
 		public double[] getCentreOfMassXYShift(int zCentre)
@@ -5880,7 +5901,8 @@ public class PSFCreator implements PlugInFilter
 		return results;
 	}
 
-	private BasePoint[] updateUsingCentreOfMassXYShift(double[] shift, double shiftd, ExtractedPSF combined,
+	@SuppressWarnings("unused")
+	private static BasePoint[] updateUsingCentreOfMassXYShift(double[] shift, double shiftd, ExtractedPSF combined,
 			BasePoint[] centres)
 	{
 		// The shift is the centre of mass of the image minus the pixel centre.

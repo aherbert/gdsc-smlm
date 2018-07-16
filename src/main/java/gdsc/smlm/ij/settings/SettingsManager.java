@@ -165,6 +165,11 @@ public class SettingsManager
 
 	private static DistanceUnit[] _DistanceUnitValues;
 
+	/**
+	 * Gets the distance unit values.
+	 *
+	 * @return the distance unit values
+	 */
 	public static DistanceUnit[] getDistanceUnitValues()
 	{
 		if (_DistanceUnitValues == null)
@@ -174,6 +179,11 @@ public class SettingsManager
 
 	private static String[] _DistanceUnitNames;
 
+	/**
+	 * Gets the distance unit names.
+	 *
+	 * @return the distance unit names
+	 */
 	public static String[] getDistanceUnitNames()
 	{
 		if (_DistanceUnitNames == null)
@@ -197,6 +207,11 @@ public class SettingsManager
 
 	private static IntensityUnit[] _IntensityUnitValues;
 
+	/**
+	 * Gets the intensity unit values.
+	 *
+	 * @return the intensity unit values
+	 */
 	public static IntensityUnit[] getIntensityUnitValues()
 	{
 		if (_IntensityUnitValues == null)
@@ -206,6 +221,11 @@ public class SettingsManager
 
 	private static String[] _IntensityUnitNames;
 
+	/**
+	 * Gets the intensity unit names.
+	 *
+	 * @return the intensity unit names
+	 */
 	public static String[] getIntensityUnitNames()
 	{
 		if (_IntensityUnitNames == null)
@@ -229,6 +249,11 @@ public class SettingsManager
 
 	private static AngleUnit[] _AngleUnitValues;
 
+	/**
+	 * Gets the angle unit values.
+	 *
+	 * @return the angle unit values
+	 */
 	public static AngleUnit[] getAngleUnitValues()
 	{
 		if (_AngleUnitValues == null)
@@ -238,6 +263,11 @@ public class SettingsManager
 
 	private static String[] _AngleUnitNames;
 
+	/**
+	 * Gets the angle unit names.
+	 *
+	 * @return the angle unit names
+	 */
 	public static String[] getAngleUnitNames()
 	{
 		if (_AngleUnitNames == null)
@@ -261,6 +291,11 @@ public class SettingsManager
 
 	private static TimeUnit[] _TimeUnitValues;
 
+	/**
+	 * Gets the time unit values.
+	 *
+	 * @return the time unit values
+	 */
 	public static TimeUnit[] getTimeUnitValues()
 	{
 		if (_TimeUnitValues == null)
@@ -270,6 +305,11 @@ public class SettingsManager
 
 	private static String[] _TimeUnitNames;
 
+	/**
+	 * Gets the time unit names.
+	 *
+	 * @return the time unit names
+	 */
 	public static String[] getTimeUnitNames()
 	{
 		if (_TimeUnitNames == null)
@@ -293,6 +333,11 @@ public class SettingsManager
 
 	private static ResultsImageType[] _ResultsImageTypeValues;
 
+	/**
+	 * Gets the results image type values.
+	 *
+	 * @return the results image type values
+	 */
 	public static ResultsImageType[] getResultsImageTypeValues()
 	{
 		if (_ResultsImageTypeValues == null)
@@ -302,6 +347,11 @@ public class SettingsManager
 
 	private static String[] _ResultsImageTypeNames;
 
+	/**
+	 * Gets the results image type names.
+	 *
+	 * @return the results image type names
+	 */
 	public static String[] getResultsImageTypeNames()
 	{
 		if (_ResultsImageTypeNames == null)
@@ -323,6 +373,11 @@ public class SettingsManager
 
 	private static ResultsFileFormat[] _ResultsFileFormatValues;
 
+	/**
+	 * Gets the results file format values.
+	 *
+	 * @return the results file format values
+	 */
 	public static ResultsFileFormat[] getResultsFileFormatValues()
 	{
 		if (_ResultsFileFormatValues == null)
@@ -332,6 +387,11 @@ public class SettingsManager
 
 	private static String[] _ResultsFileFormatNames;
 
+	/**
+	 * Gets the results file format names.
+	 *
+	 * @return the results file format names
+	 */
 	public static String[] getResultsFileFormatNames()
 	{
 		if (_ResultsFileFormatNames == null)
@@ -353,6 +413,11 @@ public class SettingsManager
 
 	private static ResultsTableFormat[] _ResultsTableFormatValues;
 
+	/**
+	 * Gets the results table format values.
+	 *
+	 * @return the results table format values
+	 */
 	public static ResultsTableFormat[] getResultsTableFormatValues()
 	{
 		if (_ResultsTableFormatValues == null)
@@ -362,6 +427,11 @@ public class SettingsManager
 
 	private static String[] _ResultsTableFormatNames;
 
+	/**
+	 * Gets the results table format names.
+	 *
+	 * @return the results table format names
+	 */
 	public static String[] getResultsTableFormatNames()
 	{
 		if (_ResultsTableFormatNames == null)
@@ -383,6 +453,11 @@ public class SettingsManager
 
 	private static DataFilterType[] _DataFilterTypeValues;
 
+	/**
+	 * Gets the data filter type values.
+	 *
+	 * @return the data filter type values
+	 */
 	public static DataFilterType[] getDataFilterTypeValues()
 	{
 		if (_DataFilterTypeValues == null)
@@ -392,6 +467,11 @@ public class SettingsManager
 
 	private static String[] _DataFilterTypeNames;
 
+	/**
+	 * Gets the data filter type names.
+	 *
+	 * @return the data filter type names
+	 */
 	public static String[] getDataFilterTypeNames()
 	{
 		if (_DataFilterTypeNames == null)
@@ -413,6 +493,11 @@ public class SettingsManager
 
 	private static DataFilterMethod[] _DataFilterMethodValues;
 
+	/**
+	 * Gets the data filter method values.
+	 *
+	 * @return the data filter method values
+	 */
 	public static DataFilterMethod[] getDataFilterMethodValues()
 	{
 		if (_DataFilterMethodValues == null)
@@ -422,6 +507,11 @@ public class SettingsManager
 
 	private static String[] _DataFilterMethodNames;
 
+	/**
+	 * Gets the data filter method names.
+	 *
+	 * @return the data filter method names
+	 */
 	public static String[] getDataFilterMethodNames()
 	{
 		if (_DataFilterMethodNames == null)
@@ -443,6 +533,11 @@ public class SettingsManager
 
 	private static FitSolver[] _FitSolverValues;
 
+	/**
+	 * Gets the fit solver values.
+	 *
+	 * @return the fit solver values
+	 */
 	public static FitSolver[] getFitSolverValues()
 	{
 		if (_FitSolverValues == null)
@@ -452,6 +547,11 @@ public class SettingsManager
 
 	private static String[] _FitSolverNames;
 
+	/**
+	 * Gets the fit solver names.
+	 *
+	 * @return the fit solver names
+	 */
 	public static String[] getFitSolverNames()
 	{
 		if (_FitSolverNames == null)
@@ -473,6 +573,11 @@ public class SettingsManager
 
 	private static NoiseEstimatorMethod[] _NoiseEstimatorMethodValues;
 
+	/**
+	 * Gets the noise estimator method values.
+	 *
+	 * @return the noise estimator method values
+	 */
 	public static NoiseEstimatorMethod[] getNoiseEstimatorMethodValues()
 	{
 		if (_NoiseEstimatorMethodValues == null)
@@ -482,6 +587,11 @@ public class SettingsManager
 
 	private static String[] _NoiseEstimatorMethodNames;
 
+	/**
+	 * Gets the noise estimator method names.
+	 *
+	 * @return the noise estimator method names
+	 */
 	public static String[] getNoiseEstimatorMethodNames()
 	{
 		if (_NoiseEstimatorMethodNames == null)
@@ -503,6 +613,11 @@ public class SettingsManager
 
 	private static CameraType[] _CameraTypeValues;
 
+	/**
+	 * Gets the camera type values.
+	 *
+	 * @return the camera type values
+	 */
 	public static CameraType[] getCameraTypeValues()
 	{
 		if (_CameraTypeValues == null)
@@ -512,6 +627,11 @@ public class SettingsManager
 
 	private static String[] _CameraTypeNames;
 
+	/**
+	 * Gets the camera type names.
+	 *
+	 * @return the camera type names
+	 */
 	public static String[] getCameraTypeNames()
 	{
 		if (_CameraTypeNames == null)
@@ -533,6 +653,11 @@ public class SettingsManager
 
 	private static PrecisionMethod[] _PrecisionMethodValues;
 
+	/**
+	 * Gets the precision method values.
+	 *
+	 * @return the precision method values
+	 */
 	public static PrecisionMethod[] getPrecisionMethodValues()
 	{
 		if (_PrecisionMethodValues == null)
@@ -542,6 +667,11 @@ public class SettingsManager
 
 	private static String[] _PrecisionMethodNames;
 
+	/**
+	 * Gets the precision method names.
+	 *
+	 * @return the precision method names
+	 */
 	public static String[] getPrecisionMethodNames()
 	{
 		if (_PrecisionMethodNames == null)
@@ -569,6 +699,7 @@ public class SettingsManager
 	 * Used to convert the settings enumerations into names used with dialogs.
 	 *
 	 * @param objects
+	 *            the objects
 	 * @return the names
 	 */
 	public static String[] getNames(Object... objects)
@@ -887,8 +1018,7 @@ public class SettingsManager
 	 */
 	public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags)
 	{
-		return new ConfigurationReader<>(GUIProtosHelper.defaultLoadLocalisationsSettings)
-				.read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultLoadLocalisationsSettings).read(flags);
 	}
 
 	/**
@@ -924,8 +1054,7 @@ public class SettingsManager
 	 */
 	public static ConfigurationTemplateSettings readConfigurationTemplateSettings(int flags)
 	{
-		return new ConfigurationReader<>(
-				GUIProtosHelper.defaultConfigurationTemplateSettings).read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultConfigurationTemplateSettings).read(flags);
 	}
 
 	/**
@@ -937,8 +1066,7 @@ public class SettingsManager
 	 */
 	public static DefaultTemplateSettings readDefaultTemplateSettings(int flags)
 	{
-		return new ConfigurationReader<>(DefaultTemplateSettings.getDefaultInstance())
-				.read(flags);
+		return new ConfigurationReader<>(DefaultTemplateSettings.getDefaultInstance()).read(flags);
 	}
 
 	/**
@@ -1014,8 +1142,7 @@ public class SettingsManager
 	 */
 	public static CameraModelManagerSettings readCameraModelManagerSettings(int flags)
 	{
-		return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelManagerSettings)
-				.read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelManagerSettings).read(flags);
 	}
 
 	/**
@@ -1027,8 +1154,7 @@ public class SettingsManager
 	 */
 	public static CameraModelAnalysisSettings readCameraModelAnalysisSettings(int flags)
 	{
-		return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelAnalysisSettings)
-				.read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelAnalysisSettings).read(flags);
 	}
 
 	/**
@@ -1041,8 +1167,8 @@ public class SettingsManager
 	public static CameraModelFisherInformationAnalysisSettings readCameraModelFisherInformationAnalysisSettings(
 			int flags)
 	{
-		return new ConfigurationReader<>(
-				GUIProtosHelper.defaultCameraModelFisherInformationAnalysisSettings).read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelFisherInformationAnalysisSettings)
+				.read(flags);
 	}
 
 	/**
@@ -1054,8 +1180,7 @@ public class SettingsManager
 	 */
 	public static CubicSplineManagerSettings readCubicSplineManagerSettings(int flags)
 	{
-		return new ConfigurationReader<>(GUIProtosHelper.defaultCubicSplineManagerSettings)
-				.read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultCubicSplineManagerSettings).read(flags);
 	}
 
 	/**
@@ -1067,8 +1192,7 @@ public class SettingsManager
 	 */
 	public static FailCountManagerSettings readFailCountManagerSettings(int flags)
 	{
-		return new ConfigurationReader<>(GUIProtosHelper.defaultFailCountManagerSettings)
-				.read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultFailCountManagerSettings).read(flags);
 	}
 
 	/**
@@ -1080,8 +1204,7 @@ public class SettingsManager
 	 */
 	public static AstigmatismModelSettings readAstigmatismModelSettings(int flags)
 	{
-		return new ConfigurationReader<>(AstigmatismModelSettings.getDefaultInstance())
-				.read(flags);
+		return new ConfigurationReader<>(AstigmatismModelSettings.getDefaultInstance()).read(flags);
 	}
 
 	/**
@@ -1093,8 +1216,7 @@ public class SettingsManager
 	 */
 	public static AstigmatismModelManagerSettings readAstigmatismModelManagerSettings(int flags)
 	{
-		return new ConfigurationReader<>(
-				GUIProtosHelper.defaultAstigmatismModelManagerSettings).read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultAstigmatismModelManagerSettings).read(flags);
 	}
 
 	/**
@@ -1118,8 +1240,7 @@ public class SettingsManager
 	 */
 	public static SummariseResultsSettings readSummariseResultsSettings(int flags)
 	{
-		return new ConfigurationReader<>(SummariseResultsSettings.getDefaultInstance())
-				.read(flags);
+		return new ConfigurationReader<>(SummariseResultsSettings.getDefaultInstance()).read(flags);
 	}
 
 	/**
@@ -1131,8 +1252,7 @@ public class SettingsManager
 	 */
 	public static ImageJ3DResultsViewerSettings readImageJ3DResultsViewerSettings(int flags)
 	{
-		return new ConfigurationReader<>(
-				GUIProtosHelper.defaultImageJ3DResultsViewerSettings).read(flags);
+		return new ConfigurationReader<>(GUIProtosHelper.defaultImageJ3DResultsViewerSettings).read(flags);
 	}
 
 	/**
@@ -1156,8 +1276,7 @@ public class SettingsManager
 	 */
 	public static TranslateResultsSettings readTranslateResultsSettings(int flags)
 	{
-		return new ConfigurationReader<>(TranslateResultsSettings.getDefaultInstance())
-				.read(flags);
+		return new ConfigurationReader<>(TranslateResultsSettings.getDefaultInstance()).read(flags);
 	}
 
 	/**
@@ -1212,31 +1331,15 @@ public class SettingsManager
 	 */
 	public static boolean writeMessage(Message message, File file, int flags)
 	{
-		FileOutputStream fs = null;
-		try
+		try (FileOutputStream fs = new FileOutputStream(file))
 		{
-			fs = new FileOutputStream(file);
 			return writeMessage(message, fs, flags);
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			//e.printStackTrace();
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
-		}
-		finally
-		{
-			if (fs != null)
-			{
-				try
-				{
-					fs.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
 		}
 		return false;
 	}
@@ -1302,13 +1405,11 @@ public class SettingsManager
 	 */
 	public static Message readMessage(Parser<? extends Message> parser, File file, int flags)
 	{
-		FileInputStream fs = null;
-		try
+		try (FileInputStream fs = new FileInputStream(file))
 		{
-			fs = new FileInputStream(file);
 			return readMessage(parser, fs, flags);
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			//e.printStackTrace();
 			// Only print this if the file-not-found flag is present
@@ -1316,20 +1417,6 @@ public class SettingsManager
 			// have yet to be created, i.e. for new users of a settings file.
 			if (BitFlags.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ) && !BitFlags.anySet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
-		}
-		finally
-		{
-			if (fs != null)
-			{
-				try
-				{
-					fs.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
 		}
 		return null;
 	}
@@ -1343,8 +1430,8 @@ public class SettingsManager
 	 *            the parser
 	 * @param input
 	 *            the input
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return the message
 	 */
 	public static Message readMessage(Parser<? extends Message> parser, InputStream input, int flags)
@@ -1426,23 +1513,14 @@ public class SettingsManager
 	 */
 	public static boolean toJSON(MessageOrBuilder message, File file, int flags)
 	{
-		PrintStream fs = null;
-		try
+		try (PrintStream fs = new PrintStream(file))
 		{
-			fs = new PrintStream(file);
 			return toJSON(message, fs, flags);
 		}
 		catch (FileNotFoundException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
-		}
-		finally
-		{
-			if (fs != null)
-			{
-				fs.close();
-			}
 		}
 		return false;
 	}
@@ -1452,6 +1530,8 @@ public class SettingsManager
 	 *
 	 * @param message
 	 *            the message
+	 * @param output
+	 *            the output
 	 * @param flags
 	 *            the flags
 	 * @return the JSON string
@@ -1523,29 +1603,14 @@ public class SettingsManager
 	 */
 	public static boolean fromJSON(File file, Message.Builder builder, int flags)
 	{
-		Reader reader = null;
-		try
+		try (Reader reader = new InputStreamReader(new FileInputStream(file)))
 		{
-			reader = new InputStreamReader(new FileInputStream(file));
 			return fromJSON(reader, builder, flags);
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
-		}
-		finally
-		{
-			if (reader != null)
-			{
-				try
-				{
-					reader.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
 		}
 		return false;
 	}

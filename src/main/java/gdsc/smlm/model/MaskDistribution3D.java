@@ -57,9 +57,10 @@ public class MaskDistribution3D implements SpatialDistribution
 	private MaskDistribution projection = null;
 
 	/**
-	 * Create a distribution from the stack of mask images (packed in YX order)
+	 * Create a distribution from the stack of mask images (packed in YX order).
 	 *
 	 * @param masks
+	 *            the masks
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -77,9 +78,10 @@ public class MaskDistribution3D implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution from the stack of mask images (packed in YX order)
+	 * Create a distribution from the stack of mask images (packed in YX order).
 	 *
 	 * @param masks
+	 *            the masks
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -100,9 +102,10 @@ public class MaskDistribution3D implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution from the stack of mask images (packed in YX order)
+	 * Create a distribution from the stack of mask images (packed in YX order).
 	 *
 	 * @param masks
+	 *            the masks
 	 * @param width
 	 *            The width of the mask in pixels
 	 * @param height
@@ -341,11 +344,14 @@ public class MaskDistribution3D implements SpatialDistribution
 	}
 
 	/**
-	 * Return the single index associated with the x,y,z coordinates
+	 * Return the single index associated with the x,y,z coordinates.
 	 *
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param z
+	 *            the z
 	 * @return The index
 	 */
 	private int getIndex(int x, int y, int z)
@@ -357,7 +363,9 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * Convert the single index into x,y,z coords, Input array must be length >= 3.
 	 *
 	 * @param index
+	 *            the index
 	 * @param xyz
+	 *            the xyz
 	 * @return The xyz array
 	 */
 	private int[] getXYZ(int index, int[] xyz)

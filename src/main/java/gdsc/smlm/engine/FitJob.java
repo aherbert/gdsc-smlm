@@ -35,13 +35,19 @@ import gdsc.smlm.results.filter.MultiPathFitResult;
  */
 public class FitJob
 {
+	/**
+	 * Thefit job status
+	 */
 	public enum Status
 	{
 		//@formatter:off
+		/** Pending (waiting to run) */
 		PENDING{ @Override
 		public String getName() { return "Pending"; }},
+		/** In-progress (running) */
 		IN_PROGRESS{ @Override
 		public String getName() { return "In-progress"; }},
+		/** Finished */
 		FINISHED{ @Override
 		public String getName() { return "Finished"; }};
 		//@formatter:on
@@ -70,9 +76,13 @@ public class FitJob
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
 	 *
 	 * @param id
+	 *            the id
 	 * @param slice
+	 *            the slice
 	 * @param data
+	 *            the data
 	 * @param bounds
+	 *            the bounds
 	 */
 	public FitJob(int id, int slice, float[] data, Rectangle bounds)
 	{
@@ -95,8 +105,11 @@ public class FitJob
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
 	 *
 	 * @param slice
+	 *            the slice
 	 * @param data
+	 *            the data
 	 * @param bounds
+	 *            the bounds
 	 */
 	public FitJob(int slice, float[] data, Rectangle bounds)
 	{
@@ -107,10 +120,15 @@ public class FitJob
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
 	 *
 	 * @param id
+	 *            the id
 	 * @param slice
+	 *            the slice
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 */
 	public FitJob(int id, int slice, float[] data, int width, int height)
 	{
@@ -121,9 +139,13 @@ public class FitJob
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
 	 *
 	 * @param slice
+	 *            the slice
 	 * @param data
+	 *            the data
 	 * @param width
+	 *            the width
 	 * @param height
+	 *            the height
 	 */
 	public FitJob(int slice, float[] data, int width, int height)
 	{
@@ -212,10 +234,11 @@ public class FitJob
 	 * results from the {@link FitWorker}.
 	 *
 	 * @param indices
+	 *            the new indices
 	 */
 	public void setIndices(int[] indices)
 	{
-
+// Do nothing
 	}
 
 	/**
@@ -225,11 +248,13 @@ public class FitJob
 	 * results from the {@link FitWorker}.
 	 *
 	 * @param n
+	 *            the index
 	 * @param fitResult
+	 *            the fit result
 	 */
 	public void setFitResult(int n, FitResult fitResult)
 	{
-
+		// Do nothing
 	}
 
 	/**
@@ -239,9 +264,11 @@ public class FitJob
 	 * results from the {@link FitWorker}.
 	 *
 	 * @param results
+	 *            the new results
 	 */
 	public void setResults(List<PeakResult> results)
 	{
+		// Do nothing
 	}
 
 	/**
@@ -251,10 +278,12 @@ public class FitJob
 	 * benchmarking results from the {@link FitWorker}.
 	 *
 	 * @param n
+	 *            the index
 	 * @param fitResult
+	 *            the fit result
 	 */
 	public void setMultiPathFitResult(int n, MultiPathFitResult fitResult)
 	{
-
+		// Do nothing
 	}
 }

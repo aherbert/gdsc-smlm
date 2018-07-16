@@ -22,6 +22,7 @@ Options:
   --unchecked
   --unused
   --deprecation
+  --javadoc
 
 ";
 

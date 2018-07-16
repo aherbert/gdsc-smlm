@@ -45,6 +45,8 @@ public class GaussianPSFModel extends PSFModel
 	private double range = 5;
 
 	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0
 	 * @param s1
@@ -71,7 +73,10 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
 	 * @param randomGenerator
+	 *            the random generator
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0
 	 * @param s1
@@ -100,7 +105,10 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
 	 * @param randomDataGenerator
+	 *            the random data generator
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0
 	 * @param s1
@@ -428,7 +436,7 @@ public class GaussianPSFModel extends PSFModel
 		return data;
 	}
 
-	private int clip(int x, int max)
+	private static int clip(int x, int max)
 	{
 		if (x < 0)
 			x = 0;

@@ -125,7 +125,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
@@ -181,6 +181,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return true;
 	}
 
+	@SuppressWarnings("null")
 	private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2, double dThreshold,
 			int increments, double delta)
 	{
@@ -304,7 +305,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			{
 				if (pairsWindow == null || !pairsWindow.isShowing())
 				{
-					pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(pairs), "", 900, 300);
+					pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
 					if (resultsWindow != null)
 					{
 						Point p = resultsWindow.getLocation();
@@ -424,17 +425,17 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	}
 
 	@SuppressWarnings("unused")
-	private boolean haveIds(MemoryPeakResults results1, MemoryPeakResults results2)
+	private static boolean haveIds(MemoryPeakResults results1, MemoryPeakResults results2)
 	{
 		return haveIds(results1) && haveIds(results2);
 	}
 
-	private boolean haveIds(MemoryPeakResults results)
+	private static boolean haveIds(MemoryPeakResults results)
 	{
 		return results.hasId();
 	}
 
-	private TextFilePeakResults createFilePeakResults(MemoryPeakResults results2)
+	private static TextFilePeakResults createFilePeakResults(MemoryPeakResults results2)
 	{
 		if (!saveClassifications)
 			return null;
@@ -452,10 +453,11 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	}
 
 	/**
-	 * Build a map between the peak id (time point) and a list of coordinates
+	 * Build a map between the peak id (time point) and a list of coordinates.
 	 *
 	 * @param results
-	 * @return
+	 *            the results
+	 * @return the coordinates
 	 */
 	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results)
 	{
@@ -463,12 +465,13 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	}
 
 	/**
-	 * Build a map between the peak id (time point) and a list of coordinates
+	 * Build a map between the peak id (time point) and a list of coordinates.
 	 *
 	 * @param results
+	 *            the results
 	 * @param integerCoordinates
 	 *            True if the values should be rounded down to integers
-	 * @return
+	 * @return the coordinates
 	 */
 	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
 			final boolean integerCoordinates)
@@ -524,10 +527,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	}
 
 	/**
-	 * Merge the time points from each map into a single sorted list of unique time points
+	 * Merge the time points from each map into a single sorted list of unique time points.
 	 *
 	 * @param actualCoordinates
+	 *            the actual coordinates
 	 * @param predictedCoordinates
+	 *            the predicted coordinates
 	 * @return a list of time points
 	 */
 	private static int[] getTimepoints(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
@@ -539,6 +544,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		final TIntHashSet hashset = new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
 		final TIntProcedure p = new TIntProcedure()
 		{
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see gnu.trove.procedure.TIntProcedure#execute(int)
+			 */
 			@Override
 			public boolean execute(int value)
 			{
@@ -558,8 +569,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * Return an array of coordinates for the given time point. Returns an empty array if there are no coordinates.
 	 *
 	 * @param coords
+	 *            the coords
 	 * @param t
-	 * @return
+	 *            the t
+	 * @return the coordinates
 	 */
 	public static Coordinate[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t)
 	{
@@ -568,21 +581,20 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		{
 			return tmp.toArray(new Coordinate[tmp.size()]);
 		}
-		else
-		{
-			return new Coordinate[0];
-		}
+		return new Coordinate[0];
 	}
 
 	/**
-	 * Merge the time points from the two sets into a single sorted list of unique time points
+	 * Merge the time points from the two sets into a single sorted list of unique time points.
 	 *
 	 * @param actualPoints
+	 *            the actual points
 	 * @param predictedPoints
-	 * @return
+	 *            the predicted points
+	 * @return the timepoints
 	 */
 	@SuppressWarnings("unused")
-	private int[] getTimepoints(List<PeakResult> actualPoints, List<PeakResult> predictedPoints)
+	private static int[] getTimepoints(List<PeakResult> actualPoints, List<PeakResult> predictedPoints)
 	{
 		TIntHashSet set = new TIntHashSet();
 		for (PeakResult r : actualPoints)
@@ -594,7 +606,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return t;
 	}
 
-	private String createResultsHeader(boolean idAnalysis)
+	private static String createResultsHeader(boolean idAnalysis)
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Image 1\t");
@@ -674,7 +686,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		}
 	}
 
-	private String createPairsHeader(List<PointPair> pairs)
+	private static String createPairsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("T\t");
@@ -745,7 +757,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		}
 	}
 
-	private TIntHashSet getIds(MemoryPeakResults results)
+	private static TIntHashSet getIds(MemoryPeakResults results)
 	{
 		final TIntHashSet ids = new TIntHashSet(results.size());
 		results.forEach(new PeakResultProcedure()
@@ -759,7 +771,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return ids;
 	}
 
-	private double[] getDistances(double dThreshold, int increments, double delta)
+	private static double[] getDistances(double dThreshold, int increments, double delta)
 	{
 		double[] d = new double[increments + 1];
 		for (int i = 0; i <= increments; i++)
@@ -767,7 +779,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return d;
 	}
 
-	private double[] getPairDistances(List<PointPair> pairs)
+	private static double[] getPairDistances(List<PointPair> pairs)
 	{
 		double[] d = new double[pairs.size()];
 		int i = 0;
@@ -778,11 +790,28 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return d;
 	}
 
+	/**
+	 * A point that holds a reference to a PeakResult
+	 */
 	public static class PeakResultPoint extends BasePoint
 	{
 		int t;
 		PeakResult peakResult;
 
+		/**
+		 * Instantiates a new peak result point.
+		 *
+		 * @param t
+		 *            the t
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param z
+		 *            the z
+		 * @param peakResult
+		 *            the peak result
+		 */
 		public PeakResultPoint(int t, float x, float y, float z, PeakResult peakResult)
 		{
 			super(x, y, z);
@@ -790,9 +819,24 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			this.peakResult = peakResult;
 		}
 
+		/**
+		 * Gets the time.
+		 *
+		 * @return the time
+		 */
 		public int getTime()
 		{
 			return t;
+		}
+		
+		/**
+		 * Gets the peak result.
+		 *
+		 * @return the peak result
+		 */
+		public PeakResult getPeakResult()
+		{
+			return peakResult;
 		}
 	}
 

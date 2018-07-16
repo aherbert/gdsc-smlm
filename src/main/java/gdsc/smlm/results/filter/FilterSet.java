@@ -45,17 +45,36 @@ public class FilterSet
 	@XStreamOmitField
 	private int allSameType = 0;
 
+	/**
+	 * Instantiates a new filter set.
+	 *
+	 * @param name
+	 *            the name
+	 * @param filters
+	 *            the filters
+	 */
 	public FilterSet(String name, List<Filter> filters)
 	{
 		this.name = name;
 		this.filters = filters;
 	}
 
+	/**
+	 * Instantiates a new filter set.
+	 *
+	 * @param filters
+	 *            the filters
+	 */
 	public FilterSet(List<Filter> filters)
 	{
 		this.filters = filters;
 	}
 
+	/**
+	 * Get the size of the set
+	 *
+	 * @return the size
+	 */
 	public int size()
 	{
 		return filters.size();
@@ -105,9 +124,10 @@ public class FilterSet
 	}
 
 	/**
-	 * Create the filter set from the XML representation
+	 * Create the filter set from the XML representation.
 	 *
 	 * @param xml
+	 *            the xml
 	 * @return the filter set
 	 */
 	public static FilterSet fromXML(String xml)

@@ -72,9 +72,14 @@ public class SeriesImageSource extends ImageSource
 	/** The buffer limit for sequential reading of TIFF images. Default = 50MB */
 	private long sequentialReadBufferLimit = 52428800L;
 
+	/**
+	 * Store details for an image
+	 */
 	private abstract class Image
 	{
-		int width, height, size;
+		int width;
+		int height;
+		int size;
 
 		Image(int width, int height, int size)
 		{
@@ -83,26 +88,56 @@ public class SeriesImageSource extends ImageSource
 			this.size = size;
 		}
 
+		/**
+		 * Gets the width.
+		 *
+		 * @return the width
+		 */
 		int getWidth()
 		{
 			return width;
 		}
 
+		/**
+		 * Gets the height.
+		 *
+		 * @return the height
+		 */
 		int getHeight()
 		{
 			return height;
 		}
 
+		/**
+		 * Gets the size.
+		 *
+		 * @return the size
+		 */
 		int getSize()
 		{
 			return size;
 		}
 
+		/**
+		 * Gets the frame.
+		 *
+		 * @param i
+		 *            the frame number
+		 * @return the frame
+		 * @throws Exception
+		 *             the exception
+		 */
 		abstract Object getFrame(int i) throws Exception;
 
+		/**
+		 * Close the image
+		 *
+		 * @param freeMemory
+		 *            Set to true to free any cached memory
+		 */
 		public void close(boolean freeMemory)
 		{
-
+			// Do nothing
 		}
 	}
 
@@ -332,9 +367,10 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		/**
-		 * Check the file info are all the same size and type and have just 1 image
+		 * Check the file info are all the same size and type and have just 1 image.
 		 *
 		 * @param info
+		 *            the info
 		 * @return True if all the same size and type
 		 */
 		boolean allSameSizeAndType(ExtendedFileInfo[] info)
@@ -358,9 +394,10 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		/**
-		 * Check the file info is the same size and type as the first file info
+		 * Check the file info is the same size and type as the first file info.
 		 *
 		 * @param info
+		 *            the info
 		 * @return True if the same size and type
 		 */
 		boolean sameSizeAndType(ExtendedFileInfo info)
@@ -372,8 +409,6 @@ public class SeriesImageSource extends ImageSource
 		/**
 		 * Check if the index map has only a single plane. This is all we support at the moment.
 		 *
-		 * @param indexMap2
-		 *            the index map 2
 		 * @return true, if successful
 		 */
 		private boolean singlePlane()
@@ -640,6 +675,7 @@ public class SeriesImageSource extends ImageSource
 		 * Reset for sequential reading.
 		 *
 		 * @throws IOException
+		 *             Signals that an I/O exception has occurred.
 		 */
 		public void reset() throws IOException
 		{
@@ -1242,7 +1278,7 @@ public class SeriesImageSource extends ImageSource
 	 *            the path
 	 * @return the seekable stream
 	 */
-	private SeekableStream createSeekableStream(String path) throws FileNotFoundException, SecurityException
+	private static SeekableStream createSeekableStream(String path) throws FileNotFoundException, SecurityException
 	{
 		return new FileSeekableStream(path);
 	}
@@ -1281,22 +1317,18 @@ public class SeriesImageSource extends ImageSource
 		}
 		catch (SecurityException e)
 		{
+			// No file size...
 		}
 		return 0;
 	}
 
-	private SeekableStream readByteArraySeekableStream(File file, long size)
+	private static SeekableStream readByteArraySeekableStream(File file, long size)
 	{
-		FileSeekableStream fs = null;
-		try
+		try (FileSeekableStream fs = new FileSeekableStream(file))
 		{
-			fs = new FileSeekableStream(file);
-			if (fs != null)
-			{
-				byte[] buf = new byte[(int) size];
-				if (fs.readBytes(buf) == size)
-					return new ByteArraySeekableStream(buf);
-			}
+			byte[] buf = new byte[(int) size];
+			if (fs.readBytes(buf) == size)
+				return new ByteArraySeekableStream(buf);
 		}
 		catch (IOException e)
 		{
@@ -1304,10 +1336,6 @@ public class SeriesImageSource extends ImageSource
 			// At the moment if we ignore this then the ImageWorker will open the file
 			// rather than process from the memory stream.
 			e.printStackTrace();
-		}
-		finally
-		{
-			closeInputStream(fs);
 		}
 		return null;
 	}
@@ -1487,10 +1515,12 @@ public class SeriesImageSource extends ImageSource
 	private DataException error = null;
 
 	/**
-	 * Create a new image source using the given image series
+	 * Create a new image source using the given image series.
 	 *
 	 * @param name
-	 * @param path
+	 *            the name
+	 * @param series
+	 *            the series
 	 */
 	public SeriesImageSource(String name, SeriesOpener series)
 	{
@@ -1516,7 +1546,9 @@ public class SeriesImageSource extends ImageSource
 	 * The directory is opened using {@link gdsc.core.ij.SeriesOpener }
 	 *
 	 * @param name
-	 * @param path
+	 *            the name
+	 * @param directory
+	 *            the directory
 	 */
 	public SeriesImageSource(String name, String directory)
 	{
@@ -1524,9 +1556,10 @@ public class SeriesImageSource extends ImageSource
 	}
 
 	/**
-	 * Create a new image source using the paths to the images
+	 * Create a new image source using the paths to the images.
 	 *
 	 * @param name
+	 *            the name
 	 * @param filenames
 	 *            the full path names of the image files
 	 */

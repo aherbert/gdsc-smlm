@@ -295,6 +295,9 @@ public class SpotAnalysis extends PlugInFrame
 	// Stores the list of images last used in the selection options
 	private ArrayList<String> imageList = new ArrayList<>();
 
+	/**
+	 * Instantiates a new spot analysis.
+	 */
 	public SpotAnalysis()
 	{
 		super(TITLE);
@@ -634,15 +637,17 @@ public class SpotAnalysis extends PlugInFrame
 			for (int i = 0; i < resultsWindow.getTextPanel().getLineCount(); i++)
 			{
 				String line = resultsWindow.getTextPanel().getLine(i);
-				Scanner s = new Scanner(line);
-				s.useDelimiter("\t");
-				s.nextInt();
-				float cx = s.nextFloat(); // cx
-				float cy = s.nextFloat(); // cy
-				s.close();
-				if (cx >= minx && cx <= maxx && cy >= miny && cy <= maxy)
+				try (Scanner s = new Scanner(line))
 				{
-					return true;
+					s.useDelimiter("\t");
+					s.nextInt();
+					float cx = s.nextFloat(); // cx
+					float cy = s.nextFloat(); // cy
+					s.close();
+					if (cx >= minx && cx <= maxx && cy >= miny && cy <= maxy)
+					{
+						return true;
+					}
 				}
 			}
 		}
@@ -856,7 +861,7 @@ public class SpotAnalysis extends PlugInFrame
 		drawProfiles();
 	}
 
-	private double[] interpolate(double[] xValues2, double[] yValues)
+	private double[] interpolate(double[] xValues, double[] yValues)
 	{
 		// Smooth the values not in the current on-frames
 		double[] newX = Arrays.copyOf(xValues, xValues.length);
@@ -1052,6 +1057,9 @@ public class SpotAnalysis extends PlugInFrame
 				trace.add(result);
 		}
 
+		if (trace == null)
+			return;
+
 		Statistics tOn = new Statistics(trace.getOnTimes());
 		Statistics tOff = new Statistics(trace.getOffTimes());
 		resultsWindow.append(
@@ -1104,38 +1112,39 @@ public class SpotAnalysis extends PlugInFrame
 		for (int i = 0; i < resultsWindow.getTextPanel().getLineCount(); i++)
 		{
 			String line = resultsWindow.getTextPanel().getLine(i);
-			Scanner s = new Scanner(line);
-			s.useDelimiter("\t");
-			int id = -1;
-			double signal = -1;
-			// Be careful as the text panel may not contain what we expect, i.e. empty lines, etc
-			if (s.hasNextInt())
+			try (Scanner s = new Scanner(line))
 			{
-				id = s.nextInt();
-				try
+				s.useDelimiter("\t");
+				int id = -1;
+				double signal = -1;
+				// Be careful as the text panel may not contain what we expect, i.e. empty lines, etc
+				if (s.hasNextInt())
 				{
-					s.nextDouble(); // cx
-					s.nextDouble(); // cy
-					signal = s.nextDouble();
+					id = s.nextInt();
+					try
+					{
+						s.nextDouble(); // cx
+						s.nextDouble(); // cy
+						signal = s.nextDouble();
+					}
+					catch (InputMismatchException e)
+					{
+						// Ignore
+					}
+					catch (NoSuchElementException e)
+					{
+						// Ignore
+					}
 				}
-				catch (InputMismatchException e)
-				{
-					// Ignore
-				}
-				catch (NoSuchElementException e)
-				{
-					// Ignore
-				}
-			}
-			s.close();
 
-			if (id != -1 && signal != -1)
-			{
-				Trace trace = traces.get(id);
-				if (trace != null)
+				if (id != -1 && signal != -1)
 				{
-					results.addAll(trace.getPoints());
-					traceResults.add(new TraceResult(new Spot(id, signal), trace));
+					Trace trace = traces.get(id);
+					if (trace != null)
+					{
+						results.addAll(trace.getPoints());
+						traceResults.add(new TraceResult(new Spot(id, signal), trace));
+					}
 				}
 			}
 		}

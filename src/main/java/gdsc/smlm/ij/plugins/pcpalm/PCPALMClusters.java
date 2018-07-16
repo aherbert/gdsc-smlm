@@ -286,7 +286,7 @@ public class PCPALMClusters implements PlugIn
 	 * Extract the results from the PCPALM molecules using the area ROI and then do clustering to obtain the histogram
 	 * of molecules per cluster.
 	 *
-	 * @return
+	 * @return the histogram data
 	 */
 	private HistogramData doClustering()
 	{
@@ -351,10 +351,11 @@ public class PCPALMClusters implements PlugIn
 	}
 
 	/**
-	 * Convert molecules for clustering
+	 * Convert molecules for clustering.
 	 *
 	 * @param molecules
-	 * @return
+	 *            the molecules
+	 * @return the list of cluster points
 	 */
 	private List<ClusterPoint> convertToPoint(ArrayList<Molecule> molecules)
 	{
@@ -371,7 +372,8 @@ public class PCPALMClusters implements PlugIn
 	 * Saves the histogram to the user selected file if the save histogram option is enabled.
 	 *
 	 * @param histogramData
-	 * @return
+	 *            the histogram data
+	 * @return true, if successful
 	 */
 	private boolean saveHistogram(HistogramData histogramData)
 	{
@@ -385,7 +387,10 @@ public class PCPALMClusters implements PlugIn
 	 * Saves the histogram to the selected file. Updates the filename property of the histogram object.
 	 *
 	 * @param histogramData
+	 *            the histogram data
 	 * @param filename
+	 *            the filename
+	 * @return true, if successful
 	 */
 	private boolean saveHistogram(HistogramData histogramData, String filename)
 	{
@@ -446,7 +451,8 @@ public class PCPALMClusters implements PlugIn
 	 * from zero
 	 *
 	 * @param filename
-	 * @return
+	 *            the filename
+	 * @return the histogram data
 	 */
 	private HistogramData loadHistogram(String filename)
 	{
@@ -586,6 +592,7 @@ public class PCPALMClusters implements PlugIn
 	 * Loads a noise histogram from a user selected file and check the units match those provided
 	 *
 	 * @param histogramData
+	 *            the histogram data
 	 * @return The histogram (or null)
 	 */
 	private HistogramData loadNoiseHistogram(HistogramData histogramData)
@@ -633,16 +640,6 @@ public class PCPALMClusters implements PlugIn
 				return data;
 		}
 		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-	 */
-	public void run(ImageProcessor ip)
-	{
-		// Do nothing
 	}
 
 	private boolean showDialog()
@@ -777,8 +774,10 @@ public class PCPALMClusters implements PlugIn
 	 * Normalise the histograms using the (frames*area). Subtract the noise from the histogram and then rescale.
 	 *
 	 * @param histogramData
+	 *            the histogram data
 	 * @param noiseData
-	 * @return
+	 *            the noise data
+	 * @return true, if successful
 	 */
 	private boolean subtractNoise(HistogramData histogramData, HistogramData noiseData)
 	{
@@ -794,9 +793,10 @@ public class PCPALMClusters implements PlugIn
 	}
 
 	/**
-	 * Normalise the histogram using the (frames*area)
+	 * Normalise the histogram using the (frames*area).
 	 *
 	 * @param data
+	 *            the data
 	 * @return the normalised data
 	 */
 	private float[] normalise(HistogramData data)
@@ -809,10 +809,11 @@ public class PCPALMClusters implements PlugIn
 	}
 
 	/**
-	 * Fit a zero-truncated Binomial to the cumulative histogram
+	 * Fit a zero-truncated Binomial to the cumulative histogram.
 	 *
 	 * @param histogramData
-	 * @return
+	 *            the histogram data
+	 * @return the double[]
 	 */
 	private double[] fitBinomial(HistogramData histogramData)
 	{

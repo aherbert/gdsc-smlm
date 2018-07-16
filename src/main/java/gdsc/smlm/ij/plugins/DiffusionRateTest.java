@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,15 +99,22 @@ public class DiffusionRateTest implements PlugIn
 	 */
 	public class Point
 	{
+		/** The id. */
 		public int id;
-		public double x, y;
+		/** The x. */
+		public double x;
+		/** The y. */
+		public double y;
 
 		/**
-		 * Create a cluster point
+		 * Create a cluster point.
 		 *
 		 * @param id
+		 *            the id
 		 * @param x
+		 *            the x
 		 * @param y
+		 *            the y
 		 */
 		public Point(int id, double x, double y)
 		{
@@ -117,11 +123,26 @@ public class DiffusionRateTest implements PlugIn
 			this.y = y;
 		}
 
+		/**
+		 * Instantiates a new point.
+		 *
+		 * @param id
+		 *            the id
+		 * @param xyz
+		 *            the xyz
+		 */
 		public Point(int id, double[] xyz)
 		{
 			this(id, xyz[0], xyz[1]);
 		}
 
+		/**
+		 * Distance 2.
+		 *
+		 * @param p
+		 *            the p
+		 * @return the double
+		 */
 		public double distance2(Point p)
 		{
 			final double dx = x - p.x;
@@ -129,6 +150,17 @@ public class DiffusionRateTest implements PlugIn
 			return dx * dx + dy * dy;
 		}
 
+		/**
+		 * Distance 2.
+		 *
+		 * @param p
+		 *            the p
+		 * @param error
+		 *            the error
+		 * @param rand
+		 *            the rand
+		 * @return the double
+		 */
 		public double distance2(Point p, double error, RandomGenerator rand)
 		{
 			final double dx = (x + rand.nextGaussian() * error) - (p.x + rand.nextGaussian() * error);
@@ -632,14 +664,17 @@ public class DiffusionRateTest implements PlugIn
 	}
 
 	/**
-	 * Add a random Gaussian XY shift using the specified precision
+	 * Add a random Gaussian XY shift using the specified precision.
 	 *
 	 * @param xyz
+	 *            the xyz
 	 * @param precision
+	 *            the precision
 	 * @param random
+	 *            the random
 	 * @return The new xyz
 	 */
-	private double[] addError(double[] xyz, double precision, RandomGenerator[] random)
+	private static double[] addError(double[] xyz, double precision, RandomGenerator[] random)
 	{
 		final double[] xy = xyz.clone();
 		for (int i = 0; i < 2; i++)
@@ -650,7 +685,7 @@ public class DiffusionRateTest implements PlugIn
 		return xy;
 	}
 
-	private int record(double[] xyz, int id, int peak, Statistics stats2D, Statistics stats3D,
+	private static int record(double[] xyz, int id, int peak, Statistics stats2D, Statistics stats3D,
 			StoredDataStatistics jumpDistances2D, StoredDataStatistics jumpDistances3D, double[] origin,
 			MemoryPeakResults results)
 	{
@@ -675,23 +710,25 @@ public class DiffusionRateTest implements PlugIn
 	}
 
 	/**
-	 * Get the squared distance from the origin in 2D (using XY coordinates)
+	 * Get the squared distance from the origin in 2D (using XY coordinates).
 	 *
 	 * @param coordinates
-	 * @return
+	 *            the coordinates
+	 * @return the squared distance
 	 */
-	private double squared2D(double[] coordinates)
+	private static double squared2D(double[] coordinates)
 	{
 		return coordinates[0] * coordinates[0] + coordinates[1] * coordinates[1];
 	}
 
 	/**
-	 * Get the distance from the origin in 3D
+	 * Get the distance from the origin in 3D.
 	 *
 	 * @param coordinates
-	 * @return
+	 *            the coordinates
+	 * @return the double
 	 */
-	private double distance(double[] coordinates)
+	private static double distance(double[] coordinates)
 	{
 		return Math.sqrt(
 				coordinates[0] * coordinates[0] + coordinates[1] * coordinates[1] + coordinates[2] * coordinates[2]);
@@ -910,12 +947,12 @@ public class DiffusionRateTest implements PlugIn
 		return newX;
 	}
 
-	private int round(float f)
+	private static int round(float f)
 	{
 		return Math.round(f);
 	}
 
-	private float[] getLimits(float[] x)
+	private static float[] getLimits(float[] x)
 	{
 		float[] limits = Maths.limits(x);
 		limits[0] = (float) Math.floor(limits[0]);
@@ -1012,9 +1049,10 @@ public class DiffusionRateTest implements PlugIn
 	}
 
 	/**
-	 * Tabulate the observed MSD for different jump distances
+	 * Tabulate the observed MSD for different jump distances.
 	 *
 	 * @param points
+	 *            the points
 	 */
 	private void msdAnalysis(ArrayList<Point> points)
 	{
@@ -1258,7 +1296,7 @@ public class DiffusionRateTest implements PlugIn
 			new WindowOrganiser().tileWindows(idList);
 	}
 
-	private boolean showSimpleDialog()
+	private static boolean showSimpleDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 
@@ -1292,8 +1330,6 @@ public class DiffusionRateTest implements PlugIn
 	 *            the jump distances
 	 * @param dimensions
 	 *            the number of dimensions for the jumps
-	 * @param steps
-	 *            the steps
 	 */
 	private void plotJumpDistances(String title, DoubleData jumpDistances, int dimensions)
 	{
@@ -1359,17 +1395,14 @@ public class DiffusionRateTest implements PlugIn
 		Utils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
 	}
 
-	private void save(StoredDataStatistics storedDataStatistics, int dimensions, String prefix)
+	private static void save(StoredDataStatistics storedDataStatistics, int dimensions, String prefix)
 	{
 		if (simpleDir == null)
 			return;
-		File file = new File(simpleDir, prefix + dimensions + "d.txt");
-		OutputStreamWriter out = null;
 		final String newLine = System.getProperty("line.separator");
-		try
+		File file = new File(simpleDir, prefix + dimensions + "d.txt");
+		try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8"))
 		{
-			FileOutputStream fos = new FileOutputStream(file);
-			out = new OutputStreamWriter(fos, "UTF-8");
 			for (double d : storedDataStatistics.getValues())
 			{
 				out.write(Double.toString(d));
@@ -1379,20 +1412,6 @@ public class DiffusionRateTest implements PlugIn
 		catch (Exception e)
 		{
 			e.printStackTrace(); // Show the error
-		}
-		finally
-		{
-			if (out != null)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 }

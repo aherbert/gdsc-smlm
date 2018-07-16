@@ -64,26 +64,76 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 	private OutputStreamWriter out;
 
+	/**
+	 * Instantiates a new text file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public TextFilePeakResults(String filename)
 	{
 		super(filename);
 	}
 
+	/**
+	 * Instantiates a new text file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 */
 	public TextFilePeakResults(String filename, boolean showDeviations)
 	{
 		super(filename, showDeviations);
 	}
 
+	/**
+	 * Instantiates a new text file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 */
 	public TextFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame)
 	{
 		super(filename, showDeviations, showEndFrame);
 	}
 
+	/**
+	 * Instantiates a new text file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 * @param showId
+	 *            Set to true to show the id
+	 */
 	public TextFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
 		super(filename, showDeviations, showEndFrame, showId);
 	}
 
+	/**
+	 * Instantiates a new text file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 * @param showId
+	 *            Set to true to show the id
+	 * @param showPrecision
+	 *            Set to true to show the precision
+	 */
 	public TextFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision)
 	{
@@ -161,9 +211,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				}
 				catch (ConfigurationException e)
 				{
+					// Ignore
 				}
 				catch (ConversionException e)
 				{
+					// Ignore
 				}
 			}
 		}
@@ -299,17 +351,17 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		add(sb, converters[PeakResult.INTENSITY].convert(meanIntensity));
 	}
 
-	private void add(StringBuilder sb, float value)
+	private static void add(StringBuilder sb, float value)
 	{
 		sb.append('\t').append(value);
 	}
 
-	private void add(StringBuilder sb, double value)
+	private static void add(StringBuilder sb, double value)
 	{
 		sb.append('\t').append(value);
 	}
 
-	private void addPrecision(StringBuilder sb, double value, boolean computed)
+	private static void addPrecision(StringBuilder sb, double value, boolean computed)
 	{
 		// Cast to a float as the precision is probably limited in significant figures
 		sb.append('\t').append((float) value);
@@ -410,6 +462,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * Note: This is not synchronised
 	 *
 	 * @param cluster
+	 *            the cluster
 	 */
 	public void addCluster(Cluster cluster)
 	{
@@ -426,6 +479,12 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 	}
 
+	/**
+	 * Adds all the results from the cluster
+	 *
+	 * @param cluster
+	 *            the cluster
+	 */
 	protected void addAll(Cluster cluster)
 	{
 		if (!isShowId() || cluster.getId() == 0)
@@ -462,6 +521,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * Note: This is not synchronised
 	 *
 	 * @param trace
+	 *            the trace
 	 */
 	public void addTrace(Trace trace)
 	{
@@ -485,6 +545,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * Note: This is not synchronised
 	 *
 	 * @param text
+	 *            the text
 	 */
 	public void addComment(String text)
 	{
@@ -525,62 +586,40 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	@Override
 	protected void sort() throws IOException
 	{
-		try
+		TurboList<Result> results = new TurboList<>(size);
+
+		StringBuilder header = new StringBuilder();
+		try (BufferedReader input = new BufferedReader(new FileReader(filename)))
 		{
-			TurboList<Result> results = new TurboList<>(size);
-
-			StringBuilder header = new StringBuilder();
-			BufferedReader input = new BufferedReader(new FileReader(filename));
-			try
+			String line;
+			// Skip the header
+			while ((line = input.readLine()) != null)
 			{
-				String line;
-				// Skip the header
-				while ((line = input.readLine()) != null)
+				if (line.charAt(0) != '#')
 				{
-					if (line.charAt(0) != '#')
-					{
-						// This is the first record
-						results.add(new Result(line));
-						break;
-					}
-					else
-						header.append(line).append('\n');
-				}
-
-				while ((line = input.readLine()) != null)
-				{
+					// This is the first record
 					results.add(new Result(line));
+					break;
 				}
-			}
-			finally
-			{
-				input.close();
+				header.append(line).append('\n');
 			}
 
-			Collections.sort(results);
+			while ((line = input.readLine()) != null)
+			{
+				results.add(new Result(line));
+			}
+		}
 
-			BufferedWriter output = new BufferedWriter(new FileWriter(filename));
-			try
-			{
-				output.write(header.toString());
-				for (int i = 0; i < results.size(); i++)
-				{
-					output.write(results.getf(i).line);
-					output.write("\n");
-				}
-			}
-			finally
-			{
-				output.close();
-			}
-		}
-		catch (IOException e)
+		Collections.sort(results);
+
+		try (BufferedWriter output = new BufferedWriter(new FileWriter(filename)))
 		{
-			throw e;
-		}
-		finally
-		{
-			out = null;
+			output.write(header.toString());
+			for (int i = 0; i < results.size(); i++)
+			{
+				output.write(results.getf(i).line);
+				output.write("\n");
+			}
 		}
 	}
 
@@ -597,22 +636,21 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 		private void extractSlice()
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter("\t");
-
-			try
+			try (Scanner scanner = new Scanner(line))
 			{
+				scanner.useDelimiter("\t");
 				slice = scanner.nextInt();
 				if (isShowId())
 					// The peak is the second column
 					slice = scanner.nextInt();
-				scanner.close();
 			}
 			catch (InputMismatchException e)
 			{
+				// Ignore
 			}
 			catch (NoSuchElementException e)
 			{
+				// Ignore
 			}
 		}
 
