@@ -33,9 +33,13 @@ import ij.process.FloatProcessor;
  */
 public class KernelFilter extends BaseWeightedFilter
 {
+	/** The kernel. */
 	protected float[] kernel;
+	/** The kernel width. */
 	protected final int kw;
+	/** The kernel height. */
 	protected final int kh;
+	/** The kernel scale (1.0/[sum of the kernel]). */
 	protected final double scale;
 
 	private Normaliser normaliser = null;
@@ -61,8 +65,8 @@ public class KernelFilter extends BaseWeightedFilter
 		if (normaliser == null)
 		{
 			float[] normalisation = weights.clone();
-			KernelFilter kf = new KernelFilter(kernel, kw, kh);
-			kf.convolve(normalisation, weightHeight, weightWidth);
+			KernelFilter kf = new KernelFilter(kernel, kw, kh, scale);
+			kf.convolve(normalisation, weightWidth, weightHeight);
 			normaliser = new PerPixelNormaliser(normalisation);
 		}
 	}
@@ -91,6 +95,26 @@ public class KernelFilter extends BaseWeightedFilter
 		this.scale = getScale(kernel);
 	}
 
+	/**
+	 * Instantiates a new kernel filter with no normaliser.
+	 *
+	 * @param kernel
+	 *            the kernel
+	 * @param kw
+	 *            the kernel width (must be odd)
+	 * @param kh
+	 *            the kernel height (must be odd)
+	 * @param scale
+	 *            the scale
+	 */
+	private KernelFilter(float[] kernel, int kw, int kh, double scale)
+	{
+		this.kernel = kernel.clone();
+		this.kw = kw;
+		this.kh = kh;
+		this.scale = scale;
+	}
+	
 	/**
 	 * Gets the scale of the kernel (i.e. 1/sum). This is used to scale the convolution result.
 	 *

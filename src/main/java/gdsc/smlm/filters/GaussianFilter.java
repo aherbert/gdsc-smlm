@@ -28,7 +28,7 @@ import java.awt.Rectangle;
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array.
  * <p>
- * Adapted from {@link ij.plugin.filter.GaussianBlur}
+ * Adapted from {@link ij.plugin.filter.GaussianBlur}.
  */
 public class GaussianFilter extends BaseWeightedFilter
 {
@@ -78,7 +78,7 @@ public class GaussianFilter extends BaseWeightedFilter
 			sx = sigmaX;
 			sy = sigmaY;
 			GaussianFilter gf = new GaussianFilter(accuracy);
-			gf.convolve(normalisation, weightHeight, weightWidth, sigmaX, sigmaY);
+			gf.convolve(normalisation, weightWidth, weightHeight, sigmaX, sigmaY);
 			normaliser = new PerPixelNormaliser(normalisation);
 		}
 	}
@@ -240,7 +240,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * @param sigma
 	 *            Standard deviation of the Gaussian
 	 * @param xDirection
-	 *            True for bluring in x direction, false for y direction
+	 *            True for blurring in x direction, false for y direction
 	 * @param extraLines
 	 *            Number of lines (parallel to the blurring direction)
 	 *            below and above the roi bounds that should be processed.
@@ -275,7 +275,7 @@ public class GaussianFilter extends BaseWeightedFilter
 		/*
 		 * Downscaling and upscaling blur the image a bit - we have to correct the standard
 		 * deviation for this:
-		 * Downscaling gives std devation sigma = 1/sqrt(3); upscale gives sigma = 1/2 (in downscaled pixels).
+		 * Downscaling gives std deviation sigma = 1/sqrt(3); upscale gives sigma = 1/2 (in downscaled pixels).
 		 * All sigma^2 values add to full sigma^2, which should be the desired value
 		 */
 		final double sigmaGauss = doDownscaling ? Math.sqrt(sigma * sigma / (reduceBy * reduceBy) - 1. / 3. - 1. / 4.)
@@ -430,7 +430,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * of four unit squares, i.e., four uniform kernels with value +1
 	 * from -0.5 to +0.5 (in downscaled coordinates). The second derivative
 	 * of this kernel is smooth, the third is not. Its standard deviation
-	 * is 1/sqrt(3) in downscaled cordinates.
+	 * is 1/sqrt(3) in downscaled coordinates.
 	 * The kernel runs from [-2 to +2[, corresponding to array index
 	 * 0 ... 4*unitLength (whereby the last point is not in the array any more).
 	 */

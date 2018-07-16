@@ -73,7 +73,7 @@ public class DPGaussianFilter extends BaseWeightedFilter
 			sx = sigmaX;
 			sy = sigmaY;
 			DPGaussianFilter gf = new DPGaussianFilter(accuracy);
-			gf.convolve(normalisation, weightHeight, weightWidth, sigmaX, sigmaY);
+			gf.convolve(normalisation, weightWidth, weightHeight, sigmaX, sigmaY);
 			normaliser = new PerPixelNormaliser(normalisation);
 		}
 	}
