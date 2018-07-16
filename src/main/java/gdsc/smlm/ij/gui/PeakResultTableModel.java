@@ -707,6 +707,9 @@ public class PeakResultTableModel extends AbstractTableModel
 	/**
 	 * Sets the model to the live state. This creates all the table layout information and causes it to update when
 	 * properties are changed.
+	 *
+	 * @param isLive
+	 *            the new live
 	 */
 	void setLive(boolean isLive)
 	{

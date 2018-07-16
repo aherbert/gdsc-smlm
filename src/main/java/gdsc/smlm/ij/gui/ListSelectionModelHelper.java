@@ -63,6 +63,14 @@ public class ListSelectionModelHelper
 		return rv;
 	}
 
+	/**
+	 * Sets the selected indices.
+	 *
+	 * @param sm
+	 *            the selection model
+	 * @param indices
+	 *            the indices
+	 */
 	public static void setSelectedIndices(ListSelectionModel sm, int[] indices)
 	{
 		if (indices == null || indices.length == 0)

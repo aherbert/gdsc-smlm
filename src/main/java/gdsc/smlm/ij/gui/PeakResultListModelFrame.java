@@ -98,11 +98,25 @@ public class PeakResultListModelFrame extends JFrame
 
 	private JList<PeakResult> list;
 
+	/**
+	 * Instantiates a new peak result list model frame.
+	 *
+	 * @param model
+	 *            the model
+	 */
 	public PeakResultListModelFrame(PeakResultListModel model)
 	{
 		this(model, null);
 	}
 
+	/**
+	 * Instantiates a new peak result list model frame.
+	 *
+	 * @param model
+	 *            the model
+	 * @param selectionModel
+	 *            the selection model
+	 */
 	public PeakResultListModelFrame(PeakResultListModel model, ListSelectionModel selectionModel)
 	{
 		list = new JList<>(model);
@@ -116,11 +130,23 @@ public class PeakResultListModelFrame extends JFrame
 
 	}
 
+	/**
+	 * Adds the list selection listener.
+	 *
+	 * @param listener
+	 *            the listener
+	 */
 	public void addListSelectionListener(ListSelectionListener listener)
 	{
 		list.addListSelectionListener(listener);
 	}
 
+	/**
+	 * Removes the list selection listener.
+	 *
+	 * @param listener
+	 *            the listener
+	 */
 	public void removeListSelectionListener(ListSelectionListener listener)
 	{
 		list.removeListSelectionListener(listener);

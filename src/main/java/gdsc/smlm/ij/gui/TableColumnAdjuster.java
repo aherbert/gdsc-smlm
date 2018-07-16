@@ -484,10 +484,10 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		table.getActionMap().put(key, action);
 	}
 
-	/*
+	/**
 	 * Action to adjust or restore the width of a single column or all columns
 	 */
-	class ColumnAction extends AbstractAction
+	private class ColumnAction extends AbstractAction
 	{
 		private static final long serialVersionUID = -6176797789918378461L;
 		private boolean isSelectedColumn;
@@ -526,11 +526,11 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		}
 	}
 
-	/*
+	/**
 	 * Toggle properties of the TableColumnAdjuster so the user can
 	 * customize the functionality to their preferences
 	 */
-	class ToggleAction extends AbstractAction
+	private class ToggleAction extends AbstractAction
 	{
 		private static final long serialVersionUID = 8147471317715640019L;
 		private boolean isToggleDynamic;

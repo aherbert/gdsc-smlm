@@ -42,6 +42,16 @@ public class PeakResultTableModelJTable extends JTable
 
 	private TableColumnAdjuster tca;
 
+	/**
+	 * Instantiates a new peak result table model J table.
+	 *
+	 * @param model
+	 *            the model
+	 * @param cm
+	 *            the cm
+	 * @param selectionModel
+	 *            the selection model
+	 */
 	public PeakResultTableModelJTable(PeakResultTableModel model, TableColumnModel cm,
 			ListSelectionModel selectionModel)
 	{

@@ -470,6 +470,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return flags;
 	}
 
+	/**
+	 * Gets the name.
+	 *
+	 * @param imageList
+	 *            the image list
+	 * @return the name
+	 */
 	static String getName(String[] imageList)
 	{
 		String name = imageList[0];
@@ -1159,7 +1166,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Adds the camera options.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param fitConfig
 	 *            the fit config
 	 */
@@ -1172,7 +1179,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Adds the camera options.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param options
 	 *            the options
 	 * @param fitConfig
@@ -1201,7 +1208,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Adds the camera options.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param calibrationWriter
 	 *            the calibration writer
 	 */
@@ -1214,7 +1221,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Adds the camera options.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param options
 	 *            the options
 	 * @param calibrationWriter
@@ -1250,7 +1257,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * Adds the camera options.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param options
 	 *            the options
 	 * @param calibrationProvider
@@ -1378,8 +1385,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static class SimpleFitEngineConfigurationProvider implements FitEngineConfigurationProvider
 	{
+		/** The fit engine configuration. */
 		FitEngineConfiguration c;
 
+		/**
+		 * Instantiates a new simple fit engine configuration provider.
+		 *
+		 * @param c
+		 *            the configuration
+		 */
 		SimpleFitEngineConfigurationProvider(FitEngineConfiguration c)
 		{
 			this.c = c;
@@ -1397,8 +1411,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static class SimpleFitConfigurationProvider implements FitConfigurationProvider
 	{
+		/** The configuration. */
 		FitConfiguration c;
 
+		/**
+		 * Instantiates a new simple fit configuration provider.
+		 *
+		 * @param c
+		 *            the configuration
+		 */
 		SimpleFitConfigurationProvider(FitConfiguration c)
 		{
 			this.c = c;
@@ -1418,7 +1439,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * {@link #configurePSFModel(FitEngineConfiguration, int)}.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param fitConfiguration
 	 *            the fit configuration
 	 */
@@ -1434,7 +1455,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * {@link #configurePSFModel(FitEngineConfiguration, int)}.
 	 *
 	 * @param gd
-	 *            the gd
+	 *            the dialog
 	 * @param fitConfigurationProvider
 	 *            the fit configuration provider
 	 */
@@ -1524,17 +1545,49 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	static abstract class RelativeParameterProvider
 	{
-		double min, max;
+		/** The min. */
+		double min;
+		/** The max. */
+		double max;
+		/** The name. */
 		String name;
+		/** The fit engine configuration provider. */
 		FitEngineConfigurationProvider fitEngineConfigurationProvider;
+		/** Set to true to include the value in {@link #getMin()} and {@link #getMax()}. */
 		boolean includeValue;
 
+		/**
+		 * Instantiates a new relative parameter provider.
+		 *
+		 * @param min
+		 *            the min
+		 * @param max
+		 *            the max
+		 * @param name
+		 *            the name
+		 * @param fitEngineConfigurationProvider
+		 *            the fit engine configuration provider
+		 */
 		public RelativeParameterProvider(double min, double max, String name,
 				FitEngineConfigurationProvider fitEngineConfigurationProvider)
 		{
 			this(min, max, name, fitEngineConfigurationProvider, false);
 		}
 
+		/**
+		 * Instantiates a new relative parameter provider.
+		 *
+		 * @param min
+		 *            the min
+		 * @param max
+		 *            the max
+		 * @param name
+		 *            the name
+		 * @param fitEngineConfigurationProvider
+		 *            the fit engine configuration provider
+		 * @param includeValue
+		 *            the include value
+		 */
 		public RelativeParameterProvider(double min, double max, String name,
 				FitEngineConfigurationProvider fitEngineConfigurationProvider, boolean includeValue)
 		{
@@ -1545,28 +1598,67 @@ public class PeakFit implements PlugInFilter, ItemListener
 			this.includeValue = includeValue;
 		}
 
+		/**
+		 * Gets the min.
+		 *
+		 * @return the min
+		 */
 		double getMin()
 		{
 			return (includeValue) ? Math.min(min, getValue()) : min;
 		}
 
+		/**
+		 * Gets the max.
+		 *
+		 * @return the max
+		 */
 		double getMax()
 		{
 			return (includeValue) ? Math.max(max, getValue()) : max;
 		}
 
+		/**
+		 * Gets the value.
+		 *
+		 * @return the value
+		 */
 		abstract double getValue();
 
+		/**
+		 * Checks if is absolute.
+		 *
+		 * @return true, if is absolute
+		 */
 		abstract boolean isAbsolute();
 
+		/**
+		 * Sets the absolute.
+		 *
+		 * @param absolute
+		 *            the new absolute
+		 */
 		abstract void setAbsolute(boolean absolute);
 
+		/**
+		 * Gets the dialog name.
+		 *
+		 * @return the dialog name
+		 */
 		String getDialogName()
 		{
 			return name.replace(' ', '_');
 		}
 	}
 
+	/**
+	 * Adds the relative parameter options.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param rp
+	 *            the relative parameter
+	 */
 	static void addRelativeParameterOptions(final ExtendedGenericDialog gd, final RelativeParameterProvider rp)
 	{
 		final String label = rp.getDialogName();

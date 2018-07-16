@@ -38,7 +38,9 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 {
 	private static final long serialVersionUID = -7095827869962490626L;
 
+	/** The store to delegate all model changes. */
 	final PeakResultStoreList delegate;
+	
 	private boolean checkForDuplicates = false;
 
 	/**
