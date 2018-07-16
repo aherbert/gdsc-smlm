@@ -67,9 +67,17 @@ public class FitJob
 	}
 
 	private int id = 0;
+
+	/** The slice. */
 	int slice;
+
+	/** The data. */
 	float[] data;
+
+	/** The bounds. */
 	Rectangle bounds;
+
+	/** The status. */
 	Status status = Status.PENDING;
 
 	/**
@@ -238,7 +246,7 @@ public class FitJob
 	 */
 	public void setIndices(int[] indices)
 	{
-// Do nothing
+		// Do nothing
 	}
 
 	/**

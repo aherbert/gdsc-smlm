@@ -100,7 +100,7 @@ public class ResultsManagerTest
 		writeTSFMatchesRead(2, 2, 2, 2);
 	}
 
-	private void writeTSFMatchesRead(int channels, int slices, int positions, int types)
+	private static void writeTSFMatchesRead(int channels, int slices, int positions, int types)
 	{
 		String filename = createFile();
 		FileOutputStream out = null;
@@ -118,6 +118,7 @@ public class ResultsManagerTest
 		// Write the offsets used in the TSF format
 		try
 		{
+			@SuppressWarnings("resource")
 			DataOutputStream dos = new DataOutputStream(out);
 			dos.writeInt(0);
 			dos.writeLong(0);
@@ -221,10 +222,8 @@ public class ResultsManagerTest
 		}
 
 		// Write the offset to the SpotList message into the offset position
-		RandomAccessFile f = null;
-		try
+		try (RandomAccessFile f = new RandomAccessFile(new File(filename), "rw"))
 		{
-			f = new RandomAccessFile(new File(filename), "rw");
 			f.seek(4);
 			f.writeLong(offset);
 		}
@@ -232,19 +231,6 @@ public class ResultsManagerTest
 		{
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
-		}
-		finally
-		{
-			if (f != null)
-			{
-				try
-				{
-					f.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
 		}
 
 		// Read each combination
@@ -271,12 +257,12 @@ public class ResultsManagerTest
 					}
 	}
 
-	private int nextInt(RandomGenerator rand, int n)
+	private static int nextInt(RandomGenerator rand, int n)
 	{
 		return (n == 1) ? 1 : 1 + rand.nextInt(n);
 	}
 
-	private void closeOutput(FileOutputStream out)
+	private static void closeOutput(FileOutputStream out)
 	{
 		if (out == null)
 			return;
@@ -295,7 +281,7 @@ public class ResultsManagerTest
 		}
 	}
 
-	private void checkEqual(Spot[] spots, int channel, int slice, int position, int type,
+	private static void checkEqual(Spot[] spots, int channel, int slice, int position, int type,
 			MemoryPeakResults actualResults) throws ArrayComparisonFailure
 	{
 		Assert.assertNotNull("Input results are null", actualResults);
@@ -336,7 +322,7 @@ public class ResultsManagerTest
 		}
 	}
 
-	private MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position, int type)
+	private static MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position, int type)
 	{
 		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
 		for (Spot spot : spots)
@@ -363,7 +349,7 @@ public class ResultsManagerTest
 		return results;
 	}
 
-	private String createFile()
+	private static String createFile()
 	{
 		File file;
 		try

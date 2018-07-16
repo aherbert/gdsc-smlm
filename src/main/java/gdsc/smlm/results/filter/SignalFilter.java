@@ -34,14 +34,22 @@ import gdsc.smlm.results.PeakResult;
  */
 public class SignalFilter extends DirectFilter implements IMultiFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 5;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 30;
 
 	@XStreamAsAttribute
-	final double signal;
+	private final double signal;
 	@XStreamOmitField
-	float signalThreshold;
+	private float signalThreshold;
 
+	/**
+	 * Instantiates a new signal filter.
+	 *
+	 * @param signal
+	 *            the signal
+	 */
 	public SignalFilter(double signal)
 	{
 		this.signal = Math.max(0, signal);

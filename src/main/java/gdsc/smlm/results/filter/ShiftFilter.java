@@ -36,21 +36,30 @@ import gdsc.smlm.results.PeakResult;
  */
 public class ShiftFilter extends DirectFilter implements IMultiFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 0.05;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 10;
+	/** The default limit. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double UPPER_LIMIT = 5;
 
 	@XStreamAsAttribute
-	final double shift;
+	private final double shift;
 	@XStreamOmitField
-	float offsetx;
+	private float offsetx;
 	@XStreamOmitField
-	float offsety;
+	private float offsety;
 	@XStreamOmitField
-	float shift2;
+	private float shift2;
 	@XStreamOmitField
-	boolean shiftEnabled;
+	private boolean shiftEnabled;
 
+	/**
+	 * Instantiates a new shift filter.
+	 *
+	 * @param shift
+	 *            the shift
+	 */
 	public ShiftFilter(double shift)
 	{
 		this.shift = Math.max(0, shift);

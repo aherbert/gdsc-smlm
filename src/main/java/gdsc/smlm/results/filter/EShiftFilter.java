@@ -36,19 +36,28 @@ import gdsc.smlm.results.PeakResult;
  */
 public class EShiftFilter extends DirectFilter implements IMultiFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 0.05;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 10;
+	/** The default limit. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double UPPER_LIMIT = 5;
 
 	@XStreamAsAttribute
-	final double eshift;
+	private final double eshift;
 	@XStreamOmitField
-	float eoffset;
+	private float eoffset;
 	@XStreamOmitField
-	float eshift2;
+	private float eshift2;
 	@XStreamOmitField
-	boolean shiftEnabled;
+	private boolean shiftEnabled;
 
+	/**
+	 * Instantiates a new e shift filter.
+	 *
+	 * @param eshift
+	 *            the eshift
+	 */
 	public EShiftFilter(double eshift)
 	{
 		this.eshift = Math.max(0, eshift);

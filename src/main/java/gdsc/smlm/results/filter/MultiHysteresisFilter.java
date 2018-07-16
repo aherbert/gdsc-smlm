@@ -42,54 +42,99 @@ import gdsc.smlm.results.PeakResult;
  */
 public class MultiHysteresisFilter extends HysteresisFilter
 {
+	/** The strict signal. */
 	@XStreamAsAttribute
 	final double strictSignal;
+	
+	/** The strict snr. */
 	@XStreamAsAttribute
 	final float strictSnr;
+	
+	/** The strict min width. */
 	@XStreamAsAttribute
 	final double strictMinWidth;
+	
+	/** The strict max width. */
 	@XStreamAsAttribute
 	final double strictMaxWidth;
+	
+	/** The strict shift. */
 	@XStreamAsAttribute
 	final double strictShift;
+	
+	/** The strict precision. */
 	@XStreamAsAttribute
 	final double strictPrecision;
+	
+	/** The range signal. */
 	@XStreamAsAttribute
 	final double rangeSignal;
+	
+	/** The range snr. */
 	@XStreamAsAttribute
 	final float rangeSnr;
+	
+	/** The range min width. */
 	@XStreamAsAttribute
 	final double rangeMinWidth;
+	
+	/** The range max width. */
 	@XStreamAsAttribute
 	final double rangeMaxWidth;
+	
+	/** The range shift. */
 	@XStreamAsAttribute
 	final double rangeShift;
+	
+	/** The range precision. */
 	@XStreamAsAttribute
 	final double rangePrecision;
 
+	/** The strict signal threshold. */
 	@XStreamOmitField
 	float strictSignalThreshold;
+	
+	/** The weak signal threshold. */
 	@XStreamOmitField
 	float weakSignalThreshold;
+	
+	/** The weak snr. */
 	@XStreamOmitField
 	float weakSnr;
+	
+	/** The strict min sigma threshold. */
 	@XStreamOmitField
 	float strictMinSigmaThreshold;
+	
+	/** The weak min sigma threshold. */
 	@XStreamOmitField
 	float weakMinSigmaThreshold;
+	
+	/** The strict max sigma threshold. */
 	@XStreamOmitField
 	float strictMaxSigmaThreshold;
+	
+	/** The weak max sigma threshold. */
 	@XStreamOmitField
 	float weakMaxSigmaThreshold;
+	
+	/** The strict offset. */
 	@XStreamOmitField
 	float strictOffset;
+	
+	/** The weak offset. */
 	@XStreamOmitField
 	float weakOffset;
+	
+	/** The strict variance. */
 	@XStreamOmitField
 	double strictVariance;
+	
+	/** The weak variance. */
 	@XStreamOmitField
 	double weakVariance;
 
+	/** The calculator. */
 	@XStreamOmitField
 	Gaussian2DPeakResultCalculator calculator;
 
@@ -421,6 +466,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		return ParameterType.PRECISION_RANGE;
 	}
 
+	/** The default range. */
 	static double[] defaultRange = new double[] { 0, 0, 0, 0, SignalFilter.DEFAULT_RANGE, SignalFilter.DEFAULT_RANGE,
 			SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE,
 			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, WidthFilter.DEFAULT_RANGE,

@@ -37,10 +37,16 @@ import gdsc.smlm.results.PeakResult;
 public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
-	final double precision;
+	private final double precision;
 	@XStreamOmitField
-	float variance;
+	private float variance;
 
+	/**
+	 * Instantiates a new precision CRLB filter.
+	 *
+	 * @param precision
+	 *            the precision
+	 */
 	public PrecisionCRLBFilter(double precision)
 	{
 		this.precision = Math.max(0, precision);

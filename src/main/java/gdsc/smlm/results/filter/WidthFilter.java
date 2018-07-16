@@ -37,20 +37,35 @@ import gdsc.smlm.results.PeakResult;
  */
 public class WidthFilter extends DirectFilter implements IMultiFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 0.05;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 1;
+	/** The default limit. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double UPPER_LIMIT = 5;
 
+	/** The width. */
 	@XStreamAsAttribute
-	final double width;
+	protected final double width;
+	
+	/** The upper sigma threshold. */
 	@XStreamOmitField
-	float upperSigmaThreshold;
+	protected float upperSigmaThreshold;
+	
+	/** The width enabled. */
 	@XStreamOmitField
-	boolean widthEnabled;
+	protected boolean widthEnabled;
 
+	/** The calculator. */
 	@XStreamOmitField
-	Gaussian2DPeakResultCalculator calculator;
+	protected Gaussian2DPeakResultCalculator calculator;
 
+	/**
+	 * Instantiates a new width filter.
+	 *
+	 * @param width
+	 *            the width
+	 */
 	public WidthFilter(double width)
 	{
 		this.width = Math.max(0, width);
@@ -87,7 +102,13 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 		setup(flags);
 	}
 
-	void setup(final double width)
+	/**
+	 * Sets up the filter.
+	 *
+	 * @param width
+	 *            the new up
+	 */
+	protected void setup(final double width)
 	{
 		upperSigmaThreshold = Filter.getUpperLimit(width);
 		widthEnabled = (width != Float.POSITIVE_INFINITY);

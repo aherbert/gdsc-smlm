@@ -39,6 +39,9 @@ import gdsc.smlm.results.PeakResult;
  */
 public class SBRFilter extends DirectFilter
 {
+	/**
+	 * The signal-to-background ratio (SBR)
+	 */
 	@XStreamAsAttribute
 	final float sbr;
 
@@ -56,6 +59,7 @@ public class SBRFilter extends DirectFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		// Do nothing
 	}
 
 	@Override

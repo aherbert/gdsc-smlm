@@ -30,6 +30,15 @@ import gdsc.smlm.results.PeakResult;
  */
 public class OrFilter extends CombinedFilter
 {
+	
+	/**
+	 * Instantiates a new or filter.
+	 *
+	 * @param filter1
+	 *            the filter 1
+	 * @param filter2
+	 *            the filter 2
+	 */
 	public OrFilter(Filter filter1, Filter filter2)
 	{
 		super(filter1, filter2);

@@ -28,8 +28,14 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent
 {
-	final double variance;
+	private final double variance;
 
+	/**
+	 * Instantiates a new multi filter variance CRLB component.
+	 *
+	 * @param precision
+	 *            the precision
+	 */
 	public MultiFilterVarianceCRLBComponent(double precision)
 	{
 		this.variance = Filter.getDUpperSquaredLimit(precision);

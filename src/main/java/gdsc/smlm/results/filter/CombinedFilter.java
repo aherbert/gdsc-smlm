@@ -40,17 +40,36 @@ import gdsc.smlm.results.PeakResult;
  */
 public abstract class CombinedFilter extends DirectFilter
 {
-	protected Filter filter1, filter2;
+	/** The first filter. */
+	protected Filter filter1;
+
+	/** The second filter. */
+	protected Filter filter2;
+
+	/** The first filter, if it is a {@link DirectFilter}. */
 	@XStreamOmitField
 	protected DirectFilter dfilter1;
+
+	/** The second filter, if it is a {@link DirectFilter}. */
 	@XStreamOmitField
 	protected DirectFilter dfilter2;
 
+	/** The result from the first filter. */
 	@XStreamOmitField
 	protected int result1;
+
+	/** The result from the second filter. */
 	@XStreamOmitField
 	protected int result2;
 
+	/**
+	 * Instantiates a new combined filter.
+	 *
+	 * @param filter1
+	 *            the first filter
+	 * @param filter2
+	 *            the second filter
+	 */
 	public CombinedFilter(Filter filter1, Filter filter2)
 	{
 		this.filter1 = filter1;
@@ -89,7 +108,7 @@ public abstract class CombinedFilter extends DirectFilter
 		return sb.toString();
 	}
 
-	private void addText(StringBuilder sb, Filter f, String text)
+	private static void addText(StringBuilder sb, Filter f, String text)
 	{
 		if (f instanceof CombinedFilter)
 			sb.append("(");
@@ -143,7 +162,7 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	/**
-	 * Filter the result using filter1
+	 * Filter the result using filter1.
 	 *
 	 * @param peak
 	 *            The result
@@ -155,7 +174,7 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	/**
-	 * Filter the result using filter2
+	 * Filter the result using filter2.
 	 *
 	 * @param peak
 	 *            The result
@@ -167,7 +186,7 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	/**
-	 * Filter the result using filter1 if it is a DirectFilter, otherwise return true
+	 * Filter the result using filter1 if it is a DirectFilter, otherwise return true.
 	 *
 	 * @param peak
 	 *            The result
@@ -180,7 +199,7 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	/**
-	 * Filter the result using filter2 if it is a DirectFilter, otherwise return true
+	 * Filter the result using filter2 if it is a DirectFilter, otherwise return true.
 	 *
 	 * @param peak
 	 *            The result
@@ -396,7 +415,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * @param f1
 	 *            the first filter
 	 * @param f2
-	 *            the  second filter 
+	 *            the second filter
 	 * @return the filter
 	 */
 	protected abstract Filter createFilter(Filter f1, Filter f2);
@@ -467,7 +486,7 @@ public abstract class CombinedFilter extends DirectFilter
 		return combine(getLowerLimit(filter1, l1), getLowerLimit(filter2, l2));
 	}
 
-	private double[] getLowerLimit(Filter filter, double[] lower)
+	private static double[] getLowerLimit(Filter filter, double[] lower)
 	{
 		if (lower == null)
 		{
@@ -492,7 +511,7 @@ public abstract class CombinedFilter extends DirectFilter
 		return combine(getUpperLimit(filter1, u1), getUpperLimit(filter2, u2));
 	}
 
-	private double[] getUpperLimit(Filter filter, double[] upper)
+	private static double[] getUpperLimit(Filter filter, double[] upper)
 	{
 		if (upper == null)
 		{
@@ -544,7 +563,7 @@ public abstract class CombinedFilter extends DirectFilter
 		int[] s2 = filter2.getChromosomeParameters();
 		int[] s = new int[s1.length + s2.length];
 		System.arraycopy(s1, 0, s, 0, s1.length);
-		// Copy the next array but offset the index by the number of parameters in filter 1
+		// Copy the next array but offset the index by the number of parameters in first filter
 		// so that getParameterName(int) works OK
 		final int n1 = filter1.getNumberOfParameters();
 		for (int i = 0, j = s1.length; i < s2.length; i++, j++)

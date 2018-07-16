@@ -34,6 +34,12 @@ import gdsc.smlm.results.PeakResult;
  */
 public class XYWidthFilter extends WidthFilter implements IMultiFilter
 {
+	/**
+	 * Instantiates a new XY width filter.
+	 *
+	 * @param width
+	 *            the width
+	 */
 	public XYWidthFilter(double width)
 	{
 		super(width);
@@ -50,7 +56,7 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter
 	}
 
 	@Override
-	void setup(final double width)
+	protected void setup(final double width)
 	{
 		upperSigmaThreshold = Filter.getUpperLimit(width * width);
 		widthEnabled = (width != Float.POSITIVE_INFINITY);

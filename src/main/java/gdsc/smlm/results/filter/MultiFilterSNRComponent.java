@@ -28,8 +28,14 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterSNRComponent extends MultiFilterComponent
 {
-	final float snr;
+	private final float snr;
 
+	/**
+	 * Instantiates a new multi filter SNR component.
+	 *
+	 * @param snr
+	 *            the snr
+	 */
 	public MultiFilterSNRComponent(float snr)
 	{
 		this.snr = snr;

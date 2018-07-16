@@ -172,8 +172,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private volatile boolean finished = false;
 
-	static int WORKER_ID = 0;
-	int workerId;
+	private static int WORKER_ID = 0;
+	private int workerId;
 
 	private static byte FILTER_RANK_MINIMAL = (byte) 0;
 	private static byte FILTER_RANK_PRIMARY = (byte) 1;

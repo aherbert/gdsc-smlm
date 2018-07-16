@@ -48,6 +48,16 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	private float[] bestSignal;
 	private PeakResult[] bestPeakResults;
 
+	/**
+	 * Instantiates a new optimum distance result filter.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @param d
+	 *            the d
+	 * @param nMaxima
+	 *            the n maxima
+	 */
 	public OptimumDistanceResultFilter(List<float[]> filter, float d, int nMaxima)
 	{
 		super(filter, d, nMaxima);

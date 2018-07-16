@@ -39,6 +39,16 @@ import gdsc.smlm.results.PeakResult;
 @Deprecated
 public class DistanceResultFilter extends ResultFilter
 {
+	/**
+	 * Instantiates a new distance result filter.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @param d
+	 *            the d
+	 * @param nMaxima
+	 *            the n maxima
+	 */
 	public DistanceResultFilter(List<float[]> filter, float d, int nMaxima)
 	{
 		super(filter, d, nMaxima);

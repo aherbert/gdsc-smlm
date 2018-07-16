@@ -30,6 +30,15 @@ import java.util.Arrays;
  */
 public class MultiFilterComponentSetFactory
 {
+	/**
+	 * Creates the multi filter component set.
+	 *
+	 * @param components
+	 *            the components
+	 * @param size
+	 *            the size
+	 * @return the multi filter component set
+	 */
 	public static MultiFilterComponentSet create(MultiFilterComponent[] components, int size)
 	{
 		switch (size)

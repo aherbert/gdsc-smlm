@@ -37,7 +37,6 @@ import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import gdsc.smlm.data.config.FitProtosHelper;
-import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
@@ -1050,7 +1049,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSDMin()
 	{
-		double[] w = PSFHelper.getGaussian2DWxWy(fitConfiguration.psf);
+		double[] w = fitConfiguration.getGaussian2DWxWy();
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];
@@ -1090,7 +1089,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSDMax()
 	{
-		double[] w = PSFHelper.getGaussian2DWxWy(fitConfiguration.psf);
+		double[] w = fitConfiguration.getGaussian2DWxWy();
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];

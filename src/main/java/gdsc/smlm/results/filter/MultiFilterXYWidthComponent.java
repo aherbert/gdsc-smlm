@@ -28,8 +28,16 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterXYWidthComponent extends MultiFilterComponent
 {
-	final float lowerSigmaThreshold, upperSigmaThreshold;
+	private final float lowerSigmaThreshold, upperSigmaThreshold;
 
+	/**
+	 * Instantiates a new multi filter XY width component.
+	 *
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 */
 	public MultiFilterXYWidthComponent(double minWidth, double maxWidth)
 	{
 		if (minWidth > 0 && minWidth < 1)

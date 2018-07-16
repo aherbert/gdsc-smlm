@@ -28,10 +28,16 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterShiftComponent extends MultiFilterComponent
 {
-	final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+	private final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 
-	final float offset;
+	private final float offset;
 
+	/**
+	 * Instantiates a new multi filter shift component.
+	 *
+	 * @param shift
+	 *            the shift
+	 */
 	public MultiFilterShiftComponent(double shift)
 	{
 		this.offset = Filter.getUpperSquaredLimit(shift);

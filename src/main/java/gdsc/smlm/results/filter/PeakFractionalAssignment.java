@@ -30,6 +30,7 @@ import gdsc.core.match.ImmutableFractionalAssignment;
  */
 public class PeakFractionalAssignment extends ImmutableFractionalAssignment
 {
+	/** The peak result. */
 	public final PreprocessedPeakResult peakResult;
 
 	/**

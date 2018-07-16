@@ -39,13 +39,13 @@ import gdsc.smlm.results.PeakResult;
 public class PrecisionHysteresisFilter extends HysteresisFilter
 {
 	@XStreamAsAttribute
-	final double strictPrecision;
+	private final double strictPrecision;
 	@XStreamAsAttribute
-	final double range;
+	private final double range;
 	@XStreamOmitField
-	double lowerVariance;
+	private double lowerVariance;
 	@XStreamOmitField
-	double upperVariance;
+	private double upperVariance;
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
 
@@ -194,6 +194,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		}
 	}
 
+	/** The default range. */
 	static double[] defaultRange = new double[] { 0, 0, 0, 0, PrecisionFilter.DEFAULT_RANGE,
 			PrecisionFilter.DEFAULT_RANGE };
 

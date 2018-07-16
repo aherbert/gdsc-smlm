@@ -28,8 +28,16 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterZComponent extends MultiFilterComponent
 {
-	final float minZ, maxZ;
+	private final float minZ, maxZ;
 
+	/**
+	 * Instantiates a new multi filter Z component.
+	 *
+	 * @param minZ
+	 *            the min Z
+	 * @param maxZ
+	 *            the max Z
+	 */
 	public MultiFilterZComponent(double minZ, double maxZ)
 	{
 		this.minZ = (float) minZ;

@@ -42,7 +42,7 @@ import gdsc.smlm.results.PeakResult;
 public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 {
 	@XStreamOmitField
-	boolean useBackground = false;
+	private boolean useBackground = false;
 
 	/**
 	 * Instantiates a new multi hysteresis filter 2.

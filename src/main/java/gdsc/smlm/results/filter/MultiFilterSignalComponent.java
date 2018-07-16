@@ -28,8 +28,14 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterSignalComponent extends MultiFilterComponent
 {
-	final float signal;
+	private final float signal;
 
+	/**
+	 * Instantiates a new multi filter signal component.
+	 *
+	 * @param signal
+	 *            the signal
+	 */
 	public MultiFilterSignalComponent(double signal)
 	{
 		this.signal = (float) signal;

@@ -102,7 +102,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	// Extract the settings for convenience
 	private CalibrationWriter calibration;
-	PSF.Builder psf;
+	private PSF.Builder psf;
 	private FilterSettings.Builder filterSettings;
 	private FitSolverSettings.Builder fitSolverSettings;
 
@@ -332,7 +332,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Gets a new calibration writer. Any changes to the writer must be saved using
-	 * {@link #setCalibration(Calibration)}.
+	 * {@link #setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)}.
 	 *
 	 * @return the calibration writer
 	 */
@@ -854,7 +854,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Sets the PSF type.
 	 * <p>
 	 * If the type is astigmatism and the astigmatism model cannot be constructed from the current PSF parameters then
-	 * the result filtering state may be incorrect. It is safer to call {@link #setAstigmatismModel(AstigmatismModel)}
+	 * the result filtering state may be incorrect. It is safer to call
+	 * {@link #setAstigmatismModel(gdsc.smlm.data.config.PSFProtos.AstigmatismModel)}
 	 * which also updates the PSF type to astigmatism.
 	 *
 	 * @param psfType
@@ -2118,8 +2119,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * Gets the parameter absolute threshold for convergence.
 	 *
-	 * @return the parameter absolute threshold
-	 * @retParameterurn the parameter absolute threshold for convergence
+	 * @return the parameter absolute threshold for convergence
 	 */
 	public double getParameterAbsoluteThreshold()
 	{
@@ -4462,8 +4462,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * the case of an astigmatic Gaussian 2D PSF.
 	 * <p>
 	 * This settings is saved to the underlying configuration. If a PSF model is used (e.g. for an astigmatic Gaussian
-	 * 2D PSF) then {@link #setAstigmatismModel(AstigmatismModel)} should be called after setting the new PSF model
-	 * name.
+	 * 2D PSF) then {@link #setAstigmatismModel(gdsc.smlm.data.config.PSFProtos.AstigmatismModel)} should be called
+	 * after setting the new PSF model name.
 	 *
 	 * @param psfModelName
 	 *            the new PSF model name
@@ -4553,5 +4553,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public boolean is3D() throws ConfigurationException
 	{
 		return (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) ? getAstigmatismZModel() != null : false;
+	}
+	
+	/**
+	 * Gets the Gaussian 2D x-width and y-width for the PSF parameters.
+	 *
+	 * @return the Gaussian 2D x-width and y-width for the PSF parameters.
+	 * @throws ConfigurationException
+	 *             if the psf is null, or not a Gaussian 2D function
+	 */
+	double[] getGaussian2DWxWy()
+	{
+		return PSFHelper.getGaussian2DWxWy(psf);
 	}
 }

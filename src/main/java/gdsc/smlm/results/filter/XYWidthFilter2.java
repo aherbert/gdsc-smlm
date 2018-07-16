@@ -34,6 +34,15 @@ import gdsc.smlm.results.PeakResult;
  */
 public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
 {
+	
+	/**
+	 * Instantiates a new XY width filter 2.
+	 *
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 */
 	public XYWidthFilter2(double minWidth, double maxWidth)
 	{
 		super(minWidth, maxWidth);
@@ -58,7 +67,7 @@ public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
 	}
 
 	@Override
-	void setup(final double minWidth, double maxWidth)
+	protected void setup(final double minWidth, double maxWidth)
 	{
 		widthEnabled = false;
 		if (maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY)

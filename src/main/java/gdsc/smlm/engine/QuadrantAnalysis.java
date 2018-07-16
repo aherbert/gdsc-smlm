@@ -30,30 +30,91 @@ public class QuadrantAnalysis
 {
 	// Make these public for simplicity
 
+	/** The sum of the 4 quadrants using the X dividing lines (two diagonals through the centre) */
 	public double ABCD;
-	public double A, B, C, D;
+	/** The sum of the A quadrant using the X dividing lines (two diagonals through the centre) */
+	public double A;
+	/** The sum of the B quadrant using the X dividing lines (two diagonals through the centre) */
+	public double B;
+	/** The sum of the C quadrant using the X dividing lines (two diagonals through the centre) */
+	public double C;
+	/** The sum of the D quadrant using the X dividing lines (two diagonals through the centre) */
+	public double D;
+	/** The sum of the 4 quadrants using the + dividing lines (horizontal and vertical through the centre) */
 	public double ABCD2;
-	public double A2, B2, C2, D2;
+	/** The sum of the A quadrant using the + dividing lines (horizontal and vertical through the centre) */
+	public double A2;
+	/** The sum of the B quadrant using the + dividing lines (horizontal and vertical through the centre) */
+	public double B2;
+	/** The sum of the C quadrant using the + dividing lines (horizontal and vertical through the centre) */
+	public double C2;
+	/** The sum of the D quadrant using the + dividing lines (horizontal and vertical through the centre) */
+	public double D2;
 
+	/** {@link #A} + {@link #C} */
 	public double AC;
+	/** {@link #B} + {@link #D} */
 	public double BD;
+	/**
+	 * The asymmetry score for the + dividing lines.
+	 * Math.abs({@link #AC} - {@link #BD}) / {@link #ABCD}
+	 */
 	public double score1;
 
+	/** {@link #A2} + {@link #C2} */
 	public double AC2;
+	/** {@link #B2} + {@link #D2} */
 	public double BD2;
+	/**
+	 * The asymmetry score for the + dividing lines.
+	 * Math.abs({@link #AC2} - {@link #BD2}) / {@link #ABCD2}
+	 */
 	public double score2;
 
+	/** The vector direction defined by the assymetry in the quadrants */
 	public int[] vector;
+	/**
+	 * The maximum asymmetry score for quadrant analysis.
+	 * The max of {@link #score1} and {@link #score2}
+	 */
 	public double score;
 
+	/**
+	 * Proposed x coordinate for centre 1 created by {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public double x1;
+	/**
+	 * Proposed y coordinate for centre 1 created by {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public double y1;
+	/**
+	 * Proposed x coordinate for centre 2 created by {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public double x2;
+	/**
+	 * Proposed y coordinate for centre 2 created by {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public double y2;
 
+	/**
+	 * Proposed integer x coordinate for centre 1 created by
+	 * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public int xi1;
+	/**
+	 * Proposed integer y coordinate for centre 1 created by
+	 * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public int yi1;
+	/**
+	 * Proposed integer x coordinate for centre 2 created by
+	 * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public int xi2;
+	/**
+	 * Proposed integer y coordinate for centre 2 created by
+	 * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+	 */
 	public int yi2;
 
 	/**

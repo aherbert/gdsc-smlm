@@ -232,7 +232,8 @@ public class AttributePeakResult extends PeakResult
 	 * @param meanIntensity
 	 *            the mean intensity
 	 * @param params
-	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
+	 *            the params (must not be null and must have at least
+	 *            {@value gdsc.smlm.results.PeakResult#STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
 	 *            the params standard deviations (if not null must match the length of the params array)
 	 * @throws IllegalArgumentException

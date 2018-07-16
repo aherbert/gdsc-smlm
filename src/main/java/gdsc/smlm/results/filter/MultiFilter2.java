@@ -37,8 +37,30 @@ import gdsc.smlm.results.PeakResult;
 public class MultiFilter2 extends MultiFilter implements IMultiFilter
 {
 	@XStreamOmitField
-	boolean useBackground = false;
+	private boolean useBackground = false;
 
+	/**
+	 * Instantiates a new multi filter 2.
+	 *
+	 * @param signal
+	 *            the signal
+	 * @param snr
+	 *            the snr
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 * @param shift
+	 *            the shift
+	 * @param eshift
+	 *            the eshift
+	 * @param precision
+	 *            the precision
+	 * @param minZ
+	 *            the min Z
+	 * @param maxZ
+	 *            the max Z
+	 */
 	public MultiFilter2(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision, float minZ, float maxZ)
 	{

@@ -39,18 +39,30 @@ import gdsc.smlm.results.TraceManager;
  */
 public class TraceFilter extends Filter
 {
+	/** The default distance increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	private static final double DEFAULT_DISTANCE_INCREMENT = 0.05;
+	/** The default time increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	private static final int DEFAULT_TIME_INCREMENT = 1;
+	/** The default distance range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	private static final double DEFAULT_DISTANCE_RANGE = 2;
+	/** The default time range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	private static final int DEFAULT_TIME_RANGE = 10;
 
 	@XStreamAsAttribute
-	final double d;
+	private final double d;
 	@XStreamAsAttribute
-	final int t;
+	private final int t;
 	@XStreamOmitField
-	Set<PeakResult> ok;
+	private Set<PeakResult> ok;
 
+	/**
+	 * Instantiates a new trace filter.
+	 *
+	 * @param d
+	 *            the d
+	 * @param t
+	 *            the t
+	 */
 	public TraceFilter(double d, int t)
 	{
 		this.d = Math.max(0, d);

@@ -33,18 +33,32 @@ import gdsc.smlm.results.PeakResult;
  */
 public class CoordinateFilter extends DirectFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 0.01;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 1;
 
 	@XStreamAsAttribute
-	final float minX;
+	private final float minX;
 	@XStreamAsAttribute
-	final float maxX;
+	private final float maxX;
 	@XStreamAsAttribute
-	final float minY;
+	private final float minY;
 	@XStreamAsAttribute
-	final float maxY;
+	private final float maxY;
 
+	/**
+	 * Instantiates a new coordinate filter.
+	 *
+	 * @param minX
+	 *            the min X
+	 * @param maxX
+	 *            the max X
+	 * @param minY
+	 *            the min Y
+	 * @param maxY
+	 *            the max Y
+	 */
 	public CoordinateFilter(float minX, float maxX, float minY, float maxY)
 	{
 		if (maxX < minX)
@@ -74,6 +88,7 @@ public class CoordinateFilter extends DirectFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		// Ignore
 	}
 
 	@Override

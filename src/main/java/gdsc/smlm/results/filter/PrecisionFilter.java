@@ -36,17 +36,26 @@ import gdsc.smlm.results.PeakResult;
  */
 public class PrecisionFilter extends DirectFilter implements IMultiFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 1;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 10;
+	/** The default limit. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double UPPER_LIMIT = 70;
 
 	@XStreamAsAttribute
-	final double precision;
+	private final double precision;
 	@XStreamOmitField
-	double variance;
+	private double variance;
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
 
+	/**
+	 * Instantiates a new precision filter.
+	 *
+	 * @param precision
+	 *            the precision
+	 */
 	public PrecisionFilter(double precision)
 	{
 		this.precision = Math.max(0, precision);

@@ -37,11 +37,11 @@ import gdsc.smlm.results.PeakResult;
 public class SNRHysteresisFilter extends HysteresisFilter
 {
 	@XStreamAsAttribute
-	final float strictSnr;
+	private final float strictSnr;
 	@XStreamAsAttribute
-	final float range;
+	private final float range;
 	@XStreamOmitField
-	float weakSnr;
+	private float weakSnr;
 
 	/**
 	 * Instantiates a new SNR hysteresis filter.
@@ -164,7 +164,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 		}
 	}
 
-	static double[] defaultRange = new double[] { 0, 0, 0, 0, SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE };
+	private static double[] defaultRange = new double[] { 0, 0, 0, 0, SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE };
 
 	/*
 	 * (non-Javadoc)

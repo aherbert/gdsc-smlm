@@ -41,15 +41,15 @@ import gdsc.smlm.results.PeakResult;
 public class PrecisionHysteresisFilter2 extends HysteresisFilter
 {
 	@XStreamAsAttribute
-	final double strictPrecision;
+	private final double strictPrecision;
 	@XStreamAsAttribute
-	final double range;
+	private final double range;
 	@XStreamOmitField
-	double lowerVariance;
+	private double lowerVariance;
 	@XStreamOmitField
-	double upperVariance;
+	private double upperVariance;
 	@XStreamOmitField
-	boolean useBackground = false;
+	private boolean useBackground = false;
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
 

@@ -36,14 +36,15 @@ import gdsc.smlm.results.PeakResult;
  */
 public class ANRFilter extends DirectFilter
 {
+	/** The amplitude-to-noise ratio (ANR). */
 	@XStreamAsAttribute
-	final float anr;
+	private final float anr;
 
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
 
 	/**
-	 * Instantiates a new ANR filter.
+	 * Instantiates a new amplitude-to-noise ratio (ANR) filter.
 	 *
 	 * @param anr
 	 *            the amplitude-to-noise ratio (ANR) threshold
@@ -66,6 +67,15 @@ public class ANRFilter extends DirectFilter
 		return getANR(calculator, peak) >= this.anr;
 	}
 
+	/**
+	 * Gets the amplitude-to-noise ratio (ANR).
+	 *
+	 * @param calculator
+	 *            the calculator
+	 * @param peak
+	 *            the peak
+	 * @return the amplitude-to-noise ratio (ANR)
+	 */
 	static float getANR(Gaussian2DPeakResultCalculator calculator, PeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? calculator.getAmplitude(peak.getParameters()) / peak.getNoise()
@@ -86,6 +96,13 @@ public class ANRFilter extends DirectFilter
 		return 0;
 	}
 
+	/**
+	 * Gets the amplitude-to-noise ratio (ANR).
+	 *
+	 * @param peak
+	 *            the peak
+	 * @return the amplitude-to-noise ratio (ANR)
+	 */
 	static float getANR(PreprocessedPeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;

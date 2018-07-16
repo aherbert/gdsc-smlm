@@ -28,11 +28,35 @@ package gdsc.smlm.results.filter;
  */
 public class FilterScore implements Comparable<FilterScore>
 {
+	/** The filter. */
 	final public Filter filter;
-	final public double score, criteria;
+	
+	/** The score. */
+	final public double score;
+	
+	/** The criteria. */
+	final public double criteria;
+	
+	/** Flag to indicate if the criteria passed. */
 	final public boolean criteriaPassed;
+	
+	/** Flag to indicate if the filters are all same type. */
 	final public boolean allSameType;
 
+	/**
+	 * Instantiates a new filter score.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @param score
+	 *            the score
+	 * @param criteria
+	 *            the criteria
+	 * @param allSameType
+	 *            the all same type
+	 * @param criteriaPassed
+	 *            the criteria passed
+	 */
 	public FilterScore(Filter filter, double score, double criteria, boolean allSameType, boolean criteriaPassed)
 	{
 		this.filter = filter;
@@ -107,6 +131,13 @@ public class FilterScore implements Comparable<FilterScore>
 		}
 	}
 
+	/**
+	 * Compare the parameters to the other score to count the number of strongest parameters.
+	 *
+	 * @param that
+	 *            the other filter score
+	 * @return the count difference
+	 */
 	protected int compareParameters(FilterScore that)
 	{
 		// Get the filter with the strongest params

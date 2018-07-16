@@ -26,25 +26,35 @@ package gdsc.smlm.engine;
 import gdsc.smlm.filters.Spot;
 
 /**
- * Extends the Spot class with fields used during fitting
+ * Extends the Spot class with fields used during fitting.
  */
 class Candidate extends Spot
 {
-	/**
-	 * The index
-	 */
+	
+	/** The index. */
 	final public int index;
-	/**
-	 * Flag to indicate if the candidate has been fit
-	 */
+	
+	/** Flag to indicate if the candidate has been fit. */
 	public boolean fit = false;
 
 	// Results of fitting
+	
+	/** The params. */
 	public float[] params;
+	
+	/** The param deviations. */
 	public float[] paramDevs;
+	
+	/** The error. */
 	public double error;
+	
+	/** The noise. */
 	public float noise;
+	
+	/** The mean intensity. */
 	public float meanIntensity;
+	
+	/** The precision. */
 	public double precision;
 
 	/**

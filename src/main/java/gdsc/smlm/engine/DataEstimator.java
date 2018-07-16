@@ -48,7 +48,7 @@ public class DataEstimator
 
 	final private float[] data;
 	private Histogram h;
-	final int width, height;
+	private final int width, height;
 	private float fraction = 0.25f;
 	private int histogramSize = 2048;
 	private AutoThreshold.Method thresholdMethod = Method.DEFAULT;

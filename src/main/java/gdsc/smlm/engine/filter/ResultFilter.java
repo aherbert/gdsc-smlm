@@ -38,16 +38,30 @@ import gdsc.smlm.results.PeakResult;
 @Deprecated
 public abstract class ResultFilter
 {
+	/** The filter. */
 	protected List<float[]> filter;
+	
+	/** The distance squared. */
 	protected float d2;
+	
+	/** The number of maxima. */
 	protected int nMaxima;
 
+	/** The filtered count. */
 	protected int filteredCount = 0;
+	
+	/** The filtered fit results. */
 	protected FitResult[] filteredFitResults;
+	
+	/** The filtered indices. */
 	protected int[] filteredIndices;
+	
+	/** The peak results. */
 	protected List<PeakResult> peakResults;
 
 	/**
+	 * Instantiates a new result filter.
+	 *
 	 * @param filter
 	 *            The list of target coordinates (relative to the fitting region bounds)
 	 * @param d

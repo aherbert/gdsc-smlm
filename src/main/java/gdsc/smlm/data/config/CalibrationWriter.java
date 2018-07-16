@@ -234,7 +234,7 @@ public class CalibrationWriter extends CalibrationReader
 	 *
 	 * @param isEMCCD
 	 *            true if an EMCCD
-	 * @deprecated This has been replaced by {@link #setCameraType(CameraType)}
+	 * @deprecated This has been replaced by {@link #setCameraType(gdsc.smlm.data.config.CalibrationProtos.CameraType)}
 	 */
 	@Deprecated
 	public void setEmCCD(boolean isEMCCD)

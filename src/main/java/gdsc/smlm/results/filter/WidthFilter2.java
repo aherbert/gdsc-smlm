@@ -37,23 +37,43 @@ import gdsc.smlm.results.PeakResult;
  */
 public class WidthFilter2 extends DirectFilter implements IMultiFilter
 {
+	/** The default increment for the min width. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_MIN_INCREMENT = 0.02;
+	/** The default range for the min width. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_MIN_RANGE = 1;
 
+	/** The min width. */
 	@XStreamAsAttribute
-	final double minWidth;
+	protected final double minWidth;
+
+	/** The max width. */
 	@XStreamAsAttribute
-	final double maxWidth;
-	@XStreamOmitField
-	float lowerSigmaThreshold;
-	@XStreamOmitField
-	float upperSigmaThreshold;
-	@XStreamOmitField
-	boolean widthEnabled;
+	protected final double maxWidth;
 
+	/** The lower sigma threshold. */
 	@XStreamOmitField
-	Gaussian2DPeakResultCalculator calculator;
+	protected float lowerSigmaThreshold;
 
+	/** The upper sigma threshold. */
+	@XStreamOmitField
+	protected float upperSigmaThreshold;
+
+	/** The width enabled. */
+	@XStreamOmitField
+	protected boolean widthEnabled;
+
+	/** The calculator. */
+	@XStreamOmitField
+	protected Gaussian2DPeakResultCalculator calculator;
+
+	/**
+	 * Instantiates a new width filter 2.
+	 *
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 */
 	public WidthFilter2(double minWidth, double maxWidth)
 	{
 		// Only swap if max width is enabled
@@ -67,12 +87,22 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		this.maxWidth = Math.max(0, maxWidth);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#generateName()
+	 */
 	@Override
 	protected String generateName()
 	{
 		return "Width " + minWidth + "-" + maxWidth;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#setup(gdsc.smlm.results.MemoryPeakResults)
+	 */
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
@@ -86,12 +116,22 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#setup()
+	 */
 	@Override
 	public void setup()
 	{
 		setup(minWidth, maxWidth);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#setup(int)
+	 */
 	@Override
 	public void setup(int flags)
 	{
@@ -101,13 +141,26 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 			setup(minWidth, maxWidth);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#setup(int, gdsc.smlm.results.filter.FilterSetupData[])
+	 */
 	@Override
 	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
 		setup(flags);
 	}
 
-	void setup(final double minWidth, double maxWidth)
+	/**
+	 * Setup the filter.
+	 *
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 */
+	protected void setup(final double minWidth, double maxWidth)
 	{
 		widthEnabled = false;
 		if (maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY)
@@ -126,12 +179,22 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 			lowerSigmaThreshold = 0f;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
+	 */
 	@Override
 	public int getFilterSetupFlags() throws IllegalStateException
 	{
 		return (widthEnabled) ? 0 : IDirectFilter.NO_WIDTH;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
+	 */
 	@Override
 	public boolean accept(PeakResult peak)
 	{
@@ -139,12 +202,22 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		return sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
+	 */
 	@Override
 	public int getValidationFlags()
 	{
 		return V_X_SD_FACTOR;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
+	 */
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
@@ -305,60 +378,110 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		return new double[] { WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getSignal()
+	 */
 	@Override
 	public double getSignal()
 	{
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getSNR()
+	 */
 	@Override
 	public double getSNR()
 	{
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getMinWidth()
+	 */
 	@Override
 	public double getMinWidth()
 	{
 		return minWidth;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getMaxWidth()
+	 */
 	@Override
 	public double getMaxWidth()
 	{
 		return maxWidth;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getShift()
+	 */
 	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getEShift()
+	 */
 	@Override
 	public double getEShift()
 	{
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getPrecision()
+	 */
 	@Override
 	public double getPrecision()
 	{
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getPrecisionType()
+	 */
 	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.NONE;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getMinZ()
+	 */
 	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiFilter#getMaxZ()
+	 */
 	@Override
 	public double getMaxZ()
 	{

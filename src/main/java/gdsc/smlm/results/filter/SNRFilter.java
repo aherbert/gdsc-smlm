@@ -33,12 +33,20 @@ import gdsc.smlm.results.PeakResult;
  */
 public class SNRFilter extends DirectFilter implements IMultiFilter
 {
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 1;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 10;
 
 	@XStreamAsAttribute
-	final float snr;
+	private final float snr;
 
+	/**
+	 * Instantiates a new signal-to-noise ratio (SNR) filter.
+	 *
+	 * @param snr
+	 *            the signal-to-noise ratio (SNR)
+	 */
 	public SNRFilter(float snr)
 	{
 		this.snr = Math.max(0, snr);
@@ -47,6 +55,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		// Do nothing
 	}
 
 	@Override

@@ -139,8 +139,8 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#setCalibration(java.lang.String)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)
 	 */
 	@Override
 	public void setCalibration(Calibration calibration)
@@ -182,8 +182,9 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Gets the calibration writer with the current calibration (must not be null). The writer can be used to update the
-	 * calibration but changes are not saved until {@link #setCalibration(Calibration)} is called with the new
-	 * calibration.
+	 * calibration but changes are not saved until 
+	 * {@link gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)} 
+	 * is called with the new calibration.
 	 *
 	 * @return the calibration writer
 	 * @throws IllegalArgumentException
@@ -196,8 +197,9 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Gets the calibration writer with the current calibration, or a default calibration. The writer can be used to
-	 * update the calibration but changes are not saved until {@link #setCalibration(Calibration)} is called with the
-	 * new calibration.
+	 * update the calibration but changes are not saved until 
+	 * {@link gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)} 
+	 * is called with the new calibration.
 	 *
 	 * @return the calibration writer
 	 */

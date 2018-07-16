@@ -28,6 +28,7 @@ package gdsc.smlm.results.filter;
  */
 public class ShiftFilterSetupData implements FilterSetupData
 {
+	/** The shift. */
 	public final double shift;
 
 	/**

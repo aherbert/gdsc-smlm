@@ -39,57 +39,107 @@ import gdsc.smlm.results.PeakResult;
  */
 public class MultiFilter extends DirectFilter implements IMultiFilter
 {
+
+	/** The signal. */
 	@XStreamAsAttribute
 	final double signal;
+
+	/** The snr. */
 	@XStreamAsAttribute
 	final float snr;
+
+	/** The min width. */
 	@XStreamAsAttribute
 	final double minWidth;
+
+	/** The max width. */
 	@XStreamAsAttribute
 	final double maxWidth;
+
+	/** The shift. */
 	@XStreamAsAttribute
 	final double shift;
+
+	/** The eshift. */
 	@XStreamAsAttribute
 	final double eshift;
+
+	/** The precision. */
 	@XStreamAsAttribute
 	final double precision;
+
+	/** The min Z. */
 	@XStreamAsAttribute
 	final float minZ;
+
+	/** The max Z. */
 	@XStreamAsAttribute
 	final float maxZ;
 
+	/** The signal threshold. */
 	@XStreamOmitField
 	float signalThreshold;
+
+	/** The lower sigma threshold. */
 	@XStreamOmitField
 	float lowerSigmaThreshold;
+
+	/** The upper sigma threshold. */
 	@XStreamOmitField
 	float upperSigmaThreshold;
+
+	/** The offsetx. */
 	@XStreamOmitField
 	float offsetx;
+
+	/** The offsety. */
 	@XStreamOmitField
 	float offsety;
+
+	/** The eoffset. */
 	@XStreamOmitField
 	float eoffset;
+
+	/** The variance. */
 	@XStreamOmitField
 	double variance;
+
+	/** The calculator. */
 	@XStreamOmitField
 	Gaussian2DPeakResultCalculator calculator;
+
+	/** The width enabled. */
 	@XStreamOmitField
 	boolean widthEnabled;
+
+	/** The flags. */
 	@XStreamOmitField
 	int flags;
+
+	/** The z enabled. */
 	@XStreamOmitField
 	boolean zEnabled;
+
+	/** The components. */
 	@XStreamOmitField
 	MultiFilterComponentSet components = null;
+
+	/** The components for no width and shift. */
 	@XStreamOmitField
 	MultiFilterComponentSet components_NoWidth_Shift = null;
+	/** The components for width and shift. */
 	@XStreamOmitField
 	MultiFilterComponentSet components_Width_Shift = null;
+	/** The components for no width and no shift. */
 	@XStreamOmitField
 	MultiFilterComponentSet components_NoWidth_NoShift = null;
+	/** The components for width and no shift. */
 	@XStreamOmitField
 	MultiFilterComponentSet components_Width_NoShift = null;
+	/**
+	 * The components for width and no shift copied into a larger array
+	 * so that the shift component can be set at position 0
+	 */
 	@XStreamOmitField
 	MultiFilterComponentSet components_Shift0 = null;
 	@XStreamOmitField
@@ -97,6 +147,28 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	private FilterSetupData[] filterSetupData;
 
+	/**
+	 * Instantiates a new multi filter.
+	 *
+	 * @param signal
+	 *            the signal
+	 * @param snr
+	 *            the snr
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 * @param shift
+	 *            the shift
+	 * @param eshift
+	 *            the eshift
+	 * @param precision
+	 *            the precision
+	 * @param minZ
+	 *            the min Z
+	 * @param maxZ
+	 *            the max Z
+	 */
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision, float minZ, float maxZ)
 	{
@@ -158,6 +230,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		return (minZ != 0 || maxZ != 0) && minZ <= maxZ;
 	}
 
+	/**
+	 * Sets up the calculator.
+	 *
+	 * @param peakResults
+	 *            the results
+	 */
 	protected void setupCalculator(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
@@ -274,11 +352,27 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		//		variance = Filter.getDUpperSquaredLimit(precision);
 	}
 
+	/**
+	 * Creates the precision component.
+	 *
+	 * @return the precision component
+	 */
 	protected MultiFilterComponent createPrecisionComponent()
 	{
 		return new MultiFilterVarianceComponent(precision);
 	}
 
+	/**
+	 * Removes the component from the input array using the class.
+	 *
+	 * @param in
+	 *            the input
+	 * @param size
+	 *            the size
+	 * @param clazz
+	 *            the clazz
+	 * @return the new array
+	 */
 	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size,
 			Class<? extends MultiFilterComponent> clazz)
 	{
@@ -367,6 +461,13 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		return true;
 	}
 
+	/**
+	 * Gets the variance.
+	 *
+	 * @param peak
+	 *            the peak
+	 * @return the variance
+	 */
 	protected double getVariance(PeakResult peak)
 	{
 		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
@@ -558,12 +659,18 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		}
 	}
 
+	/**
+	 * Gets the precision paramater type.
+	 *
+	 * @return the precision paramater type
+	 */
 	protected ParameterType getPrecisionParamaterType()
 	{
 		return ParameterType.PRECISION;
 	}
 
-	static double[] defaultRange = new double[] { SignalFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE,
+	/** The default range. */
+	protected static double[] defaultRange = new double[] { SignalFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE,
 			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
 			EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
 			ZCoordinateFilter.DEFAULT_RANGE };

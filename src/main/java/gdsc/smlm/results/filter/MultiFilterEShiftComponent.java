@@ -28,10 +28,16 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterEShiftComponent extends MultiFilterComponent
 {
-	final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+	private final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 
-	final float eoffset;
+	private final float eoffset;
 
+	/**
+	 * Instantiates a new multi filter E shift component.
+	 *
+	 * @param eshift
+	 *            the eshift
+	 */
 	public MultiFilterEShiftComponent(double eshift)
 	{
 		this.eoffset = Filter.getUpperSquaredLimit(eshift);

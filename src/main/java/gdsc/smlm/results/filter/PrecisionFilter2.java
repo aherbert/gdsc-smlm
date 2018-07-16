@@ -39,14 +39,20 @@ import gdsc.smlm.results.PeakResult;
 public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
-	final double precision;
+	private final double precision;
 	@XStreamOmitField
-	double variance;
+	private double variance;
 	@XStreamOmitField
-	boolean useBackground = false;
+	private boolean useBackground = false;
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
 
+	/**
+	 * Instantiates a new precision filter 2.
+	 *
+	 * @param precision
+	 *            the precision
+	 */
 	public PrecisionFilter2(double precision)
 	{
 		this.precision = Math.max(0, precision);

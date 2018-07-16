@@ -35,13 +35,19 @@ import gdsc.smlm.results.filter.MultiPathFilter;
  */
 public class FitParameters
 {
+	/**
+	 * The fit task.
+	 */
 	public enum FitTask
 	{
 		//@formatter:off
+		/** PSF fitting */
 		PSF_FITTING{ @Override
 		public String getName() { return "PSF Fitting"; }},
+		/** Maxima identification */
 		MAXIMA_IDENITIFICATION{ @Override
 		public String getName() { return "Maxima Identification"; }},
+		/** Benchmarking */
 		BENCHMARKING{ @Override
 		public String getName() { return "Benchmarking"; }};
 		//@formatter:on

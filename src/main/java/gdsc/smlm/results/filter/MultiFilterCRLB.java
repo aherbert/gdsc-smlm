@@ -33,6 +33,29 @@ import gdsc.smlm.results.PeakResult;
  */
 public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 {
+	
+	/**
+	 * Instantiates a new multi filter CRLB.
+	 *
+	 * @param signal
+	 *            the signal
+	 * @param snr
+	 *            the snr
+	 * @param minWidth
+	 *            the min width
+	 * @param maxWidth
+	 *            the max width
+	 * @param shift
+	 *            the shift
+	 * @param eshift
+	 *            the eshift
+	 * @param precision
+	 *            the precision
+	 * @param minZ
+	 *            the min Z
+	 * @param maxZ
+	 *            the max Z
+	 */
 	public MultiFilterCRLB(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision, float minZ, float maxZ)
 	{

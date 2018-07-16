@@ -31,35 +31,64 @@ import gdsc.smlm.data.NamedObject;
 public enum ParameterType implements NamedObject
 {
 	//@formatter:off
-	SIGNAL("Signal"),
-	SIGNAL_RANGE("Signal Range"),
-	SNR("Signal-to-Noise Ratio","SNR"),
-	SNR_RANGE("Signal-to-Noise Ratio Range","SNR Range"),
-	MIN_WIDTH("Min Width"),
-	MIN_WIDTH_RANGE("Min Width Range"),
-	MAX_WIDTH("Max Width"),
-	MAX_WIDTH_RANGE("Max Width Range"),
-	SHIFT("Shift"),
-	SHIFT_RANGE("Shift Range"),
-	ESHIFT("Euclidian Shift","EShift"),
-	PRECISION("Precision"),
-	PRECISION_RANGE("Precision Range"),
-	PRECISION2("Precision using local background","Precision2"),
-	PRECISION2_RANGE("Precision using local background Range","Precision2 Range"),
-	PRECISION_CRLB("Precision using CRLB","Precision CRLB"),
-	PRECISION_CRLB_RANGE("Precision using CRLB Range","Precision CRLB Range"),
-	ANR("Amplitude-to-Noise Ratio","ANR"),
-	SBR("Signal-to-Background Ratio","SBR"),
-	DISTANCE_THRESHOLD("Distance Threshold","D-threshold"),
-	DISTANCE_THRESHOLD_MODE("Distance Threshold Mode","D-threshold mode"),
-	TIME_THRESHOLD("Time Threshold","T-threshold"),
-	TIME_THRESHOLD_MODE("Time Threshold Mode","T-threshold mode"),
-	MIN_X("Min X"),
-	MAX_X("Max X"),
-	MIN_Y("Min Y"),
-	MAX_Y("Max Y"),
-	MIN_Z("Min Z"),
-	MAX_Z("Max Z"),
+	/** Signal */
+    SIGNAL("Signal"),
+    /** Signal Range */
+    SIGNAL_RANGE("Signal Range"),
+    /** Signal-to-Noise Ratio */
+    SNR("Signal-to-Noise Ratio","SNR"),
+    /** Signal-to-Noise Ratio Range */
+    SNR_RANGE("Signal-to-Noise Ratio Range","SNR Range"),
+    /** Min Width */
+    MIN_WIDTH("Min Width"),
+    /** Min Width Range */
+    MIN_WIDTH_RANGE("Min Width Range"),
+    /** Max Width */
+    MAX_WIDTH("Max Width"),
+    /** Max Width Range */
+    MAX_WIDTH_RANGE("Max Width Range"),
+    /** Shift */
+    SHIFT("Shift"),
+    /** Shift Range */
+    SHIFT_RANGE("Shift Range"),
+    /** Euclidian Shift */
+    ESHIFT("Euclidian Shift","EShift"),
+    /** Precision */
+    PRECISION("Precision"),
+    /** Precision Range */
+    PRECISION_RANGE("Precision Range"),
+    /** Precision using local background */
+    PRECISION2("Precision using local background","Precision2"),
+    /** Precision using local background Range */
+    PRECISION2_RANGE("Precision using local background Range","Precision2 Range"),
+    /** Precision using Cramér–Rao Lower Bounds (CRLB) */
+    PRECISION_CRLB("Precision using CRLB","Precision CRLB"),
+    /** Precision using Cramér–Rao Lower Bounds (CRLB) Range */
+    PRECISION_CRLB_RANGE("Precision using CRLB Range","Precision CRLB Range"),
+    /** Amplitude-to-Noise Ratio */
+    ANR("Amplitude-to-Noise Ratio","ANR"),
+    /** Signal-to-Background Ratio */
+    SBR("Signal-to-Background Ratio","SBR"),
+    /** Distance Threshold */
+    DISTANCE_THRESHOLD("Distance Threshold","D-threshold"),
+    /** Distance Threshold Mode */
+    DISTANCE_THRESHOLD_MODE("Distance Threshold Mode","D-threshold mode"),
+    /** Time Threshold */
+    TIME_THRESHOLD("Time Threshold","T-threshold"),
+    /** Time Threshold Mode */
+    TIME_THRESHOLD_MODE("Time Threshold Mode","T-threshold mode"),
+    /** Min X */
+    MIN_X("Min X"),
+    /** Max X */
+    MAX_X("Max X"),
+    /** Min Y */
+    MIN_Y("Min Y"),
+    /** Max Y */
+    MAX_Y("Max Y"),
+    /** Min Z */
+    MIN_Z("Min Z"),
+    /** Max Z */
+    MAX_Z("Max Z"),
 	;
 
 	//@formatter:on

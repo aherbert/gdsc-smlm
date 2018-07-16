@@ -60,11 +60,8 @@ class CandidateList
 		}
 	}
 
-	final static CandidateComparator comp;
-	static
-	{
-		comp = new CandidateComparator();
-	}
+	/** The candidate comparator. */
+	private final static CandidateComparator comp = new CandidateComparator();
 
 	private int size = 0;
 	private Candidate[] list = null;

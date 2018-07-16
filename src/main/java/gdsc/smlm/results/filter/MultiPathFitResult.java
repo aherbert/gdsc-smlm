@@ -33,6 +33,9 @@ package gdsc.smlm.results.filter;
  */
 public class MultiPathFitResult implements Cloneable
 {
+	/**
+	 * The fit result.
+	 */
 	public static class FitResult implements Cloneable
 	{
 		/**
@@ -51,27 +54,56 @@ public class MultiPathFitResult implements Cloneable
 		 */
 		final public Object data;
 
+		/**
+		 * Instantiates a new fit result.
+		 *
+		 * @param status
+		 *            the status
+		 */
 		public FitResult(int status)
 		{
 			this(status, null);
 		}
 
+		/**
+		 * Instantiates a new fit result.
+		 *
+		 * @param status
+		 *            the status
+		 * @param data
+		 *            the data
+		 */
 		public FitResult(int status, Object data)
 		{
 			this.status = status;
 			this.data = data;
 		}
 
+		/**
+		 * Gets the status.
+		 *
+		 * @return the status
+		 */
 		public int getStatus()
 		{
 			return status;
 		}
 
+		/**
+		 * Gets the results.
+		 *
+		 * @return the results
+		 */
 		public PreprocessedPeakResult[] getResults()
 		{
 			return results;
 		}
 
+		/**
+		 * Gets the data.
+		 *
+		 * @return the data
+		 */
 		public Object getData()
 		{
 			return data;

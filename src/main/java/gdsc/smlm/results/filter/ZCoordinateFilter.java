@@ -34,15 +34,27 @@ import gdsc.smlm.results.PeakResult;
 public class ZCoordinateFilter extends DirectFilter
 {
 	// Assuming units are in pixels with 100nm/px set the default range as +/- 1000nm
+
+	/** The default increment. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_INCREMENT = 0.1;
+	/** The default range. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double DEFAULT_RANGE = 10;
+	/** The default limit. Used for {@link gdsc.smlm.ga.Chromosome} interface. */
 	public static final double UPPER_LIMIT = 50; // This may need to be changed
 
 	@XStreamAsAttribute
-	final float minZ;
+	private final float minZ;
 	@XStreamAsAttribute
-	final float maxZ;
+	private final float maxZ;
 
+	/**
+	 * Instantiates a new z coordinate filter.
+	 *
+	 * @param minZ
+	 *            the min Z
+	 * @param maxZ
+	 *            the max Z
+	 */
 	public ZCoordinateFilter(float minZ, float maxZ)
 	{
 		if (maxZ < minZ)
@@ -64,6 +76,7 @@ public class ZCoordinateFilter extends DirectFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		// Ignore
 	}
 
 	@Override
