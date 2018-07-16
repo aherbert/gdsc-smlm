@@ -35,12 +35,12 @@ import gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class MedianFilterTest extends AbstractFilterTest
 {
-	private int InternalITER3 = 200;
-	private int InternalITER = 20;
-	private int ITER3 = 100;
-	private int ITER = 10;
+	private static int InternalITER3 = 200;
+	private static int InternalITER = 20;
+	private static int ITER3 = 100;
+	private static int ITER = 10;
 
-	private void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
+	private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
 	{
 		try
 		{
@@ -63,7 +63,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
+	private static void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -85,7 +85,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
+	private static void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -176,7 +176,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
+	private static void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -321,7 +321,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg,
+	private static void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg,
 			MedianFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -408,7 +408,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void floatCompareBlockMedianNxNAndRollingMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+	private static void floatCompareBlockMedianNxNAndRollingMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -636,7 +636,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareBlockMedian3x3AndBlockMedianNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3AndBlockMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+	private static void floatCompareBlockMedian3x3AndBlockMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);
@@ -719,7 +719,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareRollingMedian3x3AndRollingMedianNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingMedian3x3AndRollingMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+	private static void floatCompareRollingMedian3x3AndRollingMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = createData(rg, width, height);

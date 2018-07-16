@@ -70,6 +70,4 @@ public abstract class DataFilter
 	public abstract void filterInternal(float[] data, int width, int height, float boxSize);
 
 	public abstract void setWeights(float[] weights, int width, int height);
-	
-	public abstract boolean isSumFilter();
 }

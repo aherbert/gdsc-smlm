@@ -103,13 +103,13 @@ public abstract class WeightedFilterTest
 			}
 	}
 
-	private static float[] getOffsets(DataFilter filter1)
+	protected static float[] getOffsets(DataFilter filter1)
 	{
 		float[] offsets = (filter1.isInterpolated) ? WeightedFilterTest.offsets : new float[1];
 		return offsets;
 	}
 
-	private static int[] getBoxSizes(DataFilter filter1)
+	protected static int[] getBoxSizes(DataFilter filter1)
 	{
 		if (filter1.minBoxSize == 0)
 			return boxSizes;
@@ -181,94 +181,7 @@ public abstract class WeightedFilterTest
 			}
 	}
 
-	@Test
-	public void filterPerformsWeightedFiltering()
-	{
-		DataFilter filter = createDataFilter();
-		//org.junit.Assume.assumeFalse(filter.isSumFilter());
-
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-
-		float[] offsets = getOffsets(filter);
-		int[] boxSizes = getBoxSizes(filter);
-
-		TDoubleArrayList l1 = new TDoubleArrayList();
-
-		for (int width : primes)
-			for (int height : primes)
-			{
-				float[] data = createData(width, height, rg);
-				l1.reset();
-
-				// Uniform weights
-				float[] w1 = new float[width * height];
-				Arrays.fill(w1, 1f);
-				float[] w = new float[width * height];
-				Arrays.fill(w, 0.5f);
-
-				// Weights simulating the variance of sCMOS pixels
-				float[] w2 = new float[width * height];
-				for (int i = 0; i < w2.length; i++)
-				{
-					w2[i] = (float) (1.0 / Math.max(0.01, rg.nextGaussian() * 0.2 + 2));
-				}
-
-				for (int boxSize : boxSizes)
-					for (float offset : offsets)
-						for (boolean internal : checkInternal)
-						{
-							// The filter f(x) should compute:
-							//   f(vi * wi) / (f(wi) * f(1)) 
-							// For each pixel over the range around the pixel (vi).
-							// Use of f(1) handles sum filters.
-
-							filter.setWeights(null, width, height);
-
-							float[] f1 = filter(w1, width, height, boxSize - offset, internal, filter);
-							
-							// Uniform weights
-							testfilterPerformsWeightedFiltering(filter, width, height, data, w, boxSize, offset, internal, f1);
-							
-							// Random weights.
-							// This fails for the Gaussian and Kernel filters
-							testfilterPerformsWeightedFiltering(filter, width, height, data, w2, boxSize, offset, internal, f1);
-						}
-			}
-	}
-
-	private static void testfilterPerformsWeightedFiltering(DataFilter filter, int width, int height, float[] data, float[] w, int boxSize, float offset,
-			boolean internal, float[] f1) throws AssertionError
-	{
-		// The filter f(x) should compute:
-		//   f(vi * wi) / (f(wi) * f(1)) 
-		// For each pixel over the range around the pixel (vi).
-		// Use of f(1) handles sum filters.
-		
-		filter.setWeights(null, width, height);
-		float[] fWi = filter(w, width, height, boxSize - offset, internal, filter);
-		float[] e = data.clone();
-		for (int i = 0; i < e.length; i++)
-			e[i] = data[i] * w[i];
-		float[] fViWi = filter(e, width, height, boxSize - offset, internal, filter);
-		for (int i = 0; i < e.length; i++)
-			e[i] = fViWi[i] / (fWi[i] / f1[i]);
-
-		filter.setWeights(w, width, height);
-		float[] o = filter(data, width, height, boxSize - offset, internal, filter);
-
-		try
-		{
-			TestAssert.assertArrayEqualsRelative(e, o, 1e-4f);
-		}
-		catch (AssertionError ex)
-		{
-			String msg = String.format("%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
-					height, boxSize - offset, internal);
-			throw new AssertionError(msg, ex);
-		}
-	}
-
-	private static float[] filter(float[] data, int width, int height, float boxSize, boolean internal,
+	protected static float[] filter(float[] data, int width, int height, float boxSize, boolean internal,
 			DataFilter filter)
 	{
 		float[] data1 = data.clone();
@@ -283,13 +196,13 @@ public abstract class WeightedFilterTest
 		return data1;
 	}
 
-	private static double getMean(float[] data, int width, int height, float boxSize, boolean internal,
+	protected static double getMean(float[] data, int width, int height, float boxSize, boolean internal,
 			DataFilter filter)
 	{
 		return Maths.sum(filter(data, width, height, boxSize, internal, filter)) / data.length;
 	}
 
-	private static double testMean(float[] data, int width, int height, float boxSize, boolean internal,
+	protected static double testMean(float[] data, int width, int height, float boxSize, boolean internal,
 			DataFilter filter, String title, double u1, double tol)
 	{
 		double u2 = getMean(data, width, height, boxSize, internal, filter);

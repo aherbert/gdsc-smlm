@@ -36,37 +36,65 @@ import gdsc.test.TestSettings.TestComplexity;
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class SumFilterTest extends AbstractFilterTest
 {
-	private int InternalITER3 = 500;
-	private int InternalITER = 50;
-	private int ITER3 = 200;
-	private int ITER = 20;
+	private static int InternalITER3 = 500;
+	private static int InternalITER = 50;
+	private static int ITER3 = 200;
+	private static int ITER = 20;
 
-	private void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
+	/**
+	 * Check the float arrays are equal, else fail with a formatted message
+	 *
+	 * @param data1
+	 *            the data 1
+	 * @param data2
+	 *            the data 2
+	 * @param boxSize
+	 *            the box size used for filtering
+	 * @param format
+	 *            the format
+	 * @param args
+	 *            the args
+	 */
+	private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
 	{
 		TestAssert.assertArrayEqualsRelative(data1, data2, 1e-4, format, args);
 	}
 
-	private void intArrayEquals(int[] data1, int[] data2, int boxSize, String format, Object... args)
+	/**
+	 * Check the int arrays are equal, else fail with a formatted message
+	 *
+	 * @param data1
+	 *            the data 1
+	 * @param data2
+	 *            the data 2
+	 * @param boxSize
+	 *            the box size used for filtering
+	 * @param format
+	 *            the format
+	 * @param args
+	 *            the args
+	 */
+	private static void intArrayEquals(int[] data1, int[] data2, int boxSize, String format, Object... args)
 	{
 		TestAssert.assertArrayEquals(data1, data2, format, args);
 	}
 
-	private float[] floatCreateData(RandomGenerator rg, int width, int height)
+	private static float[] floatCreateData(RandomGenerator rg, int width, int height)
 	{
 		return createData(rg, width, height);
 	}
 
-	private int[] intCreateData(RandomGenerator rg, int width, int height)
+	private static int[] intCreateData(RandomGenerator rg, int width, int height)
 	{
 		return createIntData(rg, width, height);
 	}
 
-	private ArrayList<float[]> floatCreateSpeedData(int iter)
+	private static ArrayList<float[]> floatCreateSpeedData(int iter)
 	{
 		return getSpeedData(iter);
 	}
 
-	private ArrayList<int[]> intCreateSpeedData(int iter)
+	private static ArrayList<int[]> intCreateSpeedData(int iter)
 	{
 		return getIntSpeedData(iter);
 	}
@@ -84,8 +112,8 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
-			int width, int height, int boxSize) throws ArrayComparisonFailure
+	private static void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -108,8 +136,8 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
-			int width, int height, int boxSize) throws ArrayComparisonFailure
+	private static void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg,
+			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -131,8 +159,8 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private static void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -156,8 +184,8 @@ public class SumFilterTest extends AbstractFilterTest
 							height, boxSize);
 	}
 
-	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
-			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
+	private static void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
+			RandomGenerator rg, SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -389,8 +417,8 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -661,7 +689,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+	private static void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
@@ -883,7 +911,7 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void floatCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
@@ -907,7 +935,7 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void floatCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
@@ -1277,8 +1305,8 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private static void floatCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -1361,8 +1389,8 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -1446,8 +1474,8 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
@@ -1718,7 +1746,7 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
@@ -1742,7 +1770,7 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
@@ -1765,7 +1793,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
@@ -1790,7 +1818,7 @@ public class SumFilterTest extends AbstractFilterTest
 							height, boxSize);
 	}
 
-	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
+	private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
@@ -2023,8 +2051,8 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
@@ -2295,8 +2323,8 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private static void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
@@ -2517,8 +2545,8 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private static void intCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
@@ -2541,8 +2569,8 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private static void intCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
@@ -2908,7 +2936,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
+	private static void intCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
@@ -2992,8 +3020,8 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
@@ -3077,8 +3105,8 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);

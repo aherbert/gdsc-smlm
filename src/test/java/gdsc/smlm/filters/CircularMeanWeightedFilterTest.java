@@ -24,7 +24,7 @@
 package gdsc.smlm.filters;
 
 @SuppressWarnings({ "javadoc" })
-public class CircularMeanWeightedFilterTest extends WeightedFilterTest
+public class CircularMeanWeightedFilterTest extends WeightedMeanFilterTest
 {
 	@Override
 	DataFilter createDataFilter()
@@ -49,12 +49,6 @@ public class CircularMeanWeightedFilterTest extends WeightedFilterTest
 			public void setWeights(float[] w, int width, int height)
 			{
 				f.setWeights(w, width, height);
-			}
-			
-			@Override
-			public boolean isSumFilter()
-			{
-				return false;
 			}
 		};
 	}

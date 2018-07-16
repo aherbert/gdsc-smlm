@@ -59,7 +59,7 @@ public class FHTFilterTest
 		canFilter(Operation.DECONVOLUTION);
 	}
 
-	private void canFilter(Operation operation)
+	private static void canFilter(Operation operation)
 	{
 		int size = 16;
 		int ex = 5, ey = 7;
@@ -162,7 +162,7 @@ public class FHTFilterTest
 		}
 	}
 
-	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
+	private static FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
 	{
 		ByteProcessor bp = new ByteProcessor(size, size);
 		bp.setColor(255);

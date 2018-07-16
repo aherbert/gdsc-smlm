@@ -114,11 +114,11 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 		@Override
 		public void setWeights(float[] weights, int width, int height)
 		{
-
+			// Ignore weights
 		}
 	}
 
-	private void sumIsCorrect(int[] data, int width, int height, int boxSize, boolean internal,
+	private static void sumIsCorrect(int[] data, int width, int height, int boxSize, boolean internal,
 			BlockSumDataFilter filter) throws ArrayComparisonFailure
 	{
 		int[] data1 = data.clone();
@@ -138,7 +138,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void checkIsCorrect(BlockSumDataFilter filter)
+	private static void checkIsCorrect(BlockSumDataFilter filter)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 

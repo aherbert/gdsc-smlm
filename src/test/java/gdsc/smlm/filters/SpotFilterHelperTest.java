@@ -35,7 +35,7 @@ import gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class SpotFilterHelperTest
 {
-	private Spot[] createData(RandomGenerator rg, int width, int height, int n)
+	private static Spot[] createData(RandomGenerator rg, int width, int height, int n)
 	{
 		if (n == 0)
 			return new Spot[0];
@@ -87,7 +87,7 @@ public class SpotFilterHelperTest
 		}
 	}
 
-	private int[] countNeighbours(Spot[] spots, int width, int height, int box)
+	private static int[] countNeighbours(Spot[] spots, int width, int height, int box)
 	{
 		short[] data = new short[width * height];
 		for (int i = 0; i < spots.length; i++)

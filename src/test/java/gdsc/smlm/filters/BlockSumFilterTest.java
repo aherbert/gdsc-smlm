@@ -206,15 +206,9 @@ public class BlockSumFilterTest extends AbstractFilterTest
 		{
 			f.setWeights(w, width, height);
 		}
-		
-		@Override
-		public boolean isSumFilter()
-		{
-			return true;
-		}
 	}
 
-	private void sumIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
+	private static void sumIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
 			BlockSumDataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
@@ -236,7 +230,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void weightedSumIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
+	private static void weightedSumIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
 			BlockSumDataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
@@ -265,7 +259,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void checkIsCorrect(BlockSumDataFilter filter)
+	private static void checkIsCorrect(BlockSumDataFilter filter)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		ExponentialDistribution ed = new ExponentialDistribution(rg, 57,

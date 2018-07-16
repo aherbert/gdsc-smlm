@@ -209,15 +209,9 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		{
 			f.setWeights(w, width, height);
 		}
-		
-		@Override
-		public boolean isSumFilter()
-		{
-			return false;
-		}
 	}
 
-	private void meanIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
+	private static void meanIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
 			BlockMeanDataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
@@ -239,7 +233,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void weightedMeanIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
+	private static void weightedMeanIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
 			BlockMeanDataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
@@ -268,7 +262,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private void checkIsCorrect(BlockMeanDataFilter filter)
+	private static void checkIsCorrect(BlockMeanDataFilter filter)
 	{
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		ExponentialDistribution ed = new ExponentialDistribution(rg, 57,

@@ -46,7 +46,7 @@ import ij.process.ImageProcessor;
 @SuppressWarnings({ "javadoc" })
 public class JTransformsTest
 {
-	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
+	private static FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
 	{
 		ByteProcessor bp = new ByteProcessor(size, size);
 		bp.setColor(255);
@@ -74,7 +74,7 @@ public class JTransformsTest
 		canComputeUsingFFT(true);
 	}
 
-	private void canComputeUsingFFT(boolean convolution)
+	private static void canComputeUsingFFT(boolean convolution)
 	{
 		int size = 16;
 		int ex = 5, ey = 7;
