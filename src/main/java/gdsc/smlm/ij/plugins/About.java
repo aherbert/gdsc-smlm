@@ -53,13 +53,19 @@ public class About implements PlugIn, MacroExtension
 	public static String HELP_URL = "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
 	private static String YEAR = "2016";
 
+	/**
+	 * The configure option.
+	 */
 	enum ConfigureOption
 	{
 		//@formatter:off
+		/** Install */
 		INSTALL{ @Override
 		public String getName() { return "Install"; }},
+		/** Remove */
 		REMOVE{ @Override
 		public String getName() { return "Remove"; }},
+		/** Edit */
 		EDIT{ @Override
 		public String getName() { return "Edit & Install"; }};
 		//@formatter:on

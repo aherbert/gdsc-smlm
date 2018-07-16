@@ -153,11 +153,19 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private ImagePlus imp;
 
 	// Allow other plugins to access the results
+
+	/** The rank results id. */
 	static int rankResultsId = 0;
+	/** The rank results. */
 	static TIntObjectHashMap<RankResults> rankResults;
+	/** The distance in pixels. */
 	static double distanceInPixels;
+	/** The lower distance in pixels. */
 	static double lowerDistanceInPixels;
-	static double candidateTN, candidateFN;
+	/** The candidate TN. */
+	static double candidateTN;
+	/** The candidate FN. */
+	static double candidateFN;
 
 	private class FilterCandidates
 	{
@@ -280,6 +288,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			}
 		}
 
+		@SuppressWarnings("null")
 		private void run(int frame)
 		{
 			if (Utils.isInterrupted())
@@ -674,8 +683,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		return true;
 	}
 
-	/** The total progress. */
-	int progress, stepProgress, totalProgress;
+	private int progress, stepProgress, totalProgress;
 
 	/**
 	 * Show progress.
@@ -918,7 +926,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		return subset;
 	}
 
-	private void put(BlockingQueue<Integer> jobs, int i)
+	private static void put(BlockingQueue<Integer> jobs, int i)
 	{
 		try
 		{
@@ -1208,7 +1216,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		}
 	}
 
-	private void addToOverlay(Overlay o, int frame, int[] x, int[] y, int c, Color color)
+	private static void addToOverlay(Overlay o, int frame, int[] x, int[] y, int c, Color color)
 	{
 		PointRoi roi = new PointRoi(x, y, c);
 		roi.setFillColor(color);
@@ -1250,16 +1258,16 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		}
 	}
 
-	private void createTable()
+	private static void createTable()
 	{
 		if (summaryTable == null || !summaryTable.isVisible())
 		{
-			summaryTable = new TextWindow(TITLE, createHeader(false), "", 1000, 300);
+			summaryTable = new TextWindow(TITLE, createHeader(), "", 1000, 300);
 			summaryTable.setVisible(true);
 		}
 	}
 
-	private String createHeader(boolean extraRecall)
+	private static String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.tablePrefix);
 		sb.append('\t');
@@ -1297,7 +1305,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		return sb.toString();
 	}
 
-	private void addScoreColumns(StringBuilder sb, String prefix)
+	private static void addScoreColumns(StringBuilder sb, String prefix)
 	{
 		SORT = new String[] { "(None)", "tp", "fp", "tn", "fn", "Precision", "Recall", "F0.5", "F1", "F2", "Jaccard",
 				"MCC" };
@@ -1305,7 +1313,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			addScoreColumn(sb, prefix, SORT[i]);
 	}
 
-	private double addScores(StringBuilder sb, FractionClassificationResult m)
+	private static double addScores(StringBuilder sb, FractionClassificationResult m)
 	{
 		double[] scores = new double[SORT.length - 1];
 		int i = 0;
@@ -1325,7 +1333,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		return (sortIndex != 0) ? scores[sortIndex - 1] : 0;
 	}
 
-	private void addScoreColumn(StringBuilder sb, String prefix, String name)
+	private static void addScoreColumn(StringBuilder sb, String prefix, String name)
 	{
 		if (prefix != null)
 			sb.append(prefix);

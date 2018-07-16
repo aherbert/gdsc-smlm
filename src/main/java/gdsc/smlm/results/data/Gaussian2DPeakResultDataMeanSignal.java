@@ -35,8 +35,10 @@ import gdsc.smlm.results.PeakResult;
  */
 public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat
 {
-	final int i = PeakResult.STANDARD_PARAMETERS;
-	final int j = i + 1;
+	/** The index of the x width. */
+	final static int i = PeakResult.STANDARD_PARAMETERS;
+	/** The index of the y width. */
+	final static int j = i + 1;
 
 	/*
 	 * (non-Javadoc)

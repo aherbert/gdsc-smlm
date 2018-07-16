@@ -35,7 +35,6 @@ import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
-import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -49,6 +48,14 @@ public class PeakResultConversionHelper
 	private Calibration calibration;
 	private PSF psf;
 
+	/**
+	 * Instantiates a new peak result conversion helper.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
+	 */
 	public PeakResultConversionHelper(Calibration calibration, PSF psf)
 	{
 		this.calibration = calibration;

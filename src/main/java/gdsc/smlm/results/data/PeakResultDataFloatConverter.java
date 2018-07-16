@@ -30,6 +30,7 @@ import gdsc.core.data.utils.Converter;
  */
 public abstract class PeakResultDataFloatConverter extends PeakResultDataFloat
 {
+	/** The converter. */
 	final Converter converter;
 
 	/**
