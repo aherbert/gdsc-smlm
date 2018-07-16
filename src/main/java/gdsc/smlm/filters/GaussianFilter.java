@@ -84,7 +84,9 @@ public class GaussianFilter extends BaseWeightedFilter
 	}
 
 	/**
-	 * Use the default accuracy of 0.02
+	 * Instantiates a new gaussian filter.
+	 * <p>
+	 * Use the default accuracy of {@value #DEFAULT_ACCURACY}.
 	 */
 	public GaussianFilter()
 	{
@@ -92,6 +94,8 @@ public class GaussianFilter extends BaseWeightedFilter
 	}
 
 	/**
+	 * Instantiates a new gaussian filter.
+	 *
 	 * @param accuracy
 	 *            Accuracy of kernel, should not be above 0.02. Better (lower)
 	 *            accuracy needs slightly more computing time as the kernel size is increased.
@@ -639,6 +643,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * size is 2N + 1
 	 *
 	 * @param sigma
+	 *            the Gaussian standard deviation
 	 * @return The half width
 	 */
 	public int getHalfWidth(double sigma)
