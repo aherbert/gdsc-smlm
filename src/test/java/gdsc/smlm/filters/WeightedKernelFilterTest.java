@@ -33,10 +33,10 @@ import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings({ "javadoc" })
-public abstract class WeightedSumFilterTest extends WeightedFilterTest
+public abstract class WeightedKernelFilterTest extends WeightedFilterTest
 {
 	@Test
-	public void filterPerformsWeightedSumFiltering()
+	public void filterPerformsWeightedKernelFiltering()
 	{
 		DataFilter filter = createDataFilter();
 
@@ -45,17 +45,15 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
 		float[] offsets = getOffsets(filter);
 		int[] boxSizes = getBoxSizes(filter);
 
+		boolean[] checkInternal = new boolean[] { false };
+
 		TDoubleArrayList l1 = new TDoubleArrayList();
 
 		for (int width : primes)
-			for (int height : primes)
+			for (int height : new int[] { 29 })
 			{
 				float[] data = createData(width, height, rg);
 				l1.reset();
-
-				// Ones used for normalisation
-				float[] ones = new float[width * height];
-				Arrays.fill(ones, 1f);
 
 				// Uniform weights
 				float[] w1 = new float[width * height];
@@ -73,39 +71,42 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
 						for (boolean internal : checkInternal)
 						{
 							// For each pixel over the range around the pixel (vi).
-							// Sum filter: sum(vi)
-							// Weighted sum: sum(vi * wi) / mean(wi) 
-							// (This makes the output image have a similar mean)
+							// kernel filter: sum(vi * ki) / sum(ki)
+							// Weighted kernel filter: sum(vi * wi * ki) / sum(ki * wi)
+							// Note: The kernel filter is like a weighted filter 
+							// (New kernel = wi * ki)
 
 							filter.setWeights(null, width, height);
 
 							// Uniform weights
 							testfilterPerformsWeightedFiltering(filter, width, height, data, w1, boxSize, offset,
-									internal, ones);
+									internal);
 
 							// Random weights.
 							testfilterPerformsWeightedFiltering(filter, width, height, data, w2, boxSize, offset,
-									internal, ones);
+									internal);
 						}
 			}
 	}
 
 	private static void testfilterPerformsWeightedFiltering(DataFilter filter, int width, int height, float[] data,
-			float[] w, int boxSize, float offset, boolean internal, float[] ones) throws AssertionError
+			float[] w, int boxSize, float offset, boolean internal) throws AssertionError
 	{
-		// The filter f(x) should compute:
-		//    sum(vi * wi) / mean(wi) 
-		// where: mean(wi) = sum(wi) / sum(1)
+		// The kernel filter f(x) should compute:
+		//    sum(vi * wi * ki) / sum(ki * wi)
+		// Note: The kernel filter is like a weighted filter 
+		// (New kernel = wi * ki)
+		// If the kernel is normalised to 1 then this is equal to:
+		//    f(vi * wi) / f(wi)
 
 		filter.setWeights(null, width, height);
 		float[] fWi = filter(w, width, height, boxSize - offset, internal, filter);
-		float[] f1 = filter(ones, width, height, boxSize - offset, internal, filter);
 		float[] e = data.clone();
 		for (int i = 0; i < e.length; i++)
 			e[i] = data[i] * w[i];
 		float[] fViWi = filter(e, width, height, boxSize - offset, internal, filter);
 		for (int i = 0; i < e.length; i++)
-			e[i] = fViWi[i] / (fWi[i] / f1[i]);
+			e[i] = fViWi[i] / fWi[i];
 
 		filter.setWeights(w, width, height);
 		float[] o = filter(data, width, height, boxSize - offset, internal, filter);

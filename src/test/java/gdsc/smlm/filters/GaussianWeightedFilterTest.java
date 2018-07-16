@@ -24,7 +24,7 @@
 package gdsc.smlm.filters;
 
 @SuppressWarnings({ "javadoc" })
-public class GaussianWeightedFilterTest extends WeightedFilterTest
+public class GaussianWeightedFilterTest extends WeightedKernelFilterTest
 {
 	@Override
 	DataFilter createDataFilter()

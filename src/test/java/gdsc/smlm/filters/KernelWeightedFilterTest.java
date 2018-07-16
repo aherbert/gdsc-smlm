@@ -24,7 +24,7 @@
 package gdsc.smlm.filters;
 
 @SuppressWarnings({ "javadoc" })
-public class KernelWeightedFilterTest extends WeightedFilterTest
+public class KernelWeightedFilterTest extends WeightedKernelFilterTest
 {
 	@Override
 	DataFilter createDataFilter()
@@ -34,6 +34,8 @@ public class KernelWeightedFilterTest extends WeightedFilterTest
 		{
 			float[] w;
 			int width, height;
+			KernelFilter f;
+			int k = 0;
 
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -42,7 +44,7 @@ public class KernelWeightedFilterTest extends WeightedFilterTest
 				// Only do odd box sizes
 				if ((k & 1) != 1)
 					return;
-				KernelFilter f = createKernelFilter(k);
+				updateKernelFilter(k);
 				f.convolve(data, width, height);
 			}
 
@@ -53,15 +55,21 @@ public class KernelWeightedFilterTest extends WeightedFilterTest
 				// Only do odd box sizes
 				if ((k & 1) != 1)
 					return;
-				KernelFilter f = createKernelFilter(k);
+				updateKernelFilter(k);
 				f.convolve(data, width, height, k / 2);
+			}
+
+			private void updateKernelFilter(int k)
+			{
+				if (this.k != k || f == null)
+					f = createKernelFilter(k);
+				if (w != null)
+					f.setWeights(w, this.width, this.height);
 			}
 
 			private KernelFilter createKernelFilter(int k)
 			{
 				KernelFilter f = new KernelFilter(KernelFilterTest.createKernel(k, k), k, k);
-				if (w != null)
-					f.setWeights(w, width, height);
 				return f;
 			}
 

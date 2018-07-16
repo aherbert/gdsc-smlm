@@ -31,7 +31,11 @@ public abstract class BaseWeightedFilter extends BaseFilter
 	/** The weights. */
 	protected float[] weights;
 
-	protected int weightWidth, weightHeight;
+	/** The width of the weights. */
+	protected int weightWidth;
+	
+	/** The height of the weights. */
+	protected int weightHeight;
 
 	/**
 	 * Sets the weights of the data. This should be called before filtering data samples.
