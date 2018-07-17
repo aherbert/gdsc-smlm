@@ -103,7 +103,7 @@ public abstract class WeightedMeanFilterTest extends WeightedFilterTest
 		filter.setWeights(w, width, height);
 		float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
-		TestAssert.assertArrayEqualsRelative(e, o, 1e-4f, "%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
+		TestAssert.assertArrayEqualsRelative(e, o, 1e-6, "%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
 				height, boxSize - offset, internal);
 	}
 }
