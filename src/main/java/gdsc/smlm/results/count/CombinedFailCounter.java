@@ -28,7 +28,10 @@ package gdsc.smlm.results.count;
  */
 public abstract class CombinedFailCounter extends BaseFailCounter
 {
-	protected final FailCounter c1, c2;
+	/** The first fail counter . */
+	protected final FailCounter c1;
+	/** The second fail counter . */
+	protected final FailCounter c2;
 
 	/**
 	 * Instantiates a new combined fail counter.
@@ -56,7 +59,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
 		return sb.toString();
 	}
 
-	private void add(StringBuilder sb, FailCounter c)
+	private static void add(StringBuilder sb, FailCounter c)
 	{
 		if (c instanceof CombinedFailCounter)
 		{

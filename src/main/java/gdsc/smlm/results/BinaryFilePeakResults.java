@@ -40,35 +40,86 @@ import gdsc.core.utils.BitFlags;
  */
 public class BinaryFilePeakResults extends SMLMFilePeakResults
 {
+	/** The constant used to mark the end of the header. */
 	public static final String END_HEADER = "END_HEADER";
 
 	private String[] fieldNames;
 	private int nFields;
 
+	/**
+	 * Instantiates a new binary file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public BinaryFilePeakResults(String filename)
 	{
 		super(filename);
 	}
 
+	/**
+	 * Instantiates a new binary file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 */
 	public BinaryFilePeakResults(String filename, boolean showDeviations)
 	{
 		super(filename, showDeviations);
 	}
 
-	public BinaryFilePeakResults(String resultsFilename, boolean showDeviations, boolean showEndFrame)
+	/**
+	 * Instantiates a new binary file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 */
+	public BinaryFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame)
 	{
-		super(resultsFilename, showDeviations, showEndFrame);
+		super(filename, showDeviations, showEndFrame);
 	}
 
-	public BinaryFilePeakResults(String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId)
+	/**
+	 * Instantiates a new binary file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 * @param showId
+	 *            Set to true to show the id
+	 */
+	public BinaryFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
-		super(resultsFilename, showDeviations, showEndFrame, showId);
+		super(filename, showDeviations, showEndFrame, showId);
 	}
 
-	public BinaryFilePeakResults(String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId,
+	/**
+	 * Instantiates a new binary file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 * @param showId
+	 *            Set to true to show the id
+	 * @param showPrecision
+	 *            Set to true to show the precision
+	 */
+	public BinaryFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision)
 	{
-		super(resultsFilename, showDeviations, showEndFrame, showId, showPrecision);
+		super(filename, showDeviations, showEndFrame, showId, showPrecision);
 	}
 
 	@Override
@@ -207,22 +258,21 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			return;
 
 		// Buffer the output for the synchronized write method
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		DataOutputStream buffer = new DataOutputStream(bytes);
-
-		try
+		try (ByteArrayOutputStream bytes = new ByteArrayOutputStream())
 		{
-			addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
-					0.0);
-			buffer.flush();
+			try (DataOutputStream buffer = new DataOutputStream(bytes))
+			{
+				addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity, params,
+						paramsStdDev, 0.0);
+				buffer.flush();
+				writeResult(1, bytes);
+			}
 		}
 		catch (IOException e)
 		{
 			// Do nothing - This result will not be added to the file
 			return;
 		}
-
-		writeResult(1, bytes.toByteArray());
 	}
 
 	private void addResult(DataOutputStream buffer, final int id, final int peak, final int endPeak, final int origX,
@@ -269,24 +319,23 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			return;
 
 		// Buffer the output for the synchronized write method
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		DataOutputStream buffer = new DataOutputStream(bytes);
-
-		try
+		try (ByteArrayOutputStream bytes = new ByteArrayOutputStream())
 		{
-			addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
-					result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-					result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
-					result.getPrecision());
-			buffer.flush();
+			try (DataOutputStream buffer = new DataOutputStream(bytes))
+			{
+				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
+						result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+						result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
+						result.getPrecision());
+				buffer.flush();
+				writeResult(1, bytes);
+			}
 		}
 		catch (IOException e)
 		{
 			// Do nothing - This result will not be added to the file
 			return;
 		}
-
-		writeResult(1, bytes.toByteArray());
 	}
 
 	/*
@@ -303,57 +352,41 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		int count = 0;
 
 		// Buffer the output for the synchronized write method
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		DataOutputStream buffer = new DataOutputStream(bytes);
-
-		for (PeakResult result : results)
+		try (ByteArrayOutputStream bytes = new ByteArrayOutputStream())
 		{
-			try
+			try (DataOutputStream buffer = new DataOutputStream(bytes))
 			{
-				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
-						result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-						result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
-						result.getPrecision());
-			}
-			catch (IOException e)
-			{
-				// Do nothing - This result will not be added to the file
-				return;
-			}
-
-			// Flush the output to allow for very large input lists
-			if (++count >= 20)
-			{
-				try
+				for (PeakResult result : results)
 				{
-					buffer.flush();
-				}
-				catch (IOException e)
-				{
-					// Do nothing - This result will not be added to the file
-					return;
-				}
-				writeResult(count, bytes.toByteArray());
-				if (!isActive())
-					return;
-				bytes.reset();
-				count = 0;
-			}
-		}
+					addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
+							result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+							result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
+							result.getPrecision());
 
-		try
-		{
-			buffer.flush();
+					// Flush the output to allow for very large input lists
+					if (++count >= 20)
+					{
+						if (!isActive())
+							return;
+						buffer.flush();
+						writeResult(count, bytes);
+						bytes.reset();
+						count = 0;
+					}
+				}
+
+				buffer.flush();
+				writeResult(count, bytes);
+			}
 		}
 		catch (IOException e)
 		{
 			// Do nothing - This result will not be added to the file
 			return;
 		}
-		writeResult(count, bytes.toByteArray());
 	}
 
-	private synchronized void writeResult(int count, byte[] bytes)
+	private synchronized void writeResult(int count, ByteArrayOutputStream bytes)
 	{
 		// In case another thread caused the output to close
 		if (fos == null)
@@ -361,7 +394,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		size += count;
 		try
 		{
-			fos.write(bytes);
+			bytes.writeTo(fos);
 		}
 		catch (IOException ioe)
 		{
@@ -377,40 +410,32 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	@Override
 	protected void sort() throws IOException
 	{
-		try
+		try (DataInputStream input = new DataInputStream(new FileInputStream(filename)))
 		{
 			ArrayList<Result> results = new ArrayList<>(size);
 
-			DataInputStream input = new DataInputStream(new FileInputStream(filename));
-
 			String header;
-			try
-			{
-				header = readHeader(input);
+			header = readHeader(input);
 
-				int flags = 0;
-				if (isShowEndFrame())
-					flags += FLAG_END_FRAME;
-				if (isShowId())
-					flags += FLAG_ID;
-				if (isShowPrecision())
-					flags += FLAG_PRECISION;
-				byte[] line = new byte[getDataSize(isShowDeviations(), flags, nFields)];
-				while (input.read(line) == line.length)
-				{
-					results.add(new Result(line));
-				}
-			}
-			finally
+			int flags = 0;
+			if (isShowEndFrame())
+				flags += FLAG_END_FRAME;
+			if (isShowId())
+				flags += FLAG_ID;
+			if (isShowPrecision())
+				flags += FLAG_PRECISION;
+			byte[] line = new byte[getDataSize(isShowDeviations(), flags, nFields)];
+			while (input.read(line) == line.length)
 			{
-				input.close();
+				results.add(new Result(line));
 			}
+
+			input.close();
 
 			Collections.sort(results);
 
 			// Must write using the same method as the main code so use a FileOutputStream again
-			FileOutputStream output = new FileOutputStream(filename);
-			try
+			try (FileOutputStream output = new FileOutputStream(filename))
 			{
 				output.write(header.getBytes());
 				for (Result result : results)
@@ -418,18 +443,6 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 					output.write(result.line);
 				}
 			}
-			finally
-			{
-				output.close();
-			}
-		}
-		catch (IOException e)
-		{
-			throw e;
-		}
-		finally
-		{
-			fos = null;
 		}
 	}
 
@@ -473,6 +486,17 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		return sb.toString();
 	}
 
+	/**
+	 * Gets the data size.
+	 *
+	 * @param deviations
+	 *            Set to true to show deviations
+	 * @param flags
+	 *            the flags
+	 * @param nFields
+	 *            the number of fields
+	 * @return the data size
+	 */
 	static int getDataSize(boolean deviations, int flags, int nFields)
 	{
 		final int BYTES_INT = 4;

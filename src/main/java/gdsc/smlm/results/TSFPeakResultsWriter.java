@@ -82,6 +82,12 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	private int boxSize = 0;
 
+	/**
+	 * Instantiates a new TSF peak results writer.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public TSFPeakResultsWriter(String filename)
 	{
 		this.filename = filename;
@@ -296,7 +302,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * @param paramStdDev
 	 *            the params std dev
 	 */
-	private void addNewParamStdDevs(Builder builder, float[] paramStdDev)
+	private static void addNewParamStdDevs(Builder builder, float[] paramStdDev)
 	{
 		// Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
 		for (int i = 0; i < paramStdDev.length; i++)
@@ -370,7 +376,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * @param paramStdDev
 	 *            the params std dev
 	 */
-	private void addParamStdDevs(Builder builder, float[] paramStdDev)
+	private static void addParamStdDevs(Builder builder, float[] paramStdDev)
 	{
 		// Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
 		if (paramStdDev == null)
@@ -547,13 +553,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		{
 			builder.setConfiguration(singleLine(getConfiguration()));
 		}
-		Printer printer = null;
 		if (getPSF() != null)
 		{
 			try
 			{
-				if (printer == null)
-					printer = JsonFormat.printer().omittingInsignificantWhitespace();
+				Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 				builder.setPSF(printer.print(getPSF()));
 			}
 			catch (InvalidProtocolBufferException e)
@@ -596,10 +600,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input).
 
 		// Write the offset to the SpotList message into the offset position
-		RandomAccessFile f = null;
-		try
+		try (RandomAccessFile f = new RandomAccessFile(new File(filename), "rw"))
 		{
-			f = new RandomAccessFile(new File(filename), "rw");
 			f.seek(4);
 			f.writeLong(offset);
 		}
@@ -608,22 +610,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			System.err.println("Failed to record offset for SpotList message");
 			e.printStackTrace();
 		}
-		finally
-		{
-			if (f != null)
-			{
-				try
-				{
-					f.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-		}
 	}
 
-	private String singleLine(String text)
+	private static String singleLine(String text)
 	{
 		return text.replaceAll("\n *", "");
 	}

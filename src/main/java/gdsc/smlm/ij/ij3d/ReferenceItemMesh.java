@@ -181,7 +181,7 @@ public class ReferenceItemMesh extends ItemMesh
 		final int oldSize = size();
 		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-		if (size == 0)
+		if (size == 0 || indices == null)
 		{
 			points = new Point3f[0];
 			sizes = new Point3f[0];

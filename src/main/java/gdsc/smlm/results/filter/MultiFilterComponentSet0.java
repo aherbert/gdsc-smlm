@@ -54,5 +54,6 @@ public class MultiFilterComponentSet0 extends MultiFilterComponentSet
 	@Override
 	void replace0(MultiFilterComponent c)
 	{
+		// This set is empty so no replacement is possible. Don't throw an exception though!
 	}
 }

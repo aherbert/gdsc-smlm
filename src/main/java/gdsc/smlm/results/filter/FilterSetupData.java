@@ -28,4 +28,5 @@ package gdsc.smlm.results.filter;
  */
 public interface FilterSetupData
 {
+	// Marker interface
 }

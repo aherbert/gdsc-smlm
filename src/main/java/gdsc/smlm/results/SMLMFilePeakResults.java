@@ -28,8 +28,11 @@ package gdsc.smlm.results;
  */
 public abstract class SMLMFilePeakResults extends FilePeakResults
 {
+	/** The flag for the end frame. Used in the file format version string. */
 	public final static int FLAG_END_FRAME = 0x0001;
+	/** The flag for the id. Used in the file format version string. */
 	public final static int FLAG_ID = 0x0002;
+	/** The flag for the precision. Used in the file format version string. */
 	public final static int FLAG_PRECISION = 0x0004;
 
 	/**
@@ -48,29 +51,81 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	private final boolean showEndFrame;
 	private final boolean showId;
 	private final boolean showPrecision;
+	
+	/** The peak id column name. */
 	protected String peakIdColumnName = "Frame";
 
+	/**
+	 * Instantiates a new SMLM file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public SMLMFilePeakResults(String filename)
 	{
 		// showDeviations=true
 		this(filename, true);
 	}
 
+	/**
+	 * Instantiates a new SMLM file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 */
 	public SMLMFilePeakResults(String filename, boolean showDeviations)
 	{
 		this(filename, showDeviations, false);
 	}
 
+	/**
+	 * Instantiates a new SMLM file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 */
 	public SMLMFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame)
 	{
 		this(filename, showDeviations, showEndFrame, false, false);
 	}
 
+	/**
+	 * Instantiates a new SMLM file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 * @param showId
+	 *            Set to true to show the id
+	 */
 	public SMLMFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
 		this(filename, showDeviations, showEndFrame, showId, false);
 	}
 
+	/**
+	 * Instantiates a new SMLM file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param showEndFrame
+	 *            Set to true to show the end frame
+	 * @param showId
+	 *            Set to true to show the id
+	 * @param showPrecision
+	 *            Set to true to show the precision
+	 */
 	public SMLMFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision)
 	{
@@ -117,6 +172,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Gets the file format version.
+	 *
 	 * @return A line containing the file format version
 	 */
 	@Override
@@ -140,6 +197,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Gets the name of the peak column.
+	 *
 	 * @return the name of the peak column
 	 */
 	public String getPeakIdColumnName()
@@ -148,6 +207,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Sets the name of the peak column.
+	 *
 	 * @param peakIdColumnName
 	 *            the name of the peak column
 	 */
@@ -157,6 +218,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Checks if the records contain the parameter deviations.
+	 *
 	 * @return True if the records contain the parameter deviations
 	 */
 	public boolean isShowDeviations()
@@ -165,6 +228,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Checks if the records contain the result end frame.
+	 *
 	 * @return True if the records contain the result end frame
 	 */
 	public boolean isShowEndFrame()
@@ -173,6 +238,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Checks if the records contain a result Id.
+	 *
 	 * @return True if the records contain a result Id
 	 */
 	public boolean isShowId()
@@ -181,6 +248,8 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	}
 
 	/**
+	 * Checks if the records contain the localisation precision.
+	 *
 	 * @return True if the records contain the localisation precision
 	 */
 	public boolean isShowPrecision()

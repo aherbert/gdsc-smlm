@@ -61,6 +61,12 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	private OutputStreamWriter out;
 
+	/**
+	 * Instantiates a new MALK file peak results.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public MALKFilePeakResults(String filename)
 	{
 		super(filename);
@@ -307,6 +313,12 @@ public class MALKFilePeakResults extends FilePeakResults
 		writeResult(count, sb.toString());
 	}
 
+	/**
+	 * Adds all the results in the cluster.
+	 *
+	 * @param cluster
+	 *            the cluster
+	 */
 	protected void addAll(Cluster cluster)
 	{
 		addAll(cluster.getPoints());
@@ -320,42 +332,35 @@ public class MALKFilePeakResults extends FilePeakResults
 	@Override
 	protected void sort() throws IOException
 	{
-		try
+		try (BufferedReader input = new BufferedReader(new FileReader(filename)))
 		{
 			TurboList<Result> results = new TurboList<>(size);
-
 			StringBuilder header = new StringBuilder();
-			BufferedReader input = new BufferedReader(new FileReader(filename));
-			try
-			{
-				String line;
-				// Skip the header
-				while ((line = input.readLine()) != null)
-				{
-					if (line.charAt(0) != '#')
-					{
-						// This is the first record
-						results.add(new Result(line));
-						break;
-					}
-					else
-						header.append(line).append("\n");
-				}
 
-				while ((line = input.readLine()) != null)
-				{
-					results.add(new Result(line));
-				}
-			}
-			finally
+			String line;
+			// Skip the header
+			while ((line = input.readLine()) != null)
 			{
-				input.close();
+				if (line.charAt(0) != '#')
+				{
+					// This is the first record
+					results.add(new Result(line));
+					break;
+				}
+				else
+					header.append(line).append("\n");
 			}
+
+			while ((line = input.readLine()) != null)
+			{
+				results.add(new Result(line));
+			}
+			
+			input.close();
 
 			Collections.sort(results);
 
-			BufferedWriter output = new BufferedWriter(new FileWriter(filename));
-			try
+			try (BufferedWriter output = new BufferedWriter(new FileWriter(filename)))
 			{
 				output.write(header.toString());
 				for (int i = 0; i < results.size(); i++)
@@ -364,18 +369,6 @@ public class MALKFilePeakResults extends FilePeakResults
 					output.write("\n");
 				}
 			}
-			finally
-			{
-				output.close();
-			}
-		}
-		catch (IOException e)
-		{
-			throw e;
-		}
-		finally
-		{
-			out = null;
 		}
 	}
 
@@ -392,11 +385,9 @@ public class MALKFilePeakResults extends FilePeakResults
 
 		private void extractSlice()
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter("\t");
-
-			try
+			try (Scanner scanner = new Scanner(line))
 			{
+				scanner.useDelimiter("\t");
 				scanner.nextFloat(); // X
 				scanner.nextFloat(); // Y
 				slice = scanner.nextInt();
@@ -404,9 +395,11 @@ public class MALKFilePeakResults extends FilePeakResults
 			}
 			catch (InputMismatchException e)
 			{
+				// Ignore
 			}
 			catch (NoSuchElementException e)
 			{
+				// Ignore
 			}
 		}
 

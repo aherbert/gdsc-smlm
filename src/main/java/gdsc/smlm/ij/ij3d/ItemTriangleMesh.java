@@ -48,10 +48,19 @@ import gdsc.core.logging.TrackProgress;
  */
 public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableItemShape
 {
+	/** The object vertices. */
 	protected Point3f[] objectVertices;
+	
+	/** The object normals. */
 	protected Vector3f[] objectNormals;
+	
+	/** The points. */
 	protected Point3f[] points;
+	
+	/** The sizes. */
 	protected Point3f[] sizes;
+	
+	/** Flag set to true when modified after construction. */
 	protected boolean dirty = false;
 
 	/**
@@ -137,6 +146,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			if (sameSize)
 			{
 				// Scale the input object
+				if (sizes == null)
+					throw new NullPointerException("sizes should not be null here");
 				final Point3f s = sizes[0];
 				final float sx = s.x;
 				final float sy = s.y;
@@ -525,11 +536,11 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			throw new IllegalArgumentException("Mesh has been modified");
 
 		changed = true;
+		
+		final int oldSize = size();
+		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-		int oldSize = size();
-		int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
-
-		if (size == 0)
+		if (size == 0 || indices == null)
 		{
 			mesh.clear();
 			points = new Point3f[0];
@@ -584,6 +595,15 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		//this.setGeometry(ga);
 	}
 
+	/**
+	 * Reorder the points using the indices.
+	 *
+	 * @param p
+	 *            the points
+	 * @param indices
+	 *            the indices
+	 * @return the new points
+	 */
 	static Point3f[] reorder(Point3f[] p, int[] indices)
 	{
 		Point3f[] c = new Point3f[indices.length];

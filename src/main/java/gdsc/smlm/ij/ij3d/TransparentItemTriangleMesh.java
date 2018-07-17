@@ -176,10 +176,10 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
 		changed = true;
 
-		int oldSize = size();
-		int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
+		final int oldSize = size();
+		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-		if (size == 0)
+		if (size == 0 || indices == null)
 		{
 			mesh.clear();
 			points = new Point3f[0];

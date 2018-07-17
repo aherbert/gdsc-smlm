@@ -122,11 +122,11 @@ public class AstigmatismModelManager implements PlugIn
 	private FitConfiguration fitConfig;
 	private int cx, cy;
 	private MemoryPeakResults results;
-	double[] z, x, y, I, sx, sy;
-	PlotWindow iPlot, xyPlot, sPlot;
-	int minz, maxz;
-	double[] fitZ, fitSx, fitSy;
-	double[] parameters;
+	private double[] z, x, y, I, sx, sy;
+	private PlotWindow xyPlot, sPlot;
+	private int minz, maxz;
+	private double[] fitZ, fitSx, fitSy;
+	private double[] parameters;
 
 	private static AstigmatismModelSettings.Builder getSettings()
 	{
@@ -472,7 +472,7 @@ public class AstigmatismModelManager implements PlugIn
 			pluginSettings.setNmPerSlice(r);
 	}
 
-	private double guessScale(String unit, double units)
+	private static double guessScale(String unit, double units)
 	{
 		unit = unit.toLowerCase();
 		if (unit.equals("nm") || unit.startsWith("nanomet"))
@@ -520,7 +520,7 @@ public class AstigmatismModelManager implements PlugIn
 		return true;
 	}
 
-	public boolean showConfigurationDialog()
+	private boolean showConfigurationDialog()
 	{
 		fitConfig = config.getFitConfiguration();
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
@@ -740,7 +740,7 @@ public class AstigmatismModelManager implements PlugIn
 
 		WindowOrganiser wo = new WindowOrganiser();
 
-		iPlot = plot(wo, z, "Intensity (photon)", I, "Intensity", null, null);
+		plot(wo, z, "Intensity (photon)", I, "Intensity", null, null);
 		xyPlot = plot(wo, z, "Position (px)", x, "X", y, "Y");
 		sPlot = plot(wo, z, "Width (px)", sx, "Sx", sy, "Sy");
 
@@ -749,7 +749,7 @@ public class AstigmatismModelManager implements PlugIn
 		return true;
 	}
 
-	private PlotWindow plot(WindowOrganiser wo, double[] z, String yTitle, double[] y1, String y1Title, double[] y2,
+	private static PlotWindow plot(WindowOrganiser wo, double[] z, String yTitle, double[] y1, String y1Title, double[] y2,
 			String y2Title)
 	{
 		String title = TITLE + " " + yTitle;
@@ -1187,7 +1187,7 @@ public class AstigmatismModelManager implements PlugIn
 		}
 	}
 
-	private void record(String name, double[] parameters)
+	private static void record(String name, double[] parameters)
 	{
 		StringBuilder sb = new StringBuilder(name);
 		Rounder rounder = RounderFactory.create(4);
@@ -1269,7 +1269,7 @@ public class AstigmatismModelManager implements PlugIn
 		resultsWindow.append(sb.toString());
 	}
 
-	private void createResultWindow()
+	private static void createResultWindow()
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
 			resultsWindow = new TextWindow(TITLE,
@@ -1354,7 +1354,7 @@ public class AstigmatismModelManager implements PlugIn
 		return true;
 	}
 
-	private String suggest(Map<String, AstigmatismModel> map, String name)
+	private static String suggest(Map<String, AstigmatismModel> map, String name)
 	{
 		name += '_';
 		for (int i = 2; i > 0; i++)

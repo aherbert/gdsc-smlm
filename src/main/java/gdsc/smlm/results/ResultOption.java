@@ -28,7 +28,6 @@ package gdsc.smlm.results;
  */
 public class ResultOption
 {
-
 	/** The id. */
 	public final int id;
 
@@ -41,6 +40,18 @@ public class ResultOption
 	/** The value. */
 	private Object value;
 
+	/**
+	 * Instantiates a new result option.
+	 *
+	 * @param id
+	 *            the id
+	 * @param name
+	 *            the name
+	 * @param value
+	 *            the value
+	 * @param values
+	 *            the values
+	 */
 	ResultOption(int id, String name, Object value, Object[] values)
 	{
 		this.id = id;

@@ -84,6 +84,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	/** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
 	protected GeometryArray[] geometryArray = null;
 
+	/** The point array color updater. */
 	protected final ArrayColorUpdater pointArrayColorUpdater;
 
 	/**
@@ -116,6 +117,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * @param alphas
 	 *            the per-item alphas. Can be null.
 	 */
+	@SuppressWarnings("null")
 	public ItemGeometryGroup(final Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes,
 			Color3f[] colors, float[] alphas)
 	{
@@ -697,13 +699,25 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		if (isPointArray)
 		{
 			// PointArray alpha must be updated
-			final boolean hasAlpha = alpha != null;
-			for (int i = 0; i < geometryArray.length; i++)
+			if (alpha != null)
 			{
-				GeometryArray ga = geometryArray[i];
-				ga.getColors(0, pointArrayColorUpdater.pointColor);
-				pointArrayColorUpdater.getColors((hasAlpha) ? alpha[i] : 1f);
-				ga.setColors(0, pointArrayColorUpdater.pointColor);
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					GeometryArray ga = geometryArray[i];
+					ga.getColors(0, pointArrayColorUpdater.pointColor);
+					pointArrayColorUpdater.getColors(alpha[i]);
+					ga.setColors(0, pointArrayColorUpdater.pointColor);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					GeometryArray ga = geometryArray[i];
+					ga.getColors(0, pointArrayColorUpdater.pointColor);
+					pointArrayColorUpdater.getColors(1f);
+					ga.setColors(0, pointArrayColorUpdater.pointColor);
+				}
 			}
 		}
 		else
@@ -740,13 +754,25 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		if (isPointArray)
 		{
 			// PointArray alpha must be updated
-			final boolean hasAlpha = alpha != null;
-			for (int i = 0; i < geometryArray.length; i++)
+			if (alpha != null)
 			{
-				GeometryArray ga = geometryArray[i];
-				ga.getColors(0, pointArrayColorUpdater.pointColor);
-				pointArrayColorUpdater.getColors((hasAlpha) ? alpha[i] : 1f);
-				ga.setColors(0, pointArrayColorUpdater.pointColor);
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					GeometryArray ga = geometryArray[i];
+					ga.getColors(0, pointArrayColorUpdater.pointColor);
+					pointArrayColorUpdater.getColors(alpha[i]);
+					ga.setColors(0, pointArrayColorUpdater.pointColor);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					GeometryArray ga = geometryArray[i];
+					ga.getColors(0, pointArrayColorUpdater.pointColor);
+					pointArrayColorUpdater.getColors(1f);
+					ga.setColors(0, pointArrayColorUpdater.pointColor);
+				}
 			}
 		}
 		setTransparency(transparency);

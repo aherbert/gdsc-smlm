@@ -30,6 +30,14 @@ import ij3d.Content;
  */
 public class CustomContent extends Content
 {
+	/**
+	 * Instantiates a new custom content.
+	 *
+	 * @param name
+	 *            the name
+	 * @param isOrdered
+	 *            the is ordered
+	 */
 	public CustomContent(String name, boolean isOrdered)
 	{
 		super(name);

@@ -54,7 +54,7 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 		checkResolution(xyResolution);
 	}
 
-	private void checkResolution(double xyResolution)
+	private static void checkResolution(double xyResolution)
 	{
 		if (xyResolution > 1)
 			throw new IllegalArgumentException("XY Resolution must be <= 1");

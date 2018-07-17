@@ -33,6 +33,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 public class RawResultProcedure extends AbstractResultProcedure implements
         BIXYZResultProcedure,
 		IResultProcedure,
+		BResultProcedure,
 		XYZResultProcedure
 //@formatter:on
 {
@@ -123,6 +124,7 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 		results.forEachNative((BResultProcedure) this);
 	}
 
+	@Override
 	public void executeB(float background)
 	{
 		this.background[i] = background;

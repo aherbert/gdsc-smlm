@@ -129,16 +129,16 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	{
 		changed = true;
 
-		int oldSize = size();
-		int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
+		final int oldSize = size();
+		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-		if (size == 0)
+		if (size == 0 || indices == null)
 		{
 			mesh.clear();
 			this.setGeometry(null);
 			return;
 		}
-
+		
 		// From here on we assume the current geometry will not be null
 		// as this only happens when the original size is zero. Size has
 		// been checked at this point to be the smaller of new and old.

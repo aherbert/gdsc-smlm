@@ -33,11 +33,20 @@ public class Trace extends Cluster
 	private int nBlinks = -1;
 	private int[] onTimes, offTimes;
 
+	/**
+	 * Instantiates a new trace.
+	 */
 	public Trace()
 	{
 		super();
 	}
 
+	/**
+	 * Instantiates a new trace.
+	 *
+	 * @param peakResult
+	 *            the peak result
+	 */
 	public Trace(PeakResult peakResult)
 	{
 		super(peakResult);
@@ -123,7 +132,7 @@ public class Trace extends Cluster
 		return getAverage(offTimes);
 	}
 
-	private double getAverage(int[] times)
+	private static double getAverage(int[] times)
 	{
 		if (times != null)
 		{

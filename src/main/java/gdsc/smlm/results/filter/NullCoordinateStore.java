@@ -80,6 +80,7 @@ public class NullCoordinateStore implements CoordinateStore
 	@Override
 	public void addToQueue(double x, double y, double z)
 	{
+		// Do nothing
 	}
 
 	/*
@@ -90,6 +91,7 @@ public class NullCoordinateStore implements CoordinateStore
 	@Override
 	public void flush()
 	{
+		// Do nothing
 	}
 
 	/*
@@ -100,6 +102,7 @@ public class NullCoordinateStore implements CoordinateStore
 	@Override
 	public void add(double x, double y, double z)
 	{
+		// Do nothing
 	}
 
 	/*
@@ -110,6 +113,7 @@ public class NullCoordinateStore implements CoordinateStore
 	@Override
 	public void clear()
 	{
+		// Do nothing
 	}
 
 	/*

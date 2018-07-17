@@ -34,34 +34,66 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
  */
 public class Cluster implements Comparable<Cluster>
 {
+	/**
+	 * The method for computing the centroid.
+	 */
 	public enum CentroidMethod
 	{
-		STANDARD, SIGNAL_WEIGHTED
+		/** Weight each localisation evenly. */
+		STANDARD,
+		/** Weight each localisation using the signal. */
+		SIGNAL_WEIGHTED
 	}
 
+	/** The results. */
 	protected PeakResultStoreList results = new ArrayPeakResultStore(2);
 	private float[] centroid = null;
 	private int id;
 
+	/**
+	 * Instantiates a new cluster.
+	 */
 	public Cluster()
 	{
 	}
 
+	/**
+	 * Instantiates a new cluster.
+	 *
+	 * @param result
+	 *            the result
+	 */
 	public Cluster(PeakResult result)
 	{
 		add(result);
 	}
 
+	/**
+	 * Get the size.
+	 *
+	 * @return the size
+	 */
 	public int size()
 	{
 		return results.size();
 	}
 
+	/**
+	 * Gets the points.
+	 *
+	 * @return the points
+	 */
 	public PeakResultStoreList getPoints()
 	{
 		return results;
 	}
 
+	/**
+	 * Adds the result.
+	 *
+	 * @param result
+	 *            the result
+	 */
 	public void add(PeakResult result)
 	{
 		results.add(result);
@@ -78,6 +110,13 @@ public class Cluster implements Comparable<Cluster>
 		return size() == 0;
 	}
 
+	/**
+	 * Gets the centroid.
+	 *
+	 * @param method
+	 *            the method
+	 * @return the centroid
+	 */
 	public float[] getCentroid(CentroidMethod method)
 	{
 		if (centroid == null && results.size() != 0)
@@ -118,6 +157,11 @@ public class Cluster implements Comparable<Cluster>
 		return centroid;
 	}
 
+	/**
+	 * Gets the centroid.
+	 *
+	 * @return the centroid
+	 */
 	public float[] getCentroid()
 	{
 		if (centroid == null && results.size() != 0)
@@ -144,6 +188,8 @@ public class Cluster implements Comparable<Cluster>
 	}
 
 	/**
+	 * Gets the standard deviation of the distances from the centroid
+	 *
 	 * @return The standard deviation of the distances from the centroid
 	 */
 	public float getStandardDeviation()
@@ -253,6 +299,8 @@ public class Cluster implements Comparable<Cluster>
 	}
 
 	/**
+	 * Gets the first PeakResult in the cluster (or null)
+	 *
 	 * @return The first PeakResult in the cluster (or null)
 	 */
 	public PeakResult getHead()
@@ -263,6 +311,8 @@ public class Cluster implements Comparable<Cluster>
 	}
 
 	/**
+	 * Gets the last PeakResult in the cluster (or null)
+	 *
 	 * @return The last PeakResult in the cluster (or null)
 	 */
 	public PeakResult getTail()
@@ -285,6 +335,8 @@ public class Cluster implements Comparable<Cluster>
 	}
 
 	/**
+	 * Gets the signal.
+	 *
 	 * @return The total signal
 	 */
 	public double getSignal()
@@ -306,11 +358,22 @@ public class Cluster implements Comparable<Cluster>
 		results.sort();
 	}
 
+	/**
+	 * Gets the id.
+	 *
+	 * @return the id
+	 */
 	public int getId()
 	{
 		return id;
 	}
 
+	/**
+	 * Sets the id.
+	 *
+	 * @param id
+	 *            the new id
+	 */
 	public void setId(int id)
 	{
 		this.id = id;

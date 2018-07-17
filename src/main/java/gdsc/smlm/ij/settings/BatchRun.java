@@ -26,18 +26,32 @@ package gdsc.smlm.ij.settings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 
 /**
- * Contain the configuration for a single run of the batch fitting plugin
+ * Contain the configuration for a single run of the batch fitting plugin.
  */
 public class BatchRun
 {
+	/** The image. */
 	public String image;
+	
+	/** The fit engine configuration. */
 	public FitEngineConfiguration fitEngineConfiguration = null;
 
+	/**
+	 * Instantiates a new batch run.
+	 */
 	public BatchRun()
 	{
 		fitEngineConfiguration = new FitEngineConfiguration();
 	}
 
+	/**
+	 * Instantiates a new batch run.
+	 *
+	 * @param image
+	 *            the image
+	 * @param fitEngineConfiguration
+	 *            the fit engine configuration
+	 */
 	public BatchRun(String image, FitEngineConfiguration fitEngineConfiguration)
 	{
 		this.image = image;

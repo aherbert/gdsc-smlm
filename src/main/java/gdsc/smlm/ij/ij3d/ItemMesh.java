@@ -193,6 +193,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			if (sameSize)
 			{
 				// Scale the input object
+				if (sizes == null)
+					throw new NullPointerException("sizes should not be null here");
 				final Point3f s = sizes[0];
 				final float sx = s.x;
 				final float sy = s.y;
@@ -519,6 +521,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		return ga;
 	}
 
+	/**
+	 * Creates the geometry array.
+	 *
+	 * @param sourceGA
+	 *            the source geometry array
+	 * @param format
+	 *            the format
+	 * @return the geometry array
+	 */
 	protected GeometryArray createGeometryArray(GeometryArray sourceGA, int format)
 	{
 		// Create using reflection
@@ -587,6 +598,22 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		return ga;
 	}
 
+	/**
+	 * Duplicate the source into the destination n times.
+	 *
+	 * @param source
+	 *            the source
+	 * @param from
+	 *            the from
+	 * @param length
+	 *            the length
+	 * @param n
+	 *            the number of times
+	 * @param dest
+	 *            the dest
+	 * @param to
+	 *            the to
+	 */
 	protected void duplicate(Object source, int from, int length, int n, Object dest, int to)
 	{
 		// Binary fill
@@ -601,6 +628,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		System.arraycopy(dest, to, dest, to + fill, n * length - fill);
 	}
 
+	/**
+	 * Duplicate the objects indices into the all indices array for each point.
+	 *
+	 * @param objectIndices
+	 *            the object indices
+	 * @param allIndices
+	 *            the all indices
+	 * @see #size()
+	 */
 	protected void duplicateIndices(int[] objectIndices, int[] allIndices)
 	{
 		int nIndices = Maths.max(objectIndices) + 1;
@@ -818,7 +854,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		final int oldSize = size();
 		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-		if (size == 0)
+		if (size == 0 || indices == null)
 		{
 			points = new Point3f[0];
 			sizes = new Point3f[0];
@@ -916,6 +952,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		});
 	}
 
+	/**
+	 * Reorder the points using the indices.
+	 *
+	 * @param p
+	 *            the points
+	 * @param indices
+	 *            the indices
+	 * @return the new points
+	 */
 	static Point3f[] reorder(Point3f[] p, int[] indices)
 	{
 		Point3f[] c = new Point3f[indices.length];

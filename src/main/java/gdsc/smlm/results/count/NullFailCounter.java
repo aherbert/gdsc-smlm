@@ -40,21 +40,25 @@ public class NullFailCounter implements FailCounter
 	@Override
 	public void pass()
 	{
+		// Do nothing
 	}
 
 	@Override
 	public void pass(int n)
 	{
+		// Do nothing
 	}
 
 	@Override
 	public void fail()
 	{
+		// Do nothing
 	}
 
 	@Override
 	public void fail(int n)
 	{
+		// Do nothing
 	}
 
 	@Override
@@ -72,5 +76,6 @@ public class NullFailCounter implements FailCounter
 	@Override
 	public void reset()
 	{
+		// Do nothing
 	}
 }

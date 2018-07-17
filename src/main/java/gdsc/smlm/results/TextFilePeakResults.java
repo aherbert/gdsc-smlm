@@ -586,11 +586,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	@Override
 	protected void sort() throws IOException
 	{
-		TurboList<Result> results = new TurboList<>(size);
-
-		StringBuilder header = new StringBuilder();
 		try (BufferedReader input = new BufferedReader(new FileReader(filename)))
 		{
+			TurboList<Result> results = new TurboList<>(size);
+			StringBuilder header = new StringBuilder();
+
 			String line;
 			// Skip the header
 			while ((line = input.readLine()) != null)
@@ -608,17 +608,19 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			{
 				results.add(new Result(line));
 			}
-		}
+			
+			input.close();
 
-		Collections.sort(results);
+			Collections.sort(results);
 
-		try (BufferedWriter output = new BufferedWriter(new FileWriter(filename)))
-		{
-			output.write(header.toString());
-			for (int i = 0; i < results.size(); i++)
+			try (BufferedWriter output = new BufferedWriter(new FileWriter(filename)))
 			{
-				output.write(results.getf(i).line);
-				output.write("\n");
+				output.write(header.toString());
+				for (int i = 0; i < results.size(); i++)
+				{
+					output.write(results.getf(i).line);
+					output.write("\n");
+				}
 			}
 		}
 	}

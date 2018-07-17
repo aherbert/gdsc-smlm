@@ -28,17 +28,27 @@ import java.util.ArrayList;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
 /**
- * Contain the configuration file settings for the batch fitting plugin
+ * Contain the configuration file settings for the batch fitting plugin.
  */
 public class BatchSettings
 {
+	/** The images. */
 	public ArrayList<String> images = new ArrayList<>();
+	
+	/** The parameters. */
 	public ArrayList<ParameterSettings> parameters = new ArrayList<>();
+	
+	/** The results directory. */
 	public String resultsDirectory = null;
+	
+	/** Set to true to run the peak fit plugin. */
 	public boolean runPeakFit = true;
+	
 	private Calibration calibration = null;
 
 	/**
+	 * Gets the calibration.
+	 *
 	 * @return the calibration
 	 */
 	public Calibration getCalibration()
@@ -47,6 +57,8 @@ public class BatchSettings
 	}
 
 	/**
+	 * Sets the calibration.
+	 *
 	 * @param calibration
 	 *            the calibration to set
 	 */

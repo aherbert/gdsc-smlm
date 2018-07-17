@@ -121,7 +121,7 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Class to update single colour coordinates with alpha
 	 */
-	public static class SingleArrayColorUpdater4 extends ArrayColorUpdater
+	private static class SingleArrayColorUpdater4 extends ArrayColorUpdater
 	{
 		SingleArrayColorUpdater4()
 		{
@@ -186,7 +186,7 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Class to update multiple colour coordinates with alpha
 	 */
-	public static class MultiArrayColorUpdater4 extends ArrayColorUpdater
+	private static class MultiArrayColorUpdater4 extends ArrayColorUpdater
 	{
 		MultiArrayColorUpdater4(int n)
 		{
@@ -264,7 +264,7 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Class to update single colour coordinates with no alpha
 	 */
-	public static class SingleArrayColorUpdater3 extends ArrayColorUpdater
+	private static class SingleArrayColorUpdater3 extends ArrayColorUpdater
 	{
 		SingleArrayColorUpdater3()
 		{
@@ -329,7 +329,7 @@ public abstract class ArrayColorUpdater
 	/**
 	 * Class to update multiple colour coordinates with no alpha
 	 */
-	public static class MultiArrayColorUpdater3 extends ArrayColorUpdater
+	private static class MultiArrayColorUpdater3 extends ArrayColorUpdater
 	{
 		MultiArrayColorUpdater3(int n)
 		{

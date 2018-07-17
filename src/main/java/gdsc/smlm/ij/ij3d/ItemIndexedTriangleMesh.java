@@ -38,10 +38,19 @@ import customnode.CustomIndexedTriangleMesh;
  */
 public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 {
+	/** The object vertices. */
 	protected Point3f[] objectVertices;
+
+	/** The object faces. */
 	protected int[] objectFaces;
+
+	/** The object normals. */
 	protected Vector3f[] objectNormals;
+
+	/** The points. */
 	protected Point3f[] points;
+
+	/** The sizes. */
 	protected Point3f[] sizes;
 	private boolean dirty = false;
 
@@ -95,6 +104,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			if (sameSize)
 			{
 				// Scale the input object
+				if (sizes == null)
+					throw new NullPointerException("sizes should not be null here");
 				final Point3f s = sizes[0];
 				final float sx = s.x;
 				final float sy = s.y;

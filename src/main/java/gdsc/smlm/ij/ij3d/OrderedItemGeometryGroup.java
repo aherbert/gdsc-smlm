@@ -40,6 +40,7 @@ import org.scijava.vecmath.Point3f;
  */
 public class OrderedItemGeometryGroup extends ItemGeometryGroup implements UpdateableItemShape
 {
+	/** The ordered group. */
 	protected OrderedGroup orderedGroup;
 
 	/**

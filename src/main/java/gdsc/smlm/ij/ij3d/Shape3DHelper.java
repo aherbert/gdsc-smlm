@@ -48,61 +48,84 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
- * Create Shape3D objects
+ * Create Shape3D objects.
  */
 public class Shape3DHelper
 {
 	//@formatter:off
+	/**
+	 * The rendering.
+	 */
 	public enum Rendering implements NamedObject
 	{
-		POINT { @Override
-		public String getName() { return "Point"; }
-				@Override
-				public boolean is2D() { return true; }},
-		SQUARE { @Override
-		public String getName() { return "Square"; }
-				@Override
-				public boolean is2D() { return true; }},
-		HEXAGON{ @Override
-		public String getName() { return "Hexagon"; }
-			@Override
-			public boolean is2D() { return true; }},
-		LOW_RES_CIRCLE { @Override
-		public String getName() { return "Low resolution circle"; }
-			@Override
-			public boolean is2D() { return true; }},
-		HIGH_RES_CIRCLE { @Override
-		public String getName() { return "High resolution circle"; }
-			@Override
-			public boolean is2D() { return true; }},
-        CUBE { @Override
-		public String getName() { return "Cube"; }},
-        ICOSAHEDRON	{ @Override
-		public String getName() { return "Icosahedron"; }},
-        LOW_RES_SPHERE { @Override
-		public String getName() { return "Low Resolution Sphere"; }
-        		@Override
-				public boolean isHighResolution() { return true; }},
-        HIGH_RES_SPHERE	{ @Override
-		public String getName() { return "High Resolution Sphere"; }
-        		@Override
-				public boolean isHighResolution() { return true; }},
-        SUPER_HIGH_RES_SPHERE	{ @Override
-		public String getName() { return "Super-High Resolution Sphere"; }
-		@Override
-		public boolean isHighResolution() { return true; }},
+		/** Point. */
+		POINT { 
+			@Override public String getName() { return "Point"; }
+			@Override public boolean is2D() { return true; }},
+		/** Square. */
+		SQUARE { 
+            @Override public String getName() { return "Square"; }
+			@Override public boolean is2D() { return true; }},
+		/** Hexagon. */
+		HEXAGON{ 
+            @Override public String getName() { return "Hexagon"; }
+			@Override public boolean is2D() { return true; }},
+		/** Low resolution circle. */
+		LOW_RES_CIRCLE { 
+		    @Override public String getName() { return "Low resolution circle"; }
+			@Override public boolean is2D() { return true; }},
+		/** High resolution circle. */
+		HIGH_RES_CIRCLE { 
+            @Override public String getName() { return "High resolution circle"; }
+			@Override public boolean is2D() { return true; }},
+        /** Cube. */
+        CUBE { @Override public String getName() { return "Cube"; }},
+        /** Icosahedron. */
+        ICOSAHEDRON	{ @Override public String getName() { return "Icosahedron"; }},
+        /** Low resolution sphere. */
+        LOW_RES_SPHERE { 
+        	@Override public String getName() { return "Low Resolution Sphere"; }
+        	@Override public boolean isHighResolution() { return true; }},
+        /** High resolution sphere. */
+        HIGH_RES_SPHERE	{ 
+	        @Override public String getName() { return "High Resolution Sphere"; }
+        	@Override public boolean isHighResolution() { return true; }},
+        /** Super high resolution sphere. */
+        SUPER_HIGH_RES_SPHERE { 
+            @Override public String getName() { return "Super-High Resolution Sphere"; }
+    		@Override public boolean isHighResolution() { return true; }},
         ;
 
+		/* (non-Javadoc)
+		 * @see gdsc.smlm.data.NamedObject#getShortName()
+		 */
 		@Override
 		public String getShortName()
 		{
 			return getName();
 		}
 
+		/**
+		 * Checks if is 2d.
+		 *
+		 * @return true, if is 2d
+		 */
 		public boolean is2D() { return false; }
 
+		/**
+		 * Checks if is high resolution.
+		 *
+		 * @return true, if is high resolution
+		 */
 		public boolean isHighResolution() { return false; }
 
+		/**
+		 * For number.
+		 *
+		 * @param number
+		 *            the number
+		 * @return the rendering
+		 */
 		public static Rendering forNumber(int number)
 		{
 			Rendering[] values = Rendering.values();
@@ -115,6 +138,15 @@ public class Shape3DHelper
 
 	private static int[] numberOfTriangles = new int[Rendering.values().length];
 
+	/**
+	 * Creates the shape.
+	 *
+	 * @param rendering
+	 *            the rendering
+	 * @param colorDepth
+	 *            the color depth
+	 * @return the shape
+	 */
 	public static Shape3D createShape(Rendering rendering, int colorDepth)
 	{
 		TurboList<Point3f> points = new TurboList<>(1);
@@ -870,7 +902,7 @@ public class Shape3DHelper
 	}
 
 	/**
-	 * Creates an indexed object from a list of vertices
+	 * Creates an indexed object from a list of vertices.
 	 *
 	 * @param list
 	 *            the list of vertices

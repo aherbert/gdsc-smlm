@@ -39,8 +39,21 @@ public class ItemGroupNode extends ContentNode
 {
 	private ItemGroup itemGroup;
 
-	protected Point3f min, max, center;
+	/** The min. */
+	protected Point3f min;
+	
+	/** The max. */
+	protected Point3f max;
+	
+	/** The center. */
+	protected Point3f center;
 
+	/**
+	 * Instantiates a new item group node.
+	 *
+	 * @param itemGroup
+	 *            the item group
+	 */
 	public ItemGroupNode(final ItemGroup itemGroup)
 	{
 		this.itemGroup = itemGroup;
@@ -48,6 +61,11 @@ public class ItemGroupNode extends ContentNode
 		addChild(itemGroup);
 	}
 
+	/**
+	 * Gets the item group.
+	 *
+	 * @return the item group
+	 */
 	public ItemGroup getItemGroup()
 	{
 		return itemGroup;
