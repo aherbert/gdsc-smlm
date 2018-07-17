@@ -47,28 +47,59 @@ import gdsc.smlm.function.PoissonCalculator;
  */
 public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSolver, WLSEFunctionSolver
 {
+	/** Index for the best sum-of-squares in {@link #sumOfSquaresWorking} */
 	protected static final int SUM_OF_SQUARES_BEST = 0;
+	/** Index for the new sum-of-squares in {@link #sumOfSquaresWorking} */
 	protected static final int SUM_OF_SQUARES_OLD = 1;
+	/** Index for the previous sum-of-squares in {@link #sumOfSquaresWorking} */
 	protected static final int SUM_OF_SQUARES_NEW = 2;
 
+	/** The solver. */
 	protected EJMLLinearSolver solver = new EJMLLinearSolver();
+	/** The calculator. */
 	protected GradientCalculator calculator;
+	/** The stopping criteria. */
 	protected StoppingCriteria sc;
 
+	/** The beta. */
 	protected double[] beta = new double[0];
+
+	/** Working space for beta. */
 	protected double[] da;
+
+	/** The updated parameters a. 
+	 * This is equal to the current parameters a plus the solution x to A x = b 
+	 * with A = {@link #covar} and b = gradient vector (beta). */
 	protected double[] ap = new double[0];
 
+	/**
+	 * Working space for the alpha matrix.
+	 * This is equal to {@link #alpha} with the diagonal scaled by 1 + {@link #lambda}.
+	 */
 	protected double[][] covar;
+
+	/** The alpha matrix. */
 	protected double[][] alpha;
+
+	/** The initial lambda. */
 	protected double initialLambda = 0.01;
+
+	/** The working lambda. */
 	protected double lambda;
+
+	/** The sum of squares results. */
 	protected double[] sumOfSquaresWorking;
 
+	/** The initial residual sum of squares. */
 	protected double initialResidualSumOfSquares;
 
+	/** The function. */
 	protected NonLinearFunction func;
+
+	/** The y data from the last successful fit. */
 	protected double[] lastyFit;
+
+	/** The log-likelihood. Used for the MLE LVM algorithm. */
 	protected double ll = Double.NaN;
 
 	/**
@@ -233,7 +264,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	}
 
 	/**
-	 * Increase lambda. Call this when the solution to the matrix do not improve the score, or the matrix had no solution.
+	 * Increase lambda. Call this when the solution to the matrix do not improve the score, or the matrix had no
+	 * solution.
 	 */
 	protected void increaseLambda()
 	{

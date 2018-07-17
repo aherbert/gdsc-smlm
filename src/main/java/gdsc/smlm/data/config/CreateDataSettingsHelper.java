@@ -32,6 +32,7 @@ import gdsc.smlm.model.DiffusionType;
  */
 public class CreateDataSettingsHelper
 {
+	/** The create data settings. */
 	CreateDataSettingsOrBuilder createDataSettings;
 
 	/** Set to true if the camera type is {@link CameraType#EMCCD} */

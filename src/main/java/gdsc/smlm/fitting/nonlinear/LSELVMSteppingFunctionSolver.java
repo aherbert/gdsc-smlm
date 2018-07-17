@@ -41,6 +41,10 @@ import gdsc.smlm.function.Gradient2FunctionValueStore;
  */
 public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements LSEFunctionSolver
 {
+	/**
+	 * The solver used to invert the Fisher information matrix to find 
+	 * the Cramér–Rao lower bound (CRLB).
+	 */
 	protected EJMLLinearSolver inversionSolver;
 
 	/** The total sum of squares. */

@@ -28,8 +28,16 @@ package gdsc.smlm.filters;
  */
 public class Spot implements Comparable<Spot>, Cloneable
 {
-	final public int x, y;
+	/** The x. */
+	final public int x;
+	
+	/** The y. */
+	final public int y;
+	
+	/** The intensity. */
 	final public float intensity;
+	
+	/** The score. */
 	private float score;
 
 	/**

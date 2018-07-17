@@ -61,7 +61,10 @@ import gdsc.smlm.function.Gradient1Procedure;
  */
 public class UnivariateLikelihoodFisherInformationCalculator implements FisherInformationCalculator
 {
+	/** The gradient function. */
 	protected final Gradient1Function gf;
+	
+	/** The Fisher information for each evaluated point in the function. */
 	protected final FisherInformation[] fi;
 
 	/**

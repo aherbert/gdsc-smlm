@@ -54,9 +54,9 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
 /**
- * @SuppressWarnings({"javadoc"})
  * Base class for testing the function solvers
  */
+@SuppressWarnings({"javadoc"})
 public abstract class BaseFunctionSolverTest
 {
 	// Basic Gaussian
@@ -230,6 +230,7 @@ public abstract class BaseFunctionSolverTest
 		canFitSingleGaussian(solver, applyBounds, NoiseModel.SCMOS);
 	}
 
+	@SuppressWarnings("null")
 	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, NoiseModel noiseModel)
 	{
 		// Allow reporting the fit deviations
@@ -460,7 +461,7 @@ public abstract class BaseFunctionSolverTest
 		test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, LogLevel.INFO);
 	}
 
-	private void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
+	private static void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
 	{
 		double p = (total == 0) ? 0 : 100.0 * better / total;
 		TestSettings.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
@@ -491,13 +492,13 @@ public abstract class BaseFunctionSolverTest
 		return Math.sqrt(dx * dx + dy * dy) * Math.signum(Math.signum(dy) * Math.signum(dx));
 	}
 
-	private void compare(double[] o1, double[] e1, double[] o2, double[] e2, int i, Statistics stats1,
+	private static void compare(double[] o1, double[] e1, double[] o2, double[] e2, int i, Statistics stats1,
 			Statistics stats2)
 	{
 		compare(o1[i], e1[i], o2[i], e2[i], stats1, stats2);
 	}
 
-	private void compare(double o1, double e1, double o2, double e2, Statistics stats1, Statistics stats2)
+	private static void compare(double o1, double e1, double o2, double e2, Statistics stats1, Statistics stats2)
 	{
 		stats1.add(o1 - e1);
 		stats2.add(o2 - e2);

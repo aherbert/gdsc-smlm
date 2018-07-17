@@ -36,9 +36,12 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
+	/** The number of gradient parameters for each Gaussian. */
 	protected static final int GRADIENT_PARAMETERS_PER_PEAK = 2;
 
+	/** The pre-computed function factors for each Gaussian. */
 	protected final double[][] peakFactors;
+	/** The Gaussian parameters (a) */
 	protected double[] a;
 
 	/**
@@ -68,11 +71,15 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return new NSFixedGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
+	/** The index for the The amplitude/height normalisation: 1/(2*pi*sx*sy). */
 	protected static final int N = 0;
+	/** The index for the The amplitude/height. */
 	protected static final int HEIGHT = 1;
+	/** The index for the x0 position pre-factor */
 	protected static final int AA = 2;
+	/** The index for the x0 position gradient pre-factor */
 	protected static final int AA2 = 3;
-
+	
 	/*
 	 * (non-Javadoc)
 	 *
@@ -131,6 +138,23 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y;
 	}
 
+	/**
+	 * Compute the Gaussian at a set offset from the centre.
+	 *
+	 * @param x0
+	 *            the x0 offset
+	 * @param x1
+	 *            the x1 offset
+	 * @param dy_da
+	 *            the first-order gradient
+	 * @param apos
+	 *            the parameter position for the current peak
+	 * @param dydapos
+	 *            the gradient position for the current peak
+	 * @param factors
+	 *            the factors
+	 * @return the Gaussian value
+	 */
 	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
 			final double[] factors)
 	{
@@ -176,6 +200,19 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y;
 	}
 
+	/**
+	 * Compute the Gaussian at a set offset from the centre.
+	 *
+	 * @param x0
+	 *            the x0 offset
+	 * @param x1
+	 *            the x1 offset
+	 * @param apos
+	 *            the parameter position for the current peak
+	 * @param factors
+	 *            the factors
+	 * @return the Gaussian value
+	 */
 	protected double gaussian(final int x0, final int x1, final int apos, final double[] factors)
 	{
 		final double dx = x0 - a[apos + X_POSITION];

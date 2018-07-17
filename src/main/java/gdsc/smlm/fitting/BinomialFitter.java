@@ -382,9 +382,11 @@ public class BinomialFitter
 					}
 					catch (TooManyEvaluationsException e)
 					{
+						// No solution
 					}
 					catch (TooManyIterationsException e)
 					{
+						// No solution
 					}
 					if (solution == null)
 						continue;
@@ -403,9 +405,11 @@ public class BinomialFitter
 					}
 					catch (TooManyEvaluationsException e)
 					{
+						// No solution
 					}
 					catch (TooManyIterationsException e)
 					{
+						// No solution
 					}
 				}
 				if (solution == null)
@@ -521,7 +525,7 @@ public class BinomialFitter
 	 * Evaluates the cumulative binomial probability distribution. Assumes the
 	 * input data is a cumulative histogram from 0 to N in integer increments.
 	 */
-	public class BinomialModel
+	private class BinomialModel
 	{
 		int trials;
 		double[] p;
@@ -645,7 +649,7 @@ public class BinomialFitter
 	/**
 	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
 	 */
-	public class BinomialModelFunctionGradient extends BinomialModel implements MultivariateVectorFunction
+	private class BinomialModelFunctionGradient extends BinomialModel implements MultivariateVectorFunction
 	{
 		long[] nC;
 
@@ -693,11 +697,6 @@ public class BinomialFitter
 		{
 			return getP(point[0]);
 		}
-
-		// Set the delta using the desired fractional accuracy.
-		// See Numerical Recipes, The Art of Scientific Computing (2nd edition) Chapter 5.7
-		// on numerical derivatives
-		final double delta = FastMath.cbrt(1e-6);
 
 		double[][] jacobian(double[] variables)
 		{
@@ -763,8 +762,12 @@ public class BinomialFitter
 				}
 			}
 
-			//			// Compute the gradients using numerical differentiation
-			//			// Set the step h for computing the function around the desired point
+			//			// Compute the gradients using numerical differentiation.
+			//			// Set the step h for computing the function around the desired point.
+			//			// Set the delta using the desired fractional accuracy.
+			//			// See Numerical Recipes, The Art of Scientific Computing (2nd edition) Chapter 5.7
+			//			// on numerical derivatives
+			//			final double delta = FastMath.cbrt(1e-6);
 			//			final double h = delta * p;
 			//
 			//			// Ensure we stay within the 0-1 bounds

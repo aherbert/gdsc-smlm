@@ -103,6 +103,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		}
 	}
 
+	/** The line search method. */
 	protected LineSearchMethod lineSearchMethod = LineSearchMethod.NONE;
 
 	/** The log-likelihood. */
@@ -122,7 +123,13 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	/** The gradient procedure. */
 	protected FastMLEGradient2Procedure gradientProcedure;
 
-	protected double[] aOld, searchDirection;
+	/** The old parameters (a). */
+	protected double[] aOld;
+	
+	/** The search direction. */
+	protected double[]  searchDirection;
+	
+	/** The first evaluation flag. */
 	protected boolean firstEvaluation;
 
 	/**
@@ -593,11 +600,22 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 				getNumberOfFittedPoints() - getNumberOfFittedParameters());
 	}
 
+	/**
+	 * Gets the line search method.
+	 *
+	 * @return the line search method
+	 */
 	public LineSearchMethod getLineSearchMethod()
 	{
 		return lineSearchMethod;
 	}
 
+	/**
+	 * Sets the line search method.
+	 *
+	 * @param lineSearchMethod
+	 *            the new line search method
+	 */
 	public void setLineSearchMethod(LineSearchMethod lineSearchMethod)
 	{
 		this.lineSearchMethod = lineSearchMethod;

@@ -37,6 +37,8 @@ import gdsc.smlm.function.ValueProcedure;
 public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 {
 	// Required for the PSF
+	
+	/** The intensity. */
 	protected double tI;
 
 	/**

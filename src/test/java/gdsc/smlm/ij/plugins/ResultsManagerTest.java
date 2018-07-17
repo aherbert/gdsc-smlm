@@ -100,6 +100,7 @@ public class ResultsManagerTest
 		writeTSFMatchesRead(2, 2, 2, 2);
 	}
 
+	@SuppressWarnings("null")
 	private static void writeTSFMatchesRead(int channels, int slices, int positions, int types)
 	{
 		String filename = createFile();

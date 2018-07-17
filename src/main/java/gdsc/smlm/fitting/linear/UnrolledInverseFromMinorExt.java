@@ -47,14 +47,15 @@ import org.ejml.data.DenseMatrix64F;
 import gdsc.core.utils.Maths;
 
 /**
- * Alex Herbert created this extension of org.ejml.alg.dense.misc.UnrolledInverseFromMinor to compute only the diagonal
- * of the inverse.
+ * Alex Herbert created this extension of {@link org.ejml.alg.dense.misc.UnrolledInverseFromMinor}
+ * to compute only the diagonal of the inverse.
  *
  * @author Peter Abeles
  * @author Alex Herbert
  */
 public class UnrolledInverseFromMinorExt
 {
+	/** The maximum supported matrix size */
 	public static final int MAX = 5;
 
 	/**
@@ -102,6 +103,15 @@ public class UnrolledInverseFromMinorExt
 		}
 	}
 
+	/**
+	 * Invert the 2x2 matrix and return the diagonal.
+	 *
+	 * @param mat
+	 *            the 2x2 matrix
+	 * @param scale
+	 *            the scale (set to the maximum of the matrix data, or 1)
+	 * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+	 */
 	public static double[] inv2(DenseMatrix64F mat, double scale)
 	{
 		double[] data = mat.data;
@@ -123,6 +133,15 @@ public class UnrolledInverseFromMinorExt
 		return new double[] { m11 * det_recip, m22 * det_recip };
 	}
 
+	/**
+	 * Invert the 3x3 matrix and return the diagonal.
+	 *
+	 * @param mat
+	 *            the 3x3 matrix
+	 * @param scale
+	 *            the scale (set to the maximum of the matrix data, or 1)
+	 * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+	 */
 	public static double[] inv3(DenseMatrix64F mat, double scale)
 	{
 		double[] data = mat.data;
@@ -151,6 +170,15 @@ public class UnrolledInverseFromMinorExt
 		return new double[] { m11 * det_recip, m22 * det_recip, m33 * det_recip };
 	}
 
+	/**
+	 * Invert the 4x4 matrix and return the diagonal.
+	 *
+	 * @param mat
+	 *            the 4x4 matrix
+	 * @param scale
+	 *            the scale (set to the maximum of the matrix data, or 1)
+	 * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+	 */
 	public static double[] inv4(DenseMatrix64F mat, double scale)
 	{
 		double[] data = mat.data;
@@ -188,6 +216,15 @@ public class UnrolledInverseFromMinorExt
 		return new double[] { m11 * det_recip, m22 * det_recip, m33 * det_recip, m44 * det_recip };
 	}
 
+	/**
+	 * Invert the 5x5 matrix and return the diagonal.
+	 *
+	 * @param mat
+	 *            the 5x5 matrix
+	 * @param scale
+	 *            the scale (set to the maximum of the matrix data, or 1)
+	 * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+	 */
 	public static double[] inv5(DenseMatrix64F mat, double scale)
 	{
 		double[] data = mat.data;
@@ -271,5 +308,4 @@ public class UnrolledInverseFromMinorExt
 
 		return new double[] { m11 * det_recip, m22 * det_recip, m33 * det_recip, m44 * det_recip, m55 * det_recip };
 	}
-
 }

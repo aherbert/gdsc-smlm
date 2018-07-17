@@ -44,7 +44,7 @@ public class PrecomputedFunctionTest
 		Assert.assertArrayEquals("values", v, vo, 0);
 	}
 
-	private double[] evaluateValueFunction(ValueFunction f)
+	private static double[] evaluateValueFunction(ValueFunction f)
 	{
 		final double[] v = new double[f.size()];
 		f.initialise0(null);
@@ -83,7 +83,7 @@ public class PrecomputedFunctionTest
 		}
 	}
 
-	private double[] evaluateGradient1Function(Gradient1Function f, final double[][] g1)
+	private static double[] evaluateGradient1Function(Gradient1Function f, final double[][] g1)
 	{
 		final double[] v = new double[f.size()];
 		f.initialise1(null);
@@ -128,7 +128,7 @@ public class PrecomputedFunctionTest
 		}
 	}
 
-	private double[] evaluateGradient2Function(Gradient2Function f, final double[][] g1, final double[][] g2)
+	private static double[] evaluateGradient2Function(Gradient2Function f, final double[][] g1, final double[][] g2)
 	{
 		final double[] v = new double[f.size()];
 		f.initialise2(null);

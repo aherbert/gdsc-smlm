@@ -29,8 +29,11 @@ package gdsc.smlm.function;
 public class OffsetValueFunction extends PrecomputedValueFunction
 		implements ValueFunction, ValueProcedure, NamedFunction
 {
+	/** The value function. */
 	protected final ValueFunction f;
+	/** The counter i. */
 	protected int i;
+	/** The procedure. */
 	protected ValueProcedure procedure;
 
 	/**
@@ -57,20 +60,25 @@ public class OffsetValueFunction extends PrecomputedValueFunction
 	 *
 	 * @param pre
 	 *            the pre-computed function
-	 * @param values2
+	 * @param values
 	 *            the second set of precomputed values
 	 */
-	protected OffsetValueFunction(OffsetValueFunction pre, double[] values2)
+	protected OffsetValueFunction(OffsetValueFunction pre, double[] values)
 	{
 		// Clone the values as they will be modified
-		super(values2.clone());
+		super(values.clone());
 		this.f = pre.f;
 		final int n = f.size();
 		final double[] values1 = pre.values;
 		for (int i = 0; i < n; i++)
-			values[i] += values1[i];
+			this.values[i] += values1[i];
 	}
 
+	/**
+	 * Gets the value function.
+	 *
+	 * @return the value function
+	 */
 	public ValueFunction getValueFunction()
 	{
 		return f;

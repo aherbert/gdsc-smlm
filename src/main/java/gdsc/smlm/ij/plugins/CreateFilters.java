@@ -27,7 +27,6 @@ import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -40,7 +39,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.w3c.dom.Document;
@@ -142,7 +140,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	}
 
 	private int processElement(StringWriter sw, Node node)
-			throws TransformerFactoryConfigurationError, TransformerException
+			throws TransformerFactoryConfigurationError
 	{
 		// Get entire element as a string
 		String xmlString = gdsc.core.utils.XmlUtils.getString(node, false);
@@ -234,7 +232,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		return out.size();
 	}
 
-	private String getName(StringBuilder sb)
+	private static String getName(StringBuilder sb)
 	{
 		Filter f = Filter.fromXML(sb.toString());
 		if (f != null)
@@ -374,7 +372,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	 * Inner class for the Callback Handlers. This class replaces the attributes in the XML with the given
 	 * substitutions. Attributes are processed in order. Substitutions are ignored (skipped) if they are null.
 	 */
-	class AttributeSubstitutionHandler extends DefaultHandler
+	private class AttributeSubstitutionHandler extends DefaultHandler
 	{
 		StringBuilder sb;
 		String[] attributeSubstitutions;
@@ -432,7 +430,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		}
 	}
 
-	private void comment(String text)
+	private static void comment(String text)
 	{
 		IJ.log(TextUtils.wrap("<!-- " + text + " -->", 80));
 	}

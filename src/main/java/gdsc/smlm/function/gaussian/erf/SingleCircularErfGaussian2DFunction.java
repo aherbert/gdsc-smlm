@@ -33,6 +33,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGaussian2DFunction
 {
+	/** The gradient indices. */
 	static final int[] gradientIndices;
 	static
 	{

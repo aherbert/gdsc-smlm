@@ -29,7 +29,10 @@ package gdsc.smlm.function;
 public class OffsetGradient1Function extends OffsetValueFunction
 		implements Gradient1Function, Gradient1Procedure, NonLinearFunction
 {
+	/** The gradient1 function. */
 	protected final Gradient1Function f1;
+	
+	/** The procedure. */
 	protected Gradient1Procedure procedure;
 
 	/**
@@ -39,10 +42,23 @@ public class OffsetGradient1Function extends OffsetValueFunction
 	{
 		private int i;
 
+		/** The values. */
 		public final double[] values;
+		
+		/** The dyda gradients. */
 		public final double[][] dyda;
+		
+		/** The number of gradients. */
 		public final int length;
 
+		/**
+		 * Instantiates a new function store.
+		 *
+		 * @param values
+		 *            the values
+		 * @param dyda
+		 *            the dyda
+		 */
 		public FunctionStore(double[] values, double[][] dyda)
 		{
 			length = f1.getNumberOfGradients();
@@ -78,9 +94,13 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		}
 	}
 
-	// Used to store all the values and gradients for the NonLinearFunction interface
+	/** Used to store all the values and gradients for the NonLinearFunction interface */
 	protected FunctionStore store = null;
+	
+	/** All the values for the NonLinearFunction interface. */
 	protected double[] all_values;
+	
+	/** All the gradients for the NonLinearFunction interface. */
 	protected double[][] all_dyda;
 
 	/**
@@ -99,12 +119,27 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		f1 = f;
 	}
 
-	protected OffsetGradient1Function(OffsetGradient1Function pre, double[] values2)
+	/**
+	 * Instantiates a new offset gradient1 function.
+	 *
+	 * @param pre
+	 *            the function
+	 * @param values
+	 *            the precomputed values
+	 * @throws IllegalArgumentException
+	 *             if the values length does not match the function size
+	 */
+	protected OffsetGradient1Function(OffsetGradient1Function pre, double[] values)
 	{
-		super(pre, values2);
+		super(pre, values);
 		f1 = (Gradient1Function) f;
 	}
 
+	/**
+	 * Gets the gradient 1 function.
+	 *
+	 * @return the gradient 1 function
+	 */
 	public Gradient1Function getGradient1Function()
 	{
 		return f1;

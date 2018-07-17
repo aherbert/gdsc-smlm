@@ -28,8 +28,15 @@ package gdsc.smlm.function;
  */
 public class FixedNonLinearFunction implements NonLinearFunction
 {
+	/** The values. */
 	final double[] values;
 
+	/**
+	 * Instantiates a new fixed non linear function.
+	 *
+	 * @param values
+	 *            the values
+	 */
 	public FixedNonLinearFunction(double[] values)
 	{
 		this.values = values;
@@ -38,7 +45,7 @@ public class FixedNonLinearFunction implements NonLinearFunction
 	@Override
 	public void initialise(double[] a)
 	{
-
+		// Do nothing
 	}
 
 	@Override

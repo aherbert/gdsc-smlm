@@ -523,7 +523,7 @@ public class PrecisionTest
 		isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true, true);
 	}
 
-	private void functionsComputeSameValue(int maxx, SinglePrecision f1, DoublePrecision f2, final double precision)
+	private static void functionsComputeSameValue(int maxx, SinglePrecision f1, DoublePrecision f2, final double precision)
 	{
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);

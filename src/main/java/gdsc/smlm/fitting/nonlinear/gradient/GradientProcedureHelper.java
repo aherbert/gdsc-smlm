@@ -28,6 +28,12 @@ package gdsc.smlm.fitting.nonlinear.gradient;
  */
 class GradientProcedureHelper
 {
+	/**
+	 * Initialise a working 4x4 matrix.
+	 *
+	 * @param data
+	 *            the data
+	 */
 	static void initialiseWorkingMatrix4(double[] data)
 	{
 		data[0] = 0;
@@ -42,6 +48,12 @@ class GradientProcedureHelper
 		data[9] = 0;
 	}
 
+	/**
+	 * Initialise a working 5x5 matrix.
+	 *
+	 * @param data
+	 *            the data
+	 */
 	static void initialiseWorkingMatrix5(double[] data)
 	{
 		data[0] = 0;
@@ -61,6 +73,12 @@ class GradientProcedureHelper
 		data[14] = 0;
 	}
 
+	/**
+	 * Initialise a working 6x6 matrix.
+	 *
+	 * @param data
+	 *            the data
+	 */
 	static void initialiseWorkingMatrix6(double[] data)
 	{
 		data[0] = 0;
@@ -86,6 +104,16 @@ class GradientProcedureHelper
 		data[20] = 0;
 	}
 
+	/**
+	 * Gets the symmetric NxN matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output NxN matrix
+	 * @param n
+	 *            the n
+	 */
 	static void getMatrix(double[] data, double[][] matrix, int n)
 	{
 		// Generate symmetric matrix
@@ -100,6 +128,14 @@ class GradientProcedureHelper
 		//throw new RuntimeException();
 	}
 
+	/**
+	 * Gets the symmetric 4x4 matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output 4x4 matrix
+	 */
 	static void getMatrix4(double[] data, double[][] matrix)
 	{
 		matrix[0][0] = data[0];
@@ -120,6 +156,14 @@ class GradientProcedureHelper
 		matrix[3][3] = data[9];
 	}
 
+	/**
+	 * Gets the symmetric 5x5 matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output 5x5 matrix
+	 */
 	static void getMatrix5(double[] data, double[][] matrix)
 	{
 		matrix[0][0] = data[0];
@@ -149,6 +193,14 @@ class GradientProcedureHelper
 		matrix[4][4] = data[14];
 	}
 
+	/**
+	 * Gets the symmetric 6x6 matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output 6x6 matrix
+	 */
 	static void getMatrix6(double[] data, double[][] matrix)
 	{
 		// Generate symmetric matrix
@@ -190,6 +242,16 @@ class GradientProcedureHelper
 		matrix[5][5] = data[20];
 	}
 
+	/**
+	 * Gets the symmetric NxN matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output NxN matrix
+	 * @param n
+	 *            the n
+	 */
 	static void getMatrix(double[] data, double[] matrix, int n)
 	{
 		// Generate symmetric matrix
@@ -204,6 +266,14 @@ class GradientProcedureHelper
 		//throw new RuntimeException();
 	}
 
+	/**
+	 * Gets the symmetric 4x4 matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output 4x4 matrix
+	 */
 	static void getMatrix4(double[] data, double[] matrix)
 	{
 		matrix[0] = data[0];
@@ -224,6 +294,14 @@ class GradientProcedureHelper
 		matrix[15] = data[9];
 	}
 
+	/**
+	 * Gets the symmetric 5x5 matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output 5x5 matrix
+	 */
 	static void getMatrix5(double[] data, double[] matrix)
 	{
 		matrix[0] = data[0];
@@ -253,6 +331,14 @@ class GradientProcedureHelper
 		matrix[24] = data[14];
 	}
 
+	/**
+	 * Gets the symmetric 6x6 matrix from the working matrix.
+	 *
+	 * @param data
+	 *            the working matrix
+	 * @param matrix
+	 *            the output 6x6 matrix
+	 */
 	static void getMatrix6(double[] data, double[] matrix)
 	{
 		// Generate symmetric matrix

@@ -36,10 +36,14 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
+	/** The number of gradient parameters for each Gaussian. */
 	protected static final int GRADIENT_PARAMETERS_PER_PEAK = 5;
 
+	/** Flag set to true if the Gaussian has no rotation angle. */
 	protected boolean[] zeroAngle;
+	/** The pre-computed function factors for each Gaussian. */
 	protected final double[][] peakFactors;
+	/** The Gaussian parameters (a) */
 	protected double[] a;
 
 	/**
@@ -70,20 +74,33 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return new FreeCircularGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
+	/** The index for the The amplitude/height normalisation: 1/(2*pi*sx*sy). */
 	protected static final int N = 0;
+	/** The index for the The amplitude/height. */
 	protected static final int HEIGHT = 1;
+	/** The index for the x0 position pre-factor */
 	protected static final int AA = 2;
+	/** The index for the x0*x1 position pre-factor (for rotation) */
 	protected static final int BB = 3;
+	/** The index for the x1 position pre-factor */
 	protected static final int CC = 4;
+	/** The index for the x width gradient pre-factor */
 	protected static final int NX = 5;
+	/** The index for the x width gradient pre-factor */
 	protected static final int AX = 6;
+	/** The index for the x width gradient pre-factor */
 	protected static final int BX = 7;
+	/** The index for the x width gradient pre-factor */
 	protected static final int CX = 8;
+	/** The index for the y width gradient pre-factor */
 	protected static final int NY = 9;
+	/** The index for the y width gradient pre-factor */
 	protected static final int AY = 10;
+	/** The index for the y width gradient pre-factor */
 	protected static final int BY = 11;
+	/** The index for the y width gradient pre-factor */
 	protected static final int CY = 12;
-
+	
 	/*
 	 * (non-Javadoc)
 	 *
@@ -192,6 +209,25 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y;
 	}
 
+	/**
+	 * Compute the Gaussian at a set offset from the centre.
+	 *
+	 * @param x0
+	 *            the x0 offset
+	 * @param x1
+	 *            the x1 offset
+	 * @param dy_da
+	 *            the first-order gradient
+	 * @param apos
+	 *            the parameter position for the current peak
+	 * @param dydapos
+	 *            the gradient position for the current peak
+	 * @param zeroAngle
+	 *            set to true if the Gaussian has no rotation angle
+	 * @param factors
+	 *            the factors
+	 * @return the Gaussian value
+	 */
 	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
 			boolean zeroAngle, final double[] factors)
 	{
@@ -266,6 +302,21 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y;
 	}
 
+	/**
+	 * Compute the Gaussian at a set offset from the centre.
+	 *
+	 * @param x0
+	 *            the x0 offset
+	 * @param x1
+	 *            the x1 offset
+	 * @param apos
+	 *            the parameter position for the current peak
+	 * @param zeroAngle
+	 *            set to true if the Gaussian has no rotation angle
+	 * @param factors
+	 *            the factors
+	 * @return the Gaussian value
+	 */
 	protected double gaussian(final int x0, final int x1, final int apos, boolean zeroAngle, final double[] factors)
 	{
 		final double dx = x0 - a[apos + X_POSITION];

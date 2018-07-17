@@ -28,6 +28,7 @@ package gdsc.smlm.function;
  */
 public class PrecomputedGradient2Function extends PrecomputedGradient1Function implements Gradient2Function
 {
+	/** The second order gradient */
 	protected final double[][] g2;
 
 	/**
@@ -49,6 +50,11 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function i
 		this.g2 = g2;
 	}
 
+	/**
+	 * Gets a reference to the first order gradients
+	 *
+	 * @return the first order gradients
+	 */
 	public double[][] getGradient2Ref()
 	{
 		return g2;

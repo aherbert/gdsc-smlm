@@ -38,13 +38,23 @@ public class PoissonCalculator
 	public static final double APPROXIMATION_X = 1.5;
 
 	// For computation of Stirling series
+
+	/** The constant <code>1./12</code> */
 	protected static final double ONE_OVER_12 = 1.0 / 12.0;
+	/** The constant <code>1./360</code> */
 	protected static final double ONE_OVER_360 = 1.0 / 360;
+	/** The constant <code>1./1260</code> */
 	protected static final double ONE_OVER_1260 = 1.0 / 1260;
+	/** The constant <code>1./1680</code> */
 	protected static final double ONE_OVER_1680 = 1.0 / 1680;
 
 	private boolean uninitialsed = true;
-	protected double mll, sumLogXFactorial;
+	
+	/** The maximum log likelihood. */
+	protected double mll;
+	/** The sum of the log X factorial term to convert the pseudo log-likelihood to the log-likelihood. */
+	protected double sumLogXFactorial;
+	/** The Poisson data values x (must be positive). */
 	protected final double[] x;
 
 	/**

@@ -29,6 +29,7 @@ package gdsc.smlm.fitting;
  */
 public class WrappedFunctionSolver implements FunctionSolver
 {
+	/** The solver. */
 	protected final FunctionSolver solver;
 
 	/**

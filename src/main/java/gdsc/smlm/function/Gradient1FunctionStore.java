@@ -30,6 +30,8 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 {
 	private Gradient1Function f;
 	private Gradient1Procedure procedure;
+	
+	/** The number of gradients. */
 	protected final int length;
 
 	/** The gradients from the last call to {@link #forEach(Gradient1Procedure)}. */
@@ -123,6 +125,9 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 		f.forEach((Gradient1Procedure) this);
 	}
 
+	/**
+	 * Creates the {@link #dyda} matrix.
+	 */
 	protected void createDYDA()
 	{
 		if (dyda == null || dyda.length != f.size())

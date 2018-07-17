@@ -1297,8 +1297,9 @@ public class PCPALMMolecules implements PlugIn
 			{
 				for (double[] clusterCentre : clusterCentres)
 				{
-					int clusterN = (int) Math.round((clusterNumberSD > 0)
-							? dataGenerator.nextGaussian(clusterNumber, clusterNumberSD) : clusterNumber);
+					int clusterN = (int) Math
+							.round((clusterNumberSD > 0) ? dataGenerator.nextGaussian(clusterNumber, clusterNumberSD)
+									: clusterNumber);
 					if (clusterN < 1)
 						continue;
 					//double[] clusterCentre = dist.next();
@@ -1378,7 +1379,7 @@ public class PCPALMMolecules implements PlugIn
 		for (int i = 0; i < xyz.size(); i++)
 		{
 			int nOccurrences = getBlinks(dataGenerator, blinkingRate);
-			if (showHistograms)
+			if (blinks != null)
 				blinks.add(nOccurrences);
 
 			final int size = molecules.size();
@@ -1421,7 +1422,7 @@ public class PCPALMMolecules implements PlugIn
 			if (molecules.size() > size)
 			{
 				count++;
-				if (showHistograms)
+				if (intraDistances != null)
 				{
 					int newCount = molecules.size() - size;
 					if (newCount == 1)
@@ -1481,7 +1482,7 @@ public class PCPALMMolecules implements PlugIn
 		log("  * Blinking rate = %s", Utils.rounded((double) molecules.size() / xyz.size(), 4));
 		log("  * Precision (Mean-displacement) = %s nm",
 				(statsSigma.getN() > 0) ? Utils.rounded(Math.sqrt(statsSigma.getMean()), 4) : "0");
-		if (showHistograms)
+		if (intraDistances != null)
 		{
 			if (intraDistances.getN() == 0)
 			{

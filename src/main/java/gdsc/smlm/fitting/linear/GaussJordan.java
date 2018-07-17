@@ -110,7 +110,7 @@ public class GaussJordan
 		return true;
 	}
 
-	private void unscramble_vector(float[][] a, int[] row, int[] col)
+	private static void unscramble_vector(float[][] a, int[] row, int[] col)
 	{
 		for (int j = row.length; j-- > 0;)
 		{

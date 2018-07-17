@@ -32,8 +32,13 @@ package gdsc.smlm.fitting;
  */
 public class ScaledFunctionSolver extends WrappedFunctionSolver
 {
+	/** The up scale. */
 	protected final double upScale;
+	
+	/** The down scale. */
 	protected final double downScale;
+	
+	/** The indices. */
 	protected final int[] indices;
 
 	/**
@@ -159,7 +164,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		return out;
 	}
 
-	private void scaleFunctionValue(double[] in, double[] out, double scale)
+	private static void scaleFunctionValue(double[] in, double[] out, double scale)
 	{
 		// Only on output so check if null
 		if (in == null)

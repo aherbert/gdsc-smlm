@@ -40,6 +40,7 @@ import gdsc.smlm.function.ExtendedGradient2Procedure;
  */
 public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure implements ExtendedGradient2Procedure
 {
+	/** The function. */
 	protected final ExtendedGradient2Function func;
 
 	/**
@@ -78,6 +79,9 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 			d2[i] = J[index];
 	}
 
+	/**
+	 * Reset the computation vectors to zero
+	 */
 	protected void resetExtended2()
 	{
 		Arrays.fill(d1, 0);

@@ -445,7 +445,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			name = gd.getNextChoice();
 			showTable = gd.getNextBoolean();
 		}
-		if (t != null)
+		if (t != null && w != null)
 		{
 			w.running = false;
 			inbox.close();
@@ -455,6 +455,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			}
 			catch (InterruptedException e)
 			{
+				// Ignore
 			}
 			t = null;
 		}
@@ -469,11 +470,13 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 	@Override
 	public void imageClosed(ImagePlus arg0)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void imageOpened(ImagePlus arg0)
 	{
+		// Ignore
 	}
 
 	@Override

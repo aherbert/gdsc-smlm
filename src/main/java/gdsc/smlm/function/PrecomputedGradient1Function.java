@@ -30,7 +30,10 @@ import gdsc.core.utils.SimpleArrayUtils;
  */
 public class PrecomputedGradient1Function extends PrecomputedValueFunction implements Gradient1Function
 {
+	/** The gradient indices. */
 	protected final int[] gradientIndices;
+	
+	/** The first order gradient. */
 	protected final double[][] g1;
 
 	/**
@@ -51,6 +54,13 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
 		this.g1 = g1;
 	}
 
+	/**
+	 * Check the gradient has the correct length for the function values.
+	 *
+	 * @param g
+	 *            the gradient
+	 * @return the number of gradients
+	 */
 	protected int checkGradient(double[][] g)
 	{
 		if (g == null)
@@ -68,6 +78,11 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
 		return n;
 	}
 
+	/**
+	 * Gets a reference to the first order gradients
+	 *
+	 * @return the first order gradients
+	 */
 	public double[][] getGradient1Ref()
 	{
 		return g1;

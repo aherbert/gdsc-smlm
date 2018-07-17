@@ -210,7 +210,8 @@ public class FilterAnalysis implements PlugIn
 			IJ.showStatus("Reading filters ...");
 			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
 
-			try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(filterSettings.getFilterSetFilename()), null)))
+			try (BufferedReader input = new BufferedReader(
+					new UnicodeReader(new FileInputStream(filterSettings.getFilterSetFilename()), null)))
 			{
 				Object o = XStreamWrapper.getInstance().fromXML(input);
 				if (o != null && o instanceof List<?>)
@@ -241,7 +242,8 @@ public class FilterAnalysis implements PlugIn
 		if (chooser.getFileName() != null)
 		{
 			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
-			try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8"))
+			try (OutputStreamWriter out = new OutputStreamWriter(
+					new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8"))
 			{
 				XStreamWrapper.getInstance().toXML(filterSets, out);
 				SettingsManager.writeSettings(filterSettings.build());
@@ -804,7 +806,7 @@ public class FilterAnalysis implements PlugIn
 				maxFilter = filter;
 			}
 
-			if (!isHeadless)
+			if (xValues != null && yValues != null)
 			{
 				xValues[i] = filter.getNumericalValue();
 				yValues[i++] = jaccard;
@@ -837,7 +839,7 @@ public class FilterAnalysis implements PlugIn
 			if (showResultsTable)
 				resultsWindow.append("");
 
-			if (plotTopN > 0)
+			if (plotTopN > 0 && xValues != null)
 			{
 				// Check the xValues are unique. Since the filters have been sorted by their
 				// numeric value we only need to compare adjacent entries.
@@ -938,7 +940,7 @@ public class FilterAnalysis implements PlugIn
 		return s;
 	}
 
-	public class FilterScore
+	private class FilterScore
 	{
 		Filter filter;
 		double score;
@@ -955,7 +957,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	public class NamedPlot implements Comparable<NamedPlot>
+	private class NamedPlot implements Comparable<NamedPlot>
 	{
 		String name, xAxisName;
 		double[] xValues, yValues;

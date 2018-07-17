@@ -93,7 +93,7 @@ public class ConfigurationTemplateTest
 		checkLoaded("canLoadResourceTemplates", templates, before, after);
 	}
 
-	private void checkLoaded(String test, TemplateResource[] templates, String[] before, String[] after)
+	private static void checkLoaded(String test, TemplateResource[] templates, String[] before, String[] after)
 	{
 		// Subtract the before from the after
 		HashSet<String> set = new HashSet<>(Arrays.asList(after));
@@ -162,7 +162,7 @@ public class ConfigurationTemplateTest
 	}
 
 	@Test
-	public void canLoadTemplateImageFromResources() throws IOException
+	public void canLoadTemplateImageFromResources()
 	{
 		// This test requires that the system resources does have at least one template with an image
 

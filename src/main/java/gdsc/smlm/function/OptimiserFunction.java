@@ -32,9 +32,19 @@ import gnu.trove.list.array.TDoubleArrayList;
  */
 public abstract class OptimiserFunction
 {
+	/** The x. */
 	protected TDoubleArrayList x = null;
+	/** The y. */
 	protected TDoubleArrayList y = null;
 
+	/**
+	 * Adds the point.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
 	public void addPoint(double x, double y)
 	{
 		if (this.x == null)
@@ -46,6 +56,14 @@ public abstract class OptimiserFunction
 		this.y.add(y);
 	}
 
+	/**
+	 * Adds the data.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
 	public void addData(float[] x, float[] y)
 	{
 		this.x = new TDoubleArrayList();
@@ -57,6 +75,14 @@ public abstract class OptimiserFunction
 		}
 	}
 
+	/**
+	 * Adds the data.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
 	public void addData(double[] x, double[] y)
 	{
 		this.x = new TDoubleArrayList();
@@ -68,16 +94,31 @@ public abstract class OptimiserFunction
 		}
 	}
 
+	/**
+	 * Gets the x data
+	 *
+	 * @return the x
+	 */
 	public double[] getX()
 	{
 		return x.toArray();
 	}
 
+	/**
+	 * Gets the y data
+	 *
+	 * @return the y
+	 */
 	public double[] getY()
 	{
 		return y.toArray();
 	}
 
+	/**
+	 * Gets the weights array. This is an array filled with ones. 
+	 *
+	 * @return the weights
+	 */
 	public double[] getWeights()
 	{
 		double[] w = new double[y.size()];
@@ -85,6 +126,11 @@ public abstract class OptimiserFunction
 		return w;
 	}
 
+	/**
+	 * Get the size.
+	 *
+	 * @return the size
+	 */
 	public int size()
 	{
 		return x.size();

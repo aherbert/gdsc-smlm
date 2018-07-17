@@ -1125,7 +1125,7 @@ public class SumFilter extends BaseFilter
 		return floatRowBuffer;
 	}
 
-	private void extractRow(float[] inData, int y, int width, final int n, float[] row)
+	private static void extractRow(float[] inData, int y, int width, final int n, float[] row)
 	{
 		int index = y * width;
 
@@ -1143,7 +1143,7 @@ public class SumFilter extends BaseFilter
 		}
 	}
 
-	private void extractRow1(float[] inData, int y, int width, float[] row)
+	private static void extractRow1(float[] inData, int y, int width, float[] row)
 	{
 		int index = y * width;
 
@@ -2255,7 +2255,7 @@ public class SumFilter extends BaseFilter
 		return intRowBuffer;
 	}
 
-	private void extractRow(int[] inData, int y, int width, final int n, int[] row)
+	private static void extractRow(int[] inData, int y, int width, final int n, int[] row)
 	{
 		int index = y * width;
 
@@ -2273,7 +2273,7 @@ public class SumFilter extends BaseFilter
 		}
 	}
 
-	private void extractRow1(int[] inData, int y, int width, int[] row)
+	private static void extractRow1(int[] inData, int y, int width, int[] row)
 	{
 		int index = y * width;
 

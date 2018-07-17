@@ -431,13 +431,9 @@ public class LSQLVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1, "%s = %d : %s %d = %d : %fx\n",
+		TestSettings.logSpeedTestResult(!doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx\n",
 				factory1.getClass().getSimpleName(), time1, factory2.getClass().getSimpleName(), nparams, time2,
 				(1.0 * time1) / time2);
-
-		//if (doAssert)
-		//	TestAssert.assertTrue(time2 < time1, "n=%d : %s not faster than %s", nparams,
-		//			factory2.getClass().getSimpleName(), factory1.getClass().getSimpleName());
 	}
 
 	@Test
@@ -602,7 +598,7 @@ public class LSQLVMGradientProcedureTest
 		}
 	}
 
-	private double[] add(double[] d, double b)
+	private static double[] add(double[] d, double b)
 	{
 		d = d.clone();
 		for (int i = 0; i < d.length; i++)
@@ -734,7 +730,7 @@ public class LSQLVMGradientProcedureTest
 		return params2List;
 	}
 
-	private double[] copydouble(double[] d)
+	private static double[] copydouble(double[] d)
 	{
 		double[] d2 = new double[d.length];
 		for (int i = 0; i < d.length; i++)

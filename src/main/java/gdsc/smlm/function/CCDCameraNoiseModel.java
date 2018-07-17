@@ -31,11 +31,25 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class CCDCameraNoiseModel extends CameraNoiseModel
 {
+	/**
+	 * Instantiates a new CCD camera noise model.
+	 *
+	 * @param readNoise
+	 *            the read noise
+	 */
 	public CCDCameraNoiseModel(final double readNoise)
 	{
 		super(readNoise);
 	}
 
+	/**
+	 * Instantiates a new CCD camera noise model.
+	 *
+	 * @param readNoise
+	 *            the read noise
+	 * @param bias
+	 *            the bias
+	 */
 	public CCDCameraNoiseModel(final double readNoise, final double bias)
 	{
 		super(readNoise, bias);

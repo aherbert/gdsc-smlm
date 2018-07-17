@@ -47,8 +47,11 @@ import gdsc.core.math.interpolation.FloatCustomTricubicFunction;
  */
 public class CubicSplineData
 {
+	/** The maxx. */
 	final int maxx;
+	/** The maxy. */
 	final int maxy;
+	/** The splines. */
 	final CustomTricubicFunction[][] splines;
 
 	/**

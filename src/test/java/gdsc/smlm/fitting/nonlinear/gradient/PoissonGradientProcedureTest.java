@@ -437,6 +437,7 @@ public class PoissonGradientProcedureTest
 							double[] crlb = m1.crlb();
 							if (crlb == null)
 								Assert.fail("No variance");
+							@SuppressWarnings("null")
 							double o1 = Math.sqrt(crlb[ix]) * a;
 							double o2 = Math.sqrt(crlb[iy]) * a;
 							double e = Gaussian2DPeakResultHelper.getMLPrecisionX(a, ss, N, b2, false);

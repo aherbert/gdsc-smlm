@@ -42,7 +42,12 @@ public class ICSIFastLog extends FastLog
 	 */
 	public enum DataType
 	{
-		FLOAT, DOUBLE, BOTH
+		/** float. */
+		FLOAT, 
+		/** double. */
+		DOUBLE, 
+		/** float and double. */
+		BOTH
 	}
 
 	/** The number of bits to remove from a float mantissa. */

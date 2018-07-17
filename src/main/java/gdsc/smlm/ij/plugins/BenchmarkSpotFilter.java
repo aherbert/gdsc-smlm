@@ -1934,7 +1934,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			Worker w = workers.get(i);
 			time += w.time;
-			if (i == 0)
+			if (filterResults == null)
 			{
 				filterResults = w.results;
 			}
@@ -1945,6 +1945,9 @@ public class BenchmarkSpotFilter implements PlugIn
 				w.results.compact();
 			}
 		}
+		if (filterResults == null)
+			throw new NullPointerException();
+		
 		filterResults.compact();
 
 		IJ.showStatus("Summarising results ...");
@@ -2308,6 +2311,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		//int tp = 0, fp = 0, fn = 0, nn = 0;
 		filterResult.filterResults.forEachValue(new TObjectProcedure<FilterResult>()
 		{
+			@SuppressWarnings("null")
 			@Override
 			public boolean execute(FilterResult result)
 			{

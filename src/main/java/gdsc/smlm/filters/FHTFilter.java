@@ -43,12 +43,12 @@ public class FHTFilter extends BaseFilter
 	public enum Operation implements NamedObject
 	{
 		//@formatter:off
-		CORRELATION { @Override
-		public String getName() { return "Correlation"; } },
-		CONVOLUTION { @Override
-		public String getName() { return "Convolution"; } },
-		DECONVOLUTION { @Override
-		public String getName() { return "Deconvolution"; } };
+        /** Correlation */
+        CORRELATION { @Override public String getName() { return "Correlation"; } },
+        /** Convolution */
+        CONVOLUTION { @Override public String getName() { return "Convolution"; } },
+        /** Deconvolution */
+        DECONVOLUTION { @Override public String getName() { return "Deconvolution"; } };
 		//@formatter:on
 
 		@Override

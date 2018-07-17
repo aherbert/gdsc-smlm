@@ -64,6 +64,7 @@ public class PeakResultStoreTest
 		canStoreResults(new SetPeakResultStore(capacity));
 	}
 
+	@SuppressWarnings("null")
 	private void canStoreResults(PeakResultStore store)
 	{
 		final boolean isList = store instanceof PeakResultStoreList;

@@ -39,6 +39,7 @@ import gdsc.smlm.function.Gradient1Function;
  */
 public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 {
+	/** The weights. */
 	protected final double[] w;
 
 	/**

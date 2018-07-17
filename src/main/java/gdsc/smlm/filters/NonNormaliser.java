@@ -69,6 +69,7 @@ public class NonNormaliser implements Normaliser
 	@Override
 	public void normalise(float[] data, int size)
 	{
+		// Do nothing
 	}
 
 	/*
@@ -90,6 +91,7 @@ public class NonNormaliser implements Normaliser
 	@Override
 	public void normalise(float[] data, int maxx, int maxy, int border)
 	{
+		// Do nothing
 	}
 
 	/*

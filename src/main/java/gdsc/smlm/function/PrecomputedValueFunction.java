@@ -28,6 +28,7 @@ package gdsc.smlm.function;
  */
 public class PrecomputedValueFunction implements ValueFunction
 {
+	/** The values. */
 	protected final double[] values;
 
 	/**
@@ -45,6 +46,11 @@ public class PrecomputedValueFunction implements ValueFunction
 		this.values = values;
 	}
 
+	/**
+	 * Gets a reference to the first order gradients
+	 *
+	 * @return the values
+	 */
 	public double[] getValuesRef()
 	{
 		return values;

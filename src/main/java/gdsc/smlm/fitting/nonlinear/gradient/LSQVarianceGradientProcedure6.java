@@ -54,7 +54,8 @@ public class LSQVarianceGradientProcedure6 extends LSQVarianceGradientProcedure
 	 * @param func
 	 *            Gradient function
 	 * @param solver
-	 *            the solver
+	 *            The solver used to invert the Fisher information matrix to find
+	 *            the Cramér–Rao lower bound (CRLB).
 	 * @throws IllegalArgumentException
 	 *             if the solver is null
 	 */

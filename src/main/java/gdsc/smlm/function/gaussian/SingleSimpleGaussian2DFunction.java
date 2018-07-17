@@ -44,10 +44,14 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 {
 	private static final int[] gradientIndices = new int[0];
 
+	/** The x0 position. */
 	protected double x0pos;
+	/** The x1 position. */
 	protected double x1pos;
 
+	/** The amplitude/height. */
 	protected double height;
+	/** position pre-factor */
 	protected double aa;
 
 	/**

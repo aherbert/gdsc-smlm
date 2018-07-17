@@ -879,6 +879,7 @@ public abstract class CubicSplineFunctionTest
 		}
 	}
 
+	@SuppressWarnings("null")
 	private void speedTest(int n, int order)
 	{
 		// No assertions, this is just a report

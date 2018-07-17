@@ -50,8 +50,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import gdsc.test.TestCounter;
 import gdsc.test.TestAssert;
+import gdsc.test.TestCounter;
 import gdsc.test.TestSettings;
 
 /**
@@ -707,6 +707,7 @@ public class LVMGradientProcedureTest
 				Type.WLSQ, true);
 	}
 
+	@SuppressWarnings("null")
 	private void gradientProcedureComputesGradient(ErfGaussian2DFunction func, Type type, boolean precomputed)
 	{
 		int nparams = func.getNumberOfGradients();

@@ -210,7 +210,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
+	 * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
 	 * inverted Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the central diagonal returned.
@@ -223,7 +223,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
+	 * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
 	 * inverted Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the central diagonal returned. If the inversion fails
@@ -252,7 +252,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
+	 * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
 	 *
 	 * The information matrix is NOT inverted. The reciprocal of the central diagonal returned for a
@@ -269,7 +269,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
+	 * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
 	 * Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the central diagonal returned.
@@ -282,7 +282,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
+	 * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
 	 * Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the square root of the central diagonal returned. If the inversion fails
@@ -314,7 +314,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central diagonal of
+	 * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central diagonal of
 	 * the Fisher information matrix.
 	 *
 	 * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central diagonal returned
@@ -331,7 +331,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
+	 * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
 	 *
 	 * The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned for a (possibly
@@ -351,7 +351,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central
+	 * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
 	 *
 	 * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central diagonal returned

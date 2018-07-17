@@ -32,6 +32,7 @@ package gdsc.smlm.fitting;
  */
 public class MLEScaledFunctionSolver extends ScaledFunctionSolver implements MLEFunctionSolver
 {
+	/** The MLE function solver. */
 	protected final MLEFunctionSolver mleSolver;
 
 	/**

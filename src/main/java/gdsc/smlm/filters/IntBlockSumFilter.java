@@ -455,7 +455,7 @@ public class IntBlockSumFilter extends BaseFilter
 		return intRowBuffer;
 	}
 
-	private void extractRow(int[] inData, int y, int width, final int n, int[] row)
+	private static void extractRow(int[] inData, int y, int width, final int n, int[] row)
 	{
 		final int index = y * width;
 
@@ -473,7 +473,7 @@ public class IntBlockSumFilter extends BaseFilter
 		System.arraycopy(inData, index, row, n, width);
 	}
 
-	private void extractRow1(int[] inData, int y, int width, int[] row)
+	private static void extractRow1(int[] inData, int y, int width, int[] row)
 	{
 		final int index = y * width;
 

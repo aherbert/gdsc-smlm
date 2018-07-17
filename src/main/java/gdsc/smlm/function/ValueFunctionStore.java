@@ -31,6 +31,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 	private ValueFunction f;
 	private ValueProcedure procedure;
 
+	/** The counter i. */
 	protected int i;
 	/** The values from the last call to {@link #forEach(ValueProcedure)} */
 	public double[] values;
@@ -96,6 +97,9 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 		f.forEach(this);
 	}
 
+	/**
+	 * Creates the {@link #values} array.
+	 */
 	protected void createValues()
 	{
 		if (values == null || values.length != f.size())

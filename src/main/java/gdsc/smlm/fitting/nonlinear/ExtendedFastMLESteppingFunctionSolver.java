@@ -55,9 +55,12 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 	/** The jacobian. */
 	protected double[] jacobian = null;
 
+	/** The solver. */
 	protected EJMLLinearSolver solver = null;
 
+	/** The default max relative error. */
 	public static final double DEFAULT_MAX_RELATIVE_ERROR = LVMSteppingFunctionSolver.DEFAULT_MAX_RELATIVE_ERROR;
+	/** The default max absolute error. */
 	public static final double DEFAULT_MAX_ABSOLUTE_ERROR = LVMSteppingFunctionSolver.DEFAULT_MAX_ABSOLUTE_ERROR;
 
 	/**

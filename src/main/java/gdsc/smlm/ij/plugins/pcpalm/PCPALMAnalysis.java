@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -399,7 +398,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * Set the area property to the region covered by the molecules.
 	 *
 	 * @param imp
-	 *            the imageage
+	 *            the image
 	 * @return the array list
 	 */
 	ArrayList<Molecule> cropToRoi(ImagePlus imp)
@@ -425,6 +424,10 @@ public class PCPALMAnalysis implements PlugInFilter
 			return PCPALMMolecules.molecules;
 		}
 
+		// To avoid null  pointer warnings
+		if (imp == null)
+			throw new NullPointerException("image is null");
+		
 		int w = imp.getWidth();
 		int h = imp.getHeight();
 

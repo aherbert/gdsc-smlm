@@ -40,21 +40,49 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		implements Gradient2Function, ExtendedGradient2Function
 {
+	/** The constant <code>1.0 / Math.sqrt(2)</code>. */
 	protected final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
+	/** The constant <code>1.0 / Math.sqrt(2 * Math.PI)</code>. */
 	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
 
 	// Required for the PSF
-	protected double[] deltaEx, deltaEy;
+
+	/** The delta Ex array (difference in Gaussian integral in the x-dimension for each pixel). */
+	protected double[] deltaEx;
+	/** The delta Ey array (difference in Gaussian integral in the y-dimension for each pixel). */
+	protected double[] deltaEy;
+
+	/** The background. */
 	protected double tB;
 
 	// Required for the first gradients
-	protected double[] du_dtx, du_dty, du_dtsx, du_dtsy;
+
+	/** The x position pre-factors for first-order partial derivatives. */
+	protected double[] du_dtx;
+	/** The y position pre-factors for first-order partial derivatives. */
+	protected double[] du_dty;
+	/** The sx pre-factors for first-order partial derivatives. */
+	protected double[] du_dtsx;
+	/** The sy pre-factors for first-order partial derivatives. */
+	protected double[] du_dtsy;
 
 	// Required for the second gradients
-	protected double[] d2u_dtx2, d2u_dty2, d2u_dtsx2, d2u_dtsy2;
+
+	/** The x position pre-factors for second-order partial derivatives. */
+	protected double[] d2u_dtx2;
+	/** The y position pre-factors for second-order partial derivatives. */
+	protected double[] d2u_dty2;
+	/** The sx pre-factors for second-order partial derivatives. */
+	protected double[] d2u_dtsx2;
+	/** The sy pre-factors for second-order partial derivatives. */
+	protected double[] d2u_dtsy2;
 
 	// Required for the extended second gradients
-	protected double[] d2deltaEx_dtsxdx, d2deltaEy_dtsydy;
+
+	/** The x pre-factors for extended second-order partial derivatives. */
+	protected double[] d2deltaEx_dtsxdx;
+	/** The y pre-factors for extended second-order partial derivatives. */
+	protected double[] d2deltaEy_dtsydy;
 
 	/**
 	 * Define the error function used.

@@ -28,7 +28,10 @@ package gdsc.smlm.function;
  */
 public class OffsetGradient2Function extends OffsetGradient1Function implements Gradient2Function, Gradient2Procedure
 {
+	/** The gradient2 function. */
 	protected final Gradient2Function f2;
+
+	/** The procedure. */
 	protected Gradient2Procedure procedure;
 
 	/**
@@ -47,12 +50,27 @@ public class OffsetGradient2Function extends OffsetGradient1Function implements 
 		f2 = f;
 	}
 
-	protected OffsetGradient2Function(OffsetGradient2Function pre, double[] values2)
+	/**
+	 * Instantiates a new offset gradient2 function.
+	 *
+	 * @param pre
+	 *            the function
+	 * @param values
+	 *            the precomputed values
+	 * @throws IllegalArgumentException
+	 *             if the values length does not match the function size
+	 */
+	protected OffsetGradient2Function(OffsetGradient2Function pre, double[] values)
 	{
-		super(pre, values2);
+		super(pre, values);
 		f2 = (Gradient2Function) f;
 	}
 
+	/**
+	 * Gets the gradient 2 function.
+	 *
+	 * @return the gradient 2 function
+	 */
 	public Gradient2Function getGradient2Function()
 	{
 		return f2;

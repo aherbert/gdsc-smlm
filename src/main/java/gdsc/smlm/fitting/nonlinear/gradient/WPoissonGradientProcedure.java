@@ -42,7 +42,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 {
 	/** The weights. */
 	protected final double[] w;
-	
+
 	/** The function. */
 	protected final Gradient1Function func;
 

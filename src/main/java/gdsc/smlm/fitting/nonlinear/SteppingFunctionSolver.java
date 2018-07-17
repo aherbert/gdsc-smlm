@@ -58,8 +58,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		}
 	}
 
+	/** The gradient indices. */
 	protected int[] gradientIndices;
+	/** The tolerance checker. */
 	protected final ToleranceChecker tc;
+	/** The bounds. */
 	protected final ParameterBounds bounds;
 	private double[] weights = null;
 

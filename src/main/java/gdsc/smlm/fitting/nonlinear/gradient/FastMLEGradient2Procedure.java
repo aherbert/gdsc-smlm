@@ -39,8 +39,11 @@ import gdsc.smlm.function.ValueProcedure;
  */
 public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Procedure, Gradient2Procedure
 {
+	/** The data to fit (must be positive, i.e. the value of a Poisson process). */
 	protected final double[] x;
+	/** The function. */
 	protected final Gradient2Function func;
+	/** The poisson calculator. */
 	protected PoissonCalculator poissonCalculator = null;
 
 	/**

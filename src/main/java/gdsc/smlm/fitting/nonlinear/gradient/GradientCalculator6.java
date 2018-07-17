@@ -33,6 +33,9 @@ import gdsc.smlm.function.NonLinearFunction;
  */
 public class GradientCalculator6 extends GradientCalculator
 {
+	/**
+	 * Instantiates a new gradient calculator for a 6x6 matrix.
+	 */
 	public GradientCalculator6()
 	{
 		super(6);

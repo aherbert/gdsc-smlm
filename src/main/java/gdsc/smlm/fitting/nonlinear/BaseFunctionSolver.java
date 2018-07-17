@@ -38,17 +38,31 @@ import gdsc.smlm.function.NamedFunction;
 public abstract class BaseFunctionSolver implements FunctionSolver
 {
 	private FunctionSolverType type;
+
+	/** The gradient function. */
 	protected GradientFunction f;
 
 	private int maxEvaluations = 20;
 
+	/** The number of fitted points. */
 	protected int numberOfFittedPoints;
+
+	/** The iterations. */
 	protected int iterations;
+
+	/** The evaluations. */
 	protected int evaluations;
+
+	/** The value. */
 	protected double value;
 
 	// Cache the data to fit on success
-	protected double[] lastY, lastA;
+
+	/** The data Y from the last successful fit. */
+	protected double[] lastY;
+
+	/** The parameters A from the last successful fit. */
+	protected double[] lastA;
 
 	/**
 	 * Default constructor.
@@ -125,7 +139,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	protected void preProcess()
 	{
-
+		// To be over-ridden
 	}
 
 	/**
@@ -133,7 +147,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	protected void postProcess()
 	{
-
+		// To be over-ridden
 	}
 
 	/*
@@ -222,6 +236,14 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a);
 
+	/**
+	 * Copy the parameter values into an initial solution at positions defined by the
+	 * {@link GradientFunction#gradientIndices()}.
+	 *
+	 * @param params
+	 *            the parameters
+	 * @return the initial solution
+	 */
 	public double[] getInitialSolution(double[] params)
 	{
 		final int[] indices = f.gradientIndices();
@@ -231,6 +253,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		return initialSolution;
 	}
 
+	/**
+	 * Copy the solution values into the parameters at positions defined by the
+	 * {@link GradientFunction#gradientIndices()}.
+	 *
+	 * @param params
+	 *            the parameters
+	 * @param solution
+	 *            the solution
+	 */
 	public void setSolution(double[] params, double[] solution)
 	{
 		final int[] indices = f.gradientIndices();
@@ -238,6 +269,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			params[indices[i]] = solution[i];
 	}
 
+	/**
+	 * Copy the covariance matrix diagonal values into the deviations at positions defined by the
+	 * {@link GradientFunction#gradientIndices()}.
+	 *
+	 * @param deviations
+	 *            the deviations
+	 * @param covar
+	 *            the covariance matrix (assumed to be NxN with N = gradientIndices().length)  
+	 */
 	public void setDeviationsFromMatrix(double[] deviations, double[][] covar)
 	{
 		Arrays.fill(deviations, 0);
@@ -246,6 +286,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			deviations[indices[i]] = checkVariance(covar[i][i]);
 	}
 
+	/**
+	 * Copy the covariance matrix diagonal values into the deviations at positions defined by the
+	 * {@link GradientFunction#gradientIndices()}.
+	 *
+	 * @param deviations
+	 *            the deviations
+	 * @param covar
+	 *            the covariance matrix (assumed to be NxN with N = gradientIndices().length)  
+	 */
 	public void setDeviationsFromLinearMatrix(double[] deviations, double[] covar)
 	{
 		Arrays.fill(deviations, 0);
@@ -255,6 +304,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			deviations[indices[i]] = checkVariance(covar[j]);
 	}
 
+	/**
+	 * Copy the covariance values into the deviations at positions defined by the
+	 * {@link GradientFunction#gradientIndices()}.
+	 *
+	 * @param deviations
+	 *            the deviations
+	 * @param covar
+	 *            the covariance values (assumed to be length N with N = gradientIndices().length)  
+	 */
 	public void setDeviations(double[] deviations, double[] covar)
 	{
 		Arrays.fill(deviations, 0);
@@ -264,6 +322,16 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			deviations[indices[i]] = checkVariance(covar[i]);
 	}
 
+	/**
+	 * Invert the Fisher information matrix to determine the Cramér-Rao Lower Bound and
+	 * copy the CRLB values into the deviations at positions defined by the
+	 * {@link GradientFunction#gradientIndices()}.
+	 *
+	 * @param deviations
+	 *            the deviations
+	 * @param m
+	 *            the Fisher information matrix
+	 */
 	public void setDeviations(double[] deviations, FisherInformationMatrix m)
 	{
 		//// This may fail if the matrix cannot be inverted
@@ -411,6 +479,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	@Override
 	public void setBounds(double[] lower, double[] upper)
 	{
+		// To be over-ridden
 	}
 
 	/*
@@ -421,6 +490,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	@Override
 	public void setConstraints(double[] lower, double[] upper)
 	{
+		// To be over-ridden
 	}
 
 	/*
@@ -431,6 +501,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	@Override
 	public void setWeights(double[] weights)
 	{
+		// To be over-ridden
 	}
 
 	/*

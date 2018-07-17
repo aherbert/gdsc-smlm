@@ -48,6 +48,7 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	/** Returned when computation failed to invert the information matrix */
 	public static final int STATUS_FAILED_INVERSION = 2;
 
+	/** The function. */
 	protected final Gradient1Function func;
 
 	/**
@@ -86,7 +87,8 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	 * @param func
 	 *            Gradient function
 	 * @param solver
-	 *            the solver
+	 *            The solver used to invert the Fisher information matrix to find
+	 *            the Cramér–Rao lower bound (CRLB).
 	 * @throws IllegalArgumentException
 	 *             if the solver is null
 	 */

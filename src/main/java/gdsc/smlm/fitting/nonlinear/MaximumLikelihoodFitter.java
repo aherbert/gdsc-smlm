@@ -214,6 +214,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	// Maximum iterations for the Powell optimiser
 	private int maxIterations;
 
+	/**
+	 * The search method.
+	 */
 	public enum SearchMethod
 	{
 		/**
@@ -285,6 +288,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		}
 	}
 
+	/**
+	 * The likelihood function
+	 */
 	public enum LikelihoodFunction
 	{
 		/**
@@ -482,7 +488,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 					if (repeat++ > 1)
 					{
 						// Update the start point and population size
-						data[0] = new InitialGuess(optimum.getPointRef());
+						if (optimum != null)
+							data[0] = new InitialGuess(optimum.getPointRef());
 						popSize *= 2;
 						data[1] = new CMAESOptimizer.PopulationSize(popSize);
 					}
@@ -625,6 +632,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				//		Arrays.toString(gradient));
 			}
 
+			if (optimum == null)
+				return FitStatus.FAILED_TO_CONVERGE;
+			
 			final double[] solution = optimum.getPointRef();
 
 			setSolution(a, solution);

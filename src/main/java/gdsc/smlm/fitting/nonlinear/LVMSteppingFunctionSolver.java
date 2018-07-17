@@ -36,25 +36,45 @@ import gdsc.smlm.function.GradientFunction;
  */
 public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 {
+	/**
+	 * The solver used for solving A x = b to find the update x.
+	 * <ul>
+	 * <li>A = Scaled Hessian matrix (Alpha)
+	 * <li>b = Gradient vector (beta)
+	 * <li>x = Update vector to modify the parameters
+	 * </ul>
+	 */
 	protected EJMLLinearSolver solver = new EJMLLinearSolver();
+
+	/** The gradient procedure. */
 	protected LVMGradientProcedure gradientProcedure;
 
+	/** The initial lambda value for the LVM algorithm. */
 	protected double initialLambda = 0.01;
+
+	/** The current lambda value for the LVM algorithm. */
 	protected double lambda;
 
 	// Alpha = Scaled Hessian matrix
 	// beta  = Gradient vector
 	// We want to solve: A x = b to find the update x
 
-	// Current best alpha and beta
-	protected double[] alpha, beta;
-	// Working alpha and beta
-	protected double[] walpha, wbeta;
+	/** Current best alpha (Scaled Hessian matrix) */
+	protected double[] alpha;
+	/** Current best beta (Gradient vector). */
+	protected double[] beta;
+
+	/** Working alpha. */
+	protected double[] walpha;
+	/** Working beta. */
+	protected double[] wbeta;
 
 	// TODO - Determine what a good solution tolerance would be.
 	// We may not need to be that strict to accept the solution.
 
+	/** The default max relative error. */
 	public static final double DEFAULT_MAX_RELATIVE_ERROR = 1e-3;
+	/** The default max absolute error. */
 	public static final double DEFAULT_MAX_ABSOLUTE_ERROR = 1e-4;
 
 	/**

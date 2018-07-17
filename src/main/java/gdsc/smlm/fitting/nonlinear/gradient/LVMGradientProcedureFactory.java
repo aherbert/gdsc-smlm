@@ -31,17 +31,27 @@ import gdsc.smlm.function.Gradient1Function;
  */
 public class LVMGradientProcedureFactory
 {
+	/**
+	 * The type of LVM gradient procedure
+	 */
 	public enum Type
 	{
 		//@formatter:off
+		/** Least-squares */
 		LSQ,
-		MLE { @Override
-		public boolean isMLE()	{return true;} },
+		/** Maximum Likelihood Estimation (using LVM) */
+		MLE { @Override public boolean isMLE()	{return true;} },
+		/** Weighted least-squares */
 		WLSQ,
-		FastLogMLE { @Override
-		public boolean isMLE()	{return true;} };
+		/** Fast Maximum Likelihood Estimation (using Newton iteration) */
+		FastLogMLE { @Override public boolean isMLE()	{return true;} };
 		//@formatter:on
 
+		/**
+		 * Checks if is MLE.
+		 *
+		 * @return true, if is MLE
+		 */
 		public boolean isMLE()
 		{
 			return false;

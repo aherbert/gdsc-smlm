@@ -69,14 +69,17 @@ import gdsc.smlm.function.ChiSquaredDistributionTable;
  */
 public class JumpDistanceAnalysis
 {
-	private final boolean DEBUG_OPTIMISER = false;
-	final static double THIRD = 1.0 / 3.0;
+	private static final boolean DEBUG_OPTIMISER = false;
+	private final static double THIRD = 1.0 / 3.0;
 	private double s2 = 0;
 	private boolean msdCorrection = false;
 	private int n = 0;
 	private double deltaT = 0;
 	private boolean calibrated = false;
 
+	/**
+	 * Interface to logger to record a jump distance curve
+	 */
 	public interface CurveLogger
 	{
 		/**
@@ -118,12 +121,17 @@ public class JumpDistanceAnalysis
 	// Set by any public fit call
 	private double lastFitValue;
 
+	/**
+	 * Instantiates a new jump distance analysis.
+	 */
 	public JumpDistanceAnalysis()
 	{
 		this(null);
 	}
 
 	/**
+	 * Instantiates a new jump distance analysis.
+	 *
 	 * @param logger
 	 *            Used to write status messages on the fitting
 	 */
@@ -460,6 +468,7 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+					// No solution
 				}
 
 				if (constrainedSolution == null)
@@ -481,6 +490,7 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+					// No solution
 				}
 			}
 
@@ -504,12 +514,15 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+					// No solution
 				}
 				catch (TooManyIterationsException e)
 				{
+					// No solution
 				}
 				catch (ConvergenceException e)
 				{
+					// No solution
 				}
 			}
 		}
@@ -977,6 +990,7 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+					// No solution
 				}
 
 				if (constrainedSolution == null)
@@ -998,6 +1012,7 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+					// No solution
 				}
 			}
 
@@ -1021,12 +1036,15 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+					// No solution
 				}
 				catch (TooManyIterationsException e)
 				{
+					// No solution
 				}
 				catch (ConvergenceException e)
 				{
+					// No solution
 				}
 			}
 		}
@@ -1071,7 +1089,7 @@ public class JumpDistanceAnalysis
 		return null;
 	}
 
-	private CustomPowellOptimizer createCustomPowellOptimizer()
+	private static CustomPowellOptimizer createCustomPowellOptimizer()
 	{
 		double rel = 1e-8;
 		double abs = 1e-10;
@@ -1085,7 +1103,7 @@ public class JumpDistanceAnalysis
 		return new CustomPowellOptimizer(rel, abs, positionChecker, basisConvergence);
 	}
 
-	private CMAESOptimizer createCMAESOptimizer()
+	private static CMAESOptimizer createCMAESOptimizer()
 	{
 		double rel = 1e-8;
 		double abs = 1e-10;
@@ -1137,7 +1155,7 @@ public class JumpDistanceAnalysis
 		return sb.toString();
 	}
 
-	private String format(double[] data)
+	private static String format(double[] data)
 	{
 		if (data == null || data.length == 0)
 			return "";
@@ -1226,7 +1244,7 @@ public class JumpDistanceAnalysis
 	}
 
 	@SuppressWarnings("unused")
-	private double calculateSumOfSquares(double[] obs, double[] exp)
+	private static double calculateSumOfSquares(double[] obs, double[] exp)
 	{
 		double ss = 0;
 		for (int i = 0; i < obs.length; i++)
@@ -1237,7 +1255,7 @@ public class JumpDistanceAnalysis
 	/**
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public abstract class Function
+	private static abstract class Function
 	{
 		double[] x, y;
 		double estimatedD;
@@ -1389,8 +1407,16 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for maximum likelihood fitting.
 	 */
-	public class JumpDistanceFunction extends Function implements MultivariateFunction
+	static class JumpDistanceFunction extends Function implements MultivariateFunction
 	{
+		/**
+		 * Instantiates a new jump distance function.
+		 *
+		 * @param x
+		 *            the x
+		 * @param estimatedD
+		 *            the estimated D
+		 */
 		public JumpDistanceFunction(double[] x, double estimatedD)
 		{
 			super(x, null, estimatedD, 1);
@@ -1408,6 +1434,13 @@ public class JumpDistanceAnalysis
 			return FastMath.exp(-x / fourD) / fourD;
 		}
 
+		/**
+		 * Evaluate all.
+		 *
+		 * @param params
+		 *            the params
+		 * @return the values
+		 */
 		public double[] evaluateAll(double[] params)
 		{
 			// Compute the probability:
@@ -1502,8 +1535,18 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public class JumpDistanceCumulFunction extends Function implements MultivariateVectorFunction
+	static class JumpDistanceCumulFunction extends Function implements MultivariateVectorFunction
 	{
+		/**
+		 * Instantiates a new jump distance cumul function.
+		 *
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param estimatedD
+		 *            the estimated D
+		 */
 		public JumpDistanceCumulFunction(double[] x, double[] y, double estimatedD)
 		{
 			super(x, y, estimatedD, 1);
@@ -1583,8 +1626,18 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for maximum likelihood fitting.
 	 */
-	public class MixedJumpDistanceFunction extends Function implements MultivariateFunction
+	static class MixedJumpDistanceFunction extends Function implements MultivariateFunction
 	{
+		/**
+		 * Instantiates a new mixed jump distance function.
+		 *
+		 * @param x
+		 *            the x
+		 * @param estimatedD
+		 *            the estimated D
+		 * @param n
+		 *            the n
+		 */
 		public MixedJumpDistanceFunction(double[] x, double estimatedD, int n)
 		{
 			super(x, null, estimatedD, n);
@@ -1609,6 +1662,13 @@ public class JumpDistanceAnalysis
 			return sum / total;
 		}
 
+		/**
+		 * Evaluate all.
+		 *
+		 * @param params
+		 *            the params
+		 * @return the values
+		 */
 		public double[] evaluateAll(double[] params)
 		{
 			double total = 0;
@@ -1679,8 +1739,20 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public class MixedJumpDistanceCumulFunction extends Function
+	static class MixedJumpDistanceCumulFunction extends Function
 	{
+		/**
+		 * Instantiates a new mixed jump distance cumul function.
+		 *
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param estimatedD
+		 *            the estimated D
+		 * @param n
+		 *            the n
+		 */
 		public MixedJumpDistanceCumulFunction(double[] x, double[] y, double estimatedD, int n)
 		{
 			super(x, y, estimatedD, n);
@@ -1700,6 +1772,13 @@ public class JumpDistanceAnalysis
 			return 1 - sum / total;
 		}
 
+		/**
+		 * Gets the value.
+		 *
+		 * @param variables
+		 *            the variables
+		 * @return the values
+		 */
 		public double[] getValue(double[] variables)
 		{
 			double total = 0;
@@ -1736,9 +1815,21 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public class MixedJumpDistanceCumulFunctionGradient extends MixedJumpDistanceCumulFunction
+	static class MixedJumpDistanceCumulFunctionGradient extends MixedJumpDistanceCumulFunction
 			implements MultivariateVectorFunction
 	{
+		/**
+		 * Instantiates a new mixed jump distance cumul function gradient.
+		 *
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param estimatedD
+		 *            the estimated D
+		 * @param n
+		 *            the n
+		 */
 		public MixedJumpDistanceCumulFunctionGradient(double[] x, double[] y, double estimatedD, int n)
 		{
 			super(x, y, estimatedD, n);
@@ -1861,9 +1952,21 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public class MixedJumpDistanceCumulFunctionMultivariate extends MixedJumpDistanceCumulFunction
+	static class MixedJumpDistanceCumulFunctionMultivariate extends MixedJumpDistanceCumulFunction
 			implements MultivariateFunction
 	{
+		/**
+		 * Instantiates a new mixed jump distance cumul function multivariate.
+		 *
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param estimatedD
+		 *            the estimated D
+		 * @param n
+		 *            the n
+		 */
 		public MixedJumpDistanceCumulFunctionMultivariate(double[] x, double[] y, double estimatedD, int n)
 		{
 			super(x, y, estimatedD, n);

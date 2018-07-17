@@ -2059,7 +2059,7 @@ public class AverageFilter extends BaseFilter
 		return floatRowBuffer;
 	}
 
-	private void extractRow(float[] inData, int y, int width, final int n, float[] row)
+	private static void extractRow(float[] inData, int y, int width, final int n, float[] row)
 	{
 		final int index = y * width;
 
@@ -2074,7 +2074,7 @@ public class AverageFilter extends BaseFilter
 		System.arraycopy(inData, index, row, n, width);
 	}
 
-	private void extractRow1(float[] inData, int y, int width, float[] row)
+	private static void extractRow1(float[] inData, int y, int width, float[] row)
 	{
 		final int index = y * width;
 
@@ -2086,7 +2086,7 @@ public class AverageFilter extends BaseFilter
 		System.arraycopy(inData, index, row, 1, width);
 	}
 
-	private void extractRow2(float[] inData, int y, int width, float[] row)
+	private static void extractRow2(float[] inData, int y, int width, float[] row)
 	{
 		final int index = y * width;
 
@@ -2098,7 +2098,7 @@ public class AverageFilter extends BaseFilter
 		System.arraycopy(inData, index, row, 2, width);
 	}
 
-	private void extractRow3(float[] inData, int y, int width, float[] row)
+	private static void extractRow3(float[] inData, int y, int width, float[] row)
 	{
 		final int index = y * width;
 

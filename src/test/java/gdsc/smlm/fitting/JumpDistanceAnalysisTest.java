@@ -88,8 +88,8 @@ public class JumpDistanceAnalysisTest
 		for (double d : D)
 		{
 			final double[] params = new double[] { d };
-			final JumpDistanceFunction fp = jd.new JumpDistanceFunction(null, d);
-			JumpDistanceCumulFunction fc = jd.new JumpDistanceCumulFunction(null, null, d);
+			final JumpDistanceFunction fp = new JumpDistanceFunction(null, d);
+			JumpDistanceCumulFunction fc = new JumpDistanceCumulFunction(null, null, d);
 			double x = d / 8;
 			UnivariateFunction func = new UnivariateFunction()
 			{
@@ -124,8 +124,8 @@ public class JumpDistanceAnalysisTest
 			for (double f : new double[] { 0, 0.1, 0.2, 0.4, 0.7, 0.9, 1 })
 			{
 				final double[] params = new double[] { f, d, 1 - f, d * 0.1 };
-				final MixedJumpDistanceFunction fp = jd.new MixedJumpDistanceFunction(null, d, 2);
-				MixedJumpDistanceCumulFunction fc = jd.new MixedJumpDistanceCumulFunction(null, null, d, 2);
+				final MixedJumpDistanceFunction fp = new MixedJumpDistanceFunction(null, d, 2);
+				MixedJumpDistanceCumulFunction fc = new MixedJumpDistanceCumulFunction(null, null, d, 2);
 				double x = d / 8;
 				UnivariateFunction func = new UnivariateFunction()
 				{
@@ -293,6 +293,7 @@ public class JumpDistanceAnalysisTest
 									}
 									catch (AssertionError e)
 									{
+										// Carry on with the benchmarking
 									}
 									// If the fit had the correct N then no need to repeat
 									if (fitN == n)
@@ -304,6 +305,7 @@ public class JumpDistanceAnalysisTest
 									}
 									catch (AssertionError e)
 									{
+										// Carry on with the benchmarking
 									}
 								}
 							}

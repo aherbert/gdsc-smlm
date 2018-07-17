@@ -34,10 +34,19 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfGaussian2DFunction
 {
+	/** The z model. */
 	protected final AstigmatismZModel zModel;
 
 	// Required for the z-depth gradients
-	protected double[] dtsx_dtz, d2tsx_dtz2, dtsy_dtz, d2tsy_dtz2;
+
+	/** The x|z pre-factors for first-order partial derivatives. */
+	protected double[] dtsx_dtz;
+	/** The x|z pre-factors for first-order partial derivatives. */
+	protected double[] d2tsx_dtz2;
+	/** The y|z pre-factors for second-order partial derivatives. */
+	protected double[] dtsy_dtz;
+	/** The y|z pre-factors for second-order partial derivatives. */
+	protected double[] d2tsy_dtz2;
 
 	/**
 	 * Constructor.

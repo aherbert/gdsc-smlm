@@ -91,6 +91,9 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
 		f.forEach((Gradient2Procedure) this);
 	}
 
+	/**
+	 * Creates the {@link #d2yda2} matrix;
+	 */
 	protected void createD2YDA2()
 	{
 		if (d2yda2 == null || d2yda2.length != f.size())

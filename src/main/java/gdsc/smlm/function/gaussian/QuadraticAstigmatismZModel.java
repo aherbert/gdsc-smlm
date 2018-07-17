@@ -29,14 +29,18 @@ package gdsc.smlm.function.gaussian;
  */
 public class QuadraticAstigmatismZModel implements AstigmatismZModel
 {
-	public final double gamma, zDepth;
+	/** The gamma parameter (half the distance between the focal planes). */
+	public final double gamma;
+	/** The z-depth where the width is 1.5. */
+	public final double zDepth;
+	/** Pre-computed factor for the second derivative of s given z. */
 	private final double d2s_dz2;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param gamma
-	 *            the gamma parameter (half the distance between the focal planes)
+	 *            The gamma parameter (half the distance between the focal planes)
 	 * @param zDepth
 	 *            The z-depth where the width is 1.5
 	 */

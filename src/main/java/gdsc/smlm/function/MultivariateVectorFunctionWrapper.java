@@ -30,6 +30,16 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
  */
 public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper implements MultivariateVectorFunction
 {
+	/**
+	 * Instantiates a new multivariate vector function wrapper.
+	 *
+	 * @param fun
+	 *            The function
+	 * @param a
+	 *            The parameters
+	 * @param n
+	 *            The number of data points to evaluate
+	 */
 	public MultivariateVectorFunctionWrapper(NonLinearFunction fun, double[] a, int n)
 	{
 		super(fun, a, n);

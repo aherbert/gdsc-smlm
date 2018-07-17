@@ -46,6 +46,8 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 	 */
 	final double alpha;
 
+	/** Set to true if the gain was above 1 (inverse gain below 1) 
+	 * and the Poisson distribution should be expanded. */
 	final boolean expand;
 
 	/**

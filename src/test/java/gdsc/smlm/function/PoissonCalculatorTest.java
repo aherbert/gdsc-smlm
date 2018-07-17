@@ -48,8 +48,8 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
-import gnu.trove.list.array.TDoubleArrayList;
 import gdsc.test.TimingService;
+import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest

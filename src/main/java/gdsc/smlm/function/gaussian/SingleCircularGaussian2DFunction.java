@@ -42,14 +42,22 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 		gradientIndices = createGradientIndices(1, new SingleCircularGaussian2DFunction(1, 1));
 	}
 
+	/** The background. */
 	protected double background;
+	/** The x0 position. */
 	protected double x0pos;
+	/** The x1 position. */
 	protected double x1pos;
 
+	/** The amplitude/height normalisation: 1/(2*pi*sx*sy). */
 	protected double n;
+	/** The amplitude/height. */
 	protected double height;
+	/** x0 position pre-factor */
 	protected double aa;
+	/** x0 position gradient pre-factor */
 	protected double aa2;
+	/** x width gradient pre-factor */
 	protected double ax;
 
 	/**

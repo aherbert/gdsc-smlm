@@ -59,7 +59,8 @@ public class LSQVarianceGradientProcedureFactory
 	 * @param func
 	 *            Gradient function
 	 * @param solver
-	 *            the solver
+	 *            The solver used to invert the Fisher information matrix to find
+	 *            the Cramér–Rao lower bound (CRLB).
 	 * @return the gradient procedure
 	 */
 	public static LSQVarianceGradientProcedure create(final Gradient1Function func, EJMLLinearSolver solver)

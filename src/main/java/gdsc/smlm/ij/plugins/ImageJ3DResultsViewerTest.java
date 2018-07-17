@@ -191,6 +191,10 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 				x += space;
 			}
 
+			// Avoid null pointer warnings
+			if (a == null)
+				throw new NullPointerException();
+
 			// The T=800 sphere looks about the same as the Icosahedron(div=3) T=1280
 			// This may be a better super-high resolution option.
 

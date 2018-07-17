@@ -61,7 +61,7 @@ public class OffsetFunctionTest
 		}
 	}
 
-	private double[] evaluateValueFunction(ValueFunction f, double[] p)
+	private static double[] evaluateValueFunction(ValueFunction f, double[] p)
 	{
 		f.initialise0(p);
 		final double[] v = new double[f.size()];
@@ -110,7 +110,7 @@ public class OffsetFunctionTest
 		Assert.assertArrayEquals("d2", d0, d2, 0);
 	}
 
-	private double[] evaluateGradient1Function(Gradient1Function f, double[] p, final double[] dyda)
+	private static double[] evaluateGradient1Function(Gradient1Function f, double[] p, final double[] dyda)
 	{
 		f.initialise0(p);
 		final double[] v = new double[f.size()];
@@ -166,7 +166,7 @@ public class OffsetFunctionTest
 		Assert.assertArrayEquals("d22", d20, d22, 0);
 	}
 
-	private double[] evaluateGradient2Function(Gradient2Function f, double[] p, final double[] dyda,
+	private static double[] evaluateGradient2Function(Gradient2Function f, double[] p, final double[] dyda,
 			final double[] d2yda2)
 	{
 		f.initialise0(p);

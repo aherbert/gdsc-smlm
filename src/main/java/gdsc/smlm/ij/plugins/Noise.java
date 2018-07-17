@@ -267,7 +267,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			ne.setRange(lowestPixelsRange);
 			xValues[i] = slice;
 			yValues1[i] = ne.getNoise(method1);
-			if (twoMethods)
+			if (yValues2 != null)
 				yValues2[i] = ne.getNoise(method2);
 		}
 		IJ.showProgress(1);
@@ -310,7 +310,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		IJ.showStatus("");
 	}
 
-	private Object trim(String name)
+	private static Object trim(String name)
 	{
 		return (name.length() > 20) ? name.substring(0, 20) + "..." : name;
 	}
@@ -370,7 +370,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		}
 	}
 
-	private String createHeader()
+	private static String createHeader()
 	{
 		StringBuilder sb = new StringBuilder("Slice");
 		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
@@ -380,7 +380,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		return sb.toString();
 	}
 
-	private String createResult(double[] result)
+	private static String createResult(double[] result)
 	{
 		StringBuilder sb = new StringBuilder("" + (int) result[0]);
 		for (int i = 1; i < result.length; i++)

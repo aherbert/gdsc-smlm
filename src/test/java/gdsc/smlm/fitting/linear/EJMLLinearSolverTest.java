@@ -767,7 +767,7 @@ public class EJMLLinearSolverTest
 		@Override
 		double[] invert(DenseMatrix64F a)
 		{
-			return solver.invertDiagonalDirectInversion(a);
+			return EJMLLinearSolver.invertDiagonalDirectInversion(a);
 		}
 	}
 

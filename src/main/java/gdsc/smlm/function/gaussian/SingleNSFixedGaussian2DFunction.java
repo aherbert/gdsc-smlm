@@ -42,15 +42,23 @@ public class SingleNSFixedGaussian2DFunction extends Gaussian2DFunction
 		gradientIndices = createGradientIndices(1, new SingleNSFixedGaussian2DFunction(1, 1));
 	}
 
+	/** The width. */
 	protected double width;
 
+	/** The background. */
 	protected double background;
+	/** The x0 position. */
 	protected double x0pos;
+	/** The x1 position. */
 	protected double x1pos;
 
+	/** The amplitude/height normalisation: 1/(2*pi*sx*sy). */
 	protected double n;
+	/** The amplitude/height. */
 	protected double height;
+	/** position pre-factor */
 	protected double aa;
+	/** position gradient pre-factor */
 	protected double aa2;
 
 	/**

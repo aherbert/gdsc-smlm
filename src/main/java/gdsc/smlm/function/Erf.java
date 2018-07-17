@@ -75,6 +75,13 @@ public class Erf
 		return (negative) ? -ret : ret;
 	}
 
+	/**
+	 * Compute d^4.
+	 *
+	 * @param d
+	 *            the d
+	 * @return d^4
+	 */
 	static double pow4(double d)
 	{
 		d = d * d; // power 2
@@ -136,6 +143,13 @@ public class Erf
 		return (negative) ? -ret : ret;
 	}
 
+	/**
+	 * Compute d^16.
+	 *
+	 * @param d
+	 *            the d
+	 * @return d^16
+	 */
 	static double pow16(double d)
 	{
 		d = d * d; // power2

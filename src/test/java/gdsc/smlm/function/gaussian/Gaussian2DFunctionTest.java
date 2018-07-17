@@ -140,6 +140,7 @@ public abstract class Gaussian2DFunctionTest
 
 	protected void postInit()
 	{
+		// To be overridden
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public abstract class Gaussian2DFunctionTest
 		checkGradientIndices(2, f2);
 	}
 
-	private void checkGradientIndices(int npeaks, Gaussian2DFunction gf)
+	private static void checkGradientIndices(int npeaks, Gaussian2DFunction gf)
 	{
 		if (gf == null)
 			return;
