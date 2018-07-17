@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,6 +125,9 @@ public class FilterAnalysis implements PlugIn
 
 	private boolean isHeadless;
 
+	/**
+	 * Instantiates a new filter analysis.
+	 */
 	public FilterAnalysis()
 	{
 		isHeadless = java.awt.GraphicsEnvironment.isHeadless();
@@ -197,7 +199,7 @@ public class FilterAnalysis implements PlugIn
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<FilterSet> readFilterSets()
+	private static List<FilterSet> readFilterSets()
 	{
 		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
@@ -208,11 +210,8 @@ public class FilterAnalysis implements PlugIn
 			IJ.showStatus("Reading filters ...");
 			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
 
-			BufferedReader input = null;
-			try
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(filterSettings.getFilterSetFilename()), null)))
 			{
-				FileInputStream fis = new FileInputStream(filterSettings.getFilterSetFilename());
-				input = new BufferedReader(new UnicodeReader(fis, null));
 				Object o = XStreamWrapper.getInstance().fromXML(input);
 				if (o != null && o instanceof List<?>)
 				{
@@ -227,24 +226,13 @@ public class FilterAnalysis implements PlugIn
 			}
 			finally
 			{
-				if (input != null)
-				{
-					try
-					{
-						input.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
-				}
 				IJ.showStatus("");
 			}
 		}
 		return null;
 	}
 
-	private void saveFilterSets(List<FilterSet> filterSets)
+	private static void saveFilterSets(List<FilterSet> filterSets)
 	{
 		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
@@ -253,11 +241,8 @@ public class FilterAnalysis implements PlugIn
 		if (chooser.getFileName() != null)
 		{
 			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
-			OutputStreamWriter out = null;
-			try
+			try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8"))
 			{
-				FileOutputStream fos = new FileOutputStream(filterSettings.getFilterSetFilename());
-				out = new OutputStreamWriter(fos, "UTF-8");
 				XStreamWrapper.getInstance().toXML(filterSets, out);
 				SettingsManager.writeSettings(filterSettings.build());
 			}
@@ -265,22 +250,7 @@ public class FilterAnalysis implements PlugIn
 			{
 				IJ.log("Unable to save the filter sets to file: " + e.getMessage());
 			}
-			finally
-			{
-				if (out != null)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
-				}
-			}
 		}
-
 	}
 
 	private List<MemoryPeakResults> readResults()

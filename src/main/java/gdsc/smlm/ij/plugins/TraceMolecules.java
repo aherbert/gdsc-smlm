@@ -699,11 +699,9 @@ public class TraceMolecules implements PlugIn
 
 	private void saveTraceData(StoredDataStatistics s, String name, String fileSuffix)
 	{
-		BufferedWriter file = null;
-		try
+		try (BufferedWriter file = new BufferedWriter(
+				new FileWriter(settings.getTraceDataDirectory() + TITLE + "." + fileSuffix + ".txt")))
 		{
-			file = new BufferedWriter(
-					new FileWriter(settings.getTraceDataDirectory() + TITLE + "." + fileSuffix + ".txt"));
 			file.append(name);
 			file.newLine();
 
@@ -718,20 +716,6 @@ public class TraceMolecules implements PlugIn
 			// Q. Add better handling of errors?
 			e.printStackTrace();
 			IJ.log("Failed to save trace data to results directory: " + settings.getTraceDataDirectory());
-		}
-		finally
-		{
-			if (file != null)
-			{
-				try
-				{
-					file.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 

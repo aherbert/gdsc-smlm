@@ -200,14 +200,12 @@ public class PCPALMAnalysis implements PlugInFilter
 		return DONE;
 	}
 
-	private void saveResult(XStream xs, CorrelationResult result)
+	private static void saveResult(XStream xs, CorrelationResult result)
 	{
 		String outputFilename = String.format("%s/%s.%d.xml", resultsDirectory,
 				(result.spatialDomain) ? "Spatial" : "Frequency", result.id);
-		FileOutputStream fs = null;
-		try
+		try (FileOutputStream fs = new FileOutputStream(outputFilename))
 		{
-			fs = new FileOutputStream(outputFilename);
 			xs.toXML(result, fs);
 		}
 		catch (XStreamException ex)
@@ -218,20 +216,6 @@ public class PCPALMAnalysis implements PlugInFilter
 		catch (Exception e)
 		{
 			IJ.log("Failed to save correlation result to file: " + outputFilename);
-		}
-		finally
-		{
-			if (fs != null)
-			{
-				try
-				{
-					fs.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 
@@ -272,12 +256,10 @@ public class PCPALMAnalysis implements PlugInFilter
 		return DONE;
 	}
 
-	private boolean loadResult(XStream xs, String path)
+	private static boolean loadResult(XStream xs, String path)
 	{
-		FileInputStream fs = null;
-		try
+		try (FileInputStream fs = new FileInputStream(path))
 		{
-			fs = new FileInputStream(path);
 			CorrelationResult result = (CorrelationResult) xs.fromXML(fs);
 			// Replace a result with the same id
 			for (int i = 0; i < results.size(); i++)
@@ -308,24 +290,10 @@ public class PCPALMAnalysis implements PlugInFilter
 		{
 			IJ.log("Failed to load correlation result from file: " + path);
 		}
-		finally
-		{
-			if (fs != null)
-			{
-				try
-				{
-					fs.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
 		return false;
 	}
 
-	private void error(String message)
+	private static void error(String message)
 	{
 		log("ERROR : " + message);
 		IJ.error(TITLE, message);

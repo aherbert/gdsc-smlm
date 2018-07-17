@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -143,6 +142,9 @@ public class BenchmarkFit implements PlugIn
 	private double[][] results;
 	private long[] resultsTime;
 
+	/**
+	 * Store the benchmark result.
+	 */
 	public class BenchmarkResult
 	{
 		/**
@@ -170,6 +172,22 @@ public class BenchmarkFit implements PlugIn
 		 */
 		final long[] resultsTime;
 
+		/**
+		 * Instantiates a new benchmark result.
+		 *
+		 * @param benchmarkParameters
+		 *            the benchmark parameters
+		 * @param answer
+		 *            the answer
+		 * @param parameters
+		 *            the parameters
+		 * @param convert
+		 *            the convert
+		 * @param results
+		 *            the results
+		 * @param resultsTime
+		 *            the results time
+		 */
 		public BenchmarkResult(BenchmarkParameters benchmarkParameters, double[] answer, String parameters,
 				double[] convert, double[][] results, long[] resultsTime)
 		{
@@ -899,8 +917,7 @@ public class BenchmarkFit implements PlugIn
 		return sa;
 	}
 
-	/** The total progress. */
-	int progress, stepProgress, totalProgress;
+	private int progress, stepProgress, totalProgress;
 
 	/**
 	 * Show progress.
@@ -1045,7 +1062,7 @@ public class BenchmarkFit implements PlugIn
 		summariseResults(stats, cameraModel);
 
 		// Optionally show histograms
-		if (showHistograms)
+		if (showHistograms && stats!=null)
 		{
 			IJ.showStatus("Calculating histograms ...");
 
@@ -1087,7 +1104,7 @@ public class BenchmarkFit implements PlugIn
 		IJ.showStatus("");
 	}
 
-	private void saveData(Statistics[] stats, String dir)
+	private static void saveData(Statistics[] stats, String dir)
 	{
 		rawDataDirectory = dir;
 		for (int i = 0; i < NAMES.length; i++)
@@ -1096,15 +1113,12 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
-	private void saveStatistics(StoredDataStatistics stats, String title)
+	private static void saveStatistics(StoredDataStatistics stats, String title)
 	{
 		String filename = rawDataDirectory + title.replace(" ", "_") + ".txt";
 
-		BufferedWriter out = null;
-		try
+		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")))
 		{
-			FileOutputStream fos = new FileOutputStream(filename);
-			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
 			//out.write(title);
 			//out.newLine();
 			double[] data = stats.getValues();
@@ -1118,23 +1132,11 @@ public class BenchmarkFit implements PlugIn
 		}
 		catch (Exception e)
 		{
-		}
-		finally
-		{
-			if (out != null)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
+			e.printStackTrace();
 		}
 	}
 
-	private void put(BlockingQueue<Integer> jobs, int i)
+	private static void put(BlockingQueue<Integer> jobs, int i)
 	{
 		try
 		{
@@ -1217,7 +1219,7 @@ public class BenchmarkFit implements PlugIn
 		return startPoints;
 	}
 
-	private boolean hasOffsetXY()
+	private static boolean hasOffsetXY()
 	{
 		return offsetRangeX > 0 && offsetRangeY > 0;
 	}
@@ -1405,7 +1407,7 @@ public class BenchmarkFit implements PlugIn
 		return x * benchmarkParameters.a;
 	}
 
-	private void createTable()
+	private static void createTable()
 	{
 		if (summaryTable == null || !summaryTable.isVisible())
 		{
@@ -1414,7 +1416,7 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
-	private void createAnalysisTable()
+	private static void createAnalysisTable()
 	{
 		if (analysisTable == null || !analysisTable.isVisible())
 		{
@@ -1423,7 +1425,7 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
-	private String createHeader(boolean extraRecall)
+	private static String createHeader(boolean extraRecall)
 	{
 		StringBuilder sb = new StringBuilder(createParameterHeader() + "\tRecall");
 		if (extraRecall)
@@ -1435,7 +1437,7 @@ public class BenchmarkFit implements PlugIn
 		return sb.toString();
 	}
 
-	private String createParameterHeader()
+	private static String createParameterHeader()
 	{
 		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tCamera model\tB (photons)\tNoise (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
 	}
@@ -1528,7 +1530,7 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
-	private boolean validData(int[] valid, int target)
+	private static boolean validData(int[] valid, int target)
 	{
 		for (int i = 0; i < valid.length; i++)
 			if (valid[i] == target)

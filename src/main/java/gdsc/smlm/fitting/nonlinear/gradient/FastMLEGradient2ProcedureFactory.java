@@ -52,6 +52,8 @@ public class FastMLEGradient2ProcedureFactory
 	/**
 	 * Create a new gradient procedure that has the loops unrolled.
 	 *
+	 * @param x
+	 *            Data to fit (must be positive, i.e. the value of a Poisson process)
 	 * @param func
 	 *            Gradient function
 	 * @return the gradient procedure

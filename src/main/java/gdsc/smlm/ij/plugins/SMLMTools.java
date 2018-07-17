@@ -167,49 +167,47 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 	private boolean createFrame()
 	{
-		// Locate all the GDSC SMLM plugins using the plugins.config:
-		InputStream readmeStream = getToolsPluginsConfig();
-
-		ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
-
-		// Read into memory
 		ArrayList<String[]> plugins = new ArrayList<>();
-		int gaps = 0;
-		BufferedReader input = null;
-		try
-		{
-			input = new BufferedReader(new UnicodeReader(readmeStream, null));
-			String line;
-			while ((line = input.readLine()) != null)
-			{
-				if (line.startsWith("#"))
-					continue;
-				String[] tokens = line.split(",");
-				if (tokens.length == 3)
-				{
-					// Only copy the entries from the Plugins menu
-					if (!ignore(tokens))
-					{
-						if (!plugins.isEmpty())
-						{
-							// Multiple gaps indicates a new column
-							if (gaps > 1)
-							{
-								plugins.add(new String[] { "next", "" });
-							}
-						}
-						gaps = 0;
-						plugins.add(new String[] { tokens[1].trim(), tokens[2].trim() });
-					}
-				}
-				else
-					gaps++;
 
-				// Put a spacer between plugins if specified
-				if ((tokens.length == 2 && tokens[0].startsWith("Plugins") && tokens[1].trim().equals("\"-\"")) ||
-						line.length() == 0)
+		// Locate all the GDSC SMLM plugins using the plugins.config:
+		try (InputStream readmeStream = getToolsPluginsConfig())
+		{
+			// Read into memory
+			int gaps = 0;
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(readmeStream, null)))
+			{
+				String line;
+				while ((line = input.readLine()) != null)
 				{
-					plugins.add(new String[] { "spacer", "" });
+					if (line.startsWith("#"))
+						continue;
+					String[] tokens = line.split(",");
+					if (tokens.length == 3)
+					{
+						// Only copy the entries from the Plugins menu
+						if (!ignore(tokens))
+						{
+							if (!plugins.isEmpty())
+							{
+								// Multiple gaps indicates a new column
+								if (gaps > 1)
+								{
+									plugins.add(new String[] { "next", "" });
+								}
+							}
+							gaps = 0;
+							plugins.add(new String[] { tokens[1].trim(), tokens[2].trim() });
+						}
+					}
+					else
+						gaps++;
+
+					// Put a spacer between plugins if specified
+					if ((tokens.length == 2 && tokens[0].startsWith("Plugins") && tokens[1].trim().equals("\"-\"")) ||
+							line.length() == 0)
+					{
+						plugins.add(new String[] { "spacer", "" });
+					}
 				}
 			}
 		}
@@ -217,24 +215,13 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		{
 			// Ignore
 		}
-		finally
-		{
-			if (input != null)
-			{
-				try
-				{
-					input.close();
-				}
-				catch (IOException e)
-				{
-					// Ignore
-				}
-			}
-		}
 
 		if (plugins.isEmpty())
 			return false;
 
+		// Put a spacer on the menu
+		ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
+		
 		// Arrange on a grid.
 		Panel mainPanel = new Panel();
 		GridBagLayout grid = new GridBagLayout();
@@ -300,7 +287,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 *            The tokens from the plugins.config file
 	 * @return true if the plugin should be ignored
 	 */
-	private boolean ignore(String[] tokens)
+	private static boolean ignore(String[] tokens)
 	{
 		// Only copy the entries from the Plugins menu
 		if (!tokens[0].startsWith("Plugins"))
@@ -334,6 +321,11 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		return getPluginsConfig();
 	}
 
+	/**
+	 * Gets the plugins.config embedded in the jar.
+	 *
+	 * @return the plugins config
+	 */
 	public static InputStream getPluginsConfig()
 	{
 		// Get the embedded config in the jar file
@@ -397,7 +389,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		return row;
 	}
 
-	private int add(Panel mainPanel, GridBagLayout grid, Component comp, int col, int row)
+	private static int add(Panel mainPanel, GridBagLayout grid, Component comp, int col, int row)
 	{
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = col;
@@ -410,6 +402,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		return row;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{

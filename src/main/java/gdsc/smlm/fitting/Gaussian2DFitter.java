@@ -764,6 +764,16 @@ public class Gaussian2DFitter
 
 	/**
 	 * Finds the centre of the image using the centre of mass within the given range of the specified centre-of-mass.
+	 *
+	 * @param subImage
+	 *            the sub image
+	 * @param dimensions
+	 *            the dimensions
+	 * @param range
+	 *            the range
+	 * @param centre
+	 *            the centre
+	 * @return the centre
 	 */
 	static double[] findCentreOfMass(final double[] subImage, final int[] dimensions, final int range,
 			final int[] centre)

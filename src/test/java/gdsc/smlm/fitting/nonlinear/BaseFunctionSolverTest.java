@@ -636,8 +636,10 @@ public abstract class BaseFunctionSolverTest
 	 * the solution so the convergence criteria can be set to accept the first step. The second solver is used to
 	 * compute deviations (thus is not initialised for fitting).
 	 *
+	 * @param rg
+	 *            the random generator
 	 * @param solver1
-	 *            the solver
+	 *            the solver 1
 	 * @param solver2
 	 *            the solver 2
 	 * @param noiseModel

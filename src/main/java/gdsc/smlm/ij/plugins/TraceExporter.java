@@ -134,7 +134,7 @@ public class TraceExporter implements PlugIn
 			export(results);
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		if (FORMAT_NAMES == null)
 		{
@@ -160,7 +160,7 @@ public class TraceExporter implements PlugIn
 		return true;
 	}
 
-	private boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults, MemoryResultsItems items)
+	private static boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults, MemoryResultsItems items)
 	{
 		// Show a list box containing all the results. This should remember the last set of chosen items.
 		MultiDialog md = new MultiDialog(TITLE, items);
@@ -188,7 +188,7 @@ public class TraceExporter implements PlugIn
 		return !allResults.isEmpty();
 	}
 
-	private ExportFormat getExportFormat()
+	private static ExportFormat getExportFormat()
 	{
 		if (format >= 0 && format < FORMAT_NAMES.length)
 			return ExportFormat.values()[format];
@@ -277,7 +277,7 @@ public class TraceExporter implements PlugIn
 		}
 	}
 
-	private MemoryPeakResults splitTraces(MemoryPeakResults results)
+	private static MemoryPeakResults splitTraces(MemoryPeakResults results)
 	{
 		if (maxJump < 1)
 			// Disabled
@@ -300,7 +300,7 @@ public class TraceExporter implements PlugIn
 		return results;
 	}
 
-	private MemoryPeakResults doSplit(MemoryPeakResults results)
+	private static MemoryPeakResults doSplit(MemoryPeakResults results)
 	{
 		MemoryPeakResults results2 = new MemoryPeakResults(results.size());
 		results2.copySettings(results);
@@ -327,24 +327,21 @@ public class TraceExporter implements PlugIn
 		return results2;
 	}
 
-	private void exportSpotOn(MemoryPeakResults results)
+	private static void exportSpotOn(MemoryPeakResults results)
 	{
 		// Simple Spot-On CSV file format:
 		// https://spoton.berkeley.edu/SPTGUI/docs/latest#input-formats
 		// frame, t (seconds), trajectory (trace id), x (um), y (um)
 
-		BufferedWriter out = null;
-		try
+		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(directory, results.getName() + ".csv")), "UTF-8")))
 		{
-			File file = new File(directory, results.getName() + ".csv");
-			FileOutputStream fos = new FileOutputStream(file);
-			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
 			out.write("frame,t,trajectory,x,y");
 			out.newLine();
 
 			final TypeConverter<TimeUnit> converter = UnitConverterFactory.createConverter(TimeUnit.FRAME,
 					TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
 
+			@SuppressWarnings("resource")
 			final BufferedWriter writer = out;
 			results.forEach(DistanceUnit.UM, new XYRResultProcedure()
 			{
@@ -396,19 +393,7 @@ public class TraceExporter implements PlugIn
 		}
 		catch (Exception e)
 		{
-		}
-		finally
-		{
-			if (out != null)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
+			e.printStackTrace();
 		}
 	}
 }

@@ -291,11 +291,9 @@ public class CubicSplineManager implements PlugIn
 			return false;
 
 		// Try to save to file
-		FileOutputStream os = null;
-		try
+		try (FileOutputStream os = new FileOutputStream(filename))
 		{
 			TrackProgress progress = new IJTrackProgress();
-			os = new FileOutputStream(filename);
 
 			psfModel.imagePSF.writeDelimitedTo(os);
 			psfModel.splineData.write(os, progress);
@@ -307,18 +305,6 @@ public class CubicSplineManager implements PlugIn
 		catch (Exception e)
 		{
 			Utils.log("Failed to save spline model to file: %s. %s", filename, e.getMessage());
-		}
-		finally
-		{
-			if (os != null)
-				try
-				{
-					os.close();
-				}
-				catch (IOException e)
-				{
-					// Ignore
-				}
 		}
 
 		return false;
@@ -375,12 +361,10 @@ public class CubicSplineManager implements PlugIn
 	private static CubicSplinePSF loadFromFile(String name, String filename)
 	{
 		// Try to load from file
-		InputStream is = null;
-		try
+		try (InputStream is = new BufferedInputStream(new FileInputStream(filename)))
 		{
 			IJ.showStatus("Loading cubic spline: " + name);
 			TrackProgress progress = new IJTrackProgress();
-			is = new BufferedInputStream(new FileInputStream(filename));
 
 			ImagePSF imagePSF = ImagePSF.parseDelimitedFrom(is);
 			CubicSplineData function = CubicSplineData.read(is, progress);
@@ -394,15 +378,6 @@ public class CubicSplineManager implements PlugIn
 		finally
 		{
 			IJ.showStatus("");
-			if (is != null)
-				try
-				{
-					is.close();
-				}
-				catch (IOException e)
-				{
-					// Ignore
-				}
 		}
 		return null;
 	}

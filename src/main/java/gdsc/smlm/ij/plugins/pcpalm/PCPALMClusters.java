@@ -69,7 +69,6 @@ import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
-import ij.process.ImageProcessor;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
@@ -114,6 +113,7 @@ public class PCPALMClusters implements PlugIn
 		}
 	}
 
+	/** The title */
 	static String TITLE = "PC-PALM Clusters";
 
 	private static int runMode = 0;
@@ -375,7 +375,7 @@ public class PCPALMClusters implements PlugIn
 	 *            the histogram data
 	 * @return true, if successful
 	 */
-	private boolean saveHistogram(HistogramData histogramData)
+	private static boolean saveHistogram(HistogramData histogramData)
 	{
 		if (!saveHistogram)
 			return false;
@@ -392,7 +392,7 @@ public class PCPALMClusters implements PlugIn
 	 *            the filename
 	 * @return true, if successful
 	 */
-	private boolean saveHistogram(HistogramData histogramData, String filename)
+	private static boolean saveHistogram(HistogramData histogramData, String filename)
 	{
 		if (filename == null)
 			return false;
@@ -400,10 +400,8 @@ public class PCPALMClusters implements PlugIn
 		float[][] hist = histogramData.histogram;
 
 		filename = Utils.replaceExtension(filename, "tsv");
-		BufferedWriter output = null;
-		try
+		try (BufferedWriter output = new BufferedWriter(new FileWriter(filename)))
 		{
-			output = new BufferedWriter(new FileWriter(filename));
 			if (histogramData.isCalibrated())
 			{
 				output.write(String.format("Frames  %d", histogramData.frames));
@@ -429,20 +427,6 @@ public class PCPALMClusters implements PlugIn
 			e.printStackTrace();
 			IJ.log("Failed to save histogram to file: " + filename);
 		}
-		finally
-		{
-			if (output != null)
-			{
-				try
-				{
-					output.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
 		return false;
 	}
 
@@ -456,18 +440,15 @@ public class PCPALMClusters implements PlugIn
 	 */
 	private HistogramData loadHistogram(String filename)
 	{
-		BufferedReader input = null;
-		try
+		int count = 0;
+		
+		try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(filename), null)))
 		{
 			int f = 0;
 			double a = 0;
 			String u = "";
 
-			FileInputStream fis = new FileInputStream(filename);
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
 			String line;
-			int count = 0;
 
 			ArrayList<float[]> data = new ArrayList<>();
 
@@ -498,12 +479,10 @@ public class PCPALMClusters implements PlugIn
 					continue;
 
 				// Extract the first 2 fields
-				Scanner scanner = new Scanner(line);
-				scanner.useLocale(Locale.US);
-				scanner.useDelimiter(pattern);
-
-				try
+				try (Scanner scanner = new Scanner(line))
 				{
+					scanner.useLocale(Locale.US);
+					scanner.useDelimiter(pattern);
 					int molecules = scanner.nextInt();
 					float frequency = scanner.nextFloat();
 
@@ -518,20 +497,6 @@ public class PCPALMClusters implements PlugIn
 					}
 
 					data.add(new float[] { molecules, frequency });
-				}
-				catch (InputMismatchException e)
-				{
-					error("Incorrect fields on line " + count);
-					return null;
-				}
-				catch (NoSuchElementException e)
-				{
-					error("Incorrect fields on line " + count);
-					return null;
-				}
-				finally
-				{
-					scanner.close();
 				}
 
 				// Get the next line
@@ -567,21 +532,17 @@ public class PCPALMClusters implements PlugIn
 			histogramData.filename = filename;
 			return histogramData;
 		}
+		catch (InputMismatchException e)
+		{
+			error("Incorrect fields on line " + count);
+		}
+		catch (NoSuchElementException e)
+		{
+			error("Incorrect fields on line " + count);
+		}
 		catch (IOException e)
 		{
 			IJ.error(TITLE, "Unable to read from file " + filename);
-		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
 		}
 		return null;
 	}
@@ -756,7 +717,7 @@ public class PCPALMClusters implements PlugIn
 	/**
 	 * @return True if all the molecules have weights (allowing weighted clustering)
 	 */
-	private boolean checkForWeights()
+	private static boolean checkForWeights()
 	{
 		for (Molecule m : PCPALMMolecules.molecules)
 			if (m.photons <= 0)
@@ -764,7 +725,7 @@ public class PCPALMClusters implements PlugIn
 		return true;
 	}
 
-	private void error(String message)
+	private static void error(String message)
 	{
 		Utils.log("ERROR : " + message);
 		IJ.error(TITLE, message);
@@ -910,7 +871,7 @@ public class PCPALMClusters implements PlugIn
 		return parameters;
 	}
 
-	private void addToPlot(int n, double p, String title, Plot2 plot, Color color)
+	private static void addToPlot(int n, double p, String title, Plot2 plot, Color color)
 	{
 		double[] x = new double[n + 1];
 		double[] y = new double[n + 1];

@@ -195,31 +195,17 @@ public class SeriesImageSourceTest
 		return stacks;
 	}
 
-	private void saveAsTiff(ImagePlus imp, String path, boolean intelByteOrder) throws IOException
+	private static void saveAsTiff(ImagePlus imp, String path, boolean intelByteOrder) throws IOException
 	{
 		// IJ.saveAsTiff(imp, path);
 
 		FileInfo fi = imp.getFileInfo();
 		fi.nImages = imp.getStackSize();
 		ij.Prefs.intelByteOrder = intelByteOrder;
-		DataOutputStream out = null;
-		try
+		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path))))
 		{
 			TiffEncoder file = new TiffEncoder(fi);
-			out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
 			file.write(out);
-			out.close();
-		}
-		finally
-		{
-			if (out != null)
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-				}
 		}
 	}
 }

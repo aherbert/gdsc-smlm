@@ -100,9 +100,9 @@ public class PeakResultsReader
 	 */
 	private static String IMAGEJ_TABLE_RESULTS_HEADER_V1_V2 = "origX\torigY\torigValue\tError\tNoise";
 
-	/** The space patterm */
+	/** The space pattern */
 	private static Pattern spacePattern = Pattern.compile(" ");
-	/** The tab patterm */
+	/** The tab pattern */
 	private static Pattern tabPattern = Pattern.compile("\t");
 	/** Simple whitespace pattern for tabs of spaces */
 	private static Pattern whitespacePattern = Pattern.compile("[\t ]");
@@ -126,24 +126,28 @@ public class PeakResultsReader
 	private boolean deviations, readEndFrame, readId, readPrecision, readSource;
 	private int smlmVersion = 4; // Assume the current
 
+	/**
+	 * Instantiates a new peak results reader.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public PeakResultsReader(String filename)
 	{
 		this.filename = filename;
 	}
 
 	/**
+	 * Gets the header from the results file.
+	 *
 	 * @return The header from the results file
 	 */
 	public String getHeader()
 	{
 		if (header == null)
 		{
-			BufferedReader input = null;
-			try
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(filename), null)))
 			{
-				FileInputStream fis = new FileInputStream(filename);
-				input = new BufferedReader(new UnicodeReader(fis, null));
-
 				StringBuilder sb = new StringBuilder();
 				String line;
 				int count = 0;
@@ -183,18 +187,6 @@ public class PeakResultsReader
 			catch (IOException e)
 			{
 				// ignore
-			}
-			finally
-			{
-				try
-				{
-					if (input != null)
-						input.close();
-				}
-				catch (IOException e)
-				{
-					// Ignore
-				}
 			}
 		}
 		return header;
@@ -316,7 +308,7 @@ public class PeakResultsReader
 		}
 		else
 		{
-
+			format = FileFormat.UNKNOWN;
 		}
 	}
 
@@ -432,7 +424,7 @@ public class PeakResultsReader
 						}
 						catch (NumberFormatException e)
 						{
-
+							// Ignore
 						}
 					}
 				}
@@ -521,6 +513,11 @@ public class PeakResultsReader
 		return calibration.getCalibration();
 	}
 
+	/**
+	 * Gets the PSF specified in the results header.
+	 *
+	 * @return the PSF
+	 */
 	public PSF getPSF()
 	{
 		if (psf == null)
@@ -586,6 +583,8 @@ public class PeakResultsReader
 	}
 
 	/**
+	 * Gets the configuration specified in the results header.
+	 *
 	 * @return The configuration specified in the results header
 	 */
 	public String getConfiguration()
@@ -618,7 +617,7 @@ public class PeakResultsReader
 	}
 
 	/**
-	 * Read the results from the file. The file is read for each invocation of this method.
+	 * Read the results from the file. The file is read for each invocation of this method, i.e. no caching is done.
 	 *
 	 * @return The peak results
 	 */
@@ -882,100 +881,89 @@ public class PeakResultsReader
 			nFields = new PeakResultConversionHelper(null, psf).getNames().length;
 		}
 
-		DataInputStream input = null;
-		try
+		try (FileInputStream fis = new FileInputStream(filename))
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			FileChannel channel = fis.getChannel();
-			input = new DataInputStream(fis);
-
-			// Seek to the start of the binary data by just reading the header again
-			BinaryFilePeakResults.readHeader(input);
-
-			// Format: [i]i[i]iifdf + n*f [+ n*f]
-			// where [] are optional and n is the number of fields
-			int flags = 0;
-			if (readEndFrame)
-				flags += SMLMFilePeakResults.FLAG_END_FRAME;
-			if (readId)
-				flags += SMLMFilePeakResults.FLAG_ID;
-			if (readPrecision)
-				flags += SMLMFilePeakResults.FLAG_PRECISION;
-			int length = BinaryFilePeakResults.getDataSize(deviations, flags, nFields);
-			if (!readMeanIntensity)
-				length -= 4; // No float field for mean signal
-			byte[] buffer = new byte[length];
-
-			int c = 0;
-			final boolean convert = smlmVersion == 1;
-			while (true) // Halted by the EOFException
+			try (DataInputStream input = new DataInputStream(fis))
 			{
-				// Note: Reading single strips seems fast enough at the moment.
-				// This could be modified to read larger blocks of data if necessary.
+				// Seek to the start of the binary data by just reading the header again
+				BinaryFilePeakResults.readHeader(input);
 
-				int bytesRead = input.read(buffer);
-				if (bytesRead != length)
-					break;
+				@SuppressWarnings("resource")
+				FileChannel channel = fis.getChannel();
 
-				position = 0;
-				final int id = (readId) ? readInt(buffer) : 0;
-				int peak = readInt(buffer);
-				final int endPeak = (readEndFrame) ? readInt(buffer) : peak;
-				int origX = readInt(buffer);
-				int origY = readInt(buffer);
-				float origValue = readFloat(buffer);
-				double error = readDouble(buffer);
-				float noise = readFloat(buffer);
-				float meanSignal = (readMeanIntensity) ? readFloat(buffer) : 0;
-				float[] params = readData(buffer, new float[nFields]);
-				float[] paramsStdDev = (deviations) ? readData(buffer, new float[nFields]) : null;
-
-				// Convert format which had the full Gaussian2D parameters array
-				if (gaussian2Dformat)
-				{
-					// Convert old binary format with the amplitude to signal
-					if (convert)
-						params[LEGACY_FORMAT_SIGNAL] *= 2 * Math.PI * params[LEGACY_FORMAT_X_SD] *
-								params[LEGACY_FORMAT_Y_SD];
-					params = mapGaussian2DFormatParams(params);
-					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-				}
-
+				// Format: [i]i[i]iifdf + n*f [+ n*f]
+				// where [] are optional and n is the number of fields
+				int flags = 0;
+				if (readEndFrame)
+					flags += SMLMFilePeakResults.FLAG_END_FRAME;
+				if (readId)
+					flags += SMLMFilePeakResults.FLAG_ID;
 				if (readPrecision)
-				{
-					results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal, params,
-							paramsStdDev, endPeak, id, readFloat(buffer)));
-				}
-				else
-				{
-					results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal, params,
-							paramsStdDev, endPeak, id));
-				}
+					flags += SMLMFilePeakResults.FLAG_PRECISION;
+				int length = BinaryFilePeakResults.getDataSize(deviations, flags, nFields);
+				if (!readMeanIntensity)
+					length -= 4; // No float field for mean signal
+				byte[] buffer = new byte[length];
 
-				if (++c % 512 == 0)
-					showProgress(channel);
+				int c = 0;
+				final boolean convert = smlmVersion == 1;
+				while (true) // Halted by the EOFException
+				{
+					// Note: Reading single strips seems fast enough at the moment.
+					// This could be modified to read larger blocks of data if necessary.
+
+					int bytesRead = input.read(buffer);
+					if (bytesRead != length)
+						break;
+
+					position = 0;
+					final int id = (readId) ? readInt(buffer) : 0;
+					int peak = readInt(buffer);
+					final int endPeak = (readEndFrame) ? readInt(buffer) : peak;
+					int origX = readInt(buffer);
+					int origY = readInt(buffer);
+					float origValue = readFloat(buffer);
+					double error = readDouble(buffer);
+					float noise = readFloat(buffer);
+					float meanSignal = (readMeanIntensity) ? readFloat(buffer) : 0;
+					float[] params = readData(buffer, new float[nFields]);
+					float[] paramsStdDev = (deviations) ? readData(buffer, new float[nFields]) : null;
+
+					// Convert format which had the full Gaussian2D parameters array
+					if (gaussian2Dformat)
+					{
+						// Convert old binary format with the amplitude to signal
+						if (convert)
+							params[LEGACY_FORMAT_SIGNAL] *= 2 * Math.PI * params[LEGACY_FORMAT_X_SD] *
+									params[LEGACY_FORMAT_Y_SD];
+						params = mapGaussian2DFormatParams(params);
+						paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+					}
+
+					if (readPrecision)
+					{
+						results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal, params,
+								paramsStdDev, endPeak, id, readFloat(buffer)));
+					}
+					else
+					{
+						results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal, params,
+								paramsStdDev, endPeak, id));
+					}
+
+					if (++c % 512 == 0)
+						showProgress(channel);
+				}
 			}
 		}
 		catch (EOFException e)
 		{
-			// Ignore
+			// Ignore. Binary data does not have a size so it is read until the EOF.
 		}
 		catch (IOException e)
 		{
-			// ignore
+			// Log this but still return the results that have been read
 			e.printStackTrace();
-		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
 		}
 		return results;
 	}
@@ -1024,7 +1012,7 @@ public class PeakResultsReader
 		return p;
 	}
 
-	private float[] mapGaussian2DFormatDeviations(float[] params)
+	private static float[] mapGaussian2DFormatDeviations(float[] params)
 	{
 		return (params != null) ? mapGaussian2DFormat(params) : null;
 	}
@@ -1096,7 +1084,7 @@ public class PeakResultsReader
 		}
 	}
 
-	private float[] readData(byte[] buffer, float[] params) throws IOException
+	private float[] readData(byte[] buffer, float[] params)
 	{
 		for (int i = 0; i < params.length; i++)
 			params[i] = readFloat(buffer);
@@ -1126,68 +1114,57 @@ public class PeakResultsReader
 			nFields = new PeakResultConversionHelper(null, psf).getNames().length;
 		}
 
-		BufferedReader input = null;
-		try
+		try (FileInputStream fis = new FileInputStream(filename))
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			FileChannel channel = fis.getChannel();
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
-			String line;
-			int errors = 0;
-
-			LineReader reader = createLineReader(results, smlmVersion, nFields);
-
-			// Skip the header
-			while ((line = input.readLine()) != null)
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
-				if (line.length() == 0)
-					continue;
+				@SuppressWarnings("resource")
+				FileChannel channel = fis.getChannel();
 
-				if (line.charAt(0) != '#')
+				String line;
+				int errors = 0;
+
+				LineReader reader = createLineReader(results, smlmVersion, nFields);
+
+				// Skip the header
+				while ((line = input.readLine()) != null)
 				{
-					// This is the first record
-					if (!reader.addPeakResult(line))
-						errors = 1;
-					break;
-				}
-			}
+					if (line.length() == 0)
+						continue;
 
-			int c = 0;
-			while ((line = input.readLine()) != null)
-			{
-				if (line.length() == 0)
-					continue;
-				if (line.charAt(0) == '#')
-					continue;
-
-				if (!reader.addPeakResult(line))
-				{
-					if (++errors >= 10)
+					if (line.charAt(0) != '#')
 					{
+						// This is the first record
+						if (!reader.addPeakResult(line))
+							errors = 1;
 						break;
 					}
 				}
 
-				if (++c % 512 == 0)
-					showProgress(channel);
+				int c = 0;
+				while ((line = input.readLine()) != null)
+				{
+					if (line.length() == 0)
+						continue;
+					if (line.charAt(0) == '#')
+						continue;
+
+					if (!reader.addPeakResult(line))
+					{
+						if (++errors >= 10)
+						{
+							break;
+						}
+					}
+
+					if (++c % 512 == 0)
+						showProgress(channel);
+				}
 			}
 		}
 		catch (IOException e)
 		{
 			// ignore
-		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
 		}
 		return results;
 	}
@@ -1309,33 +1286,35 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				float signal = scanner.nextFloat(); // Ignored but must be read
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					float signal = scanner.nextFloat(); // Ignored but must be read
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
+					scanner.close();
+					params[LEGACY_FORMAT_SIGNAL] = signal;
+					params = mapGaussian2DFormatParams(params);
+					if (readId || readEndFrame)
+						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null,
+								endPeak, id);
+					else
+						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 				}
-				scanner.close();
-				params[LEGACY_FORMAT_SIGNAL] = signal;
-				params = mapGaussian2DFormatParams(params);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-							id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 			}
 			else
 			{
@@ -1366,15 +1345,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1389,35 +1372,37 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				float signal = scanner.nextFloat(); // Ignored but must be read
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
-					paramsStdDev[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					float signal = scanner.nextFloat(); // Ignored but must be read
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
+					params[LEGACY_FORMAT_SIGNAL] = signal;
+
+					params = mapGaussian2DFormatParams(params);
+					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+					if (readId || readEndFrame)
+						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params,
+								paramsStdDev, endPeak, id);
+					else
+						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 				}
-				params[LEGACY_FORMAT_SIGNAL] = signal;
-				scanner.close();
-				params = mapGaussian2DFormatParams(params);
-				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
 			else
 			{
@@ -1452,15 +1437,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1474,31 +1463,32 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
+					params = mapGaussian2DFormatParams(params);
+					if (readId || readEndFrame)
+						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null,
+								endPeak, id);
+					else
+						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 				}
-				scanner.close();
-				params = mapGaussian2DFormatParams(params);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-							id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 			}
 			else
 			{
@@ -1527,15 +1517,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1550,33 +1544,34 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
-					paramsStdDev[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
+					params = mapGaussian2DFormatParams(params);
+					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+					if (readId || readEndFrame)
+						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params,
+								paramsStdDev, endPeak, id);
+					else
+						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 				}
-				scanner.close();
-				params = mapGaussian2DFormatParams(params);
-				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
 			else
 			{
@@ -1609,15 +1604,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1631,38 +1630,39 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
+					PeakResult r;
+					// The format appends a * to computed precision. We ignore these.
+					if (readPrecision && !line.endsWith("*"))
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
+								// Read precision here because it is the final field
+								scanner.nextFloat());
+					}
+					else
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
+					}
+					return r;
 				}
-				PeakResult r;
-				// The format appends a * to computed precision. We ignore these.
-				if (readPrecision && !line.endsWith("*"))
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
-							// Read precision here because it is the final field
-							scanner.nextFloat());
-				}
-				else
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
-				}
-				scanner.close();
-				return r;
 			}
 			else
 			{
@@ -1693,15 +1693,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1716,38 +1720,41 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
-					paramsStdDev[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
+					PeakResult r;
+					if (readPrecision && !line.endsWith("*"))
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak,
+								id,
+								// Read precision here because it is the final field
+								scanner.nextFloat());
+					}
+					else
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak,
+								id);
+					}
+					return r;
 				}
-				PeakResult r;
-				if (readPrecision && !line.endsWith("*"))
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id,
-							// Read precision here because it is the final field
-							scanner.nextFloat());
-				}
-				else
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id);
-				}
-				scanner.close();
-				return r;
 			}
 			else
 			{
@@ -1781,15 +1788,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1803,41 +1814,42 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				float meanIntensity = scanner.nextFloat();
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					float meanIntensity = scanner.nextFloat();
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
+					PeakResult r;
+					// The format appends a * to computed precision. We ignore these.
+					if (readPrecision && !line.endsWith("*"))
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
+								endPeak, id,
+								// Read precision here because it is the final field
+								scanner.nextFloat());
+					}
+					else
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
+								endPeak, id);
+					}
+					return r;
 				}
-				PeakResult r;
-				// The format appends a * to computed precision. We ignore these.
-				if (readPrecision && !line.endsWith("*"))
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak,
-							id,
-							// Read precision here because it is the final field
-							scanner.nextFloat());
-				}
-				else
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak,
-							id);
-				}
-				scanner.close();
-				return r;
 			}
 			else
 			{
@@ -1871,15 +1883,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1894,41 +1910,42 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				int id = 0, endPeak = 0;
-				if (readId)
-					id = scanner.nextInt();
-				int peak = scanner.nextInt();
-				if (readEndFrame)
-					endPeak = scanner.nextInt();
-				int origX = scanner.nextInt();
-				int origY = scanner.nextInt();
-				float origValue = scanner.nextFloat();
-				double error = scanner.nextDouble();
-				float noise = scanner.nextFloat();
-				float meanIntensity = scanner.nextFloat();
-				for (int i = 0; i < params.length; i++)
+				try (Scanner scanner = new Scanner(line))
 				{
-					params[i] = scanner.nextFloat();
-					paramsStdDev[i] = scanner.nextFloat();
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					int id = 0, endPeak = 0;
+					if (readId)
+						id = scanner.nextInt();
+					int peak = scanner.nextInt();
+					if (readEndFrame)
+						endPeak = scanner.nextInt();
+					int origX = scanner.nextInt();
+					int origY = scanner.nextInt();
+					float origValue = scanner.nextFloat();
+					double error = scanner.nextDouble();
+					float noise = scanner.nextFloat();
+					float meanIntensity = scanner.nextFloat();
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
+					PeakResult r;
+					if (readPrecision && !line.endsWith("*"))
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
+								paramsStdDev, endPeak, id,
+								// Read precision here because it is the final field
+								scanner.nextFloat());
+					}
+					else
+					{
+						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
+								paramsStdDev, endPeak, id);
+					}
+					return r;
 				}
-				PeakResult r;
-				if (readPrecision && !line.endsWith("*"))
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
-							endPeak, id,
-							// Read precision here because it is the final field
-							scanner.nextFloat());
-				}
-				else
-				{
-					r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
-							endPeak, id);
-				}
-				scanner.close();
-				return r;
 			}
 			else
 			{
@@ -1964,15 +1981,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -1982,123 +2003,112 @@ public class PeakResultsReader
 		MemoryPeakResults results = createResults();
 		results.setName(new File(filename).getName());
 
-		BufferedReader input = null;
-		try
+		try (FileInputStream fis = new FileInputStream(filename))
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			FileChannel channel = fis.getChannel();
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
-			String line;
-			int errors = 0;
-
-			// Skip over the single line header
-			String header = input.readLine();
-
-			// V1: had the Signal and Amplitude. Parameters
-			// V2: have only the Signal.
-			// V3: Has variable columns with units for the PSF parameters. Signal was renamed to Intensity.
-			int version;
-			int nFields = 0;
-			if (header.contains("Signal"))
-				version = 1;
-			else if (header.contains("Amplitude"))
-				version = 2;
-			else
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
-				version = 3;
+				String line;
+				int errors = 0;
 
-				// We support reading old IJ table results as they had fixed columns.
-				// The latest table results have dynamic columns so these must be loaded manually
-				// as guessing the column format is not supported.
-				return null;
+				// Skip over the single line header
+				String header = input.readLine();
 
-				// This code functioned when the table was not dynamic ...
-
-				//				// Get the number of data fields by counting the standard fields
-				//				String[] columns = header.split("\t");
-				//				int field = 0;
-				//				if (readId)
-				//					field++; // ID #
-				//				if (readSource)
-				//					field++; // Source
-				//				field++; // Frame
-				//				if (readEndFrame)
-				//					field++; // End frame
-				//				field++; // origX
-				//				field++; // origY
-				//				field++; // origValue
-				//				field++; // error
-				//				field++; // noise
-				//				field++; // SNR
-				//
-				//				// The remaining fields are PSF parameters with the exception of the final precision field
-				//
-				//				nFields = columns.length - field;
-				//				if (columns[columns.length - 1].contains("Precision"))
-				//					nFields--;
-				//				if (deviations)
-				//				{
-				//					nFields /= 2;
-				//				}
-				//
-				//				// We can guess part of the calibration.
-				//				if (calibration == null)
-				//					calibration = new Calibration();
-				//				int jump = (deviations) ? 2 : 1;
-				//				// field is currently on Background
-				//				calibration.setIntensityUnit(UnitHelper.guessIntensityUnitFromShortName(extractUnit(columns[field])));
-				//				field += jump; // Move to Intensity
-				//				field += jump; // Move to X
-				//				calibration.setDistanceUnit(UnitHelper.guessDistanceUnitFromShortName(extractUnit(columns[field])));
-				//				field += jump; // Move to Y
-				//				field += jump; // Move to Z
-				//				// The angle may be used in fields above the standard ones
-				//				while (field < columns.length)
-				//				{
-				//					field += jump;
-				//					AngleUnit u = UnitHelper.guessAngleUnitFromShortName(extractUnit(columns[field]));
-				//					if (u != null)
-				//					{
-				//						calibration.setAngleUnit(u);
-				//						break;
-				//					}
-				//				}
-			}
-
-			int c = 0;
-			while ((line = input.readLine()) != null)
-			{
-				if (line.length() == 0)
-					continue;
-
-				if (!addTableResult(results, line, version, nFields))
+				// V1: had the Signal and Amplitude. Parameters
+				// V2: have only the Signal.
+				// V3: Has variable columns with units for the PSF parameters. Signal was renamed to Intensity.
+				int version;
+				int nFields = 0;
+				if (header.contains("Signal"))
+					version = 1;
+				else if (header.contains("Amplitude"))
+					version = 2;
+				else
 				{
-					if (++errors >= 10)
-					{
-						break;
-					}
+					version = 3;
+
+					// We support reading old IJ table results as they had fixed columns.
+					// The latest table results have dynamic columns so these must be loaded manually
+					// as guessing the column format is not supported.
+					return null;
+
+					// This code functioned when the table was not dynamic ...
+
+					//				// Get the number of data fields by counting the standard fields
+					//				String[] columns = header.split("\t");
+					//				int field = 0;
+					//				if (readId)
+					//					field++; // ID #
+					//				if (readSource)
+					//					field++; // Source
+					//				field++; // Frame
+					//				if (readEndFrame)
+					//					field++; // End frame
+					//				field++; // origX
+					//				field++; // origY
+					//				field++; // origValue
+					//				field++; // error
+					//				field++; // noise
+					//				field++; // SNR
+					//
+					//				// The remaining fields are PSF parameters with the exception of the final precision field
+					//
+					//				nFields = columns.length - field;
+					//				if (columns[columns.length - 1].contains("Precision"))
+					//					nFields--;
+					//				if (deviations)
+					//				{
+					//					nFields /= 2;
+					//				}
+					//
+					//				// We can guess part of the calibration.
+					//				if (calibration == null)
+					//					calibration = new Calibration();
+					//				int jump = (deviations) ? 2 : 1;
+					//				// field is currently on Background
+					//				calibration.setIntensityUnit(UnitHelper.guessIntensityUnitFromShortName(extractUnit(columns[field])));
+					//				field += jump; // Move to Intensity
+					//				field += jump; // Move to X
+					//				calibration.setDistanceUnit(UnitHelper.guessDistanceUnitFromShortName(extractUnit(columns[field])));
+					//				field += jump; // Move to Y
+					//				field += jump; // Move to Z
+					//				// The angle may be used in fields above the standard ones
+					//				while (field < columns.length)
+					//				{
+					//					field += jump;
+					//					AngleUnit u = UnitHelper.guessAngleUnitFromShortName(extractUnit(columns[field]));
+					//					if (u != null)
+					//					{
+					//						calibration.setAngleUnit(u);
+					//						break;
+					//					}
+					//				}
 				}
 
-				if (++c % 512 == 0)
-					showProgress(channel);
+				@SuppressWarnings("resource")
+				FileChannel channel = fis.getChannel();
+
+				int c = 0;
+				while ((line = input.readLine()) != null)
+				{
+					if (line.length() == 0)
+						continue;
+
+					if (!addTableResult(results, line, version, nFields))
+					{
+						if (++errors >= 10)
+						{
+							break;
+						}
+					}
+
+					if (++c % 512 == 0)
+						showProgress(channel);
+				}
 			}
 		}
 		catch (IOException e)
 		{
 			// ignore
-		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
 		}
 
 		return results;
@@ -2150,33 +2160,34 @@ public class PeakResultsReader
 			// Extract the source & bounds from the Source column
 			if (results.size() == 0 && readSource)
 			{
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(tabPattern);
-				scanner.useLocale(Locale.US);
-				if (readId)
-					scanner.nextInt();
-				String source = scanner.next();
-				scanner.close();
+				try (Scanner scanner = new Scanner(line))
+				{
+					scanner.useDelimiter(tabPattern);
+					scanner.useLocale(Locale.US);
+					if (readId)
+						scanner.nextInt();
+					String source = scanner.next();
 
-				if (source.contains(": "))
-				{
-					String[] fields = source.split(": ");
-					results.setName(fields[0]);
-					// Bounds is formatted as 'xN yN wN hN'
-					Pattern pattern = Pattern.compile("x(\\d+) y(\\d+) w(\\d+) h(\\d+)");
-					Matcher match = pattern.matcher(fields[1]);
-					if (match.find())
+					if (source.contains(": "))
 					{
-						int x = Integer.parseInt(match.group(1));
-						int y = Integer.parseInt(match.group(2));
-						int w = Integer.parseInt(match.group(3));
-						int h = Integer.parseInt(match.group(4));
-						results.setBounds(new Rectangle(x, y, w, h));
+						String[] fields = source.split(": ");
+						results.setName(fields[0]);
+						// Bounds is formatted as 'xN yN wN hN'
+						Pattern pattern = Pattern.compile("x(\\d+) y(\\d+) w(\\d+) h(\\d+)");
+						Matcher match = pattern.matcher(fields[1]);
+						if (match.find())
+						{
+							int x = Integer.parseInt(match.group(1));
+							int y = Integer.parseInt(match.group(2));
+							int w = Integer.parseInt(match.group(3));
+							int h = Integer.parseInt(match.group(4));
+							results.setBounds(new Rectangle(x, y, w, h));
+						}
 					}
-				}
-				else
-				{
-					results.setName(source);
+					else
+					{
+						results.setName(source);
+					}
 				}
 			}
 
@@ -2217,54 +2228,67 @@ public class PeakResultsReader
 		// [Precision]
 		try
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter(tabPattern);
-			scanner.useLocale(Locale.US);
-			int id = 0, endPeak = 0;
-			if (readId)
-				id = scanner.nextInt();
-			if (readSource)
-				scanner.next();
-			int peak = scanner.nextInt();
-			if (readEndFrame)
-				endPeak = scanner.nextInt();
-			int origX = scanner.nextInt();
-			int origY = scanner.nextInt();
-			float origValue = scanner.nextFloat();
-			double error = scanner.nextDouble();
-			float noise = scanner.nextFloat();
-			@SuppressWarnings("unused")
-			float signal = scanner.nextFloat(); // Ignored but must be read
-			@SuppressWarnings("unused")
-			float snr = scanner.nextFloat(); // Ignored but must be read
-			float[] params = new float[7];
-			float[] paramsStdDev = (deviations) ? new float[7] : null;
-			for (int i = 0; i < params.length; i++)
+			try (Scanner scanner = new Scanner(line))
 			{
-				params[i] = scanner.nextFloat();
+				scanner.useDelimiter(tabPattern);
+				scanner.useLocale(Locale.US);
+				int id = 0, endPeak = 0;
+				if (readId)
+					id = scanner.nextInt();
+				if (readSource)
+					scanner.next();
+				int peak = scanner.nextInt();
+				if (readEndFrame)
+					endPeak = scanner.nextInt();
+				int origX = scanner.nextInt();
+				int origY = scanner.nextInt();
+				float origValue = scanner.nextFloat();
+				double error = scanner.nextDouble();
+				float noise = scanner.nextFloat();
+				@SuppressWarnings("unused")
+				float signal = scanner.nextFloat(); // Ignored but must be read
+				@SuppressWarnings("unused")
+				float snr = scanner.nextFloat(); // Ignored but must be read
+				float[] params = new float[7];
+				float[] paramsStdDev = null;
 				if (deviations)
-					paramsStdDev[i] = scanner.nextFloat();
+				{
+					paramsStdDev = new float[7];
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
+				}
+				else
+				{
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
+				}
+
+				// For the new format we store the signal (not the amplitude).
+				// Convert the amplitude into a signal
+				params[LEGACY_FORMAT_SIGNAL] *= 2 * Math.PI * params[LEGACY_FORMAT_X_SD] * params[LEGACY_FORMAT_Y_SD];
+
+				params = mapGaussian2DFormatParams(params);
+				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
+							endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
-			scanner.close();
-
-			// For the new format we store the signal (not the amplitude).
-			// Convert the amplitude into a signal
-			params[LEGACY_FORMAT_SIGNAL] *= 2 * Math.PI * params[LEGACY_FORMAT_X_SD] * params[LEGACY_FORMAT_Y_SD];
-
-			params = mapGaussian2DFormatParams(params);
-			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-
-			if (readId || readEndFrame)
-				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-						endPeak, id);
-			else
-				return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -2299,48 +2323,61 @@ public class PeakResultsReader
 		// [Precision]
 		try
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter(tabPattern);
-			scanner.useLocale(Locale.US);
-			int id = 0, endPeak = 0;
-			if (readId)
-				id = scanner.nextInt();
-			if (readSource)
-				scanner.next();
-			int peak = scanner.nextInt();
-			if (readEndFrame)
-				endPeak = scanner.nextInt();
-			int origX = scanner.nextInt();
-			int origY = scanner.nextInt();
-			float origValue = scanner.nextFloat();
-			double error = scanner.nextDouble();
-			float noise = scanner.nextFloat();
-			@SuppressWarnings("unused")
-			float snr = scanner.nextFloat(); // Ignored but must be read
-			float[] params = new float[7];
-			float[] paramsStdDev = (deviations) ? new float[7] : null;
-			for (int i = 0; i < params.length; i++)
+			try (Scanner scanner = new Scanner(line))
 			{
-				params[i] = scanner.nextFloat();
+				scanner.useDelimiter(tabPattern);
+				scanner.useLocale(Locale.US);
+				int id = 0, endPeak = 0;
+				if (readId)
+					id = scanner.nextInt();
+				if (readSource)
+					scanner.next();
+				int peak = scanner.nextInt();
+				if (readEndFrame)
+					endPeak = scanner.nextInt();
+				int origX = scanner.nextInt();
+				int origY = scanner.nextInt();
+				float origValue = scanner.nextFloat();
+				double error = scanner.nextDouble();
+				float noise = scanner.nextFloat();
+				@SuppressWarnings("unused")
+				float snr = scanner.nextFloat(); // Ignored but must be read
+				float[] params = new float[7];
+				float[] paramsStdDev = null;
 				if (deviations)
-					paramsStdDev[i] = scanner.nextFloat();
+				{
+					paramsStdDev = new float[7];
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
+				}
+				else
+				{
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
+				}
+
+				params = mapGaussian2DFormatParams(params);
+				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
+							endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
-			scanner.close();
-
-			params = mapGaussian2DFormatParams(params);
-			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-
-			if (readId || readEndFrame)
-				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-						endPeak, id);
-			else
-				return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -2374,55 +2411,58 @@ public class PeakResultsReader
 		// [Precision]
 		try
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter(tabPattern);
-			scanner.useLocale(Locale.US);
-			int id = 0, endPeak = 0;
-			if (readId)
-				id = scanner.nextInt();
-			if (readSource)
-				scanner.next();
-			int peak = scanner.nextInt();
-			if (readEndFrame)
-				endPeak = scanner.nextInt();
-			int origX = scanner.nextInt();
-			int origY = scanner.nextInt();
-			float origValue = scanner.nextFloat();
-			double error = scanner.nextDouble();
-			float noise = scanner.nextFloat();
-			@SuppressWarnings("unused")
-			float snr = scanner.nextFloat(); // Ignored but must be read
-			float[] params = new float[nFields];
-			float[] paramsStdDev;
-			if (deviations)
+			try (Scanner scanner = new Scanner(line))
 			{
-				paramsStdDev = new float[params.length];
-				for (int i = 0; i < params.length; i++)
+				scanner.useDelimiter(tabPattern);
+				scanner.useLocale(Locale.US);
+				int id = 0, endPeak = 0;
+				if (readId)
+					id = scanner.nextInt();
+				if (readSource)
+					scanner.next();
+				int peak = scanner.nextInt();
+				if (readEndFrame)
+					endPeak = scanner.nextInt();
+				int origX = scanner.nextInt();
+				int origY = scanner.nextInt();
+				float origValue = scanner.nextFloat();
+				double error = scanner.nextDouble();
+				float noise = scanner.nextFloat();
+				@SuppressWarnings("unused")
+				float snr = scanner.nextFloat(); // Ignored but must be read
+				float[] params = new float[nFields];
+				float[] paramsStdDev;
+				if (deviations)
 				{
-					params[i] = scanner.nextFloat();
-					paramsStdDev[i] = scanner.nextFloat();
+					paramsStdDev = new float[params.length];
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+						paramsStdDev[i] = scanner.nextFloat();
+					}
 				}
-			}
-			else
-			{
-				paramsStdDev = null;
-				for (int i = 0; i < params.length; i++)
+				else
 				{
-					params[i] = scanner.nextFloat();
+					paramsStdDev = null;
+					for (int i = 0; i < params.length; i++)
+					{
+						params[i] = scanner.nextFloat();
+					}
 				}
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
+							endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
-			scanner.close();
-			if (readId || readEndFrame)
-				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-						endPeak, id);
-			else
-				return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -2432,70 +2472,59 @@ public class PeakResultsReader
 		MemoryPeakResults results = createResults();
 		results.setName(new File(filename).getName());
 
-		BufferedReader input = null;
-		try
+		try (FileInputStream fis = new FileInputStream(filename))
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			FileChannel channel = fis.getChannel();
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
-			String line;
-			int errors = 0;
-
-			// Skip the header
-			while ((line = input.readLine()) != null)
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
-				if (line.length() == 0)
-					continue;
-				if (line.charAt(0) != '#')
-				{
-					// This is the first record
-					if (!addRapidSTORMResult(results, line))
-						errors = 1;
-					break;
-				}
-			}
+				@SuppressWarnings("resource")
+				FileChannel channel = fis.getChannel();
 
-			int c = 0;
-			while ((line = input.readLine()) != null)
-			{
-				if (line.length() == 0)
-					continue;
-				if (line.charAt(0) == '#')
-					continue;
+				String line;
+				int errors = 0;
 
-				if (!addRapidSTORMResult(results, line))
+				// Skip the header
+				while ((line = input.readLine()) != null)
 				{
-					if (++errors >= 10)
+					if (line.length() == 0)
+						continue;
+					if (line.charAt(0) != '#')
 					{
+						// This is the first record
+						if (!addRapidSTORMResult(results, line))
+							errors = 1;
 						break;
 					}
 				}
 
-				if (++c % 512 == 0)
-					showProgress(channel);
+				int c = 0;
+				while ((line = input.readLine()) != null)
+				{
+					if (line.length() == 0)
+						continue;
+					if (line.charAt(0) == '#')
+						continue;
+
+					if (!addRapidSTORMResult(results, line))
+					{
+						if (++errors >= 10)
+						{
+							break;
+						}
+					}
+
+					if (++c % 512 == 0)
+						showProgress(channel);
+				}
 			}
 		}
 		catch (IOException e)
 		{
 			// ignore
 		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
-		}
 		return results;
 	}
 
-	private boolean addRapidSTORMResult(MemoryPeakResults results, String line)
+	private static boolean addRapidSTORMResult(MemoryPeakResults results, String line)
 	{
 		PeakResult result = createRapidSTORMResult(line);
 		if (result != null)
@@ -2506,7 +2535,7 @@ public class PeakResultsReader
 		return false;
 	}
 
-	private PeakResult createRapidSTORMResult(String line)
+	private static PeakResult createRapidSTORMResult(String line)
 	{
 		// Text file with fields:
 		//   X (nm)
@@ -2520,39 +2549,42 @@ public class PeakResultsReader
 		// *Note that the RapidSTORM Amplitude is the signal.
 		try
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter(spacePattern);
-			scanner.useLocale(Locale.US);
-			float x = scanner.nextFloat();
-			float y = scanner.nextFloat();
-			final int peak = scanner.nextInt();
-			final float signal = scanner.nextFloat();
-			final float sx2 = scanner.nextFloat();
-			final float sy2 = scanner.nextFloat();
-			@SuppressWarnings("unused")
-			final float kernelImprovement = scanner.nextFloat();
-			final double error = scanner.nextDouble();
-			scanner.close();
+			try (Scanner scanner = new Scanner(line))
+			{
+				scanner.useDelimiter(spacePattern);
+				scanner.useLocale(Locale.US);
+				float x = scanner.nextFloat();
+				float y = scanner.nextFloat();
+				final int peak = scanner.nextInt();
+				final float signal = scanner.nextFloat();
+				final float sx2 = scanner.nextFloat();
+				final float sy2 = scanner.nextFloat();
+				@SuppressWarnings("unused")
+				final float kernelImprovement = scanner.nextFloat();
+				final double error = scanner.nextDouble();
 
-			// Convert from pm^2 to nm
-			float sx = (float) (Math.sqrt(sx2) * 1000);
-			float sy = (float) (Math.sqrt(sy2) * 1000);
+				// Convert from pm^2 to nm
+				float sx = (float) (Math.sqrt(sx2) * 1000);
+				float sy = (float) (Math.sqrt(sy2) * 1000);
 
-			float[] params = new float[nTwoAxis];
-			params[PeakResult.INTENSITY] = signal;
-			params[PeakResult.X] = x;
-			params[PeakResult.Y] = y;
-			params[isx] = sx;
-			params[isy] = sy;
+				float[] params = new float[nTwoAxis];
+				params[PeakResult.INTENSITY] = signal;
+				params[PeakResult.X] = x;
+				params[PeakResult.Y] = y;
+				params[isx] = sx;
+				params[isy] = sy;
 
-			// Store the signal as the original value
-			return new PeakResult(peak, (int) x, (int) y, signal, error, 0.0f, 0, params, null);
+				// Store the signal as the original value
+				return new PeakResult(peak, (int) x, (int) y, signal, error, 0.0f, 0, params, null);
+			}
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -2562,52 +2594,41 @@ public class PeakResultsReader
 		MemoryPeakResults results = createResults();
 		results.setName(new File(filename).getName());
 
-		BufferedReader input = null;
-		try
+		try (FileInputStream fis = new FileInputStream(filename))
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			FileChannel channel = fis.getChannel();
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
-			String line;
-			int errors = 0;
-
-			// Skip the single line header
-			input.readLine();
-
-			int c = 0;
-			while ((line = input.readLine()) != null)
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
-				if (line.length() == 0)
-					continue;
+				@SuppressWarnings("resource")
+				FileChannel channel = fis.getChannel();
 
-				if (!addNSTORMResult(results, line))
+				String line;
+				int errors = 0;
+
+				// Skip the single line header
+				input.readLine();
+
+				int c = 0;
+				while ((line = input.readLine()) != null)
 				{
-					if (++errors >= 10)
-					{
-						break;
-					}
-				}
+					if (line.length() == 0)
+						continue;
 
-				if (++c % 512 == 0)
-					showProgress(channel);
+					if (!addNSTORMResult(results, line))
+					{
+						if (++errors >= 10)
+						{
+							break;
+						}
+					}
+
+					if (++c % 512 == 0)
+						showProgress(channel);
+				}
 			}
 		}
 		catch (IOException e)
 		{
 			// ignore
-		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
 		}
 
 		// The following relationship holds when length == 1:
@@ -2660,7 +2681,7 @@ public class PeakResultsReader
 		return results;
 	}
 
-	private boolean addNSTORMResult(MemoryPeakResults results, String line)
+	private static boolean addNSTORMResult(MemoryPeakResults results, String line)
 	{
 		PeakResult result = createNSTORMResult(line);
 		if (result != null)
@@ -2673,7 +2694,7 @@ public class PeakResultsReader
 
 	// So that the fields can be named
 	@SuppressWarnings("unused")
-	private PeakResult createNSTORMResult(String line)
+	private static PeakResult createNSTORMResult(String line)
 	{
 		// Note that the NSTORM file contains traced molecules hence the Frame
 		// and Length fields.
@@ -2718,67 +2739,68 @@ public class PeakResultsReader
 		//    data then Zc= Z.
 		try
 		{
-			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter(tabPattern);
-			scanner.useLocale(Locale.US);
-			String channelName = scanner.next();
-			float x = scanner.nextFloat();
-			float y = scanner.nextFloat();
-			float xc = scanner.nextFloat();
-			float yc = scanner.nextFloat();
-			float height = scanner.nextFloat();
-			float area = scanner.nextFloat();
-			float width = scanner.nextFloat();
-			float phi = scanner.nextFloat();
-			float ax = scanner.nextFloat();
-			float bg = scanner.nextFloat();
-			float i = scanner.nextFloat();
-			int frame = scanner.nextInt();
-			int length = scanner.nextInt();
-			// These are not needed
-			//float link = scanner.nextFloat();
-			//float valid = scanner.nextFloat();
-			//float z = scanner.nextFloat();
-			//float zc = scanner.nextFloat();
-			scanner.close();
-
-			// The coordinates are in nm
-			// The values are in ADUs. The area value is the signal.
-
-			// The following relationship holds when length == 1:
-			// Area = Height * 2 * pi * (Width / (pixel_pitch*2) )^2
-			// => Pixel_pitch = 0.5 * Width / sqrt(Area / (Height * 2 * pi))
-
-			float[] params = new float[nTwoAxis];
-			params[PeakResult.BACKGROUND] = bg;
-			//params[ia] = ax;
-			params[PeakResult.INTENSITY] = area;
-			params[PeakResult.X] = xc;
-			params[PeakResult.Y] = yc;
-
-			// Convert width (2*SD) to SD
-			width /= 2f;
-
-			// Convert to separate XY widths using the axial ratio
-			if (ax == 1)
+			try (Scanner scanner = new Scanner(line))
 			{
-				params[isx] = width;
-				params[isy] = width;
-			}
-			else
-			{
-				// Ensure the axial ratio is long/short
-				if (ax < 1)
-					ax = 1.0f / ax;
-				double a = Math.sqrt(ax);
+				scanner.useDelimiter(tabPattern);
+				scanner.useLocale(Locale.US);
+				String channelName = scanner.next();
+				float x = scanner.nextFloat();
+				float y = scanner.nextFloat();
+				float xc = scanner.nextFloat();
+				float yc = scanner.nextFloat();
+				float height = scanner.nextFloat();
+				float area = scanner.nextFloat();
+				float width = scanner.nextFloat();
+				float phi = scanner.nextFloat();
+				float ax = scanner.nextFloat();
+				float bg = scanner.nextFloat();
+				float i = scanner.nextFloat();
+				int frame = scanner.nextInt();
+				int length = scanner.nextInt();
+				// These are not needed
+				//float link = scanner.nextFloat();
+				//float valid = scanner.nextFloat();
+				//float z = scanner.nextFloat();
+				//float zc = scanner.nextFloat();
 
-				params[isx] = (float) (width * a);
-				params[isy] = (float) (width / a);
-			}
+				// The coordinates are in nm
+				// The values are in ADUs. The area value is the signal.
 
-			// Store the signal as the original value
-			return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, 0.0, 0.0f, 0, params, null,
-					frame + length - 1, 0);
+				// The following relationship holds when length == 1:
+				// Area = Height * 2 * pi * (Width / (pixel_pitch*2) )^2
+				// => Pixel_pitch = 0.5 * Width / sqrt(Area / (Height * 2 * pi))
+
+				float[] params = new float[nTwoAxis];
+				params[PeakResult.BACKGROUND] = bg;
+				//params[ia] = ax;
+				params[PeakResult.INTENSITY] = area;
+				params[PeakResult.X] = xc;
+				params[PeakResult.Y] = yc;
+
+				// Convert width (2*SD) to SD
+				width /= 2f;
+
+				// Convert to separate XY widths using the axial ratio
+				if (ax == 1)
+				{
+					params[isx] = width;
+					params[isy] = width;
+				}
+				else
+				{
+					// Ensure the axial ratio is long/short
+					if (ax < 1)
+						ax = 1.0f / ax;
+					double a = Math.sqrt(ax);
+
+					params[isx] = (float) (width * a);
+					params[isy] = (float) (width / a);
+				}
+
+				// Store the signal as the original value
+				return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, 0.0, 0.0f, 0, params, null,
+						frame + length - 1, 0);
+			}
 		}
 		catch (InputMismatchException e)
 		{
@@ -2797,66 +2819,55 @@ public class PeakResultsReader
 		if (TextUtils.isNullOrEmpty(name))
 			results.setName(new File(filename).getName());
 
-		BufferedReader input = null;
-		try
+		try (FileInputStream fis = new FileInputStream(filename))
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			FileChannel channel = fis.getChannel();
-			input = new BufferedReader(new UnicodeReader(fis, null));
-
-			String line;
-			int errors = 0;
-
-			// Skip the header
-			while ((line = input.readLine()) != null)
+			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
-				if (line.length() == 0)
-					continue;
+				@SuppressWarnings("resource")
+				FileChannel channel = fis.getChannel();
 
-				if (line.charAt(0) != '#')
+				String line;
+				int errors = 0;
+
+				// Skip the header
+				while ((line = input.readLine()) != null)
 				{
-					// This is the first record
-					if (!addMALKResult(results, line))
-						errors = 1;
-					break;
-				}
-			}
+					if (line.length() == 0)
+						continue;
 
-			int c = 0;
-			while ((line = input.readLine()) != null)
-			{
-				if (line.length() == 0)
-					continue;
-				if (line.charAt(0) == '#')
-					continue;
-
-				if (!addMALKResult(results, line))
-				{
-					if (++errors >= 10)
+					if (line.charAt(0) != '#')
 					{
+						// This is the first record
+						if (!addMALKResult(results, line))
+							errors = 1;
 						break;
 					}
 				}
 
-				if (++c % 512 == 0)
-					showProgress(channel);
+				int c = 0;
+				while ((line = input.readLine()) != null)
+				{
+					if (line.length() == 0)
+						continue;
+					if (line.charAt(0) == '#')
+						continue;
+
+					if (!addMALKResult(results, line))
+					{
+						if (++errors >= 10)
+						{
+							break;
+						}
+					}
+
+					if (++c % 512 == 0)
+						showProgress(channel);
+				}
 			}
 		}
 		catch (IOException e)
 		{
 			// ignore
-		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
 		}
 
 		// Set default calibration for MALK format.
@@ -2906,16 +2917,17 @@ public class PeakResultsReader
 			if (isUseScanner())
 			{
 				// Code using a Scanner
-				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter(whitespacePattern);
-				scanner.useLocale(Locale.US);
-				params[PeakResult.X] = scanner.nextFloat();
-				params[PeakResult.Y] = scanner.nextFloat();
-				int peak = scanner.nextInt();
-				params[PeakResult.INTENSITY] = scanner.nextFloat();
-				scanner.close();
+				try (Scanner scanner = new Scanner(line))
+				{
+					scanner.useDelimiter(whitespacePattern);
+					scanner.useLocale(Locale.US);
+					params[PeakResult.X] = scanner.nextFloat();
+					params[PeakResult.Y] = scanner.nextFloat();
+					int peak = scanner.nextInt();
+					params[PeakResult.INTENSITY] = scanner.nextFloat();
 
-				return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
+					return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
+				}
 			}
 			else
 			{
@@ -2932,15 +2944,19 @@ public class PeakResultsReader
 		}
 		catch (InputMismatchException e)
 		{
+			// Ignore and return null
 		}
 		catch (NoSuchElementException e)
 		{
+			// Ignore and return null
 		}
 		catch (IndexOutOfBoundsException e)
 		{
+			// Ignore and return null
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore and return null
 		}
 		return null;
 	}
@@ -2953,6 +2969,8 @@ public class PeakResultsReader
 	}
 
 	/**
+	 * Gets the tracker.
+	 *
 	 * @return the tracker
 	 */
 	public TrackProgress getTracker()
@@ -2961,6 +2979,8 @@ public class PeakResultsReader
 	}
 
 	/**
+	 * Sets the tracker.
+	 *
 	 * @param tracker
 	 *            the tracker to set
 	 */
@@ -2969,21 +2989,43 @@ public class PeakResultsReader
 		this.tracker = tracker;
 	}
 
+	/**
+	 * Checks if using a {@link Scanner} to read the text. The default is {@link Pattern#split(CharSequence)}.
+	 *
+	 * @return true, if using a scanner
+	 */
 	public boolean isUseScanner()
 	{
 		return useScanner;
 	}
 
+	/**
+	 * Set to true to use a {@link Scanner} to read the text. The default is {@link Pattern#split(CharSequence)}.
+	 *
+	 * @param useScanner
+	 *            Set to true to use a {@link Scanner} to read the text
+	 */
 	public void setUseScanner(boolean useScanner)
 	{
 		this.useScanner = useScanner;
 	}
 
+	/**
+	 * Checks if returning raw results (i.e. not converted to the preferred units).
+	 *
+	 * @return true, if returning raw results
+	 */
 	public boolean isRawResults()
 	{
 		return rawResults;
 	}
 
+	/**
+	 * Set to true to return raw results. The default is to convert to the preferred units.
+	 *
+	 * @param rawResults
+	 *            Set to true to return raw results
+	 */
 	public void setRawResults(boolean rawResults)
 	{
 		this.rawResults = rawResults;

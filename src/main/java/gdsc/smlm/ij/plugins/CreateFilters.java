@@ -249,16 +249,14 @@ public class CreateFilters implements PlugIn, ItemListener
 		String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
 		if (filename != null)
 		{
-			OutputStreamWriter out = null;
-			try
-			{
-				filterSettings.setFilterSetFilename(filename);
-				// Append .xml if no suffix
-				if (filename.lastIndexOf('.') < 0)
-					filterSettings.setFilterSetFilename(filterSettings.getFilterSetFilename() + ".xml");
+			filterSettings.setFilterSetFilename(filename);
+			// Append .xml if no suffix
+			if (filename.lastIndexOf('.') < 0)
+				filterSettings.setFilterSetFilename(filterSettings.getFilterSetFilename() + ".xml");
 
-				FileOutputStream fos = new FileOutputStream(filterSettings.getFilterSetFilename());
-				out = new OutputStreamWriter(fos, "UTF-8");
+			try (OutputStreamWriter out = new OutputStreamWriter(
+					new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8"))
+			{
 				out.write(gdsc.core.utils.XmlUtils.prettyPrintXml(sw.toString()));
 				SettingsManager.writeSettings(filterSettings.build());
 				IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());
@@ -267,21 +265,6 @@ public class CreateFilters implements PlugIn, ItemListener
 			{
 				IJ.log("Unable to save the filter sets to file: " + e.getMessage());
 			}
-			finally
-			{
-				if (out != null)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
-				}
-			}
-
 		}
 	}
 

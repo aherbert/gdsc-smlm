@@ -541,11 +541,9 @@ public class FailCountManager implements PlugIn
 		settings.setFilename(filename);
 		TurboList<FailCountData> failCountData = new TurboList<>();
 
-		BufferedReader br = null;
-		Pattern pattern = Pattern.compile("[\t, ]+");
-		try
+		try (BufferedReader br = new BufferedReader(new FileReader(filename)))
 		{
-			br = new BufferedReader(new FileReader(filename));
+			Pattern pattern = Pattern.compile("[\t, ]+");
 			// Ignore the first line
 			String line = br.readLine();
 			BooleanArray array = new BooleanArray(100);
@@ -604,17 +602,6 @@ public class FailCountManager implements PlugIn
 		{
 			IJ.error(TITLE, "Failed to load data:\n" + e.getMessage());
 		}
-		finally
-		{
-			if (br != null)
-				try
-				{
-					br.close();
-				}
-				catch (IOException e)
-				{
-				}
-		}
 	}
 
 	/**
@@ -626,7 +613,7 @@ public class FailCountManager implements PlugIn
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	private boolean guessStatus(String string) throws IOException
+	private static boolean guessStatus(String string) throws IOException
 	{
 		int len = string.length();
 		if (len < 1)
@@ -669,10 +656,8 @@ public class FailCountManager implements PlugIn
 			return;
 		settings.setFilename(filename);
 
-		BufferedWriter bw = null;
-		try
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename)))
 		{
-			bw = new BufferedWriter(new FileWriter(filename));
 			bw.write("ID,Candidate,Status");
 			bw.newLine();
 			for (int i = 0; i < failCountData.size(); i++)
@@ -696,17 +681,6 @@ public class FailCountManager implements PlugIn
 		catch (IOException e)
 		{
 			IJ.error(TITLE, "Failed to save data:\n" + e.getMessage());
-		}
-		finally
-		{
-			if (bw != null)
-				try
-				{
-					bw.close();
-				}
-				catch (IOException e)
-				{
-				}
 		}
 	}
 

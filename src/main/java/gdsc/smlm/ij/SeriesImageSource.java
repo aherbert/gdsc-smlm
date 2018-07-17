@@ -223,6 +223,9 @@ public class SeriesImageSource extends ImageSource
 					}
 					catch (IOException e)
 					{
+						canRead = false;
+						bytesPerFrame = 0;
+						return;
 					}
 				}
 
@@ -290,6 +293,9 @@ public class SeriesImageSource extends ImageSource
 					}
 					catch (IOException e)
 					{
+						canRead = false;
+						bytesPerFrame = 0;
+						return;
 					}
 				}
 
@@ -426,9 +432,6 @@ public class SeriesImageSource extends ImageSource
 
 			return true;
 		}
-
-		// TODO - Update this to use a buffered channel for faster read performance
-		// See https://dzone.com/articles/java-sequential-io-performance
 
 		/**
 		 * Gets the next frame. This is only supported if all IFDs have been read.
@@ -642,6 +645,12 @@ public class SeriesImageSource extends ImageSource
 
 		/**
 		 * Adapted from ij.io.FileOpener.validateFileInfo
+		 *
+		 * @param f
+		 *            the file
+		 * @param fi
+		 *            the file info
+		 * @return true, if successful
 		 */
 		boolean validateFileInfo(File f, ExtendedFileInfo fi)
 		{
@@ -989,6 +998,7 @@ public class SeriesImageSource extends ImageSource
 					if (currentImage == -1)
 						break;
 
+					@SuppressWarnings("resource")
 					ByteArraySeekableStream ss = new ByteArraySeekableStream(nextSource.buffer);
 
 					// Re-use the cache
@@ -1289,7 +1299,7 @@ public class SeriesImageSource extends ImageSource
 	 * @param is
 	 *            the input stream
 	 */
-	private void closeInputStream(InputStream is)
+	private static void closeInputStream(InputStream is)
 	{
 		if (is != null)
 		{
@@ -1597,17 +1607,14 @@ public class SeriesImageSource extends ImageSource
 	 * <p>
 	 * Copied from ij.io.Opener and removed all but the TIFF identification.
 	 */
-	private int getFileType(String filename)
+	private static int getFileType(String filename)
 	{
 		File file = new File(filename);
-		InputStream is;
 		byte[] buf = new byte[132];
 		int read;
-		try
+		try (InputStream is = new FileInputStream(file))
 		{
-			is = new FileInputStream(file);
 			read = is.read(buf, 0, 132);
-			is.close();
 			if (read < 4)
 				return Opener.UNKNOWN;
 		}
@@ -1649,7 +1656,7 @@ public class SeriesImageSource extends ImageSource
 	}
 
 	@SuppressWarnings("unused")
-	private boolean isOMETIFF(byte[] buf, boolean littleEndian)
+	private static boolean isOMETIFF(byte[] buf, boolean littleEndian)
 	{
 		int b8 = buf[8] & 255;
 		int b9 = buf[9] & 255;
@@ -1711,6 +1718,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				String path = images.get(i);
 
+				@SuppressWarnings("resource")
 				SeekableStream ss = null;
 				try
 				{
@@ -1765,6 +1773,7 @@ public class SeriesImageSource extends ImageSource
 						}
 						catch (IOException e1)
 						{
+							// Ignore
 						}
 					}
 				}
@@ -2287,6 +2296,7 @@ public class SeriesImageSource extends ImageSource
 		}
 		catch (IOException ioe)
 		{
+			// Ignore
 		}
 		finally
 		{

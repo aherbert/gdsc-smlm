@@ -70,63 +70,61 @@ public class TSFPeakResultsReader
 	private int position = 0;
 	private int fluorophoreType = 1;
 
+	/**
+	 * Instantiates a new TSF peak results reader.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
 	public TSFPeakResultsReader(String filename)
 	{
 		this.filename = filename;
 	}
 
+	/**
+	 * Read the TSF header.
+	 *
+	 * @return the spot list header
+	 */
 	public SpotList readHeader()
 	{
 		if (readHeader)
 			return spotList;
 		readHeader = true;
 
-		FileInputStream fi = null;
-		try
+		try (FileInputStream fi = new FileInputStream(filename))
 		{
-			fi = new FileInputStream(filename);
-			DataInputStream di = new DataInputStream(fi);
-			// the file has an initial 0, then the offset (as long)
-			// to the position of spotList
-			int magic = di.readInt();
-			if (magic != 0)
+			try (DataInputStream di = new DataInputStream(fi))
 			{
-				throw new RuntimeException("Magic number is not 0 (required for a TSF file)");
+				// the file has an initial 0, then the offset (as long)
+				// to the position of spotList
+				int magic = di.readInt();
+				if (magic != 0)
+				{
+					throw new RuntimeException("Magic number is not 0 (required for a TSF file)");
+				}
+				if (fi.available() == 0)
+				{
+					throw new RuntimeException("Cannot read offset");
+				}
+				long offset = di.readLong();
+				if (offset == 0)
+				{
+					throw new RuntimeException("Offset is 0, cannot find header data in this file");
+				}
+				fi.skip(offset);
+				spotList = SpotList.parseDelimitedFrom(fi);
+
+				// We can do special processing for a TSF file we created
+				isGDSC = (spotList.getApplicationId() == TSFPeakResultsWriter.APPLICATION_ID);
+				isMulti = isMulti(spotList);
 			}
-			if (fi.available() == 0)
-			{
-				throw new RuntimeException("Cannot read offset");
-			}
-			long offset = di.readLong();
-			if (offset == 0)
-			{
-				throw new RuntimeException("Offset is 0, cannot find header data in this file");
-			}
-			fi.skip(offset);
-			spotList = SpotList.parseDelimitedFrom(fi);
 		}
 		catch (Exception e)
 		{
 			System.err.println("Failed to read SpotList message");
 			e.printStackTrace();
 		}
-		finally
-		{
-			if (fi != null)
-			{
-				try
-				{
-					fi.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-		}
-
-		// We can do special processing for a TSF file we created
-		isGDSC = (spotList.getApplicationId() == TSFPeakResultsWriter.APPLICATION_ID);
-		isMulti = isMulti(spotList);
 
 		return spotList;
 	}
@@ -161,51 +159,38 @@ public class TSFPeakResultsReader
 	 */
 	public static boolean isTSF(String filename)
 	{
-		FileInputStream fi = null;
-		try
+		try (FileInputStream fi = new FileInputStream(filename))
 		{
-			fi = new FileInputStream(filename);
-			DataInputStream di = new DataInputStream(fi);
-			// the file has an initial 0, then the offset (as long)
-			// to the position of spotList
-			int magic = di.readInt();
-			if (magic != 0)
+			try (DataInputStream di = new DataInputStream(fi))
 			{
-				// Magic number should be zero
-				return false;
+				// the file has an initial 0, then the offset (as long)
+				// to the position of spotList
+				int magic = di.readInt();
+				if (magic != 0)
+				{
+					// Magic number should be zero
+					return false;
+				}
+				if (fi.available() == 0)
+				{
+					// No more contents
+					return false;
+				}
+				long offset = di.readLong();
+				if (offset == 0)
+				{
+					// No offset record
+					return false;
+				}
+				fi.skip(offset);
+				SpotList spotList = SpotList.parseDelimitedFrom(fi);
+				if (spotList != null)
+					return true;
 			}
-			if (fi.available() == 0)
-			{
-				// No more contents
-				return false;
-			}
-			long offset = di.readLong();
-			if (offset == 0)
-			{
-				// No offset record
-				return false;
-			}
-			fi.skip(offset);
-			SpotList spotList = SpotList.parseDelimitedFrom(fi);
-			if (spotList != null)
-				return true;
 		}
 		catch (Exception e)
 		{
 			// Fail
-		}
-		finally
-		{
-			if (fi != null)
-			{
-				try
-				{
-					fi.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
 		}
 
 		return false;
@@ -224,65 +209,47 @@ public class TSFPeakResultsReader
 
 		MemoryPeakResults results = createResults();
 
+		// Used in the exception handler to check the correct number of spots were read
+		long expectedSpots = -1;
+
 		// Read the messages that contain the spot data
-		FileInputStream fi = null;
-		try
+		try (FileInputStream fi = new FileInputStream(filename))
 		{
-			fi = new FileInputStream(filename);
 			fi.skip(12); // size of int + size of long
-		}
-		catch (Exception e)
-		{
-			System.err.println("Failed to read open TSF file: " + filename);
-			e.printStackTrace();
-			if (fi != null)
+
+			LocationUnits locationUnits = spotList.getLocationUnits();
+			boolean locationUnitsWarning = false;
+
+			IntensityUnits intensityUnits = spotList.getIntensityUnits();
+			boolean intensityUnitsWarning = false;
+
+			FitMode fitMode = FitMode.ONEAXIS;
+			if (spotList.hasFitMode())
+				fitMode = spotList.getFitMode();
+
+			final boolean filterPosition = position > 0;
+			final boolean filterSlice = slice > 0;
+
+			// Set up to read two-axis and theta data
+			PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+			int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+			final int isx = indices[0];
+			final int isy = indices[1];
+			final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
+			int nParams = PeakResult.STANDARD_PARAMETERS;
+			switch (fitMode)
 			{
-				try
-				{
-					fi.close();
-				}
-				catch (IOException ex)
-				{
-				}
+				case TWOAXISANDTHETA:
+					nParams++;
+				case TWOAXIS:
+					nParams++;
+				case ONEAXIS:
+				default:
+					nParams++;
+					break;
 			}
-			return null;
-		}
 
-		LocationUnits locationUnits = spotList.getLocationUnits();
-		boolean locationUnitsWarning = false;
-
-		IntensityUnits intensityUnits = spotList.getIntensityUnits();
-		boolean intensityUnitsWarning = false;
-
-		FitMode fitMode = FitMode.ONEAXIS;
-		if (spotList.hasFitMode())
-			fitMode = spotList.getFitMode();
-
-		final boolean filterPosition = position > 0;
-		final boolean filterSlice = slice > 0;
-
-		// Set up to read two-axis and theta data
-		PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
-		final int isx = indices[0];
-		final int isy = indices[1];
-		final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
-		int nParams = PeakResult.STANDARD_PARAMETERS;
-		switch (fitMode)
-		{
-			case TWOAXISANDTHETA:
-				nParams++;
-			case TWOAXIS:
-				nParams++;
-			case ONEAXIS:
-			default:
-				nParams++;
-				break;
-		}
-
-		long expectedSpots = getExpectedSpots();
-		try
-		{
+			expectedSpots = getExpectedSpots();
 			long totalSpots = 0;
 			while (fi.available() > 0 && (totalSpots < expectedSpots || expectedSpots == 0))
 			{
@@ -413,10 +380,18 @@ public class TSFPeakResultsReader
 		}
 		catch (IOException e)
 		{
-			System.err.println("Failed to read Spot message");
+			System.err.println("Failed to read TSF file: " + filename);
 			e.printStackTrace();
 
-			// This may just be an error because we ran out of spots to read.
+			if (expectedSpots == -1)
+			{
+				// No attempt to read the spots was made.
+				// The exception was created during set-up.
+				return null;
+			}
+
+			// If expectedSpots==0 then the number of spots was unknown and the file was 
+			// read until the EOF.
 			// Only fail if there is a number of expected spots.
 			if (expectedSpots != 0)
 			{
@@ -424,19 +399,9 @@ public class TSFPeakResultsReader
 				return null;
 			}
 		}
-		finally
-		{
-			if (fi != null)
-			{
-				try
-				{
-					fi.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-		}
+
+		// Do log a warning if the expected spots does not match the size. 
+		// The spots may be from multiple channels. etc.
 
 		return results;
 	}
@@ -575,14 +540,11 @@ public class TSFPeakResultsReader
 				results.setConfiguration(spotList.getConfiguration());
 			}
 			// Allow restoring the GDSC PSF exactly
-			Parser parser = null;
 			if (spotList.hasPSF())
 			{
 				try
 				{
-					if (parser == null)
-						parser = JsonFormat.parser();
-
+					Parser parser = JsonFormat.parser();
 					PSF.Builder psfBuilder = PSF.newBuilder();
 					parser.merge(spotList.getPSF(), psfBuilder);
 					results.setPSF(psfBuilder.build());
@@ -652,7 +614,7 @@ public class TSFPeakResultsReader
 		this.channel = get1Based(channel);
 	}
 
-	private int get1Based(int value)
+	private static int get1Based(int value)
 	{
 		return (value < 1) ? 1 : value;
 	}
@@ -788,7 +750,7 @@ public class TSFPeakResultsReader
 		return Arrays.copyOf(options, count);
 	}
 
-	private ResultOption createOption(int id, String name, int total, int value, boolean allowZero)
+	private static ResultOption createOption(int id, String name, int total, int value, boolean allowZero)
 	{
 		Integer[] values = new Integer[total + ((allowZero) ? 1 : 0)];
 		for (int v = (allowZero) ? 0 : 1, i = 0; v <= total; v++)

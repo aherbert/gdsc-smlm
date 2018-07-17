@@ -252,11 +252,9 @@ public class LoadLocalisations implements PlugIn
 		int count = 0;
 		int h = Math.max(0, settings.getHeaderLines());
 
-		BufferedReader input = null;
-		try
+		try (BufferedReader input = new BufferedReader(
+				new UnicodeReader(new FileInputStream(settings.getLocalisationsFilename()), null)))
 		{
-			FileInputStream fis = new FileInputStream(settings.getLocalisationsFilename());
-			input = new BufferedReader(new UnicodeReader(fis, null));
 			Pattern p = Pattern.compile(settings.getDelimiter());
 
 			final int it = settings.getFieldT();
@@ -323,20 +321,8 @@ public class LoadLocalisations implements PlugIn
 		{
 			Utils.log("%s IO error: %s", TITLE, e.getMessage());
 		}
-		finally
-		{
-			try
-			{
-				if (input != null)
-					input.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore
-			}
-			if (errors != 0)
-				Utils.log("%s has %d / %d error lines", TITLE, errors, count);
-		}
+		if (errors != 0)
+			Utils.log("%s has %d / %d error lines", TITLE, errors, count);
 
 		return localisations;
 	}

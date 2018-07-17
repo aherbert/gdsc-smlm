@@ -2170,15 +2170,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 	}
 
-	private boolean saveFilters(String filename, ArrayList<Filter> filters)
+	private static boolean saveFilters(String filename, ArrayList<Filter> filters)
 	{
 		ArrayList<FilterSet> filterList = new ArrayList<>(1);
 		// Add Range keyword to identify as a range filter set
 		filterList.add(new FilterSet("Range", filters));
-		FileOutputStream fos = null;
-		try
+		try (FileOutputStream fos = new FileOutputStream(filename))
 		{
-			fos = new FileOutputStream(filename);
 			// Use the instance (not .toXML() method) to allow the exception to be caught
 			XStreamWrapper.getInstance().toXML(filterList, fos);
 			return true;
@@ -2187,24 +2185,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		{
 			IJ.log("Unable to save the filter set to file: " + e.getMessage());
 		}
-		finally
-		{
-			if (fos != null)
-			{
-				try
-				{
-					fos.close();
-				}
-				catch (IOException e)
-				{
-					// Ignore
-				}
-			}
-		}
 		return false;
 	}
 
-	private void printFailures(String title, int[] status)
+	private static void printFailures(String title, int[] status)
 	{
 		int total = 0;
 		// Count failures

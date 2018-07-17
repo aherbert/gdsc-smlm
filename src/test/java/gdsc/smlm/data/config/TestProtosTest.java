@@ -47,17 +47,21 @@ public class TestProtosTest
 		TestProtos.Message2 m2 = b2.build();
 
 		// Write as message 1
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		m1.writeDelimitedTo(output);
-		output.close();
-		byte[] buf = output.toByteArray();
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream())
+		{
+			m1.writeDelimitedTo(output);
+			output.close();
+			byte[] buf = output.toByteArray();
 
-		// Read as message 2
-		ByteArrayInputStream input = new ByteArrayInputStream(buf);
-		TestProtos.Message2 o2 = TestProtos.Message2.parseDelimitedFrom(input);
+			// Read as message 2
+			try (ByteArrayInputStream input = new ByteArrayInputStream(buf))
+			{
+				TestProtos.Message2 o2 = TestProtos.Message2.parseDelimitedFrom(input);
 
-		// They should match as the field value is the same
-		Assert.assertEquals(m2, o2);
+				// They should match as the field value is the same
+				Assert.assertEquals(m2, o2);
+			}
+		}
 	}
 
 	@Test
@@ -76,16 +80,20 @@ public class TestProtosTest
 		TestProtos.Message3 m3 = b3.build();
 
 		// Write as message 1
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		m1.writeDelimitedTo(output);
-		output.close();
-		byte[] buf = output.toByteArray();
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream())
+		{
+			m1.writeDelimitedTo(output);
+			output.close();
+			byte[] buf = output.toByteArray();
 
-		// Read as message 3
-		ByteArrayInputStream input = new ByteArrayInputStream(buf);
-		TestProtos.Message3 o3 = TestProtos.Message3.parseDelimitedFrom(input);
+			// Read as message 3
+			try (ByteArrayInputStream input = new ByteArrayInputStream(buf))
+			{
+				TestProtos.Message3 o3 = TestProtos.Message3.parseDelimitedFrom(input);
 
-		// They should not match as the field size has changed
-		Assert.assertNotEquals(m3, o3);
+				// They should not match as the field size has changed
+				Assert.assertNotEquals(m3, o3);
+			}
+		}
 	}
 }
