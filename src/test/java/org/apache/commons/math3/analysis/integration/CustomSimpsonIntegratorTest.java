@@ -27,8 +27,8 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.Maths;
-import gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomSimpsonIntegratorTest

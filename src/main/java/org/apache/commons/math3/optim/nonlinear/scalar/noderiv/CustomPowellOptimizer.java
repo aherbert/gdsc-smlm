@@ -61,7 +61,7 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 /**
  * Powell's algorithm.

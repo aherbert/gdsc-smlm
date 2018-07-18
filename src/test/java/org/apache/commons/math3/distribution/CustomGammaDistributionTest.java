@@ -28,10 +28,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.test.BaseTimingTask;
-import gdsc.test.LogLevel;
-import gdsc.test.TestSettings;
-import gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.LogLevel;
+import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.TimingService;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomGammaDistributionTest
