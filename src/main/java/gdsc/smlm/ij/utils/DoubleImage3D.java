@@ -95,7 +95,7 @@ public class DoubleImage3D extends Image3D
 
 		for (int s = 1, i = 0; s <= ns; s++)
 		{
-			ImageProcessor ip = stack.getProcessor(s);
+			final ImageProcessor ip = stack.getProcessor(s);
 			for (int j = 0; i < nr_by_nc; j++)
 				data[i++] = ip.getf(j);
 		}
@@ -215,7 +215,7 @@ public class DoubleImage3D extends Image3D
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = d * h * w;
+		final int size = d * h * w;
 		if (region == null || region.length != size)
 			region = new double[size];
 		for (int s = 0, i = 0; s < d; s++, z++)
@@ -257,27 +257,25 @@ public class DoubleImage3D extends Image3D
 	public static DoubleImage3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, double[] region)
 			throws IllegalArgumentException
 	{
-		int nc = stack.getWidth();
-		int nr = stack.getHeight();
-		int ns = stack.getSize();
+		final int nc = stack.getWidth();
+		final int nr = stack.getHeight();
+		final int ns = stack.getSize();
 
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = checkSize(w, h, d, true);
+		final int size = checkSize(w, h, d, true);
 		if (region == null || region.length != size)
 			region = new double[size];
 		for (int s = 0, i = 0; s < d; s++, z++)
 		{
-			ImageProcessor ip = stack.getProcessor(1 + z);
+			final ImageProcessor ip = stack.getProcessor(1 + z);
 			int base = y * nc + x;
 			for (int r = 0; r < h; r++)
 			{
 				for (int c = 0; c < w; c++)
-				{
 					region[i++] = ip.getf(base + c);
-				}
 				base += nc;
 			}
 		}
@@ -288,13 +286,9 @@ public class DoubleImage3D extends Image3D
 	public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
 		if (image instanceof DoubleImage3D)
-		{
 			insert(x, y, z, (DoubleImage3D) image);
-		}
 		else
-		{
 			super.insert(x, y, z, image);
-		}
 	}
 
 	/**
@@ -314,14 +308,14 @@ public class DoubleImage3D extends Image3D
 	public void insert(int x, int y, int z, DoubleImage3D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
-		int d = image.getSize();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
+		final int d = image.getSize();
 		if (w < 1 || h < 1 || d < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		double[] region = image.data;
+		final double[] region = image.data;
 		for (int s = 0, i = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;

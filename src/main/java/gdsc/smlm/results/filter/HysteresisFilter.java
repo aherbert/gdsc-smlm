@@ -334,10 +334,8 @@ public abstract class HysteresisFilter extends Filter
 		});
 
 		if (candidates.isEmpty())
-		{
 			// No candidates for tracing so just return
 			return;
-		}
 
 		double distanceThreshold;
 		switch (searchDistanceMode)
@@ -361,8 +359,8 @@ public abstract class HysteresisFilter extends Filter
 				myTimeThreshold = 1;
 				if (peakResults.hasCalibration())
 				{
-					CalibrationReader cr = peakResults.getCalibrationReader();
-					double et = cr.getExposureTime();
+					final CalibrationReader cr = peakResults.getCalibrationReader();
+					final double et = cr.getExposureTime();
 					if (et > 0)
 						myTimeThreshold = (int) Math.round((this.timeThreshold / et));
 				}
@@ -379,35 +377,27 @@ public abstract class HysteresisFilter extends Filter
 			return;
 
 		// Trace through candidates
-		TraceManager tm = new TraceManager(traceResults);
+		final TraceManager tm = new TraceManager(traceResults);
 		tm.setTraceMode(TraceMode.LATEST_FORERUNNER);
 		tm.traceMolecules(distanceThreshold, myTimeThreshold);
-		Trace[] traces = tm.getTraces();
+		final Trace[] traces = tm.getTraces();
 
-		for (Trace trace : traces)
-		{
+		for (final Trace trace : traces)
 			if (trace.size() > 1)
 			{
 				// Check if the trace touches a valid point
 				boolean isOk = false;
 				for (int i = 0; i < trace.size(); i++)
-				{
 					if (ok.contains(trace.get(i)))
 					{
 						isOk = true;
 						break;
 					}
-				}
 				// Add the entire trace to the OK points
 				if (isOk)
-				{
 					for (int i = 0; i < trace.size(); i++)
-					{
 						ok.add(trace.get(i));
-					}
-				}
 			}
-		}
 	}
 
 	/**
@@ -422,15 +412,13 @@ public abstract class HysteresisFilter extends Filter
 	 */
 	private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults, LinkedList<PeakResult> candidates)
 	{
-		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+		final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
 				peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
 		double sum = 0;
-		for (PeakResult peakResult : candidates)
-		{
+		for (final PeakResult peakResult : candidates)
 			sum += calculator.getLSEPrecision(peakResult.getParameters(), peakResult.getNoise());
-		}
 		final double nmPerPixel = peakResults.getNmPerPixel();
-		double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;
+		final double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;
 		return distanceThreshold;
 	}
 
@@ -500,7 +488,7 @@ public abstract class HysteresisFilter extends Filter
 	{
 		// Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
 		// so add it back
-		double[] parameters = new double[sequence.length];
+		final double[] parameters = new double[sequence.length];
 		parameters[0] = sequence[0];
 		parameters[1] = searchDistanceMode;
 		parameters[2] = sequence[1];
@@ -520,7 +508,7 @@ public abstract class HysteresisFilter extends Filter
 		// Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
 		// Skip the search mode [param 1]
 		// Skip the time mode [param 3]
-		int[] indices = new int[length()];
+		final int[] indices = new int[length()];
 		indices[1] = 2;
 		for (int i = 2; i < indices.length; i++)
 			indices[i] = i + 2;
@@ -545,9 +533,9 @@ public abstract class HysteresisFilter extends Filter
 		// Remind derived classes to implement this.
 		//throw new NotImplementedException();
 		// Implement a default version using the results of getChromosomeParameters() and getParameters().
-		double[] sequence = new double[length()];
-		double[] params = getParameters();
-		int[] indices = getChromosomeParameters();
+		final double[] sequence = new double[length()];
+		final double[] params = getParameters();
+		final int[] indices = getChromosomeParameters();
 		for (int i = 0; i < indices.length; i++)
 			sequence[i] = params[indices[i]];
 		return sequence;

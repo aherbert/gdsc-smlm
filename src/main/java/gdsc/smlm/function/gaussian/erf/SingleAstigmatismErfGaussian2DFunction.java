@@ -54,7 +54,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	protected double dtsy_dtz;
 	/** The y|z pre-factors for second-order partial derivatives. */
 	protected double d2tsy_dtz2;
-	
+
 	/**
 	 * Constructor.
 	 *

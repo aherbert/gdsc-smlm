@@ -36,7 +36,7 @@ public class Constants
     // -=-=-=-
     // Used in the GaussianFit class
     // -=-=-=-
-    
+
     /** gdsc.smlm.smooth */
     public static final String smooth = "gdsc.smlm.smooth";
     /** gdsc.smlm.boxSize */

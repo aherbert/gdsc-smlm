@@ -43,20 +43,20 @@ public class Image3DAlignerTest
 
 	private FloatImage3D createData(int x, int y, int z, double cx, double cy, double cz)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x, y, GaussianFunctionFactory.FIT_ASTIGMATISM,
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x, y, GaussianFunctionFactory.FIT_ASTIGMATISM,
 				zModel);
-		int length = x * y;
-		float[] data = new float[z * length];
-		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final int length = x * y;
+		final float[] data = new float[z * length];
+		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.SIGNAL] = 1;
 		a[Gaussian2DFunction.X_POSITION] = cx;
 		a[Gaussian2DFunction.Y_POSITION] = cy;
 		a[Gaussian2DFunction.X_SD] = 1;
 		a[Gaussian2DFunction.Y_SD] = 1;
-		StandardFloatValueProcedure p = new StandardFloatValueProcedure();
+		final StandardFloatValueProcedure p = new StandardFloatValueProcedure();
 		for (int zz = 0; zz < z; zz++)
 		{
-			double dz = zz - cz;
+			final double dz = zz - cz;
 			//if (zz == 0 || zz == z - 1)
 			//	System.out.printf("%f  %f %f\n", dz, zModel.getSx(dz), zModel.getSy(dz));
 			a[Gaussian2DFunction.Z_POSITION] = dz;
@@ -95,22 +95,22 @@ public class Image3DAlignerTest
 		// Q. How to address in real PSF alignment? Perhaps the z-dimension should be
 		// sampled N-times more than the XY dimension.
 
-		double cx = (maxx - 1) / 2.0;
-		double cy = (maxy - 1) / 2.0;
-		double cz = (maxz - 1) / 2.0;
+		final double cx = (maxx - 1) / 2.0;
+		final double cy = (maxy - 1) / 2.0;
+		final double cz = (maxz - 1) / 2.0;
 
-		double[] shift = new double[] { 0, 1, 1.5, 2 };
+		final double[] shift = new double[] { 0, 1, 1.5, 2 };
 
-		Image3D reference = createData(maxx, maxy, maxz, cx, cy, cz);
-		Image3DAligner a = new Image3DAligner();
+		final Image3D reference = createData(maxx, maxy, maxz, cx, cy, cz);
+		final Image3DAligner a = new Image3DAligner();
 		if (ijMode)
 			a.setReference(reference.getImageStack());
 		else
 			a.setReference(reference);
 
-		for (double sz : shift)
-			for (double sy : shift)
-				for (double sx : shift)
+		for (final double sz : shift)
+			for (final double sy : shift)
+				for (final double sx : shift)
 				{
 					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 0, 1e-2, 1, ijMode);
 					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 5, 1e-2, 0.25,
@@ -124,7 +124,7 @@ public class Image3DAlignerTest
 	{
 		double[] result;
 		Image3D c;
-		Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
+		final Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
 
 		//Utils.display("Ref", reference.getImageStack());
 		//Utils.display("Tar", target.getImageStack());
@@ -133,11 +133,11 @@ public class Image3DAlignerTest
 		//a.setSearchMode(gdsc.smlm.ij.utils.StackAligner.SearchMode.BINARY);
 		//a.setRelativeThreshold(1e-6);
 
-		double[] e = new double[] { cx1 - cx2, cy1 - cy2, cz1 - cz2 };
-		int cx = maxx / 2 - (int) Math.round(e[0]);
-		int cy = maxy / 2 - (int) Math.round(e[1]);
-		int cz = maxz / 2 - (int) Math.round(e[2]);
-		int index = target.getIndex(cx, cy, cz);
+		final double[] e = new double[] { cx1 - cx2, cy1 - cy2, cz1 - cz2 };
+		final int cx = maxx / 2 - (int) Math.round(e[0]);
+		final int cy = maxy / 2 - (int) Math.round(e[1]);
+		final int cz = maxz / 2 - (int) Math.round(e[2]);
+		final int index = target.getIndex(cx, cy, cz);
 
 		// Debug the convergence
 		//for (int i = 0; i <= refinements; i++)

@@ -172,14 +172,14 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 
 		// Note: 1+nBlinks is the number of on-states
 
-		TDoubleArrayList sequence = new TDoubleArrayList();
+		final TDoubleArrayList sequence = new TDoubleArrayList();
 
 		// Perform a set number of long blinks
-		int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks2);
+		final int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks2);
 		for (int n = 0; n <= nLongBlinks; n++)
 		{
 			// For each burst between long blinks perform a number of short blinks
-			int nShortBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks);
+			final int nShortBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks);
 
 			// Starts on the current time
 			sequence.add(t);

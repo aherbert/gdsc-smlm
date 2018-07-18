@@ -100,7 +100,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	protected static final int BY = 11;
 	/** The index for the y width gradient pre-factor */
 	protected static final int CY = 12;
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -295,9 +295,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final int x0 = x % maxx;
 
 		for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK)
-		{
 			y += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
-		}
 
 		return y;
 	}

@@ -93,7 +93,7 @@ public class DrawClusters implements PlugIn
 			return;
 
 		// Load the results
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -101,7 +101,7 @@ public class DrawClusters implements PlugIn
 		}
 
 		// Get the traces
-		Trace[] traces = TraceManager.convert(results);
+		final Trace[] traces = TraceManager.convert(results);
 		if (traces == null || traces.length == 0)
 		{
 			IJ.error(TITLE, "No traces could be loaded");
@@ -132,42 +132,37 @@ public class DrawClusters implements PlugIn
 			return;
 		}
 
-		String msg = String.format(TITLE + ": %d / %s (%s)", count, TextUtils.pleural(traces.length, "trace"),
+		final String msg = String.format(TITLE + ": %d / %s (%s)", count, TextUtils.pleural(traces.length, "trace"),
 				TextUtils.pleural(results.size(), "localisation"));
 		IJ.showStatus(msg);
 		//Utils.log(msg);
 
-		Rectangle bounds = results.getBounds(true);
+		final Rectangle bounds = results.getBounds(true);
 		ImagePlus imp = WindowManager.getImage(title);
 		boolean isUseStackPosition = useStackPosition;
 		if (imp == null)
 		{
 			// Create a default image using 100 pixels as the longest edge
-			double maxD = (bounds.width > bounds.height) ? bounds.width : bounds.height;
+			final double maxD = (bounds.width > bounds.height) ? bounds.width : bounds.height;
 			int w, h;
 			if (maxD == 0)
-			{
 				// Note that imageSize can be zero (for auto sizing)
 				w = h = (imageSize == 0) ? 20 : imageSize;
+			else // Note that imageSize can be zero (for auto sizing)
+			if (imageSize == 0)
+			{
+				w = bounds.width;
+				h = bounds.height;
 			}
 			else
 			{
-				// Note that imageSize can be zero (for auto sizing)
-				if (imageSize == 0)
-				{
-					w = bounds.width;
-					h = bounds.height;
-				}
-				else
-				{
-					w = (int) (imageSize * bounds.width / maxD);
-					h = (int) (imageSize * bounds.height / maxD);
-				}
+				w = (int) (imageSize * bounds.width / maxD);
+				h = (int) (imageSize * bounds.height / maxD);
 			}
-			ByteProcessor bp = new ByteProcessor(w, h);
+			final ByteProcessor bp = new ByteProcessor(w, h);
 			if (isUseStackPosition)
 			{
-				ImageStack stack = new ImageStack(w, h, maxFrame);
+				final ImageStack stack = new ImageStack(w, h, maxFrame);
 				for (int i = 1; i <= maxFrame; i++)
 					stack.setPixels(bp.getPixels(), i); // Do not clone as the image is empty
 				imp = Utils.display(TITLE, stack);
@@ -176,39 +171,34 @@ public class DrawClusters implements PlugIn
 				imp = Utils.display(TITLE, bp);
 
 			// Enlarge
-			ImageWindow iw = imp.getWindow();
+			final ImageWindow iw = imp.getWindow();
 			for (int i = 9; i-- > 0 && iw.getWidth() < 500 && iw.getHeight() < 500;)
-			{
 				iw.getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
-			}
 		}
-		else
-		{
-			// Check if the image has enough frames for all the traces
-			if (maxFrame > imp.getNFrames())
-				isUseStackPosition = false;
-		}
+		else // Check if the image has enough frames for all the traces
+		if (maxFrame > imp.getNFrames())
+			isUseStackPosition = false;
 
 		final float xScale = (float) (imp.getWidth() / bounds.getWidth());
 		final float yScale = (float) (imp.getHeight() / bounds.getHeight());
 
 		// Create ROIs and store data to sort them
-		Roi[] rois = new Roi[count];
-		int[][] frames = (isUseStackPosition) ? new int[count][] : null;
-		int[] indices = SimpleArrayUtils.newArray(count, 0, 1);
-		double[] values = new double[count];
+		final Roi[] rois = new Roi[count];
+		final int[][] frames = (isUseStackPosition) ? new int[count][] : null;
+		final int[] indices = SimpleArrayUtils.newArray(count, 0, 1);
+		final double[] values = new double[count];
 		for (int i = 0; i < count; i++)
 		{
-			Trace trace = traces[i];
-			int nPoints = trace.size();
-			float[] xPoints = new float[nPoints];
-			float[] yPoints = new float[nPoints];
+			final Trace trace = traces[i];
+			final int nPoints = trace.size();
+			final float[] xPoints = new float[nPoints];
+			final float[] yPoints = new float[nPoints];
 			int j = 0;
 			if (frames != null)
 				frames[i] = new int[nPoints];
 			for (int k = 0; k < trace.size(); k++)
 			{
-				PeakResult result = trace.get(k);
+				final PeakResult result = trace.get(k);
 				xPoints[j] = (result.getXPosition() - bounds.x) * xScale;
 				yPoints[j] = (result.getYPosition() - bounds.y) * yScale;
 				if (frames != null)
@@ -259,8 +249,8 @@ public class DrawClusters implements PlugIn
 			Sort.sort(indices, values);
 
 		// Draw the traces as ROIs on an overlay
-		Overlay o = new Overlay();
-		LUT lut = LUTHelper.createLUT(DrawClusters.lut);
+		final Overlay o = new Overlay();
+		final LUT lut = LUTHelper.createLUT(DrawClusters.lut);
 		final double scale = 256.0 / count;
 		if (frames != null)
 		{
@@ -280,7 +270,7 @@ public class DrawClusters implements PlugIn
 				{
 					addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
 					//PointRoi pointRoi = new PointRoi(pos.x + fp.xpoints[j], pos.y + fp.ypoints[j]);
-					PointRoi pointRoi = new PointRoi(fp.xpoints[j], fp.ypoints[j]);
+					final PointRoi pointRoi = new PointRoi(fp.xpoints[j], fp.ypoints[j]);
 					pointRoi.setPointType(3);
 					pointRoi.setFillColor(c);
 					pointRoi.setStrokeColor(Color.black);
@@ -289,7 +279,6 @@ public class DrawClusters implements PlugIn
 			}
 		}
 		else
-		{
 			// Add the tracks as a single overlay
 			for (int i = 0; i < count; i++)
 			{
@@ -297,7 +286,6 @@ public class DrawClusters implements PlugIn
 				roi.setStrokeColor(new Color(lut.getRGB((int) (i * scale))));
 				o.add(roi);
 			}
-		}
 		imp.setOverlay(o);
 
 		IJ.showStatus(msg);
@@ -305,15 +293,15 @@ public class DrawClusters implements PlugIn
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
-		ArrayList<String> titles = new ArrayList<>(WindowManager.getImageCount());
+		final ArrayList<String> titles = new ArrayList<>(WindowManager.getImageCount());
 		titles.add("[None]");
-		int[] idList = WindowManager.getIDList();
+		final int[] idList = WindowManager.getIDList();
 		if (idList != null)
-			for (int id : idList)
+			for (final int id : idList)
 			{
-				ImagePlus imp = WindowManager.getImage(id);
+				final ImagePlus imp = WindowManager.getImage(id);
 				if (imp != null)
 					titles.add(imp.getTitle());
 			}

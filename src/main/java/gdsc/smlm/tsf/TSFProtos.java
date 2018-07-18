@@ -26,7 +26,7 @@
 
 package gdsc.smlm.tsf;
 
-@SuppressWarnings({ "unchecked", "unused", "javadoc" })
+@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method"})
 public final class TSFProtos
 {
 	private TSFProtos()
@@ -139,9 +139,7 @@ public final class TSFProtos
 		public static FitMode valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
 		{
 			if (desc.getType() != getDescriptor())
-			{
 				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
-			}
 			return VALUES[desc.getIndex()];
 		}
 
@@ -242,9 +240,7 @@ public final class TSFProtos
 		public static ThetaUnits valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
 		{
 			if (desc.getType() != getDescriptor())
-			{
 				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
-			}
 			return VALUES[desc.getIndex()];
 		}
 
@@ -345,9 +341,7 @@ public final class TSFProtos
 		public static IntensityUnits valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
 		{
 			if (desc.getType() != getDescriptor())
-			{
 				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
-			}
 			return VALUES[desc.getIndex()];
 		}
 
@@ -458,9 +452,7 @@ public final class TSFProtos
 		public static LocationUnits valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
 		{
 			if (desc.getType() != getDescriptor())
-			{
 				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
-			}
 			return VALUES[desc.getIndex()];
 		}
 
@@ -575,9 +567,7 @@ public final class TSFProtos
 		public static CameraType valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
 		{
 			if (desc.getType() != getDescriptor())
-			{
 				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
-			}
 			return VALUES[desc.getIndex()];
 		}
 
@@ -671,15 +661,15 @@ public final class TSFProtos
 				throws com.google.protobuf.InvalidProtocolBufferException
 		{
 			this();
-			int mutable_bitField0_ = 0;
-			com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
+			final int mutable_bitField0_ = 0;
+			final com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
 					.newBuilder();
 			try
 			{
 				boolean done = false;
 				while (!done)
 				{
-					int tag = input.readTag();
+					final int tag = input.readTag();
 					switch (tag)
 					{
 						case 0:
@@ -688,9 +678,7 @@ public final class TSFProtos
 						default:
 						{
 							if (!parseUnknownField(input, unknownFields, extensionRegistry, tag))
-							{
 								done = true;
-							}
 							break;
 						}
 						case 8:
@@ -701,7 +689,7 @@ public final class TSFProtos
 						}
 						case 18:
 						{
-							com.google.protobuf.ByteString bs = input.readBytes();
+							final com.google.protobuf.ByteString bs = input.readBytes();
 							bitField0_ |= 0x00000002;
 							description_ = bs;
 							break;
@@ -715,11 +703,11 @@ public final class TSFProtos
 					}
 				}
 			}
-			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			catch (final com.google.protobuf.InvalidProtocolBufferException e)
 			{
 				throw e.setUnfinishedMessage(this);
 			}
-			catch (java.io.IOException e)
+			catch (final java.io.IOException e)
 			{
 				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
 			}
@@ -791,19 +779,15 @@ public final class TSFProtos
 		@Override
 		public java.lang.String getDescription()
 		{
-			java.lang.Object ref = description_;
+			final java.lang.Object ref = description_;
 			if (ref instanceof java.lang.String)
-			{
 				return (java.lang.String) ref;
-			}
 			else
 			{
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
+				final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				final java.lang.String s = bs.toStringUtf8();
 				if (bs.isValidUtf8())
-				{
 					description_ = s;
-				}
 				return s;
 			}
 		}
@@ -814,17 +798,15 @@ public final class TSFProtos
 		@Override
 		public com.google.protobuf.ByteString getDescriptionBytes()
 		{
-			java.lang.Object ref = description_;
+			final java.lang.Object ref = description_;
 			if (ref instanceof java.lang.String)
 			{
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				final com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
 				description_ = b;
 				return b;
 			}
 			else
-			{
 				return (com.google.protobuf.ByteString) ref;
-			}
 		}
 
 		public static final int IS_FIDUCIAL_FIELD_NUMBER = 3;
@@ -853,7 +835,7 @@ public final class TSFProtos
 		@Override
 		public final boolean isInitialized()
 		{
-			byte isInitialized = memoizedIsInitialized;
+			final byte isInitialized = memoizedIsInitialized;
 			if (isInitialized == 1)
 				return true;
 			if (isInitialized == 0)
@@ -872,17 +854,11 @@ public final class TSFProtos
 		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
 		{
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				output.writeInt32(1, id_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				com.google.protobuf.GeneratedMessageV3.writeString(output, 2, description_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				output.writeBool(3, isFiducial_);
-			}
 			unknownFields.writeTo(output);
 		}
 
@@ -895,17 +871,11 @@ public final class TSFProtos
 
 			size = 0;
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, id_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, description_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeBoolSize(3, isFiducial_);
-			}
 			size += unknownFields.getSerializedSize();
 			memoizedSize = size;
 			return size;
@@ -917,31 +887,21 @@ public final class TSFProtos
 		public boolean equals(final java.lang.Object obj)
 		{
 			if (obj == this)
-			{
 				return true;
-			}
 			if (!(obj instanceof gdsc.smlm.tsf.TSFProtos.FluorophoreType))
-			{
 				return super.equals(obj);
-			}
-			gdsc.smlm.tsf.TSFProtos.FluorophoreType other = (gdsc.smlm.tsf.TSFProtos.FluorophoreType) obj;
+			final gdsc.smlm.tsf.TSFProtos.FluorophoreType other = (gdsc.smlm.tsf.TSFProtos.FluorophoreType) obj;
 
 			boolean result = true;
 			result = result && (hasId() == other.hasId());
 			if (hasId())
-			{
 				result = result && (getId() == other.getId());
-			}
 			result = result && (hasDescription() == other.hasDescription());
 			if (hasDescription())
-			{
 				result = result && getDescription().equals(other.getDescription());
-			}
 			result = result && (hasIsFiducial() == other.hasIsFiducial());
 			if (hasIsFiducial())
-			{
 				result = result && (getIsFiducial() == other.getIsFiducial());
-			}
 			result = result && unknownFields.equals(other.unknownFields);
 			return result;
 		}
@@ -950,9 +910,7 @@ public final class TSFProtos
 		public int hashCode()
 		{
 			if (memoizedHashCode != 0)
-			{
 				return memoizedHashCode;
-			}
 			int hash = 41;
 			hash = (19 * hash) + getDescriptor().hashCode();
 			if (hasId())
@@ -1076,7 +1034,7 @@ public final class TSFProtos
 		@java.lang.Override
 		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
 		{
-			Builder builder = new Builder(parent);
+			final Builder builder = new Builder(parent);
 			return builder;
 		}
 
@@ -1147,34 +1105,26 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.FluorophoreType build()
 			{
-				gdsc.smlm.tsf.TSFProtos.FluorophoreType result = buildPartial();
+				final gdsc.smlm.tsf.TSFProtos.FluorophoreType result = buildPartial();
 				if (!result.isInitialized())
-				{
 					throw newUninitializedMessageException(result);
-				}
 				return result;
 			}
 
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.FluorophoreType buildPartial()
 			{
-				gdsc.smlm.tsf.TSFProtos.FluorophoreType result = new gdsc.smlm.tsf.TSFProtos.FluorophoreType(this);
-				int from_bitField0_ = bitField0_;
+				final gdsc.smlm.tsf.TSFProtos.FluorophoreType result = new gdsc.smlm.tsf.TSFProtos.FluorophoreType(this);
+				final int from_bitField0_ = bitField0_;
 				int to_bitField0_ = 0;
 				if (((from_bitField0_ & 0x00000001) == 0x00000001))
-				{
 					to_bitField0_ |= 0x00000001;
-				}
 				result.id_ = id_;
 				if (((from_bitField0_ & 0x00000002) == 0x00000002))
-				{
 					to_bitField0_ |= 0x00000002;
-				}
 				result.description_ = description_;
 				if (((from_bitField0_ & 0x00000004) == 0x00000004))
-				{
 					to_bitField0_ |= 0x00000004;
-				}
 				result.isFiducial_ = isFiducial_;
 				result.bitField0_ = to_bitField0_;
 				onBuilt();
@@ -1222,9 +1172,7 @@ public final class TSFProtos
 			public Builder mergeFrom(com.google.protobuf.Message other)
 			{
 				if (other instanceof gdsc.smlm.tsf.TSFProtos.FluorophoreType)
-				{
 					return mergeFrom((gdsc.smlm.tsf.TSFProtos.FluorophoreType) other);
-				}
 				else
 				{
 					super.mergeFrom(other);
@@ -1237,9 +1185,7 @@ public final class TSFProtos
 				if (other == gdsc.smlm.tsf.TSFProtos.FluorophoreType.getDefaultInstance())
 					return this;
 				if (other.hasId())
-				{
 					setId(other.getId());
-				}
 				if (other.hasDescription())
 				{
 					bitField0_ |= 0x00000002;
@@ -1247,9 +1193,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				if (other.hasIsFiducial())
-				{
 					setIsFiducial(other.getIsFiducial());
-				}
 				this.mergeUnknownFields(other.unknownFields);
 				onChanged();
 				return this;
@@ -1259,9 +1203,7 @@ public final class TSFProtos
 			public final boolean isInitialized()
 			{
 				if (!hasId())
-				{
 					return false;
-				}
 				return true;
 			}
 
@@ -1274,7 +1216,7 @@ public final class TSFProtos
 				{
 					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
 				}
-				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				catch (final com.google.protobuf.InvalidProtocolBufferException e)
 				{
 					parsedMessage = (gdsc.smlm.tsf.TSFProtos.FluorophoreType) e.getUnfinishedMessage();
 					throw e.unwrapIOException();
@@ -1282,9 +1224,7 @@ public final class TSFProtos
 				finally
 				{
 					if (parsedMessage != null)
-					{
 						mergeFrom(parsedMessage);
-					}
 				}
 				return this;
 			}
@@ -1366,21 +1306,17 @@ public final class TSFProtos
 			@Override
 			public java.lang.String getDescription()
 			{
-				java.lang.Object ref = description_;
+				final java.lang.Object ref = description_;
 				if (!(ref instanceof java.lang.String))
 				{
-					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-					java.lang.String s = bs.toStringUtf8();
+					final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					final java.lang.String s = bs.toStringUtf8();
 					if (bs.isValidUtf8())
-					{
 						description_ = s;
-					}
 					return s;
 				}
 				else
-				{
 					return (java.lang.String) ref;
-				}
 			}
 
 			/**
@@ -1389,18 +1325,16 @@ public final class TSFProtos
 			@Override
 			public com.google.protobuf.ByteString getDescriptionBytes()
 			{
-				java.lang.Object ref = description_;
+				final java.lang.Object ref = description_;
 				if (ref instanceof String)
 				{
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+					final com.google.protobuf.ByteString b = com.google.protobuf.ByteString
 							.copyFromUtf8((java.lang.String) ref);
 					description_ = b;
 					return b;
 				}
 				else
-				{
 					return (com.google.protobuf.ByteString) ref;
-				}
 			}
 
 			/**
@@ -1409,9 +1343,7 @@ public final class TSFProtos
 			public Builder setDescription(java.lang.String value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000002;
 				description_ = value;
 				onChanged();
@@ -1435,9 +1367,7 @@ public final class TSFProtos
 			public Builder setDescriptionBytes(com.google.protobuf.ByteString value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000002;
 				description_ = value;
 				onChanged();
@@ -1626,15 +1556,15 @@ public final class TSFProtos
 				throws com.google.protobuf.InvalidProtocolBufferException
 		{
 			this();
-			int mutable_bitField0_ = 0;
-			com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
+			final int mutable_bitField0_ = 0;
+			final com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
 					.newBuilder();
 			try
 			{
 				boolean done = false;
 				while (!done)
 				{
-					int tag = input.readTag();
+					final int tag = input.readTag();
 					switch (tag)
 					{
 						case 0:
@@ -1643,9 +1573,7 @@ public final class TSFProtos
 						default:
 						{
 							if (!parseUnknownField(input, unknownFields, extensionRegistry, tag))
-							{
 								done = true;
-							}
 							break;
 						}
 						case 8:
@@ -1675,11 +1603,11 @@ public final class TSFProtos
 					}
 				}
 			}
-			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			catch (final com.google.protobuf.InvalidProtocolBufferException e)
 			{
 				throw e.setUnfinishedMessage(this);
 			}
-			catch (java.io.IOException e)
+			catch (final java.io.IOException e)
 			{
 				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
 			}
@@ -1792,7 +1720,7 @@ public final class TSFProtos
 		@Override
 		public final boolean isInitialized()
 		{
-			byte isInitialized = memoizedIsInitialized;
+			final byte isInitialized = memoizedIsInitialized;
 			if (isInitialized == 1)
 				return true;
 			if (isInitialized == 0)
@@ -1826,21 +1754,13 @@ public final class TSFProtos
 		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
 		{
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				output.writeInt32(1, x_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				output.writeInt32(2, y_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				output.writeInt32(3, xWidth_);
-			}
 			if (((bitField0_ & 0x00000008) == 0x00000008))
-			{
 				output.writeInt32(4, yWidth_);
-			}
 			unknownFields.writeTo(output);
 		}
 
@@ -1853,21 +1773,13 @@ public final class TSFProtos
 
 			size = 0;
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, x_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, y_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(3, xWidth_);
-			}
 			if (((bitField0_ & 0x00000008) == 0x00000008))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, yWidth_);
-			}
 			size += unknownFields.getSerializedSize();
 			memoizedSize = size;
 			return size;
@@ -1879,36 +1791,24 @@ public final class TSFProtos
 		public boolean equals(final java.lang.Object obj)
 		{
 			if (obj == this)
-			{
 				return true;
-			}
 			if (!(obj instanceof gdsc.smlm.tsf.TSFProtos.ROI))
-			{
 				return super.equals(obj);
-			}
-			gdsc.smlm.tsf.TSFProtos.ROI other = (gdsc.smlm.tsf.TSFProtos.ROI) obj;
+			final gdsc.smlm.tsf.TSFProtos.ROI other = (gdsc.smlm.tsf.TSFProtos.ROI) obj;
 
 			boolean result = true;
 			result = result && (hasX() == other.hasX());
 			if (hasX())
-			{
 				result = result && (getX() == other.getX());
-			}
 			result = result && (hasY() == other.hasY());
 			if (hasY())
-			{
 				result = result && (getY() == other.getY());
-			}
 			result = result && (hasXWidth() == other.hasXWidth());
 			if (hasXWidth())
-			{
 				result = result && (getXWidth() == other.getXWidth());
-			}
 			result = result && (hasYWidth() == other.hasYWidth());
 			if (hasYWidth())
-			{
 				result = result && (getYWidth() == other.getYWidth());
-			}
 			result = result && unknownFields.equals(other.unknownFields);
 			return result;
 		}
@@ -1917,9 +1817,7 @@ public final class TSFProtos
 		public int hashCode()
 		{
 			if (memoizedHashCode != 0)
-			{
 				return memoizedHashCode;
-			}
 			int hash = 41;
 			hash = (19 * hash) + getDescriptor().hashCode();
 			if (hasX())
@@ -2047,7 +1945,7 @@ public final class TSFProtos
 		@java.lang.Override
 		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
 		{
-			Builder builder = new Builder(parent);
+			final Builder builder = new Builder(parent);
 			return builder;
 		}
 
@@ -2124,39 +2022,29 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.ROI build()
 			{
-				gdsc.smlm.tsf.TSFProtos.ROI result = buildPartial();
+				final gdsc.smlm.tsf.TSFProtos.ROI result = buildPartial();
 				if (!result.isInitialized())
-				{
 					throw newUninitializedMessageException(result);
-				}
 				return result;
 			}
 
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.ROI buildPartial()
 			{
-				gdsc.smlm.tsf.TSFProtos.ROI result = new gdsc.smlm.tsf.TSFProtos.ROI(this);
-				int from_bitField0_ = bitField0_;
+				final gdsc.smlm.tsf.TSFProtos.ROI result = new gdsc.smlm.tsf.TSFProtos.ROI(this);
+				final int from_bitField0_ = bitField0_;
 				int to_bitField0_ = 0;
 				if (((from_bitField0_ & 0x00000001) == 0x00000001))
-				{
 					to_bitField0_ |= 0x00000001;
-				}
 				result.x_ = x_;
 				if (((from_bitField0_ & 0x00000002) == 0x00000002))
-				{
 					to_bitField0_ |= 0x00000002;
-				}
 				result.y_ = y_;
 				if (((from_bitField0_ & 0x00000004) == 0x00000004))
-				{
 					to_bitField0_ |= 0x00000004;
-				}
 				result.xWidth_ = xWidth_;
 				if (((from_bitField0_ & 0x00000008) == 0x00000008))
-				{
 					to_bitField0_ |= 0x00000008;
-				}
 				result.yWidth_ = yWidth_;
 				result.bitField0_ = to_bitField0_;
 				onBuilt();
@@ -2204,9 +2092,7 @@ public final class TSFProtos
 			public Builder mergeFrom(com.google.protobuf.Message other)
 			{
 				if (other instanceof gdsc.smlm.tsf.TSFProtos.ROI)
-				{
 					return mergeFrom((gdsc.smlm.tsf.TSFProtos.ROI) other);
-				}
 				else
 				{
 					super.mergeFrom(other);
@@ -2219,21 +2105,13 @@ public final class TSFProtos
 				if (other == gdsc.smlm.tsf.TSFProtos.ROI.getDefaultInstance())
 					return this;
 				if (other.hasX())
-				{
 					setX(other.getX());
-				}
 				if (other.hasY())
-				{
 					setY(other.getY());
-				}
 				if (other.hasXWidth())
-				{
 					setXWidth(other.getXWidth());
-				}
 				if (other.hasYWidth())
-				{
 					setYWidth(other.getYWidth());
-				}
 				this.mergeUnknownFields(other.unknownFields);
 				onChanged();
 				return this;
@@ -2243,21 +2121,13 @@ public final class TSFProtos
 			public final boolean isInitialized()
 			{
 				if (!hasX())
-				{
 					return false;
-				}
 				if (!hasY())
-				{
 					return false;
-				}
 				if (!hasXWidth())
-				{
 					return false;
-				}
 				if (!hasYWidth())
-				{
 					return false;
-				}
 				return true;
 			}
 
@@ -2270,7 +2140,7 @@ public final class TSFProtos
 				{
 					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
 				}
-				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				catch (final com.google.protobuf.InvalidProtocolBufferException e)
 				{
 					parsedMessage = (gdsc.smlm.tsf.TSFProtos.ROI) e.getUnfinishedMessage();
 					throw e.unwrapIOException();
@@ -2278,9 +2148,7 @@ public final class TSFProtos
 				finally
 				{
 					if (parsedMessage != null)
-					{
 						mergeFrom(parsedMessage);
-					}
 				}
 				return this;
 			}
@@ -3230,14 +3098,14 @@ public final class TSFProtos
 		{
 			this();
 			int mutable_bitField0_ = 0;
-			com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
+			final com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
 					.newBuilder();
 			try
 			{
 				boolean done = false;
 				while (!done)
 				{
-					int tag = input.readTag();
+					final int tag = input.readTag();
 					switch (tag)
 					{
 						case 0:
@@ -3246,9 +3114,7 @@ public final class TSFProtos
 						default:
 						{
 							if (!parseUnknownField(input, unknownFields, extensionRegistry, tag))
-							{
 								done = true;
-							}
 							break;
 						}
 						case 8:
@@ -3259,14 +3125,14 @@ public final class TSFProtos
 						}
 						case 18:
 						{
-							com.google.protobuf.ByteString bs = input.readBytes();
+							final com.google.protobuf.ByteString bs = input.readBytes();
 							bitField0_ |= 0x00000002;
 							name_ = bs;
 							break;
 						}
 						case 26:
 						{
-							com.google.protobuf.ByteString bs = input.readBytes();
+							final com.google.protobuf.ByteString bs = input.readBytes();
 							bitField0_ |= 0x00000004;
 							filepath_ = bs;
 							break;
@@ -3333,13 +3199,11 @@ public final class TSFProtos
 						}
 						case 176:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.LocationUnits value = gdsc.smlm.tsf.TSFProtos.LocationUnits
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.LocationUnits value = gdsc.smlm.tsf.TSFProtos.LocationUnits
 									.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(22, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x00002000;
@@ -3349,13 +3213,11 @@ public final class TSFProtos
 						}
 						case 184:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.IntensityUnits value = gdsc.smlm.tsf.TSFProtos.IntensityUnits
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.IntensityUnits value = gdsc.smlm.tsf.TSFProtos.IntensityUnits
 									.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(23, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x00004000;
@@ -3365,12 +3227,10 @@ public final class TSFProtos
 						}
 						case 192:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.FitMode value = gdsc.smlm.tsf.TSFProtos.FitMode.valueOf(rawValue);
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.FitMode value = gdsc.smlm.tsf.TSFProtos.FitMode.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(24, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x00010000;
@@ -3397,13 +3257,11 @@ public final class TSFProtos
 						}
 						case 216:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.ThetaUnits value = gdsc.smlm.tsf.TSFProtos.ThetaUnits
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.ThetaUnits value = gdsc.smlm.tsf.TSFProtos.ThetaUnits
 									.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(27, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x00008000;
@@ -3423,17 +3281,15 @@ public final class TSFProtos
 						}
 						case 226:
 						{
-							int length = input.readRawVarint32();
-							int limit = input.pushLimit(length);
+							final int length = input.readRawVarint32();
+							final int limit = input.pushLimit(length);
 							if (!((mutable_bitField0_ & 0x00080000) == 0x00080000) && input.getBytesUntilLimit() > 0)
 							{
 								ecf_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00080000;
 							}
 							while (input.getBytesUntilLimit() > 0)
-							{
 								ecf_.add(input.readDouble());
-							}
 							input.popLimit(limit);
 							break;
 						}
@@ -3441,9 +3297,7 @@ public final class TSFProtos
 						{
 							gdsc.smlm.tsf.TSFProtos.ROI.Builder subBuilder = null;
 							if (((bitField0_ & 0x00040000) == 0x00040000))
-							{
 								subBuilder = roi_.toBuilder();
-							}
 							roi_ = input.readMessage(gdsc.smlm.tsf.TSFProtos.ROI.PARSER, extensionRegistry);
 							if (subBuilder != null)
 							{
@@ -3465,30 +3319,28 @@ public final class TSFProtos
 						}
 						case 242:
 						{
-							int length = input.readRawVarint32();
-							int limit = input.pushLimit(length);
+							final int length = input.readRawVarint32();
+							final int limit = input.pushLimit(length);
 							if (!((mutable_bitField0_ & 0x00100000) == 0x00100000) && input.getBytesUntilLimit() > 0)
 							{
 								qe_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00100000;
 							}
 							while (input.getBytesUntilLimit() > 0)
-							{
 								qe_.add(input.readDouble());
-							}
 							input.popLimit(limit);
 							break;
 						}
 						case 12010:
 						{
-							com.google.protobuf.ByteString bs = input.readBytes();
+							final com.google.protobuf.ByteString bs = input.readBytes();
 							bitField0_ |= 0x00080000;
 							source_ = bs;
 							break;
 						}
 						case 12018:
 						{
-							com.google.protobuf.ByteString bs = input.readBytes();
+							final com.google.protobuf.ByteString bs = input.readBytes();
 							bitField0_ |= 0x00100000;
 							configuration_ = bs;
 							break;
@@ -3519,13 +3371,11 @@ public final class TSFProtos
 						}
 						case 12072:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.CameraType value = gdsc.smlm.tsf.TSFProtos.CameraType
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.CameraType value = gdsc.smlm.tsf.TSFProtos.CameraType
 									.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(1509, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x02000000;
@@ -3535,7 +3385,7 @@ public final class TSFProtos
 						}
 						case 12082:
 						{
-							com.google.protobuf.ByteString bs = input.readBytes();
+							final com.google.protobuf.ByteString bs = input.readBytes();
 							bitField0_ |= 0x04000000;
 							pSF_ = bs;
 							break;
@@ -3543,28 +3393,22 @@ public final class TSFProtos
 					}
 				}
 			}
-			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			catch (final com.google.protobuf.InvalidProtocolBufferException e)
 			{
 				throw e.setUnfinishedMessage(this);
 			}
-			catch (java.io.IOException e)
+			catch (final java.io.IOException e)
 			{
 				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
 			}
 			finally
 			{
 				if (((mutable_bitField0_ & 0x00002000) == 0x00002000))
-				{
 					fluorophoreTypes_ = java.util.Collections.unmodifiableList(fluorophoreTypes_);
-				}
 				if (((mutable_bitField0_ & 0x00080000) == 0x00080000))
-				{
 					ecf_ = java.util.Collections.unmodifiableList(ecf_);
-				}
 				if (((mutable_bitField0_ & 0x00100000) == 0x00100000))
-				{
 					qe_ = java.util.Collections.unmodifiableList(qe_);
-				}
 				this.unknownFields = unknownFields.build();
 				makeExtensionsImmutable();
 			}
@@ -3641,19 +3485,15 @@ public final class TSFProtos
 		@Override
 		public java.lang.String getName()
 		{
-			java.lang.Object ref = name_;
+			final java.lang.Object ref = name_;
 			if (ref instanceof java.lang.String)
-			{
 				return (java.lang.String) ref;
-			}
 			else
 			{
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
+				final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				final java.lang.String s = bs.toStringUtf8();
 				if (bs.isValidUtf8())
-				{
 					name_ = s;
-				}
 				return s;
 			}
 		}
@@ -3668,17 +3508,15 @@ public final class TSFProtos
 		@Override
 		public com.google.protobuf.ByteString getNameBytes()
 		{
-			java.lang.Object ref = name_;
+			final java.lang.Object ref = name_;
 			if (ref instanceof java.lang.String)
 			{
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				final com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
 				name_ = b;
 				return b;
 			}
 			else
-			{
 				return (com.google.protobuf.ByteString) ref;
-			}
 		}
 
 		public static final int FILEPATH_FIELD_NUMBER = 3;
@@ -3707,19 +3545,15 @@ public final class TSFProtos
 		@Override
 		public java.lang.String getFilepath()
 		{
-			java.lang.Object ref = filepath_;
+			final java.lang.Object ref = filepath_;
 			if (ref instanceof java.lang.String)
-			{
 				return (java.lang.String) ref;
-			}
 			else
 			{
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
+				final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				final java.lang.String s = bs.toStringUtf8();
 				if (bs.isValidUtf8())
-				{
 					filepath_ = s;
-				}
 				return s;
 			}
 		}
@@ -3734,17 +3568,15 @@ public final class TSFProtos
 		@Override
 		public com.google.protobuf.ByteString getFilepathBytes()
 		{
-			java.lang.Object ref = filepath_;
+			final java.lang.Object ref = filepath_;
 			if (ref instanceof java.lang.String)
 			{
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				final com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
 				filepath_ = b;
 				return b;
 			}
 			else
-			{
 				return (com.google.protobuf.ByteString) ref;
-			}
 		}
 
 		public static final int UID_FIELD_NUMBER = 4;
@@ -4138,7 +3970,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.LocationUnits getLocationUnits()
 		{
-			gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
+			final gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
 					.valueOf(locationUnits_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.LocationUnits.NM : result;
 		}
@@ -4161,7 +3993,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.IntensityUnits getIntensityUnits()
 		{
-			gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
+			final gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
 					.valueOf(intensityUnits_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.IntensityUnits.COUNTS : result;
 		}
@@ -4184,7 +4016,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.ThetaUnits getThetaUnits()
 		{
-			gdsc.smlm.tsf.TSFProtos.ThetaUnits result = gdsc.smlm.tsf.TSFProtos.ThetaUnits.valueOf(thetaUnits_);
+			final gdsc.smlm.tsf.TSFProtos.ThetaUnits result = gdsc.smlm.tsf.TSFProtos.ThetaUnits.valueOf(thetaUnits_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.ThetaUnits.DEGREES : result;
 		}
 
@@ -4216,7 +4048,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.FitMode getFitMode()
 		{
-			gdsc.smlm.tsf.TSFProtos.FitMode result = gdsc.smlm.tsf.TSFProtos.FitMode.valueOf(fitMode_);
+			final gdsc.smlm.tsf.TSFProtos.FitMode result = gdsc.smlm.tsf.TSFProtos.FitMode.valueOf(fitMode_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.FitMode.ONEAXIS : result;
 		}
 
@@ -4418,19 +4250,15 @@ public final class TSFProtos
 		@Override
 		public java.lang.String getSource()
 		{
-			java.lang.Object ref = source_;
+			final java.lang.Object ref = source_;
 			if (ref instanceof java.lang.String)
-			{
 				return (java.lang.String) ref;
-			}
 			else
 			{
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
+				final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				final java.lang.String s = bs.toStringUtf8();
 				if (bs.isValidUtf8())
-				{
 					source_ = s;
-				}
 				return s;
 			}
 		}
@@ -4445,17 +4273,15 @@ public final class TSFProtos
 		@Override
 		public com.google.protobuf.ByteString getSourceBytes()
 		{
-			java.lang.Object ref = source_;
+			final java.lang.Object ref = source_;
 			if (ref instanceof java.lang.String)
 			{
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				final com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
 				source_ = b;
 				return b;
 			}
 			else
-			{
 				return (com.google.protobuf.ByteString) ref;
-			}
 		}
 
 		public static final int CONFIGURATION_FIELD_NUMBER = 1502;
@@ -4484,19 +4310,15 @@ public final class TSFProtos
 		@Override
 		public java.lang.String getConfiguration()
 		{
-			java.lang.Object ref = configuration_;
+			final java.lang.Object ref = configuration_;
 			if (ref instanceof java.lang.String)
-			{
 				return (java.lang.String) ref;
-			}
 			else
 			{
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
+				final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				final java.lang.String s = bs.toStringUtf8();
 				if (bs.isValidUtf8())
-				{
 					configuration_ = s;
-				}
 				return s;
 			}
 		}
@@ -4511,17 +4333,15 @@ public final class TSFProtos
 		@Override
 		public com.google.protobuf.ByteString getConfigurationBytes()
 		{
-			java.lang.Object ref = configuration_;
+			final java.lang.Object ref = configuration_;
 			if (ref instanceof java.lang.String)
 			{
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				final com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
 				configuration_ = b;
 				return b;
 			}
 			else
-			{
 				return (com.google.protobuf.ByteString) ref;
-			}
 		}
 
 		public static final int GAIN_FIELD_NUMBER = 1503;
@@ -4666,7 +4486,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.CameraType getCameraType()
 		{
-			gdsc.smlm.tsf.TSFProtos.CameraType result = gdsc.smlm.tsf.TSFProtos.CameraType.valueOf(cameraType_);
+			final gdsc.smlm.tsf.TSFProtos.CameraType result = gdsc.smlm.tsf.TSFProtos.CameraType.valueOf(cameraType_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.CameraType.CCD : result;
 		}
 
@@ -4696,19 +4516,15 @@ public final class TSFProtos
 		@Override
 		public java.lang.String getPSF()
 		{
-			java.lang.Object ref = pSF_;
+			final java.lang.Object ref = pSF_;
 			if (ref instanceof java.lang.String)
-			{
 				return (java.lang.String) ref;
-			}
 			else
 			{
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
+				final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				final java.lang.String s = bs.toStringUtf8();
 				if (bs.isValidUtf8())
-				{
 					pSF_ = s;
-				}
 				return s;
 			}
 		}
@@ -4723,17 +4539,15 @@ public final class TSFProtos
 		@Override
 		public com.google.protobuf.ByteString getPSFBytes()
 		{
-			java.lang.Object ref = pSF_;
+			final java.lang.Object ref = pSF_;
 			if (ref instanceof java.lang.String)
 			{
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				final com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
 				pSF_ = b;
 				return b;
 			}
 			else
-			{
 				return (com.google.protobuf.ByteString) ref;
-			}
 		}
 
 		private byte memoizedIsInitialized = -1;
@@ -4741,7 +4555,7 @@ public final class TSFProtos
 		@Override
 		public final boolean isInitialized()
 		{
-			byte isInitialized = memoizedIsInitialized;
+			final byte isInitialized = memoizedIsInitialized;
 			if (isInitialized == 1)
 				return true;
 			if (isInitialized == 0)
@@ -4753,21 +4567,17 @@ public final class TSFProtos
 				return false;
 			}
 			for (int i = 0; i < getFluorophoreTypesCount(); i++)
-			{
 				if (!getFluorophoreTypes(i).isInitialized())
 				{
 					memoizedIsInitialized = 0;
 					return false;
 				}
-			}
 			if (hasRoi())
-			{
 				if (!getRoi().isInitialized())
 				{
 					memoizedIsInitialized = 0;
 					return false;
 				}
-			}
 			if (!extensionsAreInitialized())
 			{
 				memoizedIsInitialized = 0;
@@ -4780,127 +4590,67 @@ public final class TSFProtos
 		@Override
 		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
 		{
-			com.google.protobuf.GeneratedMessageV3.ExtendableMessage<gdsc.smlm.tsf.TSFProtos.SpotList>.ExtensionWriter extensionWriter = newExtensionWriter();
+			final com.google.protobuf.GeneratedMessageV3.ExtendableMessage<gdsc.smlm.tsf.TSFProtos.SpotList>.ExtensionWriter extensionWriter = newExtensionWriter();
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				output.writeInt32(1, applicationId_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				com.google.protobuf.GeneratedMessageV3.writeString(output, 3, filepath_);
-			}
 			if (((bitField0_ & 0x00000008) == 0x00000008))
-			{
 				output.writeInt64(4, uid_);
-			}
 			if (((bitField0_ & 0x00000010) == 0x00000010))
-			{
 				output.writeInt32(5, nrPixelsX_);
-			}
 			if (((bitField0_ & 0x00000020) == 0x00000020))
-			{
 				output.writeInt32(6, nrPixelsY_);
-			}
 			if (((bitField0_ & 0x00000040) == 0x00000040))
-			{
 				output.writeFloat(7, pixelSize_);
-			}
 			if (((bitField0_ & 0x00000080) == 0x00000080))
-			{
 				output.writeInt64(8, nrSpots_);
-			}
 			if (((bitField0_ & 0x00000100) == 0x00000100))
-			{
 				output.writeInt32(17, boxSize_);
-			}
 			if (((bitField0_ & 0x00000200) == 0x00000200))
-			{
 				output.writeInt32(18, nrChannels_);
-			}
 			if (((bitField0_ & 0x00000400) == 0x00000400))
-			{
 				output.writeInt32(19, nrFrames_);
-			}
 			if (((bitField0_ & 0x00000800) == 0x00000800))
-			{
 				output.writeInt32(20, nrSlices_);
-			}
 			if (((bitField0_ & 0x00001000) == 0x00001000))
-			{
 				output.writeInt32(21, nrPos_);
-			}
 			if (((bitField0_ & 0x00002000) == 0x00002000))
-			{
 				output.writeEnum(22, locationUnits_);
-			}
 			if (((bitField0_ & 0x00004000) == 0x00004000))
-			{
 				output.writeEnum(23, intensityUnits_);
-			}
 			if (((bitField0_ & 0x00010000) == 0x00010000))
-			{
 				output.writeEnum(24, fitMode_);
-			}
 			if (((bitField0_ & 0x00020000) == 0x00020000))
-			{
 				output.writeBool(25, isTrack_);
-			}
 			for (int i = 0; i < fluorophoreTypes_.size(); i++)
-			{
 				output.writeMessage(26, fluorophoreTypes_.get(i));
-			}
 			if (((bitField0_ & 0x00008000) == 0x00008000))
-			{
 				output.writeEnum(27, thetaUnits_);
-			}
 			for (int i = 0; i < ecf_.size(); i++)
-			{
 				output.writeDouble(28, ecf_.get(i));
-			}
 			if (((bitField0_ & 0x00040000) == 0x00040000))
-			{
 				output.writeMessage(29, getRoi());
-			}
 			for (int i = 0; i < qe_.size(); i++)
-			{
 				output.writeDouble(30, qe_.get(i));
-			}
 			if (((bitField0_ & 0x00080000) == 0x00080000))
-			{
 				com.google.protobuf.GeneratedMessageV3.writeString(output, 1501, source_);
-			}
 			if (((bitField0_ & 0x00100000) == 0x00100000))
-			{
 				com.google.protobuf.GeneratedMessageV3.writeString(output, 1502, configuration_);
-			}
 			if (((bitField0_ & 0x00200000) == 0x00200000))
-			{
 				output.writeDouble(1503, gain_);
-			}
 			if (((bitField0_ & 0x00400000) == 0x00400000))
-			{
 				output.writeDouble(1504, exposureTime_);
-			}
 			if (((bitField0_ & 0x00800000) == 0x00800000))
-			{
 				output.writeDouble(1505, readNoise_);
-			}
 			if (((bitField0_ & 0x01000000) == 0x01000000))
-			{
 				output.writeDouble(1506, bias_);
-			}
 			if (((bitField0_ & 0x02000000) == 0x02000000))
-			{
 				output.writeEnum(1509, cameraType_);
-			}
 			if (((bitField0_ & 0x04000000) == 0x04000000))
-			{
 				com.google.protobuf.GeneratedMessageV3.writeString(output, 1510, pSF_);
-			}
 			extensionWriter.writeUntil(2048, output);
 			unknownFields.writeTo(output);
 		}
@@ -4914,81 +4664,43 @@ public final class TSFProtos
 
 			size = 0;
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, applicationId_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, filepath_);
-			}
 			if (((bitField0_ & 0x00000008) == 0x00000008))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt64Size(4, uid_);
-			}
 			if (((bitField0_ & 0x00000010) == 0x00000010))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(5, nrPixelsX_);
-			}
 			if (((bitField0_ & 0x00000020) == 0x00000020))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(6, nrPixelsY_);
-			}
 			if (((bitField0_ & 0x00000040) == 0x00000040))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(7, pixelSize_);
-			}
 			if (((bitField0_ & 0x00000080) == 0x00000080))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt64Size(8, nrSpots_);
-			}
 			if (((bitField0_ & 0x00000100) == 0x00000100))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(17, boxSize_);
-			}
 			if (((bitField0_ & 0x00000200) == 0x00000200))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(18, nrChannels_);
-			}
 			if (((bitField0_ & 0x00000400) == 0x00000400))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(19, nrFrames_);
-			}
 			if (((bitField0_ & 0x00000800) == 0x00000800))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(20, nrSlices_);
-			}
 			if (((bitField0_ & 0x00001000) == 0x00001000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(21, nrPos_);
-			}
 			if (((bitField0_ & 0x00002000) == 0x00002000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(22, locationUnits_);
-			}
 			if (((bitField0_ & 0x00004000) == 0x00004000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(23, intensityUnits_);
-			}
 			if (((bitField0_ & 0x00010000) == 0x00010000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(24, fitMode_);
-			}
 			if (((bitField0_ & 0x00020000) == 0x00020000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeBoolSize(25, isTrack_);
-			}
 			for (int i = 0; i < fluorophoreTypes_.size(); i++)
-			{
 				size += com.google.protobuf.CodedOutputStream.computeMessageSize(26, fluorophoreTypes_.get(i));
-			}
 			if (((bitField0_ & 0x00008000) == 0x00008000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(27, thetaUnits_);
-			}
 			{
 				int dataSize = 0;
 				dataSize = 8 * getEcfList().size();
@@ -4996,9 +4708,7 @@ public final class TSFProtos
 				size += 2 * getEcfList().size();
 			}
 			if (((bitField0_ & 0x00040000) == 0x00040000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeMessageSize(29, getRoi());
-			}
 			{
 				int dataSize = 0;
 				dataSize = 8 * getQeList().size();
@@ -5006,37 +4716,21 @@ public final class TSFProtos
 				size += 2 * getQeList().size();
 			}
 			if (((bitField0_ & 0x00080000) == 0x00080000))
-			{
 				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1501, source_);
-			}
 			if (((bitField0_ & 0x00100000) == 0x00100000))
-			{
 				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1502, configuration_);
-			}
 			if (((bitField0_ & 0x00200000) == 0x00200000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1503, gain_);
-			}
 			if (((bitField0_ & 0x00400000) == 0x00400000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1504, exposureTime_);
-			}
 			if (((bitField0_ & 0x00800000) == 0x00800000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1505, readNoise_);
-			}
 			if (((bitField0_ & 0x01000000) == 0x01000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1506, bias_);
-			}
 			if (((bitField0_ & 0x02000000) == 0x02000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(1509, cameraType_);
-			}
 			if (((bitField0_ & 0x04000000) == 0x04000000))
-			{
 				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1510, pSF_);
-			}
 			size += extensionsSerializedSize();
 			size += unknownFields.getSerializedSize();
 			memoizedSize = size;
@@ -5049,159 +4743,101 @@ public final class TSFProtos
 		public boolean equals(final java.lang.Object obj)
 		{
 			if (obj == this)
-			{
 				return true;
-			}
 			if (!(obj instanceof gdsc.smlm.tsf.TSFProtos.SpotList))
-			{
 				return super.equals(obj);
-			}
-			gdsc.smlm.tsf.TSFProtos.SpotList other = (gdsc.smlm.tsf.TSFProtos.SpotList) obj;
+			final gdsc.smlm.tsf.TSFProtos.SpotList other = (gdsc.smlm.tsf.TSFProtos.SpotList) obj;
 
 			boolean result = true;
 			result = result && (hasApplicationId() == other.hasApplicationId());
 			if (hasApplicationId())
-			{
 				result = result && (getApplicationId() == other.getApplicationId());
-			}
 			result = result && (hasName() == other.hasName());
 			if (hasName())
-			{
 				result = result && getName().equals(other.getName());
-			}
 			result = result && (hasFilepath() == other.hasFilepath());
 			if (hasFilepath())
-			{
 				result = result && getFilepath().equals(other.getFilepath());
-			}
 			result = result && (hasUid() == other.hasUid());
 			if (hasUid())
-			{
 				result = result && (getUid() == other.getUid());
-			}
 			result = result && (hasNrPixelsX() == other.hasNrPixelsX());
 			if (hasNrPixelsX())
-			{
 				result = result && (getNrPixelsX() == other.getNrPixelsX());
-			}
 			result = result && (hasNrPixelsY() == other.hasNrPixelsY());
 			if (hasNrPixelsY())
-			{
 				result = result && (getNrPixelsY() == other.getNrPixelsY());
-			}
 			result = result && (hasPixelSize() == other.hasPixelSize());
 			if (hasPixelSize())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getPixelSize()) == java.lang.Float
 						.floatToIntBits(other.getPixelSize()));
-			}
 			result = result && (hasNrSpots() == other.hasNrSpots());
 			if (hasNrSpots())
-			{
 				result = result && (getNrSpots() == other.getNrSpots());
-			}
 			result = result && (hasBoxSize() == other.hasBoxSize());
 			if (hasBoxSize())
-			{
 				result = result && (getBoxSize() == other.getBoxSize());
-			}
 			result = result && (hasNrChannels() == other.hasNrChannels());
 			if (hasNrChannels())
-			{
 				result = result && (getNrChannels() == other.getNrChannels());
-			}
 			result = result && (hasNrFrames() == other.hasNrFrames());
 			if (hasNrFrames())
-			{
 				result = result && (getNrFrames() == other.getNrFrames());
-			}
 			result = result && (hasNrSlices() == other.hasNrSlices());
 			if (hasNrSlices())
-			{
 				result = result && (getNrSlices() == other.getNrSlices());
-			}
 			result = result && (hasNrPos() == other.hasNrPos());
 			if (hasNrPos())
-			{
 				result = result && (getNrPos() == other.getNrPos());
-			}
 			result = result && getFluorophoreTypesList().equals(other.getFluorophoreTypesList());
 			result = result && (hasLocationUnits() == other.hasLocationUnits());
 			if (hasLocationUnits())
-			{
 				result = result && locationUnits_ == other.locationUnits_;
-			}
 			result = result && (hasIntensityUnits() == other.hasIntensityUnits());
 			if (hasIntensityUnits())
-			{
 				result = result && intensityUnits_ == other.intensityUnits_;
-			}
 			result = result && (hasThetaUnits() == other.hasThetaUnits());
 			if (hasThetaUnits())
-			{
 				result = result && thetaUnits_ == other.thetaUnits_;
-			}
 			result = result && (hasFitMode() == other.hasFitMode());
 			if (hasFitMode())
-			{
 				result = result && fitMode_ == other.fitMode_;
-			}
 			result = result && (hasIsTrack() == other.hasIsTrack());
 			if (hasIsTrack())
-			{
 				result = result && (getIsTrack() == other.getIsTrack());
-			}
 			result = result && getEcfList().equals(other.getEcfList());
 			result = result && getQeList().equals(other.getQeList());
 			result = result && (hasRoi() == other.hasRoi());
 			if (hasRoi())
-			{
 				result = result && getRoi().equals(other.getRoi());
-			}
 			result = result && (hasSource() == other.hasSource());
 			if (hasSource())
-			{
 				result = result && getSource().equals(other.getSource());
-			}
 			result = result && (hasConfiguration() == other.hasConfiguration());
 			if (hasConfiguration())
-			{
 				result = result && getConfiguration().equals(other.getConfiguration());
-			}
 			result = result && (hasGain() == other.hasGain());
 			if (hasGain())
-			{
 				result = result && (java.lang.Double.doubleToLongBits(getGain()) == java.lang.Double
 						.doubleToLongBits(other.getGain()));
-			}
 			result = result && (hasExposureTime() == other.hasExposureTime());
 			if (hasExposureTime())
-			{
 				result = result && (java.lang.Double.doubleToLongBits(getExposureTime()) == java.lang.Double
 						.doubleToLongBits(other.getExposureTime()));
-			}
 			result = result && (hasReadNoise() == other.hasReadNoise());
 			if (hasReadNoise())
-			{
 				result = result && (java.lang.Double.doubleToLongBits(getReadNoise()) == java.lang.Double
 						.doubleToLongBits(other.getReadNoise()));
-			}
 			result = result && (hasBias() == other.hasBias());
 			if (hasBias())
-			{
 				result = result && (java.lang.Double.doubleToLongBits(getBias()) == java.lang.Double
 						.doubleToLongBits(other.getBias()));
-			}
 			result = result && (hasCameraType() == other.hasCameraType());
 			if (hasCameraType())
-			{
 				result = result && cameraType_ == other.cameraType_;
-			}
 			result = result && (hasPSF() == other.hasPSF());
 			if (hasPSF())
-			{
 				result = result && getPSF().equals(other.getPSF());
-			}
 			result = result && unknownFields.equals(other.unknownFields);
 			result = result && getExtensionFields().equals(other.getExtensionFields());
 			return result;
@@ -5211,9 +4847,7 @@ public final class TSFProtos
 		public int hashCode()
 		{
 			if (memoizedHashCode != 0)
-			{
 				return memoizedHashCode;
-			}
 			int hash = 41;
 			hash = (19 * hash) + getDescriptor().hashCode();
 			if (hasApplicationId())
@@ -5476,7 +5110,7 @@ public final class TSFProtos
 		@java.lang.Override
 		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
 		{
-			Builder builder = new Builder(parent);
+			final Builder builder = new Builder(parent);
 			return builder;
 		}
 
@@ -5559,9 +5193,7 @@ public final class TSFProtos
 					bitField0_ = (bitField0_ & ~0x00002000);
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.clear();
-				}
 				locationUnits_ = 0;
 				bitField0_ = (bitField0_ & ~0x00004000);
 				intensityUnits_ = 0;
@@ -5577,13 +5209,9 @@ public final class TSFProtos
 				qe_ = java.util.Collections.emptyList();
 				bitField0_ = (bitField0_ & ~0x00100000);
 				if (roiBuilder_ == null)
-				{
 					roi_ = null;
-				}
 				else
-				{
 					roiBuilder_.clear();
-				}
 				bitField0_ = (bitField0_ & ~0x00200000);
 				source_ = "";
 				bitField0_ = (bitField0_ & ~0x00400000);
@@ -5619,84 +5247,56 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.SpotList build()
 			{
-				gdsc.smlm.tsf.TSFProtos.SpotList result = buildPartial();
+				final gdsc.smlm.tsf.TSFProtos.SpotList result = buildPartial();
 				if (!result.isInitialized())
-				{
 					throw newUninitializedMessageException(result);
-				}
 				return result;
 			}
 
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.SpotList buildPartial()
 			{
-				gdsc.smlm.tsf.TSFProtos.SpotList result = new gdsc.smlm.tsf.TSFProtos.SpotList(this);
-				int from_bitField0_ = bitField0_;
+				final gdsc.smlm.tsf.TSFProtos.SpotList result = new gdsc.smlm.tsf.TSFProtos.SpotList(this);
+				final int from_bitField0_ = bitField0_;
 				int to_bitField0_ = 0;
 				if (((from_bitField0_ & 0x00000001) == 0x00000001))
-				{
 					to_bitField0_ |= 0x00000001;
-				}
 				result.applicationId_ = applicationId_;
 				if (((from_bitField0_ & 0x00000002) == 0x00000002))
-				{
 					to_bitField0_ |= 0x00000002;
-				}
 				result.name_ = name_;
 				if (((from_bitField0_ & 0x00000004) == 0x00000004))
-				{
 					to_bitField0_ |= 0x00000004;
-				}
 				result.filepath_ = filepath_;
 				if (((from_bitField0_ & 0x00000008) == 0x00000008))
-				{
 					to_bitField0_ |= 0x00000008;
-				}
 				result.uid_ = uid_;
 				if (((from_bitField0_ & 0x00000010) == 0x00000010))
-				{
 					to_bitField0_ |= 0x00000010;
-				}
 				result.nrPixelsX_ = nrPixelsX_;
 				if (((from_bitField0_ & 0x00000020) == 0x00000020))
-				{
 					to_bitField0_ |= 0x00000020;
-				}
 				result.nrPixelsY_ = nrPixelsY_;
 				if (((from_bitField0_ & 0x00000040) == 0x00000040))
-				{
 					to_bitField0_ |= 0x00000040;
-				}
 				result.pixelSize_ = pixelSize_;
 				if (((from_bitField0_ & 0x00000080) == 0x00000080))
-				{
 					to_bitField0_ |= 0x00000080;
-				}
 				result.nrSpots_ = nrSpots_;
 				if (((from_bitField0_ & 0x00000100) == 0x00000100))
-				{
 					to_bitField0_ |= 0x00000100;
-				}
 				result.boxSize_ = boxSize_;
 				if (((from_bitField0_ & 0x00000200) == 0x00000200))
-				{
 					to_bitField0_ |= 0x00000200;
-				}
 				result.nrChannels_ = nrChannels_;
 				if (((from_bitField0_ & 0x00000400) == 0x00000400))
-				{
 					to_bitField0_ |= 0x00000400;
-				}
 				result.nrFrames_ = nrFrames_;
 				if (((from_bitField0_ & 0x00000800) == 0x00000800))
-				{
 					to_bitField0_ |= 0x00000800;
-				}
 				result.nrSlices_ = nrSlices_;
 				if (((from_bitField0_ & 0x00001000) == 0x00001000))
-				{
 					to_bitField0_ |= 0x00001000;
-				}
 				result.nrPos_ = nrPos_;
 				if (fluorophoreTypesBuilder_ == null)
 				{
@@ -5708,33 +5308,21 @@ public final class TSFProtos
 					result.fluorophoreTypes_ = fluorophoreTypes_;
 				}
 				else
-				{
 					result.fluorophoreTypes_ = fluorophoreTypesBuilder_.build();
-				}
 				if (((from_bitField0_ & 0x00004000) == 0x00004000))
-				{
 					to_bitField0_ |= 0x00002000;
-				}
 				result.locationUnits_ = locationUnits_;
 				if (((from_bitField0_ & 0x00008000) == 0x00008000))
-				{
 					to_bitField0_ |= 0x00004000;
-				}
 				result.intensityUnits_ = intensityUnits_;
 				if (((from_bitField0_ & 0x00010000) == 0x00010000))
-				{
 					to_bitField0_ |= 0x00008000;
-				}
 				result.thetaUnits_ = thetaUnits_;
 				if (((from_bitField0_ & 0x00020000) == 0x00020000))
-				{
 					to_bitField0_ |= 0x00010000;
-				}
 				result.fitMode_ = fitMode_;
 				if (((from_bitField0_ & 0x00040000) == 0x00040000))
-				{
 					to_bitField0_ |= 0x00020000;
-				}
 				result.isTrack_ = isTrack_;
 				if (((bitField0_ & 0x00080000) == 0x00080000))
 				{
@@ -5749,56 +5337,34 @@ public final class TSFProtos
 				}
 				result.qe_ = qe_;
 				if (((from_bitField0_ & 0x00200000) == 0x00200000))
-				{
 					to_bitField0_ |= 0x00040000;
-				}
 				if (roiBuilder_ == null)
-				{
 					result.roi_ = roi_;
-				}
 				else
-				{
 					result.roi_ = roiBuilder_.build();
-				}
 				if (((from_bitField0_ & 0x00400000) == 0x00400000))
-				{
 					to_bitField0_ |= 0x00080000;
-				}
 				result.source_ = source_;
 				if (((from_bitField0_ & 0x00800000) == 0x00800000))
-				{
 					to_bitField0_ |= 0x00100000;
-				}
 				result.configuration_ = configuration_;
 				if (((from_bitField0_ & 0x01000000) == 0x01000000))
-				{
 					to_bitField0_ |= 0x00200000;
-				}
 				result.gain_ = gain_;
 				if (((from_bitField0_ & 0x02000000) == 0x02000000))
-				{
 					to_bitField0_ |= 0x00400000;
-				}
 				result.exposureTime_ = exposureTime_;
 				if (((from_bitField0_ & 0x04000000) == 0x04000000))
-				{
 					to_bitField0_ |= 0x00800000;
-				}
 				result.readNoise_ = readNoise_;
 				if (((from_bitField0_ & 0x08000000) == 0x08000000))
-				{
 					to_bitField0_ |= 0x01000000;
-				}
 				result.bias_ = bias_;
 				if (((from_bitField0_ & 0x10000000) == 0x10000000))
-				{
 					to_bitField0_ |= 0x02000000;
-				}
 				result.cameraType_ = cameraType_;
 				if (((from_bitField0_ & 0x20000000) == 0x20000000))
-				{
 					to_bitField0_ |= 0x04000000;
-				}
 				result.pSF_ = pSF_;
 				result.bitField0_ = to_bitField0_;
 				onBuilt();
@@ -5877,9 +5443,7 @@ public final class TSFProtos
 			public Builder mergeFrom(com.google.protobuf.Message other)
 			{
 				if (other instanceof gdsc.smlm.tsf.TSFProtos.SpotList)
-				{
 					return mergeFrom((gdsc.smlm.tsf.TSFProtos.SpotList) other);
-				}
 				else
 				{
 					super.mergeFrom(other);
@@ -5892,9 +5456,7 @@ public final class TSFProtos
 				if (other == gdsc.smlm.tsf.TSFProtos.SpotList.getDefaultInstance())
 					return this;
 				if (other.hasApplicationId())
-				{
 					setApplicationId(other.getApplicationId());
-				}
 				if (other.hasName())
 				{
 					bitField0_ |= 0x00000002;
@@ -5908,45 +5470,25 @@ public final class TSFProtos
 					onChanged();
 				}
 				if (other.hasUid())
-				{
 					setUid(other.getUid());
-				}
 				if (other.hasNrPixelsX())
-				{
 					setNrPixelsX(other.getNrPixelsX());
-				}
 				if (other.hasNrPixelsY())
-				{
 					setNrPixelsY(other.getNrPixelsY());
-				}
 				if (other.hasPixelSize())
-				{
 					setPixelSize(other.getPixelSize());
-				}
 				if (other.hasNrSpots())
-				{
 					setNrSpots(other.getNrSpots());
-				}
 				if (other.hasBoxSize())
-				{
 					setBoxSize(other.getBoxSize());
-				}
 				if (other.hasNrChannels())
-				{
 					setNrChannels(other.getNrChannels());
-				}
 				if (other.hasNrFrames())
-				{
 					setNrFrames(other.getNrFrames());
-				}
 				if (other.hasNrSlices())
-				{
 					setNrSlices(other.getNrSlices());
-				}
 				if (other.hasNrPos())
-				{
 					setNrPos(other.getNrPos());
-				}
 				if (fluorophoreTypesBuilder_ == null)
 				{
 					if (!other.fluorophoreTypes_.isEmpty())
@@ -5964,45 +5506,28 @@ public final class TSFProtos
 						onChanged();
 					}
 				}
-				else
-				{
-					if (!other.fluorophoreTypes_.isEmpty())
+				else if (!other.fluorophoreTypes_.isEmpty())
+					if (fluorophoreTypesBuilder_.isEmpty())
 					{
-						if (fluorophoreTypesBuilder_.isEmpty())
-						{
-							fluorophoreTypesBuilder_.dispose();
-							fluorophoreTypesBuilder_ = null;
-							fluorophoreTypes_ = other.fluorophoreTypes_;
-							bitField0_ = (bitField0_ & ~0x00002000);
-							fluorophoreTypesBuilder_ = com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
-									? getFluorophoreTypesFieldBuilder() : null;
-						}
-						else
-						{
-							fluorophoreTypesBuilder_.addAllMessages(other.fluorophoreTypes_);
-						}
+						fluorophoreTypesBuilder_.dispose();
+						fluorophoreTypesBuilder_ = null;
+						fluorophoreTypes_ = other.fluorophoreTypes_;
+						bitField0_ = (bitField0_ & ~0x00002000);
+						fluorophoreTypesBuilder_ = com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
+								? getFluorophoreTypesFieldBuilder() : null;
 					}
-				}
+					else
+						fluorophoreTypesBuilder_.addAllMessages(other.fluorophoreTypes_);
 				if (other.hasLocationUnits())
-				{
 					setLocationUnits(other.getLocationUnits());
-				}
 				if (other.hasIntensityUnits())
-				{
 					setIntensityUnits(other.getIntensityUnits());
-				}
 				if (other.hasThetaUnits())
-				{
 					setThetaUnits(other.getThetaUnits());
-				}
 				if (other.hasFitMode())
-				{
 					setFitMode(other.getFitMode());
-				}
 				if (other.hasIsTrack())
-				{
 					setIsTrack(other.getIsTrack());
-				}
 				if (!other.ecf_.isEmpty())
 				{
 					if (ecf_.isEmpty())
@@ -6032,9 +5557,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				if (other.hasRoi())
-				{
 					mergeRoi(other.getRoi());
-				}
 				if (other.hasSource())
 				{
 					bitField0_ |= 0x00400000;
@@ -6048,25 +5571,15 @@ public final class TSFProtos
 					onChanged();
 				}
 				if (other.hasGain())
-				{
 					setGain(other.getGain());
-				}
 				if (other.hasExposureTime())
-				{
 					setExposureTime(other.getExposureTime());
-				}
 				if (other.hasReadNoise())
-				{
 					setReadNoise(other.getReadNoise());
-				}
 				if (other.hasBias())
-				{
 					setBias(other.getBias());
-				}
 				if (other.hasCameraType())
-				{
 					setCameraType(other.getCameraType());
-				}
 				if (other.hasPSF())
 				{
 					bitField0_ |= 0x20000000;
@@ -6083,27 +5596,15 @@ public final class TSFProtos
 			public final boolean isInitialized()
 			{
 				if (!hasApplicationId())
-				{
 					return false;
-				}
 				for (int i = 0; i < getFluorophoreTypesCount(); i++)
-				{
 					if (!getFluorophoreTypes(i).isInitialized())
-					{
 						return false;
-					}
-				}
 				if (hasRoi())
-				{
 					if (!getRoi().isInitialized())
-					{
 						return false;
-					}
-				}
 				if (!extensionsAreInitialized())
-				{
 					return false;
-				}
 				return true;
 			}
 
@@ -6116,7 +5617,7 @@ public final class TSFProtos
 				{
 					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
 				}
-				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				catch (final com.google.protobuf.InvalidProtocolBufferException e)
 				{
 					parsedMessage = (gdsc.smlm.tsf.TSFProtos.SpotList) e.getUnfinishedMessage();
 					throw e.unwrapIOException();
@@ -6124,9 +5625,7 @@ public final class TSFProtos
 				finally
 				{
 					if (parsedMessage != null)
-					{
 						mergeFrom(parsedMessage);
-					}
 				}
 				return this;
 			}
@@ -6220,21 +5719,17 @@ public final class TSFProtos
 			@Override
 			public java.lang.String getName()
 			{
-				java.lang.Object ref = name_;
+				final java.lang.Object ref = name_;
 				if (!(ref instanceof java.lang.String))
 				{
-					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-					java.lang.String s = bs.toStringUtf8();
+					final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					final java.lang.String s = bs.toStringUtf8();
 					if (bs.isValidUtf8())
-					{
 						name_ = s;
-					}
 					return s;
 				}
 				else
-				{
 					return (java.lang.String) ref;
-				}
 			}
 
 			/**
@@ -6247,18 +5742,16 @@ public final class TSFProtos
 			@Override
 			public com.google.protobuf.ByteString getNameBytes()
 			{
-				java.lang.Object ref = name_;
+				final java.lang.Object ref = name_;
 				if (ref instanceof String)
 				{
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+					final com.google.protobuf.ByteString b = com.google.protobuf.ByteString
 							.copyFromUtf8((java.lang.String) ref);
 					name_ = b;
 					return b;
 				}
 				else
-				{
 					return (com.google.protobuf.ByteString) ref;
-				}
 			}
 
 			/**
@@ -6271,9 +5764,7 @@ public final class TSFProtos
 			public Builder setName(java.lang.String value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000002;
 				name_ = value;
 				onChanged();
@@ -6305,9 +5796,7 @@ public final class TSFProtos
 			public Builder setNameBytes(com.google.protobuf.ByteString value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000002;
 				name_ = value;
 				onChanged();
@@ -6339,21 +5828,17 @@ public final class TSFProtos
 			@Override
 			public java.lang.String getFilepath()
 			{
-				java.lang.Object ref = filepath_;
+				final java.lang.Object ref = filepath_;
 				if (!(ref instanceof java.lang.String))
 				{
-					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-					java.lang.String s = bs.toStringUtf8();
+					final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					final java.lang.String s = bs.toStringUtf8();
 					if (bs.isValidUtf8())
-					{
 						filepath_ = s;
-					}
 					return s;
 				}
 				else
-				{
 					return (java.lang.String) ref;
-				}
 			}
 
 			/**
@@ -6366,18 +5851,16 @@ public final class TSFProtos
 			@Override
 			public com.google.protobuf.ByteString getFilepathBytes()
 			{
-				java.lang.Object ref = filepath_;
+				final java.lang.Object ref = filepath_;
 				if (ref instanceof String)
 				{
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+					final com.google.protobuf.ByteString b = com.google.protobuf.ByteString
 							.copyFromUtf8((java.lang.String) ref);
 					filepath_ = b;
 					return b;
 				}
 				else
-				{
 					return (com.google.protobuf.ByteString) ref;
-				}
 			}
 
 			/**
@@ -6390,9 +5873,7 @@ public final class TSFProtos
 			public Builder setFilepath(java.lang.String value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000004;
 				filepath_ = value;
 				onChanged();
@@ -6424,9 +5905,7 @@ public final class TSFProtos
 			public Builder setFilepathBytes(com.google.protobuf.ByteString value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000004;
 				filepath_ = value;
 				onChanged();
@@ -7040,13 +6519,9 @@ public final class TSFProtos
 			public java.util.List<gdsc.smlm.tsf.TSFProtos.FluorophoreType> getFluorophoreTypesList()
 			{
 				if (fluorophoreTypesBuilder_ == null)
-				{
 					return java.util.Collections.unmodifiableList(fluorophoreTypes_);
-				}
 				else
-				{
 					return fluorophoreTypesBuilder_.getMessageList();
-				}
 			}
 
 			/**
@@ -7061,13 +6536,9 @@ public final class TSFProtos
 			public int getFluorophoreTypesCount()
 			{
 				if (fluorophoreTypesBuilder_ == null)
-				{
 					return fluorophoreTypes_.size();
-				}
 				else
-				{
 					return fluorophoreTypesBuilder_.getCount();
-				}
 			}
 
 			/**
@@ -7082,13 +6553,9 @@ public final class TSFProtos
 			public gdsc.smlm.tsf.TSFProtos.FluorophoreType getFluorophoreTypes(int index)
 			{
 				if (fluorophoreTypesBuilder_ == null)
-				{
 					return fluorophoreTypes_.get(index);
-				}
 				else
-				{
 					return fluorophoreTypesBuilder_.getMessage(index);
-				}
 			}
 
 			/**
@@ -7104,17 +6571,13 @@ public final class TSFProtos
 				if (fluorophoreTypesBuilder_ == null)
 				{
 					if (value == null)
-					{
 						throw new NullPointerException();
-					}
 					ensureFluorophoreTypesIsMutable();
 					fluorophoreTypes_.set(index, value);
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.setMessage(index, value);
-				}
 				return this;
 			}
 
@@ -7136,9 +6599,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.setMessage(index, builderForValue.build());
-				}
 				return this;
 			}
 
@@ -7155,17 +6616,13 @@ public final class TSFProtos
 				if (fluorophoreTypesBuilder_ == null)
 				{
 					if (value == null)
-					{
 						throw new NullPointerException();
-					}
 					ensureFluorophoreTypesIsMutable();
 					fluorophoreTypes_.add(value);
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.addMessage(value);
-				}
 				return this;
 			}
 
@@ -7182,17 +6639,13 @@ public final class TSFProtos
 				if (fluorophoreTypesBuilder_ == null)
 				{
 					if (value == null)
-					{
 						throw new NullPointerException();
-					}
 					ensureFluorophoreTypesIsMutable();
 					fluorophoreTypes_.add(index, value);
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.addMessage(index, value);
-				}
 				return this;
 			}
 
@@ -7213,9 +6666,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.addMessage(builderForValue.build());
-				}
 				return this;
 			}
 
@@ -7237,9 +6688,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.addMessage(index, builderForValue.build());
-				}
 				return this;
 			}
 
@@ -7261,9 +6710,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.addAllMessages(values);
-				}
 				return this;
 			}
 
@@ -7284,9 +6731,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.clear();
-				}
 				return this;
 			}
 
@@ -7307,9 +6752,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					fluorophoreTypesBuilder_.remove(index);
-				}
 				return this;
 			}
 
@@ -7338,13 +6781,9 @@ public final class TSFProtos
 			public gdsc.smlm.tsf.TSFProtos.FluorophoreTypeOrBuilder getFluorophoreTypesOrBuilder(int index)
 			{
 				if (fluorophoreTypesBuilder_ == null)
-				{
 					return fluorophoreTypes_.get(index);
-				}
 				else
-				{
 					return fluorophoreTypesBuilder_.getMessageOrBuilder(index);
-				}
 			}
 
 			/**
@@ -7359,13 +6798,9 @@ public final class TSFProtos
 			public java.util.List<? extends gdsc.smlm.tsf.TSFProtos.FluorophoreTypeOrBuilder> getFluorophoreTypesOrBuilderList()
 			{
 				if (fluorophoreTypesBuilder_ != null)
-				{
 					return fluorophoreTypesBuilder_.getMessageOrBuilderList();
-				}
 				else
-				{
 					return java.util.Collections.unmodifiableList(fluorophoreTypes_);
-				}
 			}
 
 			/**
@@ -7448,7 +6883,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.LocationUnits getLocationUnits()
 			{
-				gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
+				final gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
 						.valueOf(locationUnits_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.LocationUnits.NM : result;
 			}
@@ -7464,9 +6899,7 @@ public final class TSFProtos
 			public Builder setLocationUnits(gdsc.smlm.tsf.TSFProtos.LocationUnits value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00004000;
 				locationUnits_ = value.getNumber();
 				onChanged();
@@ -7506,7 +6939,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.IntensityUnits getIntensityUnits()
 			{
-				gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
+				final gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
 						.valueOf(intensityUnits_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.IntensityUnits.COUNTS : result;
 			}
@@ -7517,9 +6950,7 @@ public final class TSFProtos
 			public Builder setIntensityUnits(gdsc.smlm.tsf.TSFProtos.IntensityUnits value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00008000;
 				intensityUnits_ = value.getNumber();
 				onChanged();
@@ -7554,7 +6985,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.ThetaUnits getThetaUnits()
 			{
-				gdsc.smlm.tsf.TSFProtos.ThetaUnits result = gdsc.smlm.tsf.TSFProtos.ThetaUnits.valueOf(thetaUnits_);
+				final gdsc.smlm.tsf.TSFProtos.ThetaUnits result = gdsc.smlm.tsf.TSFProtos.ThetaUnits.valueOf(thetaUnits_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.ThetaUnits.DEGREES : result;
 			}
 
@@ -7564,9 +6995,7 @@ public final class TSFProtos
 			public Builder setThetaUnits(gdsc.smlm.tsf.TSFProtos.ThetaUnits value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00010000;
 				thetaUnits_ = value.getNumber();
 				onChanged();
@@ -7611,7 +7040,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.FitMode getFitMode()
 			{
-				gdsc.smlm.tsf.TSFProtos.FitMode result = gdsc.smlm.tsf.TSFProtos.FitMode.valueOf(fitMode_);
+				final gdsc.smlm.tsf.TSFProtos.FitMode result = gdsc.smlm.tsf.TSFProtos.FitMode.valueOf(fitMode_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.FitMode.ONEAXIS : result;
 			}
 
@@ -7626,9 +7055,7 @@ public final class TSFProtos
 			public Builder setFitMode(gdsc.smlm.tsf.TSFProtos.FitMode value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00020000;
 				fitMode_ = value.getNumber();
 				onChanged();
@@ -8015,13 +7442,9 @@ public final class TSFProtos
 			public gdsc.smlm.tsf.TSFProtos.ROI getRoi()
 			{
 				if (roiBuilder_ == null)
-				{
 					return roi_ == null ? gdsc.smlm.tsf.TSFProtos.ROI.getDefaultInstance() : roi_;
-				}
 				else
-				{
 					return roiBuilder_.getMessage();
-				}
 			}
 
 			/**
@@ -8032,16 +7455,12 @@ public final class TSFProtos
 				if (roiBuilder_ == null)
 				{
 					if (value == null)
-					{
 						throw new NullPointerException();
-					}
 					roi_ = value;
 					onChanged();
 				}
 				else
-				{
 					roiBuilder_.setMessage(value);
-				}
 				bitField0_ |= 0x00200000;
 				return this;
 			}
@@ -8057,9 +7476,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					roiBuilder_.setMessage(builderForValue.build());
-				}
 				bitField0_ |= 0x00200000;
 				return this;
 			}
@@ -8073,19 +7490,13 @@ public final class TSFProtos
 				{
 					if (((bitField0_ & 0x00200000) == 0x00200000) && roi_ != null &&
 							roi_ != gdsc.smlm.tsf.TSFProtos.ROI.getDefaultInstance())
-					{
 						roi_ = gdsc.smlm.tsf.TSFProtos.ROI.newBuilder(roi_).mergeFrom(value).buildPartial();
-					}
 					else
-					{
 						roi_ = value;
-					}
 					onChanged();
 				}
 				else
-				{
 					roiBuilder_.mergeFrom(value);
-				}
 				bitField0_ |= 0x00200000;
 				return this;
 			}
@@ -8101,9 +7512,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				else
-				{
 					roiBuilder_.clear();
-				}
 				bitField0_ = (bitField0_ & ~0x00200000);
 				return this;
 			}
@@ -8125,13 +7534,9 @@ public final class TSFProtos
 			public gdsc.smlm.tsf.TSFProtos.ROIOrBuilder getRoiOrBuilder()
 			{
 				if (roiBuilder_ != null)
-				{
 					return roiBuilder_.getMessageOrBuilder();
-				}
 				else
-				{
 					return roi_ == null ? gdsc.smlm.tsf.TSFProtos.ROI.getDefaultInstance() : roi_;
-				}
 			}
 
 			/**
@@ -8173,21 +7578,17 @@ public final class TSFProtos
 			@Override
 			public java.lang.String getSource()
 			{
-				java.lang.Object ref = source_;
+				final java.lang.Object ref = source_;
 				if (!(ref instanceof java.lang.String))
 				{
-					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-					java.lang.String s = bs.toStringUtf8();
+					final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					final java.lang.String s = bs.toStringUtf8();
 					if (bs.isValidUtf8())
-					{
 						source_ = s;
-					}
 					return s;
 				}
 				else
-				{
 					return (java.lang.String) ref;
-				}
 			}
 
 			/**
@@ -8200,18 +7601,16 @@ public final class TSFProtos
 			@Override
 			public com.google.protobuf.ByteString getSourceBytes()
 			{
-				java.lang.Object ref = source_;
+				final java.lang.Object ref = source_;
 				if (ref instanceof String)
 				{
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+					final com.google.protobuf.ByteString b = com.google.protobuf.ByteString
 							.copyFromUtf8((java.lang.String) ref);
 					source_ = b;
 					return b;
 				}
 				else
-				{
 					return (com.google.protobuf.ByteString) ref;
-				}
 			}
 
 			/**
@@ -8224,9 +7623,7 @@ public final class TSFProtos
 			public Builder setSource(java.lang.String value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00400000;
 				source_ = value;
 				onChanged();
@@ -8258,9 +7655,7 @@ public final class TSFProtos
 			public Builder setSourceBytes(com.google.protobuf.ByteString value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00400000;
 				source_ = value;
 				onChanged();
@@ -8292,21 +7687,17 @@ public final class TSFProtos
 			@Override
 			public java.lang.String getConfiguration()
 			{
-				java.lang.Object ref = configuration_;
+				final java.lang.Object ref = configuration_;
 				if (!(ref instanceof java.lang.String))
 				{
-					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-					java.lang.String s = bs.toStringUtf8();
+					final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					final java.lang.String s = bs.toStringUtf8();
 					if (bs.isValidUtf8())
-					{
 						configuration_ = s;
-					}
 					return s;
 				}
 				else
-				{
 					return (java.lang.String) ref;
-				}
 			}
 
 			/**
@@ -8319,18 +7710,16 @@ public final class TSFProtos
 			@Override
 			public com.google.protobuf.ByteString getConfigurationBytes()
 			{
-				java.lang.Object ref = configuration_;
+				final java.lang.Object ref = configuration_;
 				if (ref instanceof String)
 				{
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+					final com.google.protobuf.ByteString b = com.google.protobuf.ByteString
 							.copyFromUtf8((java.lang.String) ref);
 					configuration_ = b;
 					return b;
 				}
 				else
-				{
 					return (com.google.protobuf.ByteString) ref;
-				}
 			}
 
 			/**
@@ -8343,9 +7732,7 @@ public final class TSFProtos
 			public Builder setConfiguration(java.lang.String value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00800000;
 				configuration_ = value;
 				onChanged();
@@ -8377,9 +7764,7 @@ public final class TSFProtos
 			public Builder setConfigurationBytes(com.google.protobuf.ByteString value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00800000;
 				configuration_ = value;
 				onChanged();
@@ -8643,7 +8028,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.CameraType getCameraType()
 			{
-				gdsc.smlm.tsf.TSFProtos.CameraType result = gdsc.smlm.tsf.TSFProtos.CameraType.valueOf(cameraType_);
+				final gdsc.smlm.tsf.TSFProtos.CameraType result = gdsc.smlm.tsf.TSFProtos.CameraType.valueOf(cameraType_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.CameraType.CCD : result;
 			}
 
@@ -8657,9 +8042,7 @@ public final class TSFProtos
 			public Builder setCameraType(gdsc.smlm.tsf.TSFProtos.CameraType value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x10000000;
 				cameraType_ = value.getNumber();
 				onChanged();
@@ -8706,21 +8089,17 @@ public final class TSFProtos
 			@Override
 			public java.lang.String getPSF()
 			{
-				java.lang.Object ref = pSF_;
+				final java.lang.Object ref = pSF_;
 				if (!(ref instanceof java.lang.String))
 				{
-					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-					java.lang.String s = bs.toStringUtf8();
+					final com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					final java.lang.String s = bs.toStringUtf8();
 					if (bs.isValidUtf8())
-					{
 						pSF_ = s;
-					}
 					return s;
 				}
 				else
-				{
 					return (java.lang.String) ref;
-				}
 			}
 
 			/**
@@ -8733,18 +8112,16 @@ public final class TSFProtos
 			@Override
 			public com.google.protobuf.ByteString getPSFBytes()
 			{
-				java.lang.Object ref = pSF_;
+				final java.lang.Object ref = pSF_;
 				if (ref instanceof String)
 				{
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+					final com.google.protobuf.ByteString b = com.google.protobuf.ByteString
 							.copyFromUtf8((java.lang.String) ref);
 					pSF_ = b;
 					return b;
 				}
 				else
-				{
 					return (com.google.protobuf.ByteString) ref;
-				}
 			}
 
 			/**
@@ -8757,9 +8134,7 @@ public final class TSFProtos
 			public Builder setPSF(java.lang.String value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x20000000;
 				pSF_ = value;
 				onChanged();
@@ -8791,9 +8166,7 @@ public final class TSFProtos
 			public Builder setPSFBytes(com.google.protobuf.ByteString value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x20000000;
 				pSF_ = value;
 				onChanged();
@@ -9521,14 +8894,14 @@ public final class TSFProtos
 		{
 			this();
 			int mutable_bitField0_ = 0;
-			com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
+			final com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
 					.newBuilder();
 			try
 			{
 				boolean done = false;
 				while (!done)
 				{
-					int tag = input.readTag();
+					final int tag = input.readTag();
 					switch (tag)
 					{
 						case 0:
@@ -9537,9 +8910,7 @@ public final class TSFProtos
 						default:
 						{
 							if (!parseUnknownField(input, unknownFields, extensionRegistry, tag))
-							{
 								done = true;
-							}
 							break;
 						}
 						case 8:
@@ -9622,13 +8993,11 @@ public final class TSFProtos
 						}
 						case 136:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.LocationUnits value = gdsc.smlm.tsf.TSFProtos.LocationUnits
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.LocationUnits value = gdsc.smlm.tsf.TSFProtos.LocationUnits
 									.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(17, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x00000080;
@@ -9638,13 +9007,11 @@ public final class TSFProtos
 						}
 						case 144:
 						{
-							int rawValue = input.readEnum();
-							gdsc.smlm.tsf.TSFProtos.IntensityUnits value = gdsc.smlm.tsf.TSFProtos.IntensityUnits
+							final int rawValue = input.readEnum();
+							final gdsc.smlm.tsf.TSFProtos.IntensityUnits value = gdsc.smlm.tsf.TSFProtos.IntensityUnits
 									.valueOf(rawValue);
 							if (value == null)
-							{
 								unknownFields.mergeVarintField(18, rawValue);
-							}
 							else
 							{
 								bitField0_ |= 0x00000800;
@@ -9748,17 +9115,15 @@ public final class TSFProtos
 						}
 						case 12042:
 						{
-							int length = input.readRawVarint32();
-							int limit = input.pushLimit(length);
+							final int length = input.readRawVarint32();
+							final int limit = input.pushLimit(length);
 							if (!((mutable_bitField0_ & 0x20000000) == 0x20000000) && input.getBytesUntilLimit() > 0)
 							{
 								paramStdDevs_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x20000000;
 							}
 							while (input.getBytesUntilLimit() > 0)
-							{
 								paramStdDevs_.add(input.readFloat());
-							}
 							input.popLimit(limit);
 							break;
 						}
@@ -9771,20 +9136,18 @@ public final class TSFProtos
 					}
 				}
 			}
-			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			catch (final com.google.protobuf.InvalidProtocolBufferException e)
 			{
 				throw e.setUnfinishedMessage(this);
 			}
-			catch (java.io.IOException e)
+			catch (final java.io.IOException e)
 			{
 				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
 			}
 			finally
 			{
 				if (((mutable_bitField0_ & 0x20000000) == 0x20000000))
-				{
 					paramStdDevs_ = java.util.Collections.unmodifiableList(paramStdDevs_);
-				}
 				this.unknownFields = unknownFields.build();
 				makeExtensionsImmutable();
 			}
@@ -10102,7 +9465,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.LocationUnits getLocationUnits()
 		{
-			gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
+			final gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
 					.valueOf(locationUnits_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.LocationUnits.NM : result;
 		}
@@ -10200,7 +9563,7 @@ public final class TSFProtos
 		@Override
 		public gdsc.smlm.tsf.TSFProtos.IntensityUnits getIntensityUnits()
 		{
-			gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
+			final gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
 					.valueOf(intensityUnits_);
 			return result == null ? gdsc.smlm.tsf.TSFProtos.IntensityUnits.COUNTS : result;
 		}
@@ -10754,7 +10117,7 @@ public final class TSFProtos
 		@Override
 		public final boolean isInitialized()
 		{
-			byte isInitialized = memoizedIsInitialized;
+			final byte isInitialized = memoizedIsInitialized;
 			if (isInitialized == 1)
 				return true;
 			if (isInitialized == 0)
@@ -10802,131 +10165,69 @@ public final class TSFProtos
 		@Override
 		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
 		{
-			com.google.protobuf.GeneratedMessageV3.ExtendableMessage<gdsc.smlm.tsf.TSFProtos.Spot>.ExtensionWriter extensionWriter = newExtensionWriter();
+			final com.google.protobuf.GeneratedMessageV3.ExtendableMessage<gdsc.smlm.tsf.TSFProtos.Spot>.ExtensionWriter extensionWriter = newExtensionWriter();
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				output.writeInt32(1, molecule_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				output.writeInt32(2, channel_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				output.writeInt32(3, frame_);
-			}
 			if (((bitField0_ & 0x00000008) == 0x00000008))
-			{
 				output.writeInt32(4, slice_);
-			}
 			if (((bitField0_ & 0x00000010) == 0x00000010))
-			{
 				output.writeInt32(5, pos_);
-			}
 			if (((bitField0_ & 0x00000100) == 0x00000100))
-			{
 				output.writeFloat(7, x_);
-			}
 			if (((bitField0_ & 0x00000200) == 0x00000200))
-			{
 				output.writeFloat(8, y_);
-			}
 			if (((bitField0_ & 0x00000400) == 0x00000400))
-			{
 				output.writeFloat(9, z_);
-			}
 			if (((bitField0_ & 0x00001000) == 0x00001000))
-			{
 				output.writeFloat(10, intensity_);
-			}
 			if (((bitField0_ & 0x00002000) == 0x00002000))
-			{
 				output.writeFloat(11, background_);
-			}
 			if (((bitField0_ & 0x00004000) == 0x00004000))
-			{
 				output.writeFloat(12, width_);
-			}
 			if (((bitField0_ & 0x00008000) == 0x00008000))
-			{
 				output.writeFloat(13, a_);
-			}
 			if (((bitField0_ & 0x00010000) == 0x00010000))
-			{
 				output.writeFloat(14, theta_);
-			}
 			if (((bitField0_ & 0x00000080) == 0x00000080))
-			{
 				output.writeEnum(17, locationUnits_);
-			}
 			if (((bitField0_ & 0x00000800) == 0x00000800))
-			{
 				output.writeEnum(18, intensityUnits_);
-			}
 			if (((bitField0_ & 0x00000020) == 0x00000020))
-			{
 				output.writeInt32(19, fluorophoreType_);
-			}
 			if (((bitField0_ & 0x00000040) == 0x00000040))
-			{
 				output.writeInt32(20, cluster_);
-			}
 			if (((bitField0_ & 0x00020000) == 0x00020000))
-			{
 				output.writeFloat(101, xOriginal_);
-			}
 			if (((bitField0_ & 0x00040000) == 0x00040000))
-			{
 				output.writeFloat(102, yOriginal_);
-			}
 			if (((bitField0_ & 0x00080000) == 0x00080000))
-			{
 				output.writeFloat(103, zOriginal_);
-			}
 			if (((bitField0_ & 0x00100000) == 0x00100000))
-			{
 				output.writeFloat(104, xPrecision_);
-			}
 			if (((bitField0_ & 0x00200000) == 0x00200000))
-			{
 				output.writeFloat(105, yPrecision_);
-			}
 			if (((bitField0_ & 0x00400000) == 0x00400000))
-			{
 				output.writeFloat(106, zPrecision_);
-			}
 			if (((bitField0_ & 0x00800000) == 0x00800000))
-			{
 				output.writeInt32(107, xPosition_);
-			}
 			if (((bitField0_ & 0x01000000) == 0x01000000))
-			{
 				output.writeInt32(108, yPosition_);
-			}
 			if (((bitField0_ & 0x02000000) == 0x02000000))
-			{
 				output.writeDouble(1500, error_);
-			}
 			if (((bitField0_ & 0x04000000) == 0x04000000))
-			{
 				output.writeFloat(1501, noise_);
-			}
 			if (((bitField0_ & 0x08000000) == 0x08000000))
-			{
 				output.writeInt32(1503, endFrame_);
-			}
 			if (((bitField0_ & 0x10000000) == 0x10000000))
-			{
 				output.writeFloat(1504, originalValue_);
-			}
 			for (int i = 0; i < paramStdDevs_.size(); i++)
-			{
 				output.writeFloat(1505, paramStdDevs_.get(i));
-			}
 			if (((bitField0_ & 0x20000000) == 0x20000000))
-			{
 				output.writeFloat(1506, meanIntensity_);
-			}
 			extensionWriter.writeUntil(2048, output);
 			unknownFields.writeTo(output);
 		}
@@ -10940,121 +10241,63 @@ public final class TSFProtos
 
 			size = 0;
 			if (((bitField0_ & 0x00000001) == 0x00000001))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, molecule_);
-			}
 			if (((bitField0_ & 0x00000002) == 0x00000002))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, channel_);
-			}
 			if (((bitField0_ & 0x00000004) == 0x00000004))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(3, frame_);
-			}
 			if (((bitField0_ & 0x00000008) == 0x00000008))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, slice_);
-			}
 			if (((bitField0_ & 0x00000010) == 0x00000010))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(5, pos_);
-			}
 			if (((bitField0_ & 0x00000100) == 0x00000100))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(7, x_);
-			}
 			if (((bitField0_ & 0x00000200) == 0x00000200))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(8, y_);
-			}
 			if (((bitField0_ & 0x00000400) == 0x00000400))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(9, z_);
-			}
 			if (((bitField0_ & 0x00001000) == 0x00001000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(10, intensity_);
-			}
 			if (((bitField0_ & 0x00002000) == 0x00002000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(11, background_);
-			}
 			if (((bitField0_ & 0x00004000) == 0x00004000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(12, width_);
-			}
 			if (((bitField0_ & 0x00008000) == 0x00008000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(13, a_);
-			}
 			if (((bitField0_ & 0x00010000) == 0x00010000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(14, theta_);
-			}
 			if (((bitField0_ & 0x00000080) == 0x00000080))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(17, locationUnits_);
-			}
 			if (((bitField0_ & 0x00000800) == 0x00000800))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeEnumSize(18, intensityUnits_);
-			}
 			if (((bitField0_ & 0x00000020) == 0x00000020))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(19, fluorophoreType_);
-			}
 			if (((bitField0_ & 0x00000040) == 0x00000040))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(20, cluster_);
-			}
 			if (((bitField0_ & 0x00020000) == 0x00020000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(101, xOriginal_);
-			}
 			if (((bitField0_ & 0x00040000) == 0x00040000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(102, yOriginal_);
-			}
 			if (((bitField0_ & 0x00080000) == 0x00080000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(103, zOriginal_);
-			}
 			if (((bitField0_ & 0x00100000) == 0x00100000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(104, xPrecision_);
-			}
 			if (((bitField0_ & 0x00200000) == 0x00200000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(105, yPrecision_);
-			}
 			if (((bitField0_ & 0x00400000) == 0x00400000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(106, zPrecision_);
-			}
 			if (((bitField0_ & 0x00800000) == 0x00800000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(107, xPosition_);
-			}
 			if (((bitField0_ & 0x01000000) == 0x01000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(108, yPosition_);
-			}
 			if (((bitField0_ & 0x02000000) == 0x02000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1500, error_);
-			}
 			if (((bitField0_ & 0x04000000) == 0x04000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(1501, noise_);
-			}
 			if (((bitField0_ & 0x08000000) == 0x08000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1503, endFrame_);
-			}
 			if (((bitField0_ & 0x10000000) == 0x10000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(1504, originalValue_);
-			}
 			{
 				int dataSize = 0;
 				dataSize = 4 * getParamStdDevsList().size();
@@ -11062,9 +10305,7 @@ public final class TSFProtos
 				size += 2 * getParamStdDevsList().size();
 			}
 			if (((bitField0_ & 0x20000000) == 0x20000000))
-			{
 				size += com.google.protobuf.CodedOutputStream.computeFloatSize(1506, meanIntensity_);
-			}
 			size += extensionsSerializedSize();
 			size += unknownFields.getSerializedSize();
 			memoizedSize = size;
@@ -11077,185 +10318,121 @@ public final class TSFProtos
 		public boolean equals(final java.lang.Object obj)
 		{
 			if (obj == this)
-			{
 				return true;
-			}
 			if (!(obj instanceof gdsc.smlm.tsf.TSFProtos.Spot))
-			{
 				return super.equals(obj);
-			}
-			gdsc.smlm.tsf.TSFProtos.Spot other = (gdsc.smlm.tsf.TSFProtos.Spot) obj;
+			final gdsc.smlm.tsf.TSFProtos.Spot other = (gdsc.smlm.tsf.TSFProtos.Spot) obj;
 
 			boolean result = true;
 			result = result && (hasMolecule() == other.hasMolecule());
 			if (hasMolecule())
-			{
 				result = result && (getMolecule() == other.getMolecule());
-			}
 			result = result && (hasChannel() == other.hasChannel());
 			if (hasChannel())
-			{
 				result = result && (getChannel() == other.getChannel());
-			}
 			result = result && (hasFrame() == other.hasFrame());
 			if (hasFrame())
-			{
 				result = result && (getFrame() == other.getFrame());
-			}
 			result = result && (hasSlice() == other.hasSlice());
 			if (hasSlice())
-			{
 				result = result && (getSlice() == other.getSlice());
-			}
 			result = result && (hasPos() == other.hasPos());
 			if (hasPos())
-			{
 				result = result && (getPos() == other.getPos());
-			}
 			result = result && (hasFluorophoreType() == other.hasFluorophoreType());
 			if (hasFluorophoreType())
-			{
 				result = result && (getFluorophoreType() == other.getFluorophoreType());
-			}
 			result = result && (hasCluster() == other.hasCluster());
 			if (hasCluster())
-			{
 				result = result && (getCluster() == other.getCluster());
-			}
 			result = result && (hasLocationUnits() == other.hasLocationUnits());
 			if (hasLocationUnits())
-			{
 				result = result && locationUnits_ == other.locationUnits_;
-			}
 			result = result && (hasX() == other.hasX());
 			if (hasX())
-			{
 				result = result &&
 						(java.lang.Float.floatToIntBits(getX()) == java.lang.Float.floatToIntBits(other.getX()));
-			}
 			result = result && (hasY() == other.hasY());
 			if (hasY())
-			{
 				result = result &&
 						(java.lang.Float.floatToIntBits(getY()) == java.lang.Float.floatToIntBits(other.getY()));
-			}
 			result = result && (hasZ() == other.hasZ());
 			if (hasZ())
-			{
 				result = result &&
 						(java.lang.Float.floatToIntBits(getZ()) == java.lang.Float.floatToIntBits(other.getZ()));
-			}
 			result = result && (hasIntensityUnits() == other.hasIntensityUnits());
 			if (hasIntensityUnits())
-			{
 				result = result && intensityUnits_ == other.intensityUnits_;
-			}
 			result = result && (hasIntensity() == other.hasIntensity());
 			if (hasIntensity())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getIntensity()) == java.lang.Float
 						.floatToIntBits(other.getIntensity()));
-			}
 			result = result && (hasBackground() == other.hasBackground());
 			if (hasBackground())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getBackground()) == java.lang.Float
 						.floatToIntBits(other.getBackground()));
-			}
 			result = result && (hasWidth() == other.hasWidth());
 			if (hasWidth())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getWidth()) == java.lang.Float
 						.floatToIntBits(other.getWidth()));
-			}
 			result = result && (hasA() == other.hasA());
 			if (hasA())
-			{
 				result = result &&
 						(java.lang.Float.floatToIntBits(getA()) == java.lang.Float.floatToIntBits(other.getA()));
-			}
 			result = result && (hasTheta() == other.hasTheta());
 			if (hasTheta())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getTheta()) == java.lang.Float
 						.floatToIntBits(other.getTheta()));
-			}
 			result = result && (hasXOriginal() == other.hasXOriginal());
 			if (hasXOriginal())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getXOriginal()) == java.lang.Float
 						.floatToIntBits(other.getXOriginal()));
-			}
 			result = result && (hasYOriginal() == other.hasYOriginal());
 			if (hasYOriginal())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getYOriginal()) == java.lang.Float
 						.floatToIntBits(other.getYOriginal()));
-			}
 			result = result && (hasZOriginal() == other.hasZOriginal());
 			if (hasZOriginal())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getZOriginal()) == java.lang.Float
 						.floatToIntBits(other.getZOriginal()));
-			}
 			result = result && (hasXPrecision() == other.hasXPrecision());
 			if (hasXPrecision())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getXPrecision()) == java.lang.Float
 						.floatToIntBits(other.getXPrecision()));
-			}
 			result = result && (hasYPrecision() == other.hasYPrecision());
 			if (hasYPrecision())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getYPrecision()) == java.lang.Float
 						.floatToIntBits(other.getYPrecision()));
-			}
 			result = result && (hasZPrecision() == other.hasZPrecision());
 			if (hasZPrecision())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getZPrecision()) == java.lang.Float
 						.floatToIntBits(other.getZPrecision()));
-			}
 			result = result && (hasXPosition() == other.hasXPosition());
 			if (hasXPosition())
-			{
 				result = result && (getXPosition() == other.getXPosition());
-			}
 			result = result && (hasYPosition() == other.hasYPosition());
 			if (hasYPosition())
-			{
 				result = result && (getYPosition() == other.getYPosition());
-			}
 			result = result && (hasError() == other.hasError());
 			if (hasError())
-			{
 				result = result && (java.lang.Double.doubleToLongBits(getError()) == java.lang.Double
 						.doubleToLongBits(other.getError()));
-			}
 			result = result && (hasNoise() == other.hasNoise());
 			if (hasNoise())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getNoise()) == java.lang.Float
 						.floatToIntBits(other.getNoise()));
-			}
 			result = result && (hasEndFrame() == other.hasEndFrame());
 			if (hasEndFrame())
-			{
 				result = result && (getEndFrame() == other.getEndFrame());
-			}
 			result = result && (hasOriginalValue() == other.hasOriginalValue());
 			if (hasOriginalValue())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getOriginalValue()) == java.lang.Float
 						.floatToIntBits(other.getOriginalValue()));
-			}
 			result = result && getParamStdDevsList().equals(other.getParamStdDevsList());
 			result = result && (hasMeanIntensity() == other.hasMeanIntensity());
 			if (hasMeanIntensity())
-			{
 				result = result && (java.lang.Float.floatToIntBits(getMeanIntensity()) == java.lang.Float
 						.floatToIntBits(other.getMeanIntensity()));
-			}
 			result = result && unknownFields.equals(other.unknownFields);
 			result = result && getExtensionFields().equals(other.getExtensionFields());
 			return result;
@@ -11265,9 +10442,7 @@ public final class TSFProtos
 		public int hashCode()
 		{
 			if (memoizedHashCode != 0)
-			{
 				return memoizedHashCode;
-			}
 			int hash = 41;
 			hash = (19 * hash) + getDescriptor().hashCode();
 			if (hasMolecule())
@@ -11532,7 +10707,7 @@ public final class TSFProtos
 		@java.lang.Override
 		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
 		{
-			Builder builder = new Builder(parent);
+			final Builder builder = new Builder(parent);
 			return builder;
 		}
 
@@ -11661,164 +10836,104 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.Spot build()
 			{
-				gdsc.smlm.tsf.TSFProtos.Spot result = buildPartial();
+				final gdsc.smlm.tsf.TSFProtos.Spot result = buildPartial();
 				if (!result.isInitialized())
-				{
 					throw newUninitializedMessageException(result);
-				}
 				return result;
 			}
 
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.Spot buildPartial()
 			{
-				gdsc.smlm.tsf.TSFProtos.Spot result = new gdsc.smlm.tsf.TSFProtos.Spot(this);
-				int from_bitField0_ = bitField0_;
+				final gdsc.smlm.tsf.TSFProtos.Spot result = new gdsc.smlm.tsf.TSFProtos.Spot(this);
+				final int from_bitField0_ = bitField0_;
 				int to_bitField0_ = 0;
 				if (((from_bitField0_ & 0x00000001) == 0x00000001))
-				{
 					to_bitField0_ |= 0x00000001;
-				}
 				result.molecule_ = molecule_;
 				if (((from_bitField0_ & 0x00000002) == 0x00000002))
-				{
 					to_bitField0_ |= 0x00000002;
-				}
 				result.channel_ = channel_;
 				if (((from_bitField0_ & 0x00000004) == 0x00000004))
-				{
 					to_bitField0_ |= 0x00000004;
-				}
 				result.frame_ = frame_;
 				if (((from_bitField0_ & 0x00000008) == 0x00000008))
-				{
 					to_bitField0_ |= 0x00000008;
-				}
 				result.slice_ = slice_;
 				if (((from_bitField0_ & 0x00000010) == 0x00000010))
-				{
 					to_bitField0_ |= 0x00000010;
-				}
 				result.pos_ = pos_;
 				if (((from_bitField0_ & 0x00000020) == 0x00000020))
-				{
 					to_bitField0_ |= 0x00000020;
-				}
 				result.fluorophoreType_ = fluorophoreType_;
 				if (((from_bitField0_ & 0x00000040) == 0x00000040))
-				{
 					to_bitField0_ |= 0x00000040;
-				}
 				result.cluster_ = cluster_;
 				if (((from_bitField0_ & 0x00000080) == 0x00000080))
-				{
 					to_bitField0_ |= 0x00000080;
-				}
 				result.locationUnits_ = locationUnits_;
 				if (((from_bitField0_ & 0x00000100) == 0x00000100))
-				{
 					to_bitField0_ |= 0x00000100;
-				}
 				result.x_ = x_;
 				if (((from_bitField0_ & 0x00000200) == 0x00000200))
-				{
 					to_bitField0_ |= 0x00000200;
-				}
 				result.y_ = y_;
 				if (((from_bitField0_ & 0x00000400) == 0x00000400))
-				{
 					to_bitField0_ |= 0x00000400;
-				}
 				result.z_ = z_;
 				if (((from_bitField0_ & 0x00000800) == 0x00000800))
-				{
 					to_bitField0_ |= 0x00000800;
-				}
 				result.intensityUnits_ = intensityUnits_;
 				if (((from_bitField0_ & 0x00001000) == 0x00001000))
-				{
 					to_bitField0_ |= 0x00001000;
-				}
 				result.intensity_ = intensity_;
 				if (((from_bitField0_ & 0x00002000) == 0x00002000))
-				{
 					to_bitField0_ |= 0x00002000;
-				}
 				result.background_ = background_;
 				if (((from_bitField0_ & 0x00004000) == 0x00004000))
-				{
 					to_bitField0_ |= 0x00004000;
-				}
 				result.width_ = width_;
 				if (((from_bitField0_ & 0x00008000) == 0x00008000))
-				{
 					to_bitField0_ |= 0x00008000;
-				}
 				result.a_ = a_;
 				if (((from_bitField0_ & 0x00010000) == 0x00010000))
-				{
 					to_bitField0_ |= 0x00010000;
-				}
 				result.theta_ = theta_;
 				if (((from_bitField0_ & 0x00020000) == 0x00020000))
-				{
 					to_bitField0_ |= 0x00020000;
-				}
 				result.xOriginal_ = xOriginal_;
 				if (((from_bitField0_ & 0x00040000) == 0x00040000))
-				{
 					to_bitField0_ |= 0x00040000;
-				}
 				result.yOriginal_ = yOriginal_;
 				if (((from_bitField0_ & 0x00080000) == 0x00080000))
-				{
 					to_bitField0_ |= 0x00080000;
-				}
 				result.zOriginal_ = zOriginal_;
 				if (((from_bitField0_ & 0x00100000) == 0x00100000))
-				{
 					to_bitField0_ |= 0x00100000;
-				}
 				result.xPrecision_ = xPrecision_;
 				if (((from_bitField0_ & 0x00200000) == 0x00200000))
-				{
 					to_bitField0_ |= 0x00200000;
-				}
 				result.yPrecision_ = yPrecision_;
 				if (((from_bitField0_ & 0x00400000) == 0x00400000))
-				{
 					to_bitField0_ |= 0x00400000;
-				}
 				result.zPrecision_ = zPrecision_;
 				if (((from_bitField0_ & 0x00800000) == 0x00800000))
-				{
 					to_bitField0_ |= 0x00800000;
-				}
 				result.xPosition_ = xPosition_;
 				if (((from_bitField0_ & 0x01000000) == 0x01000000))
-				{
 					to_bitField0_ |= 0x01000000;
-				}
 				result.yPosition_ = yPosition_;
 				if (((from_bitField0_ & 0x02000000) == 0x02000000))
-				{
 					to_bitField0_ |= 0x02000000;
-				}
 				result.error_ = error_;
 				if (((from_bitField0_ & 0x04000000) == 0x04000000))
-				{
 					to_bitField0_ |= 0x04000000;
-				}
 				result.noise_ = noise_;
 				if (((from_bitField0_ & 0x08000000) == 0x08000000))
-				{
 					to_bitField0_ |= 0x08000000;
-				}
 				result.endFrame_ = endFrame_;
 				if (((from_bitField0_ & 0x10000000) == 0x10000000))
-				{
 					to_bitField0_ |= 0x10000000;
-				}
 				result.originalValue_ = originalValue_;
 				if (((bitField0_ & 0x20000000) == 0x20000000))
 				{
@@ -11827,9 +10942,7 @@ public final class TSFProtos
 				}
 				result.paramStdDevs_ = paramStdDevs_;
 				if (((from_bitField0_ & 0x40000000) == 0x40000000))
-				{
 					to_bitField0_ |= 0x20000000;
-				}
 				result.meanIntensity_ = meanIntensity_;
 				result.bitField0_ = to_bitField0_;
 				onBuilt();
@@ -11908,9 +11021,7 @@ public final class TSFProtos
 			public Builder mergeFrom(com.google.protobuf.Message other)
 			{
 				if (other instanceof gdsc.smlm.tsf.TSFProtos.Spot)
-				{
 					return mergeFrom((gdsc.smlm.tsf.TSFProtos.Spot) other);
-				}
 				else
 				{
 					super.mergeFrom(other);
@@ -11923,121 +11034,63 @@ public final class TSFProtos
 				if (other == gdsc.smlm.tsf.TSFProtos.Spot.getDefaultInstance())
 					return this;
 				if (other.hasMolecule())
-				{
 					setMolecule(other.getMolecule());
-				}
 				if (other.hasChannel())
-				{
 					setChannel(other.getChannel());
-				}
 				if (other.hasFrame())
-				{
 					setFrame(other.getFrame());
-				}
 				if (other.hasSlice())
-				{
 					setSlice(other.getSlice());
-				}
 				if (other.hasPos())
-				{
 					setPos(other.getPos());
-				}
 				if (other.hasFluorophoreType())
-				{
 					setFluorophoreType(other.getFluorophoreType());
-				}
 				if (other.hasCluster())
-				{
 					setCluster(other.getCluster());
-				}
 				if (other.hasLocationUnits())
-				{
 					setLocationUnits(other.getLocationUnits());
-				}
 				if (other.hasX())
-				{
 					setX(other.getX());
-				}
 				if (other.hasY())
-				{
 					setY(other.getY());
-				}
 				if (other.hasZ())
-				{
 					setZ(other.getZ());
-				}
 				if (other.hasIntensityUnits())
-				{
 					setIntensityUnits(other.getIntensityUnits());
-				}
 				if (other.hasIntensity())
-				{
 					setIntensity(other.getIntensity());
-				}
 				if (other.hasBackground())
-				{
 					setBackground(other.getBackground());
-				}
 				if (other.hasWidth())
-				{
 					setWidth(other.getWidth());
-				}
 				if (other.hasA())
-				{
 					setA(other.getA());
-				}
 				if (other.hasTheta())
-				{
 					setTheta(other.getTheta());
-				}
 				if (other.hasXOriginal())
-				{
 					setXOriginal(other.getXOriginal());
-				}
 				if (other.hasYOriginal())
-				{
 					setYOriginal(other.getYOriginal());
-				}
 				if (other.hasZOriginal())
-				{
 					setZOriginal(other.getZOriginal());
-				}
 				if (other.hasXPrecision())
-				{
 					setXPrecision(other.getXPrecision());
-				}
 				if (other.hasYPrecision())
-				{
 					setYPrecision(other.getYPrecision());
-				}
 				if (other.hasZPrecision())
-				{
 					setZPrecision(other.getZPrecision());
-				}
 				if (other.hasXPosition())
-				{
 					setXPosition(other.getXPosition());
-				}
 				if (other.hasYPosition())
-				{
 					setYPosition(other.getYPosition());
-				}
 				if (other.hasError())
-				{
 					setError(other.getError());
-				}
 				if (other.hasNoise())
-				{
 					setNoise(other.getNoise());
-				}
 				if (other.hasEndFrame())
-				{
 					setEndFrame(other.getEndFrame());
-				}
 				if (other.hasOriginalValue())
-				{
 					setOriginalValue(other.getOriginalValue());
-				}
 				if (!other.paramStdDevs_.isEmpty())
 				{
 					if (paramStdDevs_.isEmpty())
@@ -12053,9 +11106,7 @@ public final class TSFProtos
 					onChanged();
 				}
 				if (other.hasMeanIntensity())
-				{
 					setMeanIntensity(other.getMeanIntensity());
-				}
 				this.mergeExtensionFields(other);
 				this.mergeUnknownFields(other.unknownFields);
 				onChanged();
@@ -12066,33 +11117,19 @@ public final class TSFProtos
 			public final boolean isInitialized()
 			{
 				if (!hasMolecule())
-				{
 					return false;
-				}
 				if (!hasChannel())
-				{
 					return false;
-				}
 				if (!hasFrame())
-				{
 					return false;
-				}
 				if (!hasX())
-				{
 					return false;
-				}
 				if (!hasY())
-				{
 					return false;
-				}
 				if (!hasIntensity())
-				{
 					return false;
-				}
 				if (!extensionsAreInitialized())
-				{
 					return false;
-				}
 				return true;
 			}
 
@@ -12105,7 +11142,7 @@ public final class TSFProtos
 				{
 					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
 				}
-				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				catch (final com.google.protobuf.InvalidProtocolBufferException e)
 				{
 					parsedMessage = (gdsc.smlm.tsf.TSFProtos.Spot) e.getUnfinishedMessage();
 					throw e.unwrapIOException();
@@ -12113,9 +11150,7 @@ public final class TSFProtos
 				finally
 				{
 					if (parsedMessage != null)
-					{
 						mergeFrom(parsedMessage);
-					}
 				}
 				return this;
 			}
@@ -12691,7 +11726,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.LocationUnits getLocationUnits()
 			{
-				gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
+				final gdsc.smlm.tsf.TSFProtos.LocationUnits result = gdsc.smlm.tsf.TSFProtos.LocationUnits
 						.valueOf(locationUnits_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.LocationUnits.NM : result;
 			}
@@ -12707,9 +11742,7 @@ public final class TSFProtos
 			public Builder setLocationUnits(gdsc.smlm.tsf.TSFProtos.LocationUnits value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000080;
 				locationUnits_ = value.getNumber();
 				onChanged();
@@ -12887,7 +11920,7 @@ public final class TSFProtos
 			@Override
 			public gdsc.smlm.tsf.TSFProtos.IntensityUnits getIntensityUnits()
 			{
-				gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
+				final gdsc.smlm.tsf.TSFProtos.IntensityUnits result = gdsc.smlm.tsf.TSFProtos.IntensityUnits
 						.valueOf(intensityUnits_);
 				return result == null ? gdsc.smlm.tsf.TSFProtos.IntensityUnits.COUNTS : result;
 			}
@@ -12904,9 +11937,7 @@ public final class TSFProtos
 			public Builder setIntensityUnits(gdsc.smlm.tsf.TSFProtos.IntensityUnits value)
 			{
 				if (value == null)
-				{
 					throw new NullPointerException();
-				}
 				bitField0_ |= 0x00000800;
 				intensityUnits_ = value.getNumber();
 				onChanged();
@@ -14119,7 +13150,7 @@ public final class TSFProtos
 	private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
 	static
 	{
-		java.lang.String[] descriptorData = {
+		final java.lang.String[] descriptorData = {
 				"\n\ttsf.proto\022\003TSF\"G\n\017FluorophoreType\022\n\n\002i" +
 						"d\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_fiduc" +
 						"ial\030\003 \001(\010\"=\n\003ROI\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 \002(\005\022\017" +
@@ -14165,7 +13196,7 @@ public final class TSFProtos
 						"*+\n\rLocationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIX" +
 						"ELS\020\002*+\n\nCameraType\022\007\n\003CCD\020\000\022\t\n\005EMCCD\020\001\022" +
 						"\t\n\005SCMOS\020\002B\032\n\rgdsc.smlm.tsfB\tTSFProtos" };
-		com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner = new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner()
+		final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner = new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner()
 		{
 			@Override
 			public com.google.protobuf.ExtensionRegistry assignDescriptors(

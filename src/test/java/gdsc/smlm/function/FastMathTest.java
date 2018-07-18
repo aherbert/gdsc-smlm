@@ -89,28 +89,28 @@ public class FastMathTest
 		TestSettings.assumeSpeedTest();
 
 		// Q. What is a suitable range for this test?
-		int range = 5;
-		int steps = 10000;
+		final int range = 5;
+		final int steps = 10000;
 		final double[] x = new double[steps];
-		double total = 2 * range;
-		double step = total / steps;
+		final double total = 2 * range;
+		final double step = total / steps;
 		for (int i = 0; i < steps; i++)
 			x[i] = -range + i * step;
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new MathPow1_3(x));
 		ts.execute(new FastMathPow1_3(x));
 		ts.execute(new FastMathCbrt(x));
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report();
 
 		for (int k = 2; k <= 3; k++)
 		{
-			double t1 = ts.get(-1).getMean();
-			double t2 = ts.get(-k).getMean();
+			final double t1 = ts.get(-1).getMean();
+			final double t2 = ts.get(-k).getMean();
 			TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-k).getTask().getName(), t2,
 					ts.get(-1).getTask().getName(), t1, t2 / t1);
 		}

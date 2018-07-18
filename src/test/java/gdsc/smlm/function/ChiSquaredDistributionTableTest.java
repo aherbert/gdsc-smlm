@@ -58,10 +58,10 @@ public class ChiSquaredDistributionTableTest
 	@Test
 	public void canComputeProbability()
 	{
-		for (int df : new int[] { 5, 10 })
+		for (final int df : new int[] { 5, 10 })
 		{
 			double o, e, chi = 0;
-			ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
+			final ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
 
 			o = ChiSquaredDistributionTable.computePValue(chi, df);
 			e = d.cumulativeProbability(chi);
@@ -85,25 +85,25 @@ public class ChiSquaredDistributionTableTest
 	public void canComputeChiSquared()
 	{
 		// We have to use the transpose of the table
-		DenseMatrix64F m = new DenseMatrix64F(chi2);
+		final DenseMatrix64F m = new DenseMatrix64F(chi2);
 		CommonOps.transpose(m);
-		int max = m.numCols;
-		double[] et = m.data;
+		final int max = m.numCols;
+		final double[] et = m.data;
 		for (int i = 0, j = 0; i < p.length; i++)
 		{
-			ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(p[i], max);
+			final ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(p[i], max);
 			// Use 1-p as the significance level to get the same critical values
-			ChiSquaredDistributionTable lowerTable = ChiSquaredDistributionTable.createLowerTailed(1 - p[i], max);
+			final ChiSquaredDistributionTable lowerTable = ChiSquaredDistributionTable.createLowerTailed(1 - p[i], max);
 			for (int df = 1; df <= max; df++)
 			{
-				double o = upperTable.getCrititalValue(df);
-				double e = et[j++];
+				final double o = upperTable.getCrititalValue(df);
+				final double e = et[j++];
 				//System.out.printf("p=%.3f,df=%d = %f\n", p[i], df, o);
 				Assert.assertEquals(e, o, 1e-2);
 
 				// The test only stores 2 decimal places so use the computed value to set upper/lower
-				double upper = o * 1.01;
-				double lower = o * 0.99;
+				final double upper = o * 1.01;
+				final double lower = o * 0.99;
 
 				Assert.assertTrue("Upper did not reject higher", upperTable.reject(upper, df));
 				Assert.assertFalse("Upper did not reject actual value", upperTable.reject(o, df));
@@ -119,24 +119,24 @@ public class ChiSquaredDistributionTableTest
 	@Test
 	public void canPerformChiSquaredTest()
 	{
-		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-		ChiSquareTest test = new ChiSquareTest();
-		for (int n : new int[] { 10, 50, 100 })
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final ChiSquareTest test = new ChiSquareTest();
+		for (final int n : new int[] { 10, 50, 100 })
 		{
-			double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
-			long[] l = new long[x.length];
+			final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
+			final long[] l = new long[x.length];
 			for (int i = 0; i < x.length; i++)
 				l[i] = rdg.nextPoisson(x[i]);
-			double chi2 = test.chiSquare(x, l);
-			double ep = test.chiSquareTest(x, l);
-			int df = x.length - 1;
-			double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
+			final double chi2 = test.chiSquare(x, l);
+			final double ep = test.chiSquareTest(x, l);
+			final int df = x.length - 1;
+			final double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
 			Assert.assertEquals(ep, o, 1e-10);
 
-			ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(o, df);
+			final ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(o, df);
 
-			double upper = chi2 * 1.01;
-			double lower = chi2 * 0.99;
+			final double upper = chi2 * 1.01;
+			final double lower = chi2 * 0.99;
 
 			Assert.assertTrue("Upper did not reject higher", upperTable.reject(upper, df));
 			Assert.assertFalse("Upper did not reject actual value", upperTable.reject(o, df));

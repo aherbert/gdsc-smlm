@@ -36,7 +36,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 public class SetPeakResultStore implements PeakResultStore, PeakResultStoreCollection
 {
 	/** The results. */
-	private HashSet<PeakResult> results;
+	private final HashSet<PeakResult> results;
 
 	/**
 	 * Instantiates a new set peak results store.
@@ -113,13 +113,9 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	public boolean addStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return addArray(results.toArray());
-		}
 	}
 
 	/*
@@ -164,13 +160,9 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	public boolean removeStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return removeArray(results.toArray());
-		}
 	}
 
 	/*
@@ -204,13 +196,9 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	public boolean retainStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return retainArray(results.toArray());
-		}
 	}
 
 	/*
@@ -267,8 +255,8 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	{
 		if (deepCopy)
 		{
-			SetPeakResultStore copy = new SetPeakResultStore(size());
-			for (PeakResult r : results)
+			final SetPeakResultStore copy = new SetPeakResultStore(size());
+			for (final PeakResult r : results)
 				copy.add(r.clone());
 			return copy;
 		}
@@ -285,7 +273,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	{
 		// Delegate to the list implementation
 		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
-		for (PeakResult r : results)
+		for (final PeakResult r : results)
 			if (filter.test(r))
 				list.add(r);
 		return this.results.removeAll(Arrays.asList(list.toArray()));
@@ -299,7 +287,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	@Override
 	public void forEach(PeakResultProcedure procedure)
 	{
-		for (PeakResult r : results)
+		for (final PeakResult r : results)
 			procedure.execute(r);
 	}
 
@@ -312,7 +300,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	public PeakResult[] subset(PeakResultPredicate filter)
 	{
 		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
-		for (PeakResult r : results)
+		for (final PeakResult r : results)
 			if (filter.test(r))
 				list.add(r);
 		return list.toArray();

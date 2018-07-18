@@ -94,9 +94,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			return;
 
 		// Load the results
-		MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false, null, null);
-		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
-		MemoryPeakResults results3 = ResultsManager.loadInputResults(inputOption3, false, null, null);
+		final MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false, null, null);
+		final MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
+		final MemoryPeakResults results3 = ResultsManager.loadInputResults(inputOption3, false, null, null);
 		IJ.showStatus("");
 		if (results1 == null || results1.size() == 0)
 		{
@@ -121,14 +121,14 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 		final long start = System.nanoTime();
 		compareCoordinates(results1, results2, results3, dThreshold);
-		double seconds = (System.nanoTime() - start) / 1000000000.0;
+		final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
 		IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
 	}
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
 		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY_MULTI_FRAME);
@@ -159,7 +159,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			Parameters.isAboveZero("Distance threshold", dThreshold);
 			Parameters.isPositive("Beta", beta);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -172,16 +172,16 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2, MemoryPeakResults results3,
 			double dThreshold)
 	{
-		Pulse[] p1 = extractPulses(results1);
-		Pulse[] p2 = extractPulses(results2);
-		Pulse[] p3 = extractPulses(results3);
+		final Pulse[] p1 = extractPulses(results1);
+		final Pulse[] p2 = extractPulses(results2);
+		final Pulse[] p3 = extractPulses(results3);
 
-		List<Pulse> TP = null;
+		final List<Pulse> TP = null;
 		List<Pulse> FP = null;
 		List<Pulse> FN = null;
 		List<PointPair> pairs = null;
 
-		List<Pulse> TP2 = null;
+		final List<Pulse> TP2 = null;
 		List<Pulse> FP2 = null;
 		List<Pulse> FN2 = null;
 		List<PointPair> pairs2 = null;
@@ -196,25 +196,22 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			FN2 = new LinkedList<>();
 		}
 
-		MatchResult result = MatchCalculator.analyseResults2D(p1, p2, dThreshold, TP, FP, FN, pairs);
-		MatchResult result2 = MatchCalculator.analyseResults2D(p1, p3, dThreshold, TP2, FP2, FN2, pairs2);
+		final MatchResult result = MatchCalculator.analyseResults2D(p1, p2, dThreshold, TP, FP, FN, pairs);
+		final MatchResult result2 = MatchCalculator.analyseResults2D(p1, p3, dThreshold, TP2, FP2, FN2, pairs2);
 
 		// Create output
 		if (!java.awt.GraphicsEnvironment.isHeadless())
 		{
 			if (resultsWindow == null || !resultsWindow.isShowing())
-			{
 				resultsWindow = new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300);
-			}
 			if (showPairs)
-			{
 				if (p3 == null)
 				{
 					// Produce a pairs output
 					if (pairsWindow == null || !pairsWindow.isShowing())
 					{
 						pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
-						Point p = resultsWindow.getLocation();
+						final Point p = resultsWindow.getLocation();
 						p.y += resultsWindow.getHeight();
 						pairsWindow.setLocation(p);
 						pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(),
@@ -225,15 +222,15 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 					// Add the unmatched points
 					WindowManager.getIDList();
-					
-					for (Coordinate c : FN)
+
+					for (final Coordinate c : FN)
 						pairs.add(new PointPair(c, null));
-					for (Coordinate c : FP)
+					for (final Coordinate c : FP)
 						pairs.add(new PointPair(null, c));
 
-					List<? extends PointPair> sortedPairs = sort(pairs);
+					final List<? extends PointPair> sortedPairs = sort(pairs);
 
-					for (PointPair pair : sortedPairs)
+					for (final PointPair pair : sortedPairs)
 						addPairResult(pair);
 				}
 				else
@@ -242,7 +239,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 					if (triplesWindow == null || !triplesWindow.isShowing())
 					{
 						triplesWindow = new TextWindow(TITLE + " Triples", createTriplesHeader(), "", 900, 300);
-						Point p = resultsWindow.getLocation();
+						final Point p = resultsWindow.getLocation();
 						p.y += resultsWindow.getHeight();
 						triplesWindow.setLocation(p);
 						triplePainter = new ImageROIPainter(triplesWindow.getTextPanel(),
@@ -251,60 +248,52 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 					triplesWindow.getTextPanel().clear();
 					triplePainter.setTitle(results1.getSource().getOriginal().getName());
 
-					HashMap<Pulse, Triple> map = new HashMap<>();
-					ArrayList<Triple> triples = new ArrayList<>(pairs.size());
-					for (PointPair pair : pairs)
+					final HashMap<Pulse, Triple> map = new HashMap<>();
+					final ArrayList<Triple> triples = new ArrayList<>(pairs.size());
+					for (final PointPair pair : pairs)
 					{
-						Pulse p = (Pulse) pair.getPoint1();
-						Triple t = new Triple(p, (Pulse) pair.getPoint2(), null);
+						final Pulse p = (Pulse) pair.getPoint1();
+						final Triple t = new Triple(p, (Pulse) pair.getPoint2(), null);
 						triples.add(t);
 						map.put(p, t);
 					}
 					// Complete the reference set of points
-					for (Coordinate c : FN)
+					for (final Coordinate c : FN)
 					{
-						Pulse p = (Pulse) c;
-						Triple t = new Triple(p, null, null);
+						final Pulse p = (Pulse) c;
+						final Triple t = new Triple(p, null, null);
 						triples.add(t);
 						map.put(p, t);
 					}
 
 					// Add the unmatched points
-					for (Coordinate c : FP)
+					for (final Coordinate c : FP)
 						triples.add(new Triple(null, (Pulse) c, null));
-					for (Coordinate c : FP2)
+					for (final Coordinate c : FP2)
 						triples.add(new Triple(null, null, (Pulse) c));
 
 					// Add the results from the second match
-					for (PointPair pair : pairs2)
+					for (final PointPair pair : pairs2)
 					{
-						Pulse p = (Pulse) pair.getPoint1();
-						Pulse pp = (Pulse) pair.getPoint2();
-						Triple t = map.get(p);
+						final Pulse p = (Pulse) pair.getPoint1();
+						final Pulse pp = (Pulse) pair.getPoint2();
+						final Triple t = map.get(p);
 						if (t != null)
-						{
 							t.p3 = pp;
-						}
 						else
-						{
 							triples.add(new Triple(null, null, pp));
-						}
 					}
 
-					List<? extends Triple> sortedTriples = sort(triples);
+					final List<? extends Triple> sortedTriples = sort(triples);
 
-					for (Triple t : sortedTriples)
+					for (final Triple t : sortedTriples)
 						addTripleResult(t);
 				}
-			}
 		}
-		else
+		else if (writeHeader)
 		{
-			if (writeHeader)
-			{
-				writeHeader = false;
-				IJ.log(createResultsHeader());
-			}
+			writeHeader = false;
+			IJ.log(createResultsHeader());
 		}
 
 		addResult(inputOption1, inputOption2, dThreshold, result);
@@ -331,7 +320,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 	private static String createResultsHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Image 1\t");
 		sb.append("Image 2\t");
 		sb.append("Distance (px)\t");
@@ -352,7 +341,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 	private static void addResult(String i1, String i2, double dThrehsold, MatchResult result)
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(i1).append('\t');
 		sb.append(i2).append('\t');
 		sb.append(IJ.d2s(dThrehsold, 2)).append('\t');
@@ -370,18 +359,14 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		sb.append(IJ.d2s(result.getFScore(beta), 4));
 
 		if (java.awt.GraphicsEnvironment.isHeadless())
-		{
 			IJ.log(sb.toString());
-		}
 		else
-		{
 			resultsWindow.append(sb.toString());
-		}
 	}
 
 	private static String createPairsHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Start1\t");
 		sb.append("End2\t");
 		sb.append("X1\t");
@@ -399,9 +384,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 	private static void addPairResult(PointPair pair)
 	{
-		StringBuilder sb = new StringBuilder();
-		Pulse p1 = (Pulse) pair.getPoint1();
-		Pulse p2 = (Pulse) pair.getPoint2();
+		final StringBuilder sb = new StringBuilder();
+		final Pulse p1 = (Pulse) pair.getPoint1();
+		final Pulse p2 = (Pulse) pair.getPoint2();
 		addPoint(sb, p1);
 		addResult(sb, p1, p2);
 		pairsWindow.append(sb.toString());
@@ -410,9 +395,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	private static void addPoint(StringBuilder sb, Pulse p)
 	{
 		if (p == null)
-		{
 			sb.append("-\t-\t-\t-\t-\t");
-		}
 		else
 		{
 			sb.append(p.getStart()).append('\t');
@@ -425,7 +408,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 
 	private static String createTriplesHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Start1\t");
 		sb.append("End2\t");
 		sb.append("X1\t");
@@ -458,28 +441,26 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		// Extract the startT and x,y coordinates from the first pulse in the line
 		final int[] index = { 0, 5, 12 };
-		String[] fields = line.split("\t");
-		for (int i : index)
-		{
+		final String[] fields = line.split("\t");
+		for (final int i : index)
 			if (i < fields.length)
 			{
 				if (fields[i].equals("-"))
 					continue;
-				int startT = Integer.valueOf(fields[i]);
-				double x = Double.valueOf(fields[i + 2]);
-				double y = Double.valueOf(fields[i + 3]);
+				final int startT = Integer.valueOf(fields[i]);
+				final double x = Double.valueOf(fields[i + 2]);
+				final double y = Double.valueOf(fields[i + 3]);
 				return new double[] { startT, x, y };
 			}
-		}
 		return null;
 	}
 
 	private static void addTripleResult(Triple triple)
 	{
-		StringBuilder sb = new StringBuilder();
-		Pulse p1 = triple.p1;
-		Pulse p2 = triple.p2;
-		Pulse p3 = triple.p3;
+		final StringBuilder sb = new StringBuilder();
+		final Pulse p1 = triple.p1;
+		final Pulse p2 = triple.p2;
+		final Pulse p3 = triple.p3;
 		addPoint(sb, p1);
 		addResult(sb, p1, p2);
 		addResult(sb, p1, p3);
@@ -489,8 +470,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	private static void addResult(StringBuilder sb, Pulse p1, Pulse p2)
 	{
 		addPoint(sb, p2);
-		PointPair pair = new PointPair(p1, p2);
-		double d = pair.getXYDistance();
+		final PointPair pair = new PointPair(p1, p2);
+		final double d = pair.getXYDistance();
 		if (d >= 0)
 			sb.append(Utils.rounded(d, 4)).append('\t');
 		else
@@ -506,11 +487,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		switch (sortIndex)
 		{
 			case 1: // Sort by time
-				ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
-				for (PointPair pair : pairs)
-				{
+				final ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
+				for (final PointPair pair : pairs)
 					newPairs.add(new TimeComparablePointPair(pair));
-				}
 				Collections.sort(newPairs);
 				return newPairs;
 
@@ -524,16 +503,16 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		if (sortIndex == 1)
 		{
-			List<TimeComparableTriple> sorted = new ArrayList<>(triples.size());
-			for (Triple t : triples)
+			final List<TimeComparableTriple> sorted = new ArrayList<>(triples.size());
+			for (final Triple t : triples)
 				sorted.add(new TimeComparableTriple(t));
 			Collections.sort(sorted);
 			return sorted;
 		}
 		else
 		{
-			List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
-			for (Triple t : triples)
+			final List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
+			for (final Triple t : triples)
 				sorted.add(new ScoreComparableTriple(t));
 			Collections.sort(sorted);
 			return sorted;

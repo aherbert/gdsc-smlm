@@ -45,19 +45,19 @@ public abstract class ImageSource
 	private int startFrame;
 	@XStreamOmitField
 	private int endFrame;
-	
+
 	/** The x origin. */
 	protected int xOrigin;
-	
+
 	/** The y origin. */
 	protected int yOrigin;
-	
+
 	/** The width. */
 	protected int width;
-	
+
 	/** The height. */
 	protected int height;
-	
+
 	/** The frames. */
 	protected int frames;
 	/**
@@ -268,11 +268,9 @@ public abstract class ImageSource
 	 */
 	public float[] next()
 	{
-		Object pixels = nextRaw();
+		final Object pixels = nextRaw();
 		if (pixels != null)
-		{
 			return imageConverter.getData(pixels, getWidth(), getHeight(), null, null);
-		}
 		return null;
 	}
 
@@ -293,11 +291,9 @@ public abstract class ImageSource
 	{
 		if (!checkBounds(bounds))
 			bounds = null;
-		Object pixels = nextRaw();
+		final Object pixels = nextRaw();
 		if (pixels != null)
-		{
 			return imageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
-		}
 		return null;
 	}
 
@@ -312,17 +308,15 @@ public abstract class ImageSource
 	public Object nextRaw()
 	{
 		if (sequentialReadStatus == SequentialReadStatus.READY)
-		{
 			if (initialiseSequentialRead())
 				sequentialReadStatus = SequentialReadStatus.RUNNING;
 			else
 				sequentialReadStatus = SequentialReadStatus.CLOSED;
-		}
 		if (sequentialReadStatus != SequentialReadStatus.RUNNING)
 			return null;
 
 		startFrame = endFrame = (startFrame + 1);
-		Object data = nextRawFrame();
+		final Object data = nextRawFrame();
 		if (data == null)
 		{
 			startFrame = endFrame = 0;
@@ -384,11 +378,9 @@ public abstract class ImageSource
 		if (!checkBounds(bounds))
 			bounds = null;
 		startFrame = endFrame = frame;
-		Object pixels = getRawFrame(frame);
+		final Object pixels = getRawFrame(frame);
 		if (pixels != null)
-		{
 			return imageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
-		}
 		startFrame = endFrame = 0;
 		return null;
 	}
@@ -407,7 +399,7 @@ public abstract class ImageSource
 	public Object getRaw(int frame)
 	{
 		startFrame = endFrame = frame;
-		Object data = getRawFrame(frame);
+		final Object data = getRawFrame(frame);
 		if (data == null)
 			startFrame = endFrame = 0;
 		return data;
@@ -494,13 +486,13 @@ public abstract class ImageSource
 
 	/**
 	 * Serialise to XML.
-	 * 
+	 *
 	 * @return An XML representation of this object
 	 * @see #fromXML(String)
 	 */
 	public String toXML()
 	{
-		XStream xs = new XStream(new DomDriver());
+		final XStream xs = new XStream(new DomDriver());
 		try
 		{
 			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
@@ -508,7 +500,7 @@ public abstract class ImageSource
 			xs.autodetectAnnotations(true);
 			return xs.toXML(this);
 		}
-		catch (XStreamException ex)
+		catch (final XStreamException ex)
 		{
 			//ex.printStackTrace();
 		}
@@ -525,7 +517,7 @@ public abstract class ImageSource
 	 */
 	public static ImageSource fromXML(String xml)
 	{
-		XStream xs = new XStream(new DomDriver());
+		final XStream xs = new XStream(new DomDriver());
 		try
 		{
 			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
@@ -533,15 +525,15 @@ public abstract class ImageSource
 			xs.autodetectAnnotations(true);
 			return (ImageSource) xs.fromXML(xml);
 		}
-		catch (ClassCastException ex)
+		catch (final ClassCastException ex)
 		{
 			ex.printStackTrace();
 		}
-		catch (XStreamException ex)
+		catch (final XStreamException ex)
 		{
 			ex.printStackTrace();
 		}
-		catch (Exception ex)
+		catch (final Exception ex)
 		{
 			ex.printStackTrace();
 		}

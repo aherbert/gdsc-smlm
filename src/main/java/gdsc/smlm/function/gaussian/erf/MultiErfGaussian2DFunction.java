@@ -38,7 +38,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 {
 	/** The number of peaks. */
 	protected final int nPeaks;
-	
+
 	/** The gradient indices. */
 	protected final int[] gradientIndices;
 
@@ -97,10 +97,8 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 		if (evaluatesBackground())
 			indices[p++] = 0;
 		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
-		{
 			for (int j = start; j < m; j++)
 				indices[p++] = i + singleGradientIndices[j];
-		}
 		return indices;
 	}
 
@@ -186,7 +184,6 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 		if (nPeaks == 2)
 		{
 			if (tB == 0)
-			{
 				for (int y = 0; y < maxy; y++)
 				{
 					// Pre-compute
@@ -194,13 +191,9 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
 					for (int x = 0; x < maxx; x++)
-					{
 						procedure.execute(tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
-					}
 				}
-			}
 			else
-			{
 				for (int y = 0; y < maxy; y++)
 				{
 					// Pre-compute
@@ -208,11 +201,8 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
 					for (int x = 0; x < maxx; x++)
-					{
 						procedure.execute(tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
-					}
 				}
-			}
 		}
 		else
 		{
@@ -252,7 +242,6 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 		if (nPeaks == 2)
 		{
 			if (tB == 0)
-			{
 				for (int y = 0, i = 0; y < maxy; y++)
 				{
 					// Pre-compute
@@ -260,13 +249,9 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
 					for (int x = 0; x < maxx; x++)
-					{
 						values[i++] = (tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
-					}
 				}
-			}
 			else
-			{
 				for (int y = 0, i = 0; y < maxy; y++)
 				{
 					// Pre-compute
@@ -274,11 +259,8 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
 					for (int x = 0; x < maxx; x++)
-					{
 						values[i++] = (tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
-					}
 				}
-			}
 		}
 		else
 		{

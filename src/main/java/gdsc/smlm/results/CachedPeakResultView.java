@@ -99,7 +99,7 @@ public class CachedPeakResultView implements PeakResultView
 
 	private PeakResult[] findResults(TIntObjectHashMap<PeakResult[]> map, int key, PeakResultPredicate filter)
 	{
-		PeakResult[] results = store.subset(filter);
+		final PeakResult[] results = store.subset(filter);
 		map.put(key, results);
 		return results;
 	}

@@ -108,7 +108,7 @@ public class Gaussian2DPeakResultHelper
 		public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration)
 				throws ConfigurationException, ConversionException
 		{
-			int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+			final int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 			isx = indices[0];
 			isy = indices[1];
 			oneAxisSD = isx == isy;
@@ -174,10 +174,10 @@ public class Gaussian2DPeakResultHelper
 		protected float getPixelAmplitudeImpl(float[] params)
 		{
 			// Get the Gaussian parameters in pixels
-			double x = toPixel.convert(params[PeakResult.X]);
-			double y = toPixel.convert(params[PeakResult.Y]);
-			double sx = toPixel.convert(params[isx]);
-			double sy = toPixel.convert(params[isy]);
+			final double x = toPixel.convert(params[PeakResult.X]);
+			final double y = toPixel.convert(params[PeakResult.Y]);
+			final double sx = toPixel.convert(params[isx]);
+			final double sy = toPixel.convert(params[isy]);
 
 			return (float) (params[PeakResult.INTENSITY] * 0.25 * gaussianPixelIntegral(x, sx) *
 					gaussianPixelIntegral(y, sy));
@@ -203,7 +203,7 @@ public class Gaussian2DPeakResultHelper
 			//
 			// We compute the integral over the pixel from the lower (l) to the upper (u).
 			// erf(-lx, ux)
-			double lx = Math.floor(x) - x; // Reversed for convenience, i.e. compute -lx
+			final double lx = Math.floor(x) - x; // Reversed for convenience, i.e. compute -lx
 			return Erf.erf(lx * (ONE_OVER_ROOT2 / s), (lx + 1) * (ONE_OVER_ROOT2 / s));
 		}
 
@@ -540,7 +540,7 @@ public class Gaussian2DPeakResultHelper
 	public static Gaussian2DPeakResultCalculator create(PSF psf, Calibration calibration, int flags)
 			throws ConfigurationException, ConversionException
 	{
-		CalibrationReader helper = (calibration != null) ? new CalibrationReader(calibration) : null;
+		final CalibrationReader helper = (calibration != null) ? new CalibrationReader(calibration) : null;
 		return create(psf, helper, flags);
 	}
 
@@ -564,7 +564,7 @@ public class Gaussian2DPeakResultHelper
 	public static Gaussian2DPeakResultCalculator create(PSF psf, CalibrationReader calibrationReader, int flags)
 			throws ConfigurationException, ConversionException
 	{
-		BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibrationReader);
+		final BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibrationReader);
 
 		// Try the desired methods
 		if (BitFlags.anySet(flags, AMPLITUDE))
@@ -610,12 +610,10 @@ public class Gaussian2DPeakResultHelper
 		final double b2 = b * b;
 
 		if (emCCD)
-		{
 			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getPrecisionX(a, s, N, b2 / 2.0, 2);
-		}
 		return getPrecisionX(a, s, N, b2, 1);
 	}
 
@@ -644,12 +642,10 @@ public class Gaussian2DPeakResultHelper
 		final double b2 = b * b;
 
 		if (emCCD)
-		{
 			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getVarianceX(a, s, N, b2 / 2.0, 2);
-		}
 		return getVarianceX(a, s, N, b2, 1);
 	}
 
@@ -678,12 +674,10 @@ public class Gaussian2DPeakResultHelper
 		final double b2 = b * b;
 
 		if (emCCD)
-		{
 			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getMLPrecisionX(a, s, N, b2 / 2.0, true);
-		}
 		return getMLPrecisionX(a, s, N, b2, false);
 	}
 
@@ -712,12 +706,10 @@ public class Gaussian2DPeakResultHelper
 		final double b2 = b * b;
 
 		if (emCCD)
-		{
 			// If an emCCD camera was used then the input standard deviation will already be amplified
 			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
 			// Since this has been squared then divide by 2.
 			return getMLVarianceX(a, s, N, b2 / 2.0, true);
-		}
 		return getMLVarianceX(a, s, N, b2, false);
 	}
 
@@ -961,7 +953,7 @@ public class Gaussian2DPeakResultHelper
 			//else
 			//	System.out.printf("Invalid I1 = %f\n", I1);
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			// Ignore
 		}
@@ -971,12 +963,12 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Compute the function I1 using numerical integration. See Mortensen, et al (2010) Nature Methods 7, 377-383), SI
 	 * equation 43.
-	 * 
+	 *
 	 * <pre>
 	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
 	 *    = - sum [ t * ln(t) / (t + rho) ] dt
 	 * </pre>
-	 * 
+	 *
 	 * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
 	 *
 	 * @param rho
@@ -996,11 +988,11 @@ public class Gaussian2DPeakResultHelper
 		final int maximalIterationCount = 32;
 
 		// Use an integrator that does not use the boundary since log(0) is undefined.
-		UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+		final UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
 				absoluteAccuracy, minimalIterationCount, maximalIterationCount);
 
 		// Specify the function to integrate
-		UnivariateFunction f = new UnivariateFunction()
+		final UnivariateFunction f = new UnivariateFunction()
 		{
 			@Override
 			public double value(double x)
@@ -1135,7 +1127,7 @@ public class Gaussian2DPeakResultHelper
 	 */
 	public static float[] createOneAxisParams(float background, float intensity, float x, float y, float z, float s)
 	{
-		float[] params = new float[PeakResult.STANDARD_PARAMETERS + 1];
+		final float[] params = new float[PeakResult.STANDARD_PARAMETERS + 1];
 		params[PeakResult.BACKGROUND] = background;
 		params[PeakResult.INTENSITY] = intensity;
 		params[PeakResult.X] = x;
@@ -1167,7 +1159,7 @@ public class Gaussian2DPeakResultHelper
 	public static float[] createTwoAxisParams(float background, float intensity, float x, float y, float z, float sx,
 			float sy)
 	{
-		float[] params = new float[PeakResult.STANDARD_PARAMETERS + 2];
+		final float[] params = new float[PeakResult.STANDARD_PARAMETERS + 2];
 		params[PeakResult.BACKGROUND] = background;
 		params[PeakResult.INTENSITY] = intensity;
 		params[PeakResult.X] = x;
@@ -1202,7 +1194,7 @@ public class Gaussian2DPeakResultHelper
 	public static float[] createTwoAxisAndAngleParams(float background, float intensity, float x, float y, float z,
 			float sx, float sy, float a)
 	{
-		float[] params = new float[PeakResult.STANDARD_PARAMETERS + 3];
+		final float[] params = new float[PeakResult.STANDARD_PARAMETERS + 3];
 		params[PeakResult.BACKGROUND] = background;
 		params[PeakResult.INTENSITY] = intensity;
 		params[PeakResult.X] = x;
@@ -1409,7 +1401,7 @@ public class Gaussian2DPeakResultHelper
 	public static double getMeanSignalUsingP(double intensity, double sx, double sy, double p)
 			throws IllegalArgumentException
 	{
-		double r = inverseCumulative2D(p);
+		final double r = inverseCumulative2D(p);
 		return intensity * p / (Math.PI * sx * sy * r * r);
 	}
 

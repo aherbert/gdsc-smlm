@@ -32,9 +32,9 @@ package gdsc.smlm.model;
  */
 public class RadialFalloffIllumination implements SpatialIllumination
 {
-	private double photons, radius2;
-	private double pulsePhotons;
-	private int pulseInterval;
+	private final double photons, radius2;
+	private final double pulsePhotons;
+	private final int pulseInterval;
 
 	/**
 	 * Assume the default refractive index
@@ -104,9 +104,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
 	{
 		final double intensity = getIntensity(xyz);
 		if (pulseInterval > 1)
-		{
 			return new double[] { (t % pulseInterval == 1) ? pulsePhotons * intensity : 0, photons * intensity };
-		}
 		return new double[] { 0, photons * intensity };
 	}
 
@@ -137,9 +135,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
 		// = R arctan(1)
 		// => Average = R arctan(1) / R = arctan(1) = Math.Pi / 4;
 		if (pulseInterval > 1)
-		{
 			return (photons + pulsePhotons / pulseInterval) * (Math.PI / 4);
-		}
 		return photons * (Math.PI / 4);
 	}
 }

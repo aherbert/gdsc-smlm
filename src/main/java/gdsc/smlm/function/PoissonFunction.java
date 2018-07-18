@@ -46,7 +46,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 	 */
 	final double alpha;
 
-	/** Set to true if the gain was above 1 (inverse gain below 1) 
+	/** Set to true if the gain was above 1 (inverse gain below 1)
 	 * and the Poisson distribution should be expanded. */
 	final boolean expand;
 
@@ -76,15 +76,15 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 		if (e <= 0)
 			return 0;
 
-		int x = getX(o);
+		final int x = getX(o);
 		if (x < 0)
 			return 0;
 
 		// Compute the integer intervals of the Poisson to sample
 		// The entire P(x) of the scaled Poisson is assigned to the nearest integer
 		// Find the limits of the integer range.
-		double min = (x - 0.5) * alpha;
-		double max = (x + 0.5) * alpha;
+		final double min = (x - 0.5) * alpha;
+		final double max = (x + 0.5) * alpha;
 
 		// The first integer that would be rounded to x
 		int imin = (int) Math.ceil(min);
@@ -165,12 +165,12 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 		if (e <= 0)
 			return Double.NEGATIVE_INFINITY;
 
-		int x = getX(o);
+		final int x = getX(o);
 		if (x < 0)
 			return Double.NEGATIVE_INFINITY;
 
-		double min = (x - 0.5) * alpha;
-		double max = (x + 0.5) * alpha;
+		final double min = (x - 0.5) * alpha;
+		final double max = (x + 0.5) * alpha;
 
 		int imin = (int) Math.ceil(min);
 		if (imin < 0)
@@ -184,7 +184,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			pd.setMeanUnsafe(e);
 			return pd.logProbability(imin);
 		}
-		
+
 		int imax = (int) Math.floor(max);
 		if (imax == max)
 			imax--;

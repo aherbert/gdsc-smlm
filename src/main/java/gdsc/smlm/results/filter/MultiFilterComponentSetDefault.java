@@ -28,7 +28,7 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSetDefault extends MultiFilterComponentSet
 {
-	private MultiFilterComponent[] components;
+	private final MultiFilterComponent[] components;
 
 	/**
 	 * Instantiates a new multi filter component set default.
@@ -70,7 +70,7 @@ public class MultiFilterComponentSetDefault extends MultiFilterComponentSet
 	public MultiFilterComponentSet clone()
 	{
 		// Copy the array
-		MultiFilterComponent[] c = new MultiFilterComponent[components.length];
+		final MultiFilterComponent[] c = new MultiFilterComponent[components.length];
 		if (c.length > 0)
 			System.arraycopy(components, 0, c, 0, c.length);
 		return new MultiFilterComponentSetDefault(c);

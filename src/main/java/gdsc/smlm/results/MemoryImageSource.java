@@ -74,7 +74,7 @@ public class MemoryImageSource extends ImageSource
 		if (data == null)
 			throw new IllegalArgumentException("Image data must not be null");
 		final int length = width * height;
-		for (float[] f : data)
+		for (final float[] f : data)
 		{
 			if (f == null)
 				throw new IllegalArgumentException("Image data must not be null");
@@ -147,9 +147,7 @@ public class MemoryImageSource extends ImageSource
 	protected float[] getRawFrame(int frame)
 	{
 		if (frame > 0 && frame <= data.length)
-		{
 			return data[frame - 1];
-		}
 		return null;
 	}
 

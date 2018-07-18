@@ -34,7 +34,7 @@ import gdsc.smlm.results.PeakResult;
  */
 public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
 {
-	
+
 	/**
 	 * Instantiates a new XY width filter 2.
 	 *
@@ -60,8 +60,8 @@ public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
 
 		// Set the width limit
-		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
-		double s2 = s[0] * s[1];
+		final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		final double s2 = s[0] * s[1];
 		lowerSigmaThreshold = (float) (s2 * minWidth * minWidth);
 		upperSigmaThreshold = Filter.getUpperLimit(s2 * maxWidth * maxWidth);
 	}

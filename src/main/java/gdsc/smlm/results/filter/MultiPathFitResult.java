@@ -116,7 +116,7 @@ public class MultiPathFitResult implements Cloneable
 			{
 				return (FitResult) super.clone();
 			}
-			catch (CloneNotSupportedException e)
+			catch (final CloneNotSupportedException e)
 			{
 				return null;
 			}
@@ -185,7 +185,7 @@ public class MultiPathFitResult implements Cloneable
 		{
 			return (MultiPathFitResult) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

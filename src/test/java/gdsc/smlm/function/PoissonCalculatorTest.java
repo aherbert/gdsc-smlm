@@ -54,17 +54,17 @@ import gnu.trove.list.array.TDoubleArrayList;
 @SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest
 {
-	double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
-	private int maxx = 10;
+	static double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
+	private static int maxx = 10;
 
-	double P_LIMIT = 0.999999;
+	static double P_LIMIT = 0.999999;
 
 	@Test
 	public void canComputeLikelihoodForIntegerData()
 	{
-		for (double u : photons)
+		for (final double u : photons)
 		{
-			PoissonDistribution pd = new PoissonDistribution(u);
+			final PoissonDistribution pd = new PoissonDistribution(u);
 			for (int x = 0; x < 100; x++)
 			{
 				double e = pd.probability(x);
@@ -81,9 +81,9 @@ public class PoissonCalculatorTest
 	@Test
 	public void canComputeFastLikelihoodForIntegerData()
 	{
-		for (double u : photons)
+		for (final double u : photons)
 		{
-			PoissonDistribution pd = new PoissonDistribution(u);
+			final PoissonDistribution pd = new PoissonDistribution(u);
 			for (int x = 0; x < 100; x++)
 			{
 				double e = pd.probability(x);
@@ -100,10 +100,10 @@ public class PoissonCalculatorTest
 	@Test
 	public void canComputeFastLog_FastLikelihoodForIntegerData()
 	{
-		FastLog fastLog = FastLogFactory.getFastLog();
-		for (double u : photons)
+		final FastLog fastLog = FastLogFactory.getFastLog();
+		for (final double u : photons)
 		{
-			PoissonDistribution pd = new PoissonDistribution(u);
+			final PoissonDistribution pd = new PoissonDistribution(u);
 			for (int x = 0; x < 100; x++)
 			{
 				double e = pd.probability(x);
@@ -117,7 +117,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private abstract class PoissonFunction implements UnivariateFunction
+	private static abstract class PoissonFunction implements UnivariateFunction
 	{
 		double mu;
 
@@ -157,16 +157,16 @@ public class PoissonCalculatorTest
 		cumulativeProbabilityIsOneWithRealDataForCountAbove4(2);
 	}
 
-	private void cumulativeProbabilityIsOneWithRealDataForCountAbove4(int function)
+	private static void cumulativeProbabilityIsOneWithRealDataForCountAbove4(int function)
 	{
-		for (double mu : photons)
+		for (final double mu : photons)
 		{
 			// Determine upper limit for a Poisson
-			double max = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
+			final double max = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
 
 			// Determine lower limit
-			double sd = Math.sqrt(mu);
-			double min = (int) Math.max(0, mu - 4 * sd);
+			final double sd = Math.sqrt(mu);
+			final double min = (int) Math.max(0, mu - 4 * sd);
 
 			PoissonFunction f;
 			switch (function)
@@ -196,17 +196,17 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private void cumulativeProbabilityIsOneWithRealData(double min, double max, boolean test, PoissonFunction f)
+	private static void cumulativeProbabilityIsOneWithRealData(double min, double max, boolean test, PoissonFunction f)
 	{
 		double p = 0;
 
-		int integrationPoints = 10;
+		final int integrationPoints = 10;
 		final double relativeAccuracy = 1e-4;
 		final double absoluteAccuracy = 1e-8;
 		final int minimalIterationCount = 3;
 		final int maximalIterationCount = 32;
 
-		UnivariateIntegrator in = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+		final UnivariateIntegrator in = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
 				absoluteAccuracy, minimalIterationCount, maximalIterationCount);
 
 		//new SimpsonIntegrator();
@@ -215,12 +215,10 @@ public class PoissonCalculatorTest
 
 		TestSettings.info("mu=%f, p=%f\n", f.mu, p);
 		if (test)
-		{
 			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
-		}
 	}
 
-	private abstract class BaseNonLinearFunction implements NonLinearFunction
+	private static abstract class BaseNonLinearFunction implements NonLinearFunction
 	{
 		double[] a;
 		String name;
@@ -292,19 +290,19 @@ public class PoissonCalculatorTest
 		//@formatter:on
 	}
 
-	private void canComputeLogLikelihoodRatio(BaseNonLinearFunction nlf)
+	private static void canComputeLogLikelihoodRatio(BaseNonLinearFunction nlf)
 	{
 		TestSettings.info(nlf.name);
 
-		int n = maxx * maxx;
+		final int n = maxx * maxx;
 
-		double[] a = new double[] { 1 };
+		final double[] a = new double[] { 1 };
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-		double[] x = new double[n];
-		double[] u = new double[n];
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final double[] x = new double[n];
+		final double[] u = new double[n];
 		for (int i = 0; i < n; i++)
 		{
 			u[i] = nlf.eval(i);
@@ -313,21 +311,21 @@ public class PoissonCalculatorTest
 		}
 
 		double ll = PoissonCalculator.logLikelihood(u, x);
-		double mll = PoissonCalculator.maximumLogLikelihood(x);
+		final double mll = PoissonCalculator.maximumLogLikelihood(x);
 		double llr = -2 * (ll - mll);
 		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x);
 		TestSettings.info("llr=%f, llr2=%f\n", llr, llr2);
 		TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, llr * 1e-10);
 
-		double[] op = new double[x.length];
+		final double[] op = new double[x.length];
 		for (int i = 0; i < n; i++)
 			op[i] = PoissonCalculator.maximumLikelihood(x[i]);
 
 		//TestSettings.setLogLevel(gdsc.smlm.TestSettings.LogLevel.DEBUG);
 
-		int df = n - 1;
-		ChiSquaredDistributionTable table = ChiSquaredDistributionTable.createUpperTailed(0.05, df);
-		ChiSquaredDistributionTable table2 = ChiSquaredDistributionTable.createUpperTailed(0.001, df);
+		final int df = n - 1;
+		final ChiSquaredDistributionTable table = ChiSquaredDistributionTable.createUpperTailed(0.05, df);
+		final ChiSquaredDistributionTable table2 = ChiSquaredDistributionTable.createUpperTailed(0.001, df);
 		if (TestSettings.allow(LogLevel.INFO))
 			TestSettings.info("Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f\n", table.getCrititalValue(df),
 					table.getSignificanceValue(), table2.getCrititalValue(df), table2.getSignificanceValue(),
@@ -336,8 +334,8 @@ public class PoissonCalculatorTest
 					ChiSquaredDistributionTable.getChiSquared(1e-6, 2)
 
 			);
-		TDoubleArrayList list = new TDoubleArrayList();
-		int imin = 5, imax = 15;
+		final TDoubleArrayList list = new TDoubleArrayList();
+		final int imin = 5, imax = 15;
 		for (int i = imin; i <= imax; i++)
 		{
 			a[0] = (double) i / 10;
@@ -352,14 +350,14 @@ public class PoissonCalculatorTest
 			double ll2 = 0;
 			for (int j = 0; j < n; j++)
 			{
-				double p1 = PoissonCalculator.likelihood(u[j], x[j]);
+				final double p1 = PoissonCalculator.likelihood(u[j], x[j]);
 				ll2 += Math.log(p1);
-				double ratio = p1 / op[j];
+				final double ratio = p1 / op[j];
 				product = product.multiply(new BigDecimal(ratio));
 			}
 			llr2 = -2 * Math.log(product.doubleValue());
-			double p = ChiSquaredDistributionTable.computePValue(llr, df);
-			double q = ChiSquaredDistributionTable.computeQValue(llr, df);
+			final double p = ChiSquaredDistributionTable.computePValue(llr, df);
+			final double q = ChiSquaredDistributionTable.computeQValue(llr, df);
 			TestSettings.info(
 					"a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (reject=%b @ %.3f, reject=%b @ %.3f)\n",
 					a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q, table.reject(llr, df),
@@ -375,9 +373,9 @@ public class PoissonCalculatorTest
 		}
 
 		// Find max using quadratic fit
-		double[] data = list.toArray();
+		final double[] data = list.toArray();
 		int i = SimpleArrayUtils.findMaxIndex(data);
-		double maxa = (double) (imin + i) / 10;
+		final double maxa = (double) (imin + i) / 10;
 		double fita = maxa;
 		try
 		{
@@ -385,14 +383,14 @@ public class PoissonCalculatorTest
 				i++;
 			if (i == data.length - 1)
 				i--;
-			int i1 = i - 1;
-			int i2 = i;
-			int i3 = i + 1;
+			final int i1 = i - 1;
+			final int i2 = i;
+			final int i3 = i + 1;
 
 			fita = QuadraticUtils.findMinMax((double) (imin + i1) / 10, data[i1], (double) (imin + i2) / 10, data[i2],
 					(double) (imin + i3) / 10, data[i3]);
 		}
-		catch (DataException e)
+		catch (final DataException e)
 		{
 			// Ignore
 		}
@@ -422,19 +420,19 @@ public class PoissonCalculatorTest
 		//@formatter:on
 	}
 
-	private void canComputeFastLog_LogLikelihoodRatio(BaseNonLinearFunction nlf)
+	private static void canComputeFastLog_LogLikelihoodRatio(BaseNonLinearFunction nlf)
 	{
 		TestSettings.infoln(nlf.name);
 
-		int n = maxx * maxx;
+		final int n = maxx * maxx;
 
-		double[] a = new double[] { 1 };
+		final double[] a = new double[] { 1 };
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-		double[] x = new double[n];
-		double[] u = new double[n];
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final double[] x = new double[n];
+		final double[] u = new double[n];
 		for (int i = 0; i < n; i++)
 		{
 			u[i] = nlf.eval(i);
@@ -443,8 +441,8 @@ public class PoissonCalculatorTest
 		}
 
 		// Only test the LLR
-		double llr = PoissonCalculator.logLikelihoodRatio(u, x);
-		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
+		final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
+		final double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
 		TestSettings.info("llr=%f, llr2=%f\n", llr, llr2);
 		// Approximately equal
 		TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, 5e-3);
@@ -453,7 +451,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio()
 	{
-		int n = maxx * maxx;
+		final int n = maxx * maxx;
 		final double n2 = n * 0.5;
 		final double n3 = n * 0.33;
 		final double n4 = n * 0.66;
@@ -494,25 +492,25 @@ public class PoissonCalculatorTest
 		//@formatter:on
 	}
 
-	private void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(BaseNonLinearFunction nlf1,
+	private static void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(BaseNonLinearFunction nlf1,
 			BaseNonLinearFunction nlf2, BaseNonLinearFunction nlf3)
 	{
 		//System.out.println(nlf1.name);
 
-		int n = maxx * maxx;
+		final int n = maxx * maxx;
 
-		double[] a = new double[] { 1 };
+		final double[] a = new double[] { 1 };
 
 		// Simulate Poisson process of 3 combined functions
 		nlf1.initialise(a);
 		nlf2.initialise(a);
 		nlf3.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
-		double[] u = new double[x.length];
-		double[] b1 = new double[x.length];
-		double[] b2 = new double[x.length];
-		double[] b3 = new double[x.length];
+		final double[] u = new double[x.length];
+		final double[] b1 = new double[x.length];
+		final double[] b2 = new double[x.length];
+		final double[] b3 = new double[x.length];
 		for (int i = 0; i < n; i++)
 		{
 			b1[i] = nlf1.eval(i);
@@ -529,17 +527,17 @@ public class PoissonCalculatorTest
 		// b3 is the second function to add to the model
 
 		// Compute the LLR of adding b3 to b2 given we already have b1 modelling data x
-		double[] b12 = add(b1, b2);
-		double ll1a = PoissonCalculator.logLikelihood(b12, x);
-		double ll2a = PoissonCalculator.logLikelihood(add(b12, b3), x);
-		double llra = -2 * (ll1a - ll2a);
+		final double[] b12 = add(b1, b2);
+		final double ll1a = PoissonCalculator.logLikelihood(b12, x);
+		final double ll2a = PoissonCalculator.logLikelihood(add(b12, b3), x);
+		final double llra = -2 * (ll1a - ll2a);
 		//System.out.printf("x|(a+b+c) ll1=%f, ll2=%f, llra=%f\n", ll1a, ll2a, llra);
 
 		// Compute the LLR of adding b3 to b2 given we already have x minus b1
 		x = subtract(x, b1);
-		double ll1b = PoissonCalculator.logLikelihood(b2, x);
-		double ll2b = PoissonCalculator.logLikelihood(add(b2, b3), x);
-		double llrb = -2 * (ll1b - ll2b);
+		final double ll1b = PoissonCalculator.logLikelihood(b2, x);
+		final double ll2b = PoissonCalculator.logLikelihood(add(b2, b3), x);
+		final double llrb = -2 * (ll1b - ll2b);
 		//System.out.printf("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f\n", ll1b, ll2b, llrb);
 
 		//System.out.printf("llr=%f (%g), llr2=%f (%g)\n", llra, PoissonCalculator.computePValue(llra, 1), llrb,
@@ -565,11 +563,11 @@ public class PoissonCalculatorTest
 			showRelativeErrorOfLogFactorialApproximation(i);
 	}
 
-	private void showRelativeErrorOfLogFactorialApproximation(double x)
+	private static void showRelativeErrorOfLogFactorialApproximation(double x)
 	{
-		double e = PoissonCalculator.logFactorial(x);
-		double[] o = new double[6];
-		double[] error = new double[o.length];
+		final double e = PoissonCalculator.logFactorial(x);
+		final double[] o = new double[6];
+		final double[] error = new double[o.length];
 		for (int i = 0; i < o.length; i++)
 		{
 			o[i] = PoissonCalculator.logFactorialApproximation(x, i);
@@ -596,14 +594,14 @@ public class PoissonCalculatorTest
 			showRelativeErrorOfFastLogLikelihood(i);
 	}
 
-	private void showRelativeErrorOfFastLogLikelihood(double x)
+	private static void showRelativeErrorOfFastLogLikelihood(double x)
 	{
-		for (double factor : new double[] { 0.5, 1, 2 })
+		for (final double factor : new double[] { 0.5, 1, 2 })
 		{
-			double u = x * factor;
-			double e = PoissonCalculator.logLikelihood(u, x);
-			double o = PoissonCalculator.fastLogLikelihood(u, x);
-			double error = DoubleEquality.relativeError(e, o);
+			final double u = x * factor;
+			final double e = PoissonCalculator.logLikelihood(u, x);
+			final double o = PoissonCalculator.fastLogLikelihood(u, x);
+			final double error = DoubleEquality.relativeError(e, o);
 			TestSettings.info("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
 					Double.toString(error));
 		}
@@ -627,15 +625,15 @@ public class PoissonCalculatorTest
 			showRelativeErrorOfFastLog_FastLogLikelihood(i);
 	}
 
-	private void showRelativeErrorOfFastLog_FastLogLikelihood(double x)
+	private static void showRelativeErrorOfFastLog_FastLogLikelihood(double x)
 	{
-		FastLog fastLog = FastLogFactory.getFastLog();
-		for (double factor : new double[] { 0.5, 1, 2 })
+		final FastLog fastLog = FastLogFactory.getFastLog();
+		for (final double factor : new double[] { 0.5, 1, 2 })
 		{
-			double u = x * factor;
-			double e = PoissonCalculator.logLikelihood(u, x);
-			double o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
-			double error = DoubleEquality.relativeError(e, o);
+			final double u = x * factor;
+			final double e = PoissonCalculator.logLikelihood(u, x);
+			final double o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
+			final double error = DoubleEquality.relativeError(e, o);
 			TestSettings.info("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
 					Double.toString(error));
 		}
@@ -659,15 +657,15 @@ public class PoissonCalculatorTest
 			showRelativeErrorOfFastLog_LogLikelihoodRatio(i);
 	}
 
-	private void showRelativeErrorOfFastLog_LogLikelihoodRatio(double x)
+	private static void showRelativeErrorOfFastLog_LogLikelihoodRatio(double x)
 	{
-		FastLog fastLog = FastLogFactory.getFastLog();
-		for (double factor : new double[] { 0.5, 1, 2 })
+		final FastLog fastLog = FastLogFactory.getFastLog();
+		for (final double factor : new double[] { 0.5, 1, 2 })
 		{
-			double u = x * factor;
-			double e = PoissonCalculator.logLikelihoodRatio(u, x);
-			double o = PoissonCalculator.logLikelihoodRatio(u, x, fastLog);
-			double error = DoubleEquality.relativeError(e, o);
+			final double u = x * factor;
+			final double e = PoissonCalculator.logLikelihoodRatio(u, x);
+			final double o = PoissonCalculator.logLikelihoodRatio(u, x, fastLog);
+			final double error = DoubleEquality.relativeError(e, o);
 			TestSettings.info("llr(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
 					Double.toString(error));
 		}
@@ -676,21 +674,21 @@ public class PoissonCalculatorTest
 	@Test
 	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod()
 	{
-		DoubleEquality eq = new DoubleEquality(3e-4, 0);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final DoubleEquality eq = new DoubleEquality(3e-4, 0);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		// Test for different x. The calculator approximation begins
-		int n = 100;
-		double[] u = new double[n];
-		double[] x = new double[n];
+		final int n = 100;
+		final double[] u = new double[n];
+		final double[] x = new double[n];
 		double e, o;
-		for (double testx : new double[] { Math.nextDown(PoissonCalculator.APPROXIMATION_X),
+		for (final double testx : new double[] { Math.nextDown(PoissonCalculator.APPROXIMATION_X),
 				PoissonCalculator.APPROXIMATION_X, Math.nextUp(PoissonCalculator.APPROXIMATION_X),
 				PoissonCalculator.APPROXIMATION_X * 1.1, PoissonCalculator.APPROXIMATION_X * 2,
 				PoissonCalculator.APPROXIMATION_X * 10 })
 		{
-			String X = Double.toString(testx);
+			final String X = Double.toString(testx);
 			Arrays.fill(x, testx);
-			PoissonCalculator pc = new PoissonCalculator(x);
+			final PoissonCalculator pc = new PoissonCalculator(x);
 			e = PoissonCalculator.maximumLogLikelihood(x);
 			o = pc.getMaximumLogLikelihood();
 			TestSettings.info("[%s] Instance MaxLL = %g vs %g (error = %g)\n", X, e, o,
@@ -724,7 +722,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private abstract class PCTimingTask extends BaseTimingTask
+	private static abstract class PCTimingTask extends BaseTimingTask
 	{
 		double[] x, u;
 		int ll;
@@ -752,7 +750,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private class StaticPCTimingTask extends PCTimingTask
+	private static class StaticPCTimingTask extends PCTimingTask
 	{
 		public StaticPCTimingTask(double[] x, double[] u, int ll, int llr)
 		{
@@ -771,7 +769,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private class FastPCTimingTask extends PCTimingTask
+	private static class FastPCTimingTask extends PCTimingTask
 	{
 		public FastPCTimingTask(double[] x, double[] u, int ll, int llr)
 		{
@@ -790,7 +788,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private class FastLogPCTimingTask extends PCTimingTask
+	private static class FastLogPCTimingTask extends PCTimingTask
 	{
 		FastLog fastLog = FastLogFactory.getFastLog();
 
@@ -811,7 +809,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	private class InstancePCTimingTask extends PCTimingTask
+	private static class InstancePCTimingTask extends PCTimingTask
 	{
 		int max;
 
@@ -824,7 +822,7 @@ public class PoissonCalculatorTest
 		@Override
 		public Object run(Object data)
 		{
-			PoissonCalculator pc = new PoissonCalculator(x);
+			final PoissonCalculator pc = new PoissonCalculator(x);
 			double value = 0;
 			// Use the fastest execution possible
 			for (int i = 0; i < max; i++)
@@ -840,31 +838,31 @@ public class PoissonCalculatorTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		int n = 1000;
-		int m = 10;
-		double[] x = new double[n * m];
-		double[] u = new double[x.length];
+		final int n = 1000;
+		final int m = 10;
+		final double[] x = new double[n * m];
+		final double[] u = new double[x.length];
 		for (int i = 1, k = 0; i <= n; i++)
 		{
-			double testx = 0.1 * i;
+			final double testx = 0.1 * i;
 			// +/- 3SD of the expected
-			double sd = 3 * Math.sqrt(testx);
-			double min = Math.max(0.1, testx - sd);
-			double max = testx + sd;
-			double inc = (max - min) / (m - 1);
+			final double sd = 3 * Math.sqrt(testx);
+			final double min = Math.max(0.1, testx - sd);
+			final double max = testx + sd;
+			final double inc = (max - min) / (m - 1);
 			for (int j = 0; j < m; j++, k++)
 			{
 				x[k] = testx;
 				u[k] = min + j * inc;
 			}
 		}
-		double[] limits = Maths.limits(x);
+		final double[] limits = Maths.limits(x);
 		TestSettings.info("Speed test x-range: %f - %f\n", limits[0], limits[1]);
 
-		TimingService ts = new TimingService(5);
-		int[] loops = new int[] { 0, 1, 10 };
-		for (int ll : loops)
-			for (int llr : loops)
+		final TimingService ts = new TimingService(5);
+		final int[] loops = new int[] { 0, 1, 10 };
+		for (final int ll : loops)
+			for (final int llr : loops)
 			{
 				if (ll + llr == 0)
 					continue;
@@ -874,26 +872,26 @@ public class PoissonCalculatorTest
 				ts.execute(new InstancePCTimingTask(x, u, ll, llr));
 			}
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		int index = ts.getSize() - 1;
+		final int index = ts.getSize() - 1;
 		Assert.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());
 	}
 
-	private double[] add(double[] a, double[] b)
+	private static double[] add(double[] a, double[] b)
 	{
-		double[] c = new double[a.length];
+		final double[] c = new double[a.length];
 		for (int i = 0; i < a.length; i++)
 			c[i] = a[i] + b[i];
 		return c;
 	}
 
-	private double[] subtract(double[] a, double[] b)
+	private static double[] subtract(double[] a, double[] b)
 	{
-		double[] c = new double[a.length];
+		final double[] c = new double[a.length];
 		for (int i = 0; i < a.length; i++)
 			c[i] = a[i] - b[i];
 		return c;

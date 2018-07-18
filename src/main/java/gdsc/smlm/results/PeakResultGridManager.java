@@ -92,9 +92,7 @@ public class PeakResultGridManager
 		{
 			final PeakList[] list = peakGrid[x];
 			for (int y = 0; y < yBlocks; y++)
-			{
 				list[y] = new PeakList();
-			}
 		}
 	}
 
@@ -110,7 +108,7 @@ public class PeakResultGridManager
 	{
 		this.resolution = Maths.max(1, (int) Math.ceil(resolution));
 		double maxx = 0, maxy = 0;
-		for (PeakResult p : results)
+		for (final PeakResult p : results)
 		{
 			if (maxx < p.getXPosition())
 				maxx = p.getXPosition();
@@ -121,7 +119,7 @@ public class PeakResultGridManager
 		yBlocks = getBlock((int) maxy) + 1;
 
 		createPeakGrid();
-		for (PeakResult p : results)
+		for (final PeakResult p : results)
 			putOnGrid(p);
 	}
 
@@ -184,18 +182,13 @@ public class PeakResultGridManager
 		final int ymax = Math.min(yBlocks, yBlock + 2);
 
 		for (int xx = xmin; xx < xmax; xx++)
-		{
 			for (int yy = ymin; yy < ymax; yy++)
-			{
 				size += peakGrid[xx][yy].size;
-			}
-		}
 		final PeakResult[] list = new PeakResult[size];
 		if (size != 0)
 		{
 			size = 0;
 			for (int xx = xmin; xx < xmax; xx++)
-			{
 				for (int yy = ymin; yy < ymax; yy++)
 				{
 					if (peakGrid[xx][yy].size == 0)
@@ -203,7 +196,6 @@ public class PeakResultGridManager
 					System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
 					size += peakGrid[xx][yy].size;
 				}
-			}
 		}
 
 		peakCache = list;

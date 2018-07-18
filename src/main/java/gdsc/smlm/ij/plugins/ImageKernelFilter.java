@@ -107,17 +107,15 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	@Override
 	public void run(ImageProcessor ip)
 	{
-		float[] data = (float[]) ip.getPixels();
-		int w = ip.getWidth();
-		int h = ip.getHeight();
+		final float[] data = (float[]) ip.getPixels();
+		final int w = ip.getWidth();
+		final int h = ip.getHeight();
 		if (method == METHOD_SPATIAL)
-		{
 			kf.convolve(data, w, h, border);
-		}
 		else
 		{
 			// Use a clone for thread safety
-			FHTFilter f = (ticker.getTotal() > 1l) ? ff.clone() : ff;
+			final FHTFilter f = (ticker.getTotal() > 1l) ? ff.clone() : ff;
 			f.filter(data, w, h, border);
 		}
 		if (ticker.getTotal() == 1l)
@@ -129,7 +127,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		// Get available kernels
-		String[] names = Utils.getImageList(Utils.GREY_SCALE | Utils.SINGLE);
+		final String[] names = Utils.getImageList(Utils.GREY_SCALE | Utils.SINGLE);
 		if (names.length == 0)
 		{
 			IJ.error(TITLE, "No suitable kernel images");
@@ -138,7 +136,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 
 		this.dataImp = imp;
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Convolve an image using another image as the convolution kernel");
@@ -190,16 +188,16 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		build = build || (method == METHOD_FHT && ff == null);
 		if (build)
 		{
-			Operation operation = Operation.forOrdinal(filter);
+			final Operation operation = Operation.forOrdinal(filter);
 			FloatProcessor fp = kernelImp.getProcessor().toFloat(0, null);
 			if (method == METHOD_SPATIAL)
 			{
 				if (kf == null || kernelImp.getID() != lastId || zero != lastZero)
 				{
 					fp = KernelFilter.pad(fp);
-					int kw = fp.getWidth();
-					int kh = fp.getHeight();
-					float[] kernel = (float[]) fp.getPixels();
+					final int kw = fp.getWidth();
+					final int kh = fp.getHeight();
+					final float[] kernel = (float[]) fp.getPixels();
 					kf = (zero) ? new ZeroKernelFilter(kernel, kw, kh) : new KernelFilter(kernel, kw, kh);
 				}
 				switch (operation)
@@ -221,9 +219,9 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			{
 				if (ff == null || kernelImp.getID() != lastId)
 				{
-					int kw = fp.getWidth();
-					int kh = fp.getHeight();
-					float[] kernel = (float[]) fp.getPixels();
+					final int kw = fp.getWidth();
+					final int kh = fp.getHeight();
+					final float[] kernel = (float[]) fp.getPixels();
 					ff = new FHTFilter(kernel, kw, kh);
 					ff.initialiseKernel(dataImp.getWidth(), dataImp.getHeight());
 				}

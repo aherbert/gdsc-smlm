@@ -104,7 +104,7 @@ public class BlockAverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
@@ -120,13 +120,9 @@ public class BlockAverageDataProcessor extends DataProcessor
 			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
 
 			if (tmpSmooth <= getBorder())
-			{
 				filter.rollingBlockFilterInternal(smoothData, width, height, tmpSmooth);
-			}
 			else
-			{
 				filter.rollingBlockFilter(smoothData, width, height, tmpSmooth);
-			}
 		}
 		return smoothData;
 	}
@@ -149,7 +145,7 @@ public class BlockAverageDataProcessor extends DataProcessor
 	@Override
 	public BlockAverageDataProcessor clone()
 	{
-		BlockAverageDataProcessor f = (BlockAverageDataProcessor) super.clone();
+		final BlockAverageDataProcessor f = (BlockAverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.filter = filter.clone();
 		return f;
@@ -174,7 +170,7 @@ public class BlockAverageDataProcessor extends DataProcessor
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("smooth = " + Utils.rounded(smooth));
 		return list;
 	}

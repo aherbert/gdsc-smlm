@@ -77,8 +77,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	public void run(ImageProcessor ip)
 	{
 		// Compute rolling sums
-		FloatProcessor fp = ip.toFloat(0, null);
-		float[] data = (float[]) ip.toFloat(0, null).getPixels();
+		final FloatProcessor fp = ip.toFloat(0, null);
+		final float[] data = (float[]) ip.toFloat(0, null).getPixels();
 		double[] s = null, ss = null;
 		if (preview && cachedS != null)
 		{
@@ -96,16 +96,15 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 		final int maxx = ip.getWidth();
 		final int maxy = ip.getHeight();
 		for (int y = 0, i = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++, i++)
 			{
 				double sum = 0;
 				double sumSquares = 0;
 
 				int minU = x - radius - 1;
-				int maxU = FastMath.min(x + radius, maxx - 1);
+				final int maxU = FastMath.min(x + radius, maxx - 1);
 				int minV = y - radius - 1;
-				int maxV = FastMath.min(y + radius, maxy - 1);
+				final int maxV = FastMath.min(y + radius, maxy - 1);
 
 				// Compute sum from rolling sum using:
 				// sum(u,v) =
@@ -154,13 +153,13 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 				if (minV < 0)
 					minV = -1;
 
-				int n = (maxU - minU) * (maxV - minV);
+				final int n = (maxU - minU) * (maxV - minV);
 
 				if (n < 2)
 					continue;
 
 				// Get the sum of squared differences
-				double residuals = sumSquares - (sum * sum) / n;
+				final double residuals = sumSquares - (sum * sum) / n;
 
 				//// -----------------------------
 				//// Check using the original data
@@ -194,8 +193,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 
 				if (residuals > 0.0)
 				{
-					double stdDev = Math.sqrt(residuals / (n - 1.0));
-					double mean = sum / n;
+					final double stdDev = Math.sqrt(residuals / (n - 1.0));
+					final double mean = sum / n;
 
 					if (Math.abs(data[i] - mean) / stdDev > error)
 					{
@@ -204,7 +203,6 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 					}
 				}
 			}
-		}
 		if (preview)
 		{
 			cachedS = s;
@@ -222,10 +220,10 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 		// ss(u,v) = f(u,v) * f(u,v) + ss(u-1,v) + ss(u,v-1) - ss(u-1,v-1)
 		// where s(u,v) = ss(u,v) = 0 when either u,v < 0
 
-		int maxx = ip.getWidth();
-		int maxy = ip.getHeight();
-		float[] originalData = (float[]) ip.getPixels();
-		double[] data = Tools.toDouble(originalData);
+		final int maxx = ip.getWidth();
+		final int maxy = ip.getHeight();
+		final float[] originalData = (float[]) ip.getPixels();
+		final double[] data = Tools.toDouble(originalData);
 
 		// First row
 		double cs_ = 0; // Column sum
@@ -270,7 +268,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 		this.pfr = pfr;
 		preview = true;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Replace pixels with mean if they are N StdDevs from the mean");

@@ -84,7 +84,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			// Ask user if they want to show the demo filters
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			gd.addMessage("No results in memory. Show the demo filters?");
@@ -106,10 +106,10 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		}
 
 		// Filter results
-		Filter filter = Filter.fromXML(filterSettings.getFreeFilter());
+		final Filter filter = Filter.fromXML(filterSettings.getFreeFilter());
 		if (filter != null)
 		{
-			MemoryPeakResults newResults = filter.filter(results);
+			final MemoryPeakResults newResults = filter.filter(results);
 			if (newResults.size() > 0)
 			{
 				newResults.setName(results.getName() + " Free Filtered");
@@ -118,14 +118,12 @@ public class FreeFilterResults implements PlugIn, ItemListener
 			IJ.showStatus(String.format("Filtered %d results to %d", results.size(), newResults.size()));
 		}
 		else
-		{
 			IJ.showStatus("ERROR: Unable to create filter");
-		}
 	}
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Select a dataset to filter");
@@ -138,7 +136,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		{
 			text = gdsc.core.utils.XmlUtils.prettyPrintXml(filterSettings.getFreeFilter());
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			text = filterSettings.getFreeFilter();
 		}
@@ -147,7 +145,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 
 		if (Utils.isShowGenericDialog())
 		{
-			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
+			final Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
 			cb.addItemListener(this);
 		}
 
@@ -157,7 +155,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 
 		inputOption = ResultsManager.getInputSource(gd);
 		filterSettings.setFreeFilter(gd.getNextText());
-		boolean demoFilters = gd.getNextBoolean();
+		final boolean demoFilters = gd.getNextBoolean();
 
 		if (demoFilters)
 		{
@@ -173,7 +171,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	{
 		// When the checkbox is clicked, output the list of available filters to the ImageJ log
 
-		Checkbox cb = (Checkbox) e.getSource();
+		final Checkbox cb = (Checkbox) e.getSource();
 		if (cb.getState())
 		{
 			cb.setState(false);

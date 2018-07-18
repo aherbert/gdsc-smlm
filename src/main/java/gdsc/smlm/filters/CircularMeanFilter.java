@@ -38,8 +38,8 @@ public class CircularMeanFilter extends CircularFilter
 	@Override
 	protected Normaliser computeWeightedNormaliser(double radius)
 	{
-		float[] nPoints = weights.clone();
-		CircularSumFilter sum = new CircularSumFilter();
+		final float[] nPoints = weights.clone();
+		final CircularSumFilter sum = new CircularSumFilter();
 		sum.convolve(nPoints, weightWidth, weightHeight, radius);
 		return new PerPixelNormaliser(nPoints);
 	}
@@ -63,7 +63,7 @@ public class CircularMeanFilter extends CircularFilter
 	@Override
 	public CircularMeanFilter clone()
 	{
-		CircularMeanFilter o = (CircularMeanFilter) super.clone();
+		final CircularMeanFilter o = (CircularMeanFilter) super.clone();
 		return o;
 	}
 }

@@ -119,18 +119,18 @@ public class ToleranceCheckerTest
 		canConverge(false, NONE, NONE, NONE, NONE, 20, ToleranceChecker.STATUS_MAX_ITERATIONS);
 	}
 
-	private void canConverge(boolean minimiseValue, double relativeValue, double absoluteValue,
+	private static void canConverge(boolean minimiseValue, double relativeValue, double absoluteValue,
 			double relativeParameters, double absoluteParameters, int maxIterations, int expected)
 	{
-		double dir = (minimiseValue) ? -1 : 1;
+		final double dir = (minimiseValue) ? -1 : 1;
 		canConverge(minimiseValue, dir, relativeValue, absoluteValue, relativeParameters, absoluteParameters,
 				maxIterations, expected);
 	}
 
-	private void canConverge(boolean minimiseValue, double dir, double relativeValue, double absoluteValue,
+	private static void canConverge(boolean minimiseValue, double dir, double relativeValue, double absoluteValue,
 			double relativeParameters, double absoluteParameters, int maxIterations, int expected)
 	{
-		ToleranceChecker tc = new ToleranceChecker(minimiseValue, relativeValue, absoluteValue, relativeParameters,
+		final ToleranceChecker tc = new ToleranceChecker(minimiseValue, relativeValue, absoluteValue, relativeParameters,
 				absoluteParameters, maxIterations);
 
 		double v = 10;
@@ -139,14 +139,14 @@ public class ToleranceCheckerTest
 		double[] p2 = new double[] { 1 + p };
 		for (int i = 0; i < 20; i++)
 		{
-			double v1 = v2;
-			double[] p1 = p2;
+			final double v1 = v2;
+			final double[] p1 = p2;
 			v *= 0.5;
 			p *= 0.5;
 			v2 = v1 + dir * v;
 			//System.out.printf("v2 = %f\n", v2);
 			p2 = new double[] { p1[0] + dir * p };
-			int observed = tc.converged(v1, p1, v2, p2);
+			final int observed = tc.converged(v1, p1, v2, p2);
 			if (observed != 0)
 			{
 				Assert.assertEquals(expected, observed);
@@ -164,8 +164,8 @@ public class ToleranceCheckerTest
 	@Test
 	public void canConvergeOnImprovedValueIfMaximising()
 	{
-		double tolerance = 1e-2;
-		ToleranceChecker tc = new ToleranceChecker(false, NONE, tolerance, NONE, NONE, 100);
+		final double tolerance = 1e-2;
+		final ToleranceChecker tc = new ToleranceChecker(false, NONE, tolerance, NONE, NONE, 100);
 		Assert.assertEquals(0, tc.converged(0, null, 1, null));
 		Assert.assertEquals(0, tc.converged(0, null, -1, null));
 		Assert.assertEquals(0, tc.converged(0, null, 2 * tolerance, null));
@@ -178,8 +178,8 @@ public class ToleranceCheckerTest
 	@Test
 	public void canConvergeOnImprovedValueIfMinimising()
 	{
-		double tolerance = 1e-2;
-		ToleranceChecker tc = new ToleranceChecker(true, NONE, tolerance, NONE, NONE, 100);
+		final double tolerance = 1e-2;
+		final ToleranceChecker tc = new ToleranceChecker(true, NONE, tolerance, NONE, NONE, 100);
 		Assert.assertEquals(0, tc.converged(0, null, 1, null));
 		Assert.assertEquals(0, tc.converged(0, null, -1, null));
 		Assert.assertEquals(0, tc.converged(0, null, 2 * tolerance, null));
@@ -192,7 +192,7 @@ public class ToleranceCheckerTest
 	@Test
 	public void canConvergeOnValueUsingZeroTolerance()
 	{
-		double tolerance = 0;
+		final double tolerance = 0;
 		ToleranceChecker tc;
 
 		tc = new ToleranceChecker(false, NONE, NONE, NONE, NONE, 100);
@@ -231,9 +231,9 @@ public class ToleranceCheckerTest
 	@Test
 	public void canConvergeOnParametersUsingZeroTolerance()
 	{
-		double tolerance = 0;
+		final double tolerance = 0;
 		ToleranceChecker tc;
-		double[] p = new double[1];
+		final double[] p = new double[1];
 
 		tc = new ToleranceChecker(false, NONE, NONE, NONE, NONE, 100);
 		Assert.assertFalse(tc.checkValue);

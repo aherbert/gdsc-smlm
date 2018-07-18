@@ -67,8 +67,8 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 		// Use the estimated parameter deviations for the peak
 		if (peak.hasParameterDeviations())
 		{
-			float vx = peak.getParameterDeviation(PeakResult.X);
-			float vy = peak.getParameterDeviation(PeakResult.Y);
+			final float vx = peak.getParameterDeviation(PeakResult.X);
+			final float vy = peak.getParameterDeviation(PeakResult.Y);
 			return (vx * vx + vy * vy) <= variance;
 		}
 		return true;

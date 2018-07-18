@@ -90,20 +90,20 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	{
 		org.junit.Assume.assumeTrue(runTests);
 
-		double bias = 100;
+		final double bias = 100;
 
-		SteppingFunctionSolver solver = getSolver(clamping, false);
-		SteppingFunctionSolver solver2 = getSolver(clamping, false);
+		final SteppingFunctionSolver solver = getSolver(clamping, false);
+		final SteppingFunctionSolver solver2 = getSolver(clamping, false);
 
-		String name = getLVMName(applyBounds, clamping, false);
+		final String name = getLVMName(applyBounds, clamping, false);
 
-		int LOOPS = 5;
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		StoredDataStatistics[] stats = new StoredDataStatistics[6];
+		final int LOOPS = 5;
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
-		for (double s : signal)
+		for (final double s : signal)
 		{
-			double[] expected = createParams(1, s, 0, 0, 1);
+			final double[] expected = createParams(1, s, 0, 0, 1);
 			double[] lower = null, upper = null;
 			if (applyBounds)
 			{
@@ -112,34 +112,34 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 				solver.setBounds(lower, upper);
 			}
 
-			double[] expected2 = addBiasToParams(expected, bias);
+			final double[] expected2 = addBiasToParams(expected, bias);
 			if (applyBounds)
 			{
-				double[] lower2 = addBiasToParams(lower, bias);
-				double[] upper2 = addBiasToParams(upper, bias);
+				final double[] lower2 = addBiasToParams(lower, bias);
+				final double[] upper2 = addBiasToParams(upper, bias);
 				solver2.setBounds(lower2, upper2);
 			}
 
 			for (int loop = LOOPS; loop-- > 0;)
 			{
-				double[] data = drawGaussian(expected, rg);
-				double[] data2 = data.clone();
+				final double[] data = drawGaussian(expected, rg);
+				final double[] data2 = data.clone();
 				for (int i = 0; i < data.length; i++)
 					data2[i] += bias;
 
 				for (int i = 0; i < stats.length; i++)
 					stats[i] = new StoredDataStatistics();
 
-				for (double db : base)
-					for (double dx : shift)
-						for (double dy : shift)
-							for (double dsx : factor)
+				for (final double db : base)
+					for (final double dx : shift)
+						for (final double dy : shift)
+							for (final double dsx : factor)
 							{
-								double[] p = createParams(db, s, dx, dy, dsx);
-								double[] p2 = addBiasToParams(p, bias);
+								final double[] p = createParams(db, s, dx, dy, dsx);
+								final double[] p2 = addBiasToParams(p, bias);
 
-								double[] fp = fitGaussian(solver, data, p, expected);
-								double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
+								final double[] fp = fitGaussian(solver, data, p, expected);
+								final double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
 
 								// The result should be the same without a bias
 								Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
@@ -337,21 +337,21 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	{
 		org.junit.Assume.assumeTrue(runTests);
 
-		SteppingFunctionSolver solver = getSolver(clamping, mle);
-		SteppingFunctionSolver solver2 = getSolver(clamping2, mle2);
+		final SteppingFunctionSolver solver = getSolver(clamping, mle);
+		final SteppingFunctionSolver solver2 = getSolver(clamping2, mle2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),
 				getLVMName(bounded2, clamping2, mle2));
 	}
 
 	SteppingFunctionSolver getSolver(int clamping, boolean mle)
 	{
-		SteppingFunctionSolverClamp clamp = (clamping == 0) ? NO_CLAMP : (clamping == 1) ? CLAMP : DYNAMIC_CLAMP;
-		SteppingFunctionSolverType type = (mle) ? MLELVM : LSELVM;
+		final SteppingFunctionSolverClamp clamp = (clamping == 0) ? NO_CLAMP : (clamping == 1) ? CLAMP : DYNAMIC_CLAMP;
+		final SteppingFunctionSolverType type = (mle) ? MLELVM : LSELVM;
 		return getSolver(clamp, type);
 
 	}
 
-	private String getLVMName(boolean bounded, int clamping, boolean mle)
+	private static String getLVMName(boolean bounded, int clamping, boolean mle)
 	{
 		return ((bounded) ? "B" : "") + ((clamping == 0) ? "" : ((clamping == 1) ? "C" : "DC")) + "LVM" +
 				((mle) ? " MLE" : "");

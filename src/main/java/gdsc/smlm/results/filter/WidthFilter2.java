@@ -89,7 +89,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#generateName()
 	 */
 	@Override
@@ -100,7 +100,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#setup(gdsc.smlm.results.MemoryPeakResults)
 	 */
 	@Override
@@ -111,14 +111,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		// Set the width limit
 		lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		final double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
 		lowerSigmaThreshold = (float) (s * minWidth);
 		upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#setup()
 	 */
 	@Override
@@ -129,7 +129,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#setup(int)
 	 */
 	@Override
@@ -143,7 +143,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#setup(int, gdsc.smlm.results.filter.FilterSetupData[])
 	 */
 	@Override
@@ -181,7 +181,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
 	 */
 	@Override
@@ -192,7 +192,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
@@ -204,7 +204,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
 	 */
 	@Override
@@ -215,17 +215,15 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (widthEnabled)
-		{
 			if (peak.getXSDFactor() > upperSigmaThreshold || peak.getXSDFactor() < lowerSigmaThreshold)
 				return V_X_SD_FACTOR;
-		}
 		return 0;
 	}
 
@@ -380,7 +378,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getSignal()
 	 */
 	@Override
@@ -391,7 +389,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getSNR()
 	 */
 	@Override
@@ -402,7 +400,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getMinWidth()
 	 */
 	@Override
@@ -413,7 +411,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getMaxWidth()
 	 */
 	@Override
@@ -424,7 +422,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getShift()
 	 */
 	@Override
@@ -435,7 +433,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getEShift()
 	 */
 	@Override
@@ -446,7 +444,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getPrecision()
 	 */
 	@Override
@@ -457,7 +455,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getPrecisionType()
 	 */
 	@Override
@@ -468,7 +466,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getMinZ()
 	 */
 	@Override
@@ -479,7 +477,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IMultiFilter#getMaxZ()
 	 */
 	@Override

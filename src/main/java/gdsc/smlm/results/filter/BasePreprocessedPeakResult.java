@@ -187,7 +187,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getFrame()
 	 */
 	@Override
@@ -198,7 +198,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getUniqueId()
 	 */
 	@Override
@@ -209,7 +209,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getId()
 	 */
 	@Override
@@ -220,7 +220,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getCandidateId()
 	 */
 	@Override
@@ -231,7 +231,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getSignal()
 	 */
 	@Override
@@ -242,7 +242,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getMeanSignal()
 	 */
 	@Override
@@ -253,7 +253,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getSNR()
 	 */
 	@Override
@@ -264,7 +264,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getNoise()
 	 */
 	@Override
@@ -275,7 +275,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVariance()
 	 */
 	@Override
@@ -286,7 +286,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVariance2()
 	 */
 	@Override
@@ -297,7 +297,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVarianceCRLB()
 	 */
 	@Override
@@ -308,7 +308,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getSD()
 	 */
 	@Override
@@ -319,7 +319,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getBackground()
 	 */
 	@Override
@@ -330,7 +330,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAmplitude()
 	 */
 	@Override
@@ -341,7 +341,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAngle()
 	 */
 	@Override
@@ -352,7 +352,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getX()
 	 */
 	@Override
@@ -363,7 +363,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getY()
 	 */
 	@Override
@@ -374,7 +374,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getZ()
 	 */
 	@Override
@@ -385,7 +385,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getXRelativeShift2()
 	 */
 	@Override
@@ -396,7 +396,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getYRelativeShift2()
 	 */
 	@Override
@@ -407,7 +407,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getXSD()
 	 */
 	@Override
@@ -418,7 +418,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getYSD()
 	 */
 	@Override
@@ -429,7 +429,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getXSDFactor()
 	 */
 	@Override
@@ -440,7 +440,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getYSDFactor()
 	 */
 	@Override
@@ -451,7 +451,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isExistingResult()
 	 */
 	@Override
@@ -462,7 +462,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNewResult()
 	 */
 	@Override

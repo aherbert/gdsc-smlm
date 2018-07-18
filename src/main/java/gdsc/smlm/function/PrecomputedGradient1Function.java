@@ -32,7 +32,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
 {
 	/** The gradient indices. */
 	protected final int[] gradientIndices;
-	
+
 	/** The first order gradient. */
 	protected final double[][] g1;
 
@@ -49,7 +49,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
 	public PrecomputedGradient1Function(double[] values, double[][] g1)
 	{
 		super(values);
-		int numberOfGradients = checkGradient(g1);
+		final int numberOfGradients = checkGradient(g1);
 		gradientIndices = SimpleArrayUtils.newArray(numberOfGradients, 0, 1);
 		this.g1 = g1;
 	}
@@ -71,7 +71,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
 			return 0;
 		if (g[0] == null)
 			throw new IllegalArgumentException("Gradient[0][] is null");
-		int n = g[0].length;
+		final int n = g[0].length;
 		for (int i = 1; i < g.length; i++)
 			if (g[i] == null || g[i].length != n)
 				throw new IllegalArgumentException("Gradient[" + i + "][] is incorrect size");

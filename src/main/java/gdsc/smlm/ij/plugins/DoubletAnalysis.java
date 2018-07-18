@@ -188,7 +188,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	static
 	{
-		String currentUsersHomeDir = System.getProperty("user.home");
+		final String currentUsersHomeDir = System.getProperty("user.home");
 		templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
 	}
 
@@ -227,7 +227,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private TextField textMinWidthFactor;
 	private TextField textWidthFactor;
 
-	private AtomicInteger ignored = new AtomicInteger(0);
+	private final AtomicInteger ignored = new AtomicInteger(0);
 
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
 			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
@@ -244,7 +244,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			displayHistograms[i] = true;
 	}
 
-	private WindowOrganiser windowOrganiser = new WindowOrganiser();
+	private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
 	private class ResidualsScore
 	{
@@ -522,7 +522,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			{
 				while (true)
 				{
-					Integer job = jobs.take();
+					final Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
 						break;
 					if (!finished)
@@ -530,7 +530,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						run(job.intValue());
 				}
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				System.out.println(e.toString());
 				//throw new RuntimeException(e);
@@ -551,8 +551,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 			showProgress();
 
-			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
-			ArrayList<DoubletResult> frameResults = new ArrayList<>(actual.length);
+			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+			final ArrayList<DoubletResult> frameResults = new ArrayList<>(actual.length);
 
 			// Extract the data
 			final int maxx = stack.getWidth();
@@ -560,23 +560,23 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			data = IJImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
 
 			// Smooth the image and identify spots with a filter
-			Spot[] spots = spotFilter.rank(data, maxx, maxy);
+			final Spot[] spots = spotFilter.rank(data, maxx, maxy);
 
 			// Match the each actual result to the closest filter candidate.
 			// The match must be within the fit window used during fitting, i.e. could the actual
 			// result be fit using this candidate.
-			int[] matches = new int[actual.length];
+			final int[] matches = new int[actual.length];
 			for (int i = 0; i < actual.length; i++)
 			{
 				double dmin = Double.POSITIVE_INFINITY;
 				int match = -1;
 				// Get the coordinates, offset to allow for 0.5 to be the centre of the pixel
-				double x = actual[i].getX() - 0.5;
-				double y = actual[i].getY() - 0.5;
+				final double x = actual[i].getX() - 0.5;
+				final double y = actual[i].getY() - 0.5;
 				for (int j = 0; j < spots.length; j++)
 				{
-					double dx = Math.abs(x - spots[j].x);
-					double dy = Math.abs(y - spots[j].y);
+					final double dx = Math.abs(x - spots[j].x);
+					final double dy = Math.abs(y - spots[j].y);
 					if (dx < limit && dy < limit)
 					{
 						final double d2 = dx * dx + dy * dy;
@@ -596,24 +596,21 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 			// Identify single and doublets (and other)
 			int singles = 0, doublets = 0, multiples = 0, total = 0, ignored = 0;
-			int[] spotMatchCount = new int[spots.length];
-			int[] neighbourIndices = new int[spots.length];
+			final int[] spotMatchCount = new int[spots.length];
+			final int[] neighbourIndices = new int[spots.length];
 			for (int i = 0; i < actual.length; i++)
-			{
 				if (matches[i] != -1)
 				{
 					// Count all matches
 					int n = 0;
 					final int j = matches[i];
 					for (int ii = i; ii < matches.length; ii++)
-					{
 						if (matches[ii] == j)
 						{
 							n++;
 							// Reset to avoid double counting
 							matches[ii] = -1;
 						}
-					}
 					switch (n)
 					{
 						//@formatter:off
@@ -668,13 +665,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							continue;
 						if (spots[jj].x < xmin || spots[jj].x > xmax || spots[jj].y < ymin || spots[jj].y > ymax ||
 								spots[jj].intensity < heightThreshold)
-						{
 							almostNeighbourCount++;
-						}
 						else
-						{
 							neighbourIndices[neighbourCount++] = jj;
-						}
 					}
 
 					// Optionally ignore results with neighbours
@@ -709,7 +702,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					// (Fit even multiple since this is what the FitWorker will do)
 					region = ie.crop(regionBounds, region);
 
-					boolean[] amplitudeEstimate = new boolean[1];
+					final boolean[] amplitudeEstimate = new boolean[1];
 					float signal = 0;
 					double sum = 0;
 					final int width = regionBounds.width;
@@ -735,7 +728,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					final DoubletResult result = new DoubletResult(frame, noise, spot, n, neighbourCount,
 							almostNeighbourCount, j);
 					result.fitResult1 = gf.fit(region, width, height, 1, params, amplitudeEstimate);
-					FunctionSolver f1 = gf.getFunctionSolver();
+					final FunctionSolver f1 = gf.getFunctionSolver();
 					result.iter1 = f1.getIterations();
 					result.eval1 = f1.getEvaluations();
 
@@ -758,7 +751,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						final int cy = (int) Math.round(fitParams[Gaussian2DFunction.Y_POSITION]);
 						final double[] residuals = gf.getResiduals();
 
-						QuadrantAnalysis qa = new QuadrantAnalysis();
+						final QuadrantAnalysis qa = new QuadrantAnalysis();
 
 						// TODO - Also perform quadrant analysis on a new region centred around
 						// the fit centre...
@@ -798,10 +791,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							gf.setComputeResiduals(true);
 							fitConfig.setMaxIterations(maxIterations);
 							fitConfig.setMaxFunctionEvaluations(maxEvaluations);
-							FunctionSolver f2 = gf.getFunctionSolver();
+							final FunctionSolver f2 = gf.getFunctionSolver();
 							result.iter2 = f2.getIterations();
 							result.eval2 = f2.getEvaluations();
-							int r2 = goodFit2(result.fitResult2, width, height);
+							final int r2 = goodFit2(result.fitResult2, width, height);
 
 							// Store all results if we made a fit, even if the fit was not good
 							if (r2 != 0)
@@ -910,18 +903,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 					// True results, i.e. where there was a choice between selecting fit results of single or doublet
 					if (result.good1 && result.good2)
-					{
 						if (result.neighbours == 0)
 						{
 							result.valid = true;
 							if (result.almostNeighbours == 0)
 								result.valid2 = true;
 						}
-					}
 
 					frameResults.add(result);
 				}
-			}
 
 			DoubletAnalysis.this.ignored.addAndGet(ignored);
 
@@ -943,15 +933,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				// This is valid for comparing the score between residuals=1 (all single) and
 				// residuals=0 (all doublets), when all spot candidates are fit.
 
-				ArrayList<ResultCoordinate> f1 = new ArrayList<>();
-				ArrayList<ResultCoordinate> f2 = new ArrayList<>();
-				for (DoubletResult result : frameResults)
-				{
+				final ArrayList<ResultCoordinate> f1 = new ArrayList<>();
+				final ArrayList<ResultCoordinate> f2 = new ArrayList<>();
+				for (final DoubletResult result : frameResults)
 					if (result.good1)
 					{
 						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
-						double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
-						double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
+						final double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
+						final double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
 						f1.add(new ResultCoordinate(result, -1, x, y));
 						if (result.good2)
 						{
@@ -967,17 +956,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							f2.add(new ResultCoordinate(result, 1, x2, y2));
 						}
 					}
-				}
 
 				if (f1.isEmpty())
 					return;
 
-				List<PointPair> pairs = new ArrayList<>();
+				final List<PointPair> pairs = new ArrayList<>();
 				MatchCalculator.analyseResults2D(actual, f1.toArray(new ResultCoordinate[f1.size()]), matchDistance,
 						null, null, null, pairs);
-				for (PointPair pair : pairs)
+				for (final PointPair pair : pairs)
 				{
-					ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
+					final ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
 					coord.result.addTP1(getScore(pair.getXYDistance2(), coord, pair.getPoint1()));
 				}
 
@@ -994,9 +982,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 				MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[f2.size()]), matchDistance, null,
 						null, null, pairs);
-				for (PointPair pair : pairs)
+				for (final PointPair pair : pairs)
 				{
-					ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
+					final ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
 					coord.result.addTP2(getScore(pair.getXYDistance2(), coord, pair.getPoint1()), coord.id);
 				}
 			}
@@ -1022,16 +1010,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				final boolean[] assigned = new boolean[actual.length];
 
 				int count = 0;
-				int[] matched = new int[frameResults.size()];
+				final int[] matched = new int[frameResults.size()];
 				OUTER: for (int j = 0; j < frameResults.size(); j++)
 				{
-					DoubletResult result = frameResults.get(j);
+					final DoubletResult result = frameResults.get(j);
 					if (result.good1)
 					{
 						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
-						float x = (float) (result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] +
+						final float x = (float) (result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] +
 								regionBounds.x);
-						float y = (float) (result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] +
+						final float y = (float) (result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] +
 								regionBounds.y);
 
 						for (int i = 0; i < actual.length; i++)
@@ -1072,20 +1060,20 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				Arrays.fill(assigned, false);
 				OUTER: for (int j = 0; j < frameResults.size(); j++)
 				{
-					DoubletResult result = frameResults.get(j);
+					final DoubletResult result = frameResults.get(j);
 					if (result.good1)
 					{
 						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
 
 						if (result.good2)
 						{
-							float x1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
+							final float x1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
 									regionBounds.x);
-							float y1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
+							final float y1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
 									regionBounds.y);
-							float x2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION +
+							final float x2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION +
 									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.x);
-							float y2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION +
+							final float y2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION +
 									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.y);
 
 							ResultCoordinate ra = new ResultCoordinate(result, 0, x1, y1);
@@ -1109,16 +1097,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 										ra = null;
 									}
 								}
-								else
+								else if (d2b <= threshold)
 								{
-									if (d2b <= threshold)
-									{
-										rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
-										if (++count == actual.length)
-											break OUTER;
-										assigned[i] = true;
-										rb = null;
-									}
+									rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
+									if (++count == actual.length)
+										break OUTER;
+									assigned[i] = true;
+									rb = null;
 								}
 							}
 
@@ -1130,7 +1115,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								//ra = rb = null;
 							}
 
-							// Process the rest of the results 
+							// Process the rest of the results
 							for (i = 0; i < actual.length && (ra != null || rb != null); i++)
 							{
 								if (assigned[i])
@@ -1152,16 +1137,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 												ra = null;
 											}
 										}
-										else
+										else if (d2b <= threshold)
 										{
-											if (d2b <= threshold)
-											{
-												rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
-												if (++count == actual.length)
-													break OUTER;
-												assigned[i] = true;
-												rb = null;
-											}
+											rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
+											if (++count == actual.length)
+												break OUTER;
+											assigned[i] = true;
+											rb = null;
 										}
 									}
 									else
@@ -1197,15 +1179,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			else
 			{
 				// Matching based on spot ranking
-				ArrayList<ResultCoordinate> f1 = new ArrayList<>();
-				ArrayList<ResultCoordinate> f2 = new ArrayList<>();
-				for (DoubletResult result : frameResults)
-				{
+				final ArrayList<ResultCoordinate> f1 = new ArrayList<>();
+				final ArrayList<ResultCoordinate> f2 = new ArrayList<>();
+				for (final DoubletResult result : frameResults)
 					if (result.good1)
 					{
 						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
-						double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
-						double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
+						final double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
+						final double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
 						f1.add(new ResultCoordinate(result, -1, x, y));
 						if (result.good2)
 						{
@@ -1221,7 +1202,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							f2.add(new ResultCoordinate(result, 1, x2, y2));
 						}
 					}
-				}
 
 				if (f1.isEmpty())
 					return;
@@ -1232,9 +1212,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				// Match the singles to actual coords, rank by the Candidate spot (not distance)
 				final double threshold = matchDistance * matchDistance;
 				int count = 0;
-				boolean[] assigned = new boolean[actual.length];
-				OUTER: for (ResultCoordinate r : f1)
-				{
+				final boolean[] assigned = new boolean[actual.length];
+				OUTER: for (final ResultCoordinate r : f1)
 					for (int i = 0; i < actual.length; i++)
 					{
 						if (assigned[i])
@@ -1249,7 +1228,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							break;
 						}
 					}
-				}
 
 				// Match the doublets to actual coords, rank by the Candidate spot (not distance)
 				// Process in pairs
@@ -1281,16 +1259,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 										ra = null;
 									}
 								}
-								else
+								else if (d2b <= threshold)
 								{
-									if (d2b <= threshold)
-									{
-										rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
-										if (++count == actual.length)
-											break OUTER;
-										assigned[i] = true;
-										rb = null;
-									}
+									rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
+									if (++count == actual.length)
+										break OUTER;
+									assigned[i] = true;
+									rb = null;
 								}
 							}
 							else
@@ -1343,8 +1318,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			double matchScore = rampedScore.scoreAndFlatten(d2, 256);
 			if (signalScore != null)
 			{
-				PeakResultPoint p = (PeakResultPoint) coord;
-				double s1 = p.peakResult.getIntensity();
+				final PeakResultPoint p = (PeakResultPoint) coord;
+				final double s1 = p.peakResult.getIntensity();
 				double s2;
 				switch (id)
 				{
@@ -1361,8 +1336,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					default:
 						s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL];
 				}
-				double rsf = s1 / s2;
-				double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
+				final double rsf = s1 / s2;
+				final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
 				final double fScore = signalScore.scoreAndFlatten(sf, 256);
 				matchScore = RampedScore.flatten(matchScore * fScore, 256);
 			}
@@ -1458,10 +1433,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] < -bordery ||
 						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] > height +
 								bordery)
-				{
 					// Perhaps do a check on the quadrant?
 					return 1;
-				}
 			}
 
 			return 2;
@@ -1570,9 +1543,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		if ("analysis".equals(arg))
-		{
 			runAnalysis();
-		}
 		else
 		{
 			simulationParameters = CreateData.simulationParameters;
@@ -1619,12 +1590,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// For each new benchmark width, reset the PSF width to the square pixel adjustment
 		if (lastId != simulationParameters.id)
 		{
-			double w = sa;
+			final double w = sa;
 			matchDistance = w * Gaussian2DFunction.SD_TO_HWHM_FACTOR;
 			lowerDistance = 0.5 * matchDistance;
 			fitConfig.setInitialPeakStdDev(w);
 
-			CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
+			final CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
 			cal.setNmPerPixel(simulationParameters.a);
 			cal.setCountPerPhoton(simulationParameters.gain);
@@ -1638,7 +1609,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		}
 
 		// Support for using templates
-		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		final String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
 		// Allow the settings from the benchmark analysis to be used
@@ -1646,7 +1617,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Collect options for fitting
 		PeakFit.addPSFOptions(gd, fitConfig);
-		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
+		final PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
 				config);
 		PeakFit.addDataFilterOptions(gd, provider);
 		PeakFit.addSearchOptions(gd, provider);
@@ -1671,13 +1642,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> numerics = gd.getNumericFields();
-			Vector<Choice> choices = gd.getChoices();
+			final Vector<TextField> numerics = gd.getNumericFields();
+			final Vector<Choice> choices = gd.getChoices();
 			int n = 0;
 			int ch = 0;
 
 			choices.get(ch++).addItemListener(this);
-			Checkbox b = (Checkbox) gd.getCheckboxes().get(0);
+			final Checkbox b = (Checkbox) gd.getCheckboxes().get(0);
 			b.addItemListener(this);
 			textPSF = choices.get(ch++);
 			textDataFilterType = choices.get(ch++);
@@ -1741,17 +1712,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			lowerSignalFactor = signalFactor;
 
 		if (useBenchmarkSettings)
-		{
 			if (!updateFitConfiguration(config))
 				return false;
-		}
 
 		boolean configure = true;
 		if (useBenchmarkSettings)
-		{
 			// Only configure the fit solver if not in a macro
 			configure = Macro.getOptions() == null;
-		}
 		if (configure && !PeakFit.configurePSFModel(config))
 			return false;
 		if (configure && !PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, PeakFit.FLAG_NO_SAVE))
@@ -1787,7 +1754,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			return false;
 		}
 
-		CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
+		final CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
 		cal.setNmPerPixel(simulationParameters.a);
 		cal.setCountPerPhoton(simulationParameters.gain);
@@ -1847,10 +1814,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private synchronized void showProgress()
 	{
 		if (progress % stepProgress == 0)
-		{
 			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
-		}
 		progress++;
 	}
 
@@ -1864,7 +1829,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final ImageStack stack = imp.getImageStack();
 
 		// Get the coordinates per frame
-		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(results,
+		final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(results,
 				false);
 
 		final long[] sumCount = new long[1];
@@ -1885,11 +1850,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
 		List<Worker> workers = new LinkedList<>();
 		List<Thread> threads = new LinkedList<>();
-		Overlay overlay = (showOverlay) ? new Overlay() : null;
+		final Overlay overlay = (showOverlay) ? new Overlay() : null;
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, overlay);
-			Thread t = new Thread(worker);
+			final Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, overlay);
+			final Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
 			t.start();
@@ -1911,22 +1876,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		});
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
-		{
 			put(jobs, -1);
-		}
 
 		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
-		{
 			try
 			{
 				threads.get(i).join();
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
-		}
 		threads.clear();
 		threads = null;
 
@@ -1938,7 +1899,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		int cic = 0, daic = 0, dbic = 0;
 		ArrayList<DoubletResult> results = null;
 		int maxH = 0, maxH2 = 0, maxH3 = 0;
-		for (Worker worker : workers)
+		for (final Worker worker : workers)
 		{
 			if (results == null)
 				results = worker.results;
@@ -1958,11 +1919,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			System.out.printf("Difference AIC %d, BIC %d, Total %d\n", daic, dbic, cic);
 		if (showHistograms)
 		{
-			double[] spotHistogram = new double[maxH];
-			double[] resultHistogram = new double[maxH];
-			double[][] neighbourHistogram = new double[3][maxH2];
-			double[][] almostNeighbourHistogram = new double[3][maxH3];
-			for (Worker worker : workers)
+			final double[] spotHistogram = new double[maxH];
+			final double[] resultHistogram = new double[maxH];
+			final double[][] neighbourHistogram = new double[3][maxH2];
+			final double[][] almostNeighbourHistogram = new double[3][maxH3];
+			for (final Worker worker : workers)
 			{
 				final int[] h1a = worker.spotHistogram;
 				final int[] h1b = worker.resultHistogram;
@@ -2026,12 +1987,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				histogram = Arrays.copyOf(histogram, j + 1);
 				break;
 			}
-		String[] labels = NAMES[i].split(":");
-		Plot2 plot = new Plot2(labels[0], labels[1], "Count");
-		double max = Maths.max(histogram);
+		final String[] labels = NAMES[i].split(":");
+		final Plot2 plot = new Plot2(labels[0], labels[1], "Count");
+		final double max = Maths.max(histogram);
 		plot.setLimits(0, histogram.length, 0, max * 1.05);
 		plot.addPoints(SimpleArrayUtils.newArray(histogram.length, 0, 1.0), histogram, Plot2.BAR);
-		PlotWindow pw = Utils.display(labels[0], plot);
+		final PlotWindow pw = Utils.display(labels[0], plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw.getImagePlus().getID());
 	}
@@ -2050,7 +2011,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		{
 			jobs.put(i);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			throw new RuntimeException("Unexpected interruption", e);
 		}
@@ -2077,7 +2038,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		numberOfMolecules = this.results.size() - ignored.get();
 
 		// Store details we want in the analysis table
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(Utils.rounded(density)).append('\t');
 		sb.append(Utils.rounded(getSa())).append('\t');
 		sb.append(config.getFittingWidth()).append('\t');
@@ -2088,7 +2049,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append(":Camera\t");
 
 			// Add details of the noise model for the MLE
-			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
+			final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
 			sb.append("EM=").append(r.isEMCCD());
 			sb.append(":A=").append(Utils.rounded(r.getCountPerElectron()));
 			sb.append(":N=").append(Utils.rounded(r.getReadNoise()));
@@ -2131,7 +2092,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append(":Camera\t");
 
 			// Add details of the noise model for the MLE
-			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
+			final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
 			sb.append("EM=").append(r.isEMCCD());
 			sb.append(":A=").append(Utils.rounded(r.getCountPerElectron()));
 			sb.append(":N=").append(Utils.rounded(r.getReadNoise()));
@@ -2146,7 +2107,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Residuals scores
 		// Iterations and evaluations where fit was OK
 
-		StoredDataStatistics[] stats = new StoredDataStatistics[NAMES2.length];
+		final StoredDataStatistics[] stats = new StoredDataStatistics[NAMES2.length];
 		for (int i = 0; i < stats.length; i++)
 			stats[i] = new StoredDataStatistics();
 
@@ -2157,14 +2118,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		double bestTp = 0, bestFp = 0;
 
-		ArrayList<DoubletBonus> data = new ArrayList<>(results.size());
-		for (DoubletResult result : results)
+		final ArrayList<DoubletBonus> data = new ArrayList<>(results.size());
+		for (final DoubletResult result : results)
 		{
 			final double score = result.getMaxScore();
 
 			// Filter the singles that would be accepted
 			if (result.good1)
-			{
 				// Filter the doublets that would be accepted
 				if (result.good2)
 				{
@@ -2198,16 +2158,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						bestFp += result.fp1;
 					}
 				}
-			}
 
 			// Build statistics
 			final int c = result.c;
 
 			// True results, i.e. where there was a choice between single or doublet
 			if (result.valid)
-			{
 				stats[c].add(score);
-			}
 
 			// Of those where the fit was good, summarise the iterations and evaluations
 			if (result.good1)
@@ -2248,10 +2205,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		//		System.out.printf("Single %.1f,%.1f (%d) : Doublet %.1f,%.1f (%d)\n", tpSingle, fpSingle, nSingle, tpDoublet, fpDoublet, nDoublet*2);
 
 		// Summarise score for true results
-		Percentile p = new Percentile(99);
+		final Percentile p = new Percentile(99);
 		for (int c = 0; c < stats.length; c++)
 		{
-			double[] values = stats[c].getValues();
+			final double[] values = stats[c].getValues();
 			// Sorting is need for the percentile and the cumulative histogram so do it once
 			Arrays.sort(values);
 			sb.append(Utils.rounded(stats[c].getMean())).append("+/-")
@@ -2278,7 +2235,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		if (showJaccardPlot)
 			plotJaccard(residualsScore, null);
 
-		String bestJaccard = Utils.rounded(bestTp / (bestFp + numberOfMolecules)) + '\t';
+		final String bestJaccard = Utils.rounded(bestTp / (bestFp + numberOfMolecules)) + '\t';
 		analysisPrefix += bestJaccard;
 
 		sb.append(bestJaccard);
@@ -2300,7 +2257,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static int countN(ArrayList<DoubletResult> results)
 	{
 		int n = 0;
-		for (DoubletResult r : results)
+		for (final DoubletResult r : results)
 			n += r.n;
 		return n;
 	}
@@ -2325,7 +2282,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		data.add(new DoubletBonus(0, 0, 0, 0));
 		data.add(new DoubletBonus(1, 1, 0, 0));
 
-		for (DoubletBonus b : data)
+		for (final DoubletBonus b : data)
 			b.setScore(useMax);
 		Collections.sort(data);
 
@@ -2337,7 +2294,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		int count = 0;
 		double last = 0;
-		for (DoubletBonus b : data)
+		for (final DoubletBonus b : data)
 		{
 			if (last != b.residuals)
 			{
@@ -2371,19 +2328,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private void plotJaccard(ResidualsScore residualsScore, ResidualsScore residualsScoreReference)
 	{
-		String title = TITLE + " Score";
-		Plot plot = new Plot(title, "Residuals", "Score");
+		final String title = TITLE + " Score";
+		final Plot plot = new Plot(title, "Residuals", "Score");
 		double max = getMax(0.01, residualsScore);
 		if (residualsScoreReference != null)
-		{
 			max = getMax(max, residualsScore);
-		}
 		plot.setLimits(0, 1, 0, max * 1.05);
 		addLines(plot, residualsScore, 1);
 		if (residualsScoreReference != null)
-		{
 			addLines(plot, residualsScoreReference, 0.5);
-		}
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0,
 				String.format("Residuals %s; Jaccard %s (Black); Precision %s (Blue); Recall %s (Red)",
@@ -2428,15 +2381,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private static Color getColor(Color color, double saturation)
 	{
-		int r = color.getRed();
-		int g = color.getGreen();
-		int b = color.getBlue();
+		final int r = color.getRed();
+		final int g = color.getGreen();
+		final int b = color.getBlue();
 		if (r == 0 && g == 0 && b == 0)
-		{
 			// Black so make a grey
 			return Color.gray;
-		}
-		float[] hsbvals = Color.RGBtoHSB(r, g, b, null);
+		final float[] hsbvals = Color.RGBtoHSB(r, g, b, null);
 		hsbvals[1] *= saturation;
 		return Color.getHSBColor(hsbvals[0], hsbvals[1], hsbvals[2]);
 	}
@@ -2451,12 +2402,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	public void showHistogram(double[] values, String xTitle)
 	{
-		double[][] h = Maths.cumulativeHistogram(values, false);
+		final double[][] h = Maths.cumulativeHistogram(values, false);
 
-		String title = TITLE + " " + xTitle + " Cumulative";
-		Plot2 plot = new Plot2(title, xTitle, "Frequency");
-		double xMax = h[0][h[0].length - 1];
-		double yMax = h[1][h[1].length - 1];
+		final String title = TITLE + " " + xTitle + " Cumulative";
+		final Plot2 plot = new Plot2(title, xTitle, "Frequency");
+		final double xMax = h[0][h[0].length - 1];
+		final double yMax = h[1][h[1].length - 1];
 		plot.setLimits(0, xMax, 0, 1.05 * yMax);
 		plot.setColor(Color.blue);
 		plot.addPoints(h[0], h[1], Plot2.BAR);
@@ -2465,7 +2416,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private void display(String title, Plot plot)
 	{
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw.getImagePlus().getID());
 	}
@@ -2489,10 +2440,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private static String createSummaryHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(
 				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
-		for (String name : NAMES2)
+		for (final String name : NAMES2)
 			sb.append(name).append('\t');
 		sb.append(
 				"Matching\tBest J\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
@@ -2512,10 +2463,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		createResultsTable();
 
-		ArrayList<String> list = new ArrayList<>(results.size());
+		final ArrayList<String> list = new ArrayList<>(results.size());
 		int flush = 9;
-		StringBuilder sb = new StringBuilder();
-		for (DoubletResult result : results)
+		final StringBuilder sb = new StringBuilder();
+		for (final DoubletResult result : results)
 		{
 			sb.append(result.frame).append('\t');
 			sb.append(result.spot.x).append('\t');
@@ -2582,13 +2533,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static void add(StringBuilder sb, FitResult fitResult)
 	{
 		if (fitResult != null)
-		{
 			sb.append(fitResult.getStatus()).append('\t');
-		}
 		else
-		{
 			sb.append('\t');
-		}
 	}
 
 	/**
@@ -2602,13 +2549,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static void addParams(StringBuilder sb, FitResult fitResult)
 	{
 		if (fitResult != null)
-		{
 			sb.append(Arrays.toString(fitResult.getParameters())).append('\t');
-		}
 		else
-		{
 			sb.append('\t');
-		}
 	}
 
 	/**
@@ -2651,32 +2594,31 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		showResults(doubletResults, analysisShowResults);
 
 		// Store the effect of fitting as a doublet
-		ArrayList<DoubletBonus> data = new ArrayList<>(doubletResults.size());
+		final ArrayList<DoubletBonus> data = new ArrayList<>(doubletResults.size());
 		// True positive and False positives at residuals = 0
 		double tp = 0;
 		double fp = 0;
 
-		Logger logger = (analysisLogging) ? new IJLogger() : null;
+		final Logger logger = (analysisLogging) ? new IJLogger() : null;
 
 		// Get filters for the single and double fits
 
 		// No coordinate shift for the doublet. We have already done simple checking of the
 		// coordinates to get the good=2 flag
-		FitConfiguration filterFitConfig2 = filterFitConfig.clone();
+		final FitConfiguration filterFitConfig2 = filterFitConfig.clone();
 		filterFitConfig2.setCoordinateShift(Integer.MAX_VALUE);
 
 		final int size = 2 * config.getFittingWidth() + 1;
-		Rectangle regionBounds = new Rectangle(0, 0, size, size);
+		final Rectangle regionBounds = new Rectangle(0, 0, size, size);
 		final double otherDriftAngle = 180 - analysisDriftAngle;
 
 		// Process all the results
-		for (DoubletResult result : doubletResults)
-		{
+		for (final DoubletResult result : doubletResults)
 			// Filter the singles that would be accepted
 			if (result.good1)
 			{
 				filterFitConfig.setNoise(result.noise);
-				FitStatus fitStatus0 = filterFitConfig.validatePeak(0, result.fitResult1.getInitialParameters(),
+				final FitStatus fitStatus0 = filterFitConfig.validatePeak(0, result.fitResult1.getInitialParameters(),
 						result.fitResult1.getParameters(), result.fitResult1.getParameterDeviations());
 
 				double tp1 = 0, fp1 = 0;
@@ -2698,31 +2640,26 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 					// Basic spot criteria (SNR, Photons, width)
 					filterFitConfig2.setNoise(result.noise);
-					FitStatus fitStatus1 = filterFitConfig2.validatePeak(0, result.fitResult2.getInitialParameters(),
+					final FitStatus fitStatus1 = filterFitConfig2.validatePeak(0, result.fitResult2.getInitialParameters(),
 							result.fitResult2.getParameters(), result.fitResult2.getParameterDeviations());
-					FitStatus fitStatus2 = filterFitConfig2.validatePeak(1, result.fitResult2.getInitialParameters(),
+					final FitStatus fitStatus2 = filterFitConfig2.validatePeak(1, result.fitResult2.getInitialParameters(),
 							result.fitResult2.getParameters(), result.fitResult2.getParameterDeviations());
 
 					// Log basic failures
-					boolean[] accept = new boolean[2];
+					final boolean[] accept = new boolean[2];
 					if (fitStatus1 == FitStatus.OK)
-					{
 						accept[0] = true;
-					}
 					else if (analysisLogging)
 						logFailure(logger, 1, result, fitStatus1);
 
 					if (fitStatus2 == FitStatus.OK)
-					{
 						accept[1] = true;
-					}
 					else if (analysisLogging)
 						logFailure(logger, 2, result, fitStatus2);
 
 					// If the basic filters are OK, do some analysis of the doublet.
 					// We can filter each spot with criteria such as shift and the angle to the quadrant.
 					if (accept[0] || accept[1])
-					{
 						if (result.gap < minGap)
 						{
 							accept[0] = accept[1] = false;
@@ -2730,21 +2667,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								logger.info("Reject Doublet (%.2f): Fitted coordinates below min gap (%g<%g)\n",
 										result.getMaxScore(), result.gap, minGap);
 						}
-					}
 
 					if (accept[0] || accept[1])
 					{
 						// The logic in here will be copied to the FitWorker.quadrantAnalysis routine.
-						double[] params = result.fitResult1.getParameters();
-						double[] newParams = result.fitResult2.getParameters();
+						final double[] params = result.fitResult1.getParameters();
+						final double[] newParams = result.fitResult2.getParameters();
 
 						// Set up for shift filtering
 						double shift = filterFitConfig.getCoordinateShift();
 						if (shift == 0 || shift == Double.POSITIVE_INFINITY)
-						{
 							// Allow the shift to span half of the fitted window.
 							shift = 0.5 * FastMath.min(regionBounds.width, regionBounds.height);
-						}
 
 						// Set an upper limit on the shift that is not too far outside the fit window
 						final double maxShiftX, maxShiftY;
@@ -2781,7 +2715,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								continue;
 							}
 							if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
-							{
 								// Check the domain is OK (the angle is in radians).
 								// Allow up to a 45 degree difference to show the shift is along the vector
 								if (result.a[n] > analysisDriftAngle && result.a[n] < otherDriftAngle)
@@ -2792,9 +2725,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 												n + 1, result.getMaxScore(), xShift, yShift, result.a[n]);
 									continue;
 								}
-
-								// Note: The FitWorker also checks for drift to another candidate.
-							}
 
 							// This is OK
 							accept[n] = true;
@@ -2834,7 +2764,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					fp += fp1;
 				}
 			}
-		}
 
 		// Compute the max Jaccard
 		computeScores(data, tp, fp, numberOfMolecules, useMaxResiduals);
@@ -2844,14 +2773,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		createAnalysisTable();
 
-		StringBuilder sb = new StringBuilder(analysisPrefix);
+		final StringBuilder sb = new StringBuilder(analysisPrefix);
 		sb.append(analysisTitle).append('\t');
 		sb.append((useMaxResiduals) ? "Max" : "Average").append('\t');
 		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
 		if (filterFitConfig.isSmartFilter())
-		{
 			sb.append(filterFitConfig.getSmartFilterName()).append("\t\t\t\t\t\t\t\t");
-		}
 		else
 		{
 			sb.append('\t');
@@ -2885,8 +2812,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			return;
 
 		// Start with a clone of the filter settings
-		FitEngineConfiguration config = new FitEngineConfiguration();
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitEngineConfiguration config = new FitEngineConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setFitSettings(filterFitConfig.getFitSettings());
 
 		// Copy settings used during fitting
@@ -2901,7 +2828,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		config.setFailuresLimit(-1);
 		if (useBenchmarkSettings)
 		{
-			FitEngineConfiguration pConfig = new FitEngineConfiguration();
+			final FitEngineConfiguration pConfig = new FitEngineConfiguration();
 			// TODO - add option to use latest or the best
 			if (BenchmarkFilterAnalysis.updateConfiguration(pConfig, false))
 				config.setFailuresLimit(pConfig.getFailuresLimit());
@@ -2912,11 +2839,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// TODO - make the choice of the best residuals configurable
 		config.setResidualsThreshold(residualsScore.bestResiduals[2]);
 
-		String filename = BenchmarkFilterAnalysis.getFilename("Template_File", templateFilename);
+		final String filename = BenchmarkFilterAnalysis.getFilename("Template_File", templateFilename);
 		if (filename != null)
 		{
 			templateFilename = filename;
-			TemplateSettings.Builder settings = TemplateSettings.newBuilder();
+			final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
 			getNotes(settings, summary);
 			settings.setFitEngineSettings(config.getFitEngineSettings());
 			if (!SettingsManager.toJSON(settings.build(), filename, SettingsManager.FLAG_SILENT))
@@ -2977,9 +2904,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private void addJaccardScores(StringBuilder sb)
 	{
-		double[] residuals = residualsScore.residuals;
-		double[] jaccard = residualsScore.jaccard;
-		int maxJaccardIndex = residualsScore.maxJaccardIndex;
+		final double[] residuals = residualsScore.residuals;
+		final double[] jaccard = residualsScore.jaccard;
+		final int maxJaccardIndex = residualsScore.maxJaccardIndex;
 		sb.append(Utils.rounded(jaccard[jaccard.length - 1])).append('\t');
 		sb.append(Utils.rounded(jaccard[maxJaccardIndex])).append('\t')
 				.append(Utils.rounded(residuals[maxJaccardIndex]));
@@ -3009,9 +2936,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		for (int i = j; i-- > 0;)
 		{
 			if (jaccard[i] < limit)
-			{
 				break;
-			}
 			final double height = (jaccard[j] + jaccard[i]) * 0.5;
 			final double width = (residuals[j] - residuals[i]);
 			final double area = height * width;
@@ -3025,9 +2950,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		for (int i = j; ++i < jaccard.length;)
 		{
 			if (jaccard[i] < limit)
-			{
 				break;
-			}
 			final double height = (jaccard[j] + jaccard[i]) * 0.5;
 			final double width = (residuals[i] - residuals[j]);
 			final double area = height * width;
@@ -3044,9 +2967,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sum /= (upper - lower);
 		}
 		else
-		{
 			weightedMean = sum = jaccard[maxJaccardIndex];
-		}
 		sb.append('\t').append(Utils.rounded(sum)).append('\t').append(Utils.rounded(lower)).append('\t')
 				.append(Utils.rounded(upper)).append('\t').append(Utils.rounded(upper - lower)).append('\t')
 				.append(Utils.rounded(weightedMean));
@@ -3103,10 +3024,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private boolean showAnalysisDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		StringBuilder sb = new StringBuilder("Filters the doublet fits and reports the performance increase\n");
+		final StringBuilder sb = new StringBuilder("Filters the doublet fits and reports the performance increase\n");
 
 		// Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
 		sb.append("SD0 = ").append(Utils.rounded(fitConfig.getInitialXSD())).append("\n");
@@ -3123,7 +3044,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setPSF(fitConfig.getPSF());
 		filterFitConfig.setFitSolverSettings(fitConfig.getFitSolverSettings());
 
-		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		final String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 		// Allow the settings from the benchmark analysis to be used
 		gd.addCheckbox("Benchmark_settings", analysisUseBenchmarkSettings);
@@ -3153,9 +3074,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> numerics = gd.getNumericFields();
-			Vector<Checkbox> checkboxes = gd.getCheckboxes();
-			Vector<Choice> choices = gd.getChoices();
+			final Vector<TextField> numerics = gd.getNumericFields();
+			final Vector<Checkbox> checkboxes = gd.getCheckboxes();
+			final Vector<Choice> choices = gd.getChoices();
 			int n = 0;
 			choices.get(1).addItemListener(this);
 			checkboxes.get(0).addItemListener(this);
@@ -3202,17 +3123,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			return false;
 
 		if (analysisUseBenchmarkSettings)
-		{
 			if (!updateFilterConfiguration(filterFitConfig))
 				return false;
-		}
 
 		return true;
 	}
 
 	private static boolean updateFilterConfiguration(FitConfiguration filterFitConfig)
 	{
-		FitEngineConfiguration c = new FitEngineConfiguration();
+		final FitEngineConfiguration c = new FitEngineConfiguration();
 		// TODO - add option to use latest or the best
 		if (!BenchmarkFilterAnalysis.updateConfiguration(c, false))
 		{
@@ -3256,20 +3175,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		if (e.getSource() instanceof Choice)
 		{
 			// Update the settings from the template
-			Choice choice = (Choice) e.getSource();
-			String templateName = choice.getSelectedItem();
+			final Choice choice = (Choice) e.getSource();
+			final String templateName = choice.getSelectedItem();
 
 			// Get the configuration template
-			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
+			final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
 
 			if (textCoordinateShiftFactor != null)
 			{
 				// Start with a default. This will cause a reset.
-				FitConfiguration fitConfig = new FitConfiguration();
+				final FitConfiguration fitConfig = new FitConfiguration();
 				if (template != null)
-				{
 					fitConfig.setFitSettings(template.getFitEngineSettings().getFitSettings());
-				}
 
 				cbSmartFilter.setState(fitConfig.isSmartFilter());
 				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
@@ -3280,42 +3197,39 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 				textPrecisionMethod.select(fitConfig.getPrecisionMethod().ordinal());
 			}
+			else if (template != null)
+			{
+				if (template.hasFitEngineSettings())
+				{
+					final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+					final FitEngineConfiguration config2 = new FitEngineConfiguration(template.getFitEngineSettings(),
+							template.getCalibration(), template.getPsf());
+					fitConfig = new FitConfiguration();
+					final FitConfiguration fitConfig2 = config2.getFitConfiguration();
+					if (custom && template.hasPsf())
+						textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPSFType().ordinal()]);
+					textDataFilterType.select(config2.getDataFilterType().ordinal());
+					textDataFilter.select(config2.getDataFilterMethod(0).ordinal());
+					textSmooth.setText("" + config2.getDataFilterParameterValue(0));
+					textSearch.setText("" + config2.getSearch());
+					textBorder.setText("" + config2.getBorder());
+					textFitting.setText("" + config2.getFitting());
+					textFitSolver.select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
+
+					// Copy settings not in the dialog for the fit solver
+					if (custom)
+						fitConfig.setPSF(fitConfig2.getPSF());
+					fitConfig.setFitSolverSettings(fitConfig2.getFitSolverSettings());
+				}
+			}
 			else
 			{
-				if (template != null)
-				{
-					if (template.hasFitEngineSettings())
-					{
-						boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-						FitEngineConfiguration config2 = new FitEngineConfiguration(template.getFitEngineSettings(),
-								template.getCalibration(), template.getPsf());
-						fitConfig = new FitConfiguration();
-						FitConfiguration fitConfig2 = config2.getFitConfiguration();
-						if (custom && template.hasPsf())
-							textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPSFType().ordinal()]);
-						textDataFilterType.select(config2.getDataFilterType().ordinal());
-						textDataFilter.select(config2.getDataFilterMethod(0).ordinal());
-						textSmooth.setText("" + config2.getDataFilterParameterValue(0));
-						textSearch.setText("" + config2.getSearch());
-						textBorder.setText("" + config2.getBorder());
-						textFitting.setText("" + config2.getFitting());
-						textFitSolver.select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
-
-						// Copy settings not in the dialog for the fit solver
-						if (custom)
-							fitConfig.setPSF(fitConfig2.getPSF());
-						fitConfig.setFitSolverSettings(fitConfig2.getFitSolverSettings());
-					}
-				}
-				else
-				{
-					// Ignore
-				}
+				// Ignore
 			}
 		}
 		else if (e.getSource() instanceof Checkbox)
 		{
-			Checkbox checkbox = (Checkbox) e.getSource();
+			final Checkbox checkbox = (Checkbox) e.getSource();
 			if (!checkbox.getState())
 				return;
 

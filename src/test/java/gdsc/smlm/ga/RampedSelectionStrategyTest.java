@@ -26,11 +26,11 @@ package gdsc.smlm.ga;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
-import gdsc.test.TimingTask;
 
 @SuppressWarnings({ "javadoc" })
 public class RampedSelectionStrategyTest
@@ -38,12 +38,12 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void canSearchUsingActualKey()
 	{
-		long[] sum = RampedSelectionStrategy.createSum(10);
+		final long[] sum = RampedSelectionStrategy.createSum(10);
 
 		for (int i = 0; i < sum.length - 1; i++)
 		{
-			long key = sum[i];
-			int j = RampedSelectionStrategy.search(sum, key);
+			final long key = sum[i];
+			final int j = RampedSelectionStrategy.search(sum, key);
 			Assert.assertEquals(i + 1, j);
 		}
 	}
@@ -51,12 +51,12 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void canBinarySearchUsingActualKey()
 	{
-		long[] sum = RampedSelectionStrategy.createSum(10);
+		final long[] sum = RampedSelectionStrategy.createSum(10);
 
 		for (int i = 0; i < sum.length - 1; i++)
 		{
-			long key = sum[i];
-			int j = RampedSelectionStrategy.binarySearch(sum, key);
+			final long key = sum[i];
+			final int j = RampedSelectionStrategy.binarySearch(sum, key);
 			Assert.assertEquals(i + 1, j);
 		}
 	}
@@ -64,12 +64,12 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void canSearchUsingNotActualKey()
 	{
-		long[] sum = RampedSelectionStrategy.createSum(10);
+		final long[] sum = RampedSelectionStrategy.createSum(10);
 
 		for (int i = 0; i < sum.length; i++)
 		{
-			long key = sum[i] - 1;
-			int j = RampedSelectionStrategy.search(sum, key);
+			final long key = sum[i] - 1;
+			final int j = RampedSelectionStrategy.search(sum, key);
 			Assert.assertEquals(i, j);
 		}
 	}
@@ -77,12 +77,12 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void canBinarySearchUsingNotActualKey()
 	{
-		long[] sum = RampedSelectionStrategy.createSum(10);
+		final long[] sum = RampedSelectionStrategy.createSum(10);
 
 		for (int i = 0; i < sum.length; i++)
 		{
-			long key = sum[i] - 1;
-			int j = RampedSelectionStrategy.binarySearch(sum, key);
+			final long key = sum[i] - 1;
+			final int j = RampedSelectionStrategy.binarySearch(sum, key);
 			Assert.assertEquals(i, j);
 		}
 	}
@@ -90,11 +90,11 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void binarySearchEqualsSearch()
 	{
-		long[] sum = RampedSelectionStrategy.createSum(100);
+		final long[] sum = RampedSelectionStrategy.createSum(100);
 		for (int key = (int) sum[sum.length - 1]; key-- > 0;)
 		{
-			int i = RampedSelectionStrategy.search(sum, key);
-			int j = RampedSelectionStrategy.binarySearch(sum, key);
+			final int i = RampedSelectionStrategy.search(sum, key);
+			final int j = RampedSelectionStrategy.binarySearch(sum, key);
 			Assert.assertEquals(i, j);
 		}
 	}
@@ -132,9 +132,9 @@ public class RampedSelectionStrategyTest
 	{
 		final long[] sum = RampedSelectionStrategy.createSum(size);
 
-		TimingService ts = new TimingService(runs);
+		final TimingService ts = new TimingService(runs);
 
-		ts.execute(new TimingTask()
+		ts.execute(new BaseTimingTask("search" + size)
 		{
 			@Override
 			public Object getData(int i)
@@ -149,26 +149,14 @@ public class RampedSelectionStrategyTest
 					RampedSelectionStrategy.search(sum, key);
 				return null;
 			}
-
-			@Override
-			public void check(int i, Object result)
-			{
-			}
-
 			@Override
 			public int getSize()
 			{
 				return 1;
 			}
-
-			@Override
-			public String getName()
-			{
-				return "search" + size;
-			}
 		});
 
-		ts.execute(new TimingTask()
+		ts.execute(new BaseTimingTask("binarySearch" + size)
 		{
 			@Override
 			public Object getData(int i)
@@ -185,30 +173,19 @@ public class RampedSelectionStrategyTest
 			}
 
 			@Override
-			public void check(int i, Object result)
-			{
-			}
-
-			@Override
 			public int getSize()
 			{
 				return 1;
 			}
-
-			@Override
-			public String getName()
-			{
-				return "binarySearch" + size;
-			}
 		});
 
-		int n = ts.repeat();
+		final int n = ts.repeat();
 		ts.repeat(n);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report();
 
-		TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
-		TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);
+		final TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
+		final TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);
 		TestSettings.logSpeedTestResult(slow, fast);
 	}
 }

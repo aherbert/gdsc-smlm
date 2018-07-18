@@ -36,7 +36,7 @@ public class PeakResultDigest
 	/** The expected data bytes without the parameters */
 	private static final int EXPECTED_DATA_BYTES = 48;
 
-	private MessageDigest digest;
+	private final MessageDigest digest;
 	// Allocate assuming 8 parameters and deviations
 	private ByteBuffer buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + 4 * 2 * 8);
 
@@ -104,16 +104,10 @@ public class PeakResultDigest
 			buffer.putDouble(peakResult.getPrecision()); // 48
 
 		for (int i = 0; i < n; i++)
-		{
 			buffer.putFloat(peakResult.getParameter(i));
-		}
 		if (peakResult.hasParameterDeviations())
-		{
 			for (int i = 0; i < n; i++)
-			{
 				buffer.putFloat(peakResult.getParameterDeviation(i));
-			}
-		}
 
 		buffer.flip();
 
@@ -140,10 +134,10 @@ public class PeakResultDigest
 	{
 		try
 		{
-			MessageDigest d = (MessageDigest) digest.clone();
+			final MessageDigest d = (MessageDigest) digest.clone();
 			return Digest.toHex(d.digest());
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

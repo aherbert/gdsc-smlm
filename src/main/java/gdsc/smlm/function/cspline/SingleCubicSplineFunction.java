@@ -145,29 +145,19 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 	public void forEach(ValueProcedure procedure)
 	{
 		if (working == null)
-		{
 			// Special case as the spline does not overlap the target region
 			for (int i = maxx * maxy; i-- > 0;)
 				procedure.execute(tB);
-		}
 		else
 		{
 			working.reset();
 			for (int y = 0; y < maxy; y++)
-			{
 				if (working.isNextYActive())
-				{
 					for (int x = 0; x < maxx; x++)
-					{
 						procedure.execute(tB + working.value(x));
-					}
-				}
 				else
-				{
 					for (int x = 0; x < maxx; x++)
 						procedure.execute(tB);
-				}
-			}
 		}
 	}
 
@@ -183,30 +173,20 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 		duda[0] = 1.0;
 
 		if (working == null)
-		{
 			// Special case as the spline does not overlap the target region
 			for (int i = maxx * maxy; i-- > 0;)
 				procedure.execute(tB, duda);
-		}
 		else
 		{
 			working.reset();
 			for (int y = 0; y < maxy; y++)
-			{
 				if (working.isNextYActive(duda))
-				{
 					for (int x = 0; x < maxx; x++)
-					{
 						// Because the call to value(...) occurs before passing the arguments
 						procedure.execute(tB + working.value(x, duda), duda);
-					}
-				}
 				else
-				{
 					for (int x = 0; x < maxx; x++)
 						procedure.execute(tB, duda);
-				}
-			}
 		}
 	}
 
@@ -223,30 +203,20 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 		duda[0] = 1.0;
 
 		if (working == null)
-		{
 			// Special case as the spline does not overlap the target region
 			for (int i = maxx * maxy; i-- > 0;)
 				procedure.execute(tB, duda, d2uda2);
-		}
 		else
 		{
 			working.reset();
 			for (int y = 0; y < maxy; y++)
-			{
 				if (working.isNextYActive(duda, d2uda2))
-				{
 					for (int x = 0; x < maxx; x++)
-					{
 						// Because the call to value(...) occurs before passing the arguments
 						procedure.execute(tB + working.value(x, duda, d2uda2), duda, d2uda2);
-					}
-				}
 				else
-				{
 					for (int x = 0; x < maxx; x++)
 						procedure.execute(tB, duda, d2uda2);
-				}
-			}
 		}
 	}
 
@@ -258,15 +228,15 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 	@Override
 	public boolean isNodeBoundary(int gradientIndex)
 	{
-		int parameterIndex = gradientIndices[gradientIndex];
+		final int parameterIndex = gradientIndices[gradientIndex];
 		if (parameterIndex == BACKGROUND)
 			return false;
 
-		int dimension = (parameterIndex - 1) % PARAMETERS_PER_PEAK;
+		final int dimension = (parameterIndex - 1) % PARAMETERS_PER_PEAK;
 		if (dimension == 0)
 			return false; // Signal
 
-		int peak = getPeak(parameterIndex);
+		final int peak = getPeak(parameterIndex);
 		if (peak == 0 && working != null)
 			return working.isNodeBoundary(dimension - 1);
 		return false;

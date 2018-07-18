@@ -68,17 +68,13 @@ public class SpeedTest
 	private static synchronized void ensureDataSingle(int size)
 	{
 		if (paramsListSinglePeak.size() < size)
-		{
 			createData(1, size, paramsListSinglePeak, yListSinglePeak);
-		}
 	}
 
 	private static synchronized void ensureDataMulti(int size)
 	{
 		if (paramsListMultiPeak.size() < size)
-		{
 			createData(2, size, paramsListMultiPeak, yListMultiPeak);
-		}
 	}
 
 	@Test
@@ -239,8 +235,8 @@ public class SpeedTest
 
 	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)
 	{
-		DoubleEquality eq = new DoubleEquality(1e-2, 1e-10);
-		int iter = 50;
+		final DoubleEquality eq = new DoubleEquality(1e-2, 1e-10);
+		final int iter = 50;
 		ArrayList<double[]> paramsList2;
 		if (npeaks == 1)
 		{
@@ -253,20 +249,20 @@ public class SpeedTest
 			paramsList2 = copyList(paramsListMultiPeak, iter);
 		}
 
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2, null);
+		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
+		final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2, null);
 
-		double[] dyda1 = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		double[] dyda2 = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] dyda1 = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] dyda2 = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
-		int[] gradientIndices = f1.gradientIndices();
-		int[] g1 = new int[gradientIndices.length];
-		int[] g2 = new int[gradientIndices.length];
+		final int[] gradientIndices = f1.gradientIndices();
+		final int[] g1 = new int[gradientIndices.length];
+		final int[] g2 = new int[gradientIndices.length];
 		int nparams = 0;
 		for (int i = 0; i < gradientIndices.length; i++)
 		{
-			int index1 = f1.findGradientIndex(g1[i]);
-			int index2 = f2.findGradientIndex(g2[i]);
+			final int index1 = f1.findGradientIndex(g1[i]);
+			final int index2 = f2.findGradientIndex(g2[i]);
 			if (index1 >= 0 && index2 >= 0)
 			{
 				g1[nparams] = index1;
@@ -282,8 +278,8 @@ public class SpeedTest
 
 			for (int j = 0; j < x.length; j++)
 			{
-				double y1 = f1.eval(x[j], dyda1);
-				double y2 = f2.eval(x[j], dyda2);
+				final double y1 = f1.eval(x[j], dyda1);
+				final double y2 = f2.eval(x[j], dyda2);
 
 				Assert.assertTrue("Not same y[" + j + "] @ " + i + " " + y1 + " != " + y2,
 						eq.almostEqualRelativeOrAbsolute(y1, y2));
@@ -299,7 +295,7 @@ public class SpeedTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		int iter = 10000;
+		final int iter = 10000;
 		ArrayList<double[]> paramsList2;
 		if (npeaks == 1)
 		{
@@ -313,10 +309,10 @@ public class SpeedTest
 		}
 
 		// Use the full list of parameters to build the functions
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1, null);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags2, null);
+		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1, null);
+		final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags2, null);
 
-		double[] dyda = new double[1 + npeaks * 6];
+		final double[] dyda = new double[1 + npeaks * 6];
 
 		for (int i = 0; i < paramsList2.size(); i++)
 		{
@@ -367,10 +363,10 @@ public class SpeedTest
 	 */
 	private static double[] doubleCreateGaussianData(int npeaks, double[] params)
 	{
-		int n = blockWidth * blockWidth;
+		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
+		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
 		params[0] = Background + rand.nextFloat() * 5f;
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
@@ -382,14 +378,12 @@ public class SpeedTest
 			params[j + Gaussian2DFunction.ANGLE] = 0f; //(double) (Math.PI / 4.0); // Angle
 		}
 
-		double[] dy_da = new double[params.length];
-		double[] y = new double[n];
+		final double[] dy_da = new double[params.length];
+		final double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
-		{
 			// Add random noise
 			y[i] = func.eval(i, dy_da) + ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() * 5f : rand.nextFloat() * 5f);
-		}
 
 		// Randomise only the necessary parameters (i.e. not angle and X & Y widths should be the same)
 		params[0] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
@@ -410,8 +404,8 @@ public class SpeedTest
 	{
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			double[] y = doubleCreateGaussianData(npeaks, params);
+			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
+			final double[] y = doubleCreateGaussianData(npeaks, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -421,11 +415,9 @@ public class SpeedTest
 	{
 		iter = FastMath.min(iter, paramsList.size());
 
-		ArrayList<double[]> params2List = new ArrayList<>(iter);
+		final ArrayList<double[]> params2List = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
-		{
 			params2List.add(paramsList.get(i));
-		}
 		return params2List;
 	}
 

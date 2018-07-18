@@ -49,16 +49,15 @@ public class CubicSplineDataTest
 		canExternaliseFunction(true);
 	}
 
-	private void canExternaliseFunction(boolean singlePrecision) throws IOException
+	private static void canExternaliseFunction(boolean singlePrecision) throws IOException
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		int x = 6, y = 5, z = 4;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final int x = 6, y = 5, z = 4;
 
-		int size = x * y;
-		CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];
-		double[] a = new double[64];
+		final int size = x * y;
+		final CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];
+		final double[] a = new double[64];
 		for (int zz = 0; zz < z; zz++)
-		{
 			for (int i = 0; i < size; i++)
 			{
 				for (int j = 0; j < 64; j++)
@@ -67,21 +66,16 @@ public class CubicSplineDataTest
 				if (singlePrecision)
 					splines[zz][i] = splines[zz][i].toSinglePrecision();
 			}
-		}
-		CubicSplineData f1 = new CubicSplineData(x, y, splines);
+		final CubicSplineData f1 = new CubicSplineData(x, y, splines);
 
-		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		final ByteArrayOutputStream b = new ByteArrayOutputStream();
 		f1.write(b);
 
-		byte[] bytes = b.toByteArray();
-		CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
+		final byte[] bytes = b.toByteArray();
+		final CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
 
 		for (int zz = 0; zz < z; zz++)
-		{
 			for (int i = 0; i < size; i++)
-			{
 				Assert.assertArrayEquals(f1.splines[zz][i].getA(), f2.splines[zz][i].getA(), 0);
-			}
-		}
 	}
 }

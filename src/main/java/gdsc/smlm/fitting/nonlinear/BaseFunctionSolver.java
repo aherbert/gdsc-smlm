@@ -122,7 +122,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		lastY = null;
 		lastA = null;
 		preProcess();
-		FitStatus status = computeFit(y, yFit, a, aDev);
+		final FitStatus status = computeFit(y, yFit, a, aDev);
 		if (status == FitStatus.OK)
 		{
 			if (lastY == null)
@@ -166,7 +166,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		lastY = null;
 		lastA = null;
 		preProcess();
-		boolean status = computeValue(y, yFit, a);
+		final boolean status = computeValue(y, yFit, a);
 		if (status)
 		{
 			if (lastY == null)
@@ -276,7 +276,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * @param deviations
 	 *            the deviations
 	 * @param covar
-	 *            the covariance matrix (assumed to be NxN with N = gradientIndices().length)  
+	 *            the covariance matrix (assumed to be NxN with N = gradientIndices().length)
 	 */
 	public void setDeviationsFromMatrix(double[] deviations, double[][] covar)
 	{
@@ -293,7 +293,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * @param deviations
 	 *            the deviations
 	 * @param covar
-	 *            the covariance matrix (assumed to be NxN with N = gradientIndices().length)  
+	 *            the covariance matrix (assumed to be NxN with N = gradientIndices().length)
 	 */
 	public void setDeviationsFromLinearMatrix(double[] deviations, double[] covar)
 	{
@@ -311,7 +311,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * @param deviations
 	 *            the deviations
 	 * @param covar
-	 *            the covariance values (assumed to be length N with N = gradientIndices().length)  
+	 *            the covariance values (assumed to be length N with N = gradientIndices().length)
 	 */
 	public void setDeviations(double[] deviations, double[] covar)
 	{
@@ -547,9 +547,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	public String getName(int i)
 	{
 		if (f instanceof NamedFunction)
-		{
 			return ((NamedFunction) f).getParameterName(i);
-		}
 		return "Unknown";
 	}
 
@@ -577,7 +575,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	public static double[] ensurePositive(final int n, double[] y)
 	{
 		for (int i = 0; i < n; i++)
-		{
 			if (y[i] < 0)
 			{
 				// Not positive so create a clone
@@ -591,14 +588,11 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 				//y2[i] = 0; // We know this was not positive so skip it
 				while (++i < n)
-				{
 					//y2[i] = (y[i] < 0) ? 0 : y[i];
 					if (y[i] > 0)
 						y2[i] = y[i];
-				}
 				return y2;
 			}
-		}
 		return y;
 	}
 }

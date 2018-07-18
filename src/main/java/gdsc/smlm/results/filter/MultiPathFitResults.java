@@ -146,7 +146,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	@Override
 	public MultiPathFitResults clone()
 	{
-		MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
+		final MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
 		for (int i = 0; i < list.length; i++)
 			list[i] = multiPathFitResults[i].clone();
 		return new MultiPathFitResults(frame, list, totalCandidates, nActual);

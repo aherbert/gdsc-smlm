@@ -267,7 +267,7 @@ public abstract class PSFModel
 
 		if (poissonNoise)
 		{
-			CustomPoissonDistribution pd = new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
+			final CustomPoissonDistribution pd = new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
 			for (int i = 0; i < psf.length; i++)
 				if (psf[i] > 0)
 				{
@@ -283,13 +283,11 @@ public abstract class PSFModel
 			int indexTo = (y + x1min) * width + x0min;
 			int indexFrom = y * x0range;
 			for (int x = 0; x < x0range; x++)
-			{
 				data[indexTo++] += psf[indexFrom++];
-			}
 		}
 
 		double total = 0;
-		for (double d : psf)
+		for (final double d : psf)
 			total += d;
 		return total;
 	}
@@ -339,7 +337,7 @@ public abstract class PSFModel
 
 		if (poissonNoise)
 		{
-			CustomPoissonDistribution pd = new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
+			final CustomPoissonDistribution pd = new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
 			for (int i = 0; i < psf.length; i++)
 				if (psf[i] > 0)
 				{
@@ -355,13 +353,11 @@ public abstract class PSFModel
 			int indexTo = (y + x1min) * width + x0min;
 			int indexFrom = y * x0range;
 			for (int x = 0; x < x0range; x++)
-			{
 				data[indexTo++] += psf[indexFrom++];
-			}
 		}
 
 		double total = 0;
-		for (double d : psf)
+		for (final double d : psf)
 			total += d;
 		return total;
 	}
@@ -440,9 +436,7 @@ public abstract class PSFModel
 			int indexTo = (y + x1min) * width + x0min;
 			int indexFrom = y * x0range;
 			for (int x = 0; x < x0range; x++)
-			{
 				data[indexTo++] -= psf[indexFrom++];
-			}
 		}
 	}
 
@@ -488,9 +482,7 @@ public abstract class PSFModel
 			int indexTo = (y + x1min) * width + x0min;
 			int indexFrom = y * x0range;
 			for (int x = 0; x < x0range; x++)
-			{
 				data[indexTo++] -= psf[indexFrom++];
-			}
 		}
 	}
 
@@ -746,10 +738,8 @@ public abstract class PSFModel
 			return;
 
 		// Remove from the input data
-		for (int i : samplePositions)
-		{
+		for (final int i : samplePositions)
 			data[i] -= 1;
-		}
 	}
 
 	/**
@@ -771,10 +761,8 @@ public abstract class PSFModel
 			return;
 
 		// Remove from the input data
-		for (int i : samplePositions)
-		{
+		for (final int i : samplePositions)
 			data[i] -= 1;
-		}
 	}
 
 	/**
@@ -826,7 +814,7 @@ public abstract class PSFModel
 			throws IllegalArgumentException
 	{
 		checkSize(width, height);
-		int size = width * height;
+		final int size = width * height;
 		if (value.length != size)
 			throw new IllegalArgumentException("Value is not the correct size");
 		Arrays.fill(value, 0);
@@ -909,13 +897,12 @@ public abstract class PSFModel
 			double[] value, double[][] gradient) throws IllegalArgumentException
 	{
 		checkSize(width, height);
-		int size = width * height;
+		final int size = width * height;
 		if (value.length != size)
 			throw new IllegalArgumentException("Value is not the correct size");
 		if (gradient.length != size)
 			throw new IllegalArgumentException("Gradient is not the correct size");
 		for (int i = 0; i < gradient.length; i++)
-		{
 			if (gradient[i] == null || gradient[i].length != 3)
 				gradient[i] = new double[3];
 			else
@@ -924,7 +911,6 @@ public abstract class PSFModel
 				gradient[i][1] = 0;
 				gradient[i][2] = 0;
 			}
-		}
 		Arrays.fill(value, 0);
 		return computeValueAndGradient(width, height, x0, x1, x2, value, gradient);
 	}
@@ -977,28 +963,28 @@ public abstract class PSFModel
 	protected boolean computeValueAndGradient(final int width, final int height, double x0, double x1, double x2,
 			double[] value, double[][] jacobian, double[] dx)
 	{
-		int size = width * height;
-		double[] v1 = new double[size];
-		double[] v2 = new double[size];
+		final int size = width * height;
+		final double[] v1 = new double[size];
+		final double[] v2 = new double[size];
 		// Compute the value
 		Arrays.fill(value, 0);
 		if (!computeValue(width, height, x0, x1, x2, value))
 			return false;
-		double[] x = { x0, x1, x2 };
+		final double[] x = { x0, x1, x2 };
 		for (int i = 0; i < 3; i++)
 		{
 			// Numerical gradient
-			double p = x[i];
+			final double p = x[i];
 			double delta = Precision.representableDelta(p, dx[i]);
 			x[i] = p + delta;
 			Arrays.fill(v1, 0);
-			boolean upper = computeValue(width, height, x[0], x[1], x[2], v1);
+			final boolean upper = computeValue(width, height, x[0], x[1], x[2], v1);
 			x[i] = p - delta;
 			Arrays.fill(v2, 0);
-			boolean lower = computeValue(width, height, x[0], x[1], x[2], v2);
+			final boolean lower = computeValue(width, height, x[0], x[1], x[2], v2);
 			x[i] = p;
-			double[] u = (upper) ? v1 : value;
-			double[] l = (lower) ? v2 : value;
+			final double[] u = (upper) ? v1 : value;
+			final double[] l = (lower) ? v2 : value;
 			if (u == l)
 				return false;
 			if (upper && lower)

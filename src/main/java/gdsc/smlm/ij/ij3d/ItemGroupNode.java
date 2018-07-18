@@ -37,14 +37,14 @@ import ij3d.ContentNode;
  */
 public class ItemGroupNode extends ContentNode
 {
-	private ItemGroup itemGroup;
+	private final ItemGroup itemGroup;
 
 	/** The min. */
 	protected Point3f min;
-	
+
 	/** The max. */
 	protected Point3f max;
-	
+
 	/** The center. */
 	protected Point3f center;
 
@@ -145,7 +145,7 @@ public class ItemGroupNode extends ContentNode
 		if (itemGroup.size() == 0)
 			return;
 
-		Point3f[] points = itemGroup.getPoints();
+		final Point3f[] points = itemGroup.getPoints();
 		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 

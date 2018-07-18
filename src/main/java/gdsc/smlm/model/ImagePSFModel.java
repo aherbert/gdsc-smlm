@@ -125,7 +125,7 @@ public class ImagePSFModel extends PSFModel
 		if (zCentre < 0 || zCentre >= image.length)
 			throw new IllegalArgumentException("z-centre is not within the bounds of the image stack");
 		final int size = image[0].length;
-		double edge = Math.sqrt(size);
+		final double edge = Math.sqrt(size);
 		if (edge != (int) edge)
 			throw new IllegalArgumentException("Image planes are not square");
 		psfWidth = (int) edge;
@@ -148,14 +148,10 @@ public class ImagePSFModel extends PSFModel
 		this.sumImage = duplicate(image);
 
 		if (noiseFraction > 0)
-		{
 			//double[] scratch = new double[size];
 			for (int i = 0; i < sumImage.length; i++)
-			{
 				//subtractNoise(sumImage[i], scratch, noiseFraction);
 				subtractNoise(sumImage[i], noiseFraction);
-			}
-		}
 
 		// Debugging display
 		//Utils.display("floor", sumImage, psfWidth, psfWidth);
@@ -173,9 +169,9 @@ public class ImagePSFModel extends PSFModel
 			double sx = 0;
 			double sy = 0;
 			double s = 0;
-			double[] data = sumImage[zCentre];
-			double cx = xyCentre[zCentre][0];
-			double cy = xyCentre[zCentre][1];
+			final double[] data = sumImage[zCentre];
+			final double cx = xyCentre[zCentre][0];
+			final double cy = xyCentre[zCentre][1];
 			for (int y = 0; y < psfWidth; y++)
 			{
 				if (Math.abs(y + 0.5 - cy) > fwhm)
@@ -199,18 +195,14 @@ public class ImagePSFModel extends PSFModel
 		// Create a cumulative sum image
 		cumulativeImage = new double[sumImage.length][];
 		for (int i = 0; i < sumImage.length; i++)
-		{
 			cumulativeImage[i] = calculateCumulativeImage(sumImage[i]);
-		}
 
 		// Debugging display
 		//Utils.display("cum", cumulativeImage, psfWidth, psfWidth);
 
 		// Then create a rolling sum table
 		for (int i = 0; i < sumImage.length; i++)
-		{
 			calculateRollingSums(sumImage[i]);
-		}
 	}
 
 	/**
@@ -290,10 +282,8 @@ public class ImagePSFModel extends PSFModel
 		// Find highest value below cutoff
 		double floor = 0;
 		for (final double v : image)
-		{
 			if (v < cutoff && floor < v)
 				floor = v;
-		}
 		// All pixels to be included must subtract the noise floor.
 		// All pixels below the noise floor are zeroed.
 		double sum2 = 0;
@@ -304,7 +294,7 @@ public class ImagePSFModel extends PSFModel
 			sum2 += image[i];
 		}
 		// Re-normalise to the same intensity
-		double scale = sum / sum2;
+		final double scale = sum / sum2;
 		for (int i = 0; i < image.length; i++)
 			image[i] *= scale;
 	}
@@ -312,7 +302,7 @@ public class ImagePSFModel extends PSFModel
 	private static double[][] duplicate(float[][] image)
 	{
 		final int size = image[0].length;
-		double[][] duplicate = new double[image.length][size];
+		final double[][] duplicate = new double[image.length][size];
 		for (int i = 0; i < image.length; i++)
 			for (int j = 0; j < size; j++)
 			{
@@ -346,24 +336,22 @@ public class ImagePSFModel extends PSFModel
 		{
 			final double[] data = image[i];
 			for (int j = 0; j < data.length; j++)
-			{
 				data[j] /= max;
-			}
 		}
 	}
 
 	private static double sum(double[] data)
 	{
 		double sum = 0;
-		for (double f : data)
+		for (final double f : data)
 			sum += f;
 		return sum;
 	}
 
 	private static double[] calculateCumulativeImage(double[] s)
 	{
-		boolean normalised = true;
-		double[] c = new double[s.length + 1];
+		final boolean normalised = true;
+		final double[] c = new double[s.length + 1];
 		if (normalised)
 		{
 			// Normalised image as input
@@ -377,13 +365,11 @@ public class ImagePSFModel extends PSFModel
 		else
 		{
 			// Normalise as we go
-			int n = s.length;
+			final int n = s.length;
 			double mean = 0, sum = 0;
 
 			for (int i = 0; i < n; i++)
-			{
 				mean += (s[i] - mean) / (i + 1);
-			}
 
 			c[0] = 0;
 
@@ -487,7 +473,7 @@ public class ImagePSFModel extends PSFModel
 		{
 			return drawPSF(data, width, height, sum, x0, x1, x2, poissonNoise);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			return 0;
 		}
@@ -506,7 +492,7 @@ public class ImagePSFModel extends PSFModel
 		{
 			return drawPSF(data, width, height, sum, x0, x1, x2, poissonNoise);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			return 0;
 		}
@@ -538,9 +524,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= xyCentre.length)
-		{
 			return insert(data, 0, 0, 0, 0, 0, null, false);
-		}
 
 		// Parameter check
 		checkSize(width, height);
@@ -567,7 +551,7 @@ public class ImagePSFModel extends PSFModel
 			throw new IllegalArgumentException("Dimension 1 range not within data bounds");
 
 		// Shift centre to origin and draw the PSF
-		double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
+		final double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
 
 		return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
 	}
@@ -598,9 +582,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= xyCentre.length)
-		{
 			return insert(data, 0, 0, 0, 0, 0, null, false);
-		}
 
 		// Parameter check
 		checkSize(width, height);
@@ -627,7 +609,7 @@ public class ImagePSFModel extends PSFModel
 			throw new IllegalArgumentException("Dimension 1 range not within data bounds");
 
 		// Shift centre to origin and draw the PSF
-		double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
+		final double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
 
 		return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
 	}
@@ -654,7 +636,7 @@ public class ImagePSFModel extends PSFModel
 	 */
 	public double[] drawPSF(int x0range, int x1range, double sum, double x0, double x1, double x2, boolean interpolate)
 	{
-		double[] data = new double[x0range * x1range];
+		final double[] data = new double[x0range * x1range];
 
 		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= sumImage.length)
@@ -672,11 +654,11 @@ public class ImagePSFModel extends PSFModel
 		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method is
 		// to do linear interpolation between the pixel sums.
 
-		double[] u = createInterpolationLookup(x0range, x0, xyCentre[slice][0]);
-		double[] v = createInterpolationLookup(x1range, x1, xyCentre[slice][1]);
+		final double[] u = createInterpolationLookup(x0range, x0, xyCentre[slice][0]);
+		final double[] v = createInterpolationLookup(x1range, x1, xyCentre[slice][1]);
 
-		int[] lu = new int[u.length];
-		int[] lv = new int[v.length];
+		final int[] lu = new int[u.length];
+		final int[] lv = new int[v.length];
 
 		if (interpolate)
 		{
@@ -724,35 +706,15 @@ public class ImagePSFModel extends PSFModel
 					// - s(lowerU,upperV)
 					// - s(upperU,lowerV)
 					// + s(lowerU,lowerV)
-					double uUuV = interpolate(sumPsf, lu[x + 1], lv[y + 1], u[x + 1], v[y + 1]);
-					double lUuV = interpolate(sumPsf, lu[x], lv[y + 1], u[x], v[y + 1]);
-					double uUlV = interpolate(sumPsf, lu[x + 1], lv[y], u[x + 1], v[y]);
-					double lUlV = interpolate(sumPsf, lu[x], lv[y], u[x], v[y]);
+					final double uUuV = interpolate(sumPsf, lu[x + 1], lv[y + 1], u[x + 1], v[y + 1]);
+					final double lUuV = interpolate(sumPsf, lu[x], lv[y + 1], u[x], v[y + 1]);
+					final double uUlV = interpolate(sumPsf, lu[x + 1], lv[y], u[x + 1], v[y]);
+					final double lUlV = interpolate(sumPsf, lu[x], lv[y], u[x], v[y]);
 					data[i] = uUuV - lUuV - uUlV + lUlV;
 				}
 				else
-				{
 					// No interpolation
 					data[i] = sum(sumPsf, lu[x], lowerV, lu[x + 1], upperV);
-
-					//// Check using the original input image that the sum is correct
-					//double s = 0;
-					//for (int vv = lowerV + 1; vv <= upperV; vv++)
-					//{
-					//	if (vv > psfWidth-1)
-					//		break;
-					//	if (vv < 0)
-					//		continue;
-					//	for (int uu = u[x] + 1, index = vv * psfWidth + u[x] + 1; uu <= u[x + 1]; uu++, index++)
-					//	{
-					//		if (uu > psfWidth-1)
-					//			break;
-					//		if (uu < 0)
-					//			continue;
-					//		s += psf[index];
-					//	}
-					//}
-				}
 			}
 		}
 
@@ -765,11 +727,9 @@ public class ImagePSFModel extends PSFModel
 
 	private double[] createInterpolationLookup(int range, double origin, double xyCentre)
 	{
-		double[] pixel = new double[range + 1];
+		final double[] pixel = new double[range + 1];
 		for (int i = 0; i < pixel.length; i++)
-		{
 			pixel[i] = ((i - origin) / unitsPerPixel + xyCentre - 1);
-		}
 		return pixel;
 	}
 
@@ -870,7 +830,7 @@ public class ImagePSFModel extends PSFModel
 		upperU = FastMath.min(upperU, psfWidth - 1);
 		upperV = FastMath.min(upperV, psfWidth - 1);
 
-		int index = upperV * psfWidth + upperU;
+		final int index = upperV * psfWidth + upperU;
 		return s[index];
 	}
 
@@ -891,10 +851,10 @@ public class ImagePSFModel extends PSFModel
 	 */
 	private double interpolate(double[] sum, int x0, int y0, double x, double y)
 	{
-		double sum_00_x0y0 = safeSum(sum, x0, y0);
-		double sum_00_x1y0 = safeSum(sum, x0 + 1, y0);
-		double sum_00_x0y1 = safeSum(sum, x0, y0 + 1);
-		double sum_x0y0_x1y1 = safeSum(sum, x0, y0, x0 + 1, y0 + 1);
+		final double sum_00_x0y0 = safeSum(sum, x0, y0);
+		final double sum_00_x1y0 = safeSum(sum, x0 + 1, y0);
+		final double sum_00_x0y1 = safeSum(sum, x0, y0 + 1);
+		final double sum_x0y0_x1y1 = safeSum(sum, x0, y0, x0 + 1, y0 + 1);
 
 		x -= x0;
 		y -= y0;
@@ -918,7 +878,7 @@ public class ImagePSFModel extends PSFModel
 	@Override
 	public ImagePSFModel copy()
 	{
-		ImagePSFModel model = new ImagePSFModel();
+		final ImagePSFModel model = new ImagePSFModel();
 		model.sumImage = sumImage;
 		model.cumulativeImage = cumulativeImage;
 		model.psfWidth = psfWidth;
@@ -936,7 +896,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		if (n <= 0)
 			return insertSample(data, width, height, null, null);
-		double[][] sample = sample(n, x0, x1, x2);
+		final double[][] sample = sample(n, x0, x1, x2);
 		return insertSample(data, width, height, sample[0], sample[1]);
 	}
 
@@ -945,7 +905,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		if (n <= 0)
 			return insertSample(data, width, height, null, null);
-		double[][] sample = sample(n, x0, x1, x2);
+		final double[][] sample = sample(n, x0, x1, x2);
 		return insertSample(data, width, height, sample[0], sample[1]);
 	}
 
@@ -1082,13 +1042,9 @@ public class ImagePSFModel extends PSFModel
 			final int mid = upper + lower >>> 1;
 
 			if (p >= sum[mid])
-			{
 				lower = mid;
-			}
 			else
-			{
 				upper = mid;
-			}
 		}
 
 		///* sanity check the result */
@@ -1223,8 +1179,8 @@ public class ImagePSFModel extends PSFModel
 			}
 
 			// Identify the centre
-			int cx = (int) xyCentre[slice][0];
-			int cy = (int) xyCentre[slice][1];
+			final int cx = (int) xyCentre[slice][0];
+			final int cy = (int) xyCentre[slice][1];
 
 			final double target = total * integral;
 
@@ -1279,8 +1235,8 @@ public class ImagePSFModel extends PSFModel
 		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= sumImage.length)
 			return false;
-		double delta = 1e-2;
-		double[] dx = new double[] { delta, delta, unitsPerSlice };
+		final double delta = 1e-2;
+		final double[] dx = new double[] { delta, delta, unitsPerSlice };
 		return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);
 	}
 }

@@ -42,11 +42,11 @@ import gdsc.smlm.results.PeakResult;
 @Deprecated
 public class OptimumDistanceResultFilter extends ResultFilter
 {
-	private FitResult[] bestFitResults;
-	private int[] bestIndices;
-	private float[] bestD2;
-	private float[] bestSignal;
-	private PeakResult[] bestPeakResults;
+	private final FitResult[] bestFitResults;
+	private final int[] bestIndices;
+	private final float[] bestD2;
+	private final float[] bestSignal;
+	private final PeakResult[] bestPeakResults;
 
 	/**
 	 * Instantiates a new optimum distance result filter.
@@ -78,20 +78,20 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	@Override
 	public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
 	{
-		for (PeakResult r : results)
+		for (final PeakResult r : results)
 		{
 			if (r == null)
 				continue;
 			for (int i = 0; i < filter.size(); i++)
 			{
-				float[] coord = filter.get(i);
+				final float[] coord = filter.get(i);
 				final float dx = r.getXPosition() - coord[0];
 				final float dy = r.getYPosition() - coord[1];
 				// Only check if within the distance threshold
 				if (dx * dx + dy * dy < d2)
 				{
 					// Then filter by signal strength
-					float s = r.getIntensity();
+					final float s = r.getIntensity();
 					if (s < bestSignal[i])
 						continue;
 					bestFitResults[i] = fitResult;
@@ -116,7 +116,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 			// Skip if there is a peak result for this target coordinate
 			if (bestPeakResults[i] != null)
 				continue;
-			float[] coord = filter.get(i);
+			final float[] coord = filter.get(i);
 			final float dx = x - coord[0];
 			final float dy = y - coord[1];
 			final float dd = dx * dx + dy * dy;
@@ -140,7 +140,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	{
 		// Note that there could be the same result allocated to two target positions
 		// so find the unique results
-		int[] uniqueIndices = new int[bestIndices.length];
+		final int[] uniqueIndices = new int[bestIndices.length];
 		int unique = 0;
 		for (int i = 0; i < bestIndices.length; i++)
 		{
@@ -148,13 +148,11 @@ public class OptimumDistanceResultFilter extends ResultFilter
 				continue;
 			boolean found = false;
 			for (int j = unique; j-- > 0;)
-			{
 				if (bestIndices[uniqueIndices[j]] == bestIndices[i])
 				{
 					found = true;
 					break;
 				}
-			}
 			if (!found)
 				uniqueIndices[unique++] = i;
 		}
@@ -172,19 +170,15 @@ public class OptimumDistanceResultFilter extends ResultFilter
 		// The peak results can be in any order so use a set to find the unique results
 		if (unique > 0)
 		{
-			TreeSet<PeakResult> set = new TreeSet<>();
-			for (PeakResult r : bestPeakResults)
-			{
+			final TreeSet<PeakResult> set = new TreeSet<>();
+			for (final PeakResult r : bestPeakResults)
 				if (r != null)
 					set.add(r);
-			}
 
 			peakResults = new ArrayList<>(set.size());
 			peakResults.addAll(set);
 		}
 		else
-		{
 			peakResults = new ArrayList<>();
-		}
 	}
 }

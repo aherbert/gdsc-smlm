@@ -33,7 +33,7 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction
 {
 	private boolean logging = false;
 	private int evalCount = 0;
-	
+
 	/** The name. */
 	protected String name = "Optimiser";
 

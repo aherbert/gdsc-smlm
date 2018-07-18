@@ -181,9 +181,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	{
 		checkIndex(index);
 		if (index < super.getNumberOfParameters())
-		{
 			return super.getParameterType(index);
-		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
@@ -210,7 +208,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		// No adjustment of the mode parameters
 		if (index == 1 || index == 3)
 			return this;
-		double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
+		final double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
 				strictPrecision, range };
 		if (index == 0)
 			parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());

@@ -91,9 +91,7 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
 			final double difference = Math.abs(pi - ci);
 			final double size = FastMath.max(Math.abs(pi), Math.abs(ci));
 			if (difference > size * relative && difference > absolute)
-			{
 				return false;
-			}
 		}
 		return true;
 	}

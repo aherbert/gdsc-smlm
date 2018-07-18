@@ -69,7 +69,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the shift limit
-		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
 		offsetx = getUpperLimit(s[0] * shift);
 		offsety = getUpperLimit(s[1] * shift);
 	}
@@ -99,13 +99,11 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 		}
 
 		for (int i = filterSetupData.length; i-- > 0;)
-		{
 			if (filterSetupData[i] instanceof ShiftFilterSetupData)
 			{
 				setup(((ShiftFilterSetupData) filterSetupData[i]).shift);
 				return;
 			}
-		}
 		// Default
 		setup(shift);
 	}
@@ -128,10 +126,8 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 		if (shiftEnabled && shift2 != Float.POSITIVE_INFINITY)
 		{
 			if (shift2 == getUpperSquaredLimit(shift))
-			{
 				// This is the default so ignore
 				return null;
-			}
 			return getFilterSetupData(new ShiftFilterSetupData(Math.sqrt(shift2)));
 		}
 		return null;

@@ -31,7 +31,7 @@ public class FloatImage3DTest extends Image3DTest
 	@Override
 	protected FloatImage3D createData(int w, int h, int d)
 	{
-		float[] data = SimpleArrayUtils.newArray(w * h * d, 1f, 1f);
+		final float[] data = SimpleArrayUtils.newArray(w * h * d, 1f, 1f);
 		return new FloatImage3D(w, h, d, data);
 	}
 

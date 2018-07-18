@@ -30,12 +30,12 @@ public enum FileFormat
 {
 	//@formatter:off
 	/** SMLM Text */
-    SMLM_TEXT{ 
-    	@Override public String getName() { return "SMLM Text"; } 
+    SMLM_TEXT{
+    	@Override public String getName() { return "SMLM Text"; }
         @Override public boolean isSMLM(){return true;}},
     /** SMLM Binary */
-    SMLM_BINARY{ 
-        @Override public String getName() { return "SMLM Binary"; } 
+    SMLM_BINARY{
+        @Override public String getName() { return "SMLM Binary"; }
         @Override public boolean isSMLM(){return true;}},
     /** RapidSTORM */
     RAPID_STORM{ @Override public String getName() { return "RapidSTORM"; }},

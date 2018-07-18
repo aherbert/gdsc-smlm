@@ -64,7 +64,7 @@ public class ResequenceResults implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -77,7 +77,7 @@ public class ResequenceResults implements PlugIn
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Resequence the results in memory (assumed to be continuous from 1).\n" +
@@ -110,7 +110,7 @@ public class ResequenceResults implements PlugIn
 			Parameters.isAboveZero("Block", block);
 			Parameters.isPositive("Skip", skip);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -197,9 +197,7 @@ public class ResequenceResults implements PlugIn
 
 		// Assume the results start from frame 1 (or above)
 		if (results.getFirstFrame() < 1)
-		{
 			return false;
-		}
 
 		results.forEach(new ResequencePeakResultProcedure(start, tracker));
 

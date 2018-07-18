@@ -104,15 +104,11 @@ public class PerPixelNormaliser implements Normaliser
 	@Override
 	public void normalise(float[] data, int maxx, int maxy, int border)
 	{
-		int xlimit = maxx - border;
-		int ylimit = maxy - border;
+		final int xlimit = maxx - border;
+		final int ylimit = maxy - border;
 		for (int y = border; y < ylimit; y++)
-		{
 			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-			{
 				data[i] /= normalisation[i];
-			}
-		}
 	}
 
 	/*
@@ -123,15 +119,11 @@ public class PerPixelNormaliser implements Normaliser
 	@Override
 	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
 	{
-		int xlimit = maxx - border;
-		int ylimit = maxy - border;
+		final int xlimit = maxx - border;
+		final int ylimit = maxy - border;
 		for (int y = border; y < ylimit; y++)
-		{
 			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-			{
 				out[i] = data[i] / normalisation[i];
-			}
-		}
 	}
 
 	/*
@@ -154,14 +146,10 @@ public class PerPixelNormaliser implements Normaliser
 	@Override
 	public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
 	{
-		int xlimit = maxx - border;
-		int ylimit = maxy - border;
+		final int xlimit = maxx - border;
+		final int ylimit = maxy - border;
 		for (int y = border; y < ylimit; y++)
-		{
 			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-			{
 				out[i] = (float) (data[i] / normalisation[i]);
-			}
-		}
 	}
 }

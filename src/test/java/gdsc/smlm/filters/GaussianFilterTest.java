@@ -89,7 +89,7 @@ public class GaussianFilterTest
 		@Override
 		float[] filter(float[] d, double sigma)
 		{
-			FloatProcessor fp = new FloatProcessor(size, size, d);
+			final FloatProcessor fp = new FloatProcessor(size, size, d);
 			gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
 			return d;
 		}
@@ -97,9 +97,9 @@ public class GaussianFilterTest
 		@Override
 		float[] filterInternal(float[] d, double sigma)
 		{
-			FloatProcessor fp = new FloatProcessor(size, size, d);
+			final FloatProcessor fp = new FloatProcessor(size, size, d);
 			final int border = GaussianFilter.getBorder(sigma);
-			Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
+			final Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
 			fp.setRoi(roi);
 			gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
 			return d;
@@ -240,36 +240,34 @@ public class GaussianFilterTest
 
 	private void filter1IsSameAsFilter2(GFilter f1, GFilter f2, boolean weighted, double tolerance)
 	{
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		float[] data = createData(rand, size, size);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final float[] data = createData(rand, size, size);
 		float[] w = null;
 		if (weighted)
 		{
-			ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
+			final ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
 					ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 			w = new float[data.length];
 			for (int i = 0; i < w.length; i++)
-			{
 				w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
 				//w[i] = (float) (1.0 / Math.max(0.01, rand.nextGaussian() * 0.2 + 2));
 				//w[i] = 0.5f;
-			}
 			f1.setWeights(w);
 			f2.setWeights(w);
 		}
 
-		for (double sigma : sigmas)
+		for (final double sigma : sigmas)
 		{
-			float[] e = data.clone();
+			final float[] e = data.clone();
 			f2.run(e, sigma);
-			float[] o = data.clone();
+			final float[] o = data.clone();
 			f1.run(o, sigma);
 
 			double max = 0;
 			for (int i = 0; i < e.length; i++)
 			{
-				double d = DoubleEquality.relativeError(e[i], o[i]);
+				final double d = DoubleEquality.relativeError(e[i], o[i]);
 				if (max < d)
 					max = d;
 			}
@@ -308,7 +306,7 @@ public class GaussianFilterTest
 		@Override
 		public Object run(Object data)
 		{
-			float[] d = (float[]) data;
+			final float[] d = (float[]) data;
 			return filter.run(d, sigma);
 		}
 	}
@@ -318,34 +316,32 @@ public class GaussianFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		float[][] data = new float[10][];
+		final float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
 			data[i] = createData(rg, size, size);
 
-		TimingService ts = new TimingService();
-		for (double sigma : sigmas)
+		final TimingService ts = new TimingService();
+		for (final double sigma : sigmas)
 		{
 			ts.execute(new MyTimingTask(new FloatFilter(false), data, sigma));
 			ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
 			ts.execute(new MyTimingTask(new DoubleFilter(false), data, sigma));
 		}
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat();
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
-		int n = size / sigmas.length;
+		final int n = size / sigmas.length;
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
-		{
 			for (int k = 1; k < n; k++)
 			{
-				double t1 = ts.get(j).getMean();
-				double t2 = ts.get(j + k).getMean();
+				final double t1 = ts.get(j).getMean();
+				final double t2 = ts.get(j + k).getMean();
 				TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
 						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
-		}
 	}
 
 	@Test
@@ -353,39 +349,37 @@ public class GaussianFilterTest
 	{
 		TestSettings.assumeHighComplexity();
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		float[][] data = new float[10][];
+		final float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
 			data[i] = createData(rg, size, size);
 
-		TimingService ts = new TimingService();
-		for (double sigma : sigmas)
+		final TimingService ts = new TimingService();
+		for (final double sigma : sigmas)
 		{
 			ts.execute(new MyTimingTask(new FloatFilter(true), data, sigma));
 			ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
 			ts.execute(new MyTimingTask(new DoubleFilter(true), data, sigma));
 		}
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat();
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
-		int n = size / sigmas.length;
+		final int n = size / sigmas.length;
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
-		{
 			for (int k = 1; k < n; k++)
 			{
-				double t1 = ts.get(j).getMean();
-				double t2 = ts.get(j + k).getMean();
+				final double t1 = ts.get(j).getMean();
+				final double t2 = ts.get(j + k).getMean();
 				TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
 						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
-		}
 	}
 
 	private static float[] createData(RandomGenerator rg, int width, int height)
 	{
-		float[] data = new float[width * height];
+		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = i;
 

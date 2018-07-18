@@ -28,7 +28,7 @@ package gdsc.smlm.function;
  */
 public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gradient2Function, Gradient2Procedure
 {
-	private Gradient2Function f;
+	private final Gradient2Function f;
 	private Gradient2Procedure procedure;
 
 	/** The gradients from the last call to {@link #forEach(Gradient2Procedure)}. */

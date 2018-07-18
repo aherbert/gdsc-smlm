@@ -39,16 +39,16 @@ public class SettingsManagerTest
 	@Test
 	public void canReadWriteConfiguration() throws IOException
 	{
-		RandomGenerator rand = TestSettings.getRandomGenerator();
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
 
-		Calibration.Builder builder = Calibration.newBuilder();
+		final Calibration.Builder builder = Calibration.newBuilder();
 		builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());
-		Calibration e = builder.build();
+		final Calibration e = builder.build();
 		Calibration o;
 
-		String dir = SettingsManager.getSettingsDirectory();
+		final String dir = SettingsManager.getSettingsDirectory();
 		//System.out.println(dir);
-		File tmp = createTempDirectory(false);
+		final File tmp = createTempDirectory(false);
 		try
 		{
 			SettingsManager.setSettingsDirectory(tmp.getPath());
@@ -79,14 +79,10 @@ public class SettingsManagerTest
 		temp.deleteOnExit();
 
 		if (!(temp.delete()))
-		{
 			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-		}
 
 		if (create && !(temp.mkdir()))
-		{
 			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
-		}
 
 		//System.out.println(temp.getPath());
 

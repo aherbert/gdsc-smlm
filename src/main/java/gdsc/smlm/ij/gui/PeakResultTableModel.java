@@ -79,10 +79,10 @@ public class PeakResultTableModel extends AbstractTableModel
 	static final int RENDERER = -99;
 
 	/** Count used to count how many PeakResultTableModelFrame are displaying this model. */
-	private AtomicInteger liveCount = new AtomicInteger();
+	private final AtomicInteger liveCount = new AtomicInteger();
 
 	/** The flag used to indicate the columns require updating. */
-	private AtomicBoolean columnsComputed = new AtomicBoolean(false);
+	private final AtomicBoolean columnsComputed = new AtomicBoolean(false);
 
 	private final PeakResultStoreList data;
 	private final Calibration calibration;
@@ -238,23 +238,23 @@ public class PeakResultTableModel extends AbstractTableModel
 		rounder = RounderFactory.create(tableSettings.getRoundingPrecision());
 
 		// Create the converters
-		PeakResultConversionHelper helper = new PeakResultConversionHelper(calibration, psf);
+		final PeakResultConversionHelper helper = new PeakResultConversionHelper(calibration, psf);
 		helper.setIntensityUnit(tableSettings.getIntensityUnit());
 		helper.setDistanceUnit(tableSettings.getDistanceUnit());
 		helper.setAngleUnit(tableSettings.getAngleUnit());
 		final Converter[] converters = helper.getConverters();
 		final Converter ic = converters[PeakResult.INTENSITY];
 
-		String[] paramNames = helper.getNames();
-		String[] unitNames = helper.getUnitNames();
+		final String[] paramNames = helper.getNames();
+		final String[] unitNames = helper.getUnitNames();
 
 		//Calibration tableCalibration = (helper.isCalibrationChanged()) ? helper.getCalibration() : calibration;
 
 		// Organise the data columns.
 		// This is done as per the IJTablePeakResults for consistency
-		TurboList<PeakResultData<?>> valuesList = new TurboList<>();
-		TurboList<String> namesList = new TurboList<>();
-		
+		final TurboList<PeakResultData<?>> valuesList = new TurboList<>();
+		final TurboList<String> namesList = new TurboList<>();
+
 		rowCounter = tableSettings.getShowRowCounter();
 		if (rowCounter)
 		{
@@ -313,12 +313,12 @@ public class PeakResultTableModel extends AbstractTableModel
 		int[] outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
 		if (!showZ)
 		{
-			TIntArrayList list = new TIntArrayList(outIndices);
+			final TIntArrayList list = new TIntArrayList(outIndices);
 			list.remove(PeakResult.Z);
 			outIndices = list.toArray();
 		}
 
-		for (int i : outIndices)
+		for (final int i : outIndices)
 		{
 			// Must be converted
 			valuesList.add(new PeakResultDataParameterConverter(converters[i], i));
@@ -351,11 +351,11 @@ public class PeakResultTableModel extends AbstractTableModel
 					}
 				};
 			}
-			catch (ConfigurationException e)
+			catch (final ConfigurationException e)
 			{
 				// Ignore
 			}
-			catch (ConversionException e)
+			catch (final ConversionException e)
 			{
 				// Ignore
 			}
@@ -440,11 +440,9 @@ public class PeakResultTableModel extends AbstractTableModel
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		if (rowCounter)
-		{
 			if (columnIndex == 0)
 				return new Integer(rowIndex + 1);
-		}
-		PeakResult r = get(rowIndex);
+		final PeakResult r = get(rowIndex);
 		return values[columnIndex].getValue(r);
 	}
 
@@ -459,9 +457,9 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public MemoryPeakResults toMemoryPeakResults()
 	{
-		ArrayPeakResultStore store = new ArrayPeakResultStore(data.size());
+		final ArrayPeakResultStore store = new ArrayPeakResultStore(data.size());
 		store.addArray(data.toArray());
-		MemoryPeakResults results = new MemoryPeakResults(store);
+		final MemoryPeakResults results = new MemoryPeakResults(store);
 		results.setPSF(psf);
 		results.setCalibration(calibration);
 		results.setSource(source);
@@ -520,22 +518,20 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		if (peakResults.length == 0)
 			return;
-		int index0 = data.size();
+		final int index0 = data.size();
 		if (checkForDuplicates)
 		{
 			int size = 0;
 			for (int i = 0; i < peakResults.length; i++)
-			{
 				if (!data.contains(peakResults[i]))
 					peakResults[size++] = peakResults[i];
-			}
 			if (size == 0)
 				return;
 			if (size != peakResults.length)
 				peakResults = Arrays.copyOf(peakResults, size);
 		}
 		data.addArray(peakResults);
-		int index1 = data.size() - 1;
+		final int index1 = data.size() - 1;
 
 		fireTableRowsInserted(index0, index1);
 	}
@@ -591,7 +587,7 @@ public class PeakResultTableModel extends AbstractTableModel
 		int size = 0;
 		for (int i = 0; i < indices.length; i++)
 		{
-			int index = indices[i];
+			final int index = indices[i];
 			if (index < 0 || index >= data.size())
 				continue;
 			indices[size++] = index;
@@ -602,17 +598,15 @@ public class PeakResultTableModel extends AbstractTableModel
 		if (size < indices.length)
 			indices = Arrays.copyOf(indices, size);
 
-		int[] pairs = SimpleArrayUtils.getRanges(indices);
+		final int[] pairs = SimpleArrayUtils.getRanges(indices);
 
 		size = pairs.length;
-		int firstRow = pairs[0];
-		int lastRow = pairs[size - 1];
+		final int firstRow = pairs[0];
+		final int lastRow = pairs[size - 1];
 
 		// Remove ranges starting at the end (to preserve the list order)
 		for (int i = size - 1; i > 0; i -= 2)
-		{
 			data.remove(pairs[i - 1], pairs[i]);
-		}
 
 		fireTableRowsDeleted(firstRow, lastRow);
 	}
@@ -638,7 +632,7 @@ public class PeakResultTableModel extends AbstractTableModel
 		int size = 0;
 		for (int i = 0; i < peakResults.length; i++)
 		{
-			int j = data.indexOf(peakResults[i]);
+			final int j = data.indexOf(peakResults[i]);
 			if (j >= 0)
 				indices[size++] = j;
 		}
@@ -647,17 +641,15 @@ public class PeakResultTableModel extends AbstractTableModel
 		if (size < peakResults.length)
 			indices = Arrays.copyOf(indices, size);
 
-		int[] pairs = SimpleArrayUtils.getRanges(indices);
+		final int[] pairs = SimpleArrayUtils.getRanges(indices);
 
 		size = pairs.length;
-		int firstRow = pairs[0];
-		int lastRow = pairs[size - 1];
+		final int firstRow = pairs[0];
+		final int lastRow = pairs[size - 1];
 
 		// Remove ranges starting at the end (to preserve the list order)
 		for (int i = size - 1; i > 0; i -= 2)
-		{
 			data.remove(pairs[i - 1], pairs[i]);
-		}
 
 		fireTableRowsDeleted(firstRow, lastRow);
 	}
@@ -670,7 +662,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void clear(Object source)
 	{
-		int index1 = data.size() - 1;
+		final int index1 = data.size() - 1;
 		if (index1 >= 0)
 		{
 			data.clear();
@@ -738,7 +730,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void setSource(ImageSource source)
 	{
-		boolean changed = (this.source != source);
+		final boolean changed = (this.source != source);
 		this.source = source;
 		createTableStructure(changed);
 	}
@@ -788,7 +780,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void setShowDeviations(boolean showDeviations)
 	{
-		boolean changed = this.showDeviations != showDeviations;
+		final boolean changed = this.showDeviations != showDeviations;
 		this.showDeviations = showDeviations;
 		createTableStructure(changed);
 	}
@@ -807,7 +799,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void setShowEndFrame(boolean showEndFrame)
 	{
-		boolean changed = this.showEndFrame != showEndFrame;
+		final boolean changed = this.showEndFrame != showEndFrame;
 		this.showEndFrame = showEndFrame;
 		createTableStructure(changed);
 	}
@@ -826,7 +818,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void setShowId(boolean showId)
 	{
-		boolean changed = this.showId != showId;
+		final boolean changed = this.showId != showId;
 		this.showId = showId;
 		createTableStructure(changed);
 	}
@@ -849,7 +841,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void setShowZ(boolean showZ)
 	{
-		boolean changed = this.showZ != showZ;
+		final boolean changed = this.showZ != showZ;
 		this.showZ = showZ;
 		createTableStructure(changed);
 	}

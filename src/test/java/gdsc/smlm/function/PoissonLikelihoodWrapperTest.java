@@ -142,7 +142,7 @@ public class PoissonLikelihoodWrapperTest
 
 	private void functionComputesGradientPerDatum(int flags)
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
+		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		// Setup
 		testbackground = testbackground_;
 		testsignal1 = testsignal1_;
@@ -152,19 +152,12 @@ public class PoissonLikelihoodWrapperTest
 		testw1 = testw1_;
 		testangle1 = testangle1_;
 		if (!f1.evaluatesBackground())
-		{
 			testbackground = new double[] { testbackground[0] };
-		}
 		if (!f1.evaluatesSignal())
-		{
-			testsignal1 = new double[] { testsignal1[0] };
-		}
-		// Position is always evaluated
+		 testsignal1 = new double[] { testsignal1[0] };
 
 		if (!f1.evaluatesZ())
-		{
 			testcz1 = new double[] { 0 };
-		}
 		boolean noSecondWidth = false;
 		if (!f1.evaluatesSD0())
 		{
@@ -180,16 +173,10 @@ public class PoissonLikelihoodWrapperTest
 			noSecondWidth = true;
 		}
 		if (noSecondWidth)
-		{
 			for (int i = 0; i < testw1.length; i++)
-			{
 				testw1[i][1] = testw1[i][0];
-			}
-		}
 		if (!f1.evaluatesAngle())
-		{
 			testangle1 = new double[] { 0 };
-		}
 
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.BACKGROUND);
@@ -209,31 +196,31 @@ public class PoissonLikelihoodWrapperTest
 
 	private void functionComputesTargetGradientPerDatum(Gaussian2DFunction f1, int targetParameter)
 	{
-		int[] indices = f1.gradientIndices();
-		int gradientIndex = findGradientIndex(f1, targetParameter);
-		double[] dyda = new double[indices.length];
+		final int[] indices = f1.gradientIndices();
+		final int gradientIndex = findGradientIndex(f1, targetParameter);
+		final double[] dyda = new double[indices.length];
 		double[] a;
 
 		PoissonLikelihoodWrapper ff1;
 
-		int n = maxx * maxx;
+		final int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		for (double background : testbackground)
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double cz1 : testcz1)
-							for (double[] w1 : testw1)
-								for (double angle1 : testangle1)
+		for (final double background : testbackground)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double cz1 : testcz1)
+							for (final double[] w1 : testw1)
+								for (final double angle1 : testangle1)
 								{
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
 									// Create y as a function we would want to move towards
-									double[] a2 = a.clone();
+									final double[] a2 = a.clone();
 									a2[targetParameter] *= 1.1;
 									f1.initialise(a2);
-									double[] data = new double[maxx * maxx];
+									final double[] data = new double[maxx * maxx];
 									for (int i = 0; i < n; i++)
 										data[i] = f1.eval(i);
 
@@ -244,23 +231,23 @@ public class PoissonLikelihoodWrapperTest
 									final double xx = a[targetParameter];
 
 									// Get h to minimise roundoff error
-									double h = Precision.representableDelta(xx, h_);
+									final double h = Precision.representableDelta(xx, h_);
 
-									for (int x : testx)
-										for (int y : testy)
+									for (final int x : testx)
+										for (final int y : testy)
 										{
-											int i = y * maxx + x;
+											final int i = y * maxx + x;
 											a[targetParameter] = xx;
 											ff1.likelihood(getVariables(indices, a), dyda, i);
 
 											// Evaluate at (x+h) and (x-h)
 											a[targetParameter] = xx + h;
-											double value2 = ff1.likelihood(getVariables(indices, a), i);
+											final double value2 = ff1.likelihood(getVariables(indices, a), i);
 
 											a[targetParameter] = xx - h;
-											double value3 = ff1.likelihood(getVariables(indices, a), i);
+											final double value3 = ff1.likelihood(getVariables(indices, a), i);
 
-											double gradient = (value2 - value3) / (2 * h);
+											final double gradient = (value2 - value3) / (2 * h);
 											boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
 													Math.abs(gradient - dyda[gradientIndex]) < 0.1;
 											//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
@@ -275,7 +262,7 @@ public class PoissonLikelihoodWrapperTest
 											total++;
 										}
 								}
-		double p = (100.0 * count) / total;
+		final double p = (100.0 * count) / total;
 		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
 				count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
@@ -305,7 +292,7 @@ public class PoissonLikelihoodWrapperTest
 	{
 		TestSettings.assumeMediumComplexity();
 		// The elliptical function gradient evaluation is worse
-		DoubleEquality tmp = eq;
+		final DoubleEquality tmp = eq;
 		eq = eqPerDatum;
 		functionComputesGradient(GaussianFunctionFactory.FIT_ELLIPTICAL);
 		eq = tmp;
@@ -337,7 +324,7 @@ public class PoissonLikelihoodWrapperTest
 	{
 		TestSettings.assumeMediumComplexity();
 		// The elliptical function gradient evaluation is worse
-		DoubleEquality tmp = eq;
+		final DoubleEquality tmp = eq;
 		eq = eqPerDatum;
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 		eq = tmp;
@@ -345,7 +332,7 @@ public class PoissonLikelihoodWrapperTest
 
 	private void functionComputesGradient(int flags)
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
+		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		testbackground = testbackground_;
 		testsignal1 = testsignal1_;
 		testcx1 = testcx1_;
@@ -354,19 +341,12 @@ public class PoissonLikelihoodWrapperTest
 		testw1 = testw1_;
 		testangle1 = testangle1_;
 		if (!f1.evaluatesBackground())
-		{
 			testbackground = new double[] { testbackground[0] };
-		}
 		if (!f1.evaluatesSignal())
-		{
-			testsignal1 = new double[] { testsignal1[0] };
-		}
-		// Position is always evaluated
+		 testsignal1 = new double[] { testsignal1[0] };
 
 		if (!f1.evaluatesZ())
-		{
 			testcz1 = new double[] { 0 };
-		}
 		boolean noSecondWidth = false;
 		if (!f1.evaluatesSD0())
 		{
@@ -382,18 +362,12 @@ public class PoissonLikelihoodWrapperTest
 			noSecondWidth = true;
 		}
 		if (noSecondWidth)
-		{
 			for (int i = 0; i < testw1.length; i++)
-			{
 				testw1[i][1] = testw1[i][0];
-			}
-		}
 		if (!f1.evaluatesAngle())
-		{
 			testangle1 = new double[] { 0 };
-		}
 
-		double fraction = 90;
+		final double fraction = 90;
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.BACKGROUND, fraction);
 		if (f1.evaluatesSignal())
@@ -412,31 +386,31 @@ public class PoissonLikelihoodWrapperTest
 
 	private void functionComputesTargetGradient(Gaussian2DFunction f1, int targetParameter, double threshold)
 	{
-		int[] indices = f1.gradientIndices();
-		int gradientIndex = findGradientIndex(f1, targetParameter);
-		double[] dyda = new double[indices.length];
+		final int[] indices = f1.gradientIndices();
+		final int gradientIndex = findGradientIndex(f1, targetParameter);
+		final double[] dyda = new double[indices.length];
 		double[] a;
 
 		PoissonLikelihoodWrapper ff1;
 
-		int n = maxx * maxx;
+		final int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		for (double background : testbackground)
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double cz1 : testcz1)
-							for (double[] w1 : testw1)
-								for (double angle1 : testangle1)
+		for (final double background : testbackground)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double cz1 : testcz1)
+							for (final double[] w1 : testw1)
+								for (final double angle1 : testangle1)
 								{
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
 									// Create y as a function we would want to move towards
-									double[] a2 = a.clone();
+									final double[] a2 = a.clone();
 									a2[targetParameter] *= 1.3;
 									f1.initialise(a2);
-									double[] data = new double[maxx * maxx];
+									final double[] data = new double[maxx * maxx];
 									for (int i = 0; i < n; i++)
 										data[i] = f1.eval(i);
 
@@ -447,18 +421,18 @@ public class PoissonLikelihoodWrapperTest
 									final double xx = a[targetParameter];
 
 									// Get h to minimise roundoff error
-									double h = Precision.representableDelta(xx, h_);
+									final double h = Precision.representableDelta(xx, h_);
 
 									ff1.likelihood(getVariables(indices, a), dyda);
 
 									// Evaluate at (x+h) and (x-h)
 									a[targetParameter] = xx + h;
-									double value2 = ff1.likelihood(getVariables(indices, a));
+									final double value2 = ff1.likelihood(getVariables(indices, a));
 
 									a[targetParameter] = xx - h;
-									double value3 = ff1.likelihood(getVariables(indices, a));
+									final double value3 = ff1.likelihood(getVariables(indices, a));
 
-									double gradient = (value2 - value3) / (2 * h);
+									final double gradient = (value2 - value3) / (2 * h);
 									boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
 											Math.abs(gradient - dyda[gradientIndex]) < 0.1;
 									//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
@@ -473,26 +447,23 @@ public class PoissonLikelihoodWrapperTest
 									total++;
 
 								}
-		double p = (100.0 * count) / total;
+		final double p = (100.0 * count) / total;
 		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
 				total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
 	}
 
-	private double[] getVariables(int[] indices, double[] a)
+	private static double[] getVariables(int[] indices, double[] a)
 	{
-		double[] variables = new double[indices.length];
+		final double[] variables = new double[indices.length];
 		for (int i = 0; i < indices.length; i++)
-		{
 			variables[i] = a[indices[i]];
-
-		}
 		return variables;
 	}
 
-	private int findGradientIndex(Gaussian2DFunction f, int targetParameter)
+	private static int findGradientIndex(Gaussian2DFunction f, int targetParameter)
 	{
-		int i = f.findGradientIndex(targetParameter);
+		final int i = f.findGradientIndex(targetParameter);
 		Assert.assertTrue("Cannot find gradient index", i >= 0);
 		return i;
 	}
@@ -508,11 +479,11 @@ public class PoissonLikelihoodWrapperTest
 		// Initialise for large observed count
 		PoissonLikelihoodWrapper.likelihood(1, photons[photons.length - 1] * 2);
 
-		for (double p : photons)
+		for (final double p : photons)
 			cumulativeProbabilityIsOneWithIntegerData(p);
 	}
 
-	private void cumulativeProbabilityIsOneWithIntegerData(final double mu)
+	private static void cumulativeProbabilityIsOneWithIntegerData(final double mu)
 	{
 		double p = 0;
 		int x = 0;
@@ -522,7 +493,7 @@ public class PoissonLikelihoodWrapperTest
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
-			int max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
+			final int max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
 			for (; x <= max; x++)
 			{
 				final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
@@ -557,11 +528,11 @@ public class PoissonLikelihoodWrapperTest
 				cumulativeProbabilityIsOneWithRealData(photons[i], maxRange[i] + 1);
 	}
 
-	private void cumulativeProbabilityIsOneWithRealData(final double mu, int max)
+	private static void cumulativeProbabilityIsOneWithRealData(final double mu, int max)
 	{
 		double p = 0;
 
-		SimpsonIntegrator in = new SimpsonIntegrator();
+		final SimpsonIntegrator in = new SimpsonIntegrator();
 
 		p = in.integrate(20000, new UnivariateFunction()
 		{
@@ -587,21 +558,22 @@ public class PoissonLikelihoodWrapperTest
 	private void cumulativeProbabilityIsOneFromLikelihood(final double mu)
 	{
 		// Determine upper limit for a Poisson
-		int limit = new PoissonDistribution(mu).inverseCumulativeProbability(0.999);
+		final int limit = new PoissonDistribution(mu).inverseCumulativeProbability(0.999);
 
 		// Expand to allow for the gain
-		int n = (int) Math.ceil(limit / alpha);
+		final int n = (int) Math.ceil(limit / alpha);
 
 		// Evaluate all values from zero to large n
-		double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
-		double[] a = new double[0];
-		double[] g = new double[0];
+		final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
+		final double[] a = new double[0];
+		final double[] g = new double[0];
 
-		NonLinearFunction nlf = new NonLinearFunction()
+		final NonLinearFunction nlf = new NonLinearFunction()
 		{
 			@Override
 			public void initialise(double[] a)
 			{
+				// Do nothing
 			}
 
 			@Override
@@ -655,12 +627,12 @@ public class PoissonLikelihoodWrapperTest
 		int i = 0;
 		while (i < n)
 		{
-			double nll = f.computeLikelihood(i);
-			double nll2 = f.computeLikelihood(g, i);
+			final double nll = f.computeLikelihood(i);
+			final double nll2 = f.computeLikelihood(g, i);
 			i++;
 			Assert.assertEquals("computeLikelihood(i)", nll, nll2, 1e-10);
 			total += nll;
-			double pp = FastMath.exp(-nll);
+			final double pp = FastMath.exp(-nll);
 			//System.out.printf("mu=%f, o=%f, i=%d, pp=%f\n", mu, mu / alpha, i, pp);
 			p += pp;
 			if (p > 0.5 && pp / p < changeTolerance)
@@ -672,9 +644,9 @@ public class PoissonLikelihoodWrapperTest
 
 		// Check the function can compute the same total
 		f = new PoissonLikelihoodWrapper(nlf, a, k, i, alpha);
-		double sum = f.computeLikelihood();
-		double sum2 = f.computeLikelihood(g);
-		double delta = total * 1e-10;
+		final double sum = f.computeLikelihood();
+		final double sum2 = f.computeLikelihood(g);
+		final double delta = total * 1e-10;
 		Assert.assertEquals("computeLikelihood", total, sum, delta);
 		Assert.assertEquals("computeLikelihood with gradient", total, sum2, delta);
 	}

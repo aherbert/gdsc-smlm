@@ -66,7 +66,7 @@ public class FakeGradientFunction
 	{
 		int seed = 0;
 		for (int i = a.length; i-- > 0;)
-			seed += hashCode(a[i]);
+			seed += Double.hashCode(a[i]);
 		//System.out.printf("seed = %d\n", seed);
 		r.setSeed(seed);
 	}
@@ -95,12 +95,6 @@ public class FakeGradientFunction
 		initialise(a);
 	}
 
-	private int hashCode(double d)
-	{
-		long bits = Double.doubleToLongBits(d);
-		return (int) (bits ^ (bits >>> 32));
-	}
-
 	@Override
 	public int[] gradientIndices()
 	{
@@ -127,7 +121,6 @@ public class FakeGradientFunction
 	{
 		// Simulate a 2D forEach
 		for (int y = 0; y < maxx; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				for (int j = nparams; j-- > 0;)
@@ -135,7 +128,6 @@ public class FakeGradientFunction
 				//System.out.println(Arrays.toString(dy_da));
 				procedure.execute(r.nextDouble(), dy_da);
 			}
-		}
 	}
 
 	@Override
@@ -145,7 +137,6 @@ public class FakeGradientFunction
 
 		// Simulate a 2D forEach
 		for (int y = 0; y < maxx; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				for (int j = nparams; j-- > 0;)
@@ -156,7 +147,6 @@ public class FakeGradientFunction
 				//System.out.println(Arrays.toString(dy_da));
 				procedure.execute(r.nextDouble(), dy_da, d2y_da2);
 			}
-		}
 	}
 
 	@Override
@@ -166,7 +156,6 @@ public class FakeGradientFunction
 
 		// Simulate a 2D forEach
 		for (int y = 0; y < maxx; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				for (int j = nparams; j-- > 0;)
@@ -177,15 +166,14 @@ public class FakeGradientFunction
 				//System.out.println(Arrays.toString(dy_da));
 				procedure.executeExtended(r.nextDouble(), dy_da, d2y_dadb);
 			}
-		}
 	}
 
 	@Override
 	public double eval(int i, double[] dy_da)
 	{
 		// Unpack the predictor to the 2D coordinates
-		int y = i / maxx;
-		int x = i % maxx;
+		final int y = i / maxx;
+		final int x = i % maxx;
 		for (int j = nparams; j-- > 0;)
 			dy_da[j] = r.nextDouble() * x + y;
 		//System.out.println(Arrays.toString(dy_da));

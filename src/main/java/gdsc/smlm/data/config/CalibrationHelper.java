@@ -60,7 +60,7 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toDistanceUnit != null && calibration.hasDistanceCalibration())
 		{
-			DistanceCalibrationOrBuilder distanceCalibration = calibration.getDistanceCalibrationOrBuilder();
+			final DistanceCalibrationOrBuilder distanceCalibration = calibration.getDistanceCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(distanceCalibration.getDistanceUnit(), toDistanceUnit,
 					distanceCalibration.getNmPerPixel());
 		}
@@ -85,7 +85,7 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toIntensityUnit != null && calibration.hasIntensityCalibration())
 		{
-			IntensityCalibrationOrBuilder intensityCalibration = calibration.getIntensityCalibrationOrBuilder();
+			final IntensityCalibrationOrBuilder intensityCalibration = calibration.getIntensityCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(intensityCalibration.getIntensityUnit(), toIntensityUnit,
 					intensityCalibration.getCountPerPhoton());
 		}
@@ -110,9 +110,9 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toTimeUnit != null && calibration.hasTimeCalibration())
 		{
-			TimeCalibrationOrBuilder timeCalibration = calibration.getTimeCalibrationOrBuilder();
+			final TimeCalibrationOrBuilder timeCalibration = calibration.getTimeCalibrationOrBuilder();
 			// Assume time is in frames
-			TimeUnit timeUnit = TimeUnit.FRAME; // timeCalibration.getTimeUnit()
+			final TimeUnit timeUnit = TimeUnit.FRAME; // timeCalibration.getTimeUnit()
 			return UnitConverterFactory.createConverter(timeUnit, toTimeUnit, timeCalibration.getExposureTime());
 		}
 		throw new ConversionException();
@@ -136,7 +136,7 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toAngleUnit != null && calibration.hasAngleCalibration())
 		{
-			AngleCalibrationOrBuilder psfCalibration = calibration.getAngleCalibrationOrBuilder();
+			final AngleCalibrationOrBuilder psfCalibration = calibration.getAngleCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
 		}
 		throw new ConversionException();
@@ -161,7 +161,7 @@ public class CalibrationHelper
 		{
 			return getDistanceConverter(calibration, toDistanceUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			if (calibration != null && calibration.hasDistanceCalibration())
 				return new IdentityTypeConverter<>(
@@ -189,7 +189,7 @@ public class CalibrationHelper
 		{
 			return getIntensityConverter(calibration, toIntensityUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			if (calibration != null && calibration.hasIntensityCalibration())
 				return new IdentityTypeConverter<>(
@@ -216,7 +216,7 @@ public class CalibrationHelper
 		{
 			return getTimeConverter(calibration, toTimeUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			// Calibration is assumed to be in frames
 			return new IdentityTypeConverter<>(TimeUnit.FRAME);
@@ -242,7 +242,7 @@ public class CalibrationHelper
 		{
 			return getAngleConverter(calibration, toAngleUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			if (calibration != null && calibration.hasAngleCalibration())
 				return new IdentityTypeConverter<>(calibration.getAngleCalibrationOrBuilder().getAngleUnit());
@@ -263,7 +263,7 @@ public class CalibrationHelper
 	 */
 	public static Calibration create(double nmPerPixel, double gain, double exposureTime)
 	{
-		CalibrationWriter cw = new CalibrationWriter();
+		final CalibrationWriter cw = new CalibrationWriter();
 		cw.setIntensityUnit(IntensityUnit.PHOTON);
 		cw.setDistanceUnit(DistanceUnit.PIXEL);
 		if (nmPerPixel > 0)

@@ -147,7 +147,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			// If no Poisson mean then just use the Gaussian
 			if (computePMF)
 			{
-				double x = Math.round(o);
+				final double x = Math.round(o);
 				return (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 			}
 			return FastMath.exp((-0.5 * o * o / var) + logNormalisationGaussian);
@@ -191,49 +191,22 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			// Optionally use the error function for a full convolution between
 			// the Poisson PMF and Gaussian PDF
 			if (computePMF)
-			{
-				// The Poisson PMF is scaled using the gain to generate a PMF for (X=x).
-				// The Gaussian CDF over the range x-0.5 to x+0.5 is
-				// computed to provide the equivalent of the convolution of the PMF of
-				// the scaled Poisson and the PDF of the Gaussian over the discrete
-				// integer range. The output is a PMF.
-
 				for (int q = qmin; q <= qmax; q++)
 				{
-					double x = getX(D, q);
+					final double x = getX(D, q);
 					p +=
 							// Poisson PMF
 							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
 									// Gaussian CDF
 									(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 				}
-			}
 			else
-			{
 				for (int q = qmin; q <= qmax; q++)
-				{
-					// P(D|q) = e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)
-					// log(P(D|q) = -u + q * log(u) - log(q!) - (D-q*g)^2/2*var - log(sqrt(2pi var))
-
-					//// Poisson
-					//double pp = q * logu - u - LogFactorial.logF(q);
-					//
-					//// Gaussian
-					//double gp = -(Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian;
-					//
-					////System.out.printf("D=%f,q=%d,pp=%g,gp=%g  %g\n", D, q, FastMath.exp(pp), FastMath.exp(gp)
-					////		, FastMath.exp(-(Maths.pow2(D - q * g) / var_by_2)) / Math.sqrt(Math.PI*var_by_2));
-					//
-					//// Combine
-					//p += FastMath.exp(pp + gp);
-
 					p += FastMath.exp(
 							// Poisson
 							q * logu - u - LogFactorial.logF(q)
 							// Gaussian
 									- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
-				}
-			}
 
 			// Determine normalisation
 			// Note: This is needed when using this as a discrete probability distribution,
@@ -285,7 +258,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			// If no Poisson mean then just use the Gaussian
 			if (computePMF)
 			{
-				double x = Math.round(o);
+				final double x = Math.round(o);
 				return Math.log((gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5);
 			}
 			return (-0.5 * o * o / var) + logNormalisationGaussian;
@@ -309,28 +282,22 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			final double logu = Math.log(u);
 			double p = 0;
 			if (computePMF)
-			{
 				for (int q = qmin; q <= qmax; q++)
 				{
-					double x = getX(D, q);
+					final double x = getX(D, q);
 					p +=
 							// Poisson PMF
 							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
 									// Gaussian CDF
 									(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 				}
-			}
 			else
-			{
 				for (int q = qmin; q <= qmax; q++)
-				{
 					p += FastMath.exp(
 							// Poisson
 							q * logu - u - LogFactorial.logF(q)
 							// Gaussian
 									- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
-				}
-			}
 			return Math.log(p);
 		}
 	}

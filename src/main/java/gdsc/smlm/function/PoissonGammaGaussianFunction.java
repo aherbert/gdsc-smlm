@@ -118,7 +118,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		public double value(double u)
 		{
 			i++;
-			double pg = PoissonGammaFunction.poissonGammaN(u, e, m);
+			final double pg = PoissonGammaFunction.poissonGammaN(u, e, m);
 			return (pg == 0) ? 0 : pg * gaussianPDF(u - o);
 		}
 	}
@@ -174,9 +174,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		s = Math.abs(s);
 		// Ignore tiny read noise
 		if (s < MIN_READ_NOISE)
-		{
 			sigma = twoSigma2 = sqrt2sigma2 = sqrt2piSigma2 = 0;
-		}
 		else
 		{
 			sigma = s;
@@ -214,34 +212,25 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		//		if (mySigma == 0)
 
 		if (sigma == 0)
-		{
 			// No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
 			// This can handle e<=0.
 			return checkMinProbability(PoissonGammaFunction.poissonGamma(o, e, m));
-		}
 
 		// If no Poisson mean then just use the Gaussian (Poisson-Gamma p=1 at x=0, p=0 otherwise)
 		if (e <= 0)
-		{
-			// Output as PDF
-			//return checkMinProbability(gaussianPDF(o));
-
 			// Output as PMF
 			return checkMinProbability(gaussianCDF(o - 0.5, o + 0.5));
-		}
 
 		if (convolutionMode == ConvolutionMode.APPROXIMATION)
-		{
 			return mortensenApproximation(o, e);
-		}
-		
+
 		ConvolutionMode mode = convolutionMode;
 
 		// Integrate to infinity is not necessary. The convolution of the function with the
 		// Gaussian should be adequately sampled using a nxSD around the function value.
 		// Find a bracket around the value.
-		double range = 5 * sigma;
-		double upperu = o + range;
+		final double range = 5 * sigma;
+		final double upperu = o + range;
 		if (upperu < 0)
 			return 0;
 		double loweru = o - range;
@@ -266,12 +255,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				throw new IllegalStateException();
 
 			// Use a cached kernel using a range of 5
-			double[] g = createKernel(5);
+			final double[] g = createKernel(5);
 
 			// Perform a simple convolution at point o with the kernel
 			for (int i = 0, j = -g.length / 2; i < g.length; i++, j++)
 			{
-				double u = o - j;
+				final double u = o - j;
 				if (u >= 0.5)
 					// This approximates [u-0.5 to u+0.5] as a single point
 					p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i];
@@ -288,7 +277,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 			// Use a simple integration by adding the points in the range.
 			// Use the error function to obtain the integral of the Gaussian
-			int upper = (int) Math.ceil(upperu);
+			final int upper = (int) Math.ceil(upperu);
 			int lower = (int) Math.floor(loweru);
 
 			// Do an integration of the Poisson-Gamma PMF.
@@ -298,7 +287,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			// Simpson integration could be used to improve this.
 			// Make this an option. For now just set to true as this mode should not be used
 			// anyway. The Simpson integrator should be faster.
-			boolean doSimpson = true;
+			final boolean doSimpson = true;
 
 			double pg;
 			// This is the CDF of the Gaussian
@@ -314,7 +303,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// Upper = 0.5
 				pg = PoissonGammaFunction.poissonGammaN(0.5, p, m);
 				g = gaussianErf(0.5 - o);
-				double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
+				final double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
 						: (prevPG + pg) / 4;
 				p += sum * (g - prevG) / 2;
 				lower++;
@@ -333,7 +322,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				final double prevG = g;
 				pg = PoissonGammaFunction.poissonGammaN(u + 0.5, e, m);
 				g = gaussianErf(u + 0.5 - o);
-				double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
+				final double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
 						: (prevPG + pg) / 2;
 				p += sum * (g - prevG) / 2;
 			}
@@ -351,13 +340,13 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			// is large as it uses fewer points.
 
 			// Specify the function to integrate.
-			PGGFunction f = new PGGFunction(o, e);
+			final PGGFunction f = new PGGFunction(o, e);
 
 			try
 			{
 				p += createIntegrator().integrate(2000, f, loweru, upperu);
 			}
-			catch (TooManyEvaluationsException ex)
+			catch (final TooManyEvaluationsException ex)
 			{
 				System.out.printf("Integration failed: o=%g, e=%g, eval=%d\n", o, e, f.i);
 				return mortensenApproximation(o, e);
@@ -379,17 +368,13 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 		if (pmfMode)
 		{
-			double erf2 = gaussianErf(-o + 0.5);
+			final double erf2 = gaussianErf(-o + 0.5);
 			if (erf2 != -1)
-			{
 				// Assume u==0
 				p += PoissonGammaFunction.dirac(e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
-			}
 		}
 		else
-		{
 			p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
-		}
 
 		return checkMinProbability(p);
 	}
@@ -429,10 +414,10 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// This is the value of the Poisson-Gamma at c=0:
 		// PoissonGammaFunction.poissonGammaN(0, eta, m);
 		final double exp_eta = FastMath.exp(-eta);
-		double f0 = exp_eta * eta / m;
+		final double f0 = exp_eta * eta / m;
 
 		// ?
-		double fp0 = f0 * 0.5 * (eta - 2) / m;
+		final double fp0 = f0 * 0.5 * (eta - 2) / m;
 
 		// The cumulative normal distribution of the read noise
 		// at the observed count
@@ -458,9 +443,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		//		// and the result is the Poisson-Gamma. Perhaps this is what the above code is doing.
 
 		if (cij > 0.0)
-		{
 			temp += PoissonGammaFunction.poissonGammaN(cij, eta, m) - f0 - fp0 * cij;
-		}
 
 		// XXX : Debugging: Store the smallest likelihood we ever see.
 		// This can be used to set a limit for the likelihood

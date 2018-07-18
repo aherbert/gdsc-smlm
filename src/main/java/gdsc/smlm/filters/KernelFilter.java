@@ -64,8 +64,8 @@ public class KernelFilter extends BaseWeightedFilter
 		// Cache the normaliser
 		if (normaliser == null)
 		{
-			float[] normalisation = weights.clone();
-			KernelFilter kf = new KernelFilter(kernel, kw, kh, scale);
+			final float[] normalisation = weights.clone();
+			final KernelFilter kf = new KernelFilter(kernel, kw, kh, scale);
 			kf.convolve(normalisation, weightWidth, weightHeight);
 			normaliser = new PerPixelNormaliser(normalisation);
 		}
@@ -114,7 +114,7 @@ public class KernelFilter extends BaseWeightedFilter
 		this.kh = kh;
 		this.scale = scale;
 	}
-	
+
 	/**
 	 * Gets the scale of the kernel (i.e. 1/sum). This is used to scale the convolution result.
 	 *
@@ -166,12 +166,10 @@ public class KernelFilter extends BaseWeightedFilter
 	public void convolve(float[] data, final int maxx, final int maxy, int border)
 	{
 		if (border < 0)
-		{
 			border = 0;
-		}
 		else
 		{
-			int size = 2 * border + 1;
+			final int size = 2 * border + 1;
 			if (size > maxx || size > maxy)
 				return; // Nothing to do
 		}
@@ -195,11 +193,11 @@ public class KernelFilter extends BaseWeightedFilter
 	private void convolveInternal(float[] data, final int maxx, final int maxy, int border)
 	{
 		// Clone the input
-		float[] in = data.clone();
+		final float[] in = data.clone();
 
 		if (hasWeights())
 		{
-			int size = data.length;
+			final int size = data.length;
 			if (weights.length != size || this.weightWidth != maxx || this.weightHeight != maxy)
 				throw new IllegalStateException("Weights are not the correct size");
 
@@ -218,9 +216,7 @@ public class KernelFilter extends BaseWeightedFilter
 				normaliser.normalise(data, size);
 		}
 		else
-		{
 			convolveData(in, data, maxx, maxy, border);
-		}
 	}
 
 	/**
@@ -256,7 +252,6 @@ public class KernelFilter extends BaseWeightedFilter
 				int i = 0;
 				// Determine if at the edge
 				if (edgeY || x < uc || x >= xedge)
-				{
 					for (int v = -vc; v <= vc; v++)
 					{
 						// Create a safe y-index
@@ -268,24 +263,15 @@ public class KernelFilter extends BaseWeightedFilter
 						yIndex *= width;
 
 						for (int u = -uc; u <= uc; u++)
-						{
 							//if (i >= kernel.length) // work around for JIT compiler bug on Linux
 							//	IJ.log("kernel index error: " + i);
 							sum += getPixel(x + u, yIndex, in, width) * kernel[i++];
-						}
 					}
-				}
 				else
-				{
 					// Internal
 					for (int v = -vc; v <= vc; v++)
-					{
 						for (int u = -uc, offset = x - uc + (y + v) * width; u++ <= uc;)
-						{
 							sum += in[offset++] * kernel[i++];
-						}
-					}
-				}
 				out[c++] = (float) (sum * scale);
 			}
 		}
@@ -321,7 +307,7 @@ public class KernelFilter extends BaseWeightedFilter
 	@Override
 	public KernelFilter clone()
 	{
-		KernelFilter o = (KernelFilter) super.clone();
+		final KernelFilter o = (KernelFilter) super.clone();
 		o.kernel = getKernal();
 		return o;
 	}
@@ -376,7 +362,7 @@ public class KernelFilter extends BaseWeightedFilter
 	{
 		for (int i = kernel.length / 2, j = kernel.length - i; i-- > 0; j++)
 		{
-			float tmp = kernel[i];
+			final float tmp = kernel[i];
 			kernel[i] = kernel[j];
 			kernel[j] = tmp;
 		}
@@ -400,7 +386,7 @@ public class KernelFilter extends BaseWeightedFilter
 			kh++;
 		if (kw != fp.getWidth() || kh != fp.getHeight())
 		{
-			FloatProcessor fp2 = new FloatProcessor(kw, kh);
+			final FloatProcessor fp2 = new FloatProcessor(kw, kh);
 			fp2.insert(fp, 0, 0);
 			fp = fp2;
 		}

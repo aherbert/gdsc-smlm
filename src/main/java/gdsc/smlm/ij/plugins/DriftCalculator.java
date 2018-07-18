@@ -137,7 +137,7 @@ public class DriftCalculator implements PlugIn
 	private double[] lastdx;
 	private double[] lastdy;
 
-	private TrackProgress tracker = new IJTrackProgress();
+	private final TrackProgress tracker = new IJTrackProgress();
 
 	// Used to multi-thread the image alignment
 	private ExecutorService threadPool = null;
@@ -269,11 +269,9 @@ public class DriftCalculator implements PlugIn
 		public void run()
 		{
 			incrementProgress();
-			IJImagePeakResults blockImage = newImage(bounds, scale);
-			for (Localisation r : localisations)
-			{
+			final IJImagePeakResults blockImage = newImage(bounds, scale);
+			for (final Localisation r : localisations)
 				blockImage.add(r.t, (float) (r.x + dx[r.t]), (float) (r.y + dy[r.t]), r.s);
-			}
 			images[i] = getImage(blockImage);
 		}
 	}
@@ -334,35 +332,31 @@ public class DriftCalculator implements PlugIn
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;
 		}
-		Roi[] rois = getRois();
-		String[] stackTitles = createStackImageList();
+		final Roi[] rois = getRois();
+		final String[] stackTitles = createStackImageList();
 
 		if (!showDialog(rois, stackTitles))
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
 		if (results == null || results.size() < 2)
 		{
 			IJ.error(TITLE, "There are not enough fitting results for drift correction");
 			return;
 		}
 		double[][] drift = null;
-		int[] limits = findTimeLimits(results);
+		final int[] limits = findTimeLimits(results);
 		if (method.equals(MARKED_ROIS))
-		{
 			drift = calculateUsingMarkers(results, limits, rois);
-		}
 		else if (method.equals(STACK_ALIGNMENT))
 		{
-			ImageStack stack = showStackDialog(stackTitles);
+			final ImageStack stack = showStackDialog(stackTitles);
 			if (stack == null)
 				return;
 			drift = calculateUsingImageStack(stack, limits);
 		}
 		else if (method.equals(DRIFT_FILE))
-		{
 			drift = calculateUsingDriftFile(limits);
-		}
 		else
 		{
 			if (!showSubImageDialog())
@@ -382,7 +376,7 @@ public class DriftCalculator implements PlugIn
 
 	private static Roi[] getRois()
 	{
-		RoiManager rmanager = RoiManager.getInstance();
+		final RoiManager rmanager = RoiManager.getInstance();
 		if (rmanager == null || rmanager.getCount() == 0)
 		{
 			IJ.log("To use feducial markers for drift correction, add ROIs to the RoiManager (select a region then press [t]).");
@@ -393,19 +387,19 @@ public class DriftCalculator implements PlugIn
 
 	private static boolean showDialog(Roi[] rois, String[] stackTitles)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Correct the drift in localisation results");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-		ArrayList<String> methods = new ArrayList<>(4);
+		final ArrayList<String> methods = new ArrayList<>(4);
 		methods.add(SUB_IMAGE_ALIGNMENT);
 		methods.add(DRIFT_FILE);
 		if (rois != null)
 			methods.add(MARKED_ROIS);
 		if (stackTitles != null)
 			methods.add(STACK_ALIGNMENT);
-		String[] items = methods.toArray(new String[methods.size()]);
+		final String[] items = methods.toArray(new String[methods.size()]);
 		gd.addChoice("Method", items, method);
 		gd.addMessage("Stopping criteria");
 		gd.addSlider("Max_iterations", 0, 100, maxIterations);
@@ -449,7 +443,7 @@ public class DriftCalculator implements PlugIn
 			Parameters.isEqualOrBelow("Smoothing", smoothing, 1);
 			Parameters.isPositive("Smoothing iterations", iterations);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -460,14 +454,14 @@ public class DriftCalculator implements PlugIn
 
 	private static boolean showSubImageDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the drift using localisation sub-image alignment");
 		gd.addNumericField("Frames", frames, 0);
 		gd.addSlider("Minimum_localisations", 10, 50, minimimLocalisations);
 		gd.addChoice("FFT size", SIZES, reconstructionSize);
-		String[] methods = new String[] { AlignImagesFFT.SubPixelMethod.CUBIC.toString(),
+		final String[] methods = new String[] { AlignImagesFFT.SubPixelMethod.CUBIC.toString(),
 				AlignImagesFFT.SubPixelMethod.GAUSSIAN.toString() };
 		gd.addChoice("Sub-pixel_method", methods, subPixelMethod.toString());
 
@@ -487,7 +481,7 @@ public class DriftCalculator implements PlugIn
 		{
 			Parameters.isAboveZero("Frames", frames);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -498,7 +492,7 @@ public class DriftCalculator implements PlugIn
 
 	private static ImageStack showStackDialog(String[] stackTitles)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the drift using a reference stack alignment");
@@ -529,13 +523,13 @@ public class DriftCalculator implements PlugIn
 			Parameters.isAboveZero("Start frame", startFrame);
 			Parameters.isAboveZero("Frame spacing", frameSpacing);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return null;
 		}
 
-		ImagePlus imp = WindowManager.getImage(stackTitle);
+		final ImagePlus imp = WindowManager.getImage(stackTitle);
 		if (imp != null && imp.getStackSize() > 1)
 			return imp.getImageStack();
 		return null;
@@ -548,18 +542,16 @@ public class DriftCalculator implements PlugIn
 	 */
 	private static String[] createStackImageList()
 	{
-		int[] idList = WindowManager.getIDList();
+		final int[] idList = WindowManager.getIDList();
 		if (idList != null)
 		{
-			String[] list = new String[idList.length];
+			final String[] list = new String[idList.length];
 			int count = 0;
-			for (int id : idList)
+			for (final int id : idList)
 			{
-				ImagePlus imp = WindowManager.getImage(id);
+				final ImagePlus imp = WindowManager.getImage(id);
 				if (imp != null && imp.getStackSize() > 1)
-				{
 					list[count++] = imp.getTitle();
-				}
 			}
 			return Arrays.copyOf(list, count);
 		}
@@ -568,7 +560,7 @@ public class DriftCalculator implements PlugIn
 
 	private void applyDriftCorrection(MemoryPeakResults results, double[][] drift)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Apply drift correction to in-memory results?");
 		gd.addChoice("Update_method", UPDATE_METHODS, UPDATE_METHODS[updateMethod]);
 		// Option to save the drift unless it was loaded from file
@@ -622,10 +614,8 @@ public class DriftCalculator implements PlugIn
 				public void execute(PeakResult r)
 				{
 					if (truncate)
-					{
 						if (r.getFrame() < interpolationStart || r.getFrame() > interpolationEnd)
 							return;
-					}
 					r.setXPosition((float) (r.getXPosition() + dx[r.getFrame()]));
 					r.setYPosition((float) (r.getYPosition() + dy[r.getFrame()]));
 					newResults.add(r);
@@ -649,7 +639,7 @@ public class DriftCalculator implements PlugIn
 	 */
 	private double[][] calculateUsingMarkers(MemoryPeakResults results, int[] limits, Roi[] rois)
 	{
-		Spot[][] roiSpots = findSpots(results, rois, limits);
+		final Spot[][] roiSpots = findSpots(results, rois, limits);
 
 		// Check we have enough data
 		if (roiSpots.length == 0)
@@ -658,13 +648,13 @@ public class DriftCalculator implements PlugIn
 			return null;
 		}
 
-		double[] dx = new double[limits[1] + 1];
-		double[] dy = new double[dx.length];
+		final double[] dx = new double[limits[1] + 1];
+		final double[] dy = new double[dx.length];
 
-		double[] sum = new double[roiSpots.length];
-		double[] weights = calculateWeights(roiSpots, dx.length, sum);
+		final double[] sum = new double[roiSpots.length];
+		final double[] weights = calculateWeights(roiSpots, dx.length, sum);
 
-		double smoothing = updateSmoothingParameter(weights);
+		final double smoothing = updateSmoothingParameter(weights);
 
 		lastdx = null;
 		double change = calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing, iterations);
@@ -705,22 +695,18 @@ public class DriftCalculator implements PlugIn
 		if (!limitSmoothing)
 			return smoothing;
 
-		int n = countNonZeroValues(data);
+		final int n = countNonZeroValues(data);
 
 		int bandwidthInPoints = (int) (smoothing * n);
 
 		// Check the bounds for the smoothing
-		int original = bandwidthInPoints;
+		final int original = bandwidthInPoints;
 		if (minSmoothingPoints > 0)
-		{
 			bandwidthInPoints = FastMath.max(bandwidthInPoints, minSmoothingPoints);
-		}
 		if (maxSmoothingPoints > 0)
-		{
 			bandwidthInPoints = FastMath.min(bandwidthInPoints, maxSmoothingPoints);
-		}
 
-		double newSmoothing = (double) bandwidthInPoints / n;
+		final double newSmoothing = (double) bandwidthInPoints / n;
 		if (original != bandwidthInPoints)
 			Utils.log("Updated smoothing parameter for %d data points to %s (%d smoothing points)", n,
 					Utils.rounded(newSmoothing), bandwidthInPoints);
@@ -738,11 +724,9 @@ public class DriftCalculator implements PlugIn
 	private static int countNonZeroValues(double[] data)
 	{
 		int n = 0;
-		for (double d : data)
-		{
+		for (final double d : data)
 			if (d != 0)
 				n++;
-		}
 		return n;
 	}
 
@@ -750,18 +734,14 @@ public class DriftCalculator implements PlugIn
 	{
 		double totalDrift = 0;
 		for (int t = 0; t < dx.length; t++)
-		{
 			if (originalDriftTimePoints[t] != 0)
-			{
 				totalDrift += Math.sqrt(dx[t] * dx[t] + dy[t] * dy[t]);
-			}
-		}
 		return totalDrift;
 	}
 
 	private boolean converged(int iteration, double change, double totalDrift)
 	{
-		double error = change / totalDrift;
+		final double error = change / totalDrift;
 		Utils.log("Iteration %d : Drift %s : Total change %s : Relative change %s", iteration,
 				Utils.rounded(totalDrift), Utils.rounded(change), Utils.rounded(error));
 		if (error < relativeError || change < 1e-16)
@@ -777,17 +757,16 @@ public class DriftCalculator implements PlugIn
 	private static boolean smooth(double[] newDx, double[] newDy, double[] originalDriftTimePoints, double smoothing,
 			int iterations)
 	{
-		double[][] values = extractValues(originalDriftTimePoints, 0, newDx.length - 1, newDx, newDy);
+		final double[][] values = extractValues(originalDriftTimePoints, 0, newDx.length - 1, newDx, newDy);
 
 		// Smooth
-		LoessInterpolator loess = new LoessInterpolator(smoothing, iterations);
+		final LoessInterpolator loess = new LoessInterpolator(smoothing, iterations);
 		values[1] = loess.smooth(values[0], values[1]);
 		values[2] = loess.smooth(values[0], values[2]);
 
 		// Add back
 		int n = 0;
 		for (int t = 0; t < newDx.length; t++)
-		{
 			if (originalDriftTimePoints[t] != 0)
 			{
 				newDx[t] = values[1][n];
@@ -805,7 +784,6 @@ public class DriftCalculator implements PlugIn
 					return false;
 				}
 			}
-		}
 
 		return true;
 	}
@@ -836,7 +814,7 @@ public class DriftCalculator implements PlugIn
 			dy[t] = dy[endT];
 		}
 
-		double[][] values = extractValues(originalDriftTimePoints, startT, endT, dx, dy);
+		final double[][] values = extractValues(originalDriftTimePoints, startT, endT, dx, dy);
 
 		PolynomialSplineFunction fx, fy;
 		if (values[0].length < 3)
@@ -851,13 +829,11 @@ public class DriftCalculator implements PlugIn
 		}
 
 		for (int t = startT; t <= endT; t++)
-		{
 			if (originalDriftTimePoints[t] == 0)
 			{
 				dx[t] = fx.value(t);
 				dy[t] = fy.value(t);
 			}
-		}
 
 		this.interpolationStart = startT;
 		this.interpolationEnd = endT;
@@ -865,7 +841,7 @@ public class DriftCalculator implements PlugIn
 
 	private static int[] findTimeLimits(MemoryPeakResults results)
 	{
-		StandardResultProcedure sp = new StandardResultProcedure(results);
+		final StandardResultProcedure sp = new StandardResultProcedure(results);
 		sp.getT();
 		return Maths.limits(sp.frame);
 	}
@@ -883,10 +859,10 @@ public class DriftCalculator implements PlugIn
 	 */
 	private Spot[][] findSpots(MemoryPeakResults results, Roi[] rois, int[] limits)
 	{
-		ArrayList<Spot[]> roiSpots = new ArrayList<>(rois.length);
+		final ArrayList<Spot[]> roiSpots = new ArrayList<>(rois.length);
 		for (int i = 0; i < rois.length; i++)
 		{
-			Spot[] spots = findSpots(results, rois[i].getBounds(), limits);
+			final Spot[] spots = findSpots(results, rois[i].getBounds(), limits);
 			if (spots.length > 0)
 				roiSpots.add(spots);
 		}
@@ -908,27 +884,23 @@ public class DriftCalculator implements PlugIn
 			public void executeXYR(float x, float y, PeakResult r)
 			{
 				if (x > minx && x < maxx)
-				{
 					if (y > miny && y < maxy)
 						list.add(new Spot(r.getFrame(), x, y, r.getIntensity()));
-				}
 			}
 		});
 
 		// For each frame pick the strongest spot
 		Collections.sort(list);
 
-		TurboList<Spot> newList = new TurboList<>(list.size());
+		final TurboList<Spot> newList = new TurboList<>(list.size());
 
 		int currentT = -1;
-		for (Spot spot : list)
-		{
+		for (final Spot spot : list)
 			if (currentT != spot.t)
 			{
 				newList.add(spot);
 				currentT = spot.t;
 			}
-		}
 
 		return newList.toArray(new Spot[newList.size()]);
 	}
@@ -946,15 +918,13 @@ public class DriftCalculator implements PlugIn
 	 */
 	private static double[] calculateWeights(Spot[][] roiSpots, int timepoints, double[] sum)
 	{
-		double[] weights = new double[timepoints];
+		final double[] weights = new double[timepoints];
 		for (int i = 0; i < roiSpots.length; i++)
-		{
-			for (Spot s : roiSpots[i])
+			for (final Spot s : roiSpots[i])
 			{
 				weights[s.t] += s.s;
 				sum[i] += s.s;
 			}
-		}
 		return weights;
 	}
 
@@ -980,15 +950,15 @@ public class DriftCalculator implements PlugIn
 	private double calculateDriftUsingMarkers(Spot[][] roiSpots, double[] weights, double[] sum, double[] dx,
 			double[] dy, double smoothing, int iterations)
 	{
-		double[] newDx = new double[dx.length];
-		double[] newDy = new double[dy.length];
+		final double[] newDx = new double[dx.length];
+		final double[] newDy = new double[dy.length];
 
 		// For each ROI
 		for (int i = 0; i < roiSpots.length; i++)
 		{
 			// Calculate centre-of-mass using the current position (coord + drift)
 			double cx = 0, cy = 0;
-			for (Spot s : roiSpots[i])
+			for (final Spot s : roiSpots[i])
 			{
 				cx += s.s * (s.x + dx[s.t]);
 				cy += s.s * (s.y + dy[s.t]);
@@ -997,7 +967,7 @@ public class DriftCalculator implements PlugIn
 			cy /= sum[i];
 
 			// Calculate update to the drift as centre-of-mass minus the current position (coord + drift)
-			for (Spot s : roiSpots[i])
+			for (final Spot s : roiSpots[i])
 			{
 				newDx[s.t] += s.s * (cx - (s.x + dx[s.t]));
 				newDy[s.t] += s.s * (cy - (s.y + dy[s.t]));
@@ -1025,10 +995,8 @@ public class DriftCalculator implements PlugIn
 
 		// Perform smoothing
 		if (smoothing > 0)
-		{
 			if (!smooth(newDx, newDy, weights, smoothing, iterations))
 				return Double.NaN;
-		}
 
 		// Average drift correction for the calculated points should be zero to allow change comparison
 		normalise(newDx, weights);
@@ -1037,11 +1005,10 @@ public class DriftCalculator implements PlugIn
 		// Calculate change and update the input drift parameters
 		double change = 0;
 		for (int t = 0; t < dx.length; t++)
-		{
 			if (weights[t] != 0)
 			{
-				double d1 = dx[t] - newDx[t];
-				double d2 = dy[t] - newDy[t];
+				final double d1 = dx[t] - newDx[t];
+				final double d2 = dy[t] - newDy[t];
 				change += Math.sqrt(d1 * d1 + d2 * d2);
 				dx[t] = newDx[t];
 				dy[t] = newDy[t];
@@ -1049,7 +1016,6 @@ public class DriftCalculator implements PlugIn
 			// When weights == 0 any shift we calculate is later ignored since the points are interpolated
 			//dx[t] = newDx[t];
 			//dy[t] = newDy[t];
-		}
 		return change;
 	}
 
@@ -1067,14 +1033,11 @@ public class DriftCalculator implements PlugIn
 		double av1 = 0;
 		int count = 0;
 		for (int i = 0; i < data.length; i++)
-		{
 			if (toProcess[i] != 0)
 			{
 				av1 += data[i];
 				count++;
 			}
-
-		}
 		av1 /= count;
 
 		for (int i = 0; i < data.length; i++)
@@ -1113,11 +1076,10 @@ public class DriftCalculator implements PlugIn
 	private static double[][] extractValues(double[] data, int minT, int maxT, double[] array1, double[] array2)
 	{
 		// Extract data points for smoothing
-		int timepoints = maxT - minT + 1;
-		double[][] values = new double[3][timepoints];
+		final int timepoints = maxT - minT + 1;
+		final double[][] values = new double[3][timepoints];
 		int n = 0;
 		for (int t = minT; t <= maxT; t++)
-		{
 			if (data[t] != 0)
 			{
 				values[0][n] = t;
@@ -1125,7 +1087,6 @@ public class DriftCalculator implements PlugIn
 				values[2][n] = array2[t];
 				n++;
 			}
-		}
 		values[0] = Arrays.copyOf(values[0], n);
 		values[1] = Arrays.copyOf(values[1], n);
 		values[2] = Arrays.copyOf(values[2], n);
@@ -1138,7 +1099,7 @@ public class DriftCalculator implements PlugIn
 			return;
 
 		// Build an array of timepoints from the min to the max
-		double[] completeT = new double[limits[1] + 1];
+		final double[] completeT = new double[limits[1] + 1];
 		for (int i = limits[0]; i < completeT.length; i++)
 			completeT[i] = i;
 
@@ -1147,8 +1108,8 @@ public class DriftCalculator implements PlugIn
 		normalise(lastdy, calculatedTimepoints);
 
 		// Extract the interpolated points and the original drift
-		double[][] interpolated = extractValues(dx, limits[0], limits[1], dx, dy);
-		double[][] original = extractValues(calculatedTimepoints, limits[0], limits[1], lastdx, lastdy);
+		final double[][] interpolated = extractValues(dx, limits[0], limits[1], dx, dy);
+		final double[][] original = extractValues(calculatedTimepoints, limits[0], limits[1], lastdx, lastdy);
 
 		plotx = plotDrift(plotx, null, interpolated, original, "Drift X", 1);
 		ploty = plotDrift(ploty, plotx, interpolated, original, "Drift Y", 2);
@@ -1158,11 +1119,11 @@ public class DriftCalculator implements PlugIn
 			String name, int index)
 	{
 		// Create plot
-		double[] a = Maths.limits(interpolated[0]);
+		final double[] a = Maths.limits(interpolated[0]);
 		double[] b = Maths.limits(original[index]);
 		b = Maths.limits(b, interpolated[index]);
 
-		Plot2 plot = new Plot2(name, "Frame", "Drift (px)", (float[]) null, (float[]) null);
+		final Plot2 plot = new Plot2(name, "Frame", "Drift (px)", (float[]) null, (float[]) null);
 		plot.setLimits(a[0], a[1], b[0], b[1]);
 		plot.setColor(new Color(0, 0, 155)); // De-saturated blue
 		plot.addPoints(original[0], original[index], Plot.CROSS);
@@ -1172,7 +1133,7 @@ public class DriftCalculator implements PlugIn
 
 		if (Utils.isNewWindow() && parent != null)
 		{
-			Point location = parent.getLocation();
+			final Point location = parent.getLocation();
 			location.y += parent.getHeight();
 			src.setLocation(location);
 		}
@@ -1200,15 +1161,11 @@ public class DriftCalculator implements PlugIn
 		{
 			out.write("Time\tX\tY\n");
 			for (int t = 0; t < dx.length; t++)
-			{
 				if (originalDriftTimePoints[t] != 0)
-				{
 					out.write(String.format("%d\t%f\t%f\n", t, dx[t], dy[t]));
-				}
-			}
 			Utils.log("Saved calculated drift to file: " + driftFilename);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Do nothing
 		}
@@ -1237,17 +1194,15 @@ public class DriftCalculator implements PlugIn
 			return null;
 		}
 
-		double[] dx = Arrays.copyOf(lastdx, lastdx.length);
-		double[] dy = Arrays.copyOf(lastdy, lastdy.length);
+		final double[] dx = Arrays.copyOf(lastdx, lastdx.length);
+		final double[] dy = Arrays.copyOf(lastdy, lastdy.length);
 
-		double smoothing = updateSmoothingParameter(calculatedTimepoints);
+		final double smoothing = updateSmoothingParameter(calculatedTimepoints);
 
 		// Perform smoothing
 		if (smoothing > 0)
-		{
 			if (!smooth(dx, dy, calculatedTimepoints, smoothing, iterations))
 				return null;
-		}
 
 		// Average drift correction for the calculated points should be zero
 		normalise(dx, calculatedTimepoints);
@@ -1262,8 +1217,8 @@ public class DriftCalculator implements PlugIn
 
 	private static boolean getDriftFilename()
 	{
-		String[] path = Utils.decodePath(driftFilename);
-		OpenDialog chooser = new OpenDialog("Drift_file", path[0], path[1]);
+		final String[] path = Utils.decodePath(driftFilename);
+		final OpenDialog chooser = new OpenDialog("Drift_file", path[0], path[1]);
 		if (chooser.getFileName() == null)
 			return false;
 		driftFilename = chooser.getDirectory() + chooser.getFileName();
@@ -1285,13 +1240,12 @@ public class DriftCalculator implements PlugIn
 		try (BufferedReader input = new BufferedReader(new UnicodeReader(new FileInputStream(driftFilename), null)))
 		{
 			String line;
-			Pattern pattern = Pattern.compile("[\t, ]+");
+			final Pattern pattern = Pattern.compile("[\t, ]+");
 			while ((line = input.readLine()) != null)
 			{
 				if (line.length() == 0)
 					continue;
 				if (Character.isDigit(line.charAt(0)))
-				{
 					try (Scanner scanner = new Scanner(line))
 					{
 						scanner.useDelimiter(pattern);
@@ -1305,18 +1259,17 @@ public class DriftCalculator implements PlugIn
 						lastdx[t] = x;
 						lastdy[t] = y;
 					}
-					catch (InputMismatchException e)
+					catch (final InputMismatchException e)
 					{
 						// Do nothing
 					}
-					catch (NoSuchElementException e)
+					catch (final NoSuchElementException e)
 					{
 						// Do nothing
 					}
-				}
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// ignore
 		}
@@ -1359,12 +1312,12 @@ public class DriftCalculator implements PlugIn
 	private double[][] calculateUsingFrames(MemoryPeakResults results, int[] limits, int reconstructionSize)
 	{
 		// Extract the localisations into blocks of N consecutive frames
-		BlockPeakResultProcedure p = new BlockPeakResultProcedure();
+		final BlockPeakResultProcedure p = new BlockPeakResultProcedure();
 		results.sort();
 		results.forEach(new BlockPeakResultProcedure());
 
 		final ArrayList<ArrayList<Localisation>> blocks = p.blocks;
-		ArrayList<Localisation> nextBlock = p.nextBlock;
+		final ArrayList<Localisation> nextBlock = p.nextBlock;
 
 		if (blocks.size() < 2)
 		{
@@ -1382,36 +1335,34 @@ public class DriftCalculator implements PlugIn
 				return null;
 			}
 
-			ArrayList<Localisation> combinedBlock = blocks.get(blocks.size() - 1);
+			final ArrayList<Localisation> combinedBlock = blocks.get(blocks.size() - 1);
 			combinedBlock.addAll(nextBlock);
 		}
 
 		// Find the average time point for each block
-		int[] blockT = new int[blocks.size()];
+		final int[] blockT = new int[blocks.size()];
 		int t = 0;
-		for (ArrayList<Localisation> block : blocks)
+		for (final ArrayList<Localisation> block : blocks)
 		{
 			long sum = 0;
-			for (Localisation r : block)
-			{
+			for (final Localisation r : block)
 				sum += r.t;
-			}
 			blockT[t++] = (int) (sum / block.size());
 		}
 
 		// Calculate a scale to use when constructing the images for alignment
-		Rectangle bounds = results.getBounds(true);
-		float scale = (reconstructionSize - 1f) / FastMath.max(bounds.width, bounds.height);
+		final Rectangle bounds = results.getBounds(true);
+		final float scale = (reconstructionSize - 1f) / FastMath.max(bounds.width, bounds.height);
 
 		threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 
-		double[] dx = new double[limits[1] + 1];
-		double[] dy = new double[dx.length];
+		final double[] dx = new double[limits[1] + 1];
+		final double[] dy = new double[dx.length];
 
-		double[] originalDriftTimePoints = getOriginalDriftTimePoints(dx, blockT);
+		final double[] originalDriftTimePoints = getOriginalDriftTimePoints(dx, blockT);
 		lastdx = null;
 
-		double smoothing = updateSmoothingParameter(originalDriftTimePoints);
+		final double smoothing = updateSmoothingParameter(originalDriftTimePoints);
 
 		double change = calculateDriftUsingFrames(blocks, blockT, bounds, scale, dx, dy, originalDriftTimePoints,
 				smoothing, iterations);
@@ -1453,7 +1404,7 @@ public class DriftCalculator implements PlugIn
 	 */
 	private static double[] getOriginalDriftTimePoints(double[] dx, int[] timepoints)
 	{
-		double[] originalDriftTimePoints = new double[dx.length];
+		final double[] originalDriftTimePoints = new double[dx.length];
 		for (int i = 0; i < timepoints.length; i++)
 			originalDriftTimePoints[timepoints[i]] = 1;
 		return originalDriftTimePoints;
@@ -1491,30 +1442,26 @@ public class DriftCalculator implements PlugIn
 		// Built an image for each block of results.
 		final ImageProcessor[] images = new ImageProcessor[blocks.size()];
 
-		List<Future<?>> futures = new LinkedList<>();
+		final List<Future<?>> futures = new LinkedList<>();
 		progressCounter = 0;
 		totalCounter = images.length * 2;
 
 		for (int i = 0; i < images.length; i++)
-		{
 			futures.add(threadPool.submit(new ImageBuilder(blocks.get(i), images, i, bounds, scale, dx, dy)));
-		}
 		Utils.waitForCompletion(futures);
 
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			tracker.progress(i, blocks.size());
-			IJImagePeakResults blockImage = newImage(bounds, scale);
-			for (Localisation r : blocks.get(i))
-			{
+			final IJImagePeakResults blockImage = newImage(bounds, scale);
+			for (final Localisation r : blocks.get(i))
 				blockImage.add(r.t, (float) (r.x + dx[r.t]), (float) (r.y + dy[r.t]), r.s);
-			}
 			images[i] = getImage(blockImage);
 		}
 
 		// Build an image with all results.
-		FloatProcessor allIp = new FloatProcessor(images[0].getWidth(), images[0].getHeight());
-		for (ImageProcessor ip : images)
+		final FloatProcessor allIp = new FloatProcessor(images[0].getWidth(), images[0].getHeight());
+		for (final ImageProcessor ip : images)
 			allIp.copyBits(ip, 0, 0, Blitter.ADD);
 
 		return calculateDrift(blockT, scale, dx, dy, originalDriftTimePoints, smoothing, iterations, images, allIp,
@@ -1558,26 +1505,24 @@ public class DriftCalculator implements PlugIn
 		final Rectangle alignBounds = AlignImagesFFT.createHalfMaxBounds(reference.getWidth(), reference.getHeight(),
 				reference.getWidth(), reference.getHeight());
 
-		List<double[]> alignments = Collections.synchronizedList(new ArrayList<double[]>(images.length));
-		List<Future<?>> futures = new LinkedList<>();
+		final List<double[]> alignments = Collections.synchronizedList(new ArrayList<double[]>(images.length));
+		final List<Future<?>> futures = new LinkedList<>();
 
-		int imagesPerThread = getImagesPerThread(images);
+		final int imagesPerThread = getImagesPerThread(images);
 		for (int i = 0; i < images.length; i += imagesPerThread)
-		{
 			futures.add(threadPool.submit(
 					new ImageAligner(aligner, images, imageT, alignBounds, alignments, i, i + imagesPerThread)));
-		}
 		Utils.waitForCompletion(futures);
 		tracker.progress(1);
 
 		// Used to flag when an alignment has failed
 		originalDriftTimePoints = Arrays.copyOf(originalDriftTimePoints, originalDriftTimePoints.length);
-		double[] newDx = new double[dx.length];
-		double[] newDy = new double[dy.length];
+		final double[] newDx = new double[dx.length];
+		final double[] newDy = new double[dy.length];
 		int ok = 0;
-		for (double[] result : alignments)
+		for (final double[] result : alignments)
 		{
-			int t = (int) result[2];
+			final int t = (int) result[2];
 			if (Double.isNaN(result[0]))
 			{
 				// TODO: How to ignore bad alignments?
@@ -1632,8 +1577,8 @@ public class DriftCalculator implements PlugIn
 		{
 			if (originalDriftTimePoints[t] != 0)
 			{
-				double d1 = dx[t] - newDx[t];
-				double d2 = dy[t] - newDy[t];
+				final double d1 = dx[t] - newDx[t];
+				final double d2 = dy[t] - newDy[t];
 				change += Math.sqrt(d1 * d1 + d2 * d2);
 			}
 			// Update all points since interpolation has already been done
@@ -1659,7 +1604,7 @@ public class DriftCalculator implements PlugIn
 
 	private static IJImagePeakResults newImage(Rectangle bounds, float imageScale)
 	{
-		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, true,
+		final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, true,
 				false, "", bounds, 100, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
 		image.setDisplayImage(false);
 		image.begin();
@@ -1684,7 +1629,7 @@ public class DriftCalculator implements PlugIn
 	private double[][] calculateUsingImageStack(ImageStack stack, int[] limits)
 	{
 		// Update the limits using the stack size
-		int upperT = startFrame + frameSpacing * (stack.getSize() - 1);
+		final int upperT = startFrame + frameSpacing * (stack.getSize() - 1);
 		limits[1] = FastMath.max(limits[1], upperT);
 
 		// TODO - Truncate the stack if there are far too many frames for the localisation limits
@@ -1697,39 +1642,37 @@ public class DriftCalculator implements PlugIn
 		final ImageProcessor[] images = new ImageProcessor[stack.getSize()];
 		final FHT[] fhtImages = new FHT[stack.getSize()];
 
-		List<Future<?>> futures = new LinkedList<>();
+		final List<Future<?>> futures = new LinkedList<>();
 		progressCounter = 0;
 		totalCounter = images.length;
 
-		int imagesPerThread = getImagesPerThread(images);
+		final int imagesPerThread = getImagesPerThread(images);
 		final AlignImagesFFT aligner = new AlignImagesFFT();
-		FloatProcessor referenceIp = stack.getProcessor(1).toFloat(0, null);
+		final FloatProcessor referenceIp = stack.getProcessor(1).toFloat(0, null);
 		// We do not care about the window method because this processor will not
 		// actually be used for alignment, it is a reference for the FHT size
 		aligner.init(referenceIp, WindowMethod.NONE, false);
 		for (int i = 0; i < images.length; i += imagesPerThread)
-		{
 			futures.add(threadPool
 					.submit(new ImageFHTInitialiser(stack, images, aligner, fhtImages, i, i + imagesPerThread)));
-		}
 		Utils.waitForCompletion(futures);
 		tracker.progress(1);
 
 		if (tracker.isEnded())
 			return null;
 
-		double[] dx = new double[limits[1] + 1];
-		double[] dy = new double[dx.length];
+		final double[] dx = new double[limits[1] + 1];
+		final double[] dy = new double[dx.length];
 
-		double[] originalDriftTimePoints = new double[dx.length];
-		int[] blockT = new int[stack.getSize()];
+		final double[] originalDriftTimePoints = new double[dx.length];
+		final int[] blockT = new int[stack.getSize()];
 		for (int i = 0, t = startFrame; i < stack.getSize(); i++, t += frameSpacing)
 		{
 			originalDriftTimePoints[t] = 1;
 			blockT[i] = t;
 		}
 
-		double smoothing = updateSmoothingParameter(originalDriftTimePoints);
+		final double smoothing = updateSmoothingParameter(originalDriftTimePoints);
 
 		lastdx = null;
 		// For the first iteration calculate drift to the first image in the stack
@@ -1799,32 +1742,28 @@ public class DriftCalculator implements PlugIn
 			tracker.status("Constructing reference image");
 
 			// Built an image using the current drift
-			List<Future<?>> futures = new LinkedList<>();
+			final List<Future<?>> futures = new LinkedList<>();
 			totalCounter = images.length * 2;
 
 			final ImageProcessor[] blockIp = new ImageProcessor[images.length];
-			double[] threadDx = new double[images.length];
-			double[] threadDy = new double[images.length];
+			final double[] threadDx = new double[images.length];
+			final double[] threadDy = new double[images.length];
 			for (int i = 0; i < images.length; i++)
 			{
 				threadDx[i] = dx[blockT[i]];
 				threadDy[i] = dy[blockT[i]];
 			}
 
-			int imagesPerThread = getImagesPerThread(images);
+			final int imagesPerThread = getImagesPerThread(images);
 			for (int i = 0; i < images.length; i += imagesPerThread)
-			{
 				futures.add(threadPool
 						.submit(new ImageTranslator(images, blockIp, threadDx, threadDy, i, i + imagesPerThread)));
-			}
 			Utils.waitForCompletion(futures);
 
 			// Build an image with all results.
 			reference = new FloatProcessor(blockIp[0].getWidth(), blockIp[0].getHeight());
-			for (ImageProcessor ip : blockIp)
-			{
+			for (final ImageProcessor ip : blockIp)
 				reference.copyBits(ip, 0, 0, Blitter.ADD);
-			}
 		}
 
 		// Ensure the reference is windowed
@@ -1857,10 +1796,8 @@ public class DriftCalculator implements PlugIn
 		{
 			// Sort in time order
 			if (this.t == that.t)
-			{
 				// ... then signal
 				return Double.compare(that.s, this.s);
-			}
 			return (this.t < that.t) ? -1 : 1;
 		}
 	}

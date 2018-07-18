@@ -213,9 +213,7 @@ public class InterlacedImageSource extends ImageSource
 
 		// Check if this is the final frame in the current block
 		if (++counter >= size)
-		{
 			counter = -skip;
-		}
 		// Set the frame to the last one read from the source
 		setFrameNumber(imageSource.getStartFrameNumber(), imageSource.getEndFrameNumber());
 		//System.out.printf("Interlaced %d-%d\n", getStartFrameNumber(), getEndFrameNumber());
@@ -238,15 +236,11 @@ public class InterlacedImageSource extends ImageSource
 		//      |
 		// |----|Block|Skip|Block|Skip|Block|Skip
 		if (frame < start)
-		{
 			return null;
-		}
-		int frameInBlock = (frame - start) % (size + skip);
+		final int frameInBlock = (frame - start) % (size + skip);
 		if (frameInBlock >= size)
-		{
 			return null;
-		}
-		Object pixels = imageSource.getRaw(frame);
+		final Object pixels = imageSource.getRaw(frame);
 		// Set the frame to the last one read from the source
 		setFrameNumber(imageSource.getStartFrameNumber(), imageSource.getEndFrameNumber());
 		return pixels;

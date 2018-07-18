@@ -61,7 +61,7 @@ public class Tensor2D
 			double sumX = 0;
 			for (int x = 0; x < w; x++)
 			{
-				float f = data[j++];
+				final float f = data[j++];
 				sumX += f;
 				cx += f * x;
 			}
@@ -168,10 +168,10 @@ public class Tensor2D
 		// Sort
 		if (eigenValues[1] > eigenValues[0])
 		{
-			double tmp = eigenValues[1];
+			final double tmp = eigenValues[1];
 			eigenValues[1] = eigenValues[0];
 			eigenValues[0] = tmp;
-			double[] tmp2 = eigenVectors[1];
+			final double[] tmp2 = eigenVectors[1];
 			eigenVectors[1] = eigenVectors[0];
 			eigenVectors[0] = tmp2;
 		}
@@ -181,7 +181,7 @@ public class Tensor2D
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			double l = Math.sqrt(Maths.pow2(eigenVectors[i][0]) + Maths.pow2(eigenVectors[i][1]));
+			final double l = Math.sqrt(Maths.pow2(eigenVectors[i][0]) + Maths.pow2(eigenVectors[i][1]));
 			if (l > 0)
 			{
 				eigenVectors[i][0] /= l;

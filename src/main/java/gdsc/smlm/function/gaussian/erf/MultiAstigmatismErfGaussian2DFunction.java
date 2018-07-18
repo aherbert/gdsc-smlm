@@ -534,7 +534,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 					// Background are all 0
 
-					int k = a * ng + a;
+					final int k = a * ng + a;
 					// Signal,X
 					d2udadb[k + 1] = duda[a + 1] / tI;
 					// Signal,Y
@@ -544,7 +544,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 					a += 4;
 
-					int kk = k + ng;
+					final int kk = k + ng;
 					// X,Signal
 					d2udadb[kk] = d2udadb[k + 1];
 					// X,X
@@ -554,7 +554,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 					// X,Z
 					d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx] + du_dtx[xx] * du_dtsy_by_dtsy_dtz_tI[n];
 
-					int kkk = kk + ng;
+					final int kkk = kk + ng;
 					// Y,Signal
 					d2udadb[kkk] = d2udadb[k + 2];
 					// Y,X
@@ -564,7 +564,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 					// X,Z
 					d2udadb[kkk + 3] = du_dtsx[xx] * du_dty_by_dtsx_dtz_tI[n] + deltaEx[xx] * d2deltaEy_dtsydy[yy];
 
-					int kkkk = kkk + ng;
+					final int kkkk = kkk + ng;
 					// Z,Signal
 					d2udadb[kkkk] = d2udadb[k + 3];
 					// Z,X

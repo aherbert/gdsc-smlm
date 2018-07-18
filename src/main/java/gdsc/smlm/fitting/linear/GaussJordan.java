@@ -38,11 +38,8 @@ public class GaussJordan
 		float max = 0;
 
 		for (int i = 0; i < piv.length; i++)
-		{
 			if (piv[i] != 1)
-			{
 				for (int j = 0; j < piv.length; j++)
-				{
 					if (piv[j] == 0)
 					{
 						if (Math.abs(a[i][j]) >= max)
@@ -53,13 +50,8 @@ public class GaussJordan
 						}
 					}
 					else if (piv[j] > 1)
-					{
 						// This should not happen, i.e. a second pivot around a column
 						return false;
-					}
-				}
-			}
-		}
 
 		piv[max_col]++;
 
@@ -70,12 +62,12 @@ public class GaussJordan
 	{
 		for (int j = a[max_row].length; j-- > 0;)
 		{
-			float tmp = a[max_row][j];
+			final float tmp = a[max_row][j];
 			a[max_row][j] = a[max_col][j];
 			a[max_col][j] = tmp;
 		}
 
-		float tmp = b[max_row];
+		final float tmp = b[max_row];
 		b[max_row] = b[max_col];
 		b[max_col] = tmp;
 	}
@@ -85,7 +77,7 @@ public class GaussJordan
 		if (a[max_col][max_col] == 0)
 			return false;
 
-		float piv_inv = 1 / a[max_col][max_col];
+		final float piv_inv = 1 / a[max_col][max_col];
 
 		a[max_col][max_col] = 1;
 
@@ -94,10 +86,9 @@ public class GaussJordan
 		b[max_col] *= piv_inv;
 
 		for (int i = 0; i < a[max_col].length; i++)
-		{
 			if (i != max_col)
 			{
-				float x = a[i][max_col];
+				final float x = a[i][max_col];
 				a[i][max_col] = 0;
 
 				for (int j = 0; j < a[max_col].length; j++)
@@ -105,7 +96,6 @@ public class GaussJordan
 
 				b[i] -= x * b[max_col];
 			}
-		}
 
 		return true;
 	}
@@ -113,17 +103,13 @@ public class GaussJordan
 	private static void unscramble_vector(float[][] a, int[] row, int[] col)
 	{
 		for (int j = row.length; j-- > 0;)
-		{
 			if (row[j] != col[j])
-			{
 				for (int i = row.length; i-- > 0;)
 				{
-					float tmp = a[i][row[j]];
+					final float tmp = a[i][row[j]];
 					a[i][row[j]] = a[i][col[j]];
 					a[i][col[j]] = tmp;
 				}
-			}
-		}
 	}
 
 	/**
@@ -139,9 +125,9 @@ public class GaussJordan
 	 */
 	public boolean solve(float[][] a, float[] b)
 	{
-		int[] piv = new int[b.length];
-		int[] row = new int[b.length];
-		int[] col = new int[b.length];
+		final int[] piv = new int[b.length];
+		final int[] row = new int[b.length];
+		final int[] col = new int[b.length];
 		return solve(a, b, piv, row, col);
 	}
 
@@ -175,9 +161,7 @@ public class GaussJordan
 		for (int i = 0; i < piv.length; i++)
 		{
 			if (!find_pivot(a, piv))
-			{
 				return false;
-			}
 
 			if (max_row != max_col)
 				interchange_rows_vector(a, b);
@@ -186,9 +170,7 @@ public class GaussJordan
 			col[i] = max_col;
 
 			if (!pivot_vector(a, b))
-			{
 				return false;
-			}
 		}
 
 		unscramble_vector(a, row, col);
@@ -203,11 +185,8 @@ public class GaussJordan
 		double max = 0;
 
 		for (int i = 0; i < piv.length; i++)
-		{
 			if (piv[i] != 1)
-			{
 				for (int j = 0; j < piv.length; j++)
-				{
 					if (piv[j] == 0)
 					{
 						if (Math.abs(a[i][j]) >= max)
@@ -218,13 +197,8 @@ public class GaussJordan
 						}
 					}
 					else if (piv[j] > 1)
-					{
 						// This should not happen, i.e. a second pivot around a column
 						return false;
-					}
-				}
-			}
-		}
 
 		piv[max_col]++;
 
@@ -235,12 +209,12 @@ public class GaussJordan
 	{
 		for (int j = a[max_row].length; j-- > 0;)
 		{
-			double tmp = a[max_row][j];
+			final double tmp = a[max_row][j];
 			a[max_row][j] = a[max_col][j];
 			a[max_col][j] = tmp;
 		}
 
-		double tmp = b[max_row];
+		final double tmp = b[max_row];
 		b[max_row] = b[max_col];
 		b[max_col] = tmp;
 	}
@@ -250,7 +224,7 @@ public class GaussJordan
 		if (a[max_col][max_col] == 0)
 			return false;
 
-		double piv_inv = 1 / a[max_col][max_col];
+		final double piv_inv = 1 / a[max_col][max_col];
 
 		a[max_col][max_col] = 1;
 
@@ -259,10 +233,9 @@ public class GaussJordan
 		b[max_col] *= piv_inv;
 
 		for (int i = 0; i < a[max_col].length; i++)
-		{
 			if (i != max_col)
 			{
-				double x = a[i][max_col];
+				final double x = a[i][max_col];
 				a[i][max_col] = 0;
 
 				for (int j = 0; j < a[max_col].length; j++)
@@ -270,7 +243,6 @@ public class GaussJordan
 
 				b[i] -= x * b[max_col];
 			}
-		}
 
 		return true;
 	}
@@ -278,17 +250,13 @@ public class GaussJordan
 	private static void unscramble_vector(double[][] a, int[] row, int[] col)
 	{
 		for (int j = row.length; j-- > 0;)
-		{
 			if (row[j] != col[j])
-			{
 				for (int i = row.length; i-- > 0;)
 				{
-					double tmp = a[i][row[j]];
+					final double tmp = a[i][row[j]];
 					a[i][row[j]] = a[i][col[j]];
 					a[i][col[j]] = tmp;
 				}
-			}
-		}
 	}
 
 	/**
@@ -304,9 +272,9 @@ public class GaussJordan
 	 */
 	public boolean solve(double[][] a, double[] b)
 	{
-		int[] piv = new int[b.length];
-		int[] row = new int[b.length];
-		int[] col = new int[b.length];
+		final int[] piv = new int[b.length];
+		final int[] row = new int[b.length];
+		final int[] col = new int[b.length];
 		return solve(a, b, piv, row, col);
 	}
 
@@ -340,9 +308,7 @@ public class GaussJordan
 		for (int i = 0; i < piv.length; i++)
 		{
 			if (!find_pivot(a, piv))
-			{
 				return false;
-			}
 
 			if (max_row != max_col)
 				interchange_rows_vector(a, b);
@@ -351,9 +317,7 @@ public class GaussJordan
 			col[i] = max_col;
 
 			if (!pivot_vector(a, b))
-			{
 				return false;
-			}
 		}
 
 		unscramble_vector(a, row, col);

@@ -47,14 +47,14 @@ public class FRCTest
 	@Test
 	public void canComputeSine()
 	{
-		int steps = 1000;
-		double delta = 2 * Math.PI / steps;
+		final int steps = 1000;
+		final double delta = 2 * Math.PI / steps;
 		for (int i = 0; i <= steps; i++)
 		{
-			double a = i * delta;
-			double cosA = Math.cos(a);
-			double e = Math.sin(a);
-			double o = FRC.getSine(a, cosA);
+			final double a = i * delta;
+			final double cosA = Math.cos(a);
+			final double e = Math.sin(a);
+			final double o = FRC.getSine(a, cosA);
 			//System.out.printf("%f  %f ?= %f\n", a, e, o);
 			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(o, e, 1e-6, 1e-10));
 		}
@@ -64,45 +64,45 @@ public class FRCTest
 	public void canComputeMirrored()
 	{
 		// Sample lines through an image to create a structure.
-		int size = 1024;
-		double[][] data = new double[size * 2][];
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final int size = 1024;
+		final double[][] data = new double[size * 2][];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
 		{
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y2 + r.nextGaussian() * 5 };
 		}
 		// Create 2 images
-		Rectangle bounds = new Rectangle(0, 0, size, size);
+		final Rectangle bounds = new Rectangle(0, 0, size, size);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
-		int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
+		final int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
 		MathArrays.shuffle(indices, r);
-		for (int i : indices)
+		for (final int i : indices)
 		{
-			IJImagePeakResults image = i1;
+			final IJImagePeakResults image = i1;
 			i1 = i2;
 			i2 = image;
 			image.add((float) data[i][0], (float) data[i][1], 1);
 		}
 		i1.end();
 		i2.end();
-		ImageProcessor ip1 = i1.getImagePlus().getProcessor();
-		ImageProcessor ip2 = i2.getImagePlus().getProcessor();
+		final ImageProcessor ip1 = i1.getImagePlus().getProcessor();
+		final ImageProcessor ip2 = i2.getImagePlus().getProcessor();
 		// Test
-		FRC frc = new FRC();
+		final FRC frc = new FRC();
 		FloatProcessor[] fft1, fft2;
 		fft1 = frc.getComplexFFT(ip1);
 		fft2 = frc.getComplexFFT(ip2);
 
-		float[] dataA1 = (float[]) fft1[0].getPixels();
-		float[] dataB1 = (float[]) fft1[1].getPixels();
-		float[] dataA2 = (float[]) fft2[0].getPixels();
-		float[] dataB2 = (float[]) fft2[1].getPixels();
+		final float[] dataA1 = (float[]) fft1[0].getPixels();
+		final float[] dataB1 = (float[]) fft1[1].getPixels();
+		final float[] dataA2 = (float[]) fft2[0].getPixels();
+		final float[] dataB2 = (float[]) fft2[1].getPixels();
 
-		float[] numeratorE = new float[dataA1.length];
-		float[] absFFT1E = new float[dataA1.length];
-		float[] absFFT2E = new float[dataA1.length];
+		final float[] numeratorE = new float[dataA1.length];
+		final float[] absFFT1E = new float[dataA1.length];
+		final float[] absFFT2E = new float[dataA1.length];
 
 		FRC.compute(numeratorE, absFFT1E, absFFT2E, dataA1, dataB1, dataA2, dataB2);
 
@@ -110,9 +110,9 @@ public class FRCTest
 		Assert.assertTrue("absFFT1E", FRC.checkSymmetry(absFFT1E, size));
 		Assert.assertTrue("absFFT2E", FRC.checkSymmetry(absFFT2E, size));
 
-		float[] numeratorA = new float[dataA1.length];
-		float[] absFFT1A = new float[dataA1.length];
-		float[] absFFT2A = new float[dataA1.length];
+		final float[] numeratorA = new float[dataA1.length];
+		final float[] absFFT1A = new float[dataA1.length];
+		final float[] absFFT2A = new float[dataA1.length];
 		FRC.computeMirrored(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
 
 		//for (int y=0, i=0; y<size; y++)
@@ -137,9 +137,9 @@ public class FRCTest
 			}
 	}
 
-	private IJImagePeakResults createImage(Rectangle bounds)
+	private static IJImagePeakResults createImage(Rectangle bounds)
 	{
-		IJImagePeakResults i1 = new IJImagePeakResults("1", bounds, 1);
+		final IJImagePeakResults i1 = new IJImagePeakResults("1", bounds, 1);
 		i1.setDisplayImage(false);
 		i1.begin();
 		return i1;
@@ -170,8 +170,8 @@ public class FRCTest
 	{
 		TestSettings.assumeHighComplexity();
 
-		int steps = 100000;
-		double delta = 2 * Math.PI / steps;
+		final int steps = 100000;
+		final double delta = 2 * Math.PI / steps;
 		final double[] a = new double[steps + 1];
 		final double[] cosA = new double[steps + 1];
 		for (int i = 0; i <= steps; i++)
@@ -180,7 +180,7 @@ public class FRCTest
 			cosA[i] = Math.cos(a[i]);
 		}
 
-		TimingService ts = new TimingService(100);
+		final TimingService ts = new TimingService(100);
 		ts.execute(new MyTimingTask("sin")
 		{
 			@Override
@@ -215,7 +215,7 @@ public class FRCTest
 			}
 		});
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
@@ -231,32 +231,32 @@ public class FRCTest
 
 		// Sample lines through an image to create a structure.
 		final int N = 2048;
-		double[][] data = new double[N * 2][];
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final double[][] data = new double[N * 2][];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
 		{
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y2 + r.nextGaussian() * 5 };
 		}
 		// Create 2 images
-		Rectangle bounds = new Rectangle(0, 0, N, N);
+		final Rectangle bounds = new Rectangle(0, 0, N, N);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
-		int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
+		final int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
 		MathArrays.shuffle(indices, r);
-		for (int i : indices)
+		for (final int i : indices)
 		{
-			IJImagePeakResults image = i1;
+			final IJImagePeakResults image = i1;
 			i1 = i2;
 			i2 = image;
 			image.add((float) data[i][0], (float) data[i][1], 1);
 		}
 		i1.end();
 		i2.end();
-		ImageProcessor ip1 = i1.getImagePlus().getProcessor();
-		ImageProcessor ip2 = i2.getImagePlus().getProcessor();
+		final ImageProcessor ip1 = i1.getImagePlus().getProcessor();
+		final ImageProcessor ip2 = i2.getImagePlus().getProcessor();
 		// Test
-		FRC frc = new FRC();
+		final FRC frc = new FRC();
 		FloatProcessor[] fft1, fft2;
 		fft1 = frc.getComplexFFT(ip1);
 		fft2 = frc.getComplexFFT(ip2);
@@ -270,7 +270,7 @@ public class FRCTest
 		final float[] absFFT1 = new float[dataA1.length];
 		final float[] absFFT2 = new float[dataA1.length];
 
-		TimingService ts = new TimingService(10);
+		final TimingService ts = new TimingService(10);
 		ts.execute(new MyTimingTask("compute")
 		{
 			@Override
@@ -299,7 +299,7 @@ public class FRCTest
 			}
 		});
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);

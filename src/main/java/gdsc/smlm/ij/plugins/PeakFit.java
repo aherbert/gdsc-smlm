@@ -294,7 +294,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		maximaIdentification = (arg != null && arg.contains("spot"));
 		fitMaxima = (arg != null && arg.contains("maxima"));
 		simpleFit = (arg != null && arg.contains("simple"));
-		boolean runSeries = (arg != null && arg.contains("series"));
+		final boolean runSeries = (arg != null && arg.contains("series"));
 
 		ImageSource imageSource = null;
 		if (fitMaxima)
@@ -305,7 +305,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (!showMaximaDialog())
 				return DONE;
 
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
+			final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -352,7 +352,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				return DONE;
 			}
 
-			SeriesImageSource seriesImageSource = new SeriesImageSource(getName(series.getImageList()), series);
+			final SeriesImageSource seriesImageSource = new SeriesImageSource(getName(series.getImageList()), series);
 			seriesImageSource.setTrackProgress(new IJTrackProgress());
 			//if (extraOptions)
 			//{
@@ -377,32 +377,28 @@ public class PeakFit implements PlugInFilter, ItemListener
 				IJImageSource tmpImageSource = null;
 
 				// Check the image to see if it has an image source XML structure in the info property
-				Object o = imp.getProperty("Info");
-				Pattern pattern = Pattern.compile("Source: (<.*IJImageSource>.*<.*IJImageSource>)", Pattern.DOTALL);
-				Matcher match = pattern.matcher((o == null) ? "" : o.toString());
+				final Object o = imp.getProperty("Info");
+				final Pattern pattern = Pattern.compile("Source: (<.*IJImageSource>.*<.*IJImageSource>)", Pattern.DOTALL);
+				final Matcher match = pattern.matcher((o == null) ? "" : o.toString());
 				if (match.find())
 				{
-					ImageSource source = ImageSource.fromXML(match.group(1));
+					final ImageSource source = ImageSource.fromXML(match.group(1));
 					if (source instanceof IJImageSource)
 					{
 						tmpImageSource = (IJImageSource) source;
 						if (!tmpImageSource.open())
-						{
 							tmpImageSource = null;
-						}
 						else
-						{
 							imp = WindowManager.getImage(tmpImageSource.getName());
-						}
 					}
 				}
 
 				if (tmpImageSource == null)
 				{
 					// Look for a parent using the title
-					String parentTitle = imp.getTitle().substring(0,
+					final String parentTitle = imp.getTitle().substring(0,
 							imp.getTitle().length() - IJImagePeakResults.IMAGE_SUFFIX.length() - 1);
-					ImagePlus parentImp = WindowManager.getImage(parentTitle);
+					final ImagePlus parentImp = WindowManager.getImage(parentTitle);
 					if (parentImp != null)
 					{
 						tmpImageSource = new IJImageSource(parentImp);
@@ -419,7 +415,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				else
 					message += " \n \nDo you want to continue?";
 
-				YesNoCancelDialog d = new YesNoCancelDialog(null, TITLE, message);
+				final YesNoCancelDialog d = new YesNoCancelDialog(null, TITLE, message);
 				if (tmpImageSource == null)
 				{
 					if (!d.yesPressed())
@@ -435,19 +431,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 
 			if (imageSource == null)
-			{
 				try
 				{
 					imageSource = new IJImageSource(imp);
 				}
-				catch (IllegalArgumentException e)
+				catch (final IllegalArgumentException e)
 				{
 					// This can happen if the image has an origin not in integer pixels
 					// e.g. the plugin is run on a plot
 					IJ.error(TITLE, "Error using image: " + imp.getTitle() + "\n \n" + e.getMessage());
 					return DONE;
 				}
-			}
 		}
 
 		time = -1;
@@ -458,15 +452,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return DONE;
 		}
 
-		int flags = showDialog(imp);
+		final int flags = showDialog(imp);
 		if ((flags & DONE) == 0)
-		{
 			// Repeat so that we pass in the selected option for ignoring the bounds.
 			// This should not be necessary since it is set within the readDialog method.
 			//if (ignoreBoundsForNoise)
 			//	initialiseImage(imageSource, bounds, ignoreBoundsForNoise);
 			initialiseFitting();
-		}
 		return flags;
 	}
 
@@ -481,11 +473,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		String name = imageList[0];
 		// Remove directory
-		int index = name.lastIndexOf(File.separatorChar);
+		final int index = name.lastIndexOf(File.separatorChar);
 		if (index > -1)
-		{
 			name = name.substring(index + 1);
-		}
 		//// Remove suffix
 		//index = name.lastIndexOf('.');
 		//if (index > 0)
@@ -499,11 +489,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		if (imp == null)
 			return null;
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (roi != null && roi.isArea())
-		{
 			return roi.getBounds();
-		}
 		return null;
 	}
 
@@ -521,26 +509,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 			public void approveSelection()
 			{
 				if (getSelectedFile().isFile())
-				{
 					return;
-				}
 				super.approveSelection();
 			}
 		};
 		if (System.getProperty("os.name").startsWith("Mac OS X"))
-		{
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		}
 		else
-		{
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		}
 		chooser.setDialogTitle(title);
-		int returnVal = chooser.showOpenDialog(IJ.getInstance());
+		final int returnVal = chooser.showOpenDialog(IJ.getInstance());
 		if (returnVal == JFileChooser.APPROVE_OPTION)
-		{
 			return chooser.getSelectedFile().getPath();
-		}
 		return null;
 	}
 
@@ -606,7 +586,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			imageSource.checkBounds(bounds);
 		}
-		catch (RuntimeException e)
+		catch (final RuntimeException e)
 		{
 			return false;
 		}
@@ -693,17 +673,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 		results.begin();
 
 		if (simpleFit && showImage)
-		{
-			for (PeakResults r : results.toArray())
-			{
+			for (final PeakResults r : results.toArray())
 				if (r instanceof IJImagePeakResults)
 				{
-					ImagePlus i = ((IJImagePeakResults) r).getImagePlus();
+					final ImagePlus i = ((IJImagePeakResults) r).getImagePlus();
 					Utils.log("Super-resolution image title = " + i.getTitle());
 					WindowManager.toFront(i.getWindow());
 				}
-			}
-		}
 
 		return true;
 	}
@@ -722,7 +698,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static String getSolverName(FitConfiguration fitConfig)
 	{
-		FitSolver solver = fitConfig.getFitSolver();
+		final FitSolver solver = fitConfig.getFitSolver();
 		String name = FitProtosHelper.getName(solver);
 		if (solver == FitSolver.MLE)
 			name += " " + FitProtosHelper.getName(fitConfig.getSearchMethod());
@@ -745,7 +721,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			// Check if we are sorting
 			IJ.showStatus("Finalising results ...");
-			for (PeakResults r : results.toArray())
+			for (final PeakResults r : results.toArray())
 				if (r instanceof MemoryPeakResults)
 				{
 					if (((MemoryPeakResults) r).isSortAfterEnd())
@@ -755,11 +731,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			results.end();
 
-			String textTime = Utils.timeToString(time / 1000000.0);
-			String textRunTime = Utils.timeToString(runTime / 1000000.0);
+			final String textTime = Utils.timeToString(time / 1000000.0);
+			final String textRunTime = Utils.timeToString(runTime / 1000000.0);
 
-			int size = getSize();
-			String message = String.format("%s. Fitting Time = %s. Run time = %s",
+			final int size = getSize();
+			final String message = String.format("%s. Fitting Time = %s. Run time = %s",
 					TextUtils.pleural(size, "localisation"), textTime, textRunTime);
 			if (resultsSettings.getLogProgress())
 				IJ.log("-=-=-=-");
@@ -767,21 +743,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 			IJ.showStatus(message);
 		}
 		else
-		{
 			IJ.showStatus("");
-		}
 	}
 
 	private static boolean showMaximaDialog()
 	{
-		int size = MemoryPeakResults.countMemorySize();
+		final int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return false;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select identified maxima for fitting");
 
@@ -828,7 +802,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private static void initPSFType()
 	{
 		//@formatter:off
-		EnumSet<PSFType> d = EnumSet.of(
+		final EnumSet<PSFType> d = EnumSet.of(
 				PSFType.ONE_AXIS_GAUSSIAN_2D,
 				PSFType.TWO_AXIS_GAUSSIAN_2D,
 				PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D,
@@ -837,9 +811,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		_PSFTypeValues = d.toArray(new PSFType[d.size()]);
 		_PSFTypeNames = new String[_PSFTypeValues.length];
 		for (int i = 0; i < _PSFTypeValues.length; i++)
-		{
 			_PSFTypeNames[i] = PSFProtosHelper.getName(_PSFTypeValues[i]);
-		}
 	}
 
 	private int showDialog(ImagePlus imp)
@@ -853,11 +825,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig = config.getFitConfiguration();
 
 		if (simpleFit)
-		{
 			return showSimpleDialog();
-		}
 
-		boolean isCrop = (bounds != null && imp != null &&
+		final boolean isCrop = (bounds != null && imp != null &&
 				(bounds.width < imp.getWidth() || bounds.height < imp.getHeight()));
 
 		if (!extraOptions)
@@ -874,10 +844,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage((maximaIdentification) ? "Identify candidate maxima" : "Fit 2D Gaussian to identified maxima");
 
-		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		final String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		CalibrationReader calibration = fitConfig.getCalibrationReader();
+		final CalibrationReader calibration = fitConfig.getCalibrationReader();
 		addCameraOptions(gd, 0, fitConfig);
 		gd.addNumericField("Calibration", calibration.getNmPerPixel(), 2, 6, "nm/px");
 		gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
@@ -885,7 +855,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (isCrop)
 			gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
 
-		FitConfigurationProvider fitConfigurationProvider = new FitConfigurationProvider()
+		final FitConfigurationProvider fitConfigurationProvider = new FitConfigurationProvider()
 		{
 			@Override
 			public FitConfiguration getFitConfiguration()
@@ -894,7 +864,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 		};
 
-		FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
+		final FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
 		{
 			@Override
 			public FitEngineConfiguration getFitEngineConfiguration()
@@ -972,17 +942,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> texts = gd.getStringFields();
-			Vector<TextField> numerics = gd.getNumericFields();
-			Vector<Checkbox> checkboxes = gd.getCheckboxes();
-			Vector<Choice> choices = gd.getChoices();
+			final Vector<TextField> texts = gd.getStringFields();
+			final Vector<TextField> numerics = gd.getNumericFields();
+			final Vector<Checkbox> checkboxes = gd.getCheckboxes();
+			final Vector<Choice> choices = gd.getChoices();
 
 			int n = 0;
 			int t = 0;
 			int b = 0;
 			int ch = 0;
 
-			Choice textTemplate = choices.get(ch++);
+			final Choice textTemplate = choices.get(ch++);
 			textTemplate.addItemListener(this);
 
 			textCameraType = choices.get(ch++);
@@ -1037,9 +1007,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			textResultsTable = checkboxes.get(b++);
 			textResultsImage = choices.get(ch++);
 			if (extraOptions)
-			{
 				b++; // Skip over show processed frames option
-			}
 			textResultsDirectory = texts.get(t++);
 
 			textFileFormat = choices.get(ch++);
@@ -1054,7 +1022,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (imp != null)
 		{
 			// Store whether the user selected to process all the images.
-			int flags = IJ.setupDialog(imp, plugin_flags);
+			final int flags = IJ.setupDialog(imp, plugin_flags);
 
 			// Check if cancelled
 			if ((flags & DONE) != 0)
@@ -1109,20 +1077,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Allow interlaced data by wrapping the image source
 		if (interlacedData)
-		{
 			setSource(new InterlacedImageSource(this.source, dataStart, dataBlock, dataSkip));
-		}
 
 		// Allow frame aggregation by wrapping the image source
 		if (integrateFrames > 1)
-		{
 			setSource(new AggregatedImageSource(this.source, integrateFrames));
-		}
 
 		// Ask if the user wants to log progress on multiple frame images
 		if (resultsSettings.getLogProgress() && source.getFrames() > 1)
 		{
-			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 			egd.addMessage("Warning: Log progress on multiple-frame image will be slow");
 			egd.addCheckbox("Log_progress", true);
 			egd.showDialog();
@@ -1266,7 +1230,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static void addCameraOptions(final ExtendedGenericDialog gd, final int options,
 			final CalibrationProvider calibrationProvider)
 	{
-		CalibrationReader calibration = new CalibrationReader(calibrationProvider.getCalibration());
+		final CalibrationReader calibration = new CalibrationReader(calibrationProvider.getCalibration());
 
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Integer>()
@@ -1274,14 +1238,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 					@Override
 					public boolean collectOptions(Integer field)
 					{
-						CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
-						CameraType t = SettingsManager.getCameraTypeValues()[field];
+						final CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
+						final CameraType t = SettingsManager.getCameraTypeValues()[field];
 						if (calibration.getCameraType() != t)
 						{
 							calibration.setCameraType(t);
 							calibrationProvider.saveCalibration(calibration.getCalibration());
 						}
-						boolean result = collectOptions(false);
+						final boolean result = collectOptions(false);
 						return result;
 					}
 
@@ -1293,8 +1257,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 					private boolean collectOptions(boolean silent)
 					{
-						CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
-						ExtendedGenericDialog egd = new ExtendedGenericDialog("Camera type options", null);
+						final CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog("Camera type options", null);
 						if (calibration.isCCDCamera())
 						{
 							egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
@@ -1308,7 +1272,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						}
 						else if (calibration.isSCMOS())
 						{
-							String[] models = CameraModelManager.listCameraModels(true);
+							final String[] models = CameraModelManager.listCameraModels(true);
 							egd.addChoice("Camera_model_name", models, calibration.getCameraModelName());
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 4, 6,
@@ -1324,7 +1288,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
-						Calibration old = calibration.getCalibration();
+						final Calibration old = calibration.getCalibration();
 						if (calibration.isCCDCamera())
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
@@ -1345,8 +1309,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
 						}
-						Calibration current = calibration.getCalibration();
-						boolean changed = !old.equals(current);
+						final Calibration current = calibration.getCalibration();
+						final boolean changed = !old.equals(current);
 						if (changed)
 							calibrationProvider.saveCalibration(current);
 						return changed;
@@ -1462,16 +1426,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static void addPSFOptions(final ExtendedGenericDialog gd,
 			final FitConfigurationProvider fitConfigurationProvider)
 	{
-		FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+		final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
 				new OptionListener<Integer>()
 				{
 					@Override
 					public boolean collectOptions(Integer field)
 					{
-						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+						final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field]);
-						boolean result = collectOptions(false);
+						final boolean result = collectOptions(false);
 						return result;
 					}
 
@@ -1483,9 +1447,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 					private boolean collectOptions(boolean silent)
 					{
-						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-						PSFType psfType = fitConfig.getPSFType();
-						ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
+						final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+						final PSFType psfType = fitConfig.getPSFType();
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
 						PSF oldPsf = null;
 						if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D)
 						{
@@ -1503,7 +1467,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 							oldPsf = fitConfig.getPSF();
 							for (int i = 0; i < oldPsf.getParametersCount(); i++)
 							{
-								PSFParameter p = oldPsf.getParameters(i);
+								final PSFParameter p = oldPsf.getParameters(i);
 								egd.addNumericField(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
 										p.getValue(), 3);
 							}
@@ -1522,16 +1486,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 							return true;
 						}
 						@SuppressWarnings("null")
+						final
 						PSF.Builder b = oldPsf.toBuilder();
-						int n = b.getParametersCount();
+						final int n = b.getParametersCount();
 						for (int i = 0; i < n; i++)
 							b.getParametersBuilder(i).setValue(egd.getNextNumber());
-						PSF newPsf = b.build();
+						final PSF newPsf = b.build();
 						fitConfig.setPSF(newPsf);
 						boolean changed = !oldPsf.equals(newPsf);
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 						{
-							boolean newFixed = egd.getNextBoolean();
+							final boolean newFixed = egd.getNextBoolean();
 							changed = changed || (newFixed != fitConfig.isFixedPSF());
 							fitConfig.setFixedPSF(newFixed);
 						}
@@ -1679,14 +1644,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			private boolean collectOptions(boolean silent)
 			{
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(rp.name + " Options", null);
-				boolean oldValue = rp.isAbsolute();
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog(rp.name + " Options", null);
+				final boolean oldValue = rp.isAbsolute();
 				egd.addCheckbox(rp.getDialogName() + "_absolute", oldValue);
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
-				boolean newValue = egd.getNextBoolean();
+				final boolean newValue = egd.getNextBoolean();
 				rp.setAbsolute(newValue);
 				return oldValue != newValue;
 			}
@@ -1694,8 +1659,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Add a label after the button.
 		// The button is added in a panel with a GridBagLayout.
-		Panel p = gd.getLastPanel();
-		GridBagConstraints pc = new GridBagConstraints();
+		final Panel p = gd.getLastPanel();
+		final GridBagConstraints pc = new GridBagConstraints();
 		pc.gridy = 0;
 		pc.gridx = 3;
 		pc.insets = new Insets(5, 5, 0, 0);
@@ -1710,9 +1675,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			public void optionCollected(OptionCollectedEvent e)
 			{
 				if (label.equals(e.getLabel()))
-				{
 					updateFlag(flagLabel, rp.isAbsolute());
-				}
 			}
 		});
 	}
@@ -1721,13 +1684,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		// Note: Add spaces so the label has extra width for font width differences
 		if (absolute)
-		{
 			label.setText("Absolute   ");
-		}
 		else
-		{
 			label.setText("Relative   ");
-		}
 	}
 
 	/**
@@ -1747,7 +1706,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
 	{
 		final int n = 0;
-		FitEngineConfiguration config = fitEngineConfigurationProvider.getFitEngineConfiguration();
+		final FitEngineConfiguration config = fitEngineConfigurationProvider.getFitEngineConfiguration();
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
 				config.getDataFilterType().ordinal());
 		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
@@ -1758,9 +1717,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 					@Override
 					void setAbsolute(boolean absolute)
 					{
-						FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
-						DataFilterMethod m = c.getDataFilterMethod(n);
-						double smooth = c.getDataFilterParameter(n).getValue();
+						final FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+						final DataFilterMethod m = c.getDataFilterMethod(n);
+						final double smooth = c.getDataFilterParameter(n).getValue();
 						c.setDataFilter(m, smooth, absolute, n);
 					}
 
@@ -1937,9 +1896,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 					@Override
 					public boolean collectOptions(Double field)
 					{
-						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+						final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						fitConfig.setPrecisionThreshold(field);
-						boolean result = collectOptions(false);
+						final boolean result = collectOptions(false);
 						return result;
 					}
 
@@ -1951,17 +1910,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 					private boolean collectOptions(boolean silent)
 					{
-						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-						ExtendedGenericDialog egd = new ExtendedGenericDialog("Precision Options", null);
-						int oldIndex = fitConfig.getPrecisionMethod().ordinal();
+						final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog("Precision Options", null);
+						final int oldIndex = fitConfig.getPrecisionMethod().ordinal();
 						egd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), oldIndex);
 						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
-						int newIndex = egd.getNextChoiceIndex();
+						final int newIndex = egd.getNextChoiceIndex();
 						fitConfig.setPrecisionMethod(newIndex);
-						boolean changed = oldIndex != newIndex;
+						final boolean changed = oldIndex != newIndex;
 						return changed;
 					}
 				});
@@ -1982,16 +1941,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// TODO - Support sCMOS camera. This may be 'too difficult' as the
 		// user will need to have created a per-pixel calibration image
 
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
-		boolean requireCalibration = requireCalibration(calibration);
+		final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		final boolean requireCalibration = requireCalibration(calibration);
 		if (requireCalibration)
-		{
 			if (!showCalibrationWizard(calibration, true))
 				return DONE;
-		}
 
 		// Present dialog with simple output options: Image, Table
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Fit single-molecule localisations");
 
@@ -2011,10 +1968,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		showImage = gd.getNextBoolean();
 
 		if (!useCurrentCalibration)
-		{
 			if (!showCalibrationWizard(calibration, false))
 				return DONE;
-		}
 
 		// Restore fitting to default settings but maintain the calibrated width
 		final double sd = fitConfig.getInitialXSD();
@@ -2029,12 +1984,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(true);
 		if (showTable)
 		{
-			ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
+			final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
 			tableSettings.setShowTable(true);
 		}
 		if (showImage)
 		{
-			ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
+			final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
 			imageSettings.setImageType(ResultsImageType.DRAW_INTENSITY);
 			imageSettings.setScale(Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height))));
 			imageSettings.setWeighted(true);
@@ -2101,7 +2056,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		if (showIntroduction)
 		{
-			ExtendedGenericDialog gd = newWizardDialog("No configuration file could be loaded.",
+			final ExtendedGenericDialog gd = newWizardDialog("No configuration file could be loaded.",
 					"Please follow the configuration wizard to calibrate.");
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -2128,7 +2083,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSD());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -2139,18 +2094,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static ExtendedGenericDialog newWizardDialog(String... messages)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		final String header = "-=-";
 		gd.addMessage(header + " " + TITLE + " Configuration Wizard " + header);
-		for (String message : messages)
+		for (final String message : messages)
 			gd.addMessage(TextUtils.wrap(message, 80));
 		return gd;
 	}
 
 	private static boolean getCameraType(CalibrationWriter calibration)
 	{
-		ExtendedGenericDialog gd = newWizardDialog("Enter the type of camera.");
+		final ExtendedGenericDialog gd = newWizardDialog("Enter the type of camera.");
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(calibration.getCameraType()));
 		gd.showDialog();
@@ -2169,7 +2124,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static boolean getPixelPitch(CalibrationWriter calibration)
 	{
-		ExtendedGenericDialog gd = newWizardDialog(
+		final ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
 				"E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of 6450/60 = 107.5nm.");
 		// TODO - Add a pop-up calculator...
@@ -2183,7 +2138,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static boolean getGain(CalibrationWriter calibration)
 	{
-		ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
+		final ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
 				"This is usually supplied with your camera certificate. The bias is a fixed offset added to the camera counts. The gain indicates how many Analogue-to-Digital-Units (Count) are recorded at the pixel for each photon registered on the sensor.",
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
@@ -2200,7 +2155,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static boolean getExposureTime(CalibrationWriter calibration)
 	{
-		ExtendedGenericDialog gd = newWizardDialog(
+		final ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
 				"This is the length of time for each frame in the image.");
 		gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
@@ -2213,7 +2168,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private boolean getPeakWidth(final CalibrationWriter calibration)
 	{
-		ExtendedGenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
+		final ExtendedGenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
 				"A point source of light will not be focussed perfectly by the microscope but will appear as a spread out peak. This Point Spread Function (PSF) can be modelled using a 2D Gaussian curve.",
 				"An optimised optical system (lens and camera sensor) should have a peak standard deviation of approximately 1 pixel when in focus. This allows the fitting routine to have enough data to identify the centre of the peak without spreading the light over too many pixels (which increases noise).",
 				"The peak width can be estimated using the wavelength of light emitted by the single molecules and the parameters of the microscope. Use a PSF calculator by clicking the checkbox below:");
@@ -2229,11 +2184,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 				public void actionPerformed(ActionEvent e)
 				{
 					// Run the PSF Calculator
-					PSFCalculator calculator = new PSFCalculator();
+					final PSFCalculator calculator = new PSFCalculator();
 					calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
 					calculatorSettings.setMagnification(1);
 					calculatorSettings.setBeamExpander(1);
-					double sd = calculator.calculate(calculatorSettings.build(), true);
+					final double sd = calculator.calculate(calculatorSettings.build(), true);
 					if (sd > 0)
 						textInitialPeakStdDev0.setText(Double.toString(sd));
 				}
@@ -2252,41 +2207,32 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (e.getSource() instanceof Choice)
 		{
 			// Update the settings from the template
-			Choice choice = (Choice) e.getSource();
-			String templateName = choice.getSelectedItem();
+			final Choice choice = (Choice) e.getSource();
+			final String templateName = choice.getSelectedItem();
 			//System.out.println("Update to " + templateName);
 
 			// Get the configuration template
-			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
+			final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
 
 			if (template != null)
 			{
 				IJ.log("Applying template: " + templateName);
 
-				for (String note : template.getNotesList())
+				for (final String note : template.getNotesList())
 					IJ.log(note);
 
-				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+				final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
 				if (template.hasCalibration())
-				{
 					refreshSettings(template.getCalibration());
-				}
 				if (template.hasPsf())
-				{
 					refreshSettings(template.getPsf(), custom);
-				}
 				if (template.hasFitEngineSettings())
-				{
 					refreshSettings(template.getFitEngineSettings(), custom);
-				}
 				if (template.hasResultsSettings())
-				{
 					refreshSettings(template.getResultsSettings());
-				}
 			}
 		}
 		else if (e.getSource() instanceof Checkbox)
-		{
 			if (e.getSource() == textSmartFilter)
 			{
 				// Prevent both filters being enabled
@@ -2294,10 +2240,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				updateFilterInput();
 			}
 			else if (e.getSource() == textDisableSimpleFilter)
-			{
 				updateFilterInput();
-			}
-		}
 	}
 
 	private void updateFilterInput()
@@ -2342,7 +2285,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Ignore the template
 		gd.getNextChoice();
 
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
@@ -2431,9 +2374,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
 				if (fitConfig.getPSF().getParametersCount() > 1)
-				{
 					Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
-				}
 			}
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
@@ -2462,35 +2403,29 @@ public class PeakFit implements PlugInFilter, ItemListener
 					if (fitConfig.getPrecisionThreshold() > 0)
 					{
 						if (fitConfig.getPrecisionMethod() == PrecisionMethod.PRECISION_METHOD_NA)
-						{
 							throw new IllegalArgumentException("Precision filter requires a precision method");
-						}
 						if (fitConfig.isPrecisionUsingBackground() && calibration.isCCDCamera() &&
 								(calibration.getBias() == 0 || !calibration.hasCountPerPhoton()))
-						{
 							throw new IllegalArgumentException(
 									"Precision using the local background requires the camera bias");
-						}
 					}
 				}
 			}
 			final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
 			if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION ||
 					imageSettings.getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION)
-			{
 				Parameters.isAboveZero("Image precision", imageSettings.getAveragePrecision());
-			}
 			Parameters.isAboveZero("Image scale", imageSettings.getScale());
 			if (extraOptions)
 				Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
 
-		int flags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
+		final int flags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
 
 		// If precision filtering then we need the camera bias
 		if (!maximaIdentification)
@@ -2507,10 +2442,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
-		{
 			if (!configureFitSolver(config, source.getBounds(), bounds, flags))
 				return false;
-		}
 
 		// Extra parameters are needed for interlaced data
 		if (interlacedData)
@@ -2545,12 +2478,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 			}
 			else
-			{
 				interlacedData = false;
-			}
 		}
 
-		boolean result = saveFitEngineSettings();
+		final boolean result = saveFitEngineSettings();
 		if (!result)
 			IJ.error(TITLE, "Failed to save settings");
 
@@ -2584,12 +2515,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static boolean configurePSFModel(FitEngineConfiguration config, int flags)
 	{
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
 			return true;
 
 		// Get the astigmatism z-model
-		AstigmatismModel model = AstigmatismModelManager.getModel(fitConfig.getPSFModelName());
+		final AstigmatismModel model = AstigmatismModelManager.getModel(fitConfig.getPSFModelName());
 		if (model == null)
 		{
 			IJ.error(TITLE, "Failed to load the model: " + fitConfig.getPSFModelName());
@@ -2600,9 +2531,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig.setAstigmatismModel(model);
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
-		{
 			SettingsManager.writeSettings(config, 0);
-		}
 
 		return true;
 	}
@@ -2645,17 +2574,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static boolean configureZFilter(FitEngineConfiguration config, int flags)
 	{
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		if (fitConfig.isDisableSimpleFilter() || !fitConfig.is3D())
 			return true;
 
 		// Create a converter to map the model units in pixels to nm for the dialog.
 		// Note the output units of pixels may not yet be set in the calibration so we assume it is pixels.
 		//TypeConverter<DistanceUnit> c = fitConfig.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
-		TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, DistanceUnit.NM,
+		final TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, DistanceUnit.NM,
 				fitConfig.getCalibrationReader().getNmPerPixel());
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("3D filter");
 		gd.addNumericField("Min_z", c.convert(fitConfig.getMinZ()), 0, 6, "nm");
@@ -2665,8 +2594,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (gd.wasCanceled())
 			return false;
 
-		double minZ = gd.getNextNumber();
-		double maxZ = gd.getNextNumber();
+		final double minZ = gd.getNextNumber();
+		final double maxZ = gd.getNextNumber();
 
 		if (gd.invalidNumber() || minZ > maxZ)
 		{
@@ -2679,9 +2608,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig.setMaxZ(c.convertBack(maxZ));
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
-		{
 			SettingsManager.writeSettings(config, 0);
-		}
 
 		return true;
 	}
@@ -2704,11 +2631,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static boolean configureSmartFilter(FitEngineConfiguration config, int flags)
 	{
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		if (!fitConfig.isSmartFilter())
 			return true;
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		String xml = fitConfig.getSmartFilterString();
 		if (TextUtils.isNullOrEmpty(xml))
@@ -2725,16 +2652,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return false;
 
 		xml = gd.getNextText();
-		Filter f = Filter.fromXML(xml);
+		final Filter f = Filter.fromXML(xml);
 		if (f == null || !(f instanceof DirectFilter))
 			return false;
 
 		fitConfig.setDirectFilter((DirectFilter) f);
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
-		{
 			SettingsManager.writeSettings(config, 0);
-		}
 		return true;
 	}
 
@@ -2774,15 +2699,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 				n = 1;
 		}
 
-		String[] filterNames = SettingsManager.getDataFilterMethodNames();
-		DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
+		final String[] filterNames = SettingsManager.getDataFilterMethodNames();
+		final DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
 
 		// We use the previous value in the event the configuration does not have any current values.
 		// Check we have at least the first filter.
 		if (config.getDataFiltersCount() == 0)
 			throw new IllegalStateException("No primary filter is configured");
 
-		FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
+		final FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
 		{
 			@Override
 			public FitEngineConfiguration getFitEngineConfiguration()
@@ -2793,16 +2718,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		for (int i = 1; i < n; i++)
 		{
-			int filter = i + 1;
+			final int filter = i + 1;
 			final int ii = i;
 
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			if (filter == n)
-			{
 				// This is maximum filter count so no continue option
 				gd.addMessage(
 						String.format("Configure the %s filter.", FitProtosHelper.getName(config.getDataFilterType())));
-			}
 			else
 			{
 				gd.enableYesNoCancel("Add", "Continue");
@@ -2811,7 +2734,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 								FitProtosHelper.getName(config.getDataFilterType()), i));
 			}
 
-			String fieldName = "Spot_filter" + filter;
+			final String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
 				// Use blank default value so bad macro parameters return nothing
 				gd.addStringField(fieldName, "");
@@ -2825,9 +2748,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 						void setAbsolute(boolean absolute)
 						{
 							// Get the current settings
-							FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
-							DataFilterMethod m = c.getDataFilterMethod(ii);
-							double smooth = c.getDataFilterParameter(ii).getValue();
+							final FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+							final DataFilterMethod m = c.getDataFilterMethod(ii);
+							final double smooth = c.getDataFilterParameter(ii).getValue();
 							// Reset with the new absolute value
 							c.setDataFilter(m, smooth, absolute, ii);
 						}
@@ -2835,14 +2758,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 						@Override
 						boolean isAbsolute()
 						{
-							FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+							final FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
 							return c.getDataFilterParameterAbsolute(ii, c.getDataFilterParameterAbsolute(ii - 1));
 						}
 
 						@Override
 						double getValue()
 						{
-							FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+							final FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
 							return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
 						}
 					});
@@ -2855,7 +2778,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				int filterIndex = -1;
 				if (IJ.isMacro())
 				{
-					String filterName = gd.getNextString();
+					final String filterName = gd.getNextString();
 					for (int j = 0; j < filterNames.length; j++)
 						if (filterNames[j].equals(filterName))
 						{
@@ -2874,27 +2797,23 @@ public class PeakFit implements PlugInFilter, ItemListener
 				numberOfFilters++;
 			}
 			else
-			{
 				break;
-			}
 		}
 		config.setNumberOfFilters(numberOfFilters);
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
 			saveFitEngineSettings(config);
 
-		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationReader calibration = fitConfig.getCalibrationReader();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
+		final CalibrationReader calibration = fitConfig.getCalibrationReader();
 		if (calibration.isSCMOS())
-		{
 			fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-		}
 
 		try
 		{
 			config.createSpotFilter();
 		}
-		catch (Exception e) // IllegalStateException
+		catch (final Exception e) // IllegalStateException
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -2932,23 +2851,23 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static boolean configureFitSolver(FitEngineConfiguration config, Rectangle sourceBounds, Rectangle bounds,
 			int flags)
 	{
-		boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
-		boolean ignoreCalibration = BitFlags.anySet(flags, FLAG_IGNORE_CALIBRATION);
-		boolean saveSettings = BitFlags.anyNotSet(flags, FLAG_NO_SAVE);
+		final boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
+		final boolean ignoreCalibration = BitFlags.anySet(flags, FLAG_IGNORE_CALIBRATION);
+		final boolean saveSettings = BitFlags.anyNotSet(flags, FLAG_NO_SAVE);
 
-		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
+		final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
-		FitSolver fitSolver = fitConfig.getFitSolver();
+		final FitSolver fitSolver = fitConfig.getFitSolver();
 
-		boolean isLVM = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE ||
+		final boolean isLVM = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE ||
 				fitSolver == FitSolver.LVM_MLE;
-		boolean isFastMLE = fitSolver == FitSolver.FAST_MLE || fitSolver == FitSolver.BACKTRACKING_FAST_MLE;
-		boolean isSteppingFunctionSolver = isLVM || isFastMLE;
+		final boolean isFastMLE = fitSolver == FitSolver.FAST_MLE || fitSolver == FitSolver.BACKTRACKING_FAST_MLE;
+		final boolean isSteppingFunctionSolver = isLVM || isFastMLE;
 
 		if (fitSolver == FitSolver.MLE)
 		{
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			if (!ignoreCalibration)
 			{
 				gd.addMessage("Maximum Likelihood Estimation requires CCD-type camera parameters");
@@ -2959,11 +2878,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 			}
 			else
-			{
 				gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
-			}
 			// This works because the proto configuration enum matches the named enum
-			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
+			final String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
 			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().getNumber()]);
 			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
 			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
@@ -3005,7 +2922,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
 				fitConfig.getFunctionSolver();
 			}
-			catch (Exception e) // IllegalArgumentException, IllegalStateException
+			catch (final Exception e) // IllegalArgumentException, IllegalStateException
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
@@ -3013,11 +2930,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 		else if (isSteppingFunctionSolver)
 		{
-			boolean requireCalibration = !ignoreCalibration && fitSolver != FitSolver.LVM_LSE;
+			final boolean requireCalibration = !ignoreCalibration && fitSolver != FitSolver.LVM_LSE;
 
 			// Collect options for LVM fitting
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-			String fitSolverName = FitProtosHelper.getName(fitSolver);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final String fitSolverName = FitProtosHelper.getName(fitSolver);
 			gd.addMessage(fitSolverName + " requires additional parameters");
 			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
 			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
@@ -3030,7 +2947,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				gd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
 				// This works because the proto configuration enum matches the named enum
-				String[] lineSearchNames = SettingsManager
+				final String[] lineSearchNames = SettingsManager
 						.getNames((Object[]) FastMLESteppingFunctionSolver.LineSearchMethod.values());
 				gd.addChoice("Line_search_method", lineSearchNames,
 						lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
@@ -3038,9 +2955,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
 			gd.addCheckbox("Dynamic_clamping", fitConfig.isUseDynamicClamping());
-			PSF psf = fitConfig.getPSF();
-			boolean isAstigmatism = psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
-			int nParams = PSFHelper.getParameterCount(psf);
+			final PSF psf = fitConfig.getPSF();
+			final boolean isAstigmatism = psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
+			final int nParams = PSFHelper.getParameterCount(psf);
 			if (extraOptions)
 			{
 				gd.addNumericField("Clamp_background", fitConfig.getClampBackground(), 2);
@@ -3078,7 +2995,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						CalibrationProtosHelper.getName(calibration.getCameraType()));
 				if (calibration.isSCMOS())
 				{
-					String[] models = CameraModelManager.listCameraModels(true);
+					final String[] models = CameraModelManager.listCameraModels(true);
 					gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 				}
 				else
@@ -3127,18 +3044,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 
 			if (requireCalibration)
-			{
 				if (calibration.isSCMOS())
-				{
 					fitConfig.setCameraModelName(gd.getNextChoice());
-				}
 				else
 				{
 					calibration.setBias(Math.abs(gd.getNextNumber()));
 					calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
 					fitConfig.setCalibration(calibration.getCalibration());
 				}
-			}
 
 			// Do this even if collection of calibration settings was ignored. This ensures the
 			// camera model is set.
@@ -3159,7 +3072,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				// This call will check if the configuration is OK (including convergence criteria)
 				fitConfig.getFunctionSolver();
 			}
-			catch (Exception e) // IllegalArgumentException, IllegalStateException
+			catch (final Exception e) // IllegalArgumentException, IllegalStateException
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
@@ -3172,13 +3085,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		if (config.isIncludeNeighbours())
-		{
 			if (!fitConfig.getFunctionSolver().isBounded())
 			{
 				IJ.error(TITLE, "Including neighbours requires a bounded fit solver");
 				return false;
 			}
-		}
 
 		return true;
 	}
@@ -3197,7 +3108,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			return Double.parseDouble(gd.getNextString());
 		}
-		catch (NumberFormatException e)
+		catch (final NumberFormatException e)
 		{
 			return -1;
 		}
@@ -3219,14 +3130,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle sourceBounds, Rectangle cropBounds,
 			boolean initialise)
 	{
-		CalibrationReader calibration = fitConfig.getCalibrationReader();
+		final CalibrationReader calibration = fitConfig.getCalibrationReader();
 		if (calibration.isSCMOS() && sourceBounds != null)
 		{
 			CameraModel cameraModel = fitConfig.getCameraModel();
 			if (cameraModel == null)
-			{
 				throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
-			}
 
 			// The camera model origin must be reset to be relative to the source bounds origin
 			cameraModel = cropCameraModel(cameraModel, sourceBounds, cropBounds, true);
@@ -3234,9 +3143,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				return false;
 
 			if (initialise && cameraModel instanceof PerPixelCameraModel)
-			{
 				((PerPixelCameraModel) cameraModel).initialise();
-			}
 			fitConfig.setCameraModel(cameraModel);
 		}
 		return true;
@@ -3306,9 +3213,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			boolean resetOrigin) throws IllegalArgumentException
 	{
 		if (cameraModel == null)
-		{
 			throw new IllegalArgumentException("No camera model");
-		}
 		Rectangle modelBounds = cameraModel.getBounds();
 		if (modelBounds == null || sourceBounds == null)
 			return cameraModel;
@@ -3316,17 +3221,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Combine the source bounds with the crop
 		sourceBounds = combineBounds(sourceBounds, cropBounds);
 
-		int width = sourceBounds.width;
-		int height = sourceBounds.height;
+		final int width = sourceBounds.width;
+		final int height = sourceBounds.height;
 		if (modelBounds.width < width || modelBounds.height < height)
-		{
 			throw new IllegalArgumentException(String.format(
 					"Camera model bounds [x=%d,y=%d,width=%d,height=%d] is smaller than image size [%dx%d]",
 					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, width, height));
-		}
 		else if (modelBounds.width > width || modelBounds.height > height)
 		{
-			GenericDialog gd2 = new GenericDialog("Crop Camera Model");
+			final GenericDialog gd2 = new GenericDialog("Crop Camera Model");
 			//@formatter:off
 			gd2.addMessage(String.format(
 					"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image size [%dx%d].\n \nCrop the model?",
@@ -3334,22 +3237,20 @@ public class PeakFit implements PlugInFilter, ItemListener
 					width, height
 					));
 			//@formatter:on
-			int upperx = modelBounds.x + modelBounds.width - width;
-			int uppery = modelBounds.y + modelBounds.height - height;
+			final int upperx = modelBounds.x + modelBounds.width - width;
+			final int uppery = modelBounds.y + modelBounds.height - height;
 			int ox = sourceBounds.x;
 			int oy = sourceBounds.y;
 			gd2.addSlider("Origin_x", modelBounds.x, upperx, Maths.clip(modelBounds.x, upperx, ox));
 			gd2.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, oy));
 			gd2.showDialog();
 			if (gd2.wasCanceled())
-			{
 				return null;
 				//throw new IllegalArgumentException("Unknown camera model crop");
-			}
 			ox = (int) gd2.getNextNumber();
 			oy = (int) gd2.getNextNumber();
 
-			Rectangle bounds = new Rectangle(ox, oy, width, height);
+			final Rectangle bounds = new Rectangle(ox, oy, width, height);
 			cameraModel = cameraModel.crop(bounds, false);
 			modelBounds = cameraModel.getBounds();
 			if (modelBounds.width != bounds.width || modelBounds.height != bounds.height)
@@ -3387,7 +3288,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private void addTableResults(PeakResultsList resultsList)
 	{
-		IJTablePeakResults r = ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
+		final IJTablePeakResults r = ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
 				resultsSettings.getShowDeviations(), false, false, false);
 		if (r != null)
 		{
@@ -3399,28 +3300,23 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private void addFileResults(PeakResultsList resultsList)
 	{
-		ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
+		final ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
 		if (resultsSettings.getFileFormat().getNumber() > 0)
 		{
 			String resultsFilename = null;
 			if (resultsSettings.getResultsDirectory() != null &&
 					new File(resultsSettings.getResultsDirectory()).exists())
-			{
 				resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
 						".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat());
-			}
-			else
-			{
-				// This is used for running via other code calling PeakFit methods,
-				// i.e. not as an ImageJ plugin.
-				if (plugin_flags == 0)
-					resultsFilename = resultsSettings.getResultsFilename();
-			}
-			PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings, resultsFilename,
+			else // This is used for running via other code calling PeakFit methods,
+			// i.e. not as an ImageJ plugin.
+			if (plugin_flags == 0)
+				resultsFilename = resultsSettings.getResultsFilename();
+			final PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings, resultsFilename,
 					this.resultsSettings.getShowDeviations(), integrateFrames > 1, false);
 			if (r instanceof FilePeakResults)
 			{
-				FilePeakResults fr = (FilePeakResults) r;
+				final FilePeakResults fr = (FilePeakResults) r;
 				fr.setSortAfterEnd(Prefs.getThreads() > 1);
 			}
 		}
@@ -3430,7 +3326,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		if (resultsSettings.getResultsInMemorySettings().getInMemory() || force)
 		{
-			MemoryPeakResults results = new MemoryPeakResults();
+			final MemoryPeakResults results = new MemoryPeakResults();
 			results.setSortAfterEnd(Prefs.getThreads() > 1);
 			resultsList.addOutput(results);
 			MemoryPeakResults.addResults(results);
@@ -3461,14 +3357,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return;
 		}
 		if (fitMaxima)
-		{
 			runMaximaFitting();
-		}
 		else
-		{
 			// All setup is already done so simply run
 			run();
-		}
 
 		addSingleFrameOverlay();
 	}
@@ -3479,18 +3371,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 		ImagePlus imp = this.imp;
 
 		if (fitMaxima && singleFrame > 0)
-		{
 			if (source instanceof IJImageSource)
 			{
-				String title = source.getName();
+				final String title = source.getName();
 				imp = WindowManager.getImage(title);
 			}
-		}
 
 		if (singleFrame > 0 && imp != null)
 		{
 			MemoryPeakResults results = null;
-			for (PeakResults r : this.results.toArray())
+			for (final PeakResults r : this.results.toArray())
 				if (r instanceof MemoryPeakResults)
 				{
 					results = (MemoryPeakResults) r;
@@ -3499,7 +3389,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (results == null || results.size() == 0)
 				return;
 
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			gd.addMessage("Add the fitted localisations as an overlay?");
@@ -3517,8 +3407,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				@Override
 				public void executeXYR(float x, float y, PeakResult r)
 				{
-					PointRoi roi = new PointRoi(x, y);
-					Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
+					final PointRoi roi = new PointRoi(x, y);
+					final Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
 					roi.setStrokeColor(c);
 					roi.setFillColor(c);
 					if (finalImp.getStackSize() > 1)
@@ -3573,18 +3463,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (source == null)
 			return;
 
-		int totalFrames = source.getFrames();
+		final int totalFrames = source.getFrames();
 
 		ImageStack stack = null;
 		if (showProcessedFrames)
 			stack = new ImageStack(bounds.width, bounds.height);
 
 		// Do not crop the region from the source if the bounds match the source dimensions
-		Rectangle cropBounds = (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth() &&
+		final Rectangle cropBounds = (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth() &&
 				bounds.height == source.getHeight()) ? null : bounds;
 
 		// Use the FitEngine to allow multi-threading.
-		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
+		final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
 		if (engine == null)
 			return;
 
@@ -3602,7 +3492,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		runTime = System.nanoTime();
 		boolean shutdown = false;
 		int slice = 0;
-		String format = String.format("Slice: %%d / %d (Results=%%d)", totalFrames);
+		final String format = String.format("Slice: %%d / %d (Results=%%d)", totalFrames);
 		while (!shutdown)
 		{
 			// Noise can optionally be estimated from the entire frame
@@ -3611,24 +3501,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 				break;
 
 			if (++slice % step == 0)
-			{
 				if (Utils.showStatus(String.format(format, slice, results.size())))
 					IJ.showProgress(slice, totalFrames);
-			}
 
 			float noise = Float.NaN;
 			if (ignoreBoundsForNoise)
 			{
 				// We must pre-process the data before noise estimation
-				float[] data2 = data.clone();
+				final float[] data2 = data.clone();
 				if (isFitCameraCounts)
-				{
 					cameraModel.removeBias(data2);
-				}
 				else
-				{
 					cameraModel.removeBiasAndGain(data2);
-				}
 
 				noise = FitWorker.estimateNoise(data2, source.getWidth(), source.getHeight(), config.getNoiseMethod());
 
@@ -3637,10 +3521,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 
 			if (showProcessedFrames)
-			{
 				stack.addSlice(String.format("Frame %d - %d", source.getStartFrameNumber(), source.getEndFrameNumber()),
 						data);
-			}
 
 			// Get the frame number from the source to allow for interlaced and aggregated data
 			engine.run(createJob(source.getStartFrameNumber(), source.getEndFrameNumber(), data, bounds, noise));
@@ -3691,16 +3573,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// |----|Block|Skip|Block|Skip|Block|Skip
 		// Note the source data is still read so that the source is incremented.
 		if (frame < dataStart)
-		{
 			//System.out.printf("Skipping %d\n", frame);
 			return true;
-		}
-		int frameInBlock = (frame - dataStart) % (dataBlock + dataSkip);
+		final int frameInBlock = (frame - dataStart) % (dataBlock + dataSkip);
 		if (frameInBlock >= dataBlock)
-		{
 			//System.out.printf("Skipping %d\n", frame);
 			return true;
-		}
 		return false;
 	}
 
@@ -3782,16 +3660,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue, int queueSize)
 	{
 		// Ensure thread safety
-		PeakResultsList list = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
+		final PeakResultsList list = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
 
 		// Reduce to single object for speed
-		PeakResults r = (results.numberOfOutputs() == 1) ? list.toArray()[0] : list;
+		final PeakResults r = (results.numberOfOutputs() == 1) ? list.toArray()[0] : list;
 
 		// Update the configuration
 		if (!updateFitConfiguration(config))
 			return null;
 
-		FitEngine engine = new FitEngine(config, r, numberOfThreads, queue, queueSize);
+		final FitEngine engine = new FitEngine(config, r, numberOfThreads, queue, queueSize);
 
 		// Write settings out to the IJ log
 		if (resultsSettings.getLogProgress())
@@ -3801,9 +3679,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 			IJ.log("-=-=-=-");
 			Utils.log("Initial Peak SD = %s,%s", Utils.rounded(fitConfig.getInitialXSD()),
 					Utils.rounded(fitConfig.getInitialYSD()));
-			SpotFilter spotFilter = engine.getSpotFilter();
+			final SpotFilter spotFilter = engine.getSpotFilter();
 			IJ.log("Spot Filter = " + spotFilter.getDescription());
-			int w = 2 * engine.getFitting() + 1;
+			final int w = 2 * engine.getFitting() + 1;
 			Utils.log("Fit window = %d x %d", w, w);
 			if (!fitConfig.isDisableSimpleFilter())
 			{
@@ -3830,7 +3708,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	private boolean updateFitConfiguration(FitEngineConfiguration config)
 	{
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 
 		// Adjust the settings that are relevant within the fitting configuration.
 		fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
@@ -3854,7 +3732,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	private void runMaximaFitting()
 	{
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 		if (results == null || results.size() == 0)
 		{
 			log("No results for maxima fitting");
@@ -3886,12 +3764,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 				{
 					if (escapePressed())
 						return true;
-					int slice = counter.previousFrame();
+					final int slice = counter.previousFrame();
 					if (slice % step == 0)
-					{
 						if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
 							IJ.showProgress(slice, totalFrames);
-					}
 
 					// Process results
 					if (!processResults(engine, sliceCandidates, slice))
@@ -3906,7 +3782,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		});
 
 		// Process final results
-		boolean shutdown = escapePressed();
+		final boolean shutdown = escapePressed();
 		if (!shutdown)
 			processResults(engine, sliceCandidates, counter.currentFrame());
 
@@ -3922,35 +3798,29 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private boolean processResults(FitEngine engine, ArrayList<PeakResult> sliceCandidates, int slice)
 	{
 		// Process results
-		int[] maxIndices = new int[sliceCandidates.size()];
+		final int[] maxIndices = new int[sliceCandidates.size()];
 		int count = 0;
-		ArrayList<PeakResult> processedResults = new ArrayList<>(sliceCandidates.size());
-		for (PeakResult result : sliceCandidates)
-		{
+		final ArrayList<PeakResult> processedResults = new ArrayList<>(sliceCandidates.size());
+		for (final PeakResult result : sliceCandidates)
 			// Add ExtendedPeakResults to the results if they span multiple frames (they are the result of previous fitting).
 			if (result instanceof ExtendedPeakResult && result.getFrame() != result.getEndFrame())
-			{
 				processedResults.add(result);
-			}
 			else
-			{
 				// Fit single frame results.
 				maxIndices[count++] = result.getOrigX() + bounds.width * result.getOrigY();
-			}
-		}
 
 		if (!processedResults.isEmpty())
 			this.results.addAll(processedResults);
 
 		if (count != 0)
 		{
-			float[] data = source.get(slice);
+			final float[] data = source.get(slice);
 			if (data == null)
 				return false;
 
-			FitParameters fitParams = new FitParameters();
+			final FitParameters fitParams = new FitParameters();
 			fitParams.maxIndices = Arrays.copyOf(maxIndices, count);
-			FitJob job = new ParameterisedFitJob(fitParams, slice, data, bounds);
+			final FitJob job = new ParameterisedFitJob(fitParams, slice, data, bounds);
 
 			engine.run(job);
 		}
@@ -4001,7 +3871,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Do not use set() as we support merging a partial calibration
 		fitConfig.mergeCalibration(cal);
-		CalibrationReader calibration = fitConfig.getCalibrationReader();
+		final CalibrationReader calibration = fitConfig.getCalibrationReader();
 
 		textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
 		if (calibration.hasNmPerPixel())

@@ -108,7 +108,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			Parameters.isAboveZero("Pixel width", settings.getNmPerPixel());
 			Parameters.isAboveZero("Pixel depth", settings.getNmPerSlice());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -138,7 +138,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			{
 				Parameters.isAboveZero("Diameter", settings.getDiameter());
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
@@ -161,14 +161,14 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		final int radius = (int) Math.ceil(diameter * 500 / nmPerPixel);
 		final int radiusz = (int) Math.ceil(diameter * 500 / nmPerSlice);
 
-		int inc = 2 * radius + 1;
-		int incz = 2 * radiusz + 1;
-		int maxx = settings.getFieldWidth();
-		int maxy = maxx;
-		int ditherHeight = (settings.getYDither() > 0) ? (int) Math.ceil(settings.getYDither() * 1000 / nmPerPixel) : 0;
-		int ditherDepth = (settings.getZDither() > 0) ? (int) Math.ceil(settings.getZDither() * 1000 / nmPerSlice) : 0;
-		int maxz = ditherDepth + incz;
-		ImageStack stack = new ImageStack(maxx, maxy, maxz);
+		final int inc = 2 * radius + 1;
+		final int incz = 2 * radiusz + 1;
+		final int maxx = settings.getFieldWidth();
+		final int maxy = maxx;
+		final int ditherHeight = (settings.getYDither() > 0) ? (int) Math.ceil(settings.getYDither() * 1000 / nmPerPixel) : 0;
+		final int ditherDepth = (settings.getZDither() > 0) ? (int) Math.ceil(settings.getZDither() * 1000 / nmPerSlice) : 0;
+		final int maxz = ditherDepth + incz;
+		final ImageStack stack = new ImageStack(maxx, maxy, maxz);
 		byte[] mask = new byte[maxx * maxy];
 		for (int z = 0; z < maxz; z++)
 		{
@@ -178,31 +178,31 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 
 		if (settings.getMode() == 0)
 		{
-			ImageStack stack2 = createEllipsoid(inc, inc, incz);
+			final ImageStack stack2 = createEllipsoid(inc, inc, incz);
 
 			//Utils.display(TITLE + " nucleus", stack2, 0);
 
 			// Dither
 			int cx = radius;
-			int lowerz = (maxz - ditherDepth) / 2;
-			int upperz = (maxz + ditherDepth) / 2;
-			RandomDataGenerator r = new RandomDataGenerator();
+			final int lowerz = (maxz - ditherDepth) / 2;
+			final int upperz = (maxz + ditherDepth) / 2;
+			final RandomDataGenerator r = new RandomDataGenerator();
 
 			while (cx < maxx)
 			{
-				int xloc = cx - radius;
+				final int xloc = cx - radius;
 				int cy = radius + r.nextInt(0, ditherHeight);
 				while (cy < maxy)
 				{
-					int yloc = cy - radius;
-					int offset = r.nextInt(lowerz, upperz) - radiusz;
+					final int yloc = cy - radius;
+					final int offset = r.nextInt(lowerz, upperz) - radiusz;
 					for (int slice = 1; slice <= stack2.getSize(); slice++)
 					{
-						int i = slice + offset;
+						final int i = slice + offset;
 						if (i < 1 || i > maxz)
 							continue;
-						ImageProcessor ip = stack.getProcessor(i);
-						ImageProcessor ip2 = stack2.getProcessor(slice);
+						final ImageProcessor ip = stack.getProcessor(i);
+						final ImageProcessor ip2 = stack2.getProcessor(slice);
 						ip.copyBits(ip2, xloc, yloc, Blitter.MAX);
 					}
 					cy += inc + 1 + r.nextInt(0, ditherHeight);
@@ -222,7 +222,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			// Allow mouse click to draw spheres
 			imp.getCanvas().addMouseListener(this);
 
-			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+			final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			gd.addMessage("Click the image to add a sphere");
@@ -245,7 +245,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	private void calibrate(ImagePlus imp)
 	{
 		// Calibrate
-		Calibration cal = new Calibration();
+		final Calibration cal = new Calibration();
 		cal.setUnit("um");
 		cal.pixelWidth = cal.pixelHeight = nmPerPixel / 1000;
 		cal.pixelDepth = nmPerSlice / 1000;
@@ -266,21 +266,21 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	public static ImageStack createEllipsoid(double widthX, double heightX, double depthX)
 	{
 		// Precompute squares for the distances
-		double[] sx = getSquareDistances(widthX, depthX);
-		double[] sy = getSquareDistances(heightX, depthX);
-		double[] sz = getSquareDistances(depthX, depthX);
+		final double[] sx = getSquareDistances(widthX, depthX);
+		final double[] sy = getSquareDistances(heightX, depthX);
+		final double[] sz = getSquareDistances(depthX, depthX);
 
-		int maxx = sx.length;
-		int maxy = sy.length;
-		int maxz = sz.length;
+		final int maxx = sx.length;
+		final int maxy = sy.length;
+		final int maxz = sz.length;
 
-		ImageStack stack = new ImageStack(maxx, maxy, maxz);
+		final ImageStack stack = new ImageStack(maxx, maxy, maxz);
 		final byte on = (byte) 255;
 		// Squared distances are relative to the radius of the depth
 		final double r2 = Maths.pow2(depthX * 0.5);
 		for (int iz = 0; iz < maxz; iz++)
 		{
-			byte[] mask = new byte[maxx * maxy];
+			final byte[] mask = new byte[maxx * maxy];
 			final double z2 = sz[iz];
 			for (int iy = 0, i = 0; iy < maxy; iy++)
 			{
@@ -309,14 +309,12 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	 */
 	private static double[] getSquareDistances(double size, double reference)
 	{
-		int n = (int) Math.ceil(size);
-		double centre = n * 0.5;
-		double[] s = new double[n];
-		double scale = reference / size;
+		final int n = (int) Math.ceil(size);
+		final double centre = n * 0.5;
+		final double[] s = new double[n];
+		final double scale = reference / size;
 		for (int i = 0; i < n; i++)
-		{
 			s[i] = Maths.pow2((centre - (i + 0.5)) * scale);
-		}
 		return s;
 	}
 
@@ -325,28 +323,28 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	{
 		if (e == null)
 			return;
-		ImageCanvas ic = imp.getCanvas();
-		int cx = ic.offScreenX(e.getX());
-		int cy = ic.offScreenY(e.getY());
+		final ImageCanvas ic = imp.getCanvas();
+		final int cx = ic.offScreenX(e.getX());
+		final int cy = ic.offScreenY(e.getY());
 		final int radius = (int) Math.ceil(diameter * 500 / nmPerPixel);
 		final int radiusz = (int) Math.ceil(diameter * 500 / nmPerSlice);
 		if (sphere == null)
 		{
-			int inc = 2 * radius + 1;
-			int incz = 2 * radiusz + 1;
+			final int inc = 2 * radius + 1;
+			final int incz = 2 * radiusz + 1;
 			sphere = createEllipsoid(inc, inc, incz);
 		}
-		int xloc = cx - radius;
-		int yloc = cy - radius;
-		int offset = imp.getCurrentSlice() - radiusz;
-		ImageStack stack = imp.getImageStack();
+		final int xloc = cx - radius;
+		final int yloc = cy - radius;
+		final int offset = imp.getCurrentSlice() - radiusz;
+		final ImageStack stack = imp.getImageStack();
 		for (int slice = 1; slice <= sphere.getSize(); slice++)
 		{
-			int i = slice + offset;
+			final int i = slice + offset;
 			if (i < 1 || i > stack.getSize())
 				continue;
-			ImageProcessor ip = stack.getProcessor(i);
-			ImageProcessor ip2 = sphere.getProcessor(slice);
+			final ImageProcessor ip = stack.getProcessor(i);
+			final ImageProcessor ip2 = sphere.getProcessor(slice);
 			ip.copyBits(ip2, xloc, yloc, Blitter.MAX);
 		}
 		imp.updateAndDraw();
@@ -384,7 +382,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		double old = diameter;
+		final double old = diameter;
 		diameter = gd.getNextNumber();
 		if (diameter != old)
 			sphere = null;

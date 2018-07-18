@@ -85,20 +85,20 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private void fitSingleGaussianLVMWithoutBias(boolean applyBounds, int clamping)
 	{
-		double bias = 100;
+		final double bias = 100;
 
-		NonLinearFit solver = getLVM((applyBounds) ? 2 : 1, clamping, false);
-		NonLinearFit solver2 = getLVM((applyBounds) ? 2 : 1, clamping, false);
+		final NonLinearFit solver = getLVM((applyBounds) ? 2 : 1, clamping, false);
+		final NonLinearFit solver2 = getLVM((applyBounds) ? 2 : 1, clamping, false);
 
-		String name = getLVMName(applyBounds, clamping, false);
+		final String name = getLVMName(applyBounds, clamping, false);
 
-		int LOOPS = 5;
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		StoredDataStatistics[] stats = new StoredDataStatistics[6];
+		final int LOOPS = 5;
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
-		for (double s : signal)
+		for (final double s : signal)
 		{
-			double[] expected = createParams(1, s, 0, 0, 1);
+			final double[] expected = createParams(1, s, 0, 0, 1);
 			double[] lower = null, upper = null;
 			if (applyBounds)
 			{
@@ -107,34 +107,34 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 				solver.setBounds(lower, upper);
 			}
 
-			double[] expected2 = addBiasToParams(expected, bias);
+			final double[] expected2 = addBiasToParams(expected, bias);
 			if (applyBounds)
 			{
-				double[] lower2 = addBiasToParams(lower, bias);
-				double[] upper2 = addBiasToParams(upper, bias);
+				final double[] lower2 = addBiasToParams(lower, bias);
+				final double[] upper2 = addBiasToParams(upper, bias);
 				solver2.setBounds(lower2, upper2);
 			}
 
 			for (int loop = LOOPS; loop-- > 0;)
 			{
-				double[] data = drawGaussian(expected, rg);
-				double[] data2 = data.clone();
+				final double[] data = drawGaussian(expected, rg);
+				final double[] data2 = data.clone();
 				for (int i = 0; i < data.length; i++)
 					data2[i] += bias;
 
 				for (int i = 0; i < stats.length; i++)
 					stats[i] = new StoredDataStatistics();
 
-				for (double db : base)
-					for (double dx : shift)
-						for (double dy : shift)
-							for (double dsx : factor)
+				for (final double db : base)
+					for (final double dx : shift)
+						for (final double dy : shift)
+							for (final double dsx : factor)
 							{
-								double[] p = createParams(db, s, dx, dy, dsx);
-								double[] p2 = addBiasToParams(p, bias);
+								final double[] p = createParams(db, s, dx, dy, dsx);
+								final double[] p2 = addBiasToParams(p, bias);
 
-								double[] fp = fitGaussian(solver, data, p, expected);
-								double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
+								final double[] fp = fitGaussian(solver, data, p, expected);
+								final double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
 
 								// The result should be the same without a bias
 								Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
@@ -330,23 +330,23 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 			int clamping, boolean mle)
 	{
 		TestSettings.assumeMediumComplexity();
-		NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
-		NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
+		final NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
+		final NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),
 				getLVMName(bounded2, clamping2, mle2));
 	}
 
-	private NonLinearFit getLVM(int bounded, int clamping, boolean mle)
+	private static NonLinearFit getLVM(int bounded, int clamping, boolean mle)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, flags, null);
-		StoppingCriteria sc = new ErrorStoppingCriteria(5);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, flags, null);
+		final StoppingCriteria sc = new ErrorStoppingCriteria(5);
 		sc.setMaximumIterations(100);
-		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc, null)
+		final NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc, null)
 				: new NonLinearFit(f, sc);
 		if (clamping != 0)
 		{
-			BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
-			ParameterBounds bounds = new ParameterBounds(f);
+			final BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
+			final ParameterBounds bounds = new ParameterBounds(f);
 			bounds.setClampValues(defaultClampValues);
 			bounds.setDynamicClamp(clamping == 2);
 			bsolver.setBounds(bounds);
@@ -356,7 +356,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 		return solver;
 	}
 
-	private String getLVMName(boolean bounded, int clamping, boolean mle)
+	private static String getLVMName(boolean bounded, int clamping, boolean mle)
 	{
 		return ((bounded) ? "B" : "") + ((clamping == 0) ? "" : ((clamping == 1) ? "C" : "DC")) + "LVM" +
 				((mle) ? " MLE" : "");
@@ -367,7 +367,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 		@Override
 		public void evaluate(double oldError, double newError, double[] a)
 		{
-
+			// Do nothing
 		}
 
 		@Override
@@ -397,9 +397,9 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private void canFitAndComputeDeviationsLVM(boolean mle)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		NonLinearFit solver1 = getLVM(0, 0, mle);
-		NonLinearFit solver2 = getLVM(0, 0, mle);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final NonLinearFit solver1 = getLVM(0, 0, mle);
+		final NonLinearFit solver2 = getLVM(0, 0, mle);
 		solver1.setStoppingCriteria(new CheatingStoppingCriteria());
 		fitAndComputeDeviationsMatch(rg, solver1, solver2, NoiseModel.EMCCD, false);
 	}

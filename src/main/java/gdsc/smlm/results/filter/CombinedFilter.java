@@ -101,7 +101,7 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	protected String generateName()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		addText(sb, filter1, filter1.getName());
 		sb.append(" ").append(getOperator()).append(" ");
 		addText(sb, filter2, filter2.getName());
@@ -120,7 +120,7 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	protected String generateType()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		addText(sb, filter1, filter1.getType());
 		sb.append(" ").append(getOperator()).append(" ");
 		addText(sb, filter2, filter2.getType());
@@ -130,7 +130,7 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public String getDescription()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		addText(sb, filter1, filter1.getDescription());
 		sb.append(" ").append(getOperator()).append(" ");
 		addText(sb, filter2, filter2.getDescription());
@@ -284,17 +284,17 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
 	{
-		FilterSetupData[] data1 = (dfilter1 == null) ? null : dfilter1.getFilterSetupData();
+		final FilterSetupData[] data1 = (dfilter1 == null) ? null : dfilter1.getFilterSetupData();
 		if (data1 != null)
 		{
 			if (dfilter2 != null)
 			{
-				FilterSetupData[] data2 = dfilter1.getFilterSetupData();
+				final FilterSetupData[] data2 = dfilter1.getFilterSetupData();
 				if (data2 != null)
 				{
 					// Merge
-					int size = data1.length + data2.length;
-					FilterSetupData[] merge = Arrays.copyOf(data1, size);
+					final int size = data1.length + data2.length;
+					final FilterSetupData[] merge = Arrays.copyOf(data1, size);
 					System.arraycopy(data2, 0, merge, data1.length, data2.length);
 					return merge;
 				}
@@ -428,8 +428,8 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
-		double[] p2 = Arrays.copyOfRange(parameters, filter1.getNumberOfParameters(), parameters.length);
+		final double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
+		final double[] p2 = Arrays.copyOfRange(parameters, filter1.getNumberOfParameters(), parameters.length);
 		return createFilter(filter1.create(p1), filter2.create(p2));
 	}
 
@@ -441,8 +441,8 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public void weakestParameters(double[] parameters)
 	{
-		double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
-		double[] p2 = Arrays.copyOfRange(parameters, filter1.getNumberOfParameters(), parameters.length);
+		final double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
+		final double[] p2 = Arrays.copyOfRange(parameters, filter1.getNumberOfParameters(), parameters.length);
 		filter1.weakestParameters(p1);
 		filter2.weakestParameters(p2);
 		System.arraycopy(p1, 0, parameters, 0, p1.length);
@@ -479,8 +479,8 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public double[] lowerLimit()
 	{
-		double[] l1 = filter1.lowerLimit();
-		double[] l2 = filter2.lowerLimit();
+		final double[] l1 = filter1.lowerLimit();
+		final double[] l2 = filter2.lowerLimit();
 		if (l1 == null && l2 == null)
 			return null;
 		return combine(getLowerLimit(filter1, l1), getLowerLimit(filter2, l2));
@@ -489,10 +489,8 @@ public abstract class CombinedFilter extends DirectFilter
 	private static double[] getLowerLimit(Filter filter, double[] lower)
 	{
 		if (lower == null)
-		{
 			// Default to zero on the lower so no need to fill
 			lower = new double[filter.getNumberOfParameters()];
-		}
 		return lower;
 	}
 
@@ -504,8 +502,8 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public double[] upperLimit()
 	{
-		double[] u1 = filter1.upperLimit();
-		double[] u2 = filter2.upperLimit();
+		final double[] u1 = filter1.upperLimit();
+		final double[] u2 = filter2.upperLimit();
 		if (u1 == null && u2 == null)
 			return null;
 		return combine(getUpperLimit(filter1, u1), getUpperLimit(filter2, u2));
@@ -545,7 +543,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	private static double[] combine(double[] s1, double[] s2)
 	{
-		double[] s = new double[s1.length + s2.length];
+		final double[] s = new double[s1.length + s2.length];
 		System.arraycopy(s1, 0, s, 0, s1.length);
 		System.arraycopy(s2, 0, s, s1.length, s2.length);
 		return s;
@@ -559,9 +557,9 @@ public abstract class CombinedFilter extends DirectFilter
 	@Override
 	public int[] getChromosomeParameters()
 	{
-		int[] s1 = filter1.getChromosomeParameters();
-		int[] s2 = filter2.getChromosomeParameters();
-		int[] s = new int[s1.length + s2.length];
+		final int[] s1 = filter1.getChromosomeParameters();
+		final int[] s2 = filter2.getChromosomeParameters();
+		final int[] s = new int[s1.length + s2.length];
 		System.arraycopy(s1, 0, s, 0, s1.length);
 		// Copy the next array but offset the index by the number of parameters in first filter
 		// so that getParameterName(int) works OK

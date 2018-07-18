@@ -103,20 +103,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
 	private static void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternal(data2, width, height, boxSize);
@@ -127,20 +127,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
 	private static void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.stripedBlockSumNxNInternal(data2, width, height, boxSize);
@@ -151,19 +151,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
 	private static void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
@@ -174,12 +174,12 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(rg, filter, width,
 							height, boxSize);
 	}
@@ -187,8 +187,8 @@ public class SumFilterTest extends AbstractFilterTest
 	private static void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
 			RandomGenerator rg, SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.rollingBlockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternalTransposed(data2, width, height, boxSize);
@@ -202,26 +202,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -229,22 +229,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.blockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -272,26 +272,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.stripedBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -299,22 +299,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.blockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -342,26 +342,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -369,22 +369,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.stripedBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -409,19 +409,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
 	private static void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.blockSumNxNInternal(data2, width, height, 1);
@@ -435,25 +435,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.blockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -463,19 +463,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSumNxNInternal(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -497,25 +497,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -525,19 +525,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -559,25 +559,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -587,19 +587,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -621,25 +621,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.stripedBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -649,19 +649,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -681,19 +681,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
 	private static void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.rollingBlockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
@@ -707,25 +707,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -735,19 +735,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSumNxNInternal(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -770,25 +770,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.stripedBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -798,19 +798,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSumNxNInternal(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -833,26 +833,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxNInternalTransposed(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -860,22 +860,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxNInternalTransposed(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -902,20 +902,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					floatCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
 	private static void floatCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
@@ -926,20 +926,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					floatCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
 	private static void floatCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
@@ -953,26 +953,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.blockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -980,22 +980,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.blockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1022,26 +1022,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.stripedBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -1049,22 +1049,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.blockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1091,26 +1091,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.stripedBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -1118,22 +1118,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.stripedBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1161,26 +1161,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -1188,22 +1188,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.blockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1230,26 +1230,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -1257,22 +1257,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1297,19 +1297,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3AndBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				floatCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
 	private static void floatCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.blockSum3x3(data1, width, height);
 		filter.blockSumNxN(data2, width, height, 1);
@@ -1323,25 +1323,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.blockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -1351,19 +1351,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSumNxN(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -1381,19 +1381,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
 	private static void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.stripedBlockSum3x3(data1, width, height);
 		filter.stripedBlockSumNxN(data2, width, height, 1);
@@ -1407,25 +1407,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.stripedBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -1435,19 +1435,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSumNxN(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -1466,19 +1466,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
 	private static void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		float[] data1 = floatCreateData(rg, width, height);
-		float[] data2 = floatClone(data1);
+		final float[] data1 = floatCreateData(rg, width, height);
+		final float[] data2 = floatClone(data1);
 
 		filter.rollingBlockSum3x3(data1, width, height);
 		filter.rollingBlockSumNxN(data2, width, height, 1);
@@ -1492,25 +1492,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.rollingBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -1520,19 +1520,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSumNxN(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -1554,25 +1554,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -1582,19 +1582,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -1616,25 +1616,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -1644,19 +1644,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.blockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -1678,25 +1678,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.stripedBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.rollingBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -1706,19 +1706,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (float[] data : dataSet)
+				final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
 				long time = System.nanoTime();
-				for (float[] data : dataSet2)
+				for (final float[] data : dataSet2)
 					filter.stripedBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -1737,20 +1737,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
 	private static void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternal(data2, width, height, boxSize);
@@ -1761,20 +1761,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
 	private static void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.stripedBlockSumNxNInternal(data2, width, height, boxSize);
@@ -1785,19 +1785,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
 	private static void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
@@ -1808,12 +1808,12 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(rg, filter, width,
 							height, boxSize);
 	}
@@ -1821,8 +1821,8 @@ public class SumFilterTest extends AbstractFilterTest
 	private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.rollingBlockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternalTransposed(data2, width, height, boxSize);
@@ -1836,26 +1836,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -1863,22 +1863,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.blockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1906,26 +1906,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.stripedBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -1933,22 +1933,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.blockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -1976,26 +1976,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2003,22 +2003,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.stripedBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2043,19 +2043,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				intCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
 	private static void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.blockSumNxNInternal(data2, width, height, 1);
@@ -2069,25 +2069,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.blockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2097,19 +2097,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSumNxNInternal(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -2131,25 +2131,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2159,19 +2159,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -2193,25 +2193,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2221,19 +2221,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -2255,25 +2255,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.stripedBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2283,19 +2283,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -2315,19 +2315,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
 	private static void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.rollingBlockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
@@ -2341,25 +2341,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], 1);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2369,19 +2369,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSumNxNInternal(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -2404,25 +2404,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.stripedBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSum3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2432,19 +2432,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSumNxNInternal(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -2467,26 +2467,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxNInternalTransposed(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2494,22 +2494,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxNInternalTransposed(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2536,20 +2536,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					intCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
 	private static void intCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
@@ -2560,20 +2560,20 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
-				for (int boxSize : boxSizes)
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final int boxSize : boxSizes)
 					intCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
 	private static void intCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
@@ -2587,26 +2587,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.blockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2614,22 +2614,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.blockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2655,26 +2655,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.stripedBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2682,22 +2682,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.blockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2723,26 +2723,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.stripedBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.stripedBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2750,22 +2750,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.stripedBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2793,26 +2793,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2820,22 +2820,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.blockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2861,26 +2861,26 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter.rollingBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -2888,22 +2888,22 @@ public class SumFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -2928,19 +2928,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3AndBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				intCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
 	private static void intCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.blockSum3x3(data1, width, height);
 		filter.blockSumNxN(data2, width, height, 1);
@@ -2954,25 +2954,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.blockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -2982,19 +2982,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSumNxN(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -3012,19 +3012,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				intCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
 	private static void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.stripedBlockSum3x3(data1, width, height);
 		filter.stripedBlockSumNxN(data2, width, height, 1);
@@ -3038,25 +3038,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.stripedBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -3066,19 +3066,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSumNxN(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -3097,19 +3097,19 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SumFilter filter = new SumFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SumFilter filter = new SumFilter();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 				intCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
 	private static void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		int[] data1 = intCreateData(rg, width, height);
-		int[] data2 = intClone(data1);
+		final int[] data1 = intCreateData(rg, width, height);
+		final int[] data2 = intClone(data1);
 
 		filter.rollingBlockSum3x3(data1, width, height);
 		filter.rollingBlockSumNxN(data2, width, height, 1);
@@ -3123,25 +3123,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], 1);
 		filter.rollingBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -3151,19 +3151,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSumNxN(data, width, height, 1);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -3185,25 +3185,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -3213,19 +3213,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -3246,25 +3246,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.blockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -3274,19 +3274,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.blockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;
@@ -3307,25 +3307,25 @@ public class SumFilterTest extends AbstractFilterTest
 		// These test a deprecated filter
 		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		SumFilter filter = new SumFilter();
+		final SumFilter filter = new SumFilter();
 
-		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 		filter.stripedBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.rollingBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 				fastTimes.add(time);
@@ -3335,19 +3335,19 @@ public class SumFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
-				for (int[] data : dataSet)
+				final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
+				for (final int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
 				long time = System.nanoTime();
-				for (int[] data : dataSet2)
+				for (final int[] data : dataSet2)
 					filter.stripedBlockSum3x3(data, width, height);
 				time = System.nanoTime() - time;
 
-				long fastTime = fastTimes.get(index++);
+				final long fastTime = fastTimes.get(index++);
 				slowTotal += time;
 				fastTotal += fastTime;
 				boxSlowTotal += time;

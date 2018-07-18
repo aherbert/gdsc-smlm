@@ -52,19 +52,19 @@ public class ConvolutionTest
 	@Test
 	public void canComputeConvolution()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				double[] data = randomData(random, size);
-				double[] kernel = createKernel(s);
-				double[] r1 = Convolution.convolve(data, kernel);
-				double[] r1b = Convolution.convolve(kernel, data);
-				double[] r2 = Convolution.convolveFFT(data, kernel);
-				double[] r2b = Convolution.convolveFFT(kernel, data);
+				final double[] data = randomData(random, size);
+				final double[] kernel = createKernel(s);
+				final double[] r1 = Convolution.convolve(data, kernel);
+				final double[] r1b = Convolution.convolve(kernel, data);
+				final double[] r2 = Convolution.convolveFFT(data, kernel);
+				final double[] r2b = Convolution.convolveFFT(kernel, data);
 
 				Assert.assertEquals(r1.length, r1b.length);
 				Assert.assertEquals(r1.length, r2.length);
@@ -82,16 +82,16 @@ public class ConvolutionTest
 	@Test
 	public void canComputeDoubleConvolution()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				double[] data1 = randomData(random, size);
-				double[] data2 = randomData(random, size);
-				double[] kernel = createKernel(s);
+				final double[] data1 = randomData(random, size);
+				final double[] data2 = randomData(random, size);
+				final double[] kernel = createKernel(s);
 
 				double[] e1, e2;
 				double[][] r1;
@@ -132,7 +132,7 @@ public class ConvolutionTest
 	public void doSpeedTest()
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
@@ -151,8 +151,8 @@ public class ConvolutionTest
 	{
 		final int RUNS = 1000;
 
-		double[] data = randomData(rg, size);
-		double[] kernel = createKernel(s);
+		final double[] data = randomData(rg, size);
+		final double[] kernel = createKernel(s);
 
 		// Warm up
 		@SuppressWarnings("unused")
@@ -178,7 +178,7 @@ public class ConvolutionTest
 	public void doDoubleSpeedTest()
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
@@ -197,9 +197,9 @@ public class ConvolutionTest
 	{
 		final int RUNS = 1000;
 
-		double[] data1 = randomData(rg, size);
-		double[] data2 = randomData(rg, size);
-		double[] kernel = createKernel(s);
+		final double[] data1 = randomData(rg, size);
+		final double[] data2 = randomData(rg, size);
+		final double[] kernel = createKernel(s);
 
 		// Warm up
 		@SuppressWarnings("unused")
@@ -241,12 +241,12 @@ public class ConvolutionTest
 
 	private static void singleVsDoubleSpeedTest(int size, double s)
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 1000;
 
-		double[] data1 = randomData(random, size);
-		double[] data2 = randomData(random, size);
-		double[] kernel = createKernel(s);
+		final double[] data1 = randomData(random, size);
+		final double[] data2 = randomData(random, size);
+		final double[] kernel = createKernel(s);
 
 		// Warm up
 		@SuppressWarnings("unused")
@@ -293,12 +293,12 @@ public class ConvolutionTest
 
 	private static void singleVsDoubleFFTSpeedTest(int size, double s)
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 1000;
 
-		double[] data1 = randomData(random, size);
-		double[] data2 = randomData(random, size);
-		double[] kernel = createKernel(s);
+		final double[] data1 = randomData(random, size);
+		final double[] data2 = randomData(random, size);
+		final double[] kernel = createKernel(s);
 
 		// Warm up
 		@SuppressWarnings("unused")
@@ -327,7 +327,7 @@ public class ConvolutionTest
 
 	private static double[] randomData(RandomGenerator random, int size)
 	{
-		double[] data = new double[size];
+		final double[] data = new double[size];
 		for (int i = 0; i < size; i++)
 			data[i] = random.nextDouble();
 		return data;
@@ -343,7 +343,7 @@ public class ConvolutionTest
 	private static double[] createKernel(double s)
 	{
 		final int radius = (int) Math.ceil(Math.abs(s) * 4) + 1;
-		double[] kernel = new double[2 * radius + 1];
+		final double[] kernel = new double[2 * radius + 1];
 		final double norm = -0.5 / (s * s);
 		for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
 			kernel[j] = kernel[jj] = FastMath.exp(norm * i * i);
@@ -359,21 +359,21 @@ public class ConvolutionTest
 	@Test
 	public void canComputeScaledConvolution()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
-		TDoubleArrayList list = new TDoubleArrayList();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
+		final TDoubleArrayList list = new TDoubleArrayList();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				double[] data = randomData(random, size);
-				double[] kernel = createKernel(s);
+				final double[] data = randomData(random, size);
+				final double[] kernel = createKernel(s);
 
 				for (int scale = 2; scale < 5; scale++)
 				{
-					double[] e = convolve(kernel, data, list, scale);
-					double[] o = Convolution.convolve(kernel, data, scale);
+					final double[] e = convolve(kernel, data, list, scale);
+					final double[] o = Convolution.convolve(kernel, data, scale);
 					final double[] o2 = new double[o.length];
 					Convolution.convolve(kernel, data, scale, new ConvolutionValueProcedure()
 					{
@@ -400,23 +400,23 @@ public class ConvolutionTest
 	@Test
 	public void canComputeDoubleScaledConvolution()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
-		TDoubleArrayList list = new TDoubleArrayList();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
+		final TDoubleArrayList list = new TDoubleArrayList();
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
 		{
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				double[] data1 = randomData(random, size);
-				double[] data2 = randomData(random, size);
-				double[] kernel = createKernel(s);
+				final double[] data1 = randomData(random, size);
+				final double[] data2 = randomData(random, size);
+				final double[] kernel = createKernel(s);
 
 				for (int scale = 2; scale < 5; scale++)
 				{
-					double[] e1 = convolve(kernel, data1, list, scale);
-					double[] e2 = convolve(kernel, data2, list, scale);
-					double[][] o = Convolution.convolve(kernel, data1, data2, scale);
+					final double[] e1 = convolve(kernel, data1, list, scale);
+					final double[] e2 = convolve(kernel, data2, list, scale);
+					final double[][] o = Convolution.convolve(kernel, data1, data2, scale);
 					final double[][] o2 = new double[2][o[0].length];
 					Convolution.convolve(kernel, data1, data2, scale, new DoubleConvolutionValueProcedure()
 					{
@@ -446,14 +446,14 @@ public class ConvolutionTest
 
 	private static double[] convolve(double[] kernel, double[] data, TDoubleArrayList list, int scale)
 	{
-		double[] data1 = scale(data, list, scale);
+		final double[] data1 = scale(data, list, scale);
 		return Convolution.convolve(kernel, data1);
 	}
 
 	private static double[] scale(double[] data, TDoubleArrayList list, int scale)
 	{
 		list.resetQuick();
-		double[] fill = new double[scale - 1];
+		final double[] fill = new double[scale - 1];
 		list.add(data[0]);
 		for (int i = 1; i < data.length; i++)
 		{
@@ -466,21 +466,21 @@ public class ConvolutionTest
 	@Test
 	public void canComputeScaledConvolutionWithEarlyExit()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
-		int sizeLoops = 4;
-		int sLoops = 2;
+		final int sizeLoops = 4;
+		final int sLoops = 2;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				double[] data = randomData(random, size);
-				double[] kernel = createKernel(s);
+				final double[] data = randomData(random, size);
+				final double[] kernel = createKernel(s);
 
 				for (int scale = 2; scale < 5; scale++)
 				{
-					double[] e = Convolution.convolve(kernel, data, scale);
+					final double[] e = Convolution.convolve(kernel, data, scale);
 					final double[] o = new double[e.length];
 					final int limit = data.length;
 					Convolution.convolve(kernel, data, scale, new ConvolutionValueProcedure()
@@ -511,22 +511,22 @@ public class ConvolutionTest
 	@Test
 	public void canComputeDoubleScaledConvolutionWithEarlyExit()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
-		int sizeLoops = 4;
-		int sLoops = 2;
+		final int sizeLoops = 4;
+		final int sLoops = 2;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				double[] data1 = randomData(random, size);
-				double[] data2 = randomData(random, size);
-				double[] kernel = createKernel(s);
+				final double[] data1 = randomData(random, size);
+				final double[] data2 = randomData(random, size);
+				final double[] kernel = createKernel(s);
 
 				for (int scale = 2; scale < 5; scale++)
 				{
-					double[][] e = Convolution.convolve(kernel, data1, data2, scale);
+					final double[][] e = Convolution.convolve(kernel, data1, data2, scale);
 					final double[][] o = new double[2][e[0].length];
 					final int limit = data1.length;
 					Convolution.convolve(kernel, data1, data2, scale, new DoubleConvolutionValueProcedure()
@@ -570,7 +570,6 @@ public class ConvolutionTest
 
 		int size = 10;
 		for (int scale = 4; scale <= 8; scale *= 2)
-		{
 			for (int i = 0; i < 4; i++)
 			{
 				double s = 0.5;
@@ -581,17 +580,16 @@ public class ConvolutionTest
 				}
 				size *= 2;
 			}
-		}
 	}
 
 	private static void doScaledSpeedTest(int size, double s, int scale)
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
+		final RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 100;
 
-		double[] data1 = randomData(random, size);
-		double[] kernel = createKernel(s);
-		TDoubleArrayList list = new TDoubleArrayList();
+		final double[] data1 = randomData(random, size);
+		final double[] kernel = createKernel(s);
+		final TDoubleArrayList list = new TDoubleArrayList();
 
 		// Warm up
 		convolve(kernel, data1, list, scale);
@@ -599,9 +597,7 @@ public class ConvolutionTest
 
 		long t1 = System.nanoTime();
 		for (int i = 0; i < RUNS; i++)
-		{
 			convolve(kernel, data1, list, scale);
-		}
 		t1 = System.nanoTime() - t1;
 
 		long t2 = System.nanoTime();

@@ -40,7 +40,7 @@ public class PeakResultTableModelJTable extends JTable
 {
 	private static final long serialVersionUID = 7144289957208169053L;
 
-	private TableColumnAdjuster tca;
+	private final TableColumnAdjuster tca;
 
 	/**
 	 * Instantiates a new peak result table model J table.
@@ -84,7 +84,6 @@ public class PeakResultTableModelJTable extends JTable
 		super.tableChanged(e);
 
 		if (e.getFirstRow() == TableModelEvent.HEADER_ROW)
-		{
 			// The whole thing changed so resize the columns
 			SwingUtilities.invokeLater(new Runnable()
 			{
@@ -96,16 +95,15 @@ public class PeakResultTableModelJTable extends JTable
 						tca.adjustColumns();
 				}
 			});
-		}
 	}
 
 	private void updateRenderer()
 	{
 		// For rounding
-		TableModel m = getModel();
+		final TableModel m = getModel();
 		if (m instanceof PeakResultTableModel)
 		{
-			PeakResultTableModel model = (PeakResultTableModel) m;
+			final PeakResultTableModel model = (PeakResultTableModel) m;
 			setDefaultRenderer(Float.class, model.getFloatRenderer());
 			setDefaultRenderer(Double.class, model.getDoubleRenderer());
 			setDefaultRenderer(Integer.class, model.getIntegerRenderer());
@@ -127,42 +125,30 @@ public class PeakResultTableModelJTable extends JTable
 	{
 		if (dataModel instanceof PeakResultTableModel)
 		{
-			PeakResultTableModel model = (PeakResultTableModel) dataModel;
-			int iMin = selectionModel.getMinSelectionIndex();
-			int iMax = selectionModel.getMaxSelectionIndex();
+			final PeakResultTableModel model = (PeakResultTableModel) dataModel;
+			final int iMin = selectionModel.getMinSelectionIndex();
+			final int iMax = selectionModel.getMaxSelectionIndex();
 
 			if ((iMin == -1) || (iMax == -1))
-			{
 				return new PeakResult[0];
-			}
 
-			PeakResult[] rvTmp = new PeakResult[1 + (iMax - iMin)];
+			final PeakResult[] rvTmp = new PeakResult[1 + (iMax - iMin)];
 			int n = 0;
 
-			RowSorter<?> sorter = getRowSorter();
+			final RowSorter<?> sorter = getRowSorter();
 			if (sorter != null)
 			{
 				for (int i = iMin; i <= iMax; i++)
-				{
 					if (selectionModel.isSelectedIndex(i))
-					{
 						rvTmp[n++] = model.get(sorter.convertRowIndexToModel(i));
-					}
-				}
 			}
 			else
-			{
 				for (int i = iMin; i <= iMax; i++)
-				{
 					if (selectionModel.isSelectedIndex(i))
-					{
 						rvTmp[n++] = model.get(i);
-					}
-				}
-			}
 			if (n == rvTmp.length)
 				return rvTmp;
-			PeakResult[] rv = new PeakResult[n];
+			final PeakResult[] rv = new PeakResult[n];
 			System.arraycopy(rvTmp, 0, rv, 0, n);
 			return rv;
 		}
@@ -183,12 +169,10 @@ public class PeakResultTableModelJTable extends JTable
 	 */
 	public void convertRowIndexToModel(int[] indices)
 	{
-		RowSorter<?> sorter = getRowSorter();
+		final RowSorter<?> sorter = getRowSorter();
 		if (sorter != null)
-		{
 			for (int i = 0; i < indices.length; i++)
 				indices[i] = sorter.convertRowIndexToModel(indices[i]);
-		}
 	}
 
 	/**
@@ -205,11 +189,9 @@ public class PeakResultTableModelJTable extends JTable
 	 */
 	public void convertRowIndexToView(int[] indices)
 	{
-		RowSorter<?> sorter = getRowSorter();
+		final RowSorter<?> sorter = getRowSorter();
 		if (sorter != null)
-		{
 			for (int i = 0; i < indices.length; i++)
 				indices[i] = sorter.convertRowIndexToView(indices[i]);
-		}
 	}
 }

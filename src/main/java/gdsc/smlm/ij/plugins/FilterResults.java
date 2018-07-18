@@ -94,7 +94,7 @@ public class FilterResults implements PlugIn
 		}
 
 		// Show a dialog allowing the results set to be filtered
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to filter");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.showDialog();
@@ -125,18 +125,18 @@ public class FilterResults implements PlugIn
 	{
 		IJ.showStatus("Analysing results ...");
 
-		ArrayList<String> error = new ArrayList<>();
+		final ArrayList<String> error = new ArrayList<>();
 
 		try
 		{
 			wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
 			wp.getW();
-			float[] limits = Maths.limits(wp.wx);
+			final float[] limits = Maths.limits(wp.wx);
 			maxWidth = limits[1];
 			minWidth = limits[0];
 			averageWidth = Maths.sum(wp.wx) / wp.size();
 		}
-		catch (DataException e)
+		catch (final DataException e)
 		{
 			error.add(e.getMessage());
 			wp = null;
@@ -148,11 +148,11 @@ public class FilterResults implements PlugIn
 			pp = new PrecisionResultProcedure(results);
 			pp.getPrecision();
 
-			double[] limits = Maths.limits(pp.precision);
+			final double[] limits = Maths.limits(pp.precision);
 			maxPrecision = limits[1];
 			minPrecision = limits[0];
 		}
-		catch (DataException e)
+		catch (final DataException e)
 		{
 			error.add(e.getMessage());
 			pp = null;
@@ -174,7 +174,7 @@ public class FilterResults implements PlugIn
 				if (i % 64 == 0)
 					IJ.showProgress(i, sp.size());
 
-				PeakResult result = sp.peakResults[i];
+				final PeakResult result = sp.peakResults[i];
 
 				final float drift = getDrift(result, sp.x[i], sp.y[i]);
 				if (maxDrift < drift)
@@ -200,7 +200,7 @@ public class FilterResults implements PlugIn
 				sp.background[i] = snr;
 			}
 		}
-		catch (DataException e)
+		catch (final DataException e)
 		{
 			error.add(e.getMessage());
 			sp = null;
@@ -208,8 +208,8 @@ public class FilterResults implements PlugIn
 
 		if (error.size() == 3 || sp == null)
 		{
-			StringBuilder sb = new StringBuilder("Unable to analyse the results:\n");
-			for (String s : error)
+			final StringBuilder sb = new StringBuilder("Unable to analyse the results:\n");
+			for (final String s : error)
 				sb.append(s).append(".\n");
 			IJ.error(TITLE, sb.toString());
 			return false;
@@ -257,7 +257,7 @@ public class FilterResults implements PlugIn
 
 		if (filterSettings.getMinWidth() > filterSettings.getMaxWidth())
 		{
-			float tmp = filterSettings.getMaxWidth();
+			final float tmp = filterSettings.getMaxWidth();
 			filterSettings.setMaxWidth(filterSettings.getMinWidth());
 			filterSettings.setMinWidth(tmp);
 		}
@@ -270,19 +270,19 @@ public class FilterResults implements PlugIn
 	{
 		checkLimits();
 
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 		newResults.copySettings(results);
 		newResults.setName(results.getName() + " Filtered");
 
 		// Initialise the mask
-		ByteProcessor mask = getMask(filterSettings.getMaskTitle());
+		final ByteProcessor mask = getMask(filterSettings.getMaskTitle());
 		MaskDistribution maskFilter = null;
 		final float centreX = results.getBounds().width / 2.0f;
 		final float centreY = results.getBounds().height / 2.0f;
 		if (mask != null)
 		{
-			double scaleX = (double) results.getBounds().width / mask.getWidth();
-			double scaleY = (double) results.getBounds().height / mask.getHeight();
+			final double scaleX = (double) results.getBounds().width / mask.getWidth();
+			final double scaleY = (double) results.getBounds().height / mask.getHeight();
 			maskFilter = new MaskDistribution((byte[]) mask.getPixels(), mask.getWidth(), mask.getHeight(), 0, scaleX,
 					scaleY);
 		}
@@ -307,7 +307,7 @@ public class FilterResults implements PlugIn
 			if (maskFilter != null)
 			{
 				// Check the coordinates are inside the mask
-				double[] xy = new double[] { sp.x[i] - centreX, sp.y[i] - centreY };
+				final double[] xy = new double[] { sp.x[i] - centreX, sp.y[i] - centreY };
 				if (!maskFilter.isWithinXY(xy))
 					continue;
 			}
@@ -334,17 +334,15 @@ public class FilterResults implements PlugIn
 
 	private static ByteProcessor getMask(String maskTitle)
 	{
-		ImagePlus imp = WindowManager.getImage(maskTitle);
+		final ImagePlus imp = WindowManager.getImage(maskTitle);
 		if (imp != null)
-		{
 			return (ByteProcessor) imp.getProcessor().convertToByte(false);
-		}
 		return null;
 	}
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
@@ -363,7 +361,7 @@ public class FilterResults implements PlugIn
 		gd.addSlider("Max_Width", minWidth, maxWidth, filterSettings.getMaxWidth());
 
 		// Get a list of potential mask images
-		String[] items = getImageList();
+		final String[] items = getImageList();
 		gd.addChoice("Mask", items, filterSettings.getMaskTitle());
 
 		gd.showDialog();
@@ -389,12 +387,12 @@ public class FilterResults implements PlugIn
 	 */
 	public static String[] getImageList()
 	{
-		ArrayList<String> newImageList = new ArrayList<>();
+		final ArrayList<String> newImageList = new ArrayList<>();
 		newImageList.add("[None]");
 
-		for (int id : Utils.getIDList())
+		for (final int id : Utils.getIDList())
 		{
-			ImagePlus imp = WindowManager.getImage(id);
+			final ImagePlus imp = WindowManager.getImage(id);
 			if (imp == null)
 				continue;
 			if (!imp.getProcessor().isBinary())

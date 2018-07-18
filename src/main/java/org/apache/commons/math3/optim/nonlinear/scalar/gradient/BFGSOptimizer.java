@@ -84,7 +84,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 */
 	public static class StepLength implements OptimizationData
 	{
-		private double[] step;
+		private final double[] step;
 
 		/**
 		 * Build an instance
@@ -113,7 +113,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 */
 	public static class GradientTolerance implements OptimizationData
 	{
-		private double tolerance;
+		private final double tolerance;
 
 		/**
 		 * Build an instance
@@ -143,7 +143,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 */
 	public static class MaximumRestarts implements OptimizationData
 	{
-		private int restarts;
+		private final int restarts;
 
 		/**
 		 * Build an instance
@@ -247,7 +247,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		// Assume minimisation
 		sign = -1;
 
-		LineStepSearch lineSearch = new LineStepSearch();
+		final LineStepSearch lineSearch = new LineStepSearch();
 
 		// In case there are no restarts
 		if (restarts <= 0)
@@ -269,10 +269,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			//	initialConvergenceIteration = getIterations();
 
 			if (converged == GRADIENT)
-			{
 				// If no gradient remains then we cannot move anywhere so return
 				break;
-			}
 
 			if (lastResult != null)
 			{
@@ -294,13 +292,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 				// Check if the optimum was improved using the convergence criteria
 				if (checker != null && checker.converged(getIterations(), lastResult, result))
-				{
 					break;
-				}
 				if (positionChecker.converged(getIterations(), lastResult, result))
-				{
 					break;
-				}
 			}
 
 			// Store the new optimum and repeat
@@ -370,9 +364,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		final double EPS = epsilon;
 
-		double[] hdg = new double[n];
-		double[] xi = new double[n];
-		double[][] hessian = new double[n][n];
+		final double[] hdg = new double[n];
+		final double[] xi = new double[n];
+		final double[][] hessian = new double[n][n];
 
 		// Get the gradient for the the bounded point
 		applyBounds(p);
@@ -393,17 +387,15 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			// Get the value of the point
 			double fp = computeObjectiveValue(p);
 
-			PointValuePair previous = current;
+			final PointValuePair previous = current;
 			current = new PointValuePair(p, fp, false);
 			if (checker != null)
-			{
 				if (previous != null && checker.converged(getIterations(), previous, current))
 				{
 					// We have found an optimum.
 					converged = CHECKER;
 					return current;
 				}
-			}
 
 			incrementIterationCount();
 
@@ -413,7 +405,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			{
 				pnew = lineSearch.lineSearch(p, fp, g, xi);
 			}
-			catch (LineSearchRoundoffException e)
+			catch (final LineSearchRoundoffException e)
 			{
 				// This can happen if the Hessian is nearly singular or non-positive-definite.
 				// In this case the algorithm should be restarted.
@@ -423,10 +415,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			}
 
 			// We assume the new point is on/within the bounds since the line search is constrained
-			double fret = lineSearch.f;
+			final double fret = lineSearch.f;
 
 			// Test for convergence on change in position
-			PointValuePair updated = new PointValuePair(pnew, fret, false);
+			final PointValuePair updated = new PointValuePair(pnew, fret, false);
 			if (positionChecker.converged(getIterations(), current, updated))
 			{
 				converged = POSITION;
@@ -435,13 +427,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 			// Update the line direction
 			for (int i = 0; i < n; i++)
-			{
 				xi[i] = pnew[i] - p[i];
-			}
 			p = pnew;
 
 			// Save the old gradient
-			double[] dg = g;
+			final double[] dg = g;
 
 			// Get the gradient for the new point
 			g = computeObjectiveGradient(p);
@@ -492,13 +482,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				for (int i = 0; i < n; i++)
 					dg[i] = fac * xi[i] - fad * hdg[i];
 				for (int i = 0; i < n; i++)
-				{
 					for (int j = i; j < n; j++)
 					{
 						hessian[i][j] += fac * xi[i] * xi[j] - fad * hdg[i] * hdg[j] + fae * dg[i] * dg[j];
 						hessian[j][i] = hessian[i][j];
 					}
-				}
 			}
 			for (int i = 0; i < n; i++)
 			{
@@ -532,29 +520,17 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		// The existing values (as set by the previous call) are reused if
 		// not provided in the argument list.
-		for (OptimizationData data : optData)
-		{
+		for (final OptimizationData data : optData)
 			if (data instanceof PositionChecker)
-			{
 				positionChecker = (PositionChecker) data;
-			}
 			else if (data instanceof StepLength)
-			{
 				maximumStepLength = ((StepLength) data).getStep();
-			}
 			else if (data instanceof GradientTolerance)
-			{
 				gradientTolerance = ((GradientTolerance) data).getTolerance();
-			}
 			else if (data instanceof MaximumRestarts)
-			{
 				restarts = ((MaximumRestarts) data).getRestarts();
-			}
 			else if (data instanceof MaximumRoundoffRestarts)
-			{
 				roundoffRestarts = ((MaximumRoundoffRestarts) data).getRestarts();
-			}
-		}
 
 		checkParameters();
 	}
@@ -661,7 +637,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			double alam2 = 0.0, f2 = 0.0;
 
 			// New point
-			double[] x = new double[xOld.length];
+			final double[] x = new double[xOld.length];
 
 			final int n = xOld.length;
 			check = false;
@@ -671,25 +647,19 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			{
 				double scale = 1;
 				for (int i = 0; i < n; i++)
-				{
 					if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
 						scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
-				}
 				if (scale < 1)
-				{
 					// Scale the entire search direction
 					for (int i = 0; i < n; i++)
 						searchDirection[i] *= scale;
-				}
 			}
 
 			double slope = 0.0;
 			for (int i = 0; i < n; i++)
 				slope += gradient[i] * searchDirection[i];
 			if (slope >= 0.0)
-			{
 				throw new LineSearchRoundoffException(slope);
-			}
 
 			// Compute lambda min
 			double test = 0.0;
@@ -699,7 +669,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				if (temp > test)
 					test = temp;
 			}
-			double alamin = TOLX / test;
+			final double alamin = TOLX / test;
 
 			// Always try the full step first
 			double alam = 1.0;
@@ -723,12 +693,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				f = BFGSOptimizer.this.computeObjectiveValue(x);
 				//System.out.printf("f=%f @ %f : %s\n", f, alam, java.util.Arrays.toString(x));
 				if (f <= fOld + ALF * alam * slope)
-				{
 					// Sufficient function decrease
 					//System.out.printf("f=%f < %f\n", f, fOld + ALF * alam * slope);
 					return x;
-				}
-				
+
 				// Check for bad function evaluation
 				if (f == Double.POSITIVE_INFINITY)
 				{
@@ -796,11 +764,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		isUpper = checkArray(upper, Double.POSITIVE_INFINITY);
 		// Check that the upper bound is above the lower bound
 		if (isUpper && isLower)
-		{
 			for (int i = 0; i < lower.length; i++)
 				if (lower[i] > upper[i])
 					throw new MathUnsupportedOperationException(createError("Lower bound must be below upper bound"));
-		}
 
 		// Numerical Recipes set the position convergence very low
 		if (positionChecker == null)
@@ -808,14 +774,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		// Ensure that the step length is strictly positive
 		if (maximumStepLength == null)
-		{
 			for (int i = 0; i < maximumStepLength.length; i++)
-			{
 				if (maximumStepLength[i] <= 0)
 					throw new MathUnsupportedOperationException(
 							createError("Maximum step length must be strictly positive"));
-			}
-		}
 
 		// Set a tolerance? If not then the routine will iterate until position convergence
 		//if (gradientTolerance == 0)
@@ -862,7 +824,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	{
 		if (array == null)
 			return false;
-		for (double v : array)
+		for (final double v : array)
 			if (v != value)
 				return true;
 		return false;
@@ -879,23 +841,19 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	{
 		boolean truncated = false;
 		if (isUpper)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] > upper[i])
 				{
 					point[i] = upper[i];
 					truncated = true;
 				}
-		}
 		if (isLower)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] < lower[i])
 				{
 					point[i] = lower[i];
 					truncated = true;
 				}
-		}
 		return truncated;
 	}
 
@@ -927,23 +885,12 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	private void checkGradients(double[] r, double[] point, final double sign)
 	{
 		if (isUpper)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] >= upper[i] && Math.signum(r[i]) == sign)
 					r[i] = 0;
-		}
 		if (isLower)
-		{
-			for (int i = 0; i < point.length; i++)
+		 for (int i = 0; i < point.length; i++)
 				if (point[i] <= lower[i] && Math.signum(r[i]) == -sign)
 					r[i] = 0;
-		}
-		//boolean isNaN = false;
-		//for (int i = 0; i < point.length; i++)
-		//	if (Double.isNaN(r[i]))
-		//	{
-		//		isNaN = true;
-		//		r[i] = 0;
-		//	}
 	}
 }

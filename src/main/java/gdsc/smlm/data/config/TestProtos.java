@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "javadoc"})
+@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method"})
 public final class TestProtos {
   private TestProtos() {}
   public static void registerAllExtensions(
@@ -55,19 +55,18 @@ public final class TestProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -82,9 +81,9 @@ public final class TestProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -127,7 +126,7 @@ public final class TestProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -138,12 +137,10 @@ public final class TestProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (field1_ != 0) {
-        output.writeInt32(1, field1_);
-      }
-      if (field2_ != false) {
-        output.writeBool(2, field2_);
-      }
+      if (field1_ != 0)
+		output.writeInt32(1, field1_);
+      if (field2_ != false)
+		output.writeBool(2, field2_);
     }
 
     @Override
@@ -152,14 +149,12 @@ public final class TestProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (field1_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (field1_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, field1_);
-      }
-      if (field2_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (field2_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, field2_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -167,13 +162,11 @@ public final class TestProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message1)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TestProtos.Message1 other = (gdsc.smlm.data.config.TestProtos.Message1) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message1))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.TestProtos.Message1 other = (gdsc.smlm.data.config.TestProtos.Message1) obj;
 
       boolean result = true;
       result = result && (getField1()
@@ -185,9 +178,8 @@ public final class TestProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + FIELD1_FIELD_NUMBER;
@@ -287,7 +279,7 @@ public final class TestProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -348,16 +340,15 @@ public final class TestProtos {
 
       @Override
 	public gdsc.smlm.data.config.TestProtos.Message1 build() {
-        gdsc.smlm.data.config.TestProtos.Message1 result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.TestProtos.Message1 result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.TestProtos.Message1 buildPartial() {
-        gdsc.smlm.data.config.TestProtos.Message1 result = new gdsc.smlm.data.config.TestProtos.Message1(this);
+        final gdsc.smlm.data.config.TestProtos.Message1 result = new gdsc.smlm.data.config.TestProtos.Message1(this);
         result.field1_ = field1_;
         result.field2_ = field2_;
         onBuilt();
@@ -398,9 +389,9 @@ public final class TestProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TestProtos.Message1) {
-          return mergeFrom((gdsc.smlm.data.config.TestProtos.Message1)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.TestProtos.Message1)
+			return mergeFrom((gdsc.smlm.data.config.TestProtos.Message1)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -408,12 +399,10 @@ public final class TestProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message1 other) {
         if (other == gdsc.smlm.data.config.TestProtos.Message1.getDefaultInstance()) return this;
-        if (other.getField1() != 0) {
-          setField1(other.getField1());
-        }
-        if (other.getField2() != false) {
-          setField2(other.getField2());
-        }
+        if (other.getField1() != 0)
+			setField1(other.getField1());
+        if (other.getField2() != false)
+			setField2(other.getField2());
         onChanged();
         return this;
       }
@@ -431,13 +420,12 @@ public final class TestProtos {
         gdsc.smlm.data.config.TestProtos.Message1 parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.TestProtos.Message1) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -588,19 +576,18 @@ public final class TestProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -615,9 +602,9 @@ public final class TestProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -660,7 +647,7 @@ public final class TestProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -671,12 +658,10 @@ public final class TestProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (entry1_ != 0) {
-        output.writeInt32(1, entry1_);
-      }
-      if (entry2_ != 0D) {
-        output.writeDouble(2, entry2_);
-      }
+      if (entry1_ != 0)
+		output.writeInt32(1, entry1_);
+      if (entry2_ != 0D)
+		output.writeDouble(2, entry2_);
     }
 
     @Override
@@ -685,14 +670,12 @@ public final class TestProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (entry1_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (entry1_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, entry1_);
-      }
-      if (entry2_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (entry2_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, entry2_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -700,13 +683,11 @@ public final class TestProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message2)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TestProtos.Message2 other = (gdsc.smlm.data.config.TestProtos.Message2) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message2))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.TestProtos.Message2 other = (gdsc.smlm.data.config.TestProtos.Message2) obj;
 
       boolean result = true;
       result = result && (getEntry1()
@@ -720,9 +701,8 @@ public final class TestProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ENTRY1_FIELD_NUMBER;
@@ -822,7 +802,7 @@ public final class TestProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -883,16 +863,15 @@ public final class TestProtos {
 
       @Override
 	public gdsc.smlm.data.config.TestProtos.Message2 build() {
-        gdsc.smlm.data.config.TestProtos.Message2 result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.TestProtos.Message2 result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.TestProtos.Message2 buildPartial() {
-        gdsc.smlm.data.config.TestProtos.Message2 result = new gdsc.smlm.data.config.TestProtos.Message2(this);
+        final gdsc.smlm.data.config.TestProtos.Message2 result = new gdsc.smlm.data.config.TestProtos.Message2(this);
         result.entry1_ = entry1_;
         result.entry2_ = entry2_;
         onBuilt();
@@ -933,9 +912,9 @@ public final class TestProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TestProtos.Message2) {
-          return mergeFrom((gdsc.smlm.data.config.TestProtos.Message2)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.TestProtos.Message2)
+			return mergeFrom((gdsc.smlm.data.config.TestProtos.Message2)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -943,12 +922,10 @@ public final class TestProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message2 other) {
         if (other == gdsc.smlm.data.config.TestProtos.Message2.getDefaultInstance()) return this;
-        if (other.getEntry1() != 0) {
-          setEntry1(other.getEntry1());
-        }
-        if (other.getEntry2() != 0D) {
-          setEntry2(other.getEntry2());
-        }
+        if (other.getEntry1() != 0)
+			setEntry1(other.getEntry1());
+        if (other.getEntry2() != 0D)
+			setEntry2(other.getEntry2());
         onChanged();
         return this;
       }
@@ -966,13 +943,12 @@ public final class TestProtos {
         gdsc.smlm.data.config.TestProtos.Message2 parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.TestProtos.Message2) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -1123,19 +1099,18 @@ public final class TestProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -1150,9 +1125,9 @@ public final class TestProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -1195,7 +1170,7 @@ public final class TestProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -1206,12 +1181,10 @@ public final class TestProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (field1_ != 0D) {
-        output.writeDouble(1, field1_);
-      }
-      if (field2_ != 0) {
-        output.writeInt32(2, field2_);
-      }
+      if (field1_ != 0D)
+		output.writeDouble(1, field1_);
+      if (field2_ != 0)
+		output.writeInt32(2, field2_);
     }
 
     @Override
@@ -1220,14 +1193,12 @@ public final class TestProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (field1_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (field1_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, field1_);
-      }
-      if (field2_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (field2_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, field2_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -1235,13 +1206,11 @@ public final class TestProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message3)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TestProtos.Message3 other = (gdsc.smlm.data.config.TestProtos.Message3) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message3))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.TestProtos.Message3 other = (gdsc.smlm.data.config.TestProtos.Message3) obj;
 
       boolean result = true;
       result = result && (
@@ -1255,9 +1224,8 @@ public final class TestProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + FIELD1_FIELD_NUMBER;
@@ -1357,7 +1325,7 @@ public final class TestProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -1418,16 +1386,15 @@ public final class TestProtos {
 
       @Override
 	public gdsc.smlm.data.config.TestProtos.Message3 build() {
-        gdsc.smlm.data.config.TestProtos.Message3 result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.TestProtos.Message3 result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.TestProtos.Message3 buildPartial() {
-        gdsc.smlm.data.config.TestProtos.Message3 result = new gdsc.smlm.data.config.TestProtos.Message3(this);
+        final gdsc.smlm.data.config.TestProtos.Message3 result = new gdsc.smlm.data.config.TestProtos.Message3(this);
         result.field1_ = field1_;
         result.field2_ = field2_;
         onBuilt();
@@ -1468,9 +1435,9 @@ public final class TestProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TestProtos.Message3) {
-          return mergeFrom((gdsc.smlm.data.config.TestProtos.Message3)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.TestProtos.Message3)
+			return mergeFrom((gdsc.smlm.data.config.TestProtos.Message3)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -1478,12 +1445,10 @@ public final class TestProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message3 other) {
         if (other == gdsc.smlm.data.config.TestProtos.Message3.getDefaultInstance()) return this;
-        if (other.getField1() != 0D) {
-          setField1(other.getField1());
-        }
-        if (other.getField2() != 0) {
-          setField2(other.getField2());
-        }
+        if (other.getField1() != 0D)
+			setField1(other.getField1());
+        if (other.getField2() != 0)
+			setField2(other.getField2());
         onChanged();
         return this;
       }
@@ -1501,13 +1466,12 @@ public final class TestProtos {
         gdsc.smlm.data.config.TestProtos.Message3 parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.TestProtos.Message3) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -1641,14 +1605,14 @@ public final class TestProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    final java.lang.String[] descriptorData = {
       "\n\ntest.proto\022\025gdsc.smlm.data.config\"*\n\010M" +
       "essage1\022\016\n\006field1\030\001 \001(\005\022\016\n\006field2\030\002 \001(\010\"" +
       "*\n\010Message2\022\016\n\006entry1\030\001 \001(\005\022\016\n\006entry2\030\002 " +
       "\001(\001\"*\n\010Message3\022\016\n\006field1\030\001 \001(\001\022\016\n\006field" +
       "2\030\002 \001(\005B\014B\nTestProtosb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
           @Override
 		public com.google.protobuf.ExtensionRegistry assignDescriptors(

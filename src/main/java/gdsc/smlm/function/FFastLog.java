@@ -106,41 +106,7 @@ public class FFastLog extends FastLog
 		data = new float[size];
 
 		for (int i = 0; i < size; i++)
-		{
-			// Store log2 value of a range of floating point numbers using a limited
-			// precision mantissa (m). The purpose of this code is to enumerate all
-			// possible mantissas of a float with limited precision (23-q). Note the
-			// 24 for a 23-bit mantissa comes from the fact that the mantissa
-			// represents the digits of a binary number after the binary-point: .10101010101
-			// It is assumed that the digit before the point is a 1 if the exponent
-			// is non-zero. Otherwise the binary point is moved to the right of the first
-			// digit (i.e. a bit shift left).
-
-			// See Float.intBitsToFloat(int):
-			// int s = ((bits >> 31) == 0) ? 1 : -1;
-			// int e = ((bits >> 23) & 0xff); // Unsigned exponent
-			// int m = (e == 0) ?
-			//                 (bits & 0x7fffff) << 1 :
-			//                 (bits & 0x7fffff) | 0x800000;
-			//
-			// Then the floating-point result equals the value of the mathematical
-			// expression s x m x 2^(e-150).
-
-			// For a precision of n=(23-q)=6
-			// We enumerate:
-			// ( .000000 to  .111111) * 2^q (i.e. q additional zeros)
-			// (1.000000 to 1.111111) * 2^q
-
-			// The bit shift is performed on integer data to construct the desired mantissa
-			// which is then converted to a double for the call to exactLog2(double).
-
-			// int m = i << q
-			// log2(m x 2^(e-150)) == log2(m) + log2(2^e-150) = log2(m) +(e-150)
-			// We subtract the -150 here so that the log2(float) can be reconstructed
-			// from the table of log2(m) + e.
-
 			data[i] = (float) (exactLog2(i << q) - 150);
-		}
 
 		// We need the complete table to do this
 		// Comment out for production code since the tolerance is variable.
@@ -201,10 +167,8 @@ public class FFastLog extends FastLog
 		}
 
 		if ((bits >> 31) != 0)
-		{
 			// Only -0 is allowed
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]);
 	}
@@ -247,9 +211,7 @@ public class FFastLog extends FastLog
 			return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
 		}
 		if ((bits >> 31) != 0)
-		{
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]) * scale;
 	}
 
@@ -309,10 +271,8 @@ public class FFastLog extends FastLog
 
 		// Check for negatives
 		if ((bits >> 63) != 0L)
-		{
 			// Only -0 is allowed
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		// We must subtract -1075 from the exponent.
 		// However -150 has been pre-subtracted in the table.
@@ -377,10 +337,8 @@ public class FFastLog extends FastLog
 
 		// Check for negatives
 		if ((bits >> 63) != 0L)
-		{
 			// Only -0 is allowed
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		// We must subtract -1075 from the exponent.
 		// However -150 has been pre-subtracted in the table.

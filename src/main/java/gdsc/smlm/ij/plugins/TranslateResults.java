@@ -59,10 +59,10 @@ public class TranslateResults implements PlugIn
 			return;
 		}
 
-		TranslateResultsSettings.Builder settings = SettingsManager.readTranslateResultsSettings(0).toBuilder();
+		final TranslateResultsSettings.Builder settings = SettingsManager.readTranslateResultsSettings(0).toBuilder();
 
 		// Show a dialog allowing the results set to be filtered
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to translate");
 		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
 		gd.addNumericField("x", settings.getDx(), 3);
@@ -81,7 +81,7 @@ public class TranslateResults implements PlugIn
 
 		SettingsManager.writeSettings(settings);
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -93,7 +93,7 @@ public class TranslateResults implements PlugIn
 		{
 			c = results.getDistanceConverter(settings.getDistanceUnit());
 		}
-		catch (DataException e)
+		catch (final DataException e)
 		{
 			IJ.error(TITLE, "Unit conversion error: " + e.getMessage());
 			return;
@@ -113,7 +113,7 @@ public class TranslateResults implements PlugIn
 			public void execute(PeakResult peakResult)
 			{
 				// Requires a direct reference!
-				float[] params = peakResult.getParameters();
+				final float[] params = peakResult.getParameters();
 				params[PeakResult.X] += x;
 				params[PeakResult.Y] += y;
 				params[PeakResult.Z] += z;

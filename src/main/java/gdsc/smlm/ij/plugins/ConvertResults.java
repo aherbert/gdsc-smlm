@@ -60,7 +60,7 @@ public class ConvertResults implements PlugIn
 		if (!showInputDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -75,14 +75,14 @@ public class ConvertResults implements PlugIn
 
 	private static boolean showInputDialog()
 	{
-		int size = MemoryPeakResults.countMemorySize();
+		final int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return false;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select results to convert");
 
@@ -100,11 +100,11 @@ public class ConvertResults implements PlugIn
 
 	private static boolean showDialog(MemoryPeakResults results)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Convert the current units for the results");
 		gd.addHelp(About.HELP_URL);
 
-		CalibrationReader cr = CalibrationWriter.create(results.getCalibration());
+		final CalibrationReader cr = CalibrationWriter.create(results.getCalibration());
 
 		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), UnitHelper.getName(cr.getDistanceUnit()));
 		gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
@@ -117,12 +117,12 @@ public class ConvertResults implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		CalibrationWriter cw = results.getCalibrationWriterSafe();
-		DistanceUnit distanceUnit = SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()];
+		final CalibrationWriter cw = results.getCalibrationWriterSafe();
+		final DistanceUnit distanceUnit = SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()];
 		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
-		IntensityUnit intensityUnit = SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
+		final IntensityUnit intensityUnit = SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
 		cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
-		AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
+		final AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
 
 		// Don't set the calibration with bad values
 		if (distanceUnit.getNumber() > 0 && !(cw.getNmPerPixel() > 0))
@@ -136,7 +136,7 @@ public class ConvertResults implements PlugIn
 			return false;
 		}
 
-		Calibration newCalibration = cw.getCalibration();
+		final Calibration newCalibration = cw.getCalibration();
 		results.setCalibration(newCalibration);
 
 		if (!results.convertToUnits(distanceUnit, intensityUnit, angleUnit))

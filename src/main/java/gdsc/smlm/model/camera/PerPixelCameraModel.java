@@ -133,7 +133,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 			throw new IllegalArgumentException("Bounds must not be null");
 		checkBounds(bounds);
 		cameraBounds = (cloneBounds) ? new Rectangle(bounds) : bounds;
-		int size = SimpleArrayUtils.check2DSize(bounds.width, bounds.height);
+		final int size = SimpleArrayUtils.check2DSize(bounds.width, bounds.height);
 		checkArray(bias, size);
 		checkArray(gain, size);
 		checkArray(variance, size);
@@ -421,9 +421,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	private float[] getNormalisedVarianceInternal()
 	{
 		if (var_g2 == null)
-		{
 			createNormalisedVariance();
-		}
 		return var_g2;
 	}
 
@@ -431,12 +429,10 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (var_g2 == null)
 		{
-			int size = variance.length;
+			final int size = variance.length;
 			var_g2 = new float[size];
 			for (int i = 0; i < size; i++)
-			{
 				var_g2[i] = variance[i] / (gain[i] * gain[i]);
-			}
 		}
 	}
 
@@ -519,7 +515,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 */
 	private float[] getData(Rectangle bounds, float[] values)
 	{
-		Rectangle intersection = getIntersection(bounds);
+		final Rectangle intersection = getIntersection(bounds);
 		return getData(values, intersection, true);
 	}
 
@@ -534,7 +530,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 */
 	private double getMean(Rectangle bounds, float[] values)
 	{
-		Rectangle intersection = getIntersection(bounds);
+		final Rectangle intersection = getIntersection(bounds);
 		return getMean(values, intersection);
 	}
 
@@ -554,13 +550,13 @@ public class PerPixelCameraModel extends BaseCameraModel
 			return new Rectangle(getWidth(), getHeight()); // Offset to the origin
 		checkBounds(bounds);
 		// We avoid underflow since we have checked the bounds are positive integers
-		int minx = bounds.x - cameraBounds.x;
-		int miny = bounds.y - cameraBounds.y;
+		final int minx = bounds.x - cameraBounds.x;
+		final int miny = bounds.y - cameraBounds.y;
 		if (minx < 0 || miny < 0)
 			throw new IllegalArgumentException("Bounds must be within the camera bounds");
 		// Avoid overflow using a long result
-		long maxx = (long) minx + bounds.width;
-		long maxy = (long) miny + bounds.height;
+		final long maxx = (long) minx + bounds.width;
+		final long maxy = (long) miny + bounds.height;
 		if (maxx > cameraBounds.width || maxy > cameraBounds.height)
 			throw new IllegalArgumentException("Bounds must be within the camera bounds");
 		return new Rectangle(minx, miny, bounds.width, bounds.height);
@@ -607,19 +603,15 @@ public class PerPixelCameraModel extends BaseCameraModel
 		if (bounds.x != 0 || bounds.y != 0 || bounds.width != cameraBounds.width ||
 				bounds.height != cameraBounds.height)
 		{
-			float[] pixels2 = new float[bounds.width * bounds.height];
+			final float[] pixels2 = new float[bounds.width * bounds.height];
 			final int width = cameraBounds.width;
 			for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-			{
 				for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 					pixels2[offset1++] = pixels[offset2++];
-			}
 			return pixels2;
 		}
 		else
-		{
 			return (copy) ? pixels.clone() : pixels;
-		}
 	}
 
 	/**
@@ -639,10 +631,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 		{
 			final int width = cameraBounds.width;
 			for (int ys = 0; ys < bounds.height; ys++)
-			{
 				for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 					sum += pixels[offset2++];
-			}
 			return sum / (bounds.height * bounds.width);
 		}
 		else
@@ -685,8 +675,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (data == null)
 			return;
-		Rectangle intersection = getIntersection(bounds);
-		float[] bias = getData(this.bias, intersection, false);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] bias = getData(this.bias, intersection, false);
 		if (data.length != bias.length)
 			throw new IllegalArgumentException("Bounds must match the data size");
 		for (int i = 0; i < data.length; i++)
@@ -703,8 +693,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (data == null)
 			return;
-		Rectangle intersection = getIntersection(bounds);
-		float[] gain = getData(this.gain, intersection, false);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] gain = getData(this.gain, intersection, false);
 		if (data.length != gain.length)
 			throw new IllegalArgumentException("Bounds must match the data size");
 		for (int i = 0; i < data.length; i++)
@@ -721,11 +711,11 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (data == null)
 			return;
-		Rectangle intersection = getIntersection(bounds);
-		float[] bias = getData(this.bias, intersection, false);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] bias = getData(this.bias, intersection, false);
 		if (data.length != bias.length)
 			throw new IllegalArgumentException("Bounds must match the data size");
-		float[] gain = getData(this.gain, intersection, false);
+		final float[] gain = getData(this.gain, intersection, false);
 		for (int i = 0; i < data.length; i++)
 			data[i] = (data[i] - bias[i]) / gain[i];
 	}
@@ -740,8 +730,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (data == null)
 			return;
-		Rectangle intersection = getIntersection(bounds);
-		float[] bias = getData(this.bias, intersection, false);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] bias = getData(this.bias, intersection, false);
 		if (data.length != bias.length)
 			throw new IllegalArgumentException("Bounds must match the data size");
 		for (int i = 0; i < data.length; i++)
@@ -758,8 +748,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (data == null)
 			return;
-		Rectangle intersection = getIntersection(bounds);
-		float[] gain = getData(this.gain, intersection, false);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] gain = getData(this.gain, intersection, false);
 		if (data.length != gain.length)
 			throw new IllegalArgumentException("Bounds must match the data size");
 		for (int i = 0; i < data.length; i++)
@@ -776,11 +766,11 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		if (data == null)
 			return;
-		Rectangle intersection = getIntersection(bounds);
-		float[] bias = getData(this.bias, intersection, false);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] bias = getData(this.bias, intersection, false);
 		if (data.length != bias.length)
 			throw new IllegalArgumentException("Bounds must match the data size");
-		float[] gain = getData(this.gain, intersection, false);
+		final float[] gain = getData(this.gain, intersection, false);
 		for (int i = 0; i < data.length; i++)
 			data[i] = data[i] * gain[i] + bias[i];
 	}
@@ -895,17 +885,17 @@ public class PerPixelCameraModel extends BaseCameraModel
 		{
 			if (resetOrigin)
 			{
-				PerPixelCameraModel model = copy();
+				final PerPixelCameraModel model = copy();
 				model.setOrigin(0, 0);
 				return model;
 			}
 			return this;
 		}
-		Rectangle intersection = getIntersection(bounds);
-		float[] bias = getData(this.bias, intersection, true);
-		float[] gain = getData(this.gain, intersection, true);
-		float[] variance = getData(this.variance, intersection, true);
-		float[] var_g2 = (this.var_g2 == null) ? null : getData(this.var_g2, intersection, true);
+		final Rectangle intersection = getIntersection(bounds);
+		final float[] bias = getData(this.bias, intersection, true);
+		final float[] gain = getData(this.gain, intersection, true);
+		final float[] variance = getData(this.variance, intersection, true);
+		final float[] var_g2 = (this.var_g2 == null) ? null : getData(this.var_g2, intersection, true);
 		return new PerPixelCameraModel(false, bounds, bias, gain, variance, var_g2);
 	}
 
@@ -933,7 +923,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 		{
 			return (PerPixelCameraModel) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

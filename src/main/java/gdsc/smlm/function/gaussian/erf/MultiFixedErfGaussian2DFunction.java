@@ -229,7 +229,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
-			double x_u_m12 = x_u_p12;
+			final double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
 			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
@@ -352,7 +352,6 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 		final double[] duda = new double[getNumberOfGradients()];
 		duda[0] = 1.0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -365,7 +364,6 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 				}
 				procedure.execute(I, duda);
 			}
-		}
 	}
 
 	/*
@@ -380,7 +378,6 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 		final double[] d2uda2 = new double[getNumberOfGradients()];
 		duda[0] = 1.0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -395,7 +392,6 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 				}
 				procedure.execute(I, duda, d2uda2);
 			}
-		}
 	}
 
 	/*
@@ -414,9 +410,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 		for (int y = 0; y < maxy; y++)
 		{
 			for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy)
-			{
 				du_dty_tI[n] = du_dty[yy] / tI[n];
-			}
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -432,7 +426,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 
 					// Background are all 0
 
-					int k = a * ng + a;
+					final int k = a * ng + a;
 					// Signal,X
 					d2udadb[k + 1] = duda[a + 1] / tI;
 					// Signal,Y
@@ -440,7 +434,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 
 					a += 3;
 
-					int kk = k + ng;
+					final int kk = k + ng;
 					// X,Signal
 					d2udadb[kk] = d2udadb[k + 1];
 					// X,X
@@ -448,7 +442,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 					// X,Y
 					d2udadb[kk + 2] = du_dtx[xx] * du_dty_tI[n];
 
-					int kkk = kk + ng;
+					final int kkk = kk + ng;
 					// Y,Signal
 					d2udadb[kkk] = d2udadb[k + 2];
 					// Y,X

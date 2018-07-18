@@ -176,7 +176,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		{
 			int m = t.length;
 			t = Arrays.copyOf(t, n); // Preserve memory space
-			boolean sp = splines[0][0].isSinglePrecision();
+			final boolean sp = splines[0][0].isSinglePrecision();
 			while (m < n)
 				t[m++] = (sp) ? new FloatTargetSpline() : new DoubleTargetSpline();
 			working = new TargetSpline[n];
@@ -186,10 +186,10 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		w = 0;
 		for (int i = 0, j = PeakResult.INTENSITY; i < n; i++)
 		{
-			double tI = a[j++];
-			double tX = a[j++];
-			double tY = a[j++];
-			double tZ = a[j++];
+			final double tI = a[j++];
+			final double tX = a[j++];
+			final double tY = a[j++];
+			final double tZ = a[j++];
 			if (t[i].initialise(i, tI, tX, tY, tZ, order))
 				working[w++] = t[i];
 		}
@@ -211,28 +211,20 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			// Get the working targets for this Y
 			wY = 0;
 			for (int n = 0; n < w; n++)
-			{
 				if (working[n].isNextYActive())
 					workingY[wY++] = working[n];
-			}
 
 			if (wY == 0)
-			{
 				for (int x = 0; x < maxx; x++)
 					procedure.execute(tB);
-			}
 			else
-			{
 				for (int x = 0; x < maxx; x++)
 				{
 					double I = tB;
 					for (int n = 0; n < wY; n++)
-					{
 						I += workingY[n].value(x);
-					}
 					procedure.execute(I);
 				}
-			}
 		}
 	}
 
@@ -255,28 +247,20 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			// Get the working targets for this Y
 			wY = 0;
 			for (int n = 0; n < w; n++)
-			{
 				if (working[n].isNextYActive(duda))
 					workingY[wY++] = working[n];
-			}
 
 			if (wY == 0)
-			{
 				for (int x = 0; x < maxx; x++)
 					procedure.execute(tB, duda);
-			}
 			else
-			{
 				for (int x = 0; x < maxx; x++)
 				{
 					double I = tB;
 					for (int n = 0; n < wY; n++)
-					{
 						I += workingY[n].value(x, duda);
-					}
 					procedure.execute(I, duda);
 				}
-			}
 		}
 	}
 
@@ -300,28 +284,20 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			// Get the working targets for this Y
 			wY = 0;
 			for (int n = 0; n < w; n++)
-			{
 				if (working[n].isNextYActive(duda, d2uda2))
 					workingY[wY++] = working[n];
-			}
 
 			if (wY == 0)
-			{
 				for (int x = 0; x < maxx; x++)
 					procedure.execute(tB, duda, d2uda2);
-			}
 			else
-			{
 				for (int x = 0; x < maxx; x++)
 				{
 					double I = tB;
 					for (int n = 0; n < wY; n++)
-					{
 						I += workingY[n].value(x, duda, d2uda2);
-					}
 					procedure.execute(I, duda, d2uda2);
 				}
-			}
 		}
 	}
 
@@ -333,15 +309,15 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	@Override
 	public boolean isNodeBoundary(int gradientIndex)
 	{
-		int parameterIndex = gradientIndices()[gradientIndex];
+		final int parameterIndex = gradientIndices()[gradientIndex];
 		if (parameterIndex == BACKGROUND)
 			return false;
 
-		int dimension = (parameterIndex - 1) % PARAMETERS_PER_PEAK;
+		final int dimension = (parameterIndex - 1) % PARAMETERS_PER_PEAK;
 		if (dimension == 0)
 			return false; // Signal
 
-		int peak = getPeak(parameterIndex);
+		final int peak = getPeak(parameterIndex);
 		for (int n = 0; n < w; n++)
 			if (working[n].id == peak)
 				return working[n].isNodeBoundary(dimension - 1);

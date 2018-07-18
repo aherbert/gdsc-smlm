@@ -88,9 +88,7 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 			{
 				value += fi;
 				for (int k = 0; k < n; k++)
-				{
 					beta[k] -= dfi_da[k];
-				}
 			}
 		}
 	}
@@ -111,13 +109,9 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 
 			// We assume y[i] is positive but must handle zero
 			if (xi > 0.0)
-			{
 				value += (fi - xi - xi * Math.log(fi / xi));
-			}
 			else
-			{
 				value += fi;
-			}
 		}
 	}
 

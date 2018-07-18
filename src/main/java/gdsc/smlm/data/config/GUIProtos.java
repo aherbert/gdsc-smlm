@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc"})
+@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc", "static-method"})
 public final class GUIProtos {
   private GUIProtos() {}
   public static void registerAllExtensions(
@@ -51,10 +51,9 @@ public final class GUIProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -107,13 +106,11 @@ public final class GUIProtos {
 
     public static TemplateType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -249,19 +246,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 13: {
@@ -295,40 +291,40 @@ public final class GUIProtos {
               break;
             }
             case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               maskTitle_ = s;
               break;
             }
             case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               freeFilter_ = s;
               break;
             }
             case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               filterTemplate_ = s;
               break;
             }
             case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               filterAnalysisDirectory_ = s;
               break;
             }
             case 90: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               filterSetFilename_ = s;
               break;
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -415,13 +411,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getMaskTitle() {
-      java.lang.Object ref = maskTitle_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = maskTitle_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         maskTitle_ = s;
         return s;
       }
@@ -432,16 +428,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getMaskTitleBytes() {
-      java.lang.Object ref = maskTitle_;
+      final java.lang.Object ref = maskTitle_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         maskTitle_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FREE_FILTER_FIELD_NUMBER = 8;
@@ -451,13 +447,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFreeFilter() {
-      java.lang.Object ref = freeFilter_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = freeFilter_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         freeFilter_ = s;
         return s;
       }
@@ -468,16 +464,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFreeFilterBytes() {
-      java.lang.Object ref = freeFilter_;
+      final java.lang.Object ref = freeFilter_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         freeFilter_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FILTER_TEMPLATE_FIELD_NUMBER = 9;
@@ -487,13 +483,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFilterTemplate() {
-      java.lang.Object ref = filterTemplate_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = filterTemplate_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         filterTemplate_ = s;
         return s;
       }
@@ -504,16 +500,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFilterTemplateBytes() {
-      java.lang.Object ref = filterTemplate_;
+      final java.lang.Object ref = filterTemplate_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filterTemplate_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FILTER_ANALYSIS_DIRECTORY_FIELD_NUMBER = 10;
@@ -523,13 +519,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFilterAnalysisDirectory() {
-      java.lang.Object ref = filterAnalysisDirectory_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = filterAnalysisDirectory_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         filterAnalysisDirectory_ = s;
         return s;
       }
@@ -540,16 +536,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFilterAnalysisDirectoryBytes() {
-      java.lang.Object ref = filterAnalysisDirectory_;
+      final java.lang.Object ref = filterAnalysisDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filterAnalysisDirectory_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FILTER_SET_FILENAME_FIELD_NUMBER = 11;
@@ -559,13 +555,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFilterSetFilename() {
-      java.lang.Object ref = filterSetFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = filterSetFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         filterSetFilename_ = s;
         return s;
       }
@@ -576,22 +572,22 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFilterSetFilenameBytes() {
-      java.lang.Object ref = filterSetFilename_;
+      final java.lang.Object ref = filterSetFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filterSetFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -602,39 +598,28 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (maxDrift_ != 0F) {
-        output.writeFloat(1, maxDrift_);
-      }
-      if (minSignal_ != 0F) {
-        output.writeFloat(2, minSignal_);
-      }
-      if (minSnr_ != 0F) {
-        output.writeFloat(3, minSnr_);
-      }
-      if (maxPrecision_ != 0D) {
-        output.writeDouble(4, maxPrecision_);
-      }
-      if (maxWidth_ != 0F) {
-        output.writeFloat(5, maxWidth_);
-      }
-      if (minWidth_ != 0F) {
-        output.writeFloat(6, minWidth_);
-      }
-      if (!getMaskTitleBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, maskTitle_);
-      }
-      if (!getFreeFilterBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, freeFilter_);
-      }
-      if (!getFilterTemplateBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, filterTemplate_);
-      }
-      if (!getFilterAnalysisDirectoryBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, filterAnalysisDirectory_);
-      }
-      if (!getFilterSetFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, filterSetFilename_);
-      }
+      if (maxDrift_ != 0F)
+		output.writeFloat(1, maxDrift_);
+      if (minSignal_ != 0F)
+		output.writeFloat(2, minSignal_);
+      if (minSnr_ != 0F)
+		output.writeFloat(3, minSnr_);
+      if (maxPrecision_ != 0D)
+		output.writeDouble(4, maxPrecision_);
+      if (maxWidth_ != 0F)
+		output.writeFloat(5, maxWidth_);
+      if (minWidth_ != 0F)
+		output.writeFloat(6, minWidth_);
+      if (!getMaskTitleBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 7, maskTitle_);
+      if (!getFreeFilterBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 8, freeFilter_);
+      if (!getFilterTemplateBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 9, filterTemplate_);
+      if (!getFilterAnalysisDirectoryBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 10, filterAnalysisDirectory_);
+      if (!getFilterSetFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 11, filterSetFilename_);
     }
 
     @Override
@@ -643,45 +628,34 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (maxDrift_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxDrift_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(1, maxDrift_);
-      }
-      if (minSignal_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minSignal_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(2, minSignal_);
-      }
-      if (minSnr_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minSnr_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(3, minSnr_);
-      }
-      if (maxPrecision_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxPrecision_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, maxPrecision_);
-      }
-      if (maxWidth_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxWidth_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(5, maxWidth_);
-      }
-      if (minWidth_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minWidth_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(6, minWidth_);
-      }
-      if (!getMaskTitleBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, maskTitle_);
-      }
-      if (!getFreeFilterBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, freeFilter_);
-      }
-      if (!getFilterTemplateBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, filterTemplate_);
-      }
-      if (!getFilterAnalysisDirectoryBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, filterAnalysisDirectory_);
-      }
-      if (!getFilterSetFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, filterSetFilename_);
-      }
+      if (!getMaskTitleBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, maskTitle_);
+      if (!getFreeFilterBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, freeFilter_);
+      if (!getFilterTemplateBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, filterTemplate_);
+      if (!getFilterAnalysisDirectoryBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, filterAnalysisDirectory_);
+      if (!getFilterSetFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, filterSetFilename_);
       memoizedSize = size;
       return size;
     }
@@ -689,13 +663,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.GUIFilterSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.GUIFilterSettings other = (gdsc.smlm.data.config.GUIProtos.GUIFilterSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.GUIFilterSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.GUIFilterSettings other = (gdsc.smlm.data.config.GUIProtos.GUIFilterSettings) obj;
 
       boolean result = true;
       result = result && (
@@ -737,9 +709,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + MAX_DRIFT_FIELD_NUMBER;
@@ -862,7 +833,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -945,16 +916,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings build() {
-        gdsc.smlm.data.config.GUIProtos.GUIFilterSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.GUIFilterSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.GUIFilterSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.GUIFilterSettings result = new gdsc.smlm.data.config.GUIProtos.GUIFilterSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.GUIFilterSettings result = new gdsc.smlm.data.config.GUIProtos.GUIFilterSettings(this);
         result.maxDrift_ = maxDrift_;
         result.minSignal_ = minSignal_;
         result.minSnr_ = minSnr_;
@@ -1004,9 +974,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.GUIFilterSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.GUIFilterSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.GUIFilterSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.GUIFilterSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -1014,24 +984,18 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.GUIFilterSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.GUIFilterSettings.getDefaultInstance()) return this;
-        if (other.getMaxDrift() != 0F) {
-          setMaxDrift(other.getMaxDrift());
-        }
-        if (other.getMinSignal() != 0F) {
-          setMinSignal(other.getMinSignal());
-        }
-        if (other.getMinSnr() != 0F) {
-          setMinSnr(other.getMinSnr());
-        }
-        if (other.getMaxPrecision() != 0D) {
-          setMaxPrecision(other.getMaxPrecision());
-        }
-        if (other.getMaxWidth() != 0F) {
-          setMaxWidth(other.getMaxWidth());
-        }
-        if (other.getMinWidth() != 0F) {
-          setMinWidth(other.getMinWidth());
-        }
+        if (other.getMaxDrift() != 0F)
+			setMaxDrift(other.getMaxDrift());
+        if (other.getMinSignal() != 0F)
+			setMinSignal(other.getMinSignal());
+        if (other.getMinSnr() != 0F)
+			setMinSnr(other.getMinSnr());
+        if (other.getMaxPrecision() != 0D)
+			setMaxPrecision(other.getMaxPrecision());
+        if (other.getMaxWidth() != 0F)
+			setMaxWidth(other.getMaxWidth());
+        if (other.getMinWidth() != 0F)
+			setMinWidth(other.getMinWidth());
         if (!other.getMaskTitle().isEmpty()) {
           maskTitle_ = other.maskTitle_;
           onChanged();
@@ -1069,13 +1033,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.GUIFilterSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.GUIFilterSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -1248,16 +1211,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getMaskTitle() {
-        java.lang.Object ref = maskTitle_;
+        final java.lang.Object ref = maskTitle_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           maskTitle_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string mask_title = 7;</code>
@@ -1265,25 +1228,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getMaskTitleBytes() {
-        java.lang.Object ref = maskTitle_;
+        final java.lang.Object ref = maskTitle_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           maskTitle_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string mask_title = 7;</code>
        */
       public Builder setMaskTitle(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         maskTitle_ = value;
         onChanged();
@@ -1303,9 +1265,8 @@ public final class GUIProtos {
        */
       public Builder setMaskTitleBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         maskTitle_ = value;
@@ -1319,16 +1280,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFreeFilter() {
-        java.lang.Object ref = freeFilter_;
+        final java.lang.Object ref = freeFilter_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           freeFilter_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string free_filter = 8;</code>
@@ -1336,25 +1297,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFreeFilterBytes() {
-        java.lang.Object ref = freeFilter_;
+        final java.lang.Object ref = freeFilter_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           freeFilter_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string free_filter = 8;</code>
        */
       public Builder setFreeFilter(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         freeFilter_ = value;
         onChanged();
@@ -1374,9 +1334,8 @@ public final class GUIProtos {
        */
       public Builder setFreeFilterBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         freeFilter_ = value;
@@ -1390,16 +1349,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFilterTemplate() {
-        java.lang.Object ref = filterTemplate_;
+        final java.lang.Object ref = filterTemplate_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           filterTemplate_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string filter_template = 9;</code>
@@ -1407,25 +1366,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFilterTemplateBytes() {
-        java.lang.Object ref = filterTemplate_;
+        final java.lang.Object ref = filterTemplate_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filterTemplate_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string filter_template = 9;</code>
        */
       public Builder setFilterTemplate(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         filterTemplate_ = value;
         onChanged();
@@ -1445,9 +1403,8 @@ public final class GUIProtos {
        */
       public Builder setFilterTemplateBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         filterTemplate_ = value;
@@ -1461,16 +1418,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFilterAnalysisDirectory() {
-        java.lang.Object ref = filterAnalysisDirectory_;
+        final java.lang.Object ref = filterAnalysisDirectory_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           filterAnalysisDirectory_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string filter_analysis_directory = 10;</code>
@@ -1478,25 +1435,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFilterAnalysisDirectoryBytes() {
-        java.lang.Object ref = filterAnalysisDirectory_;
+        final java.lang.Object ref = filterAnalysisDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filterAnalysisDirectory_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string filter_analysis_directory = 10;</code>
        */
       public Builder setFilterAnalysisDirectory(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         filterAnalysisDirectory_ = value;
         onChanged();
@@ -1516,9 +1472,8 @@ public final class GUIProtos {
        */
       public Builder setFilterAnalysisDirectoryBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         filterAnalysisDirectory_ = value;
@@ -1532,16 +1487,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFilterSetFilename() {
-        java.lang.Object ref = filterSetFilename_;
+        final java.lang.Object ref = filterSetFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           filterSetFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string filter_set_filename = 11;</code>
@@ -1549,25 +1504,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFilterSetFilenameBytes() {
-        java.lang.Object ref = filterSetFilename_;
+        final java.lang.Object ref = filterSetFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filterSetFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string filter_set_filename = 11;</code>
        */
       public Builder setFilterSetFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         filterSetFilename_ = value;
         onChanged();
@@ -1587,9 +1541,8 @@ public final class GUIProtos {
        */
       public Builder setFilterSetFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         filterSetFilename_ = value;
@@ -1723,19 +1676,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -1775,9 +1727,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -1870,7 +1822,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -1881,27 +1833,20 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (pixelPitch_ != 0D) {
-        output.writeDouble(1, pixelPitch_);
-      }
-      if (magnification_ != 0D) {
-        output.writeDouble(2, magnification_);
-      }
-      if (beamExpander_ != 0D) {
-        output.writeDouble(3, beamExpander_);
-      }
-      if (wavelength_ != 0D) {
-        output.writeDouble(4, wavelength_);
-      }
-      if (numericalAperture_ != 0D) {
-        output.writeDouble(5, numericalAperture_);
-      }
-      if (adjustForSquarePixels_ != false) {
-        output.writeBool(6, adjustForSquarePixels_);
-      }
-      if (proportionalityFactor_ != 0D) {
-        output.writeDouble(7, proportionalityFactor_);
-      }
+      if (pixelPitch_ != 0D)
+		output.writeDouble(1, pixelPitch_);
+      if (magnification_ != 0D)
+		output.writeDouble(2, magnification_);
+      if (beamExpander_ != 0D)
+		output.writeDouble(3, beamExpander_);
+      if (wavelength_ != 0D)
+		output.writeDouble(4, wavelength_);
+      if (numericalAperture_ != 0D)
+		output.writeDouble(5, numericalAperture_);
+      if (adjustForSquarePixels_ != false)
+		output.writeBool(6, adjustForSquarePixels_);
+      if (proportionalityFactor_ != 0D)
+		output.writeDouble(7, proportionalityFactor_);
     }
 
     @Override
@@ -1910,34 +1855,27 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (pixelPitch_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pixelPitch_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, pixelPitch_);
-      }
-      if (magnification_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (magnification_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, magnification_);
-      }
-      if (beamExpander_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (beamExpander_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, beamExpander_);
-      }
-      if (wavelength_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (wavelength_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, wavelength_);
-      }
-      if (numericalAperture_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (numericalAperture_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, numericalAperture_);
-      }
-      if (adjustForSquarePixels_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (adjustForSquarePixels_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, adjustForSquarePixels_);
-      }
-      if (proportionalityFactor_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (proportionalityFactor_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, proportionalityFactor_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -1945,13 +1883,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings other = (gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings other = (gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings) obj;
 
       boolean result = true;
       result = result && (
@@ -1985,9 +1921,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PIXEL_PITCH_FIELD_NUMBER;
@@ -2103,7 +2038,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -2178,16 +2113,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings build() {
-        gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings(this);
         result.pixelPitch_ = pixelPitch_;
         result.magnification_ = magnification_;
         result.beamExpander_ = beamExpander_;
@@ -2233,9 +2167,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -2243,27 +2177,20 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings.getDefaultInstance()) return this;
-        if (other.getPixelPitch() != 0D) {
-          setPixelPitch(other.getPixelPitch());
-        }
-        if (other.getMagnification() != 0D) {
-          setMagnification(other.getMagnification());
-        }
-        if (other.getBeamExpander() != 0D) {
-          setBeamExpander(other.getBeamExpander());
-        }
-        if (other.getWavelength() != 0D) {
-          setWavelength(other.getWavelength());
-        }
-        if (other.getNumericalAperture() != 0D) {
-          setNumericalAperture(other.getNumericalAperture());
-        }
-        if (other.getAdjustForSquarePixels() != false) {
-          setAdjustForSquarePixels(other.getAdjustForSquarePixels());
-        }
-        if (other.getProportionalityFactor() != 0D) {
-          setProportionalityFactor(other.getProportionalityFactor());
-        }
+        if (other.getPixelPitch() != 0D)
+			setPixelPitch(other.getPixelPitch());
+        if (other.getMagnification() != 0D)
+			setMagnification(other.getMagnification());
+        if (other.getBeamExpander() != 0D)
+			setBeamExpander(other.getBeamExpander());
+        if (other.getWavelength() != 0D)
+			setWavelength(other.getWavelength());
+        if (other.getNumericalAperture() != 0D)
+			setNumericalAperture(other.getNumericalAperture());
+        if (other.getAdjustForSquarePixels() != false)
+			setAdjustForSquarePixels(other.getAdjustForSquarePixels());
+        if (other.getProportionalityFactor() != 0D)
+			setProportionalityFactor(other.getProportionalityFactor());
         onChanged();
         return this;
       }
@@ -2281,13 +2208,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -2607,19 +2533,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -2659,9 +2584,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -2754,7 +2679,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -2765,27 +2690,20 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (numberOfPeaks_ != 0) {
-        output.writeInt32(1, numberOfPeaks_);
-      }
-      if (pValue_ != 0D) {
-        output.writeDouble(2, pValue_);
-      }
-      if (updatePreferences_ != false) {
-        output.writeBool(3, updatePreferences_);
-      }
-      if (debugPsfEstimator_ != false) {
-        output.writeBool(4, debugPsfEstimator_);
-      }
-      if (iterate_ != false) {
-        output.writeBool(5, iterate_);
-      }
-      if (showHistograms_ != false) {
-        output.writeBool(6, showHistograms_);
-      }
-      if (histogramBins_ != 0) {
-        output.writeInt32(7, histogramBins_);
-      }
+      if (numberOfPeaks_ != 0)
+		output.writeInt32(1, numberOfPeaks_);
+      if (pValue_ != 0D)
+		output.writeDouble(2, pValue_);
+      if (updatePreferences_ != false)
+		output.writeBool(3, updatePreferences_);
+      if (debugPsfEstimator_ != false)
+		output.writeBool(4, debugPsfEstimator_);
+      if (iterate_ != false)
+		output.writeBool(5, iterate_);
+      if (showHistograms_ != false)
+		output.writeBool(6, showHistograms_);
+      if (histogramBins_ != 0)
+		output.writeInt32(7, histogramBins_);
     }
 
     @Override
@@ -2794,34 +2712,27 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (numberOfPeaks_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (numberOfPeaks_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, numberOfPeaks_);
-      }
-      if (pValue_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pValue_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, pValue_);
-      }
-      if (updatePreferences_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (updatePreferences_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, updatePreferences_);
-      }
-      if (debugPsfEstimator_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (debugPsfEstimator_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, debugPsfEstimator_);
-      }
-      if (iterate_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (iterate_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, iterate_);
-      }
-      if (showHistograms_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showHistograms_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, showHistograms_);
-      }
-      if (histogramBins_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (histogramBins_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, histogramBins_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -2829,13 +2740,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings other = (gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings other = (gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings) obj;
 
       boolean result = true;
       result = result && (getNumberOfPeaks()
@@ -2859,9 +2768,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + NUMBER_OF_PEAKS_FIELD_NUMBER;
@@ -2975,7 +2883,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -3050,16 +2958,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings build() {
-        gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings(this);
         result.numberOfPeaks_ = numberOfPeaks_;
         result.pValue_ = pValue_;
         result.updatePreferences_ = updatePreferences_;
@@ -3105,9 +3012,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -3115,27 +3022,20 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings.getDefaultInstance()) return this;
-        if (other.getNumberOfPeaks() != 0) {
-          setNumberOfPeaks(other.getNumberOfPeaks());
-        }
-        if (other.getPValue() != 0D) {
-          setPValue(other.getPValue());
-        }
-        if (other.getUpdatePreferences() != false) {
-          setUpdatePreferences(other.getUpdatePreferences());
-        }
-        if (other.getDebugPsfEstimator() != false) {
-          setDebugPsfEstimator(other.getDebugPsfEstimator());
-        }
-        if (other.getIterate() != false) {
-          setIterate(other.getIterate());
-        }
-        if (other.getShowHistograms() != false) {
-          setShowHistograms(other.getShowHistograms());
-        }
-        if (other.getHistogramBins() != 0) {
-          setHistogramBins(other.getHistogramBins());
-        }
+        if (other.getNumberOfPeaks() != 0)
+			setNumberOfPeaks(other.getNumberOfPeaks());
+        if (other.getPValue() != 0D)
+			setPValue(other.getPValue());
+        if (other.getUpdatePreferences() != false)
+			setUpdatePreferences(other.getUpdatePreferences());
+        if (other.getDebugPsfEstimator() != false)
+			setDebugPsfEstimator(other.getDebugPsfEstimator());
+        if (other.getIterate() != false)
+			setIterate(other.getIterate());
+        if (other.getShowHistograms() != false)
+			setShowHistograms(other.getShowHistograms());
+        if (other.getHistogramBins() != 0)
+			setHistogramBins(other.getHistogramBins());
         onChanged();
         return this;
       }
@@ -3153,13 +3053,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -4120,21 +4019,20 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
-      int mutable_bitField2_ = 0;
+      final int mutable_bitField0_ = 0;
+      final int mutable_bitField1_ = 0;
+      final int mutable_bitField2_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -4168,25 +4066,25 @@ public final class GUIProtos {
               break;
             }
             case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               illumination_ = s;
               break;
             }
             case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               backgroundImage_ = s;
               break;
             }
             case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               distribution_ = s;
               break;
             }
             case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               distributionMask_ = s;
               break;
@@ -4252,13 +4150,13 @@ public final class GUIProtos {
               break;
             }
             case 186: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               photonDistribution_ = s;
               break;
             }
             case 194: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               photonDistributionFile_ = s;
               break;
@@ -4274,13 +4172,13 @@ public final class GUIProtos {
               break;
             }
             case 218: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               psfModel_ = s;
               break;
             }
             case 226: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               psfImageName_ = s;
               break;
@@ -4331,7 +4229,7 @@ public final class GUIProtos {
               break;
             }
             case 306: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               compoundText_ = s;
               break;
@@ -4362,13 +4260,13 @@ public final class GUIProtos {
               break;
             }
             case 354: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               confinement_ = s;
               break;
             }
             case 362: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               confinementMask_ = s;
               break;
@@ -4464,19 +4362,19 @@ public final class GUIProtos {
               break;
             }
             case 514: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               imageFilename_ = s;
               break;
             }
             case 522: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               imageResultsFilename_ = s;
               break;
             }
             case 530: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               fluorophoresFilename_ = s;
               break;
@@ -4547,13 +4445,13 @@ public final class GUIProtos {
               break;
             }
             case 640: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               cameraType_ = rawValue;
               break;
             }
             case 650: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               cameraModelName_ = s;
               break;
@@ -4579,16 +4477,16 @@ public final class GUIProtos {
               break;
             }
             case 690: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               astigmatismModel_ = s;
               break;
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -4675,13 +4573,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getIllumination() {
-      java.lang.Object ref = illumination_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = illumination_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         illumination_ = s;
         return s;
       }
@@ -4692,16 +4590,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getIlluminationBytes() {
-      java.lang.Object ref = illumination_;
+      final java.lang.Object ref = illumination_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         illumination_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int BACKGROUND_IMAGE_FIELD_NUMBER = 8;
@@ -4711,13 +4609,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getBackgroundImage() {
-      java.lang.Object ref = backgroundImage_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = backgroundImage_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         backgroundImage_ = s;
         return s;
       }
@@ -4728,16 +4626,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getBackgroundImageBytes() {
-      java.lang.Object ref = backgroundImage_;
+      final java.lang.Object ref = backgroundImage_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         backgroundImage_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int DISTRIBUTION_FIELD_NUMBER = 9;
@@ -4747,13 +4645,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getDistribution() {
-      java.lang.Object ref = distribution_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = distribution_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         distribution_ = s;
         return s;
       }
@@ -4764,16 +4662,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getDistributionBytes() {
-      java.lang.Object ref = distribution_;
+      final java.lang.Object ref = distribution_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         distribution_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int DISTRIBUTION_MASK_FIELD_NUMBER = 10;
@@ -4783,13 +4681,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getDistributionMask() {
-      java.lang.Object ref = distributionMask_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = distributionMask_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         distributionMask_ = s;
         return s;
       }
@@ -4800,16 +4698,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getDistributionMaskBytes() {
-      java.lang.Object ref = distributionMask_;
+      final java.lang.Object ref = distributionMask_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         distributionMask_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int DISTRIBUTION_MASK_SLICE_DEPTH_FIELD_NUMBER = 11;
@@ -4959,13 +4857,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getPhotonDistribution() {
-      java.lang.Object ref = photonDistribution_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = photonDistribution_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         photonDistribution_ = s;
         return s;
       }
@@ -4981,16 +4879,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getPhotonDistributionBytes() {
-      java.lang.Object ref = photonDistribution_;
+      final java.lang.Object ref = photonDistribution_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         photonDistribution_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int PHOTON_DISTRIBUTION_FILE_FIELD_NUMBER = 24;
@@ -5000,13 +4898,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getPhotonDistributionFile() {
-      java.lang.Object ref = photonDistributionFile_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = photonDistributionFile_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         photonDistributionFile_ = s;
         return s;
       }
@@ -5017,16 +4915,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getPhotonDistributionFileBytes() {
-      java.lang.Object ref = photonDistributionFile_;
+      final java.lang.Object ref = photonDistributionFile_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         photonDistributionFile_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int PHOTON_SHAPE_FIELD_NUMBER = 25;
@@ -5056,13 +4954,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getPsfModel() {
-      java.lang.Object ref = psfModel_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = psfModel_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         psfModel_ = s;
         return s;
       }
@@ -5073,16 +4971,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getPsfModelBytes() {
-      java.lang.Object ref = psfModel_;
+      final java.lang.Object ref = psfModel_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         psfModel_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int PSF_IMAGE_NAME_FIELD_NUMBER = 28;
@@ -5092,13 +4990,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getPsfImageName() {
-      java.lang.Object ref = psfImageName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = psfImageName_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         psfImageName_ = s;
         return s;
       }
@@ -5109,16 +5007,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getPsfImageNameBytes() {
-      java.lang.Object ref = psfImageName_;
+      final java.lang.Object ref = psfImageName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         psfImageName_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int ENTER_WIDTH_FIELD_NUMBER = 29;
@@ -5218,13 +5116,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getCompoundText() {
-      java.lang.Object ref = compoundText_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = compoundText_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         compoundText_ = s;
         return s;
       }
@@ -5235,16 +5133,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getCompoundTextBytes() {
-      java.lang.Object ref = compoundText_;
+      final java.lang.Object ref = compoundText_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         compoundText_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int DIFFUSE_2D_FIELD_NUMBER = 39;
@@ -5304,13 +5202,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getConfinement() {
-      java.lang.Object ref = confinement_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = confinement_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         confinement_ = s;
         return s;
       }
@@ -5321,16 +5219,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getConfinementBytes() {
-      java.lang.Object ref = confinement_;
+      final java.lang.Object ref = confinement_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         confinement_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int CONFINEMENT_MASK_FIELD_NUMBER = 45;
@@ -5340,13 +5238,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getConfinementMask() {
-      java.lang.Object ref = confinementMask_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = confinementMask_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         confinementMask_ = s;
         return s;
       }
@@ -5357,16 +5255,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getConfinementMaskBytes() {
-      java.lang.Object ref = confinementMask_;
+      final java.lang.Object ref = confinementMask_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         confinementMask_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int CONFINEMENT_MASK_SLICE_DEPTH_FIELD_NUMBER = 46;
@@ -5580,13 +5478,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getImageFilename() {
-      java.lang.Object ref = imageFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = imageFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         imageFilename_ = s;
         return s;
       }
@@ -5597,16 +5495,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getImageFilenameBytes() {
-      java.lang.Object ref = imageFilename_;
+      final java.lang.Object ref = imageFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         imageFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int IMAGE_RESULTS_FILENAME_FIELD_NUMBER = 65;
@@ -5616,13 +5514,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getImageResultsFilename() {
-      java.lang.Object ref = imageResultsFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = imageResultsFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         imageResultsFilename_ = s;
         return s;
       }
@@ -5633,16 +5531,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getImageResultsFilenameBytes() {
-      java.lang.Object ref = imageResultsFilename_;
+      final java.lang.Object ref = imageResultsFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         imageResultsFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FLUOROPHORESFILENAME_FIELD_NUMBER = 66;
@@ -5652,13 +5550,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFluorophoresFilename() {
-      java.lang.Object ref = fluorophoresFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = fluorophoresFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         fluorophoresFilename_ = s;
         return s;
       }
@@ -5669,16 +5567,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFluorophoresFilenameBytes() {
-      java.lang.Object ref = fluorophoresFilename_;
+      final java.lang.Object ref = fluorophoresFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         fluorophoresFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int CELL_SIZE_FIELD_NUMBER = 67;
@@ -5837,7 +5735,7 @@ public final class GUIProtos {
      */
     @Override
 	public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
-      gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
+      final gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
       return result == null ? gdsc.smlm.data.config.CalibrationProtos.CameraType.UNRECOGNIZED : result;
     }
 
@@ -5853,13 +5751,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getCameraModelName() {
-      java.lang.Object ref = cameraModelName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = cameraModelName_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         cameraModelName_ = s;
         return s;
       }
@@ -5875,16 +5773,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getCameraModelNameBytes() {
-      java.lang.Object ref = cameraModelName_;
+      final java.lang.Object ref = cameraModelName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         cameraModelName_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int RANDOM_CROP_FIELD_NUMBER = 82;
@@ -5946,13 +5844,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getAstigmatismModel() {
-      java.lang.Object ref = astigmatismModel_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = astigmatismModel_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         astigmatismModel_ = s;
         return s;
       }
@@ -5963,22 +5861,22 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getAstigmatismModelBytes() {
-      java.lang.Object ref = astigmatismModel_;
+      final java.lang.Object ref = astigmatismModel_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         astigmatismModel_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -5989,264 +5887,178 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (size_ != 0) {
-        output.writeInt32(1, size_);
-      }
-      if (depth_ != 0D) {
-        output.writeDouble(2, depth_);
-      }
-      if (fixedDepth_ != false) {
-        output.writeBool(3, fixedDepth_);
-      }
-      if (seconds_ != 0D) {
-        output.writeDouble(4, seconds_);
-      }
-      if (exposureTime_ != 0D) {
-        output.writeDouble(5, exposureTime_);
-      }
-      if (stepsPerSecond_ != 0D) {
-        output.writeDouble(6, stepsPerSecond_);
-      }
-      if (!getIlluminationBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, illumination_);
-      }
-      if (!getBackgroundImageBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, backgroundImage_);
-      }
-      if (!getDistributionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, distribution_);
-      }
-      if (!getDistributionMaskBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, distributionMask_);
-      }
-      if (distributionMaskSliceDepth_ != 0D) {
-        output.writeDouble(11, distributionMaskSliceDepth_);
-      }
-      if (poissonNoise_ != false) {
-        output.writeBool(12, poissonNoise_);
-      }
-      if (background_ != 0D) {
-        output.writeDouble(13, background_);
-      }
-      if (emGain_ != 0D) {
-        output.writeDouble(14, emGain_);
-      }
-      if (cameraGain_ != 0D) {
-        output.writeDouble(15, cameraGain_);
-      }
-      if (quantumEfficiency_ != 0D) {
-        output.writeDouble(16, quantumEfficiency_);
-      }
-      if (readNoise_ != 0D) {
-        output.writeDouble(17, readNoise_);
-      }
-      if (bias_ != 0) {
-        output.writeInt32(18, bias_);
-      }
-      if (particles_ != 0) {
-        output.writeInt32(19, particles_);
-      }
-      if (samplePerFrame_ != false) {
-        output.writeBool(20, samplePerFrame_);
-      }
-      if (photonsPerSecond_ != 0D) {
-        output.writeDouble(21, photonsPerSecond_);
-      }
-      if (photonsPerSecondMaximum_ != 0D) {
-        output.writeDouble(22, photonsPerSecondMaximum_);
-      }
-      if (!getPhotonDistributionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 23, photonDistribution_);
-      }
-      if (!getPhotonDistributionFileBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 24, photonDistributionFile_);
-      }
-      if (photonShape_ != 0D) {
-        output.writeDouble(25, photonShape_);
-      }
-      if (correlation_ != 0D) {
-        output.writeDouble(26, correlation_);
-      }
-      if (!getPsfModelBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 27, psfModel_);
-      }
-      if (!getPsfImageNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 28, psfImageName_);
-      }
-      if (enterWidth_ != false) {
-        output.writeBool(29, enterWidth_);
-      }
-      if (wavelength_ != 0D) {
-        output.writeDouble(30, wavelength_);
-      }
-      if (numericalAperture_ != 0D) {
-        output.writeDouble(31, numericalAperture_);
-      }
-      if (psfSd_ != 0D) {
-        output.writeDouble(32, psfSd_);
-      }
-      if (pixelPitch_ != 0D) {
-        output.writeDouble(33, pixelPitch_);
-      }
-      if (density_ != 0D) {
-        output.writeDouble(34, density_);
-      }
-      if (diffusionRate_ != 0D) {
-        output.writeDouble(35, diffusionRate_);
-      }
-      if (diffusionType_ != 0) {
-        output.writeInt32(36, diffusionType_);
-      }
-      if (compoundMolecules_ != false) {
-        output.writeBool(37, compoundMolecules_);
-      }
-      if (!getCompoundTextBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 38, compoundText_);
-      }
-      if (diffuse2D_ != false) {
-        output.writeBool(39, diffuse2D_);
-      }
-      if (rotateInitialOrientation_ != false) {
-        output.writeBool(40, rotateInitialOrientation_);
-      }
-      if (rotateDuringSimulation_ != false) {
-        output.writeBool(41, rotateDuringSimulation_);
-      }
-      if (rotate2D_ != false) {
-        output.writeBool(42, rotate2D_);
-      }
-      if (fixedFraction_ != 0D) {
-        output.writeDouble(43, fixedFraction_);
-      }
-      if (!getConfinementBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 44, confinement_);
-      }
-      if (!getConfinementMaskBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 45, confinementMask_);
-      }
-      if (confinementMaskSliceDepth_ != 0D) {
-        output.writeDouble(46, confinementMaskSliceDepth_);
-      }
-      if (confinementRadius_ != 0D) {
-        output.writeDouble(47, confinementRadius_);
-      }
-      if (pulseInterval_ != 0) {
-        output.writeInt32(48, pulseInterval_);
-      }
-      if (pulseRatio_ != 0D) {
-        output.writeDouble(49, pulseRatio_);
-      }
-      if (tOn_ != 0D) {
-        output.writeDouble(50, tOn_);
-      }
-      if (tOffShort_ != 0D) {
-        output.writeDouble(51, tOffShort_);
-      }
-      if (tOffLong_ != 0D) {
-        output.writeDouble(52, tOffLong_);
-      }
-      if (nBlinksShort_ != 0D) {
-        output.writeDouble(53, nBlinksShort_);
-      }
-      if (nBlinksLong_ != 0D) {
-        output.writeDouble(54, nBlinksLong_);
-      }
-      if (nBlinksGeometricDistribution_ != false) {
-        output.writeBool(55, nBlinksGeometricDistribution_);
-      }
-      if (minPhotons_ != 0D) {
-        output.writeDouble(56, minPhotons_);
-      }
-      if (minSnrT1_ != 0D) {
-        output.writeDouble(57, minSnrT1_);
-      }
-      if (minSnrTN_ != 0D) {
-        output.writeDouble(58, minSnrTN_);
-      }
-      if (rawImage_ != false) {
-        output.writeBool(59, rawImage_);
-      }
-      if (saveImage_ != false) {
-        output.writeBool(60, saveImage_);
-      }
-      if (saveImageResults_ != false) {
-        output.writeBool(61, saveImageResults_);
-      }
-      if (saveLocalisations_ != false) {
-        output.writeBool(62, saveLocalisations_);
-      }
-      if (saveFluorophores_ != false) {
-        output.writeBool(63, saveFluorophores_);
-      }
-      if (!getImageFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 64, imageFilename_);
-      }
-      if (!getImageResultsFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 65, imageResultsFilename_);
-      }
-      if (!getFluorophoresFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 66, fluorophoresFilename_);
-      }
-      if (cellSize_ != 0) {
-        output.writeInt32(67, cellSize_);
-      }
-      if (probabilityBinary_ != 0D) {
-        output.writeDouble(68, probabilityBinary_);
-      }
-      if (minBinaryDistance_ != 0D) {
-        output.writeDouble(69, minBinaryDistance_);
-      }
-      if (maxBinaryDistance_ != 0D) {
-        output.writeDouble(70, maxBinaryDistance_);
-      }
-      if (showHistograms_ != false) {
-        output.writeBool(71, showHistograms_);
-      }
-      if (chooseHistograms_ != false) {
-        output.writeBool(72, chooseHistograms_);
-      }
-      if (histogramBins_ != 0) {
-        output.writeInt32(73, histogramBins_);
-      }
-      if (removeOutliers_ != false) {
-        output.writeBool(74, removeOutliers_);
-      }
-      if (densityRadius_ != 0F) {
-        output.writeFloat(75, densityRadius_);
-      }
-      if (depthOfField_ != 0F) {
-        output.writeFloat(76, depthOfField_);
-      }
-      if (xPosition_ != 0D) {
-        output.writeDouble(77, xPosition_);
-      }
-      if (yPosition_ != 0D) {
-        output.writeDouble(78, yPosition_);
-      }
-      if (zPosition_ != 0D) {
-        output.writeDouble(79, zPosition_);
-      }
-      if (cameraType_ != gdsc.smlm.data.config.CalibrationProtos.CameraType.CAMERA_TYPE_NA.getNumber()) {
-        output.writeEnum(80, cameraType_);
-      }
-      if (!getCameraModelNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 81, cameraModelName_);
-      }
-      if (randomCrop_ != false) {
-        output.writeBool(82, randomCrop_);
-      }
-      if (originX_ != 0) {
-        output.writeInt32(83, originX_);
-      }
-      if (originY_ != 0) {
-        output.writeInt32(84, originY_);
-      }
-      if (depthOfFocus_ != 0D) {
-        output.writeDouble(85, depthOfFocus_);
-      }
-      if (!getAstigmatismModelBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 86, astigmatismModel_);
-      }
+      if (size_ != 0)
+		output.writeInt32(1, size_);
+      if (depth_ != 0D)
+		output.writeDouble(2, depth_);
+      if (fixedDepth_ != false)
+		output.writeBool(3, fixedDepth_);
+      if (seconds_ != 0D)
+		output.writeDouble(4, seconds_);
+      if (exposureTime_ != 0D)
+		output.writeDouble(5, exposureTime_);
+      if (stepsPerSecond_ != 0D)
+		output.writeDouble(6, stepsPerSecond_);
+      if (!getIlluminationBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 7, illumination_);
+      if (!getBackgroundImageBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 8, backgroundImage_);
+      if (!getDistributionBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 9, distribution_);
+      if (!getDistributionMaskBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 10, distributionMask_);
+      if (distributionMaskSliceDepth_ != 0D)
+		output.writeDouble(11, distributionMaskSliceDepth_);
+      if (poissonNoise_ != false)
+		output.writeBool(12, poissonNoise_);
+      if (background_ != 0D)
+		output.writeDouble(13, background_);
+      if (emGain_ != 0D)
+		output.writeDouble(14, emGain_);
+      if (cameraGain_ != 0D)
+		output.writeDouble(15, cameraGain_);
+      if (quantumEfficiency_ != 0D)
+		output.writeDouble(16, quantumEfficiency_);
+      if (readNoise_ != 0D)
+		output.writeDouble(17, readNoise_);
+      if (bias_ != 0)
+		output.writeInt32(18, bias_);
+      if (particles_ != 0)
+		output.writeInt32(19, particles_);
+      if (samplePerFrame_ != false)
+		output.writeBool(20, samplePerFrame_);
+      if (photonsPerSecond_ != 0D)
+		output.writeDouble(21, photonsPerSecond_);
+      if (photonsPerSecondMaximum_ != 0D)
+		output.writeDouble(22, photonsPerSecondMaximum_);
+      if (!getPhotonDistributionBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 23, photonDistribution_);
+      if (!getPhotonDistributionFileBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 24, photonDistributionFile_);
+      if (photonShape_ != 0D)
+		output.writeDouble(25, photonShape_);
+      if (correlation_ != 0D)
+		output.writeDouble(26, correlation_);
+      if (!getPsfModelBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 27, psfModel_);
+      if (!getPsfImageNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 28, psfImageName_);
+      if (enterWidth_ != false)
+		output.writeBool(29, enterWidth_);
+      if (wavelength_ != 0D)
+		output.writeDouble(30, wavelength_);
+      if (numericalAperture_ != 0D)
+		output.writeDouble(31, numericalAperture_);
+      if (psfSd_ != 0D)
+		output.writeDouble(32, psfSd_);
+      if (pixelPitch_ != 0D)
+		output.writeDouble(33, pixelPitch_);
+      if (density_ != 0D)
+		output.writeDouble(34, density_);
+      if (diffusionRate_ != 0D)
+		output.writeDouble(35, diffusionRate_);
+      if (diffusionType_ != 0)
+		output.writeInt32(36, diffusionType_);
+      if (compoundMolecules_ != false)
+		output.writeBool(37, compoundMolecules_);
+      if (!getCompoundTextBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 38, compoundText_);
+      if (diffuse2D_ != false)
+		output.writeBool(39, diffuse2D_);
+      if (rotateInitialOrientation_ != false)
+		output.writeBool(40, rotateInitialOrientation_);
+      if (rotateDuringSimulation_ != false)
+		output.writeBool(41, rotateDuringSimulation_);
+      if (rotate2D_ != false)
+		output.writeBool(42, rotate2D_);
+      if (fixedFraction_ != 0D)
+		output.writeDouble(43, fixedFraction_);
+      if (!getConfinementBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 44, confinement_);
+      if (!getConfinementMaskBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 45, confinementMask_);
+      if (confinementMaskSliceDepth_ != 0D)
+		output.writeDouble(46, confinementMaskSliceDepth_);
+      if (confinementRadius_ != 0D)
+		output.writeDouble(47, confinementRadius_);
+      if (pulseInterval_ != 0)
+		output.writeInt32(48, pulseInterval_);
+      if (pulseRatio_ != 0D)
+		output.writeDouble(49, pulseRatio_);
+      if (tOn_ != 0D)
+		output.writeDouble(50, tOn_);
+      if (tOffShort_ != 0D)
+		output.writeDouble(51, tOffShort_);
+      if (tOffLong_ != 0D)
+		output.writeDouble(52, tOffLong_);
+      if (nBlinksShort_ != 0D)
+		output.writeDouble(53, nBlinksShort_);
+      if (nBlinksLong_ != 0D)
+		output.writeDouble(54, nBlinksLong_);
+      if (nBlinksGeometricDistribution_ != false)
+		output.writeBool(55, nBlinksGeometricDistribution_);
+      if (minPhotons_ != 0D)
+		output.writeDouble(56, minPhotons_);
+      if (minSnrT1_ != 0D)
+		output.writeDouble(57, minSnrT1_);
+      if (minSnrTN_ != 0D)
+		output.writeDouble(58, minSnrTN_);
+      if (rawImage_ != false)
+		output.writeBool(59, rawImage_);
+      if (saveImage_ != false)
+		output.writeBool(60, saveImage_);
+      if (saveImageResults_ != false)
+		output.writeBool(61, saveImageResults_);
+      if (saveLocalisations_ != false)
+		output.writeBool(62, saveLocalisations_);
+      if (saveFluorophores_ != false)
+		output.writeBool(63, saveFluorophores_);
+      if (!getImageFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 64, imageFilename_);
+      if (!getImageResultsFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 65, imageResultsFilename_);
+      if (!getFluorophoresFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 66, fluorophoresFilename_);
+      if (cellSize_ != 0)
+		output.writeInt32(67, cellSize_);
+      if (probabilityBinary_ != 0D)
+		output.writeDouble(68, probabilityBinary_);
+      if (minBinaryDistance_ != 0D)
+		output.writeDouble(69, minBinaryDistance_);
+      if (maxBinaryDistance_ != 0D)
+		output.writeDouble(70, maxBinaryDistance_);
+      if (showHistograms_ != false)
+		output.writeBool(71, showHistograms_);
+      if (chooseHistograms_ != false)
+		output.writeBool(72, chooseHistograms_);
+      if (histogramBins_ != 0)
+		output.writeInt32(73, histogramBins_);
+      if (removeOutliers_ != false)
+		output.writeBool(74, removeOutliers_);
+      if (densityRadius_ != 0F)
+		output.writeFloat(75, densityRadius_);
+      if (depthOfField_ != 0F)
+		output.writeFloat(76, depthOfField_);
+      if (xPosition_ != 0D)
+		output.writeDouble(77, xPosition_);
+      if (yPosition_ != 0D)
+		output.writeDouble(78, yPosition_);
+      if (zPosition_ != 0D)
+		output.writeDouble(79, zPosition_);
+      if (cameraType_ != gdsc.smlm.data.config.CalibrationProtos.CameraType.CAMERA_TYPE_NA.getNumber())
+		output.writeEnum(80, cameraType_);
+      if (!getCameraModelNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 81, cameraModelName_);
+      if (randomCrop_ != false)
+		output.writeBool(82, randomCrop_);
+      if (originX_ != 0)
+		output.writeInt32(83, originX_);
+      if (originY_ != 0)
+		output.writeInt32(84, originY_);
+      if (depthOfFocus_ != 0D)
+		output.writeDouble(85, depthOfFocus_);
+      if (!getAstigmatismModelBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 86, astigmatismModel_);
     }
 
     @Override
@@ -6255,334 +6067,248 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (size_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (size_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, size_);
-      }
-      if (depth_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (depth_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, depth_);
-      }
-      if (fixedDepth_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fixedDepth_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, fixedDepth_);
-      }
-      if (seconds_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (seconds_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, seconds_);
-      }
-      if (exposureTime_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (exposureTime_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, exposureTime_);
-      }
-      if (stepsPerSecond_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (stepsPerSecond_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, stepsPerSecond_);
-      }
-      if (!getIlluminationBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, illumination_);
-      }
-      if (!getBackgroundImageBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, backgroundImage_);
-      }
-      if (!getDistributionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, distribution_);
-      }
-      if (!getDistributionMaskBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, distributionMask_);
-      }
-      if (distributionMaskSliceDepth_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getIlluminationBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, illumination_);
+      if (!getBackgroundImageBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, backgroundImage_);
+      if (!getDistributionBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, distribution_);
+      if (!getDistributionMaskBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, distributionMask_);
+      if (distributionMaskSliceDepth_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, distributionMaskSliceDepth_);
-      }
-      if (poissonNoise_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (poissonNoise_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(12, poissonNoise_);
-      }
-      if (background_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (background_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, background_);
-      }
-      if (emGain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (emGain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(14, emGain_);
-      }
-      if (cameraGain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cameraGain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(15, cameraGain_);
-      }
-      if (quantumEfficiency_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (quantumEfficiency_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(16, quantumEfficiency_);
-      }
-      if (readNoise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (readNoise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(17, readNoise_);
-      }
-      if (bias_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (bias_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(18, bias_);
-      }
-      if (particles_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (particles_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(19, particles_);
-      }
-      if (samplePerFrame_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (samplePerFrame_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(20, samplePerFrame_);
-      }
-      if (photonsPerSecond_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (photonsPerSecond_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(21, photonsPerSecond_);
-      }
-      if (photonsPerSecondMaximum_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (photonsPerSecondMaximum_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(22, photonsPerSecondMaximum_);
-      }
-      if (!getPhotonDistributionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, photonDistribution_);
-      }
-      if (!getPhotonDistributionFileBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(24, photonDistributionFile_);
-      }
-      if (photonShape_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getPhotonDistributionBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, photonDistribution_);
+      if (!getPhotonDistributionFileBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(24, photonDistributionFile_);
+      if (photonShape_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(25, photonShape_);
-      }
-      if (correlation_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (correlation_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(26, correlation_);
-      }
-      if (!getPsfModelBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(27, psfModel_);
-      }
-      if (!getPsfImageNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, psfImageName_);
-      }
-      if (enterWidth_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getPsfModelBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(27, psfModel_);
+      if (!getPsfImageNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, psfImageName_);
+      if (enterWidth_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(29, enterWidth_);
-      }
-      if (wavelength_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (wavelength_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(30, wavelength_);
-      }
-      if (numericalAperture_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (numericalAperture_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(31, numericalAperture_);
-      }
-      if (psfSd_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psfSd_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(32, psfSd_);
-      }
-      if (pixelPitch_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pixelPitch_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(33, pixelPitch_);
-      }
-      if (density_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (density_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(34, density_);
-      }
-      if (diffusionRate_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (diffusionRate_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(35, diffusionRate_);
-      }
-      if (diffusionType_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (diffusionType_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(36, diffusionType_);
-      }
-      if (compoundMolecules_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (compoundMolecules_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(37, compoundMolecules_);
-      }
-      if (!getCompoundTextBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(38, compoundText_);
-      }
-      if (diffuse2D_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getCompoundTextBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(38, compoundText_);
+      if (diffuse2D_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(39, diffuse2D_);
-      }
-      if (rotateInitialOrientation_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rotateInitialOrientation_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(40, rotateInitialOrientation_);
-      }
-      if (rotateDuringSimulation_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rotateDuringSimulation_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(41, rotateDuringSimulation_);
-      }
-      if (rotate2D_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rotate2D_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(42, rotate2D_);
-      }
-      if (fixedFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fixedFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(43, fixedFraction_);
-      }
-      if (!getConfinementBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(44, confinement_);
-      }
-      if (!getConfinementMaskBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(45, confinementMask_);
-      }
-      if (confinementMaskSliceDepth_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getConfinementBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(44, confinement_);
+      if (!getConfinementMaskBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(45, confinementMask_);
+      if (confinementMaskSliceDepth_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(46, confinementMaskSliceDepth_);
-      }
-      if (confinementRadius_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (confinementRadius_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(47, confinementRadius_);
-      }
-      if (pulseInterval_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pulseInterval_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(48, pulseInterval_);
-      }
-      if (pulseRatio_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pulseRatio_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(49, pulseRatio_);
-      }
-      if (tOn_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tOn_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(50, tOn_);
-      }
-      if (tOffShort_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tOffShort_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(51, tOffShort_);
-      }
-      if (tOffLong_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tOffLong_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(52, tOffLong_);
-      }
-      if (nBlinksShort_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nBlinksShort_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(53, nBlinksShort_);
-      }
-      if (nBlinksLong_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nBlinksLong_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(54, nBlinksLong_);
-      }
-      if (nBlinksGeometricDistribution_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nBlinksGeometricDistribution_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(55, nBlinksGeometricDistribution_);
-      }
-      if (minPhotons_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minPhotons_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(56, minPhotons_);
-      }
-      if (minSnrT1_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minSnrT1_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(57, minSnrT1_);
-      }
-      if (minSnrTN_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minSnrTN_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(58, minSnrTN_);
-      }
-      if (rawImage_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rawImage_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(59, rawImage_);
-      }
-      if (saveImage_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveImage_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(60, saveImage_);
-      }
-      if (saveImageResults_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveImageResults_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(61, saveImageResults_);
-      }
-      if (saveLocalisations_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveLocalisations_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(62, saveLocalisations_);
-      }
-      if (saveFluorophores_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveFluorophores_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(63, saveFluorophores_);
-      }
-      if (!getImageFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(64, imageFilename_);
-      }
-      if (!getImageResultsFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(65, imageResultsFilename_);
-      }
-      if (!getFluorophoresFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(66, fluorophoresFilename_);
-      }
-      if (cellSize_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getImageFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(64, imageFilename_);
+      if (!getImageResultsFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(65, imageResultsFilename_);
+      if (!getFluorophoresFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(66, fluorophoresFilename_);
+      if (cellSize_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(67, cellSize_);
-      }
-      if (probabilityBinary_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (probabilityBinary_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(68, probabilityBinary_);
-      }
-      if (minBinaryDistance_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minBinaryDistance_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(69, minBinaryDistance_);
-      }
-      if (maxBinaryDistance_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxBinaryDistance_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(70, maxBinaryDistance_);
-      }
-      if (showHistograms_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showHistograms_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(71, showHistograms_);
-      }
-      if (chooseHistograms_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (chooseHistograms_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(72, chooseHistograms_);
-      }
-      if (histogramBins_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (histogramBins_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(73, histogramBins_);
-      }
-      if (removeOutliers_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (removeOutliers_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(74, removeOutliers_);
-      }
-      if (densityRadius_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (densityRadius_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(75, densityRadius_);
-      }
-      if (depthOfField_ != 0F) {
-        size += com.google.protobuf.CodedOutputStream
+      if (depthOfField_ != 0F)
+		size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(76, depthOfField_);
-      }
-      if (xPosition_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (xPosition_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(77, xPosition_);
-      }
-      if (yPosition_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (yPosition_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(78, yPosition_);
-      }
-      if (zPosition_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (zPosition_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(79, zPosition_);
-      }
-      if (cameraType_ != gdsc.smlm.data.config.CalibrationProtos.CameraType.CAMERA_TYPE_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cameraType_ != gdsc.smlm.data.config.CalibrationProtos.CameraType.CAMERA_TYPE_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(80, cameraType_);
-      }
-      if (!getCameraModelNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(81, cameraModelName_);
-      }
-      if (randomCrop_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getCameraModelNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(81, cameraModelName_);
+      if (randomCrop_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(82, randomCrop_);
-      }
-      if (originX_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (originX_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(83, originX_);
-      }
-      if (originY_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (originY_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(84, originY_);
-      }
-      if (depthOfFocus_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (depthOfFocus_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(85, depthOfFocus_);
-      }
-      if (!getAstigmatismModelBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(86, astigmatismModel_);
-      }
+      if (!getAstigmatismModelBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(86, astigmatismModel_);
       memoizedSize = size;
       return size;
     }
@@ -6590,13 +6316,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CreateDataSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.CreateDataSettings other = (gdsc.smlm.data.config.GUIProtos.CreateDataSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CreateDataSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.CreateDataSettings other = (gdsc.smlm.data.config.GUIProtos.CreateDataSettings) obj;
 
       boolean result = true;
       result = result && (getSize()
@@ -6857,9 +6581,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SIZE_FIELD_NUMBER;
@@ -7186,7 +6909,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -7419,16 +7142,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CreateDataSettings build() {
-        gdsc.smlm.data.config.GUIProtos.CreateDataSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.CreateDataSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CreateDataSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.CreateDataSettings result = new gdsc.smlm.data.config.GUIProtos.CreateDataSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.CreateDataSettings result = new gdsc.smlm.data.config.GUIProtos.CreateDataSettings(this);
         result.size_ = size_;
         result.depth_ = depth_;
         result.fixedDepth_ = fixedDepth_;
@@ -7553,9 +7275,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.CreateDataSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CreateDataSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CreateDataSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.CreateDataSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -7563,24 +7285,18 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CreateDataSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.CreateDataSettings.getDefaultInstance()) return this;
-        if (other.getSize() != 0) {
-          setSize(other.getSize());
-        }
-        if (other.getDepth() != 0D) {
-          setDepth(other.getDepth());
-        }
-        if (other.getFixedDepth() != false) {
-          setFixedDepth(other.getFixedDepth());
-        }
-        if (other.getSeconds() != 0D) {
-          setSeconds(other.getSeconds());
-        }
-        if (other.getExposureTime() != 0D) {
-          setExposureTime(other.getExposureTime());
-        }
-        if (other.getStepsPerSecond() != 0D) {
-          setStepsPerSecond(other.getStepsPerSecond());
-        }
+        if (other.getSize() != 0)
+			setSize(other.getSize());
+        if (other.getDepth() != 0D)
+			setDepth(other.getDepth());
+        if (other.getFixedDepth() != false)
+			setFixedDepth(other.getFixedDepth());
+        if (other.getSeconds() != 0D)
+			setSeconds(other.getSeconds());
+        if (other.getExposureTime() != 0D)
+			setExposureTime(other.getExposureTime());
+        if (other.getStepsPerSecond() != 0D)
+			setStepsPerSecond(other.getStepsPerSecond());
         if (!other.getIllumination().isEmpty()) {
           illumination_ = other.illumination_;
           onChanged();
@@ -7597,42 +7313,30 @@ public final class GUIProtos {
           distributionMask_ = other.distributionMask_;
           onChanged();
         }
-        if (other.getDistributionMaskSliceDepth() != 0D) {
-          setDistributionMaskSliceDepth(other.getDistributionMaskSliceDepth());
-        }
-        if (other.getPoissonNoise() != false) {
-          setPoissonNoise(other.getPoissonNoise());
-        }
-        if (other.getBackground() != 0D) {
-          setBackground(other.getBackground());
-        }
-        if (other.getEmGain() != 0D) {
-          setEmGain(other.getEmGain());
-        }
-        if (other.getCameraGain() != 0D) {
-          setCameraGain(other.getCameraGain());
-        }
-        if (other.getQuantumEfficiency() != 0D) {
-          setQuantumEfficiency(other.getQuantumEfficiency());
-        }
-        if (other.getReadNoise() != 0D) {
-          setReadNoise(other.getReadNoise());
-        }
-        if (other.getBias() != 0) {
-          setBias(other.getBias());
-        }
-        if (other.getParticles() != 0) {
-          setParticles(other.getParticles());
-        }
-        if (other.getSamplePerFrame() != false) {
-          setSamplePerFrame(other.getSamplePerFrame());
-        }
-        if (other.getPhotonsPerSecond() != 0D) {
-          setPhotonsPerSecond(other.getPhotonsPerSecond());
-        }
-        if (other.getPhotonsPerSecondMaximum() != 0D) {
-          setPhotonsPerSecondMaximum(other.getPhotonsPerSecondMaximum());
-        }
+        if (other.getDistributionMaskSliceDepth() != 0D)
+			setDistributionMaskSliceDepth(other.getDistributionMaskSliceDepth());
+        if (other.getPoissonNoise() != false)
+			setPoissonNoise(other.getPoissonNoise());
+        if (other.getBackground() != 0D)
+			setBackground(other.getBackground());
+        if (other.getEmGain() != 0D)
+			setEmGain(other.getEmGain());
+        if (other.getCameraGain() != 0D)
+			setCameraGain(other.getCameraGain());
+        if (other.getQuantumEfficiency() != 0D)
+			setQuantumEfficiency(other.getQuantumEfficiency());
+        if (other.getReadNoise() != 0D)
+			setReadNoise(other.getReadNoise());
+        if (other.getBias() != 0)
+			setBias(other.getBias());
+        if (other.getParticles() != 0)
+			setParticles(other.getParticles());
+        if (other.getSamplePerFrame() != false)
+			setSamplePerFrame(other.getSamplePerFrame());
+        if (other.getPhotonsPerSecond() != 0D)
+			setPhotonsPerSecond(other.getPhotonsPerSecond());
+        if (other.getPhotonsPerSecondMaximum() != 0D)
+			setPhotonsPerSecondMaximum(other.getPhotonsPerSecondMaximum());
         if (!other.getPhotonDistribution().isEmpty()) {
           photonDistribution_ = other.photonDistribution_;
           onChanged();
@@ -7641,12 +7345,10 @@ public final class GUIProtos {
           photonDistributionFile_ = other.photonDistributionFile_;
           onChanged();
         }
-        if (other.getPhotonShape() != 0D) {
-          setPhotonShape(other.getPhotonShape());
-        }
-        if (other.getCorrelation() != 0D) {
-          setCorrelation(other.getCorrelation());
-        }
+        if (other.getPhotonShape() != 0D)
+			setPhotonShape(other.getPhotonShape());
+        if (other.getCorrelation() != 0D)
+			setCorrelation(other.getCorrelation());
         if (!other.getPsfModel().isEmpty()) {
           psfModel_ = other.psfModel_;
           onChanged();
@@ -7655,52 +7357,38 @@ public final class GUIProtos {
           psfImageName_ = other.psfImageName_;
           onChanged();
         }
-        if (other.getEnterWidth() != false) {
-          setEnterWidth(other.getEnterWidth());
-        }
-        if (other.getWavelength() != 0D) {
-          setWavelength(other.getWavelength());
-        }
-        if (other.getNumericalAperture() != 0D) {
-          setNumericalAperture(other.getNumericalAperture());
-        }
-        if (other.getPsfSd() != 0D) {
-          setPsfSd(other.getPsfSd());
-        }
-        if (other.getPixelPitch() != 0D) {
-          setPixelPitch(other.getPixelPitch());
-        }
-        if (other.getDensity() != 0D) {
-          setDensity(other.getDensity());
-        }
-        if (other.getDiffusionRate() != 0D) {
-          setDiffusionRate(other.getDiffusionRate());
-        }
-        if (other.getDiffusionType() != 0) {
-          setDiffusionType(other.getDiffusionType());
-        }
-        if (other.getCompoundMolecules() != false) {
-          setCompoundMolecules(other.getCompoundMolecules());
-        }
+        if (other.getEnterWidth() != false)
+			setEnterWidth(other.getEnterWidth());
+        if (other.getWavelength() != 0D)
+			setWavelength(other.getWavelength());
+        if (other.getNumericalAperture() != 0D)
+			setNumericalAperture(other.getNumericalAperture());
+        if (other.getPsfSd() != 0D)
+			setPsfSd(other.getPsfSd());
+        if (other.getPixelPitch() != 0D)
+			setPixelPitch(other.getPixelPitch());
+        if (other.getDensity() != 0D)
+			setDensity(other.getDensity());
+        if (other.getDiffusionRate() != 0D)
+			setDiffusionRate(other.getDiffusionRate());
+        if (other.getDiffusionType() != 0)
+			setDiffusionType(other.getDiffusionType());
+        if (other.getCompoundMolecules() != false)
+			setCompoundMolecules(other.getCompoundMolecules());
         if (!other.getCompoundText().isEmpty()) {
           compoundText_ = other.compoundText_;
           onChanged();
         }
-        if (other.getDiffuse2D() != false) {
-          setDiffuse2D(other.getDiffuse2D());
-        }
-        if (other.getRotateInitialOrientation() != false) {
-          setRotateInitialOrientation(other.getRotateInitialOrientation());
-        }
-        if (other.getRotateDuringSimulation() != false) {
-          setRotateDuringSimulation(other.getRotateDuringSimulation());
-        }
-        if (other.getRotate2D() != false) {
-          setRotate2D(other.getRotate2D());
-        }
-        if (other.getFixedFraction() != 0D) {
-          setFixedFraction(other.getFixedFraction());
-        }
+        if (other.getDiffuse2D() != false)
+			setDiffuse2D(other.getDiffuse2D());
+        if (other.getRotateInitialOrientation() != false)
+			setRotateInitialOrientation(other.getRotateInitialOrientation());
+        if (other.getRotateDuringSimulation() != false)
+			setRotateDuringSimulation(other.getRotateDuringSimulation());
+        if (other.getRotate2D() != false)
+			setRotate2D(other.getRotate2D());
+        if (other.getFixedFraction() != 0D)
+			setFixedFraction(other.getFixedFraction());
         if (!other.getConfinement().isEmpty()) {
           confinement_ = other.confinement_;
           onChanged();
@@ -7709,60 +7397,42 @@ public final class GUIProtos {
           confinementMask_ = other.confinementMask_;
           onChanged();
         }
-        if (other.getConfinementMaskSliceDepth() != 0D) {
-          setConfinementMaskSliceDepth(other.getConfinementMaskSliceDepth());
-        }
-        if (other.getConfinementRadius() != 0D) {
-          setConfinementRadius(other.getConfinementRadius());
-        }
-        if (other.getPulseInterval() != 0) {
-          setPulseInterval(other.getPulseInterval());
-        }
-        if (other.getPulseRatio() != 0D) {
-          setPulseRatio(other.getPulseRatio());
-        }
-        if (other.getTOn() != 0D) {
-          setTOn(other.getTOn());
-        }
-        if (other.getTOffShort() != 0D) {
-          setTOffShort(other.getTOffShort());
-        }
-        if (other.getTOffLong() != 0D) {
-          setTOffLong(other.getTOffLong());
-        }
-        if (other.getNBlinksShort() != 0D) {
-          setNBlinksShort(other.getNBlinksShort());
-        }
-        if (other.getNBlinksLong() != 0D) {
-          setNBlinksLong(other.getNBlinksLong());
-        }
-        if (other.getNBlinksGeometricDistribution() != false) {
-          setNBlinksGeometricDistribution(other.getNBlinksGeometricDistribution());
-        }
-        if (other.getMinPhotons() != 0D) {
-          setMinPhotons(other.getMinPhotons());
-        }
-        if (other.getMinSnrT1() != 0D) {
-          setMinSnrT1(other.getMinSnrT1());
-        }
-        if (other.getMinSnrTN() != 0D) {
-          setMinSnrTN(other.getMinSnrTN());
-        }
-        if (other.getRawImage() != false) {
-          setRawImage(other.getRawImage());
-        }
-        if (other.getSaveImage() != false) {
-          setSaveImage(other.getSaveImage());
-        }
-        if (other.getSaveImageResults() != false) {
-          setSaveImageResults(other.getSaveImageResults());
-        }
-        if (other.getSaveLocalisations() != false) {
-          setSaveLocalisations(other.getSaveLocalisations());
-        }
-        if (other.getSaveFluorophores() != false) {
-          setSaveFluorophores(other.getSaveFluorophores());
-        }
+        if (other.getConfinementMaskSliceDepth() != 0D)
+			setConfinementMaskSliceDepth(other.getConfinementMaskSliceDepth());
+        if (other.getConfinementRadius() != 0D)
+			setConfinementRadius(other.getConfinementRadius());
+        if (other.getPulseInterval() != 0)
+			setPulseInterval(other.getPulseInterval());
+        if (other.getPulseRatio() != 0D)
+			setPulseRatio(other.getPulseRatio());
+        if (other.getTOn() != 0D)
+			setTOn(other.getTOn());
+        if (other.getTOffShort() != 0D)
+			setTOffShort(other.getTOffShort());
+        if (other.getTOffLong() != 0D)
+			setTOffLong(other.getTOffLong());
+        if (other.getNBlinksShort() != 0D)
+			setNBlinksShort(other.getNBlinksShort());
+        if (other.getNBlinksLong() != 0D)
+			setNBlinksLong(other.getNBlinksLong());
+        if (other.getNBlinksGeometricDistribution() != false)
+			setNBlinksGeometricDistribution(other.getNBlinksGeometricDistribution());
+        if (other.getMinPhotons() != 0D)
+			setMinPhotons(other.getMinPhotons());
+        if (other.getMinSnrT1() != 0D)
+			setMinSnrT1(other.getMinSnrT1());
+        if (other.getMinSnrTN() != 0D)
+			setMinSnrTN(other.getMinSnrTN());
+        if (other.getRawImage() != false)
+			setRawImage(other.getRawImage());
+        if (other.getSaveImage() != false)
+			setSaveImage(other.getSaveImage());
+        if (other.getSaveImageResults() != false)
+			setSaveImageResults(other.getSaveImageResults());
+        if (other.getSaveLocalisations() != false)
+			setSaveLocalisations(other.getSaveLocalisations());
+        if (other.getSaveFluorophores() != false)
+			setSaveFluorophores(other.getSaveFluorophores());
         if (!other.getImageFilename().isEmpty()) {
           imageFilename_ = other.imageFilename_;
           onChanged();
@@ -7775,64 +7445,46 @@ public final class GUIProtos {
           fluorophoresFilename_ = other.fluorophoresFilename_;
           onChanged();
         }
-        if (other.getCellSize() != 0) {
-          setCellSize(other.getCellSize());
-        }
-        if (other.getProbabilityBinary() != 0D) {
-          setProbabilityBinary(other.getProbabilityBinary());
-        }
-        if (other.getMinBinaryDistance() != 0D) {
-          setMinBinaryDistance(other.getMinBinaryDistance());
-        }
-        if (other.getMaxBinaryDistance() != 0D) {
-          setMaxBinaryDistance(other.getMaxBinaryDistance());
-        }
-        if (other.getShowHistograms() != false) {
-          setShowHistograms(other.getShowHistograms());
-        }
-        if (other.getChooseHistograms() != false) {
-          setChooseHistograms(other.getChooseHistograms());
-        }
-        if (other.getHistogramBins() != 0) {
-          setHistogramBins(other.getHistogramBins());
-        }
-        if (other.getRemoveOutliers() != false) {
-          setRemoveOutliers(other.getRemoveOutliers());
-        }
-        if (other.getDensityRadius() != 0F) {
-          setDensityRadius(other.getDensityRadius());
-        }
-        if (other.getDepthOfField() != 0F) {
-          setDepthOfField(other.getDepthOfField());
-        }
-        if (other.getXPosition() != 0D) {
-          setXPosition(other.getXPosition());
-        }
-        if (other.getYPosition() != 0D) {
-          setYPosition(other.getYPosition());
-        }
-        if (other.getZPosition() != 0D) {
-          setZPosition(other.getZPosition());
-        }
-        if (other.cameraType_ != 0) {
-          setCameraTypeValue(other.getCameraTypeValue());
-        }
+        if (other.getCellSize() != 0)
+			setCellSize(other.getCellSize());
+        if (other.getProbabilityBinary() != 0D)
+			setProbabilityBinary(other.getProbabilityBinary());
+        if (other.getMinBinaryDistance() != 0D)
+			setMinBinaryDistance(other.getMinBinaryDistance());
+        if (other.getMaxBinaryDistance() != 0D)
+			setMaxBinaryDistance(other.getMaxBinaryDistance());
+        if (other.getShowHistograms() != false)
+			setShowHistograms(other.getShowHistograms());
+        if (other.getChooseHistograms() != false)
+			setChooseHistograms(other.getChooseHistograms());
+        if (other.getHistogramBins() != 0)
+			setHistogramBins(other.getHistogramBins());
+        if (other.getRemoveOutliers() != false)
+			setRemoveOutliers(other.getRemoveOutliers());
+        if (other.getDensityRadius() != 0F)
+			setDensityRadius(other.getDensityRadius());
+        if (other.getDepthOfField() != 0F)
+			setDepthOfField(other.getDepthOfField());
+        if (other.getXPosition() != 0D)
+			setXPosition(other.getXPosition());
+        if (other.getYPosition() != 0D)
+			setYPosition(other.getYPosition());
+        if (other.getZPosition() != 0D)
+			setZPosition(other.getZPosition());
+        if (other.cameraType_ != 0)
+			setCameraTypeValue(other.getCameraTypeValue());
         if (!other.getCameraModelName().isEmpty()) {
           cameraModelName_ = other.cameraModelName_;
           onChanged();
         }
-        if (other.getRandomCrop() != false) {
-          setRandomCrop(other.getRandomCrop());
-        }
-        if (other.getOriginX() != 0) {
-          setOriginX(other.getOriginX());
-        }
-        if (other.getOriginY() != 0) {
-          setOriginY(other.getOriginY());
-        }
-        if (other.getDepthOfFocus() != 0D) {
-          setDepthOfFocus(other.getDepthOfFocus());
-        }
+        if (other.getRandomCrop() != false)
+			setRandomCrop(other.getRandomCrop());
+        if (other.getOriginX() != 0)
+			setOriginX(other.getOriginX());
+        if (other.getOriginY() != 0)
+			setOriginY(other.getOriginY());
+        if (other.getDepthOfFocus() != 0D)
+			setDepthOfFocus(other.getDepthOfFocus());
         if (!other.getAstigmatismModel().isEmpty()) {
           astigmatismModel_ = other.astigmatismModel_;
           onChanged();
@@ -7854,13 +7506,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.CreateDataSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.CreateDataSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -8033,16 +7684,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getIllumination() {
-        java.lang.Object ref = illumination_;
+        final java.lang.Object ref = illumination_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           illumination_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string illumination = 7;</code>
@@ -8050,25 +7701,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getIlluminationBytes() {
-        java.lang.Object ref = illumination_;
+        final java.lang.Object ref = illumination_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           illumination_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string illumination = 7;</code>
        */
       public Builder setIllumination(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         illumination_ = value;
         onChanged();
@@ -8088,9 +7738,8 @@ public final class GUIProtos {
        */
       public Builder setIlluminationBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         illumination_ = value;
@@ -8104,16 +7753,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getBackgroundImage() {
-        java.lang.Object ref = backgroundImage_;
+        final java.lang.Object ref = backgroundImage_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           backgroundImage_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string background_image = 8;</code>
@@ -8121,25 +7770,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getBackgroundImageBytes() {
-        java.lang.Object ref = backgroundImage_;
+        final java.lang.Object ref = backgroundImage_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           backgroundImage_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string background_image = 8;</code>
        */
       public Builder setBackgroundImage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         backgroundImage_ = value;
         onChanged();
@@ -8159,9 +7807,8 @@ public final class GUIProtos {
        */
       public Builder setBackgroundImageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         backgroundImage_ = value;
@@ -8175,16 +7822,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getDistribution() {
-        java.lang.Object ref = distribution_;
+        final java.lang.Object ref = distribution_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           distribution_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string distribution = 9;</code>
@@ -8192,25 +7839,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getDistributionBytes() {
-        java.lang.Object ref = distribution_;
+        final java.lang.Object ref = distribution_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           distribution_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string distribution = 9;</code>
        */
       public Builder setDistribution(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         distribution_ = value;
         onChanged();
@@ -8230,9 +7876,8 @@ public final class GUIProtos {
        */
       public Builder setDistributionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         distribution_ = value;
@@ -8246,16 +7891,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getDistributionMask() {
-        java.lang.Object ref = distributionMask_;
+        final java.lang.Object ref = distributionMask_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           distributionMask_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string distribution_mask = 10;</code>
@@ -8263,25 +7908,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getDistributionMaskBytes() {
-        java.lang.Object ref = distributionMask_;
+        final java.lang.Object ref = distributionMask_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           distributionMask_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string distribution_mask = 10;</code>
        */
       public Builder setDistributionMask(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         distributionMask_ = value;
         onChanged();
@@ -8301,9 +7945,8 @@ public final class GUIProtos {
        */
       public Builder setDistributionMaskBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         distributionMask_ = value;
@@ -8691,16 +8334,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getPhotonDistribution() {
-        java.lang.Object ref = photonDistribution_;
+        final java.lang.Object ref = photonDistribution_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           photonDistribution_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -8713,16 +8356,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getPhotonDistributionBytes() {
-        java.lang.Object ref = photonDistribution_;
+        final java.lang.Object ref = photonDistribution_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           photonDistribution_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -8734,9 +8377,8 @@ public final class GUIProtos {
        */
       public Builder setPhotonDistribution(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         photonDistribution_ = value;
         onChanged();
@@ -8766,9 +8408,8 @@ public final class GUIProtos {
        */
       public Builder setPhotonDistributionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         photonDistribution_ = value;
@@ -8782,16 +8423,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getPhotonDistributionFile() {
-        java.lang.Object ref = photonDistributionFile_;
+        final java.lang.Object ref = photonDistributionFile_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           photonDistributionFile_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string photon_distribution_file = 24;</code>
@@ -8799,25 +8440,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getPhotonDistributionFileBytes() {
-        java.lang.Object ref = photonDistributionFile_;
+        final java.lang.Object ref = photonDistributionFile_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           photonDistributionFile_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string photon_distribution_file = 24;</code>
        */
       public Builder setPhotonDistributionFile(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         photonDistributionFile_ = value;
         onChanged();
@@ -8837,9 +8477,8 @@ public final class GUIProtos {
        */
       public Builder setPhotonDistributionFileBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         photonDistributionFile_ = value;
@@ -8907,16 +8546,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getPsfModel() {
-        java.lang.Object ref = psfModel_;
+        final java.lang.Object ref = psfModel_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           psfModel_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string psf_model = 27;</code>
@@ -8924,25 +8563,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getPsfModelBytes() {
-        java.lang.Object ref = psfModel_;
+        final java.lang.Object ref = psfModel_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           psfModel_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string psf_model = 27;</code>
        */
       public Builder setPsfModel(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         psfModel_ = value;
         onChanged();
@@ -8962,9 +8600,8 @@ public final class GUIProtos {
        */
       public Builder setPsfModelBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         psfModel_ = value;
@@ -8978,16 +8615,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getPsfImageName() {
-        java.lang.Object ref = psfImageName_;
+        final java.lang.Object ref = psfImageName_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           psfImageName_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string psf_image_name = 28;</code>
@@ -8995,25 +8632,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getPsfImageNameBytes() {
-        java.lang.Object ref = psfImageName_;
+        final java.lang.Object ref = psfImageName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           psfImageName_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string psf_image_name = 28;</code>
        */
       public Builder setPsfImageName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         psfImageName_ = value;
         onChanged();
@@ -9033,9 +8669,8 @@ public final class GUIProtos {
        */
       public Builder setPsfImageNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         psfImageName_ = value;
@@ -9292,16 +8927,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getCompoundText() {
-        java.lang.Object ref = compoundText_;
+        final java.lang.Object ref = compoundText_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           compoundText_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string compound_text = 38;</code>
@@ -9309,25 +8944,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getCompoundTextBytes() {
-        java.lang.Object ref = compoundText_;
+        final java.lang.Object ref = compoundText_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           compoundText_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string compound_text = 38;</code>
        */
       public Builder setCompoundText(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         compoundText_ = value;
         onChanged();
@@ -9347,9 +8981,8 @@ public final class GUIProtos {
        */
       public Builder setCompoundTextBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         compoundText_ = value;
@@ -9498,16 +9131,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getConfinement() {
-        java.lang.Object ref = confinement_;
+        final java.lang.Object ref = confinement_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           confinement_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string confinement = 44;</code>
@@ -9515,25 +9148,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getConfinementBytes() {
-        java.lang.Object ref = confinement_;
+        final java.lang.Object ref = confinement_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           confinement_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string confinement = 44;</code>
        */
       public Builder setConfinement(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         confinement_ = value;
         onChanged();
@@ -9553,9 +9185,8 @@ public final class GUIProtos {
        */
       public Builder setConfinementBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         confinement_ = value;
@@ -9569,16 +9200,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getConfinementMask() {
-        java.lang.Object ref = confinementMask_;
+        final java.lang.Object ref = confinementMask_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           confinementMask_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string confinement_mask = 45;</code>
@@ -9586,25 +9217,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getConfinementMaskBytes() {
-        java.lang.Object ref = confinementMask_;
+        final java.lang.Object ref = confinementMask_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           confinementMask_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string confinement_mask = 45;</code>
        */
       public Builder setConfinementMask(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         confinementMask_ = value;
         onChanged();
@@ -9624,9 +9254,8 @@ public final class GUIProtos {
        */
       public Builder setConfinementMaskBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         confinementMask_ = value;
@@ -10198,16 +9827,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getImageFilename() {
-        java.lang.Object ref = imageFilename_;
+        final java.lang.Object ref = imageFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           imageFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string image_filename = 64;</code>
@@ -10215,25 +9844,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getImageFilenameBytes() {
-        java.lang.Object ref = imageFilename_;
+        final java.lang.Object ref = imageFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           imageFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string image_filename = 64;</code>
        */
       public Builder setImageFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         imageFilename_ = value;
         onChanged();
@@ -10253,9 +9881,8 @@ public final class GUIProtos {
        */
       public Builder setImageFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         imageFilename_ = value;
@@ -10269,16 +9896,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getImageResultsFilename() {
-        java.lang.Object ref = imageResultsFilename_;
+        final java.lang.Object ref = imageResultsFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           imageResultsFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string image_results_filename = 65;</code>
@@ -10286,25 +9913,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getImageResultsFilenameBytes() {
-        java.lang.Object ref = imageResultsFilename_;
+        final java.lang.Object ref = imageResultsFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           imageResultsFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string image_results_filename = 65;</code>
        */
       public Builder setImageResultsFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         imageResultsFilename_ = value;
         onChanged();
@@ -10324,9 +9950,8 @@ public final class GUIProtos {
        */
       public Builder setImageResultsFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         imageResultsFilename_ = value;
@@ -10340,16 +9965,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFluorophoresFilename() {
-        java.lang.Object ref = fluorophoresFilename_;
+        final java.lang.Object ref = fluorophoresFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           fluorophoresFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string fluorophoresFilename = 66;</code>
@@ -10357,25 +9982,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFluorophoresFilenameBytes() {
-        java.lang.Object ref = fluorophoresFilename_;
+        final java.lang.Object ref = fluorophoresFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           fluorophoresFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string fluorophoresFilename = 66;</code>
        */
       public Builder setFluorophoresFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         fluorophoresFilename_ = value;
         onChanged();
@@ -10395,9 +10019,8 @@ public final class GUIProtos {
        */
       public Builder setFluorophoresFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         fluorophoresFilename_ = value;
@@ -10801,7 +10424,7 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
-        gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
+        final gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
         return result == null ? gdsc.smlm.data.config.CalibrationProtos.CameraType.UNRECOGNIZED : result;
       }
       /**
@@ -10812,9 +10435,8 @@ public final class GUIProtos {
        * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
        */
       public Builder setCameraType(gdsc.smlm.data.config.CalibrationProtos.CameraType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         cameraType_ = value.getNumber();
         onChanged();
@@ -10845,16 +10467,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getCameraModelName() {
-        java.lang.Object ref = cameraModelName_;
+        final java.lang.Object ref = cameraModelName_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           cameraModelName_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -10867,16 +10489,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getCameraModelNameBytes() {
-        java.lang.Object ref = cameraModelName_;
+        final java.lang.Object ref = cameraModelName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           cameraModelName_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -10888,9 +10510,8 @@ public final class GUIProtos {
        */
       public Builder setCameraModelName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         cameraModelName_ = value;
         onChanged();
@@ -10920,9 +10541,8 @@ public final class GUIProtos {
        */
       public Builder setCameraModelNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         cameraModelName_ = value;
@@ -11080,16 +10700,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getAstigmatismModel() {
-        java.lang.Object ref = astigmatismModel_;
+        final java.lang.Object ref = astigmatismModel_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           astigmatismModel_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string astigmatism_model = 86;</code>
@@ -11097,25 +10717,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getAstigmatismModelBytes() {
-        java.lang.Object ref = astigmatismModel_;
+        final java.lang.Object ref = astigmatismModel_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           astigmatismModel_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string astigmatism_model = 86;</code>
        */
       public Builder setAstigmatismModel(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         astigmatismModel_ = value;
         onChanged();
@@ -11135,9 +10754,8 @@ public final class GUIProtos {
        */
       public Builder setAstigmatismModelBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         astigmatismModel_ = value;
@@ -11376,23 +10994,22 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               localisationsFilename_ = s;
               break;
@@ -11403,22 +11020,21 @@ public final class GUIProtos {
               break;
             }
             case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               comment_ = s;
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               delimiter_ = s;
               break;
             }
             case 42: {
               gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder subBuilder = null;
-              if (calibration_ != null) {
-                subBuilder = calibration_.toBuilder();
-              }
+              if (calibration_ != null)
+				subBuilder = calibration_.toBuilder();
               calibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationProtos.Calibration.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(calibration_);
@@ -11473,7 +11089,7 @@ public final class GUIProtos {
               break;
             }
             case 170: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               name_ = s;
               break;
@@ -11495,9 +11111,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -11524,13 +11140,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getLocalisationsFilename() {
-      java.lang.Object ref = localisationsFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = localisationsFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         localisationsFilename_ = s;
         return s;
       }
@@ -11541,16 +11157,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getLocalisationsFilenameBytes() {
-      java.lang.Object ref = localisationsFilename_;
+      final java.lang.Object ref = localisationsFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         localisationsFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int HEADER_LINES_FIELD_NUMBER = 2;
@@ -11570,13 +11186,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getComment() {
-      java.lang.Object ref = comment_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = comment_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         comment_ = s;
         return s;
       }
@@ -11587,16 +11203,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getCommentBytes() {
-      java.lang.Object ref = comment_;
+      final java.lang.Object ref = comment_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         comment_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int DELIMITER_FIELD_NUMBER = 4;
@@ -11606,13 +11222,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getDelimiter() {
-      java.lang.Object ref = delimiter_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = delimiter_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         delimiter_ = s;
         return s;
       }
@@ -11623,16 +11239,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getDelimiterBytes() {
-      java.lang.Object ref = delimiter_;
+      final java.lang.Object ref = delimiter_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         delimiter_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int CALIBRATION_FIELD_NUMBER = 5;
@@ -11768,13 +11384,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         name_ = s;
         return s;
       }
@@ -11785,16 +11401,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getNameBytes() {
-      java.lang.Object ref = name_;
+      final java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int LIMIT_Z_FIELD_NUMBER = 22;
@@ -11830,7 +11446,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -11841,60 +11457,42 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getLocalisationsFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, localisationsFilename_);
-      }
-      if (headerLines_ != 0) {
-        output.writeInt32(2, headerLines_);
-      }
-      if (!getCommentBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, comment_);
-      }
-      if (!getDelimiterBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, delimiter_);
-      }
-      if (calibration_ != null) {
-        output.writeMessage(5, getCalibration());
-      }
-      if (fieldT_ != 0) {
-        output.writeInt32(11, fieldT_);
-      }
-      if (fieldId_ != 0) {
-        output.writeInt32(12, fieldId_);
-      }
-      if (fieldX_ != 0) {
-        output.writeInt32(13, fieldX_);
-      }
-      if (fieldY_ != 0) {
-        output.writeInt32(14, fieldY_);
-      }
-      if (fieldZ_ != 0) {
-        output.writeInt32(15, fieldZ_);
-      }
-      if (fieldI_ != 0) {
-        output.writeInt32(16, fieldI_);
-      }
-      if (fieldSx_ != 0) {
-        output.writeInt32(17, fieldSx_);
-      }
-      if (fieldSy_ != 0) {
-        output.writeInt32(18, fieldSy_);
-      }
-      if (fieldPrecision_ != 0) {
-        output.writeInt32(19, fieldPrecision_);
-      }
-      if (!getNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 21, name_);
-      }
-      if (limitZ_ != false) {
-        output.writeBool(22, limitZ_);
-      }
-      if (minZ_ != 0D) {
-        output.writeDouble(23, minZ_);
-      }
-      if (maxZ_ != 0D) {
-        output.writeDouble(24, maxZ_);
-      }
+      if (!getLocalisationsFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, localisationsFilename_);
+      if (headerLines_ != 0)
+		output.writeInt32(2, headerLines_);
+      if (!getCommentBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 3, comment_);
+      if (!getDelimiterBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 4, delimiter_);
+      if (calibration_ != null)
+		output.writeMessage(5, getCalibration());
+      if (fieldT_ != 0)
+		output.writeInt32(11, fieldT_);
+      if (fieldId_ != 0)
+		output.writeInt32(12, fieldId_);
+      if (fieldX_ != 0)
+		output.writeInt32(13, fieldX_);
+      if (fieldY_ != 0)
+		output.writeInt32(14, fieldY_);
+      if (fieldZ_ != 0)
+		output.writeInt32(15, fieldZ_);
+      if (fieldI_ != 0)
+		output.writeInt32(16, fieldI_);
+      if (fieldSx_ != 0)
+		output.writeInt32(17, fieldSx_);
+      if (fieldSy_ != 0)
+		output.writeInt32(18, fieldSy_);
+      if (fieldPrecision_ != 0)
+		output.writeInt32(19, fieldPrecision_);
+      if (!getNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 21, name_);
+      if (limitZ_ != false)
+		output.writeBool(22, limitZ_);
+      if (minZ_ != 0D)
+		output.writeDouble(23, minZ_);
+      if (maxZ_ != 0D)
+		output.writeDouble(24, maxZ_);
     }
 
     @Override
@@ -11903,74 +11501,56 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!getLocalisationsFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, localisationsFilename_);
-      }
-      if (headerLines_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getLocalisationsFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, localisationsFilename_);
+      if (headerLines_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, headerLines_);
-      }
-      if (!getCommentBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, comment_);
-      }
-      if (!getDelimiterBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, delimiter_);
-      }
-      if (calibration_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getCommentBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, comment_);
+      if (!getDelimiterBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, delimiter_);
+      if (calibration_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getCalibration());
-      }
-      if (fieldT_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldT_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(11, fieldT_);
-      }
-      if (fieldId_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldId_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(12, fieldId_);
-      }
-      if (fieldX_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldX_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(13, fieldX_);
-      }
-      if (fieldY_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldY_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, fieldY_);
-      }
-      if (fieldZ_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldZ_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(15, fieldZ_);
-      }
-      if (fieldI_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldI_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(16, fieldI_);
-      }
-      if (fieldSx_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldSx_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(17, fieldSx_);
-      }
-      if (fieldSy_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldSy_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(18, fieldSy_);
-      }
-      if (fieldPrecision_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldPrecision_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(19, fieldPrecision_);
-      }
-      if (!getNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, name_);
-      }
-      if (limitZ_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, name_);
+      if (limitZ_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(22, limitZ_);
-      }
-      if (minZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(23, minZ_);
-      }
-      if (maxZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(24, maxZ_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -11978,13 +11558,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings other = (gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings other = (gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings) obj;
 
       boolean result = true;
       result = result && getLocalisationsFilename()
@@ -11996,10 +11574,9 @@ public final class GUIProtos {
       result = result && getDelimiter()
           .equals(other.getDelimiter());
       result = result && (hasCalibration() == other.hasCalibration());
-      if (hasCalibration()) {
-        result = result && getCalibration()
+      if (hasCalibration())
+		result = result && getCalibration()
             .equals(other.getCalibration());
-      }
       result = result && (getFieldT()
           == other.getFieldT());
       result = result && (getFieldId()
@@ -12035,9 +11612,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + LOCALISATIONSFILENAME_FIELD_NUMBER;
@@ -12173,7 +11749,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -12226,9 +11802,9 @@ public final class GUIProtos {
 
         delimiter_ = "";
 
-        if (calibrationBuilder_ == null) {
-          calibration_ = null;
-        } else {
+        if (calibrationBuilder_ == null)
+			calibration_ = null;
+		else {
           calibration_ = null;
           calibrationBuilder_ = null;
         }
@@ -12274,25 +11850,23 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings build() {
-        gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = new gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = new gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings(this);
         result.localisationsFilename_ = localisationsFilename_;
         result.headerLines_ = headerLines_;
         result.comment_ = comment_;
         result.delimiter_ = delimiter_;
-        if (calibrationBuilder_ == null) {
-          result.calibration_ = calibration_;
-        } else {
-          result.calibration_ = calibrationBuilder_.build();
-        }
+        if (calibrationBuilder_ == null)
+			result.calibration_ = calibration_;
+		else
+			result.calibration_ = calibrationBuilder_.build();
         result.fieldT_ = fieldT_;
         result.fieldId_ = fieldId_;
         result.fieldX_ = fieldX_;
@@ -12344,9 +11918,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -12358,9 +11932,8 @@ public final class GUIProtos {
           localisationsFilename_ = other.localisationsFilename_;
           onChanged();
         }
-        if (other.getHeaderLines() != 0) {
-          setHeaderLines(other.getHeaderLines());
-        }
+        if (other.getHeaderLines() != 0)
+			setHeaderLines(other.getHeaderLines());
         if (!other.getComment().isEmpty()) {
           comment_ = other.comment_;
           onChanged();
@@ -12369,49 +11942,36 @@ public final class GUIProtos {
           delimiter_ = other.delimiter_;
           onChanged();
         }
-        if (other.hasCalibration()) {
-          mergeCalibration(other.getCalibration());
-        }
-        if (other.getFieldT() != 0) {
-          setFieldT(other.getFieldT());
-        }
-        if (other.getFieldId() != 0) {
-          setFieldId(other.getFieldId());
-        }
-        if (other.getFieldX() != 0) {
-          setFieldX(other.getFieldX());
-        }
-        if (other.getFieldY() != 0) {
-          setFieldY(other.getFieldY());
-        }
-        if (other.getFieldZ() != 0) {
-          setFieldZ(other.getFieldZ());
-        }
-        if (other.getFieldI() != 0) {
-          setFieldI(other.getFieldI());
-        }
-        if (other.getFieldSx() != 0) {
-          setFieldSx(other.getFieldSx());
-        }
-        if (other.getFieldSy() != 0) {
-          setFieldSy(other.getFieldSy());
-        }
-        if (other.getFieldPrecision() != 0) {
-          setFieldPrecision(other.getFieldPrecision());
-        }
+        if (other.hasCalibration())
+			mergeCalibration(other.getCalibration());
+        if (other.getFieldT() != 0)
+			setFieldT(other.getFieldT());
+        if (other.getFieldId() != 0)
+			setFieldId(other.getFieldId());
+        if (other.getFieldX() != 0)
+			setFieldX(other.getFieldX());
+        if (other.getFieldY() != 0)
+			setFieldY(other.getFieldY());
+        if (other.getFieldZ() != 0)
+			setFieldZ(other.getFieldZ());
+        if (other.getFieldI() != 0)
+			setFieldI(other.getFieldI());
+        if (other.getFieldSx() != 0)
+			setFieldSx(other.getFieldSx());
+        if (other.getFieldSy() != 0)
+			setFieldSy(other.getFieldSy());
+        if (other.getFieldPrecision() != 0)
+			setFieldPrecision(other.getFieldPrecision());
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
           onChanged();
         }
-        if (other.getLimitZ() != false) {
-          setLimitZ(other.getLimitZ());
-        }
-        if (other.getMinZ() != 0D) {
-          setMinZ(other.getMinZ());
-        }
-        if (other.getMaxZ() != 0D) {
-          setMaxZ(other.getMaxZ());
-        }
+        if (other.getLimitZ() != false)
+			setLimitZ(other.getLimitZ());
+        if (other.getMinZ() != 0D)
+			setMinZ(other.getMinZ());
+        if (other.getMaxZ() != 0D)
+			setMaxZ(other.getMaxZ());
         onChanged();
         return this;
       }
@@ -12429,13 +11989,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -12446,16 +12005,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getLocalisationsFilename() {
-        java.lang.Object ref = localisationsFilename_;
+        final java.lang.Object ref = localisationsFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           localisationsFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string localisationsFilename = 1;</code>
@@ -12463,25 +12022,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getLocalisationsFilenameBytes() {
-        java.lang.Object ref = localisationsFilename_;
+        final java.lang.Object ref = localisationsFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           localisationsFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string localisationsFilename = 1;</code>
        */
       public Builder setLocalisationsFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         localisationsFilename_ = value;
         onChanged();
@@ -12501,9 +12059,8 @@ public final class GUIProtos {
        */
       public Builder setLocalisationsFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         localisationsFilename_ = value;
@@ -12544,16 +12101,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getComment() {
-        java.lang.Object ref = comment_;
+        final java.lang.Object ref = comment_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           comment_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string comment = 3;</code>
@@ -12561,25 +12118,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getCommentBytes() {
-        java.lang.Object ref = comment_;
+        final java.lang.Object ref = comment_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           comment_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string comment = 3;</code>
        */
       public Builder setComment(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         comment_ = value;
         onChanged();
@@ -12599,9 +12155,8 @@ public final class GUIProtos {
        */
       public Builder setCommentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         comment_ = value;
@@ -12615,16 +12170,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getDelimiter() {
-        java.lang.Object ref = delimiter_;
+        final java.lang.Object ref = delimiter_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           delimiter_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string delimiter = 4;</code>
@@ -12632,25 +12187,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getDelimiterBytes() {
-        java.lang.Object ref = delimiter_;
+        final java.lang.Object ref = delimiter_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           delimiter_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string delimiter = 4;</code>
        */
       public Builder setDelimiter(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         delimiter_ = value;
         onChanged();
@@ -12670,9 +12224,8 @@ public final class GUIProtos {
        */
       public Builder setDelimiterBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         delimiter_ = value;
@@ -12703,11 +12256,10 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
-        if (calibrationBuilder_ == null) {
-          return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        } else {
-          return calibrationBuilder_.getMessage();
-        }
+        if (calibrationBuilder_ == null)
+			return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
+		else
+			return calibrationBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -12718,14 +12270,13 @@ public final class GUIProtos {
        */
       public Builder setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(value);
         }
+		else
+			calibrationBuilder_.setMessage(value);
 
         return this;
       }
@@ -12741,9 +12292,9 @@ public final class GUIProtos {
         if (calibrationBuilder_ == null) {
           calibration_ = builderForValue.build();
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(builderForValue.build());
         }
+		else
+			calibrationBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -12756,16 +12307,15 @@ public final class GUIProtos {
        */
       public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (calibration_ != null) {
-            calibration_ =
+          if (calibration_ != null)
+			calibration_ =
               gdsc.smlm.data.config.CalibrationProtos.Calibration.newBuilder(calibration_).mergeFrom(value).buildPartial();
-          } else {
-            calibration_ = value;
-          }
+		else
+			calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.mergeFrom(value);
         }
+		else
+			calibrationBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -12808,12 +12358,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
-        if (calibrationBuilder_ != null) {
-          return calibrationBuilder_.getMessageOrBuilder();
-        } else {
-          return calibration_ == null ?
-              gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        }
+        if (calibrationBuilder_ != null)
+			return calibrationBuilder_.getMessageOrBuilder();
+		else
+			return calibration_ == null ?
+			      gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
       }
       /**
        * <pre>
@@ -13084,16 +12633,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getName() {
-        java.lang.Object ref = name_;
+        final java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           name_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string name = 21;</code>
@@ -13101,25 +12650,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getNameBytes() {
-        java.lang.Object ref = name_;
+        final java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string name = 21;</code>
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         name_ = value;
         onChanged();
@@ -13139,9 +12687,8 @@ public final class GUIProtos {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         name_ = value;
@@ -13545,20 +13092,19 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
+      final int mutable_bitField0_ = 0;
+      final int mutable_bitField1_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -13577,7 +13123,7 @@ public final class GUIProtos {
               break;
             }
             case 32: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               timeUnit_ = rawValue;
               break;
@@ -13663,7 +13209,7 @@ public final class GUIProtos {
               break;
             }
             case 170: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               traceDataDirectory_ = s;
               break;
@@ -13740,9 +13286,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -13806,7 +13352,7 @@ public final class GUIProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.TimeUnit getTimeUnit() {
-      gdsc.smlm.data.config.UnitProtos.TimeUnit result = gdsc.smlm.data.config.UnitProtos.TimeUnit.valueOf(timeUnit_);
+      final gdsc.smlm.data.config.UnitProtos.TimeUnit result = gdsc.smlm.data.config.UnitProtos.TimeUnit.valueOf(timeUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.TimeUnit.UNRECOGNIZED : result;
     }
 
@@ -13985,13 +13531,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getTraceDataDirectory() {
-      java.lang.Object ref = traceDataDirectory_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = traceDataDirectory_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         traceDataDirectory_ = s;
         return s;
       }
@@ -14002,16 +13548,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getTraceDataDirectoryBytes() {
-      java.lang.Object ref = traceDataDirectory_;
+      final java.lang.Object ref = traceDataDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         traceDataDirectory_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int HISTOGRAM_BINS_FIELD_NUMBER = 22;
@@ -14161,7 +13707,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -14172,111 +13718,76 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (distanceThreshold_ != 0D) {
-        output.writeDouble(1, distanceThreshold_);
-      }
-      if (distanceExclusion_ != 0D) {
-        output.writeDouble(2, distanceExclusion_);
-      }
-      if (timeThreshold_ != 0D) {
-        output.writeDouble(3, timeThreshold_);
-      }
-      if (timeUnit_ != gdsc.smlm.data.config.UnitProtos.TimeUnit.TIME_UNIT_NA.getNumber()) {
-        output.writeEnum(4, timeUnit_);
-      }
-      if (traceMode_ != 0) {
-        output.writeInt32(5, traceMode_);
-      }
-      if (clusteringAlgorithm_ != 0) {
-        output.writeInt32(6, clusteringAlgorithm_);
-      }
-      if (pulseInterval_ != 0) {
-        output.writeInt32(7, pulseInterval_);
-      }
-      if (pulseWindow_ != 0) {
-        output.writeInt32(8, pulseWindow_);
-      }
-      if (splitPulses_ != false) {
-        output.writeBool(9, splitPulses_);
-      }
-      if (blinkingRate_ != 0D) {
-        output.writeDouble(10, blinkingRate_);
-      }
-      if (optimise_ != false) {
-        output.writeBool(11, optimise_);
-      }
-      if (minDistanceThreshold_ != 0D) {
-        output.writeDouble(12, minDistanceThreshold_);
-      }
-      if (maxDistanceThreshold_ != 0D) {
-        output.writeDouble(13, maxDistanceThreshold_);
-      }
-      if (minTimeThreshold_ != 0) {
-        output.writeInt32(14, minTimeThreshold_);
-      }
-      if (maxTimeThreshold_ != 0) {
-        output.writeInt32(15, maxTimeThreshold_);
-      }
-      if (optimiserSteps_ != 0) {
-        output.writeInt32(16, optimiserSteps_);
-      }
-      if (optimiserPlot_ != 0) {
-        output.writeInt32(17, optimiserPlot_);
-      }
-      if (saveTraces_ != false) {
-        output.writeBool(18, saveTraces_);
-      }
-      if (showHistograms_ != false) {
-        output.writeBool(19, showHistograms_);
-      }
-      if (saveTraceData_ != false) {
-        output.writeBool(20, saveTraceData_);
-      }
-      if (!getTraceDataDirectoryBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 21, traceDataDirectory_);
-      }
-      if (histogramBins_ != 0) {
-        output.writeInt32(22, histogramBins_);
-      }
-      if (removeOutliers_ != false) {
-        output.writeBool(23, removeOutliers_);
-      }
-      if (refitOption_ != false) {
-        output.writeBool(24, refitOption_);
-      }
-      if (minimumTraceLength_ != 0) {
-        output.writeInt32(25, minimumTraceLength_);
-      }
-      if (truncate_ != false) {
-        output.writeBool(26, truncate_);
-      }
-      if (internalDistances_ != false) {
-        output.writeBool(27, internalDistances_);
-      }
-      if (subSampledDistances_ != false) {
-        output.writeBool(28, subSampledDistances_);
-      }
-      if (ignoreEnds_ != false) {
-        output.writeBool(29, ignoreEnds_);
-      }
-      if (precisionCorrection_ != false) {
-        output.writeBool(30, precisionCorrection_);
-      }
-      if (msdCorrection_ != false) {
-        output.writeBool(31, msdCorrection_);
-      }
-      if (mle_ != false) {
-        output.writeBool(32, mle_);
-      }
-      if (fitLength_ != 0) {
-        output.writeInt32(33, fitLength_);
-      }
-      if (fitRestarts_ != 0) {
-        output.writeInt32(34, fitRestarts_);
-      }
-      if (jumpDistance_ != 0) {
-        output.writeInt32(35, jumpDistance_);
-      }
+      if (distanceThreshold_ != 0D)
+		output.writeDouble(1, distanceThreshold_);
+      if (distanceExclusion_ != 0D)
+		output.writeDouble(2, distanceExclusion_);
+      if (timeThreshold_ != 0D)
+		output.writeDouble(3, timeThreshold_);
+      if (timeUnit_ != gdsc.smlm.data.config.UnitProtos.TimeUnit.TIME_UNIT_NA.getNumber())
+		output.writeEnum(4, timeUnit_);
+      if (traceMode_ != 0)
+		output.writeInt32(5, traceMode_);
+      if (clusteringAlgorithm_ != 0)
+		output.writeInt32(6, clusteringAlgorithm_);
+      if (pulseInterval_ != 0)
+		output.writeInt32(7, pulseInterval_);
+      if (pulseWindow_ != 0)
+		output.writeInt32(8, pulseWindow_);
+      if (splitPulses_ != false)
+		output.writeBool(9, splitPulses_);
+      if (blinkingRate_ != 0D)
+		output.writeDouble(10, blinkingRate_);
+      if (optimise_ != false)
+		output.writeBool(11, optimise_);
+      if (minDistanceThreshold_ != 0D)
+		output.writeDouble(12, minDistanceThreshold_);
+      if (maxDistanceThreshold_ != 0D)
+		output.writeDouble(13, maxDistanceThreshold_);
+      if (minTimeThreshold_ != 0)
+		output.writeInt32(14, minTimeThreshold_);
+      if (maxTimeThreshold_ != 0)
+		output.writeInt32(15, maxTimeThreshold_);
+      if (optimiserSteps_ != 0)
+		output.writeInt32(16, optimiserSteps_);
+      if (optimiserPlot_ != 0)
+		output.writeInt32(17, optimiserPlot_);
+      if (saveTraces_ != false)
+		output.writeBool(18, saveTraces_);
+      if (showHistograms_ != false)
+		output.writeBool(19, showHistograms_);
+      if (saveTraceData_ != false)
+		output.writeBool(20, saveTraceData_);
+      if (!getTraceDataDirectoryBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 21, traceDataDirectory_);
+      if (histogramBins_ != 0)
+		output.writeInt32(22, histogramBins_);
+      if (removeOutliers_ != false)
+		output.writeBool(23, removeOutliers_);
+      if (refitOption_ != false)
+		output.writeBool(24, refitOption_);
+      if (minimumTraceLength_ != 0)
+		output.writeInt32(25, minimumTraceLength_);
+      if (truncate_ != false)
+		output.writeBool(26, truncate_);
+      if (internalDistances_ != false)
+		output.writeBool(27, internalDistances_);
+      if (subSampledDistances_ != false)
+		output.writeBool(28, subSampledDistances_);
+      if (ignoreEnds_ != false)
+		output.writeBool(29, ignoreEnds_);
+      if (precisionCorrection_ != false)
+		output.writeBool(30, precisionCorrection_);
+      if (msdCorrection_ != false)
+		output.writeBool(31, msdCorrection_);
+      if (mle_ != false)
+		output.writeBool(32, mle_);
+      if (fitLength_ != 0)
+		output.writeInt32(33, fitLength_);
+      if (fitRestarts_ != 0)
+		output.writeInt32(34, fitRestarts_);
+      if (jumpDistance_ != 0)
+		output.writeInt32(35, jumpDistance_);
     }
 
     @Override
@@ -14285,145 +13796,110 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (distanceThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (distanceThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, distanceThreshold_);
-      }
-      if (distanceExclusion_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (distanceExclusion_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, distanceExclusion_);
-      }
-      if (timeThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (timeThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, timeThreshold_);
-      }
-      if (timeUnit_ != gdsc.smlm.data.config.UnitProtos.TimeUnit.TIME_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (timeUnit_ != gdsc.smlm.data.config.UnitProtos.TimeUnit.TIME_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, timeUnit_);
-      }
-      if (traceMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (traceMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, traceMode_);
-      }
-      if (clusteringAlgorithm_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (clusteringAlgorithm_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, clusteringAlgorithm_);
-      }
-      if (pulseInterval_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pulseInterval_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, pulseInterval_);
-      }
-      if (pulseWindow_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pulseWindow_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, pulseWindow_);
-      }
-      if (splitPulses_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (splitPulses_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, splitPulses_);
-      }
-      if (blinkingRate_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (blinkingRate_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(10, blinkingRate_);
-      }
-      if (optimise_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (optimise_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(11, optimise_);
-      }
-      if (minDistanceThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minDistanceThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, minDistanceThreshold_);
-      }
-      if (maxDistanceThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxDistanceThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, maxDistanceThreshold_);
-      }
-      if (minTimeThreshold_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minTimeThreshold_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, minTimeThreshold_);
-      }
-      if (maxTimeThreshold_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxTimeThreshold_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(15, maxTimeThreshold_);
-      }
-      if (optimiserSteps_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (optimiserSteps_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(16, optimiserSteps_);
-      }
-      if (optimiserPlot_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (optimiserPlot_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(17, optimiserPlot_);
-      }
-      if (saveTraces_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveTraces_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(18, saveTraces_);
-      }
-      if (showHistograms_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showHistograms_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(19, showHistograms_);
-      }
-      if (saveTraceData_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveTraceData_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(20, saveTraceData_);
-      }
-      if (!getTraceDataDirectoryBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, traceDataDirectory_);
-      }
-      if (histogramBins_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getTraceDataDirectoryBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, traceDataDirectory_);
+      if (histogramBins_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(22, histogramBins_);
-      }
-      if (removeOutliers_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (removeOutliers_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(23, removeOutliers_);
-      }
-      if (refitOption_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (refitOption_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(24, refitOption_);
-      }
-      if (minimumTraceLength_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minimumTraceLength_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(25, minimumTraceLength_);
-      }
-      if (truncate_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (truncate_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(26, truncate_);
-      }
-      if (internalDistances_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (internalDistances_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(27, internalDistances_);
-      }
-      if (subSampledDistances_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (subSampledDistances_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(28, subSampledDistances_);
-      }
-      if (ignoreEnds_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (ignoreEnds_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(29, ignoreEnds_);
-      }
-      if (precisionCorrection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (precisionCorrection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(30, precisionCorrection_);
-      }
-      if (msdCorrection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (msdCorrection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(31, msdCorrection_);
-      }
-      if (mle_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (mle_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(32, mle_);
-      }
-      if (fitLength_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitLength_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(33, fitLength_);
-      }
-      if (fitRestarts_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitRestarts_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(34, fitRestarts_);
-      }
-      if (jumpDistance_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (jumpDistance_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(35, jumpDistance_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -14431,13 +13907,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ClusteringSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.ClusteringSettings other = (gdsc.smlm.data.config.GUIProtos.ClusteringSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ClusteringSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.ClusteringSettings other = (gdsc.smlm.data.config.GUIProtos.ClusteringSettings) obj;
 
       boolean result = true;
       result = result && (
@@ -14526,9 +14000,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DISTANCE_THRESHOLD_FIELD_NUMBER;
@@ -14713,7 +14186,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -14844,16 +14317,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.ClusteringSettings build() {
-        gdsc.smlm.data.config.GUIProtos.ClusteringSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.ClusteringSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.ClusteringSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.ClusteringSettings result = new gdsc.smlm.data.config.GUIProtos.ClusteringSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.ClusteringSettings result = new gdsc.smlm.data.config.GUIProtos.ClusteringSettings(this);
         result.distanceThreshold_ = distanceThreshold_;
         result.distanceExclusion_ = distanceExclusion_;
         result.timeThreshold_ = timeThreshold_;
@@ -14927,9 +14399,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.ClusteringSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.ClusteringSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.ClusteringSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.ClusteringSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -14937,112 +14409,78 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.ClusteringSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.ClusteringSettings.getDefaultInstance()) return this;
-        if (other.getDistanceThreshold() != 0D) {
-          setDistanceThreshold(other.getDistanceThreshold());
-        }
-        if (other.getDistanceExclusion() != 0D) {
-          setDistanceExclusion(other.getDistanceExclusion());
-        }
-        if (other.getTimeThreshold() != 0D) {
-          setTimeThreshold(other.getTimeThreshold());
-        }
-        if (other.timeUnit_ != 0) {
-          setTimeUnitValue(other.getTimeUnitValue());
-        }
-        if (other.getTraceMode() != 0) {
-          setTraceMode(other.getTraceMode());
-        }
-        if (other.getClusteringAlgorithm() != 0) {
-          setClusteringAlgorithm(other.getClusteringAlgorithm());
-        }
-        if (other.getPulseInterval() != 0) {
-          setPulseInterval(other.getPulseInterval());
-        }
-        if (other.getPulseWindow() != 0) {
-          setPulseWindow(other.getPulseWindow());
-        }
-        if (other.getSplitPulses() != false) {
-          setSplitPulses(other.getSplitPulses());
-        }
-        if (other.getBlinkingRate() != 0D) {
-          setBlinkingRate(other.getBlinkingRate());
-        }
-        if (other.getOptimise() != false) {
-          setOptimise(other.getOptimise());
-        }
-        if (other.getMinDistanceThreshold() != 0D) {
-          setMinDistanceThreshold(other.getMinDistanceThreshold());
-        }
-        if (other.getMaxDistanceThreshold() != 0D) {
-          setMaxDistanceThreshold(other.getMaxDistanceThreshold());
-        }
-        if (other.getMinTimeThreshold() != 0) {
-          setMinTimeThreshold(other.getMinTimeThreshold());
-        }
-        if (other.getMaxTimeThreshold() != 0) {
-          setMaxTimeThreshold(other.getMaxTimeThreshold());
-        }
-        if (other.getOptimiserSteps() != 0) {
-          setOptimiserSteps(other.getOptimiserSteps());
-        }
-        if (other.getOptimiserPlot() != 0) {
-          setOptimiserPlot(other.getOptimiserPlot());
-        }
-        if (other.getSaveTraces() != false) {
-          setSaveTraces(other.getSaveTraces());
-        }
-        if (other.getShowHistograms() != false) {
-          setShowHistograms(other.getShowHistograms());
-        }
-        if (other.getSaveTraceData() != false) {
-          setSaveTraceData(other.getSaveTraceData());
-        }
+        if (other.getDistanceThreshold() != 0D)
+			setDistanceThreshold(other.getDistanceThreshold());
+        if (other.getDistanceExclusion() != 0D)
+			setDistanceExclusion(other.getDistanceExclusion());
+        if (other.getTimeThreshold() != 0D)
+			setTimeThreshold(other.getTimeThreshold());
+        if (other.timeUnit_ != 0)
+			setTimeUnitValue(other.getTimeUnitValue());
+        if (other.getTraceMode() != 0)
+			setTraceMode(other.getTraceMode());
+        if (other.getClusteringAlgorithm() != 0)
+			setClusteringAlgorithm(other.getClusteringAlgorithm());
+        if (other.getPulseInterval() != 0)
+			setPulseInterval(other.getPulseInterval());
+        if (other.getPulseWindow() != 0)
+			setPulseWindow(other.getPulseWindow());
+        if (other.getSplitPulses() != false)
+			setSplitPulses(other.getSplitPulses());
+        if (other.getBlinkingRate() != 0D)
+			setBlinkingRate(other.getBlinkingRate());
+        if (other.getOptimise() != false)
+			setOptimise(other.getOptimise());
+        if (other.getMinDistanceThreshold() != 0D)
+			setMinDistanceThreshold(other.getMinDistanceThreshold());
+        if (other.getMaxDistanceThreshold() != 0D)
+			setMaxDistanceThreshold(other.getMaxDistanceThreshold());
+        if (other.getMinTimeThreshold() != 0)
+			setMinTimeThreshold(other.getMinTimeThreshold());
+        if (other.getMaxTimeThreshold() != 0)
+			setMaxTimeThreshold(other.getMaxTimeThreshold());
+        if (other.getOptimiserSteps() != 0)
+			setOptimiserSteps(other.getOptimiserSteps());
+        if (other.getOptimiserPlot() != 0)
+			setOptimiserPlot(other.getOptimiserPlot());
+        if (other.getSaveTraces() != false)
+			setSaveTraces(other.getSaveTraces());
+        if (other.getShowHistograms() != false)
+			setShowHistograms(other.getShowHistograms());
+        if (other.getSaveTraceData() != false)
+			setSaveTraceData(other.getSaveTraceData());
         if (!other.getTraceDataDirectory().isEmpty()) {
           traceDataDirectory_ = other.traceDataDirectory_;
           onChanged();
         }
-        if (other.getHistogramBins() != 0) {
-          setHistogramBins(other.getHistogramBins());
-        }
-        if (other.getRemoveOutliers() != false) {
-          setRemoveOutliers(other.getRemoveOutliers());
-        }
-        if (other.getRefitOption() != false) {
-          setRefitOption(other.getRefitOption());
-        }
-        if (other.getMinimumTraceLength() != 0) {
-          setMinimumTraceLength(other.getMinimumTraceLength());
-        }
-        if (other.getTruncate() != false) {
-          setTruncate(other.getTruncate());
-        }
-        if (other.getInternalDistances() != false) {
-          setInternalDistances(other.getInternalDistances());
-        }
-        if (other.getSubSampledDistances() != false) {
-          setSubSampledDistances(other.getSubSampledDistances());
-        }
-        if (other.getIgnoreEnds() != false) {
-          setIgnoreEnds(other.getIgnoreEnds());
-        }
-        if (other.getPrecisionCorrection() != false) {
-          setPrecisionCorrection(other.getPrecisionCorrection());
-        }
-        if (other.getMsdCorrection() != false) {
-          setMsdCorrection(other.getMsdCorrection());
-        }
-        if (other.getMle() != false) {
-          setMle(other.getMle());
-        }
-        if (other.getFitLength() != 0) {
-          setFitLength(other.getFitLength());
-        }
-        if (other.getFitRestarts() != 0) {
-          setFitRestarts(other.getFitRestarts());
-        }
-        if (other.getJumpDistance() != 0) {
-          setJumpDistance(other.getJumpDistance());
-        }
+        if (other.getHistogramBins() != 0)
+			setHistogramBins(other.getHistogramBins());
+        if (other.getRemoveOutliers() != false)
+			setRemoveOutliers(other.getRemoveOutliers());
+        if (other.getRefitOption() != false)
+			setRefitOption(other.getRefitOption());
+        if (other.getMinimumTraceLength() != 0)
+			setMinimumTraceLength(other.getMinimumTraceLength());
+        if (other.getTruncate() != false)
+			setTruncate(other.getTruncate());
+        if (other.getInternalDistances() != false)
+			setInternalDistances(other.getInternalDistances());
+        if (other.getSubSampledDistances() != false)
+			setSubSampledDistances(other.getSubSampledDistances());
+        if (other.getIgnoreEnds() != false)
+			setIgnoreEnds(other.getIgnoreEnds());
+        if (other.getPrecisionCorrection() != false)
+			setPrecisionCorrection(other.getPrecisionCorrection());
+        if (other.getMsdCorrection() != false)
+			setMsdCorrection(other.getMsdCorrection());
+        if (other.getMle() != false)
+			setMle(other.getMle());
+        if (other.getFitLength() != 0)
+			setFitLength(other.getFitLength());
+        if (other.getFitRestarts() != 0)
+			setFitRestarts(other.getFitRestarts());
+        if (other.getJumpDistance() != 0)
+			setJumpDistance(other.getJumpDistance());
         onChanged();
         return this;
       }
@@ -15060,13 +14498,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.ClusteringSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.ClusteringSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -15173,16 +14610,15 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.TimeUnit getTimeUnit() {
-        gdsc.smlm.data.config.UnitProtos.TimeUnit result = gdsc.smlm.data.config.UnitProtos.TimeUnit.valueOf(timeUnit_);
+        final gdsc.smlm.data.config.UnitProtos.TimeUnit result = gdsc.smlm.data.config.UnitProtos.TimeUnit.valueOf(timeUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.TimeUnit.UNRECOGNIZED : result;
       }
       /**
        * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
        */
       public Builder setTimeUnit(gdsc.smlm.data.config.UnitProtos.TimeUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         timeUnit_ = value.getNumber();
         onChanged();
@@ -15660,16 +15096,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getTraceDataDirectory() {
-        java.lang.Object ref = traceDataDirectory_;
+        final java.lang.Object ref = traceDataDirectory_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           traceDataDirectory_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string trace_data_directory = 21;</code>
@@ -15677,25 +15113,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getTraceDataDirectoryBytes() {
-        java.lang.Object ref = traceDataDirectory_;
+        final java.lang.Object ref = traceDataDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           traceDataDirectory_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string trace_data_directory = 21;</code>
        */
       public Builder setTraceDataDirectory(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         traceDataDirectory_ = value;
         onChanged();
@@ -15715,9 +15150,8 @@ public final class GUIProtos {
        */
       public Builder setTraceDataDirectoryBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         traceDataDirectory_ = value;
@@ -16241,19 +15675,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -16293,9 +15726,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -16388,7 +15821,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -16399,27 +15832,20 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (showSelectionTable_ != false) {
-        output.writeBool(1, showSelectionTable_);
-      }
-      if (tableCreateSelection_ != false) {
-        output.writeBool(2, tableCreateSelection_);
-      }
-      if (imageCreateSelection_ != false) {
-        output.writeBool(3, imageCreateSelection_);
-      }
-      if (plotCreateSelection_ != false) {
-        output.writeBool(4, plotCreateSelection_);
-      }
-      if (tableShowSelection_ != false) {
-        output.writeBool(5, tableShowSelection_);
-      }
-      if (imageShowSelection_ != false) {
-        output.writeBool(6, imageShowSelection_);
-      }
-      if (plotShowSelection_ != false) {
-        output.writeBool(7, plotShowSelection_);
-      }
+      if (showSelectionTable_ != false)
+		output.writeBool(1, showSelectionTable_);
+      if (tableCreateSelection_ != false)
+		output.writeBool(2, tableCreateSelection_);
+      if (imageCreateSelection_ != false)
+		output.writeBool(3, imageCreateSelection_);
+      if (plotCreateSelection_ != false)
+		output.writeBool(4, plotCreateSelection_);
+      if (tableShowSelection_ != false)
+		output.writeBool(5, tableShowSelection_);
+      if (imageShowSelection_ != false)
+		output.writeBool(6, imageShowSelection_);
+      if (plotShowSelection_ != false)
+		output.writeBool(7, plotShowSelection_);
     }
 
     @Override
@@ -16428,34 +15854,27 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (showSelectionTable_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showSelectionTable_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, showSelectionTable_);
-      }
-      if (tableCreateSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tableCreateSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, tableCreateSelection_);
-      }
-      if (imageCreateSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (imageCreateSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, imageCreateSelection_);
-      }
-      if (plotCreateSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotCreateSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, plotCreateSelection_);
-      }
-      if (tableShowSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tableShowSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, tableShowSelection_);
-      }
-      if (imageShowSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (imageShowSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, imageShowSelection_);
-      }
-      if (plotShowSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotShowSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, plotShowSelection_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -16463,13 +15882,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.OpticsEventSettings other = (gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.OpticsEventSettings other = (gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) obj;
 
       boolean result = true;
       result = result && (getShowSelectionTable()
@@ -16491,9 +15908,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SHOW_SELECTION_TABLE_FIELD_NUMBER;
@@ -16609,7 +16025,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -16684,16 +16100,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings build() {
-        gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsEventSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsEventSettings(this);
         result.showSelectionTable_ = showSelectionTable_;
         result.tableCreateSelection_ = tableCreateSelection_;
         result.imageCreateSelection_ = imageCreateSelection_;
@@ -16739,9 +16154,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -16749,27 +16164,20 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance()) return this;
-        if (other.getShowSelectionTable() != false) {
-          setShowSelectionTable(other.getShowSelectionTable());
-        }
-        if (other.getTableCreateSelection() != false) {
-          setTableCreateSelection(other.getTableCreateSelection());
-        }
-        if (other.getImageCreateSelection() != false) {
-          setImageCreateSelection(other.getImageCreateSelection());
-        }
-        if (other.getPlotCreateSelection() != false) {
-          setPlotCreateSelection(other.getPlotCreateSelection());
-        }
-        if (other.getTableShowSelection() != false) {
-          setTableShowSelection(other.getTableShowSelection());
-        }
-        if (other.getImageShowSelection() != false) {
-          setImageShowSelection(other.getImageShowSelection());
-        }
-        if (other.getPlotShowSelection() != false) {
-          setPlotShowSelection(other.getPlotShowSelection());
-        }
+        if (other.getShowSelectionTable() != false)
+			setShowSelectionTable(other.getShowSelectionTable());
+        if (other.getTableCreateSelection() != false)
+			setTableCreateSelection(other.getTableCreateSelection());
+        if (other.getImageCreateSelection() != false)
+			setImageCreateSelection(other.getImageCreateSelection());
+        if (other.getPlotCreateSelection() != false)
+			setPlotCreateSelection(other.getPlotCreateSelection());
+        if (other.getTableShowSelection() != false)
+			setTableShowSelection(other.getTableShowSelection());
+        if (other.getImageShowSelection() != false)
+			setImageShowSelection(other.getImageShowSelection());
+        if (other.getPlotShowSelection() != false)
+			setPlotShowSelection(other.getPlotShowSelection());
         onChanged();
         return this;
       }
@@ -16787,13 +16195,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -17404,23 +16811,22 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               inputOption_ = s;
               break;
@@ -17567,9 +16973,8 @@ public final class GUIProtos {
             }
             case 242: {
               gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder subBuilder = null;
-              if (opticsEventSettings_ != null) {
-                subBuilder = opticsEventSettings_.toBuilder();
-              }
+              if (opticsEventSettings_ != null)
+				subBuilder = opticsEventSettings_.toBuilder();
               opticsEventSettings_ = input.readMessage(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(opticsEventSettings_);
@@ -17580,9 +16985,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -17613,13 +17018,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getInputOption() {
-      java.lang.Object ref = inputOption_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
         return s;
       }
@@ -17634,16 +17039,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getInputOptionBytes() {
-      java.lang.Object ref = inputOption_;
+      final java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int OPTICS_MODE_FIELD_NUMBER = 2;
@@ -18086,7 +17491,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -18097,96 +17502,66 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getInputOptionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
-      }
-      if (opticsMode_ != 0) {
-        output.writeInt32(2, opticsMode_);
-      }
-      if (numberOfSplitSets_ != 0) {
-        output.writeInt32(3, numberOfSplitSets_);
-      }
-      if (useRandomVectors_ != false) {
-        output.writeBool(4, useRandomVectors_);
-      }
-      if (saveApproximateSets_ != false) {
-        output.writeBool(5, saveApproximateSets_);
-      }
-      if (sampleMode_ != 0) {
-        output.writeInt32(6, sampleMode_);
-      }
-      if (generatingDistance_ != 0D) {
-        output.writeDouble(7, generatingDistance_);
-      }
-      if (minPoints_ != 0) {
-        output.writeInt32(8, minPoints_);
-      }
-      if (clusteringMode_ != 0) {
-        output.writeInt32(9, clusteringMode_);
-      }
-      if (xi_ != 0D) {
-        output.writeDouble(10, xi_);
-      }
-      if (topLevel_ != false) {
-        output.writeBool(11, topLevel_);
-      }
-      if (upperLimit_ != 0D) {
-        output.writeDouble(12, upperLimit_);
-      }
-      if (lowerLimit_ != 0D) {
-        output.writeDouble(13, lowerLimit_);
-      }
-      if (samples_ != 0) {
-        output.writeInt32(14, samples_);
-      }
-      if (sampleFraction_ != 0D) {
-        output.writeDouble(15, sampleFraction_);
-      }
-      if (fractionNoise_ != 0D) {
-        output.writeDouble(16, fractionNoise_);
-      }
-      if (clusteringDistance_ != 0D) {
-        output.writeDouble(17, clusteringDistance_);
-      }
-      if (core_ != false) {
-        output.writeBool(18, core_);
-      }
-      if (imageScale_ != 0D) {
-        output.writeDouble(19, imageScale_);
-      }
-      if (imageMode_ != 0) {
-        output.writeInt32(20, imageMode_);
-      }
-      if (weighted_ != false) {
-        output.writeBool(21, weighted_);
-      }
-      if (equalised_ != false) {
-        output.writeBool(22, equalised_);
-      }
-      if (plotMode_ != 0) {
-        output.writeInt32(23, plotMode_);
-      }
-      if (outlineMode_ != 0) {
-        output.writeInt32(24, outlineMode_);
-      }
-      if (spanningTreeMode_ != 0) {
-        output.writeInt32(25, spanningTreeMode_);
-      }
-      if (lambda_ != 0D) {
-        output.writeDouble(26, lambda_);
-      }
-      if (showTable_ != false) {
-        output.writeBool(27, showTable_);
-      }
-      if (tableSortMode_ != 0) {
-        output.writeInt32(28, tableSortMode_);
-      }
-      if (tableReverseSort_ != false) {
-        output.writeBool(29, tableReverseSort_);
-      }
-      if (opticsEventSettings_ != null) {
-        output.writeMessage(30, getOpticsEventSettings());
-      }
+      if (!getInputOptionBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      if (opticsMode_ != 0)
+		output.writeInt32(2, opticsMode_);
+      if (numberOfSplitSets_ != 0)
+		output.writeInt32(3, numberOfSplitSets_);
+      if (useRandomVectors_ != false)
+		output.writeBool(4, useRandomVectors_);
+      if (saveApproximateSets_ != false)
+		output.writeBool(5, saveApproximateSets_);
+      if (sampleMode_ != 0)
+		output.writeInt32(6, sampleMode_);
+      if (generatingDistance_ != 0D)
+		output.writeDouble(7, generatingDistance_);
+      if (minPoints_ != 0)
+		output.writeInt32(8, minPoints_);
+      if (clusteringMode_ != 0)
+		output.writeInt32(9, clusteringMode_);
+      if (xi_ != 0D)
+		output.writeDouble(10, xi_);
+      if (topLevel_ != false)
+		output.writeBool(11, topLevel_);
+      if (upperLimit_ != 0D)
+		output.writeDouble(12, upperLimit_);
+      if (lowerLimit_ != 0D)
+		output.writeDouble(13, lowerLimit_);
+      if (samples_ != 0)
+		output.writeInt32(14, samples_);
+      if (sampleFraction_ != 0D)
+		output.writeDouble(15, sampleFraction_);
+      if (fractionNoise_ != 0D)
+		output.writeDouble(16, fractionNoise_);
+      if (clusteringDistance_ != 0D)
+		output.writeDouble(17, clusteringDistance_);
+      if (core_ != false)
+		output.writeBool(18, core_);
+      if (imageScale_ != 0D)
+		output.writeDouble(19, imageScale_);
+      if (imageMode_ != 0)
+		output.writeInt32(20, imageMode_);
+      if (weighted_ != false)
+		output.writeBool(21, weighted_);
+      if (equalised_ != false)
+		output.writeBool(22, equalised_);
+      if (plotMode_ != 0)
+		output.writeInt32(23, plotMode_);
+      if (outlineMode_ != 0)
+		output.writeInt32(24, outlineMode_);
+      if (spanningTreeMode_ != 0)
+		output.writeInt32(25, spanningTreeMode_);
+      if (lambda_ != 0D)
+		output.writeDouble(26, lambda_);
+      if (showTable_ != false)
+		output.writeBool(27, showTable_);
+      if (tableSortMode_ != 0)
+		output.writeInt32(28, tableSortMode_);
+      if (tableReverseSort_ != false)
+		output.writeBool(29, tableReverseSort_);
+      if (opticsEventSettings_ != null)
+		output.writeMessage(30, getOpticsEventSettings());
     }
 
     @Override
@@ -18195,125 +17570,95 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!getInputOptionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
-      }
-      if (opticsMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getInputOptionBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      if (opticsMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, opticsMode_);
-      }
-      if (numberOfSplitSets_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (numberOfSplitSets_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, numberOfSplitSets_);
-      }
-      if (useRandomVectors_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (useRandomVectors_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, useRandomVectors_);
-      }
-      if (saveApproximateSets_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveApproximateSets_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, saveApproximateSets_);
-      }
-      if (sampleMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sampleMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, sampleMode_);
-      }
-      if (generatingDistance_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (generatingDistance_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, generatingDistance_);
-      }
-      if (minPoints_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minPoints_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, minPoints_);
-      }
-      if (clusteringMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (clusteringMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(9, clusteringMode_);
-      }
-      if (xi_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (xi_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(10, xi_);
-      }
-      if (topLevel_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (topLevel_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(11, topLevel_);
-      }
-      if (upperLimit_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (upperLimit_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, upperLimit_);
-      }
-      if (lowerLimit_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (lowerLimit_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, lowerLimit_);
-      }
-      if (samples_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (samples_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, samples_);
-      }
-      if (sampleFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sampleFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(15, sampleFraction_);
-      }
-      if (fractionNoise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fractionNoise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(16, fractionNoise_);
-      }
-      if (clusteringDistance_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (clusteringDistance_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(17, clusteringDistance_);
-      }
-      if (core_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (core_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(18, core_);
-      }
-      if (imageScale_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (imageScale_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(19, imageScale_);
-      }
-      if (imageMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (imageMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(20, imageMode_);
-      }
-      if (weighted_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weighted_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(21, weighted_);
-      }
-      if (equalised_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (equalised_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(22, equalised_);
-      }
-      if (plotMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(23, plotMode_);
-      }
-      if (outlineMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (outlineMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(24, outlineMode_);
-      }
-      if (spanningTreeMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (spanningTreeMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(25, spanningTreeMode_);
-      }
-      if (lambda_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (lambda_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(26, lambda_);
-      }
-      if (showTable_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showTable_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(27, showTable_);
-      }
-      if (tableSortMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tableSortMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(28, tableSortMode_);
-      }
-      if (tableReverseSort_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tableReverseSort_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(29, tableReverseSort_);
-      }
-      if (opticsEventSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (opticsEventSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(30, getOpticsEventSettings());
-      }
       memoizedSize = size;
       return size;
     }
@@ -18321,13 +17666,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.OpticsSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.OpticsSettings other = (gdsc.smlm.data.config.GUIProtos.OpticsSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.OpticsSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.OpticsSettings other = (gdsc.smlm.data.config.GUIProtos.OpticsSettings) obj;
 
       boolean result = true;
       result = result && getInputOption()
@@ -18407,18 +17750,16 @@ public final class GUIProtos {
       result = result && (getTableReverseSort()
           == other.getTableReverseSort());
       result = result && (hasOpticsEventSettings() == other.hasOpticsEventSettings());
-      if (hasOpticsEventSettings()) {
-        result = result && getOpticsEventSettings()
+      if (hasOpticsEventSettings())
+		result = result && getOpticsEventSettings()
             .equals(other.getOpticsEventSettings());
-      }
       return result;
     }
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
@@ -18592,7 +17933,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -18695,9 +18036,9 @@ public final class GUIProtos {
 
         tableReverseSort_ = false;
 
-        if (opticsEventSettingsBuilder_ == null) {
-          opticsEventSettings_ = null;
-        } else {
+        if (opticsEventSettingsBuilder_ == null)
+			opticsEventSettings_ = null;
+		else {
           opticsEventSettings_ = null;
           opticsEventSettingsBuilder_ = null;
         }
@@ -18717,16 +18058,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.OpticsSettings build() {
-        gdsc.smlm.data.config.GUIProtos.OpticsSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.OpticsSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.OpticsSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.OpticsSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.OpticsSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsSettings(this);
         result.inputOption_ = inputOption_;
         result.opticsMode_ = opticsMode_;
         result.numberOfSplitSets_ = numberOfSplitSets_;
@@ -18756,11 +18096,10 @@ public final class GUIProtos {
         result.showTable_ = showTable_;
         result.tableSortMode_ = tableSortMode_;
         result.tableReverseSort_ = tableReverseSort_;
-        if (opticsEventSettingsBuilder_ == null) {
-          result.opticsEventSettings_ = opticsEventSettings_;
-        } else {
-          result.opticsEventSettings_ = opticsEventSettingsBuilder_.build();
-        }
+        if (opticsEventSettingsBuilder_ == null)
+			result.opticsEventSettings_ = opticsEventSettings_;
+		else
+			result.opticsEventSettings_ = opticsEventSettingsBuilder_.build();
         onBuilt();
         return result;
       }
@@ -18799,9 +18138,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -18813,93 +18152,64 @@ public final class GUIProtos {
           inputOption_ = other.inputOption_;
           onChanged();
         }
-        if (other.getOpticsMode() != 0) {
-          setOpticsMode(other.getOpticsMode());
-        }
-        if (other.getNumberOfSplitSets() != 0) {
-          setNumberOfSplitSets(other.getNumberOfSplitSets());
-        }
-        if (other.getUseRandomVectors() != false) {
-          setUseRandomVectors(other.getUseRandomVectors());
-        }
-        if (other.getSaveApproximateSets() != false) {
-          setSaveApproximateSets(other.getSaveApproximateSets());
-        }
-        if (other.getSampleMode() != 0) {
-          setSampleMode(other.getSampleMode());
-        }
-        if (other.getGeneratingDistance() != 0D) {
-          setGeneratingDistance(other.getGeneratingDistance());
-        }
-        if (other.getMinPoints() != 0) {
-          setMinPoints(other.getMinPoints());
-        }
-        if (other.getClusteringMode() != 0) {
-          setClusteringMode(other.getClusteringMode());
-        }
-        if (other.getXi() != 0D) {
-          setXi(other.getXi());
-        }
-        if (other.getTopLevel() != false) {
-          setTopLevel(other.getTopLevel());
-        }
-        if (other.getUpperLimit() != 0D) {
-          setUpperLimit(other.getUpperLimit());
-        }
-        if (other.getLowerLimit() != 0D) {
-          setLowerLimit(other.getLowerLimit());
-        }
-        if (other.getSamples() != 0) {
-          setSamples(other.getSamples());
-        }
-        if (other.getSampleFraction() != 0D) {
-          setSampleFraction(other.getSampleFraction());
-        }
-        if (other.getFractionNoise() != 0D) {
-          setFractionNoise(other.getFractionNoise());
-        }
-        if (other.getClusteringDistance() != 0D) {
-          setClusteringDistance(other.getClusteringDistance());
-        }
-        if (other.getCore() != false) {
-          setCore(other.getCore());
-        }
-        if (other.getImageScale() != 0D) {
-          setImageScale(other.getImageScale());
-        }
-        if (other.getImageMode() != 0) {
-          setImageMode(other.getImageMode());
-        }
-        if (other.getWeighted() != false) {
-          setWeighted(other.getWeighted());
-        }
-        if (other.getEqualised() != false) {
-          setEqualised(other.getEqualised());
-        }
-        if (other.getPlotMode() != 0) {
-          setPlotMode(other.getPlotMode());
-        }
-        if (other.getOutlineMode() != 0) {
-          setOutlineMode(other.getOutlineMode());
-        }
-        if (other.getSpanningTreeMode() != 0) {
-          setSpanningTreeMode(other.getSpanningTreeMode());
-        }
-        if (other.getLambda() != 0D) {
-          setLambda(other.getLambda());
-        }
-        if (other.getShowTable() != false) {
-          setShowTable(other.getShowTable());
-        }
-        if (other.getTableSortMode() != 0) {
-          setTableSortMode(other.getTableSortMode());
-        }
-        if (other.getTableReverseSort() != false) {
-          setTableReverseSort(other.getTableReverseSort());
-        }
-        if (other.hasOpticsEventSettings()) {
-          mergeOpticsEventSettings(other.getOpticsEventSettings());
-        }
+        if (other.getOpticsMode() != 0)
+			setOpticsMode(other.getOpticsMode());
+        if (other.getNumberOfSplitSets() != 0)
+			setNumberOfSplitSets(other.getNumberOfSplitSets());
+        if (other.getUseRandomVectors() != false)
+			setUseRandomVectors(other.getUseRandomVectors());
+        if (other.getSaveApproximateSets() != false)
+			setSaveApproximateSets(other.getSaveApproximateSets());
+        if (other.getSampleMode() != 0)
+			setSampleMode(other.getSampleMode());
+        if (other.getGeneratingDistance() != 0D)
+			setGeneratingDistance(other.getGeneratingDistance());
+        if (other.getMinPoints() != 0)
+			setMinPoints(other.getMinPoints());
+        if (other.getClusteringMode() != 0)
+			setClusteringMode(other.getClusteringMode());
+        if (other.getXi() != 0D)
+			setXi(other.getXi());
+        if (other.getTopLevel() != false)
+			setTopLevel(other.getTopLevel());
+        if (other.getUpperLimit() != 0D)
+			setUpperLimit(other.getUpperLimit());
+        if (other.getLowerLimit() != 0D)
+			setLowerLimit(other.getLowerLimit());
+        if (other.getSamples() != 0)
+			setSamples(other.getSamples());
+        if (other.getSampleFraction() != 0D)
+			setSampleFraction(other.getSampleFraction());
+        if (other.getFractionNoise() != 0D)
+			setFractionNoise(other.getFractionNoise());
+        if (other.getClusteringDistance() != 0D)
+			setClusteringDistance(other.getClusteringDistance());
+        if (other.getCore() != false)
+			setCore(other.getCore());
+        if (other.getImageScale() != 0D)
+			setImageScale(other.getImageScale());
+        if (other.getImageMode() != 0)
+			setImageMode(other.getImageMode());
+        if (other.getWeighted() != false)
+			setWeighted(other.getWeighted());
+        if (other.getEqualised() != false)
+			setEqualised(other.getEqualised());
+        if (other.getPlotMode() != 0)
+			setPlotMode(other.getPlotMode());
+        if (other.getOutlineMode() != 0)
+			setOutlineMode(other.getOutlineMode());
+        if (other.getSpanningTreeMode() != 0)
+			setSpanningTreeMode(other.getSpanningTreeMode());
+        if (other.getLambda() != 0D)
+			setLambda(other.getLambda());
+        if (other.getShowTable() != false)
+			setShowTable(other.getShowTable());
+        if (other.getTableSortMode() != 0)
+			setTableSortMode(other.getTableSortMode());
+        if (other.getTableReverseSort() != false)
+			setTableReverseSort(other.getTableReverseSort());
+        if (other.hasOpticsEventSettings())
+			mergeOpticsEventSettings(other.getOpticsEventSettings());
         onChanged();
         return this;
       }
@@ -18917,13 +18227,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.OpticsSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.OpticsSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -18938,16 +18247,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getInputOption() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           inputOption_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -18959,16 +18268,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getInputOptionBytes() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -18979,9 +18288,8 @@ public final class GUIProtos {
        */
       public Builder setInputOption(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         inputOption_ = value;
         onChanged();
@@ -19009,9 +18317,8 @@ public final class GUIProtos {
        */
       public Builder setInputOptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         inputOption_ = value;
@@ -20161,11 +19468,10 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
-        if (opticsEventSettingsBuilder_ == null) {
-          return opticsEventSettings_ == null ? gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
-        } else {
-          return opticsEventSettingsBuilder_.getMessage();
-        }
+        if (opticsEventSettingsBuilder_ == null)
+			return opticsEventSettings_ == null ? gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
+		else
+			return opticsEventSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -20176,14 +19482,13 @@ public final class GUIProtos {
        */
       public Builder setOpticsEventSettings(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings value) {
         if (opticsEventSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           opticsEventSettings_ = value;
           onChanged();
-        } else {
-          opticsEventSettingsBuilder_.setMessage(value);
         }
+		else
+			opticsEventSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -20199,9 +19504,9 @@ public final class GUIProtos {
         if (opticsEventSettingsBuilder_ == null) {
           opticsEventSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          opticsEventSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			opticsEventSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -20214,16 +19519,15 @@ public final class GUIProtos {
        */
       public Builder mergeOpticsEventSettings(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings value) {
         if (opticsEventSettingsBuilder_ == null) {
-          if (opticsEventSettings_ != null) {
-            opticsEventSettings_ =
+          if (opticsEventSettings_ != null)
+			opticsEventSettings_ =
               gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.newBuilder(opticsEventSettings_).mergeFrom(value).buildPartial();
-          } else {
-            opticsEventSettings_ = value;
-          }
+		else
+			opticsEventSettings_ = value;
           onChanged();
-        } else {
-          opticsEventSettingsBuilder_.mergeFrom(value);
         }
+		else
+			opticsEventSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -20266,12 +19570,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
-        if (opticsEventSettingsBuilder_ != null) {
-          return opticsEventSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return opticsEventSettings_ == null ?
-              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
-        }
+        if (opticsEventSettingsBuilder_ != null)
+			return opticsEventSettingsBuilder_.getMessageOrBuilder();
+		else
+			return opticsEventSettings_ == null ?
+			      gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
       }
       /**
        * <pre>
@@ -20420,50 +19723,49 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               templateType_ = rawValue;
               break;
             }
             case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               name_ = s;
               break;
             }
             case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               filename_ = s;
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               tifFilename_ = s;
               break;
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -20497,7 +19799,7 @@ public final class GUIProtos {
      */
     @Override
 	public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
-      gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
+      final gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
       return result == null ? gdsc.smlm.data.config.GUIProtos.TemplateType.UNRECOGNIZED : result;
     }
 
@@ -20508,13 +19810,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         name_ = s;
         return s;
       }
@@ -20525,16 +19827,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getNameBytes() {
-      java.lang.Object ref = name_;
+      final java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FILENAME_FIELD_NUMBER = 3;
@@ -20544,13 +19846,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFilename() {
-      java.lang.Object ref = filename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         filename_ = s;
         return s;
       }
@@ -20561,16 +19863,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFilenameBytes() {
-      java.lang.Object ref = filename_;
+      final java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int TIF_FILENAME_FIELD_NUMBER = 4;
@@ -20580,13 +19882,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getTifFilename() {
-      java.lang.Object ref = tifFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = tifFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         tifFilename_ = s;
         return s;
       }
@@ -20597,22 +19899,22 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getTifFilenameBytes() {
-      java.lang.Object ref = tifFilename_;
+      final java.lang.Object ref = tifFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         tifFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -20623,18 +19925,14 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber()) {
-        output.writeEnum(1, templateType_);
-      }
-      if (!getNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
-      }
-      if (!getFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, filename_);
-      }
-      if (!getTifFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, tifFilename_);
-      }
+      if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber())
+		output.writeEnum(1, templateType_);
+      if (!getNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      if (!getFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 3, filename_);
+      if (!getTifFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 4, tifFilename_);
     }
 
     @Override
@@ -20643,19 +19941,15 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, templateType_);
-      }
-      if (!getNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
-      }
-      if (!getFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, filename_);
-      }
-      if (!getTifFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, tifFilename_);
-      }
+      if (!getNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      if (!getFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, filename_);
+      if (!getTifFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, tifFilename_);
       memoizedSize = size;
       return size;
     }
@@ -20663,13 +19957,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.DefaultTemplate other = (gdsc.smlm.data.config.GUIProtos.DefaultTemplate) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.DefaultTemplate other = (gdsc.smlm.data.config.GUIProtos.DefaultTemplate) obj;
 
       boolean result = true;
       result = result && templateType_ == other.templateType_;
@@ -20684,9 +19976,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + TEMPLATE_TYPE_FIELD_NUMBER;
@@ -20789,7 +20080,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -20858,16 +20149,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate build() {
-        gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplate(this);
+        final gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplate(this);
         result.templateType_ = templateType_;
         result.name_ = name_;
         result.filename_ = filename_;
@@ -20910,9 +20200,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplate)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplate)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -20920,9 +20210,8 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.DefaultTemplate other) {
         if (other == gdsc.smlm.data.config.GUIProtos.DefaultTemplate.getDefaultInstance()) return this;
-        if (other.templateType_ != 0) {
-          setTemplateTypeValue(other.getTemplateTypeValue());
-        }
+        if (other.templateType_ != 0)
+			setTemplateTypeValue(other.getTemplateTypeValue());
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
           onChanged();
@@ -20952,13 +20241,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.DefaultTemplate parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.DefaultTemplate) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -20984,16 +20272,15 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
-        gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
+        final gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
         return result == null ? gdsc.smlm.data.config.GUIProtos.TemplateType.UNRECOGNIZED : result;
       }
       /**
        * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
        */
       public Builder setTemplateType(gdsc.smlm.data.config.GUIProtos.TemplateType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         templateType_ = value.getNumber();
         onChanged();
@@ -21015,16 +20302,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getName() {
-        java.lang.Object ref = name_;
+        final java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           name_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string name = 2;</code>
@@ -21032,25 +20319,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getNameBytes() {
-        java.lang.Object ref = name_;
+        final java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string name = 2;</code>
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         name_ = value;
         onChanged();
@@ -21070,9 +20356,8 @@ public final class GUIProtos {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         name_ = value;
@@ -21086,16 +20371,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFilename() {
-        java.lang.Object ref = filename_;
+        final java.lang.Object ref = filename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           filename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string filename = 3;</code>
@@ -21103,25 +20388,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFilenameBytes() {
-        java.lang.Object ref = filename_;
+        final java.lang.Object ref = filename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string filename = 3;</code>
        */
       public Builder setFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         filename_ = value;
         onChanged();
@@ -21141,9 +20425,8 @@ public final class GUIProtos {
        */
       public Builder setFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         filename_ = value;
@@ -21157,16 +20440,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getTifFilename() {
-        java.lang.Object ref = tifFilename_;
+        final java.lang.Object ref = tifFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           tifFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string tif_filename = 4;</code>
@@ -21174,25 +20457,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getTifFilenameBytes() {
-        java.lang.Object ref = tifFilename_;
+        final java.lang.Object ref = tifFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           tifFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string tif_filename = 4;</code>
        */
       public Builder setTifFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         tifFilename_ = value;
         onChanged();
@@ -21212,9 +20494,8 @@ public final class GUIProtos {
        */
       public Builder setTifFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         tifFilename_ = value;
@@ -21335,15 +20616,14 @@ public final class GUIProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
@@ -21357,15 +20637,14 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          defaultTemplates_ = java.util.Collections.unmodifiableList(defaultTemplates_);
-        }
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001))
+			defaultTemplates_ = java.util.Collections.unmodifiableList(defaultTemplates_);
         makeExtensionsImmutable();
       }
     }
@@ -21425,7 +20704,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -21436,9 +20715,8 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < defaultTemplates_.size(); i++) {
-        output.writeMessage(1, defaultTemplates_.get(i));
-      }
+      for (int i = 0; i < defaultTemplates_.size(); i++)
+		output.writeMessage(1, defaultTemplates_.get(i));
     }
 
     @Override
@@ -21447,10 +20725,9 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < defaultTemplates_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
+      for (int i = 0; i < defaultTemplates_.size(); i++)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, defaultTemplates_.get(i));
-      }
       memoizedSize = size;
       return size;
     }
@@ -21458,13 +20735,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings other = (gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings other = (gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) obj;
 
       boolean result = true;
       result = result && getDefaultTemplatesList()
@@ -21474,9 +20749,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (getDefaultTemplatesCount() > 0) {
@@ -21575,7 +20849,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -21614,9 +20888,8 @@ public final class GUIProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getDefaultTemplatesFieldBuilder();
-        }
+                .alwaysUseFieldBuilders)
+			getDefaultTemplatesFieldBuilder();
       }
       @Override
 	public Builder clear() {
@@ -21624,9 +20897,9 @@ public final class GUIProtos {
         if (defaultTemplatesBuilder_ == null) {
           defaultTemplates_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          defaultTemplatesBuilder_.clear();
         }
+		else
+			defaultTemplatesBuilder_.clear();
         return this;
       }
 
@@ -21643,26 +20916,25 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings build() {
-        gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings(this);
-        int from_bitField0_ = bitField0_;
+        final gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings(this);
+        final int from_bitField0_ = bitField0_;
         if (defaultTemplatesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001)) {
             defaultTemplates_ = java.util.Collections.unmodifiableList(defaultTemplates_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.defaultTemplates_ = defaultTemplates_;
-        } else {
-          result.defaultTemplates_ = defaultTemplatesBuilder_.build();
         }
+		else
+			result.defaultTemplates_ = defaultTemplatesBuilder_.build();
         onBuilt();
         return result;
       }
@@ -21701,9 +20973,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -21722,9 +20994,9 @@ public final class GUIProtos {
             }
             onChanged();
           }
-        } else {
-          if (!other.defaultTemplates_.isEmpty()) {
-            if (defaultTemplatesBuilder_.isEmpty()) {
+        }
+		else if (!other.defaultTemplates_.isEmpty())
+			if (defaultTemplatesBuilder_.isEmpty()) {
               defaultTemplatesBuilder_.dispose();
               defaultTemplatesBuilder_ = null;
               defaultTemplates_ = other.defaultTemplates_;
@@ -21732,11 +21004,9 @@ public final class GUIProtos {
               defaultTemplatesBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDefaultTemplatesFieldBuilder() : null;
-            } else {
-              defaultTemplatesBuilder_.addAllMessages(other.defaultTemplates_);
             }
-          }
-        }
+			else
+				defaultTemplatesBuilder_.addAllMessages(other.defaultTemplates_);
         onChanged();
         return this;
       }
@@ -21754,13 +21024,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -21783,33 +21052,30 @@ public final class GUIProtos {
        */
       @Override
 	public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
-        if (defaultTemplatesBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(defaultTemplates_);
-        } else {
-          return defaultTemplatesBuilder_.getMessageList();
-        }
+        if (defaultTemplatesBuilder_ == null)
+			return java.util.Collections.unmodifiableList(defaultTemplates_);
+		else
+			return defaultTemplatesBuilder_.getMessageList();
       }
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
       @Override
 	public int getDefaultTemplatesCount() {
-        if (defaultTemplatesBuilder_ == null) {
-          return defaultTemplates_.size();
-        } else {
-          return defaultTemplatesBuilder_.getCount();
-        }
+        if (defaultTemplatesBuilder_ == null)
+			return defaultTemplates_.size();
+		else
+			return defaultTemplatesBuilder_.getCount();
       }
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
        */
       @Override
 	public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
-        if (defaultTemplatesBuilder_ == null) {
-          return defaultTemplates_.get(index);
-        } else {
-          return defaultTemplatesBuilder_.getMessage(index);
-        }
+        if (defaultTemplatesBuilder_ == null)
+			return defaultTemplates_.get(index);
+		else
+			return defaultTemplatesBuilder_.getMessage(index);
       }
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
@@ -21817,15 +21083,14 @@ public final class GUIProtos {
       public Builder setDefaultTemplates(
           int index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate value) {
         if (defaultTemplatesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.set(index, value);
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.setMessage(index, value);
         }
+		else
+			defaultTemplatesBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -21837,9 +21102,9 @@ public final class GUIProtos {
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.set(index, builderForValue.build());
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.setMessage(index, builderForValue.build());
         }
+		else
+			defaultTemplatesBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -21847,15 +21112,14 @@ public final class GUIProtos {
        */
       public Builder addDefaultTemplates(gdsc.smlm.data.config.GUIProtos.DefaultTemplate value) {
         if (defaultTemplatesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.add(value);
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.addMessage(value);
         }
+		else
+			defaultTemplatesBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -21864,15 +21128,14 @@ public final class GUIProtos {
       public Builder addDefaultTemplates(
           int index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate value) {
         if (defaultTemplatesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.add(index, value);
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.addMessage(index, value);
         }
+		else
+			defaultTemplatesBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -21884,9 +21147,9 @@ public final class GUIProtos {
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.add(builderForValue.build());
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.addMessage(builderForValue.build());
         }
+		else
+			defaultTemplatesBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -21898,9 +21161,9 @@ public final class GUIProtos {
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.add(index, builderForValue.build());
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.addMessage(index, builderForValue.build());
         }
+		else
+			defaultTemplatesBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -21913,9 +21176,9 @@ public final class GUIProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, defaultTemplates_);
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.addAllMessages(values);
         }
+		else
+			defaultTemplatesBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -21926,9 +21189,9 @@ public final class GUIProtos {
           defaultTemplates_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.clear();
         }
+		else
+			defaultTemplatesBuilder_.clear();
         return this;
       }
       /**
@@ -21939,9 +21202,9 @@ public final class GUIProtos {
           ensureDefaultTemplatesIsMutable();
           defaultTemplates_.remove(index);
           onChanged();
-        } else {
-          defaultTemplatesBuilder_.remove(index);
         }
+		else
+			defaultTemplatesBuilder_.remove(index);
         return this;
       }
       /**
@@ -21957,10 +21220,10 @@ public final class GUIProtos {
       @Override
 	public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
           int index) {
-        if (defaultTemplatesBuilder_ == null) {
-          return defaultTemplates_.get(index);  } else {
-          return defaultTemplatesBuilder_.getMessageOrBuilder(index);
-        }
+        if (defaultTemplatesBuilder_ == null)
+			return defaultTemplates_.get(index);
+		else
+			return defaultTemplatesBuilder_.getMessageOrBuilder(index);
       }
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
@@ -21968,11 +21231,10 @@ public final class GUIProtos {
       @Override
 	public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>
            getDefaultTemplatesOrBuilderList() {
-        if (defaultTemplatesBuilder_ != null) {
-          return defaultTemplatesBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(defaultTemplates_);
-        }
+        if (defaultTemplatesBuilder_ != null)
+			return defaultTemplatesBuilder_.getMessageOrBuilderList();
+		else
+			return java.util.Collections.unmodifiableList(defaultTemplates_);
       }
       /**
        * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
@@ -22248,15 +21510,14 @@ public final class GUIProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -22275,13 +21536,13 @@ public final class GUIProtos {
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               configurationDirectory_ = s;
               break;
             }
             case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
                 selectedStandardTemplates_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000010;
@@ -22290,7 +21551,7 @@ public final class GUIProtos {
               break;
             }
             case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 selectedCustomTemplates_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000020;
@@ -22299,7 +21560,7 @@ public final class GUIProtos {
               break;
             }
             case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               template_ = s;
               break;
@@ -22311,18 +21572,16 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-          selectedStandardTemplates_ = selectedStandardTemplates_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-          selectedCustomTemplates_ = selectedCustomTemplates_.getUnmodifiableView();
-        }
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010))
+			selectedStandardTemplates_ = selectedStandardTemplates_.getUnmodifiableView();
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020))
+			selectedCustomTemplates_ = selectedCustomTemplates_.getUnmodifiableView();
         makeExtensionsImmutable();
       }
     }
@@ -22393,13 +21652,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getConfigurationDirectory() {
-      java.lang.Object ref = configurationDirectory_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = configurationDirectory_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         configurationDirectory_ = s;
         return s;
       }
@@ -22414,16 +21673,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getConfigurationDirectoryBytes() {
-      java.lang.Object ref = configurationDirectory_;
+      final java.lang.Object ref = configurationDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         configurationDirectory_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int SELECTED_STANDARD_TEMPLATES_FIELD_NUMBER = 5;
@@ -22535,13 +21794,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getTemplate() {
-      java.lang.Object ref = template_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = template_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         template_ = s;
         return s;
       }
@@ -22556,16 +21815,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getTemplateBytes() {
-      java.lang.Object ref = template_;
+      final java.lang.Object ref = template_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         template_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int CLOSE_FIELD_NUMBER = 8;
@@ -22585,7 +21844,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -22596,30 +21855,22 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (option_ != 0) {
-        output.writeInt32(1, option_);
-      }
-      if (selectStandardTemplates_ != false) {
-        output.writeBool(2, selectStandardTemplates_);
-      }
-      if (selectCustomDirectory_ != false) {
-        output.writeBool(3, selectCustomDirectory_);
-      }
-      if (!getConfigurationDirectoryBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, configurationDirectory_);
-      }
-      for (int i = 0; i < selectedStandardTemplates_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, selectedStandardTemplates_.getRaw(i));
-      }
-      for (int i = 0; i < selectedCustomTemplates_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, selectedCustomTemplates_.getRaw(i));
-      }
-      if (!getTemplateBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, template_);
-      }
-      if (close_ != false) {
-        output.writeBool(8, close_);
-      }
+      if (option_ != 0)
+		output.writeInt32(1, option_);
+      if (selectStandardTemplates_ != false)
+		output.writeBool(2, selectStandardTemplates_);
+      if (selectCustomDirectory_ != false)
+		output.writeBool(3, selectCustomDirectory_);
+      if (!getConfigurationDirectoryBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 4, configurationDirectory_);
+      for (int i = 0; i < selectedStandardTemplates_.size(); i++)
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 5, selectedStandardTemplates_.getRaw(i));
+      for (int i = 0; i < selectedCustomTemplates_.size(); i++)
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 6, selectedCustomTemplates_.getRaw(i));
+      if (!getTemplateBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 7, template_);
+      if (close_ != false)
+		output.writeBool(8, close_);
     }
 
     @Override
@@ -22628,44 +21879,36 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (option_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (option_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, option_);
-      }
-      if (selectStandardTemplates_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (selectStandardTemplates_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, selectStandardTemplates_);
-      }
-      if (selectCustomDirectory_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (selectCustomDirectory_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, selectCustomDirectory_);
-      }
-      if (!getConfigurationDirectoryBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, configurationDirectory_);
-      }
+      if (!getConfigurationDirectoryBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, configurationDirectory_);
       {
         int dataSize = 0;
-        for (int i = 0; i < selectedStandardTemplates_.size(); i++) {
-          dataSize += computeStringSizeNoTag(selectedStandardTemplates_.getRaw(i));
-        }
+        for (int i = 0; i < selectedStandardTemplates_.size(); i++)
+			dataSize += computeStringSizeNoTag(selectedStandardTemplates_.getRaw(i));
         size += dataSize;
         size += 1 * getSelectedStandardTemplatesList().size();
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < selectedCustomTemplates_.size(); i++) {
-          dataSize += computeStringSizeNoTag(selectedCustomTemplates_.getRaw(i));
-        }
+        for (int i = 0; i < selectedCustomTemplates_.size(); i++)
+			dataSize += computeStringSizeNoTag(selectedCustomTemplates_.getRaw(i));
         size += dataSize;
         size += 1 * getSelectedCustomTemplatesList().size();
       }
-      if (!getTemplateBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, template_);
-      }
-      if (close_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getTemplateBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, template_);
+      if (close_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, close_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -22673,13 +21916,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings other = (gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings other = (gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings) obj;
 
       boolean result = true;
       result = result && (getOption()
@@ -22703,9 +21944,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPTION_FIELD_NUMBER;
@@ -22823,7 +22063,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -22900,18 +22140,17 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings build() {
-        gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        final gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings(this);
+        final int from_bitField0_ = bitField0_;
+        final int to_bitField0_ = 0;
         result.option_ = option_;
         result.selectStandardTemplates_ = selectStandardTemplates_;
         result.selectCustomDirectory_ = selectCustomDirectory_;
@@ -22967,9 +22206,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -22977,15 +22216,12 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings.getDefaultInstance()) return this;
-        if (other.getOption() != 0) {
-          setOption(other.getOption());
-        }
-        if (other.getSelectStandardTemplates() != false) {
-          setSelectStandardTemplates(other.getSelectStandardTemplates());
-        }
-        if (other.getSelectCustomDirectory() != false) {
-          setSelectCustomDirectory(other.getSelectCustomDirectory());
-        }
+        if (other.getOption() != 0)
+			setOption(other.getOption());
+        if (other.getSelectStandardTemplates() != false)
+			setSelectStandardTemplates(other.getSelectStandardTemplates());
+        if (other.getSelectCustomDirectory() != false)
+			setSelectCustomDirectory(other.getSelectCustomDirectory());
         if (!other.getConfigurationDirectory().isEmpty()) {
           configurationDirectory_ = other.configurationDirectory_;
           onChanged();
@@ -23014,9 +22250,8 @@ public final class GUIProtos {
           template_ = other.template_;
           onChanged();
         }
-        if (other.getClose() != false) {
-          setClose(other.getClose());
-        }
+        if (other.getClose() != false)
+			setClose(other.getClose());
         onChanged();
         return this;
       }
@@ -23034,13 +22269,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -23173,16 +22407,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getConfigurationDirectory() {
-        java.lang.Object ref = configurationDirectory_;
+        final java.lang.Object ref = configurationDirectory_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           configurationDirectory_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -23194,16 +22428,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getConfigurationDirectoryBytes() {
-        java.lang.Object ref = configurationDirectory_;
+        final java.lang.Object ref = configurationDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           configurationDirectory_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -23214,9 +22448,8 @@ public final class GUIProtos {
        */
       public Builder setConfigurationDirectory(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         configurationDirectory_ = value;
         onChanged();
@@ -23244,9 +22477,8 @@ public final class GUIProtos {
        */
       public Builder setConfigurationDirectoryBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         configurationDirectory_ = value;
@@ -23316,9 +22548,8 @@ public final class GUIProtos {
        */
       public Builder setSelectedStandardTemplates(
           int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   ensureSelectedStandardTemplatesIsMutable();
         selectedStandardTemplates_.set(index, value);
         onChanged();
@@ -23333,9 +22564,8 @@ public final class GUIProtos {
        */
       public Builder addSelectedStandardTemplates(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   ensureSelectedStandardTemplatesIsMutable();
         selectedStandardTemplates_.add(value);
         onChanged();
@@ -23378,9 +22608,8 @@ public final class GUIProtos {
        */
       public Builder addSelectedStandardTemplatesBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
         ensureSelectedStandardTemplatesIsMutable();
         selectedStandardTemplates_.add(value);
@@ -23450,9 +22679,8 @@ public final class GUIProtos {
        */
       public Builder setSelectedCustomTemplates(
           int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   ensureSelectedCustomTemplatesIsMutable();
         selectedCustomTemplates_.set(index, value);
         onChanged();
@@ -23467,9 +22695,8 @@ public final class GUIProtos {
        */
       public Builder addSelectedCustomTemplates(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   ensureSelectedCustomTemplatesIsMutable();
         selectedCustomTemplates_.add(value);
         onChanged();
@@ -23512,9 +22739,8 @@ public final class GUIProtos {
        */
       public Builder addSelectedCustomTemplatesBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
         ensureSelectedCustomTemplatesIsMutable();
         selectedCustomTemplates_.add(value);
@@ -23532,16 +22758,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getTemplate() {
-        java.lang.Object ref = template_;
+        final java.lang.Object ref = template_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           template_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -23553,16 +22779,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getTemplateBytes() {
-        java.lang.Object ref = template_;
+        final java.lang.Object ref = template_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           template_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -23573,9 +22799,8 @@ public final class GUIProtos {
        */
       public Builder setTemplate(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         template_ = value;
         onChanged();
@@ -23603,9 +22828,8 @@ public final class GUIProtos {
        */
       public Builder setTemplateBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         template_ = value;
@@ -23782,19 +23006,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -23834,9 +23057,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -23933,7 +23156,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -23944,27 +23167,20 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (mode_ != 0) {
-        output.writeInt32(1, mode_);
-      }
-      if (fieldWidth_ != 0) {
-        output.writeInt32(2, fieldWidth_);
-      }
-      if (yDither_ != 0D) {
-        output.writeDouble(3, yDither_);
-      }
-      if (zDither_ != 0D) {
-        output.writeDouble(4, zDither_);
-      }
-      if (nmPerPixel_ != 0D) {
-        output.writeDouble(5, nmPerPixel_);
-      }
-      if (nmPerSlice_ != 0D) {
-        output.writeDouble(6, nmPerSlice_);
-      }
-      if (diameter_ != 0D) {
-        output.writeDouble(7, diameter_);
-      }
+      if (mode_ != 0)
+		output.writeInt32(1, mode_);
+      if (fieldWidth_ != 0)
+		output.writeInt32(2, fieldWidth_);
+      if (yDither_ != 0D)
+		output.writeDouble(3, yDither_);
+      if (zDither_ != 0D)
+		output.writeDouble(4, zDither_);
+      if (nmPerPixel_ != 0D)
+		output.writeDouble(5, nmPerPixel_);
+      if (nmPerSlice_ != 0D)
+		output.writeDouble(6, nmPerSlice_);
+      if (diameter_ != 0D)
+		output.writeDouble(7, diameter_);
     }
 
     @Override
@@ -23973,34 +23189,27 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (mode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (mode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, mode_);
-      }
-      if (fieldWidth_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fieldWidth_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, fieldWidth_);
-      }
-      if (yDither_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (yDither_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, yDither_);
-      }
-      if (zDither_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (zDither_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, zDither_);
-      }
-      if (nmPerPixel_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nmPerPixel_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, nmPerPixel_);
-      }
-      if (nmPerSlice_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nmPerSlice_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, nmPerSlice_);
-      }
-      if (diameter_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (diameter_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, diameter_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -24008,13 +23217,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings other = (gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings other = (gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) obj;
 
       boolean result = true;
       result = result && (getMode()
@@ -24046,9 +23253,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + MODE_FIELD_NUMBER;
@@ -24162,7 +23368,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -24237,16 +23443,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings build() {
-        gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = new gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = new gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings(this);
         result.mode_ = mode_;
         result.fieldWidth_ = fieldWidth_;
         result.yDither_ = yDither_;
@@ -24292,9 +23497,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -24302,27 +23507,20 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.getDefaultInstance()) return this;
-        if (other.getMode() != 0) {
-          setMode(other.getMode());
-        }
-        if (other.getFieldWidth() != 0) {
-          setFieldWidth(other.getFieldWidth());
-        }
-        if (other.getYDither() != 0D) {
-          setYDither(other.getYDither());
-        }
-        if (other.getZDither() != 0D) {
-          setZDither(other.getZDither());
-        }
-        if (other.getNmPerPixel() != 0D) {
-          setNmPerPixel(other.getNmPerPixel());
-        }
-        if (other.getNmPerSlice() != 0D) {
-          setNmPerSlice(other.getNmPerSlice());
-        }
-        if (other.getDiameter() != 0D) {
-          setDiameter(other.getDiameter());
-        }
+        if (other.getMode() != 0)
+			setMode(other.getMode());
+        if (other.getFieldWidth() != 0)
+			setFieldWidth(other.getFieldWidth());
+        if (other.getYDither() != 0D)
+			setYDither(other.getYDither());
+        if (other.getZDither() != 0D)
+			setZDither(other.getZDither());
+        if (other.getNmPerPixel() != 0D)
+			setNmPerPixel(other.getNmPerPixel());
+        if (other.getNmPerSlice() != 0D)
+			setNmPerSlice(other.getNmPerSlice());
+        if (other.getDiameter() != 0D)
+			setDiameter(other.getDiameter());
         onChanged();
         return this;
       }
@@ -24340,13 +23538,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -24918,20 +24115,19 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
+      final int mutable_bitField0_ = 0;
+      final int mutable_bitField1_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -24956,9 +24152,8 @@ public final class GUIProtos {
             }
             case 42: {
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder subBuilder = null;
-              if (fitEngineSettings_ != null) {
-                subBuilder = fitEngineSettings_.toBuilder();
-              }
+              if (fitEngineSettings_ != null)
+				subBuilder = fitEngineSettings_.toBuilder();
               fitEngineSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.FitEngineSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitEngineSettings_);
@@ -24969,9 +24164,8 @@ public final class GUIProtos {
             }
             case 50: {
               gdsc.smlm.data.config.PSFProtos.PSF.Builder subBuilder = null;
-              if (psf_ != null) {
-                subBuilder = psf_.toBuilder();
-              }
+              if (psf_ != null)
+				subBuilder = psf_.toBuilder();
               psf_ = input.readMessage(gdsc.smlm.data.config.PSFProtos.PSF.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(psf_);
@@ -25027,9 +24221,8 @@ public final class GUIProtos {
             }
             case 130: {
               gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder subBuilder = null;
-              if (calibration_ != null) {
-                subBuilder = calibration_.toBuilder();
-              }
+              if (calibration_ != null)
+				subBuilder = calibration_.toBuilder();
               calibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationProtos.Calibration.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(calibration_);
@@ -25114,7 +24307,7 @@ public final class GUIProtos {
               break;
             }
             case 258: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               splineFilename_ = s;
               break;
@@ -25161,9 +24354,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -25558,13 +24751,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getSplineFilename() {
-      java.lang.Object ref = splineFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = splineFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         splineFilename_ = s;
         return s;
       }
@@ -25575,16 +24768,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getSplineFilenameBytes() {
-      java.lang.Object ref = splineFilename_;
+      final java.lang.Object ref = splineFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         splineFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int CROP_TO_Z_CENTRE_FIELD_NUMBER = 33;
@@ -25670,7 +24863,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -25681,126 +24874,86 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (mode_ != 0) {
-        output.writeInt32(1, mode_);
-      }
-      if (radius_ != 0D) {
-        output.writeDouble(2, radius_);
-      }
-      if (interactiveMode_ != false) {
-        output.writeBool(3, interactiveMode_);
-      }
-      if (nmPerSlice_ != 0D) {
-        output.writeDouble(4, nmPerSlice_);
-      }
-      if (fitEngineSettings_ != null) {
-        output.writeMessage(5, getFitEngineSettings());
-      }
-      if (psf_ != null) {
-        output.writeMessage(6, getPsf());
-      }
-      if (amplitudeFraction_ != 0D) {
-        output.writeDouble(7, amplitudeFraction_);
-      }
-      if (startBackgroundFrames_ != 0) {
-        output.writeInt32(8, startBackgroundFrames_);
-      }
-      if (endBackgroundFrames_ != 0) {
-        output.writeInt32(9, endBackgroundFrames_);
-      }
-      if (magnification_ != 0) {
-        output.writeInt32(10, magnification_);
-      }
-      if (smoothing_ != 0D) {
-        output.writeDouble(11, smoothing_);
-      }
-      if (centreEachSlice_ != false) {
-        output.writeBool(12, centreEachSlice_);
-      }
-      if (comCutOff_ != 0D) {
-        output.writeDouble(13, comCutOff_);
-      }
-      if (interpolationMethod_ != 0) {
-        output.writeInt32(14, interpolationMethod_);
-      }
-      if (psfType_ != 0) {
-        output.writeInt32(15, psfType_);
-      }
-      if (calibration_ != null) {
-        output.writeMessage(16, getCalibration());
-      }
-      if (analysisWindow_ != 0D) {
-        output.writeDouble(17, analysisWindow_);
-      }
-      if (comWindow_ != 0) {
-        output.writeInt32(18, comWindow_);
-      }
-      if (alignmentMagnification_ != 0) {
-        output.writeInt32(19, alignmentMagnification_);
-      }
-      if (maxIterations_ != 0) {
-        output.writeInt32(20, maxIterations_);
-      }
-      if (checkAlignments_ != false) {
-        output.writeBool(21, checkAlignments_);
-      }
-      if (psfMagnification_ != 0) {
-        output.writeInt32(22, psfMagnification_);
-      }
-      if (window_ != 0) {
-        output.writeInt32(23, window_);
-      }
-      if (smoothStackSignal_ != false) {
-        output.writeBool(24, smoothStackSignal_);
-      }
-      if (singlePrecision_ != false) {
-        output.writeBool(25, singlePrecision_);
-      }
-      if (cropBorder_ != 0) {
-        output.writeInt32(26, cropBorder_);
-      }
-      if (cropStart_ != 0) {
-        output.writeInt32(27, cropStart_);
-      }
-      if (cropEnd_ != 0) {
-        output.writeInt32(28, cropEnd_);
-      }
-      if (psfZMagnification_ != 0) {
-        output.writeInt32(29, psfZMagnification_);
-      }
-      if (comBorder_ != 0D) {
-        output.writeDouble(30, comBorder_);
-      }
-      if (outputType_ != 0) {
-        output.writeInt32(31, outputType_);
-      }
-      if (!getSplineFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 32, splineFilename_);
-      }
-      if (cropToZCentre_ != false) {
-        output.writeBool(33, cropToZCentre_);
-      }
-      if (alignmentMode_ != 0) {
-        output.writeInt32(34, alignmentMode_);
-      }
-      if (alignmentZRadius_ != 0D) {
-        output.writeDouble(35, alignmentZRadius_);
-      }
-      if (updateRoi_ != false) {
-        output.writeBool(36, updateRoi_);
-      }
-      if (subPixelPrecision_ != 0D) {
-        output.writeDouble(37, subPixelPrecision_);
-      }
-      if (rmsdXyThreshold_ != 0D) {
-        output.writeDouble(38, rmsdXyThreshold_);
-      }
-      if (rmsdZThreshold_ != 0D) {
-        output.writeDouble(39, rmsdZThreshold_);
-      }
-      if (comShiftThreshold_ != 0D) {
-        output.writeDouble(40, comShiftThreshold_);
-      }
+      if (mode_ != 0)
+		output.writeInt32(1, mode_);
+      if (radius_ != 0D)
+		output.writeDouble(2, radius_);
+      if (interactiveMode_ != false)
+		output.writeBool(3, interactiveMode_);
+      if (nmPerSlice_ != 0D)
+		output.writeDouble(4, nmPerSlice_);
+      if (fitEngineSettings_ != null)
+		output.writeMessage(5, getFitEngineSettings());
+      if (psf_ != null)
+		output.writeMessage(6, getPsf());
+      if (amplitudeFraction_ != 0D)
+		output.writeDouble(7, amplitudeFraction_);
+      if (startBackgroundFrames_ != 0)
+		output.writeInt32(8, startBackgroundFrames_);
+      if (endBackgroundFrames_ != 0)
+		output.writeInt32(9, endBackgroundFrames_);
+      if (magnification_ != 0)
+		output.writeInt32(10, magnification_);
+      if (smoothing_ != 0D)
+		output.writeDouble(11, smoothing_);
+      if (centreEachSlice_ != false)
+		output.writeBool(12, centreEachSlice_);
+      if (comCutOff_ != 0D)
+		output.writeDouble(13, comCutOff_);
+      if (interpolationMethod_ != 0)
+		output.writeInt32(14, interpolationMethod_);
+      if (psfType_ != 0)
+		output.writeInt32(15, psfType_);
+      if (calibration_ != null)
+		output.writeMessage(16, getCalibration());
+      if (analysisWindow_ != 0D)
+		output.writeDouble(17, analysisWindow_);
+      if (comWindow_ != 0)
+		output.writeInt32(18, comWindow_);
+      if (alignmentMagnification_ != 0)
+		output.writeInt32(19, alignmentMagnification_);
+      if (maxIterations_ != 0)
+		output.writeInt32(20, maxIterations_);
+      if (checkAlignments_ != false)
+		output.writeBool(21, checkAlignments_);
+      if (psfMagnification_ != 0)
+		output.writeInt32(22, psfMagnification_);
+      if (window_ != 0)
+		output.writeInt32(23, window_);
+      if (smoothStackSignal_ != false)
+		output.writeBool(24, smoothStackSignal_);
+      if (singlePrecision_ != false)
+		output.writeBool(25, singlePrecision_);
+      if (cropBorder_ != 0)
+		output.writeInt32(26, cropBorder_);
+      if (cropStart_ != 0)
+		output.writeInt32(27, cropStart_);
+      if (cropEnd_ != 0)
+		output.writeInt32(28, cropEnd_);
+      if (psfZMagnification_ != 0)
+		output.writeInt32(29, psfZMagnification_);
+      if (comBorder_ != 0D)
+		output.writeDouble(30, comBorder_);
+      if (outputType_ != 0)
+		output.writeInt32(31, outputType_);
+      if (!getSplineFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 32, splineFilename_);
+      if (cropToZCentre_ != false)
+		output.writeBool(33, cropToZCentre_);
+      if (alignmentMode_ != 0)
+		output.writeInt32(34, alignmentMode_);
+      if (alignmentZRadius_ != 0D)
+		output.writeDouble(35, alignmentZRadius_);
+      if (updateRoi_ != false)
+		output.writeBool(36, updateRoi_);
+      if (subPixelPrecision_ != 0D)
+		output.writeDouble(37, subPixelPrecision_);
+      if (rmsdXyThreshold_ != 0D)
+		output.writeDouble(38, rmsdXyThreshold_);
+      if (rmsdZThreshold_ != 0D)
+		output.writeDouble(39, rmsdZThreshold_);
+      if (comShiftThreshold_ != 0D)
+		output.writeDouble(40, comShiftThreshold_);
     }
 
     @Override
@@ -25809,165 +24962,125 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (mode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (mode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, mode_);
-      }
-      if (radius_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (radius_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, radius_);
-      }
-      if (interactiveMode_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (interactiveMode_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, interactiveMode_);
-      }
-      if (nmPerSlice_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nmPerSlice_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, nmPerSlice_);
-      }
-      if (fitEngineSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitEngineSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getFitEngineSettings());
-      }
-      if (psf_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psf_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getPsf());
-      }
-      if (amplitudeFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (amplitudeFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, amplitudeFraction_);
-      }
-      if (startBackgroundFrames_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (startBackgroundFrames_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, startBackgroundFrames_);
-      }
-      if (endBackgroundFrames_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (endBackgroundFrames_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(9, endBackgroundFrames_);
-      }
-      if (magnification_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (magnification_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(10, magnification_);
-      }
-      if (smoothing_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (smoothing_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, smoothing_);
-      }
-      if (centreEachSlice_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (centreEachSlice_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(12, centreEachSlice_);
-      }
-      if (comCutOff_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (comCutOff_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, comCutOff_);
-      }
-      if (interpolationMethod_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (interpolationMethod_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, interpolationMethod_);
-      }
-      if (psfType_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psfType_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(15, psfType_);
-      }
-      if (calibration_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (calibration_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(16, getCalibration());
-      }
-      if (analysisWindow_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (analysisWindow_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(17, analysisWindow_);
-      }
-      if (comWindow_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (comWindow_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(18, comWindow_);
-      }
-      if (alignmentMagnification_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (alignmentMagnification_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(19, alignmentMagnification_);
-      }
-      if (maxIterations_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxIterations_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(20, maxIterations_);
-      }
-      if (checkAlignments_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (checkAlignments_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(21, checkAlignments_);
-      }
-      if (psfMagnification_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psfMagnification_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(22, psfMagnification_);
-      }
-      if (window_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (window_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(23, window_);
-      }
-      if (smoothStackSignal_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (smoothStackSignal_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(24, smoothStackSignal_);
-      }
-      if (singlePrecision_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (singlePrecision_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(25, singlePrecision_);
-      }
-      if (cropBorder_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cropBorder_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(26, cropBorder_);
-      }
-      if (cropStart_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cropStart_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(27, cropStart_);
-      }
-      if (cropEnd_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cropEnd_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(28, cropEnd_);
-      }
-      if (psfZMagnification_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psfZMagnification_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(29, psfZMagnification_);
-      }
-      if (comBorder_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (comBorder_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(30, comBorder_);
-      }
-      if (outputType_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (outputType_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(31, outputType_);
-      }
-      if (!getSplineFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, splineFilename_);
-      }
-      if (cropToZCentre_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getSplineFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, splineFilename_);
+      if (cropToZCentre_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(33, cropToZCentre_);
-      }
-      if (alignmentMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (alignmentMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(34, alignmentMode_);
-      }
-      if (alignmentZRadius_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (alignmentZRadius_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(35, alignmentZRadius_);
-      }
-      if (updateRoi_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (updateRoi_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(36, updateRoi_);
-      }
-      if (subPixelPrecision_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (subPixelPrecision_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(37, subPixelPrecision_);
-      }
-      if (rmsdXyThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rmsdXyThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(38, rmsdXyThreshold_);
-      }
-      if (rmsdZThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rmsdZThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(39, rmsdZThreshold_);
-      }
-      if (comShiftThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (comShiftThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(40, comShiftThreshold_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -25975,13 +25088,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings other = (gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings other = (gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings) obj;
 
       boolean result = true;
       result = result && (getMode()
@@ -25997,15 +25108,13 @@ public final class GUIProtos {
           == java.lang.Double.doubleToLongBits(
               other.getNmPerSlice()));
       result = result && (hasFitEngineSettings() == other.hasFitEngineSettings());
-      if (hasFitEngineSettings()) {
-        result = result && getFitEngineSettings()
+      if (hasFitEngineSettings())
+		result = result && getFitEngineSettings()
             .equals(other.getFitEngineSettings());
-      }
       result = result && (hasPsf() == other.hasPsf());
-      if (hasPsf()) {
-        result = result && getPsf()
+      if (hasPsf())
+		result = result && getPsf()
             .equals(other.getPsf());
-      }
       result = result && (
           java.lang.Double.doubleToLongBits(getAmplitudeFraction())
           == java.lang.Double.doubleToLongBits(
@@ -26031,10 +25140,9 @@ public final class GUIProtos {
       result = result && (getPsfType()
           == other.getPsfType());
       result = result && (hasCalibration() == other.hasCalibration());
-      if (hasCalibration()) {
-        result = result && getCalibration()
+      if (hasCalibration())
+		result = result && getCalibration()
             .equals(other.getCalibration());
-      }
       result = result && (
           java.lang.Double.doubleToLongBits(getAnalysisWindow())
           == java.lang.Double.doubleToLongBits(
@@ -26102,9 +25210,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + MODE_FIELD_NUMBER;
@@ -26304,7 +25411,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -26357,15 +25464,15 @@ public final class GUIProtos {
 
         nmPerSlice_ = 0D;
 
-        if (fitEngineSettingsBuilder_ == null) {
-          fitEngineSettings_ = null;
-        } else {
+        if (fitEngineSettingsBuilder_ == null)
+			fitEngineSettings_ = null;
+		else {
           fitEngineSettings_ = null;
           fitEngineSettingsBuilder_ = null;
         }
-        if (psfBuilder_ == null) {
-          psf_ = null;
-        } else {
+        if (psfBuilder_ == null)
+			psf_ = null;
+		else {
           psf_ = null;
           psfBuilder_ = null;
         }
@@ -26387,9 +25494,9 @@ public final class GUIProtos {
 
         psfType_ = 0;
 
-        if (calibrationBuilder_ == null) {
-          calibration_ = null;
-        } else {
+        if (calibrationBuilder_ == null)
+			calibration_ = null;
+		else {
           calibration_ = null;
           calibrationBuilder_ = null;
         }
@@ -26457,30 +25564,27 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings build() {
-        gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings result = new gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings(this);
         result.mode_ = mode_;
         result.radius_ = radius_;
         result.interactiveMode_ = interactiveMode_;
         result.nmPerSlice_ = nmPerSlice_;
-        if (fitEngineSettingsBuilder_ == null) {
-          result.fitEngineSettings_ = fitEngineSettings_;
-        } else {
-          result.fitEngineSettings_ = fitEngineSettingsBuilder_.build();
-        }
-        if (psfBuilder_ == null) {
-          result.psf_ = psf_;
-        } else {
-          result.psf_ = psfBuilder_.build();
-        }
+        if (fitEngineSettingsBuilder_ == null)
+			result.fitEngineSettings_ = fitEngineSettings_;
+		else
+			result.fitEngineSettings_ = fitEngineSettingsBuilder_.build();
+        if (psfBuilder_ == null)
+			result.psf_ = psf_;
+		else
+			result.psf_ = psfBuilder_.build();
         result.amplitudeFraction_ = amplitudeFraction_;
         result.startBackgroundFrames_ = startBackgroundFrames_;
         result.endBackgroundFrames_ = endBackgroundFrames_;
@@ -26490,11 +25594,10 @@ public final class GUIProtos {
         result.comCutOff_ = comCutOff_;
         result.interpolationMethod_ = interpolationMethod_;
         result.psfType_ = psfType_;
-        if (calibrationBuilder_ == null) {
-          result.calibration_ = calibration_;
-        } else {
-          result.calibration_ = calibrationBuilder_.build();
-        }
+        if (calibrationBuilder_ == null)
+			result.calibration_ = calibration_;
+		else
+			result.calibration_ = calibrationBuilder_.build();
         result.analysisWindow_ = analysisWindow_;
         result.comWindow_ = comWindow_;
         result.alignmentMagnification_ = alignmentMagnification_;
@@ -26557,9 +25660,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -26567,127 +25670,88 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings.getDefaultInstance()) return this;
-        if (other.getMode() != 0) {
-          setMode(other.getMode());
-        }
-        if (other.getRadius() != 0D) {
-          setRadius(other.getRadius());
-        }
-        if (other.getInteractiveMode() != false) {
-          setInteractiveMode(other.getInteractiveMode());
-        }
-        if (other.getNmPerSlice() != 0D) {
-          setNmPerSlice(other.getNmPerSlice());
-        }
-        if (other.hasFitEngineSettings()) {
-          mergeFitEngineSettings(other.getFitEngineSettings());
-        }
-        if (other.hasPsf()) {
-          mergePsf(other.getPsf());
-        }
-        if (other.getAmplitudeFraction() != 0D) {
-          setAmplitudeFraction(other.getAmplitudeFraction());
-        }
-        if (other.getStartBackgroundFrames() != 0) {
-          setStartBackgroundFrames(other.getStartBackgroundFrames());
-        }
-        if (other.getEndBackgroundFrames() != 0) {
-          setEndBackgroundFrames(other.getEndBackgroundFrames());
-        }
-        if (other.getMagnification() != 0) {
-          setMagnification(other.getMagnification());
-        }
-        if (other.getSmoothing() != 0D) {
-          setSmoothing(other.getSmoothing());
-        }
-        if (other.getCentreEachSlice() != false) {
-          setCentreEachSlice(other.getCentreEachSlice());
-        }
-        if (other.getComCutOff() != 0D) {
-          setComCutOff(other.getComCutOff());
-        }
-        if (other.getInterpolationMethod() != 0) {
-          setInterpolationMethod(other.getInterpolationMethod());
-        }
-        if (other.getPsfType() != 0) {
-          setPsfType(other.getPsfType());
-        }
-        if (other.hasCalibration()) {
-          mergeCalibration(other.getCalibration());
-        }
-        if (other.getAnalysisWindow() != 0D) {
-          setAnalysisWindow(other.getAnalysisWindow());
-        }
-        if (other.getComWindow() != 0) {
-          setComWindow(other.getComWindow());
-        }
-        if (other.getAlignmentMagnification() != 0) {
-          setAlignmentMagnification(other.getAlignmentMagnification());
-        }
-        if (other.getMaxIterations() != 0) {
-          setMaxIterations(other.getMaxIterations());
-        }
-        if (other.getCheckAlignments() != false) {
-          setCheckAlignments(other.getCheckAlignments());
-        }
-        if (other.getPsfMagnification() != 0) {
-          setPsfMagnification(other.getPsfMagnification());
-        }
-        if (other.getWindow() != 0) {
-          setWindow(other.getWindow());
-        }
-        if (other.getSmoothStackSignal() != false) {
-          setSmoothStackSignal(other.getSmoothStackSignal());
-        }
-        if (other.getSinglePrecision() != false) {
-          setSinglePrecision(other.getSinglePrecision());
-        }
-        if (other.getCropBorder() != 0) {
-          setCropBorder(other.getCropBorder());
-        }
-        if (other.getCropStart() != 0) {
-          setCropStart(other.getCropStart());
-        }
-        if (other.getCropEnd() != 0) {
-          setCropEnd(other.getCropEnd());
-        }
-        if (other.getPsfZMagnification() != 0) {
-          setPsfZMagnification(other.getPsfZMagnification());
-        }
-        if (other.getComBorder() != 0D) {
-          setComBorder(other.getComBorder());
-        }
-        if (other.getOutputType() != 0) {
-          setOutputType(other.getOutputType());
-        }
+        if (other.getMode() != 0)
+			setMode(other.getMode());
+        if (other.getRadius() != 0D)
+			setRadius(other.getRadius());
+        if (other.getInteractiveMode() != false)
+			setInteractiveMode(other.getInteractiveMode());
+        if (other.getNmPerSlice() != 0D)
+			setNmPerSlice(other.getNmPerSlice());
+        if (other.hasFitEngineSettings())
+			mergeFitEngineSettings(other.getFitEngineSettings());
+        if (other.hasPsf())
+			mergePsf(other.getPsf());
+        if (other.getAmplitudeFraction() != 0D)
+			setAmplitudeFraction(other.getAmplitudeFraction());
+        if (other.getStartBackgroundFrames() != 0)
+			setStartBackgroundFrames(other.getStartBackgroundFrames());
+        if (other.getEndBackgroundFrames() != 0)
+			setEndBackgroundFrames(other.getEndBackgroundFrames());
+        if (other.getMagnification() != 0)
+			setMagnification(other.getMagnification());
+        if (other.getSmoothing() != 0D)
+			setSmoothing(other.getSmoothing());
+        if (other.getCentreEachSlice() != false)
+			setCentreEachSlice(other.getCentreEachSlice());
+        if (other.getComCutOff() != 0D)
+			setComCutOff(other.getComCutOff());
+        if (other.getInterpolationMethod() != 0)
+			setInterpolationMethod(other.getInterpolationMethod());
+        if (other.getPsfType() != 0)
+			setPsfType(other.getPsfType());
+        if (other.hasCalibration())
+			mergeCalibration(other.getCalibration());
+        if (other.getAnalysisWindow() != 0D)
+			setAnalysisWindow(other.getAnalysisWindow());
+        if (other.getComWindow() != 0)
+			setComWindow(other.getComWindow());
+        if (other.getAlignmentMagnification() != 0)
+			setAlignmentMagnification(other.getAlignmentMagnification());
+        if (other.getMaxIterations() != 0)
+			setMaxIterations(other.getMaxIterations());
+        if (other.getCheckAlignments() != false)
+			setCheckAlignments(other.getCheckAlignments());
+        if (other.getPsfMagnification() != 0)
+			setPsfMagnification(other.getPsfMagnification());
+        if (other.getWindow() != 0)
+			setWindow(other.getWindow());
+        if (other.getSmoothStackSignal() != false)
+			setSmoothStackSignal(other.getSmoothStackSignal());
+        if (other.getSinglePrecision() != false)
+			setSinglePrecision(other.getSinglePrecision());
+        if (other.getCropBorder() != 0)
+			setCropBorder(other.getCropBorder());
+        if (other.getCropStart() != 0)
+			setCropStart(other.getCropStart());
+        if (other.getCropEnd() != 0)
+			setCropEnd(other.getCropEnd());
+        if (other.getPsfZMagnification() != 0)
+			setPsfZMagnification(other.getPsfZMagnification());
+        if (other.getComBorder() != 0D)
+			setComBorder(other.getComBorder());
+        if (other.getOutputType() != 0)
+			setOutputType(other.getOutputType());
         if (!other.getSplineFilename().isEmpty()) {
           splineFilename_ = other.splineFilename_;
           onChanged();
         }
-        if (other.getCropToZCentre() != false) {
-          setCropToZCentre(other.getCropToZCentre());
-        }
-        if (other.getAlignmentMode() != 0) {
-          setAlignmentMode(other.getAlignmentMode());
-        }
-        if (other.getAlignmentZRadius() != 0D) {
-          setAlignmentZRadius(other.getAlignmentZRadius());
-        }
-        if (other.getUpdateRoi() != false) {
-          setUpdateRoi(other.getUpdateRoi());
-        }
-        if (other.getSubPixelPrecision() != 0D) {
-          setSubPixelPrecision(other.getSubPixelPrecision());
-        }
-        if (other.getRmsdXyThreshold() != 0D) {
-          setRmsdXyThreshold(other.getRmsdXyThreshold());
-        }
-        if (other.getRmsdZThreshold() != 0D) {
-          setRmsdZThreshold(other.getRmsdZThreshold());
-        }
-        if (other.getComShiftThreshold() != 0D) {
-          setComShiftThreshold(other.getComShiftThreshold());
-        }
+        if (other.getCropToZCentre() != false)
+			setCropToZCentre(other.getCropToZCentre());
+        if (other.getAlignmentMode() != 0)
+			setAlignmentMode(other.getAlignmentMode());
+        if (other.getAlignmentZRadius() != 0D)
+			setAlignmentZRadius(other.getAlignmentZRadius());
+        if (other.getUpdateRoi() != false)
+			setUpdateRoi(other.getUpdateRoi());
+        if (other.getSubPixelPrecision() != 0D)
+			setSubPixelPrecision(other.getSubPixelPrecision());
+        if (other.getRmsdXyThreshold() != 0D)
+			setRmsdXyThreshold(other.getRmsdXyThreshold());
+        if (other.getRmsdZThreshold() != 0D)
+			setRmsdZThreshold(other.getRmsdZThreshold());
+        if (other.getComShiftThreshold() != 0D)
+			setComShiftThreshold(other.getComShiftThreshold());
         onChanged();
         return this;
       }
@@ -26705,13 +25769,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -26847,11 +25910,10 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
-        if (fitEngineSettingsBuilder_ == null) {
-          return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
-        } else {
-          return fitEngineSettingsBuilder_.getMessage();
-        }
+        if (fitEngineSettingsBuilder_ == null)
+			return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
+		else
+			return fitEngineSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -26862,14 +25924,13 @@ public final class GUIProtos {
        */
       public Builder setFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           fitEngineSettings_ = value;
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.setMessage(value);
         }
+		else
+			fitEngineSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -26885,9 +25946,9 @@ public final class GUIProtos {
         if (fitEngineSettingsBuilder_ == null) {
           fitEngineSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			fitEngineSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -26900,16 +25961,15 @@ public final class GUIProtos {
        */
       public Builder mergeFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
-          if (fitEngineSettings_ != null) {
-            fitEngineSettings_ =
+          if (fitEngineSettings_ != null)
+			fitEngineSettings_ =
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.newBuilder(fitEngineSettings_).mergeFrom(value).buildPartial();
-          } else {
-            fitEngineSettings_ = value;
-          }
+		else
+			fitEngineSettings_ = value;
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.mergeFrom(value);
         }
+		else
+			fitEngineSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -26952,12 +26012,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
-        if (fitEngineSettingsBuilder_ != null) {
-          return fitEngineSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return fitEngineSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
-        }
+        if (fitEngineSettingsBuilder_ != null)
+			return fitEngineSettingsBuilder_.getMessageOrBuilder();
+		else
+			return fitEngineSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
       }
       /**
        * <pre>
@@ -26994,25 +26053,23 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
-        if (psfBuilder_ == null) {
-          return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
-        } else {
-          return psfBuilder_.getMessage();
-        }
+        if (psfBuilder_ == null)
+			return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
+		else
+			return psfBuilder_.getMessage();
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
        */
       public Builder setPsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           psf_ = value;
           onChanged();
-        } else {
-          psfBuilder_.setMessage(value);
         }
+		else
+			psfBuilder_.setMessage(value);
 
         return this;
       }
@@ -27024,9 +26081,9 @@ public final class GUIProtos {
         if (psfBuilder_ == null) {
           psf_ = builderForValue.build();
           onChanged();
-        } else {
-          psfBuilder_.setMessage(builderForValue.build());
         }
+		else
+			psfBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -27035,16 +26092,15 @@ public final class GUIProtos {
        */
       public Builder mergePsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
-          if (psf_ != null) {
-            psf_ =
+          if (psf_ != null)
+			psf_ =
               gdsc.smlm.data.config.PSFProtos.PSF.newBuilder(psf_).mergeFrom(value).buildPartial();
-          } else {
-            psf_ = value;
-          }
+		else
+			psf_ = value;
           onChanged();
-        } else {
-          psfBuilder_.mergeFrom(value);
         }
+		else
+			psfBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -27075,12 +26131,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
-        if (psfBuilder_ != null) {
-          return psfBuilder_.getMessageOrBuilder();
-        } else {
-          return psf_ == null ?
-              gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
-        }
+        if (psfBuilder_ != null)
+			return psfBuilder_.getMessageOrBuilder();
+		else
+			return psf_ == null ?
+			      gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 6;</code>
@@ -27368,25 +26423,23 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
-        if (calibrationBuilder_ == null) {
-          return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        } else {
-          return calibrationBuilder_.getMessage();
-        }
+        if (calibrationBuilder_ == null)
+			return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
+		else
+			return calibrationBuilder_.getMessage();
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
        */
       public Builder setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(value);
         }
+		else
+			calibrationBuilder_.setMessage(value);
 
         return this;
       }
@@ -27398,9 +26451,9 @@ public final class GUIProtos {
         if (calibrationBuilder_ == null) {
           calibration_ = builderForValue.build();
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(builderForValue.build());
         }
+		else
+			calibrationBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -27409,16 +26462,15 @@ public final class GUIProtos {
        */
       public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (calibration_ != null) {
-            calibration_ =
+          if (calibration_ != null)
+			calibration_ =
               gdsc.smlm.data.config.CalibrationProtos.Calibration.newBuilder(calibration_).mergeFrom(value).buildPartial();
-          } else {
-            calibration_ = value;
-          }
+		else
+			calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.mergeFrom(value);
         }
+		else
+			calibrationBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -27449,12 +26501,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
-        if (calibrationBuilder_ != null) {
-          return calibrationBuilder_.getMessageOrBuilder();
-        } else {
-          return calibration_ == null ?
-              gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        }
+        if (calibrationBuilder_ != null)
+			return calibrationBuilder_.getMessageOrBuilder();
+		else
+			return calibration_ == null ?
+			      gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 16;</code>
@@ -27883,16 +26934,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getSplineFilename() {
-        java.lang.Object ref = splineFilename_;
+        final java.lang.Object ref = splineFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           splineFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string spline_filename = 32;</code>
@@ -27900,25 +26951,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getSplineFilenameBytes() {
-        java.lang.Object ref = splineFilename_;
+        final java.lang.Object ref = splineFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           splineFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string spline_filename = 32;</code>
        */
       public Builder setSplineFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         splineFilename_ = value;
         onChanged();
@@ -27938,9 +26988,8 @@ public final class GUIProtos {
        */
       public Builder setSplineFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         splineFilename_ = value;
@@ -28288,19 +27337,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -28319,22 +27367,22 @@ public final class GUIProtos {
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               image_ = s;
               break;
             }
             case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               selected_ = s;
               break;
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -28391,13 +27439,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getImage() {
-      java.lang.Object ref = image_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = image_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         image_ = s;
         return s;
       }
@@ -28408,16 +27456,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getImageBytes() {
-      java.lang.Object ref = image_;
+      final java.lang.Object ref = image_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         image_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int SELECTED_FIELD_NUMBER = 5;
@@ -28427,13 +27475,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getSelected() {
-      java.lang.Object ref = selected_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         selected_ = s;
         return s;
       }
@@ -28444,22 +27492,22 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getSelectedBytes() {
-      java.lang.Object ref = selected_;
+      final java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         selected_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -28470,21 +27518,16 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (option_ != 0) {
-        output.writeInt32(1, option_);
-      }
-      if (originX_ != 0) {
-        output.writeInt32(2, originX_);
-      }
-      if (originY_ != 0) {
-        output.writeInt32(3, originY_);
-      }
-      if (!getImageBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, image_);
-      }
-      if (!getSelectedBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, selected_);
-      }
+      if (option_ != 0)
+		output.writeInt32(1, option_);
+      if (originX_ != 0)
+		output.writeInt32(2, originX_);
+      if (originY_ != 0)
+		output.writeInt32(3, originY_);
+      if (!getImageBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 4, image_);
+      if (!getSelectedBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 5, selected_);
     }
 
     @Override
@@ -28493,24 +27536,19 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (option_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (option_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, option_);
-      }
-      if (originX_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (originX_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, originX_);
-      }
-      if (originY_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (originY_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, originY_);
-      }
-      if (!getImageBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, image_);
-      }
-      if (!getSelectedBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, selected_);
-      }
+      if (!getImageBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, image_);
+      if (!getSelectedBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, selected_);
       memoizedSize = size;
       return size;
     }
@@ -28518,13 +27556,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) obj;
 
       boolean result = true;
       result = result && (getOption()
@@ -28542,9 +27578,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPTION_FIELD_NUMBER;
@@ -28649,7 +27684,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -28720,16 +27755,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings build() {
-        gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings(this);
         result.option_ = option_;
         result.originX_ = originX_;
         result.originY_ = originY_;
@@ -28773,9 +27807,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -28783,15 +27817,12 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.getDefaultInstance()) return this;
-        if (other.getOption() != 0) {
-          setOption(other.getOption());
-        }
-        if (other.getOriginX() != 0) {
-          setOriginX(other.getOriginX());
-        }
-        if (other.getOriginY() != 0) {
-          setOriginY(other.getOriginY());
-        }
+        if (other.getOption() != 0)
+			setOption(other.getOption());
+        if (other.getOriginX() != 0)
+			setOriginX(other.getOriginX());
+        if (other.getOriginY() != 0)
+			setOriginY(other.getOriginY());
         if (!other.getImage().isEmpty()) {
           image_ = other.image_;
           onChanged();
@@ -28817,13 +27848,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -28915,16 +27945,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getImage() {
-        java.lang.Object ref = image_;
+        final java.lang.Object ref = image_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           image_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string image = 4;</code>
@@ -28932,25 +27962,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getImageBytes() {
-        java.lang.Object ref = image_;
+        final java.lang.Object ref = image_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           image_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string image = 4;</code>
        */
       public Builder setImage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         image_ = value;
         onChanged();
@@ -28970,9 +27999,8 @@ public final class GUIProtos {
        */
       public Builder setImageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         image_ = value;
@@ -28986,16 +28014,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getSelected() {
-        java.lang.Object ref = selected_;
+        final java.lang.Object ref = selected_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           selected_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string selected = 5;</code>
@@ -29003,25 +28031,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getSelectedBytes() {
-        java.lang.Object ref = selected_;
+        final java.lang.Object ref = selected_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           selected_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string selected = 5;</code>
        */
       public Builder setSelected(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         selected_ = value;
         onChanged();
@@ -29041,9 +28068,8 @@ public final class GUIProtos {
        */
       public Builder setSelectedBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         selected_ = value;
@@ -29225,19 +28251,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -29317,9 +28342,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -29492,7 +28517,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -29503,51 +28528,36 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (photons_ != 0D) {
-        output.writeDouble(1, photons_);
-      }
-      if (mode_ != 0) {
-        output.writeInt32(2, mode_);
-      }
-      if (gain_ != 0D) {
-        output.writeDouble(3, gain_);
-      }
-      if (noise_ != 0D) {
-        output.writeDouble(4, noise_);
-      }
-      if (seed_ != 0) {
-        output.writeInt32(5, seed_);
-      }
-      if (samples_ != 0) {
-        output.writeInt32(6, samples_);
-      }
-      if (noiseSamples_ != 0) {
-        output.writeInt32(7, noiseSamples_);
-      }
-      if (model_ != 0) {
-        output.writeInt32(8, model_);
-      }
-      if (emGain_ != 0D) {
-        output.writeDouble(9, emGain_);
-      }
-      if (emSamples_ != 0) {
-        output.writeInt32(10, emSamples_);
-      }
-      if (emNoise_ != 0D) {
-        output.writeDouble(11, emNoise_);
-      }
-      if (cmosGain_ != 0D) {
-        output.writeDouble(12, cmosGain_);
-      }
-      if (cmosNoise_ != 0D) {
-        output.writeDouble(13, cmosNoise_);
-      }
-      if (simpsonIntegration_ != false) {
-        output.writeBool(14, simpsonIntegration_);
-      }
-      if (roundDown_ != false) {
-        output.writeBool(15, roundDown_);
-      }
+      if (photons_ != 0D)
+		output.writeDouble(1, photons_);
+      if (mode_ != 0)
+		output.writeInt32(2, mode_);
+      if (gain_ != 0D)
+		output.writeDouble(3, gain_);
+      if (noise_ != 0D)
+		output.writeDouble(4, noise_);
+      if (seed_ != 0)
+		output.writeInt32(5, seed_);
+      if (samples_ != 0)
+		output.writeInt32(6, samples_);
+      if (noiseSamples_ != 0)
+		output.writeInt32(7, noiseSamples_);
+      if (model_ != 0)
+		output.writeInt32(8, model_);
+      if (emGain_ != 0D)
+		output.writeDouble(9, emGain_);
+      if (emSamples_ != 0)
+		output.writeInt32(10, emSamples_);
+      if (emNoise_ != 0D)
+		output.writeDouble(11, emNoise_);
+      if (cmosGain_ != 0D)
+		output.writeDouble(12, cmosGain_);
+      if (cmosNoise_ != 0D)
+		output.writeDouble(13, cmosNoise_);
+      if (simpsonIntegration_ != false)
+		output.writeBool(14, simpsonIntegration_);
+      if (roundDown_ != false)
+		output.writeBool(15, roundDown_);
     }
 
     @Override
@@ -29556,66 +28566,51 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (photons_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (photons_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, photons_);
-      }
-      if (mode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (mode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, mode_);
-      }
-      if (gain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (gain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, gain_);
-      }
-      if (noise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (noise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, noise_);
-      }
-      if (seed_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (seed_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, seed_);
-      }
-      if (samples_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (samples_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, samples_);
-      }
-      if (noiseSamples_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (noiseSamples_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, noiseSamples_);
-      }
-      if (model_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (model_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, model_);
-      }
-      if (emGain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (emGain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, emGain_);
-      }
-      if (emSamples_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (emSamples_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(10, emSamples_);
-      }
-      if (emNoise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (emNoise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, emNoise_);
-      }
-      if (cmosGain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cmosGain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, cmosGain_);
-      }
-      if (cmosNoise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (cmosNoise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, cmosNoise_);
-      }
-      if (simpsonIntegration_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (simpsonIntegration_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(14, simpsonIntegration_);
-      }
-      if (roundDown_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (roundDown_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(15, roundDown_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -29623,13 +28618,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) obj;
 
       boolean result = true;
       result = result && (
@@ -29681,9 +28674,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PHOTONS_FIELD_NUMBER;
@@ -29817,7 +28809,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -29908,16 +28900,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings build() {
-        gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings(this);
         result.photons_ = photons_;
         result.mode_ = mode_;
         result.gain_ = gain_;
@@ -29971,9 +28962,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -29981,51 +28972,36 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.getDefaultInstance()) return this;
-        if (other.getPhotons() != 0D) {
-          setPhotons(other.getPhotons());
-        }
-        if (other.getMode() != 0) {
-          setMode(other.getMode());
-        }
-        if (other.getGain() != 0D) {
-          setGain(other.getGain());
-        }
-        if (other.getNoise() != 0D) {
-          setNoise(other.getNoise());
-        }
-        if (other.getSeed() != 0) {
-          setSeed(other.getSeed());
-        }
-        if (other.getSamples() != 0) {
-          setSamples(other.getSamples());
-        }
-        if (other.getNoiseSamples() != 0) {
-          setNoiseSamples(other.getNoiseSamples());
-        }
-        if (other.getModel() != 0) {
-          setModel(other.getModel());
-        }
-        if (other.getEmGain() != 0D) {
-          setEmGain(other.getEmGain());
-        }
-        if (other.getEmSamples() != 0) {
-          setEmSamples(other.getEmSamples());
-        }
-        if (other.getEmNoise() != 0D) {
-          setEmNoise(other.getEmNoise());
-        }
-        if (other.getCmosGain() != 0D) {
-          setCmosGain(other.getCmosGain());
-        }
-        if (other.getCmosNoise() != 0D) {
-          setCmosNoise(other.getCmosNoise());
-        }
-        if (other.getSimpsonIntegration() != false) {
-          setSimpsonIntegration(other.getSimpsonIntegration());
-        }
-        if (other.getRoundDown() != false) {
-          setRoundDown(other.getRoundDown());
-        }
+        if (other.getPhotons() != 0D)
+			setPhotons(other.getPhotons());
+        if (other.getMode() != 0)
+			setMode(other.getMode());
+        if (other.getGain() != 0D)
+			setGain(other.getGain());
+        if (other.getNoise() != 0D)
+			setNoise(other.getNoise());
+        if (other.getSeed() != 0)
+			setSeed(other.getSeed());
+        if (other.getSamples() != 0)
+			setSamples(other.getSamples());
+        if (other.getNoiseSamples() != 0)
+			setNoiseSamples(other.getNoiseSamples());
+        if (other.getModel() != 0)
+			setModel(other.getModel());
+        if (other.getEmGain() != 0D)
+			setEmGain(other.getEmGain());
+        if (other.getEmSamples() != 0)
+			setEmSamples(other.getEmSamples());
+        if (other.getEmNoise() != 0D)
+			setEmNoise(other.getEmNoise());
+        if (other.getCmosGain() != 0D)
+			setCmosGain(other.getCmosGain());
+        if (other.getCmosNoise() != 0D)
+			setCmosNoise(other.getCmosNoise());
+        if (other.getSimpsonIntegration() != false)
+			setSimpsonIntegration(other.getSimpsonIntegration());
+        if (other.getRoundDown() != false)
+			setRoundDown(other.getRoundDown());
         onChanged();
         return this;
       }
@@ -30043,13 +29019,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -30603,19 +29578,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -30670,9 +29644,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -30795,7 +29769,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -30806,36 +29780,26 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (minExponent_ != 0) {
-        output.writeInt32(1, minExponent_);
-      }
-      if (maxExponent_ != 0) {
-        output.writeInt32(2, maxExponent_);
-      }
-      if (subDivisions_ != 0) {
-        output.writeInt32(3, subDivisions_);
-      }
-      if (camera1Gain_ != 0D) {
-        output.writeDouble(4, camera1Gain_);
-      }
-      if (camera1Noise_ != 0D) {
-        output.writeDouble(5, camera1Noise_);
-      }
-      if (camera2Gain_ != 0D) {
-        output.writeDouble(6, camera2Gain_);
-      }
-      if (camera2Noise_ != 0D) {
-        output.writeDouble(7, camera2Noise_);
-      }
-      if (pointOption_ != 0) {
-        output.writeInt32(8, pointOption_);
-      }
-      if (camera1Type_ != 0) {
-        output.writeInt32(9, camera1Type_);
-      }
-      if (camera2Type_ != 0) {
-        output.writeInt32(10, camera2Type_);
-      }
+      if (minExponent_ != 0)
+		output.writeInt32(1, minExponent_);
+      if (maxExponent_ != 0)
+		output.writeInt32(2, maxExponent_);
+      if (subDivisions_ != 0)
+		output.writeInt32(3, subDivisions_);
+      if (camera1Gain_ != 0D)
+		output.writeDouble(4, camera1Gain_);
+      if (camera1Noise_ != 0D)
+		output.writeDouble(5, camera1Noise_);
+      if (camera2Gain_ != 0D)
+		output.writeDouble(6, camera2Gain_);
+      if (camera2Noise_ != 0D)
+		output.writeDouble(7, camera2Noise_);
+      if (pointOption_ != 0)
+		output.writeInt32(8, pointOption_);
+      if (camera1Type_ != 0)
+		output.writeInt32(9, camera1Type_);
+      if (camera2Type_ != 0)
+		output.writeInt32(10, camera2Type_);
     }
 
     @Override
@@ -30844,46 +29808,36 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (minExponent_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minExponent_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, minExponent_);
-      }
-      if (maxExponent_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxExponent_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, maxExponent_);
-      }
-      if (subDivisions_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (subDivisions_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, subDivisions_);
-      }
-      if (camera1Gain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (camera1Gain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, camera1Gain_);
-      }
-      if (camera1Noise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (camera1Noise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, camera1Noise_);
-      }
-      if (camera2Gain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (camera2Gain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, camera2Gain_);
-      }
-      if (camera2Noise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (camera2Noise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, camera2Noise_);
-      }
-      if (pointOption_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pointOption_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, pointOption_);
-      }
-      if (camera1Type_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (camera1Type_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(9, camera1Type_);
-      }
-      if (camera2Type_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (camera2Type_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(10, camera2Type_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -30891,13 +29845,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings) obj;
 
       boolean result = true;
       result = result && (getMinExponent()
@@ -30933,9 +29885,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + MIN_EXPONENT_FIELD_NUMBER;
@@ -31054,7 +30005,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -31135,16 +30086,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings build() {
-        gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings(this);
         result.minExponent_ = minExponent_;
         result.maxExponent_ = maxExponent_;
         result.subDivisions_ = subDivisions_;
@@ -31193,9 +30143,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -31203,36 +30153,26 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings.getDefaultInstance()) return this;
-        if (other.getMinExponent() != 0) {
-          setMinExponent(other.getMinExponent());
-        }
-        if (other.getMaxExponent() != 0) {
-          setMaxExponent(other.getMaxExponent());
-        }
-        if (other.getSubDivisions() != 0) {
-          setSubDivisions(other.getSubDivisions());
-        }
-        if (other.getCamera1Gain() != 0D) {
-          setCamera1Gain(other.getCamera1Gain());
-        }
-        if (other.getCamera1Noise() != 0D) {
-          setCamera1Noise(other.getCamera1Noise());
-        }
-        if (other.getCamera2Gain() != 0D) {
-          setCamera2Gain(other.getCamera2Gain());
-        }
-        if (other.getCamera2Noise() != 0D) {
-          setCamera2Noise(other.getCamera2Noise());
-        }
-        if (other.getPointOption() != 0) {
-          setPointOption(other.getPointOption());
-        }
-        if (other.getCamera1Type() != 0) {
-          setCamera1Type(other.getCamera1Type());
-        }
-        if (other.getCamera2Type() != 0) {
-          setCamera2Type(other.getCamera2Type());
-        }
+        if (other.getMinExponent() != 0)
+			setMinExponent(other.getMinExponent());
+        if (other.getMaxExponent() != 0)
+			setMaxExponent(other.getMaxExponent());
+        if (other.getSubDivisions() != 0)
+			setSubDivisions(other.getSubDivisions());
+        if (other.getCamera1Gain() != 0D)
+			setCamera1Gain(other.getCamera1Gain());
+        if (other.getCamera1Noise() != 0D)
+			setCamera1Noise(other.getCamera1Noise());
+        if (other.getCamera2Gain() != 0D)
+			setCamera2Gain(other.getCamera2Gain());
+        if (other.getCamera2Noise() != 0D)
+			setCamera2Noise(other.getCamera2Noise());
+        if (other.getPointOption() != 0)
+			setPointOption(other.getPointOption());
+        if (other.getCamera1Type() != 0)
+			setCamera1Type(other.getCamera1Type());
+        if (other.getCamera2Type() != 0)
+			setCamera2Type(other.getCamera2Type());
         onChanged();
         return this;
       }
@@ -31250,13 +30190,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -31662,19 +30601,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -31683,7 +30621,7 @@ public final class GUIProtos {
               break;
             }
             case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               selected_ = s;
               break;
@@ -31715,9 +30653,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -31754,13 +30692,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getSelected() {
-      java.lang.Object ref = selected_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         selected_ = s;
         return s;
       }
@@ -31771,16 +30709,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getSelectedBytes() {
-      java.lang.Object ref = selected_;
+      final java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         selected_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int MAGNIFICATION_FIELD_NUMBER = 3;
@@ -31836,7 +30774,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -31847,27 +30785,20 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (option_ != 0) {
-        output.writeInt32(1, option_);
-      }
-      if (!getSelectedBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, selected_);
-      }
-      if (magnification_ != 0) {
-        output.writeInt32(3, magnification_);
-      }
-      if (scale_ != 0) {
-        output.writeInt32(4, scale_);
-      }
-      if (xShift_ != 0D) {
-        output.writeDouble(5, xShift_);
-      }
-      if (yShift_ != 0D) {
-        output.writeDouble(6, yShift_);
-      }
-      if (zShift_ != 0D) {
-        output.writeDouble(7, zShift_);
-      }
+      if (option_ != 0)
+		output.writeInt32(1, option_);
+      if (!getSelectedBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 2, selected_);
+      if (magnification_ != 0)
+		output.writeInt32(3, magnification_);
+      if (scale_ != 0)
+		output.writeInt32(4, scale_);
+      if (xShift_ != 0D)
+		output.writeDouble(5, xShift_);
+      if (yShift_ != 0D)
+		output.writeDouble(6, yShift_);
+      if (zShift_ != 0D)
+		output.writeDouble(7, zShift_);
     }
 
     @Override
@@ -31876,33 +30807,26 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (option_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (option_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, option_);
-      }
-      if (!getSelectedBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, selected_);
-      }
-      if (magnification_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getSelectedBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, selected_);
+      if (magnification_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, magnification_);
-      }
-      if (scale_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (scale_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, scale_);
-      }
-      if (xShift_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (xShift_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, xShift_);
-      }
-      if (yShift_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (yShift_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, yShift_);
-      }
-      if (zShift_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (zShift_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, zShift_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -31910,13 +30834,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings other = (gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings other = (gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) obj;
 
       boolean result = true;
       result = result && (getOption()
@@ -31944,9 +30866,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPTION_FIELD_NUMBER;
@@ -32058,7 +30979,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -32133,16 +31054,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings build() {
-        gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings(this);
         result.option_ = option_;
         result.selected_ = selected_;
         result.magnification_ = magnification_;
@@ -32188,9 +31108,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -32198,28 +31118,22 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.getDefaultInstance()) return this;
-        if (other.getOption() != 0) {
-          setOption(other.getOption());
-        }
+        if (other.getOption() != 0)
+			setOption(other.getOption());
         if (!other.getSelected().isEmpty()) {
           selected_ = other.selected_;
           onChanged();
         }
-        if (other.getMagnification() != 0) {
-          setMagnification(other.getMagnification());
-        }
-        if (other.getScale() != 0) {
-          setScale(other.getScale());
-        }
-        if (other.getXShift() != 0D) {
-          setXShift(other.getXShift());
-        }
-        if (other.getYShift() != 0D) {
-          setYShift(other.getYShift());
-        }
-        if (other.getZShift() != 0D) {
-          setZShift(other.getZShift());
-        }
+        if (other.getMagnification() != 0)
+			setMagnification(other.getMagnification());
+        if (other.getScale() != 0)
+			setScale(other.getScale());
+        if (other.getXShift() != 0D)
+			setXShift(other.getXShift());
+        if (other.getYShift() != 0D)
+			setYShift(other.getYShift());
+        if (other.getZShift() != 0D)
+			setZShift(other.getZShift());
         onChanged();
         return this;
       }
@@ -32237,13 +31151,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -32281,16 +31194,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getSelected() {
-        java.lang.Object ref = selected_;
+        final java.lang.Object ref = selected_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           selected_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string selected = 2;</code>
@@ -32298,25 +31211,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getSelectedBytes() {
-        java.lang.Object ref = selected_;
+        final java.lang.Object ref = selected_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           selected_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string selected = 2;</code>
        */
       public Builder setSelected(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         selected_ = value;
         onChanged();
@@ -32336,9 +31248,8 @@ public final class GUIProtos {
        */
       public Builder setSelectedBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         selected_ = value;
@@ -32756,19 +31667,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -32797,7 +31707,7 @@ public final class GUIProtos {
               break;
             }
             case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               filename_ = s;
               break;
@@ -32929,9 +31839,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -33008,13 +31918,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFilename() {
-      java.lang.Object ref = filename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         filename_ = s;
         return s;
       }
@@ -33025,16 +31935,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFilenameBytes() {
-      java.lang.Object ref = filename_;
+      final java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int PLOT_ITEM_FIELD_NUMBER = 7;
@@ -33290,7 +32200,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -33301,99 +32211,68 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (option_ != 0) {
-        output.writeInt32(1, option_);
-      }
-      if (maxFrames_ != 0) {
-        output.writeInt32(2, maxFrames_);
-      }
-      if (failCountLimit_ != 0) {
-        output.writeInt32(3, failCountLimit_);
-      }
-      if (saveAfterFitting_ != false) {
-        output.writeBool(4, saveAfterFitting_);
-      }
-      if (targetPassFraction_ != 0D) {
-        output.writeDouble(5, targetPassFraction_);
-      }
-      if (!getFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, filename_);
-      }
-      if (plotItem_ != 0) {
-        output.writeInt32(7, plotItem_);
-      }
-      if (plotRollingWindow_ != 0) {
-        output.writeInt32(8, plotRollingWindow_);
-      }
-      if (plotPassWeight_ != 0) {
-        output.writeInt32(9, plotPassWeight_);
-      }
-      if (plotFailWeight_ != 0) {
-        output.writeInt32(10, plotFailWeight_);
-      }
-      if (plotResetFraction_ != 0D) {
-        output.writeDouble(11, plotResetFraction_);
-      }
-      if (plotFixedXAxis_ != false) {
-        output.writeBool(12, plotFixedXAxis_);
-      }
-      if (tableTopN_ != 0) {
-        output.writeInt32(13, tableTopN_);
-      }
-      if (rollingCounterMinAllowedFailures_ != 0) {
-        output.writeInt32(14, rollingCounterMinAllowedFailures_);
-      }
-      if (rollingCounterMaxAllowedFailures_ != 0) {
-        output.writeInt32(15, rollingCounterMaxAllowedFailures_);
-      }
-      if (rollingCounterMinWindow_ != 0) {
-        output.writeInt32(16, rollingCounterMinWindow_);
-      }
-      if (rollingCounterMaxWindow_ != 0) {
-        output.writeInt32(17, rollingCounterMaxWindow_);
-      }
-      if (weightedCounterMinAllowedFailures_ != 0) {
-        output.writeInt32(18, weightedCounterMinAllowedFailures_);
-      }
-      if (weightedCounterMaxAllowedFailures_ != 0) {
-        output.writeInt32(19, weightedCounterMaxAllowedFailures_);
-      }
-      if (weightedCounterMinPassDecrement_ != 0) {
-        output.writeInt32(20, weightedCounterMinPassDecrement_);
-      }
-      if (weightedCounterMaxPassDecrement_ != 0) {
-        output.writeInt32(21, weightedCounterMaxPassDecrement_);
-      }
-      if (resettingCounterMinAllowedFailures_ != 0) {
-        output.writeInt32(22, resettingCounterMinAllowedFailures_);
-      }
-      if (resettingCounterMaxAllowedFailures_ != 0) {
-        output.writeInt32(23, resettingCounterMaxAllowedFailures_);
-      }
-      if (resettingCounterMinResetFraction_ != 0D) {
-        output.writeDouble(24, resettingCounterMinResetFraction_);
-      }
-      if (resettingCounterMaxResetFraction_ != 0D) {
-        output.writeDouble(25, resettingCounterMaxResetFraction_);
-      }
-      if (resettingCounterIncResetFraction_ != 0D) {
-        output.writeDouble(26, resettingCounterIncResetFraction_);
-      }
-      if (passRateCounterMinAllowedCounts_ != 0) {
-        output.writeInt32(27, passRateCounterMinAllowedCounts_);
-      }
-      if (passRateCounterMaxAllowedCounts_ != 0) {
-        output.writeInt32(28, passRateCounterMaxAllowedCounts_);
-      }
-      if (passRateCounterMinPassRate_ != 0D) {
-        output.writeDouble(29, passRateCounterMinPassRate_);
-      }
-      if (passRateCounterMaxPassRate_ != 0D) {
-        output.writeDouble(30, passRateCounterMaxPassRate_);
-      }
-      if (passRateCounterIncPassRate_ != 0D) {
-        output.writeDouble(31, passRateCounterIncPassRate_);
-      }
+      if (option_ != 0)
+		output.writeInt32(1, option_);
+      if (maxFrames_ != 0)
+		output.writeInt32(2, maxFrames_);
+      if (failCountLimit_ != 0)
+		output.writeInt32(3, failCountLimit_);
+      if (saveAfterFitting_ != false)
+		output.writeBool(4, saveAfterFitting_);
+      if (targetPassFraction_ != 0D)
+		output.writeDouble(5, targetPassFraction_);
+      if (!getFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 6, filename_);
+      if (plotItem_ != 0)
+		output.writeInt32(7, plotItem_);
+      if (plotRollingWindow_ != 0)
+		output.writeInt32(8, plotRollingWindow_);
+      if (plotPassWeight_ != 0)
+		output.writeInt32(9, plotPassWeight_);
+      if (plotFailWeight_ != 0)
+		output.writeInt32(10, plotFailWeight_);
+      if (plotResetFraction_ != 0D)
+		output.writeDouble(11, plotResetFraction_);
+      if (plotFixedXAxis_ != false)
+		output.writeBool(12, plotFixedXAxis_);
+      if (tableTopN_ != 0)
+		output.writeInt32(13, tableTopN_);
+      if (rollingCounterMinAllowedFailures_ != 0)
+		output.writeInt32(14, rollingCounterMinAllowedFailures_);
+      if (rollingCounterMaxAllowedFailures_ != 0)
+		output.writeInt32(15, rollingCounterMaxAllowedFailures_);
+      if (rollingCounterMinWindow_ != 0)
+		output.writeInt32(16, rollingCounterMinWindow_);
+      if (rollingCounterMaxWindow_ != 0)
+		output.writeInt32(17, rollingCounterMaxWindow_);
+      if (weightedCounterMinAllowedFailures_ != 0)
+		output.writeInt32(18, weightedCounterMinAllowedFailures_);
+      if (weightedCounterMaxAllowedFailures_ != 0)
+		output.writeInt32(19, weightedCounterMaxAllowedFailures_);
+      if (weightedCounterMinPassDecrement_ != 0)
+		output.writeInt32(20, weightedCounterMinPassDecrement_);
+      if (weightedCounterMaxPassDecrement_ != 0)
+		output.writeInt32(21, weightedCounterMaxPassDecrement_);
+      if (resettingCounterMinAllowedFailures_ != 0)
+		output.writeInt32(22, resettingCounterMinAllowedFailures_);
+      if (resettingCounterMaxAllowedFailures_ != 0)
+		output.writeInt32(23, resettingCounterMaxAllowedFailures_);
+      if (resettingCounterMinResetFraction_ != 0D)
+		output.writeDouble(24, resettingCounterMinResetFraction_);
+      if (resettingCounterMaxResetFraction_ != 0D)
+		output.writeDouble(25, resettingCounterMaxResetFraction_);
+      if (resettingCounterIncResetFraction_ != 0D)
+		output.writeDouble(26, resettingCounterIncResetFraction_);
+      if (passRateCounterMinAllowedCounts_ != 0)
+		output.writeInt32(27, passRateCounterMinAllowedCounts_);
+      if (passRateCounterMaxAllowedCounts_ != 0)
+		output.writeInt32(28, passRateCounterMaxAllowedCounts_);
+      if (passRateCounterMinPassRate_ != 0D)
+		output.writeDouble(29, passRateCounterMinPassRate_);
+      if (passRateCounterMaxPassRate_ != 0D)
+		output.writeDouble(30, passRateCounterMaxPassRate_);
+      if (passRateCounterIncPassRate_ != 0D)
+		output.writeDouble(31, passRateCounterIncPassRate_);
     }
 
     @Override
@@ -33402,129 +32281,98 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (option_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (option_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, option_);
-      }
-      if (maxFrames_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxFrames_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, maxFrames_);
-      }
-      if (failCountLimit_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (failCountLimit_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, failCountLimit_);
-      }
-      if (saveAfterFitting_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveAfterFitting_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, saveAfterFitting_);
-      }
-      if (targetPassFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (targetPassFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, targetPassFraction_);
-      }
-      if (!getFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, filename_);
-      }
-      if (plotItem_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, filename_);
+      if (plotItem_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, plotItem_);
-      }
-      if (plotRollingWindow_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotRollingWindow_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, plotRollingWindow_);
-      }
-      if (plotPassWeight_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotPassWeight_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(9, plotPassWeight_);
-      }
-      if (plotFailWeight_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotFailWeight_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(10, plotFailWeight_);
-      }
-      if (plotResetFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotResetFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, plotResetFraction_);
-      }
-      if (plotFixedXAxis_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotFixedXAxis_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(12, plotFixedXAxis_);
-      }
-      if (tableTopN_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (tableTopN_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(13, tableTopN_);
-      }
-      if (rollingCounterMinAllowedFailures_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rollingCounterMinAllowedFailures_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, rollingCounterMinAllowedFailures_);
-      }
-      if (rollingCounterMaxAllowedFailures_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rollingCounterMaxAllowedFailures_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(15, rollingCounterMaxAllowedFailures_);
-      }
-      if (rollingCounterMinWindow_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rollingCounterMinWindow_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(16, rollingCounterMinWindow_);
-      }
-      if (rollingCounterMaxWindow_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rollingCounterMaxWindow_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(17, rollingCounterMaxWindow_);
-      }
-      if (weightedCounterMinAllowedFailures_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weightedCounterMinAllowedFailures_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(18, weightedCounterMinAllowedFailures_);
-      }
-      if (weightedCounterMaxAllowedFailures_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weightedCounterMaxAllowedFailures_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(19, weightedCounterMaxAllowedFailures_);
-      }
-      if (weightedCounterMinPassDecrement_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weightedCounterMinPassDecrement_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(20, weightedCounterMinPassDecrement_);
-      }
-      if (weightedCounterMaxPassDecrement_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weightedCounterMaxPassDecrement_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(21, weightedCounterMaxPassDecrement_);
-      }
-      if (resettingCounterMinAllowedFailures_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resettingCounterMinAllowedFailures_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(22, resettingCounterMinAllowedFailures_);
-      }
-      if (resettingCounterMaxAllowedFailures_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resettingCounterMaxAllowedFailures_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(23, resettingCounterMaxAllowedFailures_);
-      }
-      if (resettingCounterMinResetFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resettingCounterMinResetFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(24, resettingCounterMinResetFraction_);
-      }
-      if (resettingCounterMaxResetFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resettingCounterMaxResetFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(25, resettingCounterMaxResetFraction_);
-      }
-      if (resettingCounterIncResetFraction_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resettingCounterIncResetFraction_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(26, resettingCounterIncResetFraction_);
-      }
-      if (passRateCounterMinAllowedCounts_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (passRateCounterMinAllowedCounts_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(27, passRateCounterMinAllowedCounts_);
-      }
-      if (passRateCounterMaxAllowedCounts_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (passRateCounterMaxAllowedCounts_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(28, passRateCounterMaxAllowedCounts_);
-      }
-      if (passRateCounterMinPassRate_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (passRateCounterMinPassRate_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(29, passRateCounterMinPassRate_);
-      }
-      if (passRateCounterMaxPassRate_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (passRateCounterMaxPassRate_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(30, passRateCounterMaxPassRate_);
-      }
-      if (passRateCounterIncPassRate_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (passRateCounterIncPassRate_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(31, passRateCounterIncPassRate_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -33532,13 +32380,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings other = (gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings other = (gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) obj;
 
       boolean result = true;
       result = result && (getOption()
@@ -33624,9 +32470,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPTION_FIELD_NUMBER;
@@ -33793,7 +32638,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -33916,16 +32761,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings build() {
-        gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = new gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = new gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings(this);
         result.option_ = option_;
         result.maxFrames_ = maxFrames_;
         result.failCountLimit_ = failCountLimit_;
@@ -33995,9 +32839,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -34005,100 +32849,70 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.getDefaultInstance()) return this;
-        if (other.getOption() != 0) {
-          setOption(other.getOption());
-        }
-        if (other.getMaxFrames() != 0) {
-          setMaxFrames(other.getMaxFrames());
-        }
-        if (other.getFailCountLimit() != 0) {
-          setFailCountLimit(other.getFailCountLimit());
-        }
-        if (other.getSaveAfterFitting() != false) {
-          setSaveAfterFitting(other.getSaveAfterFitting());
-        }
-        if (other.getTargetPassFraction() != 0D) {
-          setTargetPassFraction(other.getTargetPassFraction());
-        }
+        if (other.getOption() != 0)
+			setOption(other.getOption());
+        if (other.getMaxFrames() != 0)
+			setMaxFrames(other.getMaxFrames());
+        if (other.getFailCountLimit() != 0)
+			setFailCountLimit(other.getFailCountLimit());
+        if (other.getSaveAfterFitting() != false)
+			setSaveAfterFitting(other.getSaveAfterFitting());
+        if (other.getTargetPassFraction() != 0D)
+			setTargetPassFraction(other.getTargetPassFraction());
         if (!other.getFilename().isEmpty()) {
           filename_ = other.filename_;
           onChanged();
         }
-        if (other.getPlotItem() != 0) {
-          setPlotItem(other.getPlotItem());
-        }
-        if (other.getPlotRollingWindow() != 0) {
-          setPlotRollingWindow(other.getPlotRollingWindow());
-        }
-        if (other.getPlotPassWeight() != 0) {
-          setPlotPassWeight(other.getPlotPassWeight());
-        }
-        if (other.getPlotFailWeight() != 0) {
-          setPlotFailWeight(other.getPlotFailWeight());
-        }
-        if (other.getPlotResetFraction() != 0D) {
-          setPlotResetFraction(other.getPlotResetFraction());
-        }
-        if (other.getPlotFixedXAxis() != false) {
-          setPlotFixedXAxis(other.getPlotFixedXAxis());
-        }
-        if (other.getTableTopN() != 0) {
-          setTableTopN(other.getTableTopN());
-        }
-        if (other.getRollingCounterMinAllowedFailures() != 0) {
-          setRollingCounterMinAllowedFailures(other.getRollingCounterMinAllowedFailures());
-        }
-        if (other.getRollingCounterMaxAllowedFailures() != 0) {
-          setRollingCounterMaxAllowedFailures(other.getRollingCounterMaxAllowedFailures());
-        }
-        if (other.getRollingCounterMinWindow() != 0) {
-          setRollingCounterMinWindow(other.getRollingCounterMinWindow());
-        }
-        if (other.getRollingCounterMaxWindow() != 0) {
-          setRollingCounterMaxWindow(other.getRollingCounterMaxWindow());
-        }
-        if (other.getWeightedCounterMinAllowedFailures() != 0) {
-          setWeightedCounterMinAllowedFailures(other.getWeightedCounterMinAllowedFailures());
-        }
-        if (other.getWeightedCounterMaxAllowedFailures() != 0) {
-          setWeightedCounterMaxAllowedFailures(other.getWeightedCounterMaxAllowedFailures());
-        }
-        if (other.getWeightedCounterMinPassDecrement() != 0) {
-          setWeightedCounterMinPassDecrement(other.getWeightedCounterMinPassDecrement());
-        }
-        if (other.getWeightedCounterMaxPassDecrement() != 0) {
-          setWeightedCounterMaxPassDecrement(other.getWeightedCounterMaxPassDecrement());
-        }
-        if (other.getResettingCounterMinAllowedFailures() != 0) {
-          setResettingCounterMinAllowedFailures(other.getResettingCounterMinAllowedFailures());
-        }
-        if (other.getResettingCounterMaxAllowedFailures() != 0) {
-          setResettingCounterMaxAllowedFailures(other.getResettingCounterMaxAllowedFailures());
-        }
-        if (other.getResettingCounterMinResetFraction() != 0D) {
-          setResettingCounterMinResetFraction(other.getResettingCounterMinResetFraction());
-        }
-        if (other.getResettingCounterMaxResetFraction() != 0D) {
-          setResettingCounterMaxResetFraction(other.getResettingCounterMaxResetFraction());
-        }
-        if (other.getResettingCounterIncResetFraction() != 0D) {
-          setResettingCounterIncResetFraction(other.getResettingCounterIncResetFraction());
-        }
-        if (other.getPassRateCounterMinAllowedCounts() != 0) {
-          setPassRateCounterMinAllowedCounts(other.getPassRateCounterMinAllowedCounts());
-        }
-        if (other.getPassRateCounterMaxAllowedCounts() != 0) {
-          setPassRateCounterMaxAllowedCounts(other.getPassRateCounterMaxAllowedCounts());
-        }
-        if (other.getPassRateCounterMinPassRate() != 0D) {
-          setPassRateCounterMinPassRate(other.getPassRateCounterMinPassRate());
-        }
-        if (other.getPassRateCounterMaxPassRate() != 0D) {
-          setPassRateCounterMaxPassRate(other.getPassRateCounterMaxPassRate());
-        }
-        if (other.getPassRateCounterIncPassRate() != 0D) {
-          setPassRateCounterIncPassRate(other.getPassRateCounterIncPassRate());
-        }
+        if (other.getPlotItem() != 0)
+			setPlotItem(other.getPlotItem());
+        if (other.getPlotRollingWindow() != 0)
+			setPlotRollingWindow(other.getPlotRollingWindow());
+        if (other.getPlotPassWeight() != 0)
+			setPlotPassWeight(other.getPlotPassWeight());
+        if (other.getPlotFailWeight() != 0)
+			setPlotFailWeight(other.getPlotFailWeight());
+        if (other.getPlotResetFraction() != 0D)
+			setPlotResetFraction(other.getPlotResetFraction());
+        if (other.getPlotFixedXAxis() != false)
+			setPlotFixedXAxis(other.getPlotFixedXAxis());
+        if (other.getTableTopN() != 0)
+			setTableTopN(other.getTableTopN());
+        if (other.getRollingCounterMinAllowedFailures() != 0)
+			setRollingCounterMinAllowedFailures(other.getRollingCounterMinAllowedFailures());
+        if (other.getRollingCounterMaxAllowedFailures() != 0)
+			setRollingCounterMaxAllowedFailures(other.getRollingCounterMaxAllowedFailures());
+        if (other.getRollingCounterMinWindow() != 0)
+			setRollingCounterMinWindow(other.getRollingCounterMinWindow());
+        if (other.getRollingCounterMaxWindow() != 0)
+			setRollingCounterMaxWindow(other.getRollingCounterMaxWindow());
+        if (other.getWeightedCounterMinAllowedFailures() != 0)
+			setWeightedCounterMinAllowedFailures(other.getWeightedCounterMinAllowedFailures());
+        if (other.getWeightedCounterMaxAllowedFailures() != 0)
+			setWeightedCounterMaxAllowedFailures(other.getWeightedCounterMaxAllowedFailures());
+        if (other.getWeightedCounterMinPassDecrement() != 0)
+			setWeightedCounterMinPassDecrement(other.getWeightedCounterMinPassDecrement());
+        if (other.getWeightedCounterMaxPassDecrement() != 0)
+			setWeightedCounterMaxPassDecrement(other.getWeightedCounterMaxPassDecrement());
+        if (other.getResettingCounterMinAllowedFailures() != 0)
+			setResettingCounterMinAllowedFailures(other.getResettingCounterMinAllowedFailures());
+        if (other.getResettingCounterMaxAllowedFailures() != 0)
+			setResettingCounterMaxAllowedFailures(other.getResettingCounterMaxAllowedFailures());
+        if (other.getResettingCounterMinResetFraction() != 0D)
+			setResettingCounterMinResetFraction(other.getResettingCounterMinResetFraction());
+        if (other.getResettingCounterMaxResetFraction() != 0D)
+			setResettingCounterMaxResetFraction(other.getResettingCounterMaxResetFraction());
+        if (other.getResettingCounterIncResetFraction() != 0D)
+			setResettingCounterIncResetFraction(other.getResettingCounterIncResetFraction());
+        if (other.getPassRateCounterMinAllowedCounts() != 0)
+			setPassRateCounterMinAllowedCounts(other.getPassRateCounterMinAllowedCounts());
+        if (other.getPassRateCounterMaxAllowedCounts() != 0)
+			setPassRateCounterMaxAllowedCounts(other.getPassRateCounterMaxAllowedCounts());
+        if (other.getPassRateCounterMinPassRate() != 0D)
+			setPassRateCounterMinPassRate(other.getPassRateCounterMinPassRate());
+        if (other.getPassRateCounterMaxPassRate() != 0D)
+			setPassRateCounterMaxPassRate(other.getPassRateCounterMaxPassRate());
+        if (other.getPassRateCounterIncPassRate() != 0D)
+			setPassRateCounterIncPassRate(other.getPassRateCounterIncPassRate());
         onChanged();
         return this;
       }
@@ -34116,13 +32930,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -34268,16 +33081,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFilename() {
-        java.lang.Object ref = filename_;
+        final java.lang.Object ref = filename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           filename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string filename = 6;</code>
@@ -34285,25 +33098,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFilenameBytes() {
-        java.lang.Object ref = filename_;
+        final java.lang.Object ref = filename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string filename = 6;</code>
        */
       public Builder setFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         filename_ = value;
         onChanged();
@@ -34323,9 +33135,8 @@ public final class GUIProtos {
        */
       public Builder setFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         filename_ = value;
@@ -35293,19 +34104,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -35320,9 +34130,8 @@ public final class GUIProtos {
             }
             case 26: {
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder subBuilder = null;
-              if (fitEngineSettings_ != null) {
-                subBuilder = fitEngineSettings_.toBuilder();
-              }
+              if (fitEngineSettings_ != null)
+				subBuilder = fitEngineSettings_.toBuilder();
               fitEngineSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.FitEngineSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitEngineSettings_);
@@ -35333,9 +34142,8 @@ public final class GUIProtos {
             }
             case 34: {
               gdsc.smlm.data.config.PSFProtos.PSF.Builder subBuilder = null;
-              if (psf_ != null) {
-                subBuilder = psf_.toBuilder();
-              }
+              if (psf_ != null)
+				subBuilder = psf_.toBuilder();
               psf_ = input.readMessage(gdsc.smlm.data.config.PSFProtos.PSF.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(psf_);
@@ -35346,9 +34154,8 @@ public final class GUIProtos {
             }
             case 42: {
               gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder subBuilder = null;
-              if (calibration_ != null) {
-                subBuilder = calibration_.toBuilder();
-              }
+              if (calibration_ != null)
+				subBuilder = calibration_.toBuilder();
               calibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationProtos.Calibration.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(calibration_);
@@ -35383,19 +34190,19 @@ public final class GUIProtos {
               break;
             }
             case 90: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               image_ = s;
               break;
             }
             case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               modelName_ = s;
               break;
             }
             case 106: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               selected_ = s;
               break;
@@ -35416,7 +34223,7 @@ public final class GUIProtos {
               break;
             }
             case 138: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               filename_ = s;
               break;
@@ -35427,13 +34234,13 @@ public final class GUIProtos {
               break;
             }
             case 152: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               zDistanceUnit_ = rawValue;
               break;
             }
             case 160: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               sDistanceUnit_ = rawValue;
               break;
@@ -35450,9 +34257,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -35625,13 +34432,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getImage() {
-      java.lang.Object ref = image_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = image_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         image_ = s;
         return s;
       }
@@ -35642,16 +34449,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getImageBytes() {
-      java.lang.Object ref = image_;
+      final java.lang.Object ref = image_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         image_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int MODEL_NAME_FIELD_NUMBER = 12;
@@ -35661,13 +34468,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getModelName() {
-      java.lang.Object ref = modelName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = modelName_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         modelName_ = s;
         return s;
       }
@@ -35678,16 +34485,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getModelNameBytes() {
-      java.lang.Object ref = modelName_;
+      final java.lang.Object ref = modelName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         modelName_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int SAVE_MODEL_FIELD_NUMBER = 14;
@@ -35721,13 +34528,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getSelected() {
-      java.lang.Object ref = selected_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         selected_ = s;
         return s;
       }
@@ -35742,16 +34549,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getSelectedBytes() {
-      java.lang.Object ref = selected_;
+      final java.lang.Object ref = selected_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         selected_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int SHOW_DEPTH_OF_FOCUS_FIELD_NUMBER = 16;
@@ -35798,7 +34605,7 @@ public final class GUIProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
+      final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
 
@@ -35816,7 +34623,7 @@ public final class GUIProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
+      final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
 
@@ -35841,13 +34648,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getFilename() {
-      java.lang.Object ref = filename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         filename_ = s;
         return s;
       }
@@ -35862,22 +34669,22 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getFilenameBytes() {
-      java.lang.Object ref = filename_;
+      final java.lang.Object ref = filename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -35888,72 +34695,50 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (option_ != 0) {
-        output.writeInt32(1, option_);
-      }
-      if (nmPerSlice_ != 0D) {
-        output.writeDouble(2, nmPerSlice_);
-      }
-      if (fitEngineSettings_ != null) {
-        output.writeMessage(3, getFitEngineSettings());
-      }
-      if (psf_ != null) {
-        output.writeMessage(4, getPsf());
-      }
-      if (calibration_ != null) {
-        output.writeMessage(5, getCalibration());
-      }
-      if (radius_ != 0D) {
-        output.writeDouble(6, radius_);
-      }
-      if (logFitProgress_ != false) {
-        output.writeBool(7, logFitProgress_);
-      }
-      if (smoothing_ != 0D) {
-        output.writeDouble(8, smoothing_);
-      }
-      if (weightedFit_ != false) {
-        output.writeBool(9, weightedFit_);
-      }
-      if (showEstimatedCurve_ != false) {
-        output.writeBool(10, showEstimatedCurve_);
-      }
-      if (!getImageBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, image_);
-      }
-      if (!getModelNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, modelName_);
-      }
-      if (!getSelectedBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, selected_);
-      }
-      if (saveModel_ != false) {
-        output.writeBool(14, saveModel_);
-      }
-      if (saveFitWidth_ != false) {
-        output.writeBool(15, saveFitWidth_);
-      }
-      if (showDepthOfFocus_ != false) {
-        output.writeBool(16, showDepthOfFocus_);
-      }
-      if (!getFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 17, filename_);
-      }
-      if (showPsf_ != false) {
-        output.writeBool(18, showPsf_);
-      }
-      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(19, zDistanceUnit_);
-      }
-      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(20, sDistanceUnit_);
-      }
-      if (calibratedImage_ != false) {
-        output.writeBool(21, calibratedImage_);
-      }
-      if (showCombinedWidth_ != false) {
-        output.writeBool(22, showCombinedWidth_);
-      }
+      if (option_ != 0)
+		output.writeInt32(1, option_);
+      if (nmPerSlice_ != 0D)
+		output.writeDouble(2, nmPerSlice_);
+      if (fitEngineSettings_ != null)
+		output.writeMessage(3, getFitEngineSettings());
+      if (psf_ != null)
+		output.writeMessage(4, getPsf());
+      if (calibration_ != null)
+		output.writeMessage(5, getCalibration());
+      if (radius_ != 0D)
+		output.writeDouble(6, radius_);
+      if (logFitProgress_ != false)
+		output.writeBool(7, logFitProgress_);
+      if (smoothing_ != 0D)
+		output.writeDouble(8, smoothing_);
+      if (weightedFit_ != false)
+		output.writeBool(9, weightedFit_);
+      if (showEstimatedCurve_ != false)
+		output.writeBool(10, showEstimatedCurve_);
+      if (!getImageBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 11, image_);
+      if (!getModelNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 12, modelName_);
+      if (!getSelectedBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 13, selected_);
+      if (saveModel_ != false)
+		output.writeBool(14, saveModel_);
+      if (saveFitWidth_ != false)
+		output.writeBool(15, saveFitWidth_);
+      if (showDepthOfFocus_ != false)
+		output.writeBool(16, showDepthOfFocus_);
+      if (!getFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 17, filename_);
+      if (showPsf_ != false)
+		output.writeBool(18, showPsf_);
+      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		output.writeEnum(19, zDistanceUnit_);
+      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		output.writeEnum(20, sDistanceUnit_);
+      if (calibratedImage_ != false)
+		output.writeBool(21, calibratedImage_);
+      if (showCombinedWidth_ != false)
+		output.writeBool(22, showCombinedWidth_);
     }
 
     @Override
@@ -35962,90 +34747,68 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (option_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (option_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, option_);
-      }
-      if (nmPerSlice_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (nmPerSlice_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, nmPerSlice_);
-      }
-      if (fitEngineSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitEngineSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getFitEngineSettings());
-      }
-      if (psf_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psf_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getPsf());
-      }
-      if (calibration_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (calibration_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getCalibration());
-      }
-      if (radius_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (radius_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, radius_);
-      }
-      if (logFitProgress_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (logFitProgress_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, logFitProgress_);
-      }
-      if (smoothing_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (smoothing_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(8, smoothing_);
-      }
-      if (weightedFit_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weightedFit_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, weightedFit_);
-      }
-      if (showEstimatedCurve_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showEstimatedCurve_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(10, showEstimatedCurve_);
-      }
-      if (!getImageBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, image_);
-      }
-      if (!getModelNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, modelName_);
-      }
-      if (!getSelectedBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, selected_);
-      }
-      if (saveModel_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getImageBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, image_);
+      if (!getModelNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, modelName_);
+      if (!getSelectedBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, selected_);
+      if (saveModel_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(14, saveModel_);
-      }
-      if (saveFitWidth_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveFitWidth_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(15, saveFitWidth_);
-      }
-      if (showDepthOfFocus_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showDepthOfFocus_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(16, showDepthOfFocus_);
-      }
-      if (!getFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, filename_);
-      }
-      if (showPsf_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, filename_);
+      if (showPsf_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(18, showPsf_);
-      }
-      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(19, zDistanceUnit_);
-      }
-      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(20, sDistanceUnit_);
-      }
-      if (calibratedImage_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (calibratedImage_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(21, calibratedImage_);
-      }
-      if (showCombinedWidth_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showCombinedWidth_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(22, showCombinedWidth_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -36053,13 +34816,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings other = (gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings other = (gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) obj;
 
       boolean result = true;
       result = result && (getOption()
@@ -36069,20 +34830,17 @@ public final class GUIProtos {
           == java.lang.Double.doubleToLongBits(
               other.getNmPerSlice()));
       result = result && (hasFitEngineSettings() == other.hasFitEngineSettings());
-      if (hasFitEngineSettings()) {
-        result = result && getFitEngineSettings()
+      if (hasFitEngineSettings())
+		result = result && getFitEngineSettings()
             .equals(other.getFitEngineSettings());
-      }
       result = result && (hasPsf() == other.hasPsf());
-      if (hasPsf()) {
-        result = result && getPsf()
+      if (hasPsf())
+		result = result && getPsf()
             .equals(other.getPsf());
-      }
       result = result && (hasCalibration() == other.hasCalibration());
-      if (hasCalibration()) {
-        result = result && getCalibration()
+      if (hasCalibration())
+		result = result && getCalibration()
             .equals(other.getCalibration());
-      }
       result = result && (
           java.lang.Double.doubleToLongBits(getRadius())
           == java.lang.Double.doubleToLongBits(
@@ -36124,9 +34882,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPTION_FIELD_NUMBER;
@@ -36283,7 +35040,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -36332,21 +35089,21 @@ public final class GUIProtos {
 
         nmPerSlice_ = 0D;
 
-        if (fitEngineSettingsBuilder_ == null) {
-          fitEngineSettings_ = null;
-        } else {
+        if (fitEngineSettingsBuilder_ == null)
+			fitEngineSettings_ = null;
+		else {
           fitEngineSettings_ = null;
           fitEngineSettingsBuilder_ = null;
         }
-        if (psfBuilder_ == null) {
-          psf_ = null;
-        } else {
+        if (psfBuilder_ == null)
+			psf_ = null;
+		else {
           psf_ = null;
           psfBuilder_ = null;
         }
-        if (calibrationBuilder_ == null) {
-          calibration_ = null;
-        } else {
+        if (calibrationBuilder_ == null)
+			calibration_ = null;
+		else {
           calibration_ = null;
           calibrationBuilder_ = null;
         }
@@ -36400,33 +35157,29 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings build() {
-        gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings(this);
         result.option_ = option_;
         result.nmPerSlice_ = nmPerSlice_;
-        if (fitEngineSettingsBuilder_ == null) {
-          result.fitEngineSettings_ = fitEngineSettings_;
-        } else {
-          result.fitEngineSettings_ = fitEngineSettingsBuilder_.build();
-        }
-        if (psfBuilder_ == null) {
-          result.psf_ = psf_;
-        } else {
-          result.psf_ = psfBuilder_.build();
-        }
-        if (calibrationBuilder_ == null) {
-          result.calibration_ = calibration_;
-        } else {
-          result.calibration_ = calibrationBuilder_.build();
-        }
+        if (fitEngineSettingsBuilder_ == null)
+			result.fitEngineSettings_ = fitEngineSettings_;
+		else
+			result.fitEngineSettings_ = fitEngineSettingsBuilder_.build();
+        if (psfBuilder_ == null)
+			result.psf_ = psf_;
+		else
+			result.psf_ = psfBuilder_.build();
+        if (calibrationBuilder_ == null)
+			result.calibration_ = calibration_;
+		else
+			result.calibration_ = calibrationBuilder_.build();
         result.radius_ = radius_;
         result.logFitProgress_ = logFitProgress_;
         result.smoothing_ = smoothing_;
@@ -36482,9 +35235,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -36492,36 +35245,26 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.getDefaultInstance()) return this;
-        if (other.getOption() != 0) {
-          setOption(other.getOption());
-        }
-        if (other.getNmPerSlice() != 0D) {
-          setNmPerSlice(other.getNmPerSlice());
-        }
-        if (other.hasFitEngineSettings()) {
-          mergeFitEngineSettings(other.getFitEngineSettings());
-        }
-        if (other.hasPsf()) {
-          mergePsf(other.getPsf());
-        }
-        if (other.hasCalibration()) {
-          mergeCalibration(other.getCalibration());
-        }
-        if (other.getRadius() != 0D) {
-          setRadius(other.getRadius());
-        }
-        if (other.getLogFitProgress() != false) {
-          setLogFitProgress(other.getLogFitProgress());
-        }
-        if (other.getSmoothing() != 0D) {
-          setSmoothing(other.getSmoothing());
-        }
-        if (other.getWeightedFit() != false) {
-          setWeightedFit(other.getWeightedFit());
-        }
-        if (other.getShowEstimatedCurve() != false) {
-          setShowEstimatedCurve(other.getShowEstimatedCurve());
-        }
+        if (other.getOption() != 0)
+			setOption(other.getOption());
+        if (other.getNmPerSlice() != 0D)
+			setNmPerSlice(other.getNmPerSlice());
+        if (other.hasFitEngineSettings())
+			mergeFitEngineSettings(other.getFitEngineSettings());
+        if (other.hasPsf())
+			mergePsf(other.getPsf());
+        if (other.hasCalibration())
+			mergeCalibration(other.getCalibration());
+        if (other.getRadius() != 0D)
+			setRadius(other.getRadius());
+        if (other.getLogFitProgress() != false)
+			setLogFitProgress(other.getLogFitProgress());
+        if (other.getSmoothing() != 0D)
+			setSmoothing(other.getSmoothing());
+        if (other.getWeightedFit() != false)
+			setWeightedFit(other.getWeightedFit());
+        if (other.getShowEstimatedCurve() != false)
+			setShowEstimatedCurve(other.getShowEstimatedCurve());
         if (!other.getImage().isEmpty()) {
           image_ = other.image_;
           onChanged();
@@ -36530,34 +35273,26 @@ public final class GUIProtos {
           modelName_ = other.modelName_;
           onChanged();
         }
-        if (other.getSaveModel() != false) {
-          setSaveModel(other.getSaveModel());
-        }
-        if (other.getSaveFitWidth() != false) {
-          setSaveFitWidth(other.getSaveFitWidth());
-        }
+        if (other.getSaveModel() != false)
+			setSaveModel(other.getSaveModel());
+        if (other.getSaveFitWidth() != false)
+			setSaveFitWidth(other.getSaveFitWidth());
         if (!other.getSelected().isEmpty()) {
           selected_ = other.selected_;
           onChanged();
         }
-        if (other.getShowDepthOfFocus() != false) {
-          setShowDepthOfFocus(other.getShowDepthOfFocus());
-        }
-        if (other.getShowCombinedWidth() != false) {
-          setShowCombinedWidth(other.getShowCombinedWidth());
-        }
-        if (other.getShowPsf() != false) {
-          setShowPsf(other.getShowPsf());
-        }
-        if (other.zDistanceUnit_ != 0) {
-          setZDistanceUnitValue(other.getZDistanceUnitValue());
-        }
-        if (other.sDistanceUnit_ != 0) {
-          setSDistanceUnitValue(other.getSDistanceUnitValue());
-        }
-        if (other.getCalibratedImage() != false) {
-          setCalibratedImage(other.getCalibratedImage());
-        }
+        if (other.getShowDepthOfFocus() != false)
+			setShowDepthOfFocus(other.getShowDepthOfFocus());
+        if (other.getShowCombinedWidth() != false)
+			setShowCombinedWidth(other.getShowCombinedWidth());
+        if (other.getShowPsf() != false)
+			setShowPsf(other.getShowPsf());
+        if (other.zDistanceUnit_ != 0)
+			setZDistanceUnitValue(other.getZDistanceUnitValue());
+        if (other.sDistanceUnit_ != 0)
+			setSDistanceUnitValue(other.getSDistanceUnitValue());
+        if (other.getCalibratedImage() != false)
+			setCalibratedImage(other.getCalibratedImage());
         if (!other.getFilename().isEmpty()) {
           filename_ = other.filename_;
           onChanged();
@@ -36579,13 +35314,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -36671,25 +35405,23 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
-        if (fitEngineSettingsBuilder_ == null) {
-          return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
-        } else {
-          return fitEngineSettingsBuilder_.getMessage();
-        }
+        if (fitEngineSettingsBuilder_ == null)
+			return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
+		else
+			return fitEngineSettingsBuilder_.getMessage();
       }
       /**
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public Builder setFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           fitEngineSettings_ = value;
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.setMessage(value);
         }
+		else
+			fitEngineSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -36701,9 +35433,9 @@ public final class GUIProtos {
         if (fitEngineSettingsBuilder_ == null) {
           fitEngineSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			fitEngineSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -36712,16 +35444,15 @@ public final class GUIProtos {
        */
       public Builder mergeFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
-          if (fitEngineSettings_ != null) {
-            fitEngineSettings_ =
+          if (fitEngineSettings_ != null)
+			fitEngineSettings_ =
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.newBuilder(fitEngineSettings_).mergeFrom(value).buildPartial();
-          } else {
-            fitEngineSettings_ = value;
-          }
+		else
+			fitEngineSettings_ = value;
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.mergeFrom(value);
         }
+		else
+			fitEngineSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -36752,12 +35483,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
-        if (fitEngineSettingsBuilder_ != null) {
-          return fitEngineSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return fitEngineSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
-        }
+        if (fitEngineSettingsBuilder_ != null)
+			return fitEngineSettingsBuilder_.getMessageOrBuilder();
+		else
+			return fitEngineSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
       }
       /**
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
@@ -36790,25 +35520,23 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
-        if (psfBuilder_ == null) {
-          return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
-        } else {
-          return psfBuilder_.getMessage();
-        }
+        if (psfBuilder_ == null)
+			return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
+		else
+			return psfBuilder_.getMessage();
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public Builder setPsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           psf_ = value;
           onChanged();
-        } else {
-          psfBuilder_.setMessage(value);
         }
+		else
+			psfBuilder_.setMessage(value);
 
         return this;
       }
@@ -36820,9 +35548,9 @@ public final class GUIProtos {
         if (psfBuilder_ == null) {
           psf_ = builderForValue.build();
           onChanged();
-        } else {
-          psfBuilder_.setMessage(builderForValue.build());
         }
+		else
+			psfBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -36831,16 +35559,15 @@ public final class GUIProtos {
        */
       public Builder mergePsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
-          if (psf_ != null) {
-            psf_ =
+          if (psf_ != null)
+			psf_ =
               gdsc.smlm.data.config.PSFProtos.PSF.newBuilder(psf_).mergeFrom(value).buildPartial();
-          } else {
-            psf_ = value;
-          }
+		else
+			psf_ = value;
           onChanged();
-        } else {
-          psfBuilder_.mergeFrom(value);
         }
+		else
+			psfBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -36871,12 +35598,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
-        if (psfBuilder_ != null) {
-          return psfBuilder_.getMessageOrBuilder();
-        } else {
-          return psf_ == null ?
-              gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
-        }
+        if (psfBuilder_ != null)
+			return psfBuilder_.getMessageOrBuilder();
+		else
+			return psf_ == null ?
+			      gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
       }
       /**
        * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
@@ -36909,25 +35635,23 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
-        if (calibrationBuilder_ == null) {
-          return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        } else {
-          return calibrationBuilder_.getMessage();
-        }
+        if (calibrationBuilder_ == null)
+			return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
+		else
+			return calibrationBuilder_.getMessage();
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public Builder setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(value);
         }
+		else
+			calibrationBuilder_.setMessage(value);
 
         return this;
       }
@@ -36939,9 +35663,9 @@ public final class GUIProtos {
         if (calibrationBuilder_ == null) {
           calibration_ = builderForValue.build();
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(builderForValue.build());
         }
+		else
+			calibrationBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -36950,16 +35674,15 @@ public final class GUIProtos {
        */
       public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (calibration_ != null) {
-            calibration_ =
+          if (calibration_ != null)
+			calibration_ =
               gdsc.smlm.data.config.CalibrationProtos.Calibration.newBuilder(calibration_).mergeFrom(value).buildPartial();
-          } else {
-            calibration_ = value;
-          }
+		else
+			calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.mergeFrom(value);
         }
+		else
+			calibrationBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -36990,12 +35713,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
-        if (calibrationBuilder_ != null) {
-          return calibrationBuilder_.getMessageOrBuilder();
-        } else {
-          return calibration_ == null ?
-              gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        }
+        if (calibrationBuilder_ != null)
+			return calibrationBuilder_.getMessageOrBuilder();
+		else
+			return calibration_ == null ?
+			      gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
       }
       /**
        * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
@@ -37154,16 +35876,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getImage() {
-        java.lang.Object ref = image_;
+        final java.lang.Object ref = image_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           image_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string image = 11;</code>
@@ -37171,25 +35893,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getImageBytes() {
-        java.lang.Object ref = image_;
+        final java.lang.Object ref = image_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           image_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string image = 11;</code>
        */
       public Builder setImage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         image_ = value;
         onChanged();
@@ -37209,9 +35930,8 @@ public final class GUIProtos {
        */
       public Builder setImageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         image_ = value;
@@ -37225,16 +35945,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getModelName() {
-        java.lang.Object ref = modelName_;
+        final java.lang.Object ref = modelName_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           modelName_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string model_name = 12;</code>
@@ -37242,25 +35962,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getModelNameBytes() {
-        java.lang.Object ref = modelName_;
+        final java.lang.Object ref = modelName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           modelName_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string model_name = 12;</code>
        */
       public Builder setModelName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         modelName_ = value;
         onChanged();
@@ -37280,9 +35999,8 @@ public final class GUIProtos {
        */
       public Builder setModelNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         modelName_ = value;
@@ -37354,16 +36072,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getSelected() {
-        java.lang.Object ref = selected_;
+        final java.lang.Object ref = selected_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           selected_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -37375,16 +36093,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getSelectedBytes() {
-        java.lang.Object ref = selected_;
+        final java.lang.Object ref = selected_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           selected_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -37395,9 +36113,8 @@ public final class GUIProtos {
        */
       public Builder setSelected(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         selected_ = value;
         onChanged();
@@ -37425,9 +36142,8 @@ public final class GUIProtos {
        */
       public Builder setSelectedBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         selected_ = value;
@@ -37537,16 +36253,15 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
+        final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 19;</code>
        */
       public Builder setZDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         zDistanceUnit_ = value.getNumber();
         onChanged();
@@ -37583,16 +36298,15 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
+        final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 20;</code>
        */
       public Builder setSDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         sDistanceUnit_ = value.getNumber();
         onChanged();
@@ -37645,16 +36359,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getFilename() {
-        java.lang.Object ref = filename_;
+        final java.lang.Object ref = filename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           filename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -37666,16 +36380,16 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getFilenameBytes() {
-        java.lang.Object ref = filename_;
+        final java.lang.Object ref = filename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -37686,9 +36400,8 @@ public final class GUIProtos {
        */
       public Builder setFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         filename_ = value;
         onChanged();
@@ -37716,9 +36429,8 @@ public final class GUIProtos {
        */
       public Builder setFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         filename_ = value;
@@ -37932,23 +36644,22 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               inputOption_ = s;
               break;
@@ -37989,7 +36700,7 @@ public final class GUIProtos {
               break;
             }
             case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               roiImage_ = s;
               break;
@@ -38000,7 +36711,7 @@ public final class GUIProtos {
               break;
             }
             case 90: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               outputName_ = s;
               break;
@@ -38011,7 +36722,7 @@ public final class GUIProtos {
               break;
             }
             case 106: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               nameSuffix_ = s;
               break;
@@ -38038,9 +36749,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -38067,13 +36778,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getInputOption() {
-      java.lang.Object ref = inputOption_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
         return s;
       }
@@ -38084,16 +36795,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getInputOptionBytes() {
-      java.lang.Object ref = inputOption_;
+      final java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int BORDER_FIELD_NUMBER = 2;
@@ -38173,13 +36884,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getRoiImage() {
-      java.lang.Object ref = roiImage_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = roiImage_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         roiImage_ = s;
         return s;
       }
@@ -38190,16 +36901,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getRoiImageBytes() {
-      java.lang.Object ref = roiImage_;
+      final java.lang.Object ref = roiImage_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         roiImage_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int RESET_ORIGIN_FIELD_NUMBER = 10;
@@ -38219,13 +36930,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getOutputName() {
-      java.lang.Object ref = outputName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = outputName_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         outputName_ = s;
         return s;
       }
@@ -38236,16 +36947,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getOutputNameBytes() {
-      java.lang.Object ref = outputName_;
+      final java.lang.Object ref = outputName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         outputName_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int NAME_OPTION_FIELD_NUMBER = 12;
@@ -38265,13 +36976,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getNameSuffix() {
-      java.lang.Object ref = nameSuffix_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = nameSuffix_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         nameSuffix_ = s;
         return s;
       }
@@ -38282,16 +36993,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getNameSuffixBytes() {
-      java.lang.Object ref = nameSuffix_;
+      final java.lang.Object ref = nameSuffix_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         nameSuffix_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int NAME_COUNTER_FIELD_NUMBER = 14;
@@ -38337,7 +37048,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -38348,57 +37059,40 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getInputOptionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
-      }
-      if (border_ != 0D) {
-        output.writeDouble(2, border_);
-      }
-      if (x_ != 0D) {
-        output.writeDouble(3, x_);
-      }
-      if (y_ != 0D) {
-        output.writeDouble(4, y_);
-      }
-      if (width_ != 0D) {
-        output.writeDouble(5, width_);
-      }
-      if (height_ != 0D) {
-        output.writeDouble(6, height_);
-      }
-      if (selectRegion_ != false) {
-        output.writeBool(7, selectRegion_);
-      }
-      if (useRoi_ != false) {
-        output.writeBool(8, useRoi_);
-      }
-      if (!getRoiImageBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, roiImage_);
-      }
-      if (resetOrigin_ != false) {
-        output.writeBool(10, resetOrigin_);
-      }
-      if (!getOutputNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, outputName_);
-      }
-      if (nameOption_ != 0) {
-        output.writeInt32(12, nameOption_);
-      }
-      if (!getNameSuffixBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, nameSuffix_);
-      }
-      if (nameCounter_ != 0) {
-        output.writeInt32(14, nameCounter_);
-      }
-      if (limitZ_ != false) {
-        output.writeBool(15, limitZ_);
-      }
-      if (minZ_ != 0D) {
-        output.writeDouble(16, minZ_);
-      }
-      if (maxZ_ != 0D) {
-        output.writeDouble(17, maxZ_);
-      }
+      if (!getInputOptionBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      if (border_ != 0D)
+		output.writeDouble(2, border_);
+      if (x_ != 0D)
+		output.writeDouble(3, x_);
+      if (y_ != 0D)
+		output.writeDouble(4, y_);
+      if (width_ != 0D)
+		output.writeDouble(5, width_);
+      if (height_ != 0D)
+		output.writeDouble(6, height_);
+      if (selectRegion_ != false)
+		output.writeBool(7, selectRegion_);
+      if (useRoi_ != false)
+		output.writeBool(8, useRoi_);
+      if (!getRoiImageBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 9, roiImage_);
+      if (resetOrigin_ != false)
+		output.writeBool(10, resetOrigin_);
+      if (!getOutputNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 11, outputName_);
+      if (nameOption_ != 0)
+		output.writeInt32(12, nameOption_);
+      if (!getNameSuffixBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 13, nameSuffix_);
+      if (nameCounter_ != 0)
+		output.writeInt32(14, nameCounter_);
+      if (limitZ_ != false)
+		output.writeBool(15, limitZ_);
+      if (minZ_ != 0D)
+		output.writeDouble(16, minZ_);
+      if (maxZ_ != 0D)
+		output.writeDouble(17, maxZ_);
     }
 
     @Override
@@ -38407,70 +37101,53 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!getInputOptionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
-      }
-      if (border_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getInputOptionBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      if (border_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, border_);
-      }
-      if (x_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (x_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, x_);
-      }
-      if (y_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (y_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, y_);
-      }
-      if (width_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (width_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, width_);
-      }
-      if (height_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (height_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, height_);
-      }
-      if (selectRegion_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (selectRegion_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, selectRegion_);
-      }
-      if (useRoi_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (useRoi_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, useRoi_);
-      }
-      if (!getRoiImageBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, roiImage_);
-      }
-      if (resetOrigin_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getRoiImageBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, roiImage_);
+      if (resetOrigin_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(10, resetOrigin_);
-      }
-      if (!getOutputNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, outputName_);
-      }
-      if (nameOption_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getOutputNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, outputName_);
+      if (nameOption_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(12, nameOption_);
-      }
-      if (!getNameSuffixBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, nameSuffix_);
-      }
-      if (nameCounter_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getNameSuffixBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, nameSuffix_);
+      if (nameCounter_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, nameCounter_);
-      }
-      if (limitZ_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (limitZ_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(15, limitZ_);
-      }
-      if (minZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(16, minZ_);
-      }
-      if (maxZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(17, maxZ_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -38478,13 +37155,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.CropResultsSettings other = (gdsc.smlm.data.config.GUIProtos.CropResultsSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.CropResultsSettings other = (gdsc.smlm.data.config.GUIProtos.CropResultsSettings) obj;
 
       boolean result = true;
       result = result && getInputOption()
@@ -38540,9 +37215,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
@@ -38682,7 +37356,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -38777,16 +37451,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CropResultsSettings build() {
-        gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.CropResultsSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = new gdsc.smlm.data.config.GUIProtos.CropResultsSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = new gdsc.smlm.data.config.GUIProtos.CropResultsSettings(this);
         result.inputOption_ = inputOption_;
         result.border_ = border_;
         result.x_ = x_;
@@ -38842,9 +37515,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CropResultsSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.CropResultsSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -38856,57 +37529,44 @@ public final class GUIProtos {
           inputOption_ = other.inputOption_;
           onChanged();
         }
-        if (other.getBorder() != 0D) {
-          setBorder(other.getBorder());
-        }
-        if (other.getX() != 0D) {
-          setX(other.getX());
-        }
-        if (other.getY() != 0D) {
-          setY(other.getY());
-        }
-        if (other.getWidth() != 0D) {
-          setWidth(other.getWidth());
-        }
-        if (other.getHeight() != 0D) {
-          setHeight(other.getHeight());
-        }
-        if (other.getSelectRegion() != false) {
-          setSelectRegion(other.getSelectRegion());
-        }
-        if (other.getUseRoi() != false) {
-          setUseRoi(other.getUseRoi());
-        }
+        if (other.getBorder() != 0D)
+			setBorder(other.getBorder());
+        if (other.getX() != 0D)
+			setX(other.getX());
+        if (other.getY() != 0D)
+			setY(other.getY());
+        if (other.getWidth() != 0D)
+			setWidth(other.getWidth());
+        if (other.getHeight() != 0D)
+			setHeight(other.getHeight());
+        if (other.getSelectRegion() != false)
+			setSelectRegion(other.getSelectRegion());
+        if (other.getUseRoi() != false)
+			setUseRoi(other.getUseRoi());
         if (!other.getRoiImage().isEmpty()) {
           roiImage_ = other.roiImage_;
           onChanged();
         }
-        if (other.getResetOrigin() != false) {
-          setResetOrigin(other.getResetOrigin());
-        }
+        if (other.getResetOrigin() != false)
+			setResetOrigin(other.getResetOrigin());
         if (!other.getOutputName().isEmpty()) {
           outputName_ = other.outputName_;
           onChanged();
         }
-        if (other.getNameOption() != 0) {
-          setNameOption(other.getNameOption());
-        }
+        if (other.getNameOption() != 0)
+			setNameOption(other.getNameOption());
         if (!other.getNameSuffix().isEmpty()) {
           nameSuffix_ = other.nameSuffix_;
           onChanged();
         }
-        if (other.getNameCounter() != 0) {
-          setNameCounter(other.getNameCounter());
-        }
-        if (other.getLimitZ() != false) {
-          setLimitZ(other.getLimitZ());
-        }
-        if (other.getMinZ() != 0D) {
-          setMinZ(other.getMinZ());
-        }
-        if (other.getMaxZ() != 0D) {
-          setMaxZ(other.getMaxZ());
-        }
+        if (other.getNameCounter() != 0)
+			setNameCounter(other.getNameCounter());
+        if (other.getLimitZ() != false)
+			setLimitZ(other.getLimitZ());
+        if (other.getMinZ() != 0D)
+			setMinZ(other.getMinZ());
+        if (other.getMaxZ() != 0D)
+			setMaxZ(other.getMaxZ());
         onChanged();
         return this;
       }
@@ -38924,13 +37584,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.CropResultsSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.CropResultsSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -38941,16 +37600,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getInputOption() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           inputOption_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string input_option = 1;</code>
@@ -38958,25 +37617,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getInputOptionBytes() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string input_option = 1;</code>
        */
       public Builder setInputOption(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         inputOption_ = value;
         onChanged();
@@ -38996,9 +37654,8 @@ public final class GUIProtos {
        */
       public Builder setInputOptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         inputOption_ = value;
@@ -39201,16 +37858,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getRoiImage() {
-        java.lang.Object ref = roiImage_;
+        final java.lang.Object ref = roiImage_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           roiImage_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string roi_image = 9;</code>
@@ -39218,25 +37875,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getRoiImageBytes() {
-        java.lang.Object ref = roiImage_;
+        final java.lang.Object ref = roiImage_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           roiImage_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string roi_image = 9;</code>
        */
       public Builder setRoiImage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         roiImage_ = value;
         onChanged();
@@ -39256,9 +37912,8 @@ public final class GUIProtos {
        */
       public Builder setRoiImageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         roiImage_ = value;
@@ -39299,16 +37954,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getOutputName() {
-        java.lang.Object ref = outputName_;
+        final java.lang.Object ref = outputName_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           outputName_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string output_name = 11;</code>
@@ -39316,25 +37971,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getOutputNameBytes() {
-        java.lang.Object ref = outputName_;
+        final java.lang.Object ref = outputName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           outputName_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string output_name = 11;</code>
        */
       public Builder setOutputName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         outputName_ = value;
         onChanged();
@@ -39354,9 +38008,8 @@ public final class GUIProtos {
        */
       public Builder setOutputNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         outputName_ = value;
@@ -39397,16 +38050,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getNameSuffix() {
-        java.lang.Object ref = nameSuffix_;
+        final java.lang.Object ref = nameSuffix_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           nameSuffix_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string name_suffix = 13;</code>
@@ -39414,25 +38067,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getNameSuffixBytes() {
-        java.lang.Object ref = nameSuffix_;
+        final java.lang.Object ref = nameSuffix_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           nameSuffix_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string name_suffix = 13;</code>
        */
       public Builder setNameSuffix(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         nameSuffix_ = value;
         onChanged();
@@ -39452,9 +38104,8 @@ public final class GUIProtos {
        */
       public Builder setNameSuffixBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         nameSuffix_ = value;
@@ -39714,19 +38365,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -39781,9 +38431,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -39906,7 +38556,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -39917,36 +38567,26 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (plotBackground_ != false) {
-        output.writeBool(1, plotBackground_);
-      }
-      if (plotSignal_ != false) {
-        output.writeBool(2, plotSignal_);
-      }
-      if (plotX_ != false) {
-        output.writeBool(3, plotX_);
-      }
-      if (plotY_ != false) {
-        output.writeBool(4, plotY_);
-      }
-      if (plotZ_ != false) {
-        output.writeBool(5, plotZ_);
-      }
-      if (plotNoise_ != false) {
-        output.writeBool(6, plotNoise_);
-      }
-      if (plotSnr_ != false) {
-        output.writeBool(7, plotSnr_);
-      }
-      if (plotPrecision_ != false) {
-        output.writeBool(8, plotPrecision_);
-      }
-      if (histgramBins_ != 0) {
-        output.writeInt32(9, histgramBins_);
-      }
-      if (removeOutliers_ != 0) {
-        output.writeInt32(10, removeOutliers_);
-      }
+      if (plotBackground_ != false)
+		output.writeBool(1, plotBackground_);
+      if (plotSignal_ != false)
+		output.writeBool(2, plotSignal_);
+      if (plotX_ != false)
+		output.writeBool(3, plotX_);
+      if (plotY_ != false)
+		output.writeBool(4, plotY_);
+      if (plotZ_ != false)
+		output.writeBool(5, plotZ_);
+      if (plotNoise_ != false)
+		output.writeBool(6, plotNoise_);
+      if (plotSnr_ != false)
+		output.writeBool(7, plotSnr_);
+      if (plotPrecision_ != false)
+		output.writeBool(8, plotPrecision_);
+      if (histgramBins_ != 0)
+		output.writeInt32(9, histgramBins_);
+      if (removeOutliers_ != 0)
+		output.writeInt32(10, removeOutliers_);
     }
 
     @Override
@@ -39955,46 +38595,36 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (plotBackground_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotBackground_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, plotBackground_);
-      }
-      if (plotSignal_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotSignal_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, plotSignal_);
-      }
-      if (plotX_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotX_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, plotX_);
-      }
-      if (plotY_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotY_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, plotY_);
-      }
-      if (plotZ_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotZ_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, plotZ_);
-      }
-      if (plotNoise_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotNoise_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, plotNoise_);
-      }
-      if (plotSnr_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotSnr_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, plotSnr_);
-      }
-      if (plotPrecision_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (plotPrecision_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, plotPrecision_);
-      }
-      if (histgramBins_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (histgramBins_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(9, histgramBins_);
-      }
-      if (removeOutliers_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (removeOutliers_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(10, removeOutliers_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -40002,13 +38632,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings other = (gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings other = (gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings) obj;
 
       boolean result = true;
       result = result && (getPlotBackground()
@@ -40036,9 +38664,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PLOT_BACKGROUND_FIELD_NUMBER;
@@ -40161,7 +38788,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -40242,16 +38869,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings build() {
-        gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings result = new gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings result = new gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings(this);
         result.plotBackground_ = plotBackground_;
         result.plotSignal_ = plotSignal_;
         result.plotX_ = plotX_;
@@ -40300,9 +38926,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -40310,36 +38936,26 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings.getDefaultInstance()) return this;
-        if (other.getPlotBackground() != false) {
-          setPlotBackground(other.getPlotBackground());
-        }
-        if (other.getPlotSignal() != false) {
-          setPlotSignal(other.getPlotSignal());
-        }
-        if (other.getPlotX() != false) {
-          setPlotX(other.getPlotX());
-        }
-        if (other.getPlotY() != false) {
-          setPlotY(other.getPlotY());
-        }
-        if (other.getPlotZ() != false) {
-          setPlotZ(other.getPlotZ());
-        }
-        if (other.getPlotNoise() != false) {
-          setPlotNoise(other.getPlotNoise());
-        }
-        if (other.getPlotSnr() != false) {
-          setPlotSnr(other.getPlotSnr());
-        }
-        if (other.getPlotPrecision() != false) {
-          setPlotPrecision(other.getPlotPrecision());
-        }
-        if (other.getHistgramBins() != 0) {
-          setHistgramBins(other.getHistgramBins());
-        }
-        if (other.getRemoveOutliers() != 0) {
-          setRemoveOutliers(other.getRemoveOutliers());
-        }
+        if (other.getPlotBackground() != false)
+			setPlotBackground(other.getPlotBackground());
+        if (other.getPlotSignal() != false)
+			setPlotSignal(other.getPlotSignal());
+        if (other.getPlotX() != false)
+			setPlotX(other.getPlotX());
+        if (other.getPlotY() != false)
+			setPlotY(other.getPlotY());
+        if (other.getPlotZ() != false)
+			setPlotZ(other.getPlotZ());
+        if (other.getPlotNoise() != false)
+			setPlotNoise(other.getPlotNoise());
+        if (other.getPlotSnr() != false)
+			setPlotSnr(other.getPlotSnr());
+        if (other.getPlotPrecision() != false)
+			setPlotPrecision(other.getPlotPrecision());
+        if (other.getHistgramBins() != 0)
+			setHistgramBins(other.getHistgramBins());
+        if (other.getRemoveOutliers() != 0)
+			setRemoveOutliers(other.getRemoveOutliers());
         onChanged();
         return this;
       }
@@ -40357,13 +38973,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -40941,23 +39556,22 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               inputOption_ = s;
               break;
@@ -41004,9 +39618,8 @@ public final class GUIProtos {
             }
             case 82: {
               gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder subBuilder = null;
-              if (resultsTableSettings_ != null) {
-                subBuilder = resultsTableSettings_.toBuilder();
-              }
+              if (resultsTableSettings_ != null)
+				subBuilder = resultsTableSettings_.toBuilder();
               resultsTableSettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsTableSettings_);
@@ -41086,13 +39699,13 @@ public final class GUIProtos {
               break;
             }
             case 202: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               highlightColour_ = s;
               break;
             }
             case 210: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               outputName_ = s;
               break;
@@ -41103,7 +39716,7 @@ public final class GUIProtos {
               break;
             }
             case 226: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               nameSuffix_ = s;
               break;
@@ -41130,9 +39743,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -41159,13 +39772,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getInputOption() {
-      java.lang.Object ref = inputOption_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
         return s;
       }
@@ -41176,16 +39789,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getInputOptionBytes() {
-      java.lang.Object ref = inputOption_;
+      final java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int SIZE_FIELD_NUMBER = 2;
@@ -41439,13 +40052,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getHighlightColour() {
-      java.lang.Object ref = highlightColour_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = highlightColour_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         highlightColour_ = s;
         return s;
       }
@@ -41456,16 +40069,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getHighlightColourBytes() {
-      java.lang.Object ref = highlightColour_;
+      final java.lang.Object ref = highlightColour_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         highlightColour_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int OUTPUT_NAME_FIELD_NUMBER = 26;
@@ -41475,13 +40088,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getOutputName() {
-      java.lang.Object ref = outputName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = outputName_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         outputName_ = s;
         return s;
       }
@@ -41492,16 +40105,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getOutputNameBytes() {
-      java.lang.Object ref = outputName_;
+      final java.lang.Object ref = outputName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         outputName_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int NAME_OPTION_FIELD_NUMBER = 27;
@@ -41521,13 +40134,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getNameSuffix() {
-      java.lang.Object ref = nameSuffix_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = nameSuffix_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         nameSuffix_ = s;
         return s;
       }
@@ -41538,16 +40151,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getNameSuffixBytes() {
-      java.lang.Object ref = nameSuffix_;
+      final java.lang.Object ref = nameSuffix_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         nameSuffix_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int NAME_COUNTER_FIELD_NUMBER = 29;
@@ -41593,7 +40206,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -41604,102 +40217,70 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getInputOptionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
-      }
-      if (size_ != 0D) {
-        output.writeDouble(2, size_);
-      }
-      if (transparency_ != 0D) {
-        output.writeDouble(3, transparency_);
-      }
-      if (lut_ != 0) {
-        output.writeInt32(4, lut_);
-      }
-      if (rendering_ != 0) {
-        output.writeInt32(5, rendering_);
-      }
-      if (shaded_ != false) {
-        output.writeBool(6, shaded_);
-      }
-      if (newWindow_ != false) {
-        output.writeBool(7, newWindow_);
-      }
-      if (sizeMode_ != 0) {
-        output.writeInt32(8, sizeMode_);
-      }
-      if (pixelSize_ != 0D) {
-        output.writeDouble(9, pixelSize_);
-      }
-      if (resultsTableSettings_ != null) {
-        output.writeMessage(10, getResultsTableSettings());
-      }
-      if (depthMode_ != 0) {
-        output.writeInt32(11, depthMode_);
-      }
-      if (depthRange_ != 0D) {
-        output.writeDouble(12, depthRange_);
-      }
-      if (ditherSeed_ != 0) {
-        output.writeInt32(13, ditherSeed_);
-      }
-      if (transparencyMode_ != 0) {
-        output.writeInt32(14, transparencyMode_);
-      }
-      if (minTransparency_ != 0D) {
-        output.writeDouble(15, minTransparency_);
-      }
-      if (maxTransparency_ != 0D) {
-        output.writeDouble(16, maxTransparency_);
-      }
-      if (sortMode_ != 0) {
-        output.writeInt32(17, sortMode_);
-      }
-      if (sortDirectionX_ != 0D) {
-        output.writeDouble(18, sortDirectionX_);
-      }
-      if (sortDirectionY_ != 0D) {
-        output.writeDouble(19, sortDirectionY_);
-      }
-      if (sortDirectionZ_ != 0D) {
-        output.writeDouble(20, sortDirectionZ_);
-      }
-      if (sortEyeX_ != 0D) {
-        output.writeDouble(21, sortEyeX_);
-      }
-      if (sortEyeY_ != 0D) {
-        output.writeDouble(22, sortEyeY_);
-      }
-      if (sortEyeZ_ != 0D) {
-        output.writeDouble(23, sortEyeZ_);
-      }
-      if (saveEyePoint_ != false) {
-        output.writeBool(24, saveEyePoint_);
-      }
-      if (!getHighlightColourBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 25, highlightColour_);
-      }
-      if (!getOutputNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 26, outputName_);
-      }
-      if (nameOption_ != 0) {
-        output.writeInt32(27, nameOption_);
-      }
-      if (!getNameSuffixBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 28, nameSuffix_);
-      }
-      if (nameCounter_ != 0) {
-        output.writeInt32(29, nameCounter_);
-      }
-      if (supportDynamicTransparency_ != false) {
-        output.writeBool(30, supportDynamicTransparency_);
-      }
-      if (enableDynamicTransparency_ != false) {
-        output.writeBool(31, enableDynamicTransparency_);
-      }
-      if (addToSelection_ != false) {
-        output.writeBool(32, addToSelection_);
-      }
+      if (!getInputOptionBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      if (size_ != 0D)
+		output.writeDouble(2, size_);
+      if (transparency_ != 0D)
+		output.writeDouble(3, transparency_);
+      if (lut_ != 0)
+		output.writeInt32(4, lut_);
+      if (rendering_ != 0)
+		output.writeInt32(5, rendering_);
+      if (shaded_ != false)
+		output.writeBool(6, shaded_);
+      if (newWindow_ != false)
+		output.writeBool(7, newWindow_);
+      if (sizeMode_ != 0)
+		output.writeInt32(8, sizeMode_);
+      if (pixelSize_ != 0D)
+		output.writeDouble(9, pixelSize_);
+      if (resultsTableSettings_ != null)
+		output.writeMessage(10, getResultsTableSettings());
+      if (depthMode_ != 0)
+		output.writeInt32(11, depthMode_);
+      if (depthRange_ != 0D)
+		output.writeDouble(12, depthRange_);
+      if (ditherSeed_ != 0)
+		output.writeInt32(13, ditherSeed_);
+      if (transparencyMode_ != 0)
+		output.writeInt32(14, transparencyMode_);
+      if (minTransparency_ != 0D)
+		output.writeDouble(15, minTransparency_);
+      if (maxTransparency_ != 0D)
+		output.writeDouble(16, maxTransparency_);
+      if (sortMode_ != 0)
+		output.writeInt32(17, sortMode_);
+      if (sortDirectionX_ != 0D)
+		output.writeDouble(18, sortDirectionX_);
+      if (sortDirectionY_ != 0D)
+		output.writeDouble(19, sortDirectionY_);
+      if (sortDirectionZ_ != 0D)
+		output.writeDouble(20, sortDirectionZ_);
+      if (sortEyeX_ != 0D)
+		output.writeDouble(21, sortEyeX_);
+      if (sortEyeY_ != 0D)
+		output.writeDouble(22, sortEyeY_);
+      if (sortEyeZ_ != 0D)
+		output.writeDouble(23, sortEyeZ_);
+      if (saveEyePoint_ != false)
+		output.writeBool(24, saveEyePoint_);
+      if (!getHighlightColourBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 25, highlightColour_);
+      if (!getOutputNameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 26, outputName_);
+      if (nameOption_ != 0)
+		output.writeInt32(27, nameOption_);
+      if (!getNameSuffixBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 28, nameSuffix_);
+      if (nameCounter_ != 0)
+		output.writeInt32(29, nameCounter_);
+      if (supportDynamicTransparency_ != false)
+		output.writeBool(30, supportDynamicTransparency_);
+      if (enableDynamicTransparency_ != false)
+		output.writeBool(31, enableDynamicTransparency_);
+      if (addToSelection_ != false)
+		output.writeBool(32, addToSelection_);
     }
 
     @Override
@@ -41708,130 +40289,98 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!getInputOptionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
-      }
-      if (size_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getInputOptionBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      if (size_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, size_);
-      }
-      if (transparency_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (transparency_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, transparency_);
-      }
-      if (lut_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (lut_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, lut_);
-      }
-      if (rendering_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rendering_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, rendering_);
-      }
-      if (shaded_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (shaded_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, shaded_);
-      }
-      if (newWindow_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (newWindow_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, newWindow_);
-      }
-      if (sizeMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sizeMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, sizeMode_);
-      }
-      if (pixelSize_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (pixelSize_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, pixelSize_);
-      }
-      if (resultsTableSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsTableSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, getResultsTableSettings());
-      }
-      if (depthMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (depthMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(11, depthMode_);
-      }
-      if (depthRange_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (depthRange_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, depthRange_);
-      }
-      if (ditherSeed_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (ditherSeed_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(13, ditherSeed_);
-      }
-      if (transparencyMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (transparencyMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, transparencyMode_);
-      }
-      if (minTransparency_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minTransparency_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(15, minTransparency_);
-      }
-      if (maxTransparency_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxTransparency_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(16, maxTransparency_);
-      }
-      if (sortMode_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortMode_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(17, sortMode_);
-      }
-      if (sortDirectionX_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortDirectionX_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(18, sortDirectionX_);
-      }
-      if (sortDirectionY_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortDirectionY_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(19, sortDirectionY_);
-      }
-      if (sortDirectionZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortDirectionZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(20, sortDirectionZ_);
-      }
-      if (sortEyeX_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortEyeX_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(21, sortEyeX_);
-      }
-      if (sortEyeY_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortEyeY_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(22, sortEyeY_);
-      }
-      if (sortEyeZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (sortEyeZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(23, sortEyeZ_);
-      }
-      if (saveEyePoint_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (saveEyePoint_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(24, saveEyePoint_);
-      }
-      if (!getHighlightColourBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, highlightColour_);
-      }
-      if (!getOutputNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(26, outputName_);
-      }
-      if (nameOption_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getHighlightColourBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, highlightColour_);
+      if (!getOutputNameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(26, outputName_);
+      if (nameOption_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(27, nameOption_);
-      }
-      if (!getNameSuffixBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, nameSuffix_);
-      }
-      if (nameCounter_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getNameSuffixBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, nameSuffix_);
+      if (nameCounter_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(29, nameCounter_);
-      }
-      if (supportDynamicTransparency_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (supportDynamicTransparency_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(30, supportDynamicTransparency_);
-      }
-      if (enableDynamicTransparency_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (enableDynamicTransparency_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(31, enableDynamicTransparency_);
-      }
-      if (addToSelection_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (addToSelection_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(32, addToSelection_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -41839,13 +40388,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings other = (gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings other = (gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) obj;
 
       boolean result = true;
       result = result && getInputOption()
@@ -41873,10 +40420,9 @@ public final class GUIProtos {
           == java.lang.Double.doubleToLongBits(
               other.getPixelSize()));
       result = result && (hasResultsTableSettings() == other.hasResultsTableSettings());
-      if (hasResultsTableSettings()) {
-        result = result && getResultsTableSettings()
+      if (hasResultsTableSettings())
+		result = result && getResultsTableSettings()
             .equals(other.getResultsTableSettings());
-      }
       result = result && (getDepthMode()
           == other.getDepthMode());
       result = result && (
@@ -41944,9 +40490,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
@@ -42125,7 +40670,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -42188,9 +40733,9 @@ public final class GUIProtos {
 
         pixelSize_ = 0D;
 
-        if (resultsTableSettingsBuilder_ == null) {
-          resultsTableSettings_ = null;
-        } else {
+        if (resultsTableSettingsBuilder_ == null)
+			resultsTableSettings_ = null;
+		else {
           resultsTableSettings_ = null;
           resultsTableSettingsBuilder_ = null;
         }
@@ -42254,16 +40799,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings build() {
-        gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = new gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = new gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings(this);
         result.inputOption_ = inputOption_;
         result.size_ = size_;
         result.transparency_ = transparency_;
@@ -42273,11 +40817,10 @@ public final class GUIProtos {
         result.newWindow_ = newWindow_;
         result.sizeMode_ = sizeMode_;
         result.pixelSize_ = pixelSize_;
-        if (resultsTableSettingsBuilder_ == null) {
-          result.resultsTableSettings_ = resultsTableSettings_;
-        } else {
-          result.resultsTableSettings_ = resultsTableSettingsBuilder_.build();
-        }
+        if (resultsTableSettingsBuilder_ == null)
+			result.resultsTableSettings_ = resultsTableSettings_;
+		else
+			result.resultsTableSettings_ = resultsTableSettingsBuilder_.build();
         result.depthMode_ = depthMode_;
         result.depthRange_ = depthRange_;
         result.ditherSeed_ = ditherSeed_;
@@ -42338,9 +40881,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -42352,75 +40895,52 @@ public final class GUIProtos {
           inputOption_ = other.inputOption_;
           onChanged();
         }
-        if (other.getSize() != 0D) {
-          setSize(other.getSize());
-        }
-        if (other.getTransparency() != 0D) {
-          setTransparency(other.getTransparency());
-        }
-        if (other.getLut() != 0) {
-          setLut(other.getLut());
-        }
-        if (other.getRendering() != 0) {
-          setRendering(other.getRendering());
-        }
-        if (other.getShaded() != false) {
-          setShaded(other.getShaded());
-        }
-        if (other.getNewWindow() != false) {
-          setNewWindow(other.getNewWindow());
-        }
-        if (other.getSizeMode() != 0) {
-          setSizeMode(other.getSizeMode());
-        }
-        if (other.getPixelSize() != 0D) {
-          setPixelSize(other.getPixelSize());
-        }
-        if (other.hasResultsTableSettings()) {
-          mergeResultsTableSettings(other.getResultsTableSettings());
-        }
-        if (other.getDepthMode() != 0) {
-          setDepthMode(other.getDepthMode());
-        }
-        if (other.getDepthRange() != 0D) {
-          setDepthRange(other.getDepthRange());
-        }
-        if (other.getDitherSeed() != 0) {
-          setDitherSeed(other.getDitherSeed());
-        }
-        if (other.getTransparencyMode() != 0) {
-          setTransparencyMode(other.getTransparencyMode());
-        }
-        if (other.getMinTransparency() != 0D) {
-          setMinTransparency(other.getMinTransparency());
-        }
-        if (other.getMaxTransparency() != 0D) {
-          setMaxTransparency(other.getMaxTransparency());
-        }
-        if (other.getSortMode() != 0) {
-          setSortMode(other.getSortMode());
-        }
-        if (other.getSortDirectionX() != 0D) {
-          setSortDirectionX(other.getSortDirectionX());
-        }
-        if (other.getSortDirectionY() != 0D) {
-          setSortDirectionY(other.getSortDirectionY());
-        }
-        if (other.getSortDirectionZ() != 0D) {
-          setSortDirectionZ(other.getSortDirectionZ());
-        }
-        if (other.getSortEyeX() != 0D) {
-          setSortEyeX(other.getSortEyeX());
-        }
-        if (other.getSortEyeY() != 0D) {
-          setSortEyeY(other.getSortEyeY());
-        }
-        if (other.getSortEyeZ() != 0D) {
-          setSortEyeZ(other.getSortEyeZ());
-        }
-        if (other.getSaveEyePoint() != false) {
-          setSaveEyePoint(other.getSaveEyePoint());
-        }
+        if (other.getSize() != 0D)
+			setSize(other.getSize());
+        if (other.getTransparency() != 0D)
+			setTransparency(other.getTransparency());
+        if (other.getLut() != 0)
+			setLut(other.getLut());
+        if (other.getRendering() != 0)
+			setRendering(other.getRendering());
+        if (other.getShaded() != false)
+			setShaded(other.getShaded());
+        if (other.getNewWindow() != false)
+			setNewWindow(other.getNewWindow());
+        if (other.getSizeMode() != 0)
+			setSizeMode(other.getSizeMode());
+        if (other.getPixelSize() != 0D)
+			setPixelSize(other.getPixelSize());
+        if (other.hasResultsTableSettings())
+			mergeResultsTableSettings(other.getResultsTableSettings());
+        if (other.getDepthMode() != 0)
+			setDepthMode(other.getDepthMode());
+        if (other.getDepthRange() != 0D)
+			setDepthRange(other.getDepthRange());
+        if (other.getDitherSeed() != 0)
+			setDitherSeed(other.getDitherSeed());
+        if (other.getTransparencyMode() != 0)
+			setTransparencyMode(other.getTransparencyMode());
+        if (other.getMinTransparency() != 0D)
+			setMinTransparency(other.getMinTransparency());
+        if (other.getMaxTransparency() != 0D)
+			setMaxTransparency(other.getMaxTransparency());
+        if (other.getSortMode() != 0)
+			setSortMode(other.getSortMode());
+        if (other.getSortDirectionX() != 0D)
+			setSortDirectionX(other.getSortDirectionX());
+        if (other.getSortDirectionY() != 0D)
+			setSortDirectionY(other.getSortDirectionY());
+        if (other.getSortDirectionZ() != 0D)
+			setSortDirectionZ(other.getSortDirectionZ());
+        if (other.getSortEyeX() != 0D)
+			setSortEyeX(other.getSortEyeX());
+        if (other.getSortEyeY() != 0D)
+			setSortEyeY(other.getSortEyeY());
+        if (other.getSortEyeZ() != 0D)
+			setSortEyeZ(other.getSortEyeZ());
+        if (other.getSaveEyePoint() != false)
+			setSaveEyePoint(other.getSaveEyePoint());
         if (!other.getHighlightColour().isEmpty()) {
           highlightColour_ = other.highlightColour_;
           onChanged();
@@ -42429,25 +40949,20 @@ public final class GUIProtos {
           outputName_ = other.outputName_;
           onChanged();
         }
-        if (other.getNameOption() != 0) {
-          setNameOption(other.getNameOption());
-        }
+        if (other.getNameOption() != 0)
+			setNameOption(other.getNameOption());
         if (!other.getNameSuffix().isEmpty()) {
           nameSuffix_ = other.nameSuffix_;
           onChanged();
         }
-        if (other.getNameCounter() != 0) {
-          setNameCounter(other.getNameCounter());
-        }
-        if (other.getSupportDynamicTransparency() != false) {
-          setSupportDynamicTransparency(other.getSupportDynamicTransparency());
-        }
-        if (other.getEnableDynamicTransparency() != false) {
-          setEnableDynamicTransparency(other.getEnableDynamicTransparency());
-        }
-        if (other.getAddToSelection() != false) {
-          setAddToSelection(other.getAddToSelection());
-        }
+        if (other.getNameCounter() != 0)
+			setNameCounter(other.getNameCounter());
+        if (other.getSupportDynamicTransparency() != false)
+			setSupportDynamicTransparency(other.getSupportDynamicTransparency());
+        if (other.getEnableDynamicTransparency() != false)
+			setEnableDynamicTransparency(other.getEnableDynamicTransparency());
+        if (other.getAddToSelection() != false)
+			setAddToSelection(other.getAddToSelection());
         onChanged();
         return this;
       }
@@ -42465,13 +40980,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -42482,16 +40996,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getInputOption() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           inputOption_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string input_option = 1;</code>
@@ -42499,25 +41013,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getInputOptionBytes() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string input_option = 1;</code>
        */
       public Builder setInputOption(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         inputOption_ = value;
         onChanged();
@@ -42537,9 +41050,8 @@ public final class GUIProtos {
        */
       public Builder setInputOptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         inputOption_ = value;
@@ -42778,25 +41290,23 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
-        if (resultsTableSettingsBuilder_ == null) {
-          return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
-        } else {
-          return resultsTableSettingsBuilder_.getMessage();
-        }
+        if (resultsTableSettingsBuilder_ == null)
+			return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
+		else
+			return resultsTableSettingsBuilder_.getMessage();
       }
       /**
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
        */
       public Builder setResultsTableSettings(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings value) {
         if (resultsTableSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           resultsTableSettings_ = value;
           onChanged();
-        } else {
-          resultsTableSettingsBuilder_.setMessage(value);
         }
+		else
+			resultsTableSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -42808,9 +41318,9 @@ public final class GUIProtos {
         if (resultsTableSettingsBuilder_ == null) {
           resultsTableSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          resultsTableSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			resultsTableSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -42819,16 +41329,15 @@ public final class GUIProtos {
        */
       public Builder mergeResultsTableSettings(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings value) {
         if (resultsTableSettingsBuilder_ == null) {
-          if (resultsTableSettings_ != null) {
-            resultsTableSettings_ =
+          if (resultsTableSettings_ != null)
+			resultsTableSettings_ =
               gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.newBuilder(resultsTableSettings_).mergeFrom(value).buildPartial();
-          } else {
-            resultsTableSettings_ = value;
-          }
+		else
+			resultsTableSettings_ = value;
           onChanged();
-        } else {
-          resultsTableSettingsBuilder_.mergeFrom(value);
         }
+		else
+			resultsTableSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -42859,12 +41368,11 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
-        if (resultsTableSettingsBuilder_ != null) {
-          return resultsTableSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return resultsTableSettings_ == null ?
-              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
-        }
+        if (resultsTableSettingsBuilder_ != null)
+			return resultsTableSettingsBuilder_.getMessageOrBuilder();
+		else
+			return resultsTableSettings_ == null ?
+			      gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
       }
       /**
        * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
@@ -43266,16 +41774,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getHighlightColour() {
-        java.lang.Object ref = highlightColour_;
+        final java.lang.Object ref = highlightColour_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           highlightColour_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string highlight_colour = 25;</code>
@@ -43283,25 +41791,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getHighlightColourBytes() {
-        java.lang.Object ref = highlightColour_;
+        final java.lang.Object ref = highlightColour_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           highlightColour_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string highlight_colour = 25;</code>
        */
       public Builder setHighlightColour(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         highlightColour_ = value;
         onChanged();
@@ -43321,9 +41828,8 @@ public final class GUIProtos {
        */
       public Builder setHighlightColourBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         highlightColour_ = value;
@@ -43337,16 +41843,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getOutputName() {
-        java.lang.Object ref = outputName_;
+        final java.lang.Object ref = outputName_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           outputName_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string output_name = 26;</code>
@@ -43354,25 +41860,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getOutputNameBytes() {
-        java.lang.Object ref = outputName_;
+        final java.lang.Object ref = outputName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           outputName_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string output_name = 26;</code>
        */
       public Builder setOutputName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         outputName_ = value;
         onChanged();
@@ -43392,9 +41897,8 @@ public final class GUIProtos {
        */
       public Builder setOutputNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         outputName_ = value;
@@ -43435,16 +41939,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getNameSuffix() {
-        java.lang.Object ref = nameSuffix_;
+        final java.lang.Object ref = nameSuffix_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           nameSuffix_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string name_suffix = 28;</code>
@@ -43452,25 +41956,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getNameSuffixBytes() {
-        java.lang.Object ref = nameSuffix_;
+        final java.lang.Object ref = nameSuffix_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           nameSuffix_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string name_suffix = 28;</code>
        */
       public Builder setNameSuffix(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         nameSuffix_ = value;
         onChanged();
@@ -43490,9 +41993,8 @@ public final class GUIProtos {
        */
       public Builder setNameSuffixBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         nameSuffix_ = value;
@@ -43731,23 +42233,22 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               inputOption_ = s;
               break;
@@ -43768,16 +42269,16 @@ public final class GUIProtos {
               break;
             }
             case 40: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               distanceUnit_ = rawValue;
               break;
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -43804,13 +42305,13 @@ public final class GUIProtos {
      */
     @Override
 	public java.lang.String getInputOption() {
-      java.lang.Object ref = inputOption_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         inputOption_ = s;
         return s;
       }
@@ -43821,16 +42322,16 @@ public final class GUIProtos {
     @Override
 	public com.google.protobuf.ByteString
         getInputOptionBytes() {
-      java.lang.Object ref = inputOption_;
+      final java.lang.Object ref = inputOption_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         inputOption_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int DX_FIELD_NUMBER = 2;
@@ -43877,14 +42378,14 @@ public final class GUIProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+      final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -43895,21 +42396,16 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getInputOptionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
-      }
-      if (dx_ != 0D) {
-        output.writeDouble(2, dx_);
-      }
-      if (dy_ != 0D) {
-        output.writeDouble(3, dy_);
-      }
-      if (dz_ != 0D) {
-        output.writeDouble(4, dz_);
-      }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(5, distanceUnit_);
-      }
+      if (!getInputOptionBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      if (dx_ != 0D)
+		output.writeDouble(2, dx_);
+      if (dy_ != 0D)
+		output.writeDouble(3, dy_);
+      if (dz_ != 0D)
+		output.writeDouble(4, dz_);
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		output.writeEnum(5, distanceUnit_);
     }
 
     @Override
@@ -43918,25 +42414,20 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!getInputOptionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
-      }
-      if (dx_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getInputOptionBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      if (dx_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, dx_);
-      }
-      if (dy_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (dy_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, dy_);
-      }
-      if (dz_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (dz_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, dz_);
-      }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, distanceUnit_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -43944,13 +42435,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings other = (gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings other = (gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) obj;
 
       boolean result = true;
       result = result && getInputOption()
@@ -43973,9 +42462,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
@@ -44083,7 +42571,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -44154,16 +42642,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings build() {
-        gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = new gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = new gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings(this);
         result.inputOption_ = inputOption_;
         result.dx_ = dx_;
         result.dy_ = dy_;
@@ -44207,9 +42694,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -44221,18 +42708,14 @@ public final class GUIProtos {
           inputOption_ = other.inputOption_;
           onChanged();
         }
-        if (other.getDx() != 0D) {
-          setDx(other.getDx());
-        }
-        if (other.getDy() != 0D) {
-          setDy(other.getDy());
-        }
-        if (other.getDz() != 0D) {
-          setDz(other.getDz());
-        }
-        if (other.distanceUnit_ != 0) {
-          setDistanceUnitValue(other.getDistanceUnitValue());
-        }
+        if (other.getDx() != 0D)
+			setDx(other.getDx());
+        if (other.getDy() != 0D)
+			setDy(other.getDy());
+        if (other.getDz() != 0D)
+			setDz(other.getDz());
+        if (other.distanceUnit_ != 0)
+			setDistanceUnitValue(other.getDistanceUnitValue());
         onChanged();
         return this;
       }
@@ -44250,13 +42733,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -44267,16 +42749,16 @@ public final class GUIProtos {
        */
       @Override
 	public java.lang.String getInputOption() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           inputOption_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <code>string input_option = 1;</code>
@@ -44284,25 +42766,24 @@ public final class GUIProtos {
       @Override
 	public com.google.protobuf.ByteString
           getInputOptionBytes() {
-        java.lang.Object ref = inputOption_;
+        final java.lang.Object ref = inputOption_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           inputOption_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <code>string input_option = 1;</code>
        */
       public Builder setInputOption(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         inputOption_ = value;
         onChanged();
@@ -44322,9 +42803,8 @@ public final class GUIProtos {
        */
       public Builder setInputOptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         inputOption_ = value;
@@ -44434,16 +42914,15 @@ public final class GUIProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+        final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
       /**
        * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
        */
       public Builder setDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         distanceUnit_ = value.getNumber();
         onChanged();
@@ -44591,19 +43070,18 @@ public final class GUIProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -44648,9 +43126,9 @@ public final class GUIProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -44753,7 +43231,7 @@ public final class GUIProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -44764,30 +43242,22 @@ public final class GUIProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (channel_ != 0) {
-        output.writeInt32(1, channel_);
-      }
-      if (searchRadius_ != 0) {
-        output.writeInt32(2, searchRadius_);
-      }
-      if (fitRadius_ != 0) {
-        output.writeInt32(3, fitRadius_);
-      }
-      if (showOverlay_ != false) {
-        output.writeBool(4, showOverlay_);
-      }
-      if (attachToSlice_ != false) {
-        output.writeBool(5, attachToSlice_);
-      }
-      if (logProgress_ != false) {
-        output.writeBool(6, logProgress_);
-      }
-      if (showFitRoi_ != false) {
-        output.writeBool(7, showFitRoi_);
-      }
-      if (snrThreshold_ != 0D) {
-        output.writeDouble(8, snrThreshold_);
-      }
+      if (channel_ != 0)
+		output.writeInt32(1, channel_);
+      if (searchRadius_ != 0)
+		output.writeInt32(2, searchRadius_);
+      if (fitRadius_ != 0)
+		output.writeInt32(3, fitRadius_);
+      if (showOverlay_ != false)
+		output.writeBool(4, showOverlay_);
+      if (attachToSlice_ != false)
+		output.writeBool(5, attachToSlice_);
+      if (logProgress_ != false)
+		output.writeBool(6, logProgress_);
+      if (showFitRoi_ != false)
+		output.writeBool(7, showFitRoi_);
+      if (snrThreshold_ != 0D)
+		output.writeDouble(8, snrThreshold_);
     }
 
     @Override
@@ -44796,38 +43266,30 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (channel_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (channel_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, channel_);
-      }
-      if (searchRadius_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (searchRadius_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, searchRadius_);
-      }
-      if (fitRadius_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitRadius_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, fitRadius_);
-      }
-      if (showOverlay_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showOverlay_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, showOverlay_);
-      }
-      if (attachToSlice_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (attachToSlice_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, attachToSlice_);
-      }
-      if (logProgress_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (logProgress_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, logProgress_);
-      }
-      if (showFitRoi_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showFitRoi_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, showFitRoi_);
-      }
-      if (snrThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (snrThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(8, snrThreshold_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -44835,13 +43297,11 @@ public final class GUIProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.GUIProtos.SpotFitSettings other = (gdsc.smlm.data.config.GUIProtos.SpotFitSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.GUIProtos.SpotFitSettings other = (gdsc.smlm.data.config.GUIProtos.SpotFitSettings) obj;
 
       boolean result = true;
       result = result && (getChannel()
@@ -44867,9 +43327,8 @@ public final class GUIProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + CHANNEL_FIELD_NUMBER;
@@ -44985,7 +43444,7 @@ public final class GUIProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -45062,16 +43521,15 @@ public final class GUIProtos {
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.SpotFitSettings build() {
-        gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.GUIProtos.SpotFitSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = new gdsc.smlm.data.config.GUIProtos.SpotFitSettings(this);
+        final gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = new gdsc.smlm.data.config.GUIProtos.SpotFitSettings(this);
         result.channel_ = channel_;
         result.searchRadius_ = searchRadius_;
         result.fitRadius_ = fitRadius_;
@@ -45118,9 +43576,9 @@ public final class GUIProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.SpotFitSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings)
+			return mergeFrom((gdsc.smlm.data.config.GUIProtos.SpotFitSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -45128,30 +43586,22 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.SpotFitSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.SpotFitSettings.getDefaultInstance()) return this;
-        if (other.getChannel() != 0) {
-          setChannel(other.getChannel());
-        }
-        if (other.getSearchRadius() != 0) {
-          setSearchRadius(other.getSearchRadius());
-        }
-        if (other.getFitRadius() != 0) {
-          setFitRadius(other.getFitRadius());
-        }
-        if (other.getShowOverlay() != false) {
-          setShowOverlay(other.getShowOverlay());
-        }
-        if (other.getAttachToSlice() != false) {
-          setAttachToSlice(other.getAttachToSlice());
-        }
-        if (other.getLogProgress() != false) {
-          setLogProgress(other.getLogProgress());
-        }
-        if (other.getShowFitRoi() != false) {
-          setShowFitRoi(other.getShowFitRoi());
-        }
-        if (other.getSnrThreshold() != 0D) {
-          setSnrThreshold(other.getSnrThreshold());
-        }
+        if (other.getChannel() != 0)
+			setChannel(other.getChannel());
+        if (other.getSearchRadius() != 0)
+			setSearchRadius(other.getSearchRadius());
+        if (other.getFitRadius() != 0)
+			setFitRadius(other.getFitRadius());
+        if (other.getShowOverlay() != false)
+			setShowOverlay(other.getShowOverlay());
+        if (other.getAttachToSlice() != false)
+			setAttachToSlice(other.getAttachToSlice());
+        if (other.getLogProgress() != false)
+			setLogProgress(other.getLogProgress());
+        if (other.getShowFitRoi() != false)
+			setShowFitRoi(other.getShowFitRoi());
+        if (other.getSnrThreshold() != 0D)
+			setSnrThreshold(other.getSnrThreshold());
         onChanged();
         return this;
       }
@@ -45169,13 +43619,12 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.SpotFitSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.GUIProtos.SpotFitSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -45576,7 +44025,7 @@ public final class GUIProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    final java.lang.String[] descriptorData = {
       "\n\tgui.proto\022\025gdsc.smlm.data.config\032\nunit" +
       ".proto\032\021calibration.proto\032\tfit.proto\032\tps" +
       "f.proto\032\rresults.proto\"\212\002\n\021GUIFilterSett" +
@@ -45863,7 +44312,7 @@ public final class GUIProtos {
       "TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUS" +
       "TOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
           @Override
 		public com.google.protobuf.ExtensionRegistry assignDescriptors(

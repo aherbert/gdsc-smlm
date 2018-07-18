@@ -134,7 +134,7 @@ public class PCPALMFitting implements PlugIn
 	private boolean spatialDomain;
 
 	// Save the input for the analysis
-	
+
 	/** The previous correlation curve (gr). */
 	static double[][] previous_gr;
 	private static double previous_peakDensity;
@@ -159,13 +159,13 @@ public class PCPALMFitting implements PlugIn
 		if (!showDialog())
 			return;
 
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		header();
 
 		analyse();
 
-		double seconds = (System.currentTimeMillis() - start) / 1000.0;
-		String msg = TITLE + " complete : " + seconds + "s";
+		final double seconds = (System.currentTimeMillis() - start) / 1000.0;
+		final String msg = TITLE + " complete : " + seconds + "s";
 		IJ.showStatus(msg);
 		log(msg);
 	}
@@ -183,7 +183,7 @@ public class PCPALMFitting implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of results to use in the analysis
@@ -204,13 +204,9 @@ public class PCPALMFitting implements PlugIn
 		}
 
 		if (estimatedPrecision < 0 || copiedEstimatedPrecision != PCPALMMolecules.sigmaS)
-		{
 			copiedEstimatedPrecision = estimatedPrecision = PCPALMMolecules.sigmaS;
-		}
 		if (blinkingRate < 0 || copiedBlinkingRate != PCPALMAnalysis.blinkingRate)
-		{
 			copiedBlinkingRate = blinkingRate = PCPALMAnalysis.blinkingRate;
-		}
 
 		gd.addMessage("Analyse clusters using Pair Correlation.");
 
@@ -249,7 +245,7 @@ public class PCPALMFitting implements PlugIn
 			Parameters.isAbove("Blinking_rate", blinkingRate, 0);
 			Parameters.isAbove("gr random threshold", gr_protein_threshold, 1);
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			IJ.error(TITLE, ex.getMessage());
 			return false;
@@ -272,7 +268,7 @@ public class PCPALMFitting implements PlugIn
 			options[count++] = INPUT_ANALYSIS;
 
 		options = Arrays.copyOf(options, count);
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Select the source for the correlation curve");
 		gd.addChoice("Input", options, inputOption);
 		gd.showDialog();
@@ -292,12 +288,10 @@ public class PCPALMFitting implements PlugIn
 			return true;
 		}
 		else if (inputOption.equals(INPUT_FROM_FILE))
-		{
 			return loadCorrelationCurve();
-		}
 
 		// Fill the results list with analysis results from PCPALM Analysis
-		ArrayList<CorrelationResult> results = new ArrayList<>();
+		final ArrayList<CorrelationResult> results = new ArrayList<>();
 		if (!selectAnalysisResults(results))
 			return false;
 
@@ -312,7 +306,7 @@ public class PCPALMFitting implements PlugIn
 		peakDensity = 0;
 
 		int size = 0;
-		for (CorrelationResult r : results)
+		for (final CorrelationResult r : results)
 		{
 			peakDensity += r.peakDensity;
 			size = FastMath.max(size, r.gr[0].length);
@@ -346,17 +340,17 @@ public class PCPALMFitting implements PlugIn
 				// All processing done in selectNextCorrelation
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
 
 		// Remove bad results from the dataset.
-		ArrayList<CorrelationResult> newResults = new ArrayList<>(results.size());
+		final ArrayList<CorrelationResult> newResults = new ArrayList<>(results.size());
 		for (int i = 0; i < results.size(); i++)
 		{
-			CorrelationResult r = results.get(i);
+			final CorrelationResult r = results.get(i);
 			// If the PC-PALM Analysis has been done on too few molecules then the g(r) curve will be bad
 			if (r.n < 10)
 			{
@@ -365,13 +359,11 @@ public class PCPALMFitting implements PlugIn
 				continue;
 			}
 			// If the PC-PALM Analysis has a g(r) curve all below 1 then it is not valid
-			int offset = r.spatialDomain ? 0 : 1;
+			final int offset = r.spatialDomain ? 0 : 1;
 			double max = 0;
 			for (int j = offset; j < r.gr[1].length; j++)
-			{
 				if (max < r.gr[1][j])
 					max = r.gr[1][j];
-			}
 			if (max < 1)
 			{
 				header();
@@ -387,16 +379,16 @@ public class PCPALMFitting implements PlugIn
 
 	private static boolean selectNextCorrelation(ArrayList<CorrelationResult> results)
 	{
-		ArrayList<String> titles = buildTitlesList(results);
+		final ArrayList<String> titles = buildTitlesList(results);
 
 		// Show a dialog allowing the user to select an input image
 		if (titles.isEmpty())
 			return false;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select the next correlation curve\nFrequency domain curves are identified with *");
-		int n = (results.size() + 1);
+		final int n = (results.size() + 1);
 
 		// If in macro mode then we must just use the String input field to allow the macro
 		// IJ to return the field values from the macro arguments. Using a Choice input
@@ -421,20 +413,18 @@ public class PCPALMFitting implements PlugIn
 
 		// Check the correlation exists. If not then exit. This is mainly relevant for Macro mode since
 		// the loop will continue otherwise since the titles list is not empty.
-		String[] fields = title.split("\\*?:");
+		final String[] fields = title.split("\\*?:");
 		try
 		{
-			int id = Integer.parseInt(fields[0]);
-			for (CorrelationResult r : PCPALMAnalysis.results)
-			{
+			final int id = Integer.parseInt(fields[0]);
+			for (final CorrelationResult r : PCPALMAnalysis.results)
 				if (r.id == id)
 				{
 					results.add(r);
 					return true;
 				}
-			}
 		}
-		catch (NumberFormatException e)
+		catch (final NumberFormatException e)
 		{
 			// Ignore
 		}
@@ -454,8 +444,8 @@ public class PCPALMFitting implements PlugIn
 			spatialDomain = results.get(0).spatialDomain;
 		}
 
-		ArrayList<String> titles = new ArrayList<>();
-		for (CorrelationResult r : PCPALMAnalysis.results)
+		final ArrayList<String> titles = new ArrayList<>();
+		for (final CorrelationResult r : PCPALMAnalysis.results)
 		{
 			if (alreadySelected(results, r) ||
 					(filter && (r.nmPerPixel != nmPerPixel || r.spatialDomain != spatialDomain)))
@@ -468,7 +458,7 @@ public class PCPALMFitting implements PlugIn
 
 	private static boolean alreadySelected(ArrayList<CorrelationResult> results, CorrelationResult r)
 	{
-		for (CorrelationResult r2 : results)
+		for (final CorrelationResult r2 : results)
 			if (r.id == r2.id)
 				return true;
 		return false;
@@ -512,8 +502,8 @@ public class PCPALMFitting implements PlugIn
 			offset = (gr[0][0] == 0) ? 1 : 0;
 			axisTitle = "g(r)";
 		}
-		String title = TITLE + " " + axisTitle;
-		Plot plot = PCPALMAnalysis.plotCorrelation(gr, offset, title, axisTitle, spatialDomain, showErrorBars);
+		final String title = TITLE + " " + axisTitle;
+		final Plot plot = PCPALMAnalysis.plotCorrelation(gr, offset, title, axisTitle, spatialDomain, showErrorBars);
 
 		if (spatialDomain)
 		{
@@ -536,9 +526,9 @@ public class PCPALMFitting implements PlugIn
 
 		// Use the blinking rate estimate to estimate the density
 		// (factors in the over-counting of the same molecules)
-		double proteinDensity = peakDensity / blinkingRate;
+		final double proteinDensity = peakDensity / blinkingRate;
 
-		ArrayList<double[]> curves = new ArrayList<>();
+		final ArrayList<double[]> curves = new ArrayList<>();
 
 		// Fit the g(r) curve for r>0 to equation 2
 		Color color = Color.red;
@@ -606,7 +596,6 @@ public class PCPALMFitting implements PlugIn
 		double[] y = new double[x.length];
 		int j = 0;
 		for (int i = offset; i < gr[0].length; i++)
-		{
 			// Output points that were not fitted
 			if (gr[0][i] < randomModel.getX()[0])
 			{
@@ -614,7 +603,6 @@ public class PCPALMFitting implements PlugIn
 				y[j] = model.evaluate(gr[0][i], parameters);
 				j++;
 			}
-		}
 		x = Arrays.copyOf(x, j);
 		y = Arrays.copyOf(y, j);
 		plot.addPoints(x, y, Plot.CIRCLE);
@@ -622,23 +610,20 @@ public class PCPALMFitting implements PlugIn
 
 	private double[] extractCurve(double[][] gr, BaseModelFunction model, double[] parameters)
 	{
-		double[] y = new double[gr[0].length - offset];
+		final double[] y = new double[gr[0].length - offset];
 		for (int i = offset; i < gr[0].length; i++)
-		{
 			y[i - offset] = model.evaluate(gr[0][i], parameters);
-		}
 		return y;
 	}
 
 	private static double[][] combineCurves(ArrayList<CorrelationResult> results, int maxSize)
 	{
-		double[][] gr = new double[3][maxSize];
-		Statistics[] gr_ = new Statistics[maxSize];
+		final double[][] gr = new double[3][maxSize];
+		final Statistics[] gr_ = new Statistics[maxSize];
 		for (int i = 0; i < maxSize; i++)
 			gr_[i] = new Statistics();
 
-		for (CorrelationResult r : results)
-		{
+		for (final CorrelationResult r : results)
 			for (int i = 0; i < r.gr[0].length; i++)
 			{
 				gr[0][i] = r.gr[0][i]; // All scales should be the same so over-write is OK
@@ -650,7 +635,6 @@ public class PCPALMFitting implements PlugIn
 				if (!Double.isNaN(r.gr[1][i]))
 					gr_[i].add(r.gr[1][i]);
 			}
-		}
 		for (int i = 0; i < maxSize; i++)
 		{
 			gr[1][i] = gr_[i].getMean();
@@ -685,7 +669,7 @@ public class PCPALMFitting implements PlugIn
 					output.newLine();
 				}
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				// Q. Add better handling of errors?
 				e.printStackTrace();
@@ -724,7 +708,7 @@ public class PCPALMFitting implements PlugIn
 			String line;
 			int count = 0;
 
-			Pattern pattern = Pattern.compile("#([^=]+) = ([^ ]+)");
+			final Pattern pattern = Pattern.compile("#([^=]+) = ([^ ]+)");
 
 			// Read the header
 			while ((line = input.readLine()) != null)
@@ -734,15 +718,12 @@ public class PCPALMFitting implements PlugIn
 				if (line.length() == 0)
 					continue;
 				if (line.charAt(0) != '#')
-				{
 					// This is the first record
 					break;
-				}
 
 				// This is a header line. Extract the key-value pair
-				Matcher match = pattern.matcher(line);
+				final Matcher match = pattern.matcher(line);
 				if (match.find())
-				{
 					if (match.group(1).equals(HEADER_SPATIAL_DOMAIN))
 					{
 						// Do not use Boolean.parseBoolean because this will not fail if the field is
@@ -757,18 +738,15 @@ public class PCPALMFitting implements PlugIn
 							spatialDomainSet = false;
 					}
 					else if (match.group(1).equals(HEADER_PEAK_DENSITY))
-					{
 						try
 						{
 							peakDensity = Double.parseDouble(match.group(2));
 							peakDensitySet = true;
 						}
-						catch (NumberFormatException e)
+						catch (final NumberFormatException e)
 						{
 							// Ignore this.
 						}
-					}
-				}
 			}
 
 			if (!peakDensitySet)
@@ -783,7 +761,7 @@ public class PCPALMFitting implements PlugIn
 			}
 
 			// Read the data: gr[0][i], gr[1][i], gr[2][i]
-			ArrayList<double[]> data = new ArrayList<>();
+			final ArrayList<double[]> data = new ArrayList<>();
 			while (line != null)
 			{
 				if (line.length() == 0)
@@ -802,12 +780,12 @@ public class PCPALMFitting implements PlugIn
 						r = scanner.nextDouble();
 						g = scanner.nextDouble();
 					}
-					catch (InputMismatchException e)
+					catch (final InputMismatchException e)
 					{
 						IJ.error(TITLE, "Incorrect fields on line " + count);
 						return false;
 					}
-					catch (NoSuchElementException e)
+					catch (final NoSuchElementException e)
 					{
 						IJ.error(TITLE, "Incorrect fields on line " + count);
 						return false;
@@ -818,11 +796,11 @@ public class PCPALMFitting implements PlugIn
 					{
 						error = scanner.nextDouble();
 					}
-					catch (InputMismatchException e)
+					catch (final InputMismatchException e)
 					{
 						// Ignore
 					}
-					catch (NoSuchElementException e)
+					catch (final NoSuchElementException e)
 					{
 						// Ignore
 					}
@@ -850,7 +828,7 @@ public class PCPALMFitting implements PlugIn
 			}
 
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			IJ.error(TITLE, "Unable to read from file " + inputFilename);
 			return false;
@@ -884,18 +862,16 @@ public class PCPALMFitting implements PlugIn
 		randomModel.setLogging(true);
 
 		for (int i = offset; i < gr[0].length; i++)
-		{
 			// Only fit the curve above the estimated resolution (points below it will be subject to error)
 			if (gr[0][i] > sigmaS * fitAboveEstimatedPrecision)
 				randomModel.addPoint(gr[0][i], gr[1][i]);
-		}
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+		final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
 		Optimum optimum;
 		try
 		{
 			//@formatter:off
-			LeastSquaresProblem problem = new LeastSquaresBuilder()
+			final LeastSquaresProblem problem = new LeastSquaresBuilder()
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(3000)
 					.start(new double[] { sigmaS, proteinDensity })
@@ -912,12 +888,12 @@ public class PCPALMFitting implements PlugIn
 
 			optimum = optimizer.optimize(problem);
 		}
-		catch (TooManyIterationsException e)
+		catch (final TooManyIterationsException e)
 		{
 			log("Failed to fit %s: Too many iterations (%s)", randomModel.getName(), e.getMessage());
 			return null;
 		}
-		catch (ConvergenceException e)
+		catch (final ConvergenceException e)
 		{
 			log("Failed to fit %s: %s", randomModel.getName(), e.getMessage());
 			return null;
@@ -925,19 +901,19 @@ public class PCPALMFitting implements PlugIn
 
 		randomModel.setLogging(false);
 
-		double[] parameters = optimum.getPoint().toArray();
+		final double[] parameters = optimum.getPoint().toArray();
 		// Ensure the width is positive
 		parameters[0] = Math.abs(parameters[0]);
 
-		double ss = optimum.getResiduals().dotProduct(optimum.getResiduals());
+		final double ss = optimum.getResiduals().dotProduct(optimum.getResiduals());
 		ic1 = Maths.getAkaikeInformationCriterionFromResiduals(ss, randomModel.size(), parameters.length);
 
 		final double fitSigmaS = parameters[0];
 		final double fitProteinDensity = parameters[1];
 
 		// Check the fitted parameters are within tolerance of the initial estimates
-		double e1 = parameterDrift(sigmaS, fitSigmaS);
-		double e2 = parameterDrift(proteinDensity, fitProteinDensity);
+		final double e1 = parameterDrift(sigmaS, fitSigmaS);
+		final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
 		log("  %s fit: SS = %f. cAIC = %f. %d evaluations", randomModel.getName(), ss, ic1, optimum.getEvaluations());
 		log("  %s parameters:", randomModel.getName());
@@ -967,9 +943,9 @@ public class PCPALMFitting implements PlugIn
 			// g(r)peaks = g(r)protein + g(r)stoch
 			// g(r)peaks ~ 1           + g(r)stoch
 			// Verify g(r)protein should be <1.5 for all r>0
-			double[] gr_stoch = randomModel.value(parameters);
-			double[] gr_peaks = randomModel.getY();
-			double[] gr_ = randomModel.getX();
+			final double[] gr_stoch = randomModel.value(parameters);
+			final double[] gr_peaks = randomModel.getY();
+			final double[] gr_ = randomModel.getX();
 
 			//SummaryStatistics stats = new SummaryStatistics();
 			for (int i = 0; i < gr_peaks.length; i++)
@@ -979,7 +955,7 @@ public class PCPALMFitting implements PlugIn
 					continue;
 
 				// Note the RandomModelFunction evaluates g(r)stoch + 1;
-				double gr_protein_i = gr_peaks[i] - (gr_stoch[i] - 1);
+				final double gr_protein_i = gr_peaks[i] - (gr_stoch[i] - 1);
 
 				if (gr_protein_i > gr_protein_threshold)
 				{
@@ -1002,9 +978,7 @@ public class PCPALMFitting implements PlugIn
 	private static double parameterDrift(double start, double end)
 	{
 		if (end < start)
-		{
 			return -100 * (start - end) / end;
-		}
 		return 100 * (end - start) / start;
 	}
 
@@ -1031,33 +1005,31 @@ public class PCPALMFitting implements PlugIn
 
 		clusteredModel.setLogging(true);
 		for (int i = offset; i < gr[0].length; i++)
-		{
 			// Only fit the curve above the estimated resolution (points below it will be subject to error)
 			if (gr[0][i] > sigmaS * fitAboveEstimatedPrecision)
 				clusteredModel.addPoint(gr[0][i], gr[1][i]);
-		}
 
 		double[] parameters;
 		// The model is: sigma, density, range, amplitude
-		double[] initialSolution = new double[] { sigmaS, proteinDensity, sigmaS * 5, 1 };
+		final double[] initialSolution = new double[] { sigmaS, proteinDensity, sigmaS * 5, 1 };
 		int evaluations = 0;
 
 		// Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
 		// LVM fitting does not support constrained fitting so use a bounded optimiser.
-		SumOfSquaresModelFunction clusteredModelMulti = new SumOfSquaresModelFunction(clusteredModel);
-		double[] x = clusteredModelMulti.x;
+		final SumOfSquaresModelFunction clusteredModelMulti = new SumOfSquaresModelFunction(clusteredModel);
+		final double[] x = clusteredModelMulti.x;
 
 		// Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
-		double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
-		double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0 };
+		final double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
+		final double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0 };
 		// The amplitude and range should not extend beyond the limits of the g(r) curve.
-		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
+		final double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
 				Maths.max(gr[1]) };
 		log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", clusteredModel.getName(),
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
 
-		PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, clusteredModelMulti);
+		final PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, clusteredModelMulti);
 
 		if (constrainedSolution == null)
 			return null;
@@ -1069,12 +1041,12 @@ public class PCPALMFitting implements PlugIn
 		if (useLSE)
 		{
 			log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
-			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+			final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 			Optimum lvmSolution;
 			try
 			{
 				//@formatter:off
-				LeastSquaresProblem problem = new LeastSquaresBuilder()
+				final LeastSquaresProblem problem = new LeastSquaresBuilder()
 						.maxEvaluations(Integer.MAX_VALUE)
 						.maxIterations(3000)
 						.start(parameters)
@@ -1092,7 +1064,7 @@ public class PCPALMFitting implements PlugIn
 				lvmSolution = optimizer.optimize(problem);
 				evaluations += lvmSolution.getEvaluations();
 
-				double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+				final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				if (ss < constrainedSolution.getValue())
 				{
 					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(),
@@ -1101,11 +1073,11 @@ public class PCPALMFitting implements PlugIn
 					parameters = lvmSolution.getPoint().toArray();
 				}
 			}
-			catch (TooManyIterationsException e)
+			catch (final TooManyIterationsException e)
 			{
 				log("Failed to re-fit %s: Too many iterations (%s)", clusteredModel.getName(), e.getMessage());
 			}
-			catch (ConvergenceException e)
+			catch (final ConvergenceException e)
 			{
 				log("Failed to re-fit %s: %s", clusteredModel.getName(), e.getMessage());
 			}
@@ -1118,8 +1090,8 @@ public class PCPALMFitting implements PlugIn
 		//parameters[2] = Math.abs(parameters[2]);
 
 		double ss = 0;
-		double[] obs = clusteredModel.getY();
-		double[] exp = clusteredModel.value(parameters);
+		final double[] obs = clusteredModel.getY();
+		final double[] exp = clusteredModel.value(parameters);
 		for (int i = 0; i < obs.length; i++)
 			ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 		ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, clusteredModel.size(), parameters.length);
@@ -1133,8 +1105,8 @@ public class PCPALMFitting implements PlugIn
 		// with the g(r)PSF. In this method we have just fit the exponential
 		final double nCluster = 2 * domainDensity * Math.PI * domainRadius * domainRadius * fitProteinDensity;
 
-		double e1 = parameterDrift(sigmaS, fitSigmaS);
-		double e2 = parameterDrift(proteinDensity, fitProteinDensity);
+		final double e1 = parameterDrift(sigmaS, fitSigmaS);
+		final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
 		log("  %s fit: SS = %f. cAIC = %f. %d evaluations", clusteredModel.getName(), ss, ic2, evaluations);
 		log("  %s parameters:", clusteredModel.getName());
@@ -1186,8 +1158,8 @@ public class PCPALMFitting implements PlugIn
 			SumOfSquaresModelFunction function)
 	{
 		// Create the functions to optimise
-		ObjectiveFunction objective = new ObjectiveFunction(new SumOfSquaresMultivariateFunction(function));
-		ObjectiveFunctionGradient gradient = new ObjectiveFunctionGradient(
+		final ObjectiveFunction objective = new ObjectiveFunction(new SumOfSquaresMultivariateFunction(function));
+		final ObjectiveFunctionGradient gradient = new ObjectiveFunctionGradient(
 				new SumOfSquaresMultivariateVectorFunction(function));
 
 		final boolean debug = false;
@@ -1198,14 +1170,13 @@ public class PCPALMFitting implements PlugIn
 		final MaxEval maxEvaluations = new MaxEval(2000);
 		MultivariateOptimizer opt = null;
 		for (int iteration = 0; iteration <= fitRestarts; iteration++)
-		{
 			try
 			{
 				opt = new BFGSOptimizer();
 				final double relativeThreshold = 1e-6;
 
 				// Configure maximum step length for each dimension using the bounds
-				double[] stepLength = new double[lB.length];
+				final double[] stepLength = new double[lB.length];
 				for (int i = 0; i < stepLength.length; i++)
 					stepLength[i] = (uB[i] - lB[i]) * 0.3333333;
 
@@ -1217,11 +1188,11 @@ public class PCPALMFitting implements PlugIn
 				if (debug)
 					System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(), opt.getEvaluations());
 			}
-			catch (TooManyEvaluationsException e)
+			catch (final TooManyEvaluationsException e)
 			{
 				break; // No need to restart
 			}
-			catch (RuntimeException e)
+			catch (final RuntimeException e)
 			{
 				break; // No need to restart
 			}
@@ -1230,28 +1201,27 @@ public class PCPALMFitting implements PlugIn
 				if (opt != null)
 					boundedEvaluations += opt.getEvaluations();
 			}
-		}
 
 		// Try a CMAES optimiser which is non-deterministic. To overcome this we perform restarts.
 
 		// CMAESOptimiser based on Matlab code:
 		// https://www.lri.fr/~hansen/cmaes.m
 		// Take the defaults from the Matlab documentation
-		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
-		boolean isActiveCMA = true;
-		int diagonalOnly = 0;
-		int checkFeasableCount = 1;
-		RandomGenerator random = new Well44497b(); //Well19937c();
-		boolean generateStatistics = false;
-		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
+		final double stopFitness = 0; //Double.NEGATIVE_INFINITY;
+		final boolean isActiveCMA = true;
+		final int diagonalOnly = 0;
+		final int checkFeasableCount = 1;
+		final RandomGenerator random = new Well44497b(); //Well19937c();
+		final boolean generateStatistics = false;
+		final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
 		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
-		double[] range = new double[lB.length];
+		final double[] range = new double[lB.length];
 		for (int i = 0; i < lB.length; i++)
 			range[i] = (uB[i] - lB[i]) / 3;
-		OptimizationData sigma = new CMAESOptimizer.Sigma(range);
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize(
+		final OptimizationData sigma = new CMAESOptimizer.Sigma(range);
+		final OptimizationData popSize = new CMAESOptimizer.PopulationSize(
 				(int) (4 + Math.floor(3 * Math.log(initialSolution.length))));
-		SimpleBounds bounds = new SimpleBounds(lB, uB);
+		final SimpleBounds bounds = new SimpleBounds(lB, uB);
 
 		opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
 				checkFeasableCount, random, generateStatistics, checker);
@@ -1261,22 +1231,20 @@ public class PCPALMFitting implements PlugIn
 			try
 			{
 				// Start from the initial solution
-				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution), objective,
+				final PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution), objective,
 						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
 				if (debug)
 					System.out.printf("CMAES Iter %d initial = %g (%d)\n", iteration, constrainedSolution.getValue(),
 							opt.getEvaluations());
 				boundedEvaluations += opt.getEvaluations();
 				if (optimum == null || constrainedSolution.getValue() < optimum.getValue())
-				{
 					optimum = constrainedSolution;
-				}
 			}
-			catch (TooManyEvaluationsException e)
+			catch (final TooManyEvaluationsException e)
 			{
 				// Ignore
 			}
-			catch (TooManyIterationsException e)
+			catch (final TooManyIterationsException e)
 			{
 				// Ignore
 			}
@@ -1289,21 +1257,19 @@ public class PCPALMFitting implements PlugIn
 			try
 			{
 				// Also restart from the current optimum
-				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(optimum.getPointRef()), objective,
+				final PointValuePair constrainedSolution = opt.optimize(new InitialGuess(optimum.getPointRef()), objective,
 						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
 				if (debug)
 					System.out.printf("CMAES Iter %d restart = %g (%d)\n", iteration, constrainedSolution.getValue(),
 							opt.getEvaluations());
 				if (constrainedSolution.getValue() < optimum.getValue())
-				{
 					optimum = constrainedSolution;
-				}
 			}
-			catch (TooManyEvaluationsException e)
+			catch (final TooManyEvaluationsException e)
 			{
 				// Ignore
 			}
-			catch (TooManyIterationsException e)
+			catch (final TooManyIterationsException e)
 			{
 				// Ignore
 			}
@@ -1338,22 +1304,20 @@ public class PCPALMFitting implements PlugIn
 
 		emulsionModel.setLogging(true);
 		for (int i = offset; i < gr[0].length; i++)
-		{
 			// Only fit the curve above the estimated resolution (points below it will be subject to error)
 			if (gr[0][i] > sigmaS * fitAboveEstimatedPrecision)
 				emulsionModel.addPoint(gr[0][i], gr[1][i]);
-		}
 
 		double[] parameters;
 		// The model is: sigma, density, range, amplitude, alpha
-		double[] initialSolution = new double[] { sigmaS, proteinDensity, sigmaS * 5, 1, sigmaS * 5 };
+		final double[] initialSolution = new double[] { sigmaS, proteinDensity, sigmaS * 5, 1, sigmaS * 5 };
 		int evaluations = 0;
 
 		// Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
 		// LVM fitting does not support constrained fitting so use a bounded optimiser.
-		SumOfSquaresModelFunction emulsionModelMulti = new SumOfSquaresModelFunction(emulsionModel);
-		double[] x = emulsionModelMulti.x;
-		double[] y = emulsionModelMulti.y;
+		final SumOfSquaresModelFunction emulsionModelMulti = new SumOfSquaresModelFunction(emulsionModel);
+		final double[] x = emulsionModelMulti.x;
+		final double[] y = emulsionModelMulti.y;
 
 		// Range should be equal to the first time the g(r) curve crosses 1
 		for (int i = 0; i < x.length; i++)
@@ -1364,17 +1328,17 @@ public class PCPALMFitting implements PlugIn
 			}
 
 		// Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
-		double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
-		double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0 };
+		final double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
+		final double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0 };
 		// The amplitude and range should not extend beyond the limits of the g(r) curve.
 		// TODO - Find out the expected range for the alpha parameter.
-		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
+		final double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
 				Maths.max(gr[1]), Maths.max(x) * 2 };
 		log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", emulsionModel.getName(),
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
 
-		PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, emulsionModelMulti);
+		final PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, emulsionModelMulti);
 
 		if (constrainedSolution == null)
 			return null;
@@ -1386,12 +1350,12 @@ public class PCPALMFitting implements PlugIn
 		if (useLSE)
 		{
 			log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
-			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+			final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 			Optimum lvmSolution;
 			try
 			{
 				//@formatter:off
-				LeastSquaresProblem problem = new LeastSquaresBuilder()
+				final LeastSquaresProblem problem = new LeastSquaresBuilder()
 						.maxEvaluations(Integer.MAX_VALUE)
 						.maxIterations(3000)
 						.start(parameters)
@@ -1409,7 +1373,7 @@ public class PCPALMFitting implements PlugIn
 				lvmSolution = optimizer.optimize(problem);
 				evaluations += lvmSolution.getEvaluations();
 
-				double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+				final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				if (ss < constrainedSolution.getValue())
 				{
 					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(),
@@ -1418,11 +1382,11 @@ public class PCPALMFitting implements PlugIn
 					parameters = lvmSolution.getPoint().toArray();
 				}
 			}
-			catch (TooManyIterationsException e)
+			catch (final TooManyIterationsException e)
 			{
 				log("Failed to re-fit %s: Too many iterations (%s)", emulsionModel.getName(), e.getMessage());
 			}
-			catch (ConvergenceException e)
+			catch (final ConvergenceException e)
 			{
 				log("Failed to re-fit %s: %s", emulsionModel.getName(), e.getMessage());
 			}
@@ -1435,8 +1399,8 @@ public class PCPALMFitting implements PlugIn
 		//parameters[2] = Math.abs(parameters[2]);
 
 		double ss = 0;
-		double[] obs = emulsionModel.getY();
-		double[] exp = emulsionModel.value(parameters);
+		final double[] obs = emulsionModel.getY();
+		final double[] exp = emulsionModel.value(parameters);
 		for (int i = 0; i < obs.length; i++)
 			ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 		ic3 = Maths.getAkaikeInformationCriterionFromResiduals(ss, emulsionModel.size(), parameters.length);
@@ -1450,8 +1414,8 @@ public class PCPALMFitting implements PlugIn
 		// This is from the PC-PALM paper. It may not be correct for the emulsion model.
 		final double nCluster = 2 * domainDensity * Math.PI * domainRadius * domainRadius * fitProteinDensity;
 
-		double e1 = parameterDrift(sigmaS, fitSigmaS);
-		double e2 = parameterDrift(proteinDensity, fitProteinDensity);
+		final double e1 = parameterDrift(sigmaS, fitSigmaS);
+		final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
 		log("  %s fit: SS = %f. cAIC = %f. %d evaluations", emulsionModel.getName(), ss, ic3, evaluations);
 		log("  %s parameters:", emulsionModel.getName());
@@ -1682,11 +1646,9 @@ public class PCPALMFitting implements PlugIn
 		public double[] value(double[] variables)
 		{
 			increment();
-			double[] values = new double[x.size()];
+			final double[] values = new double[x.size()];
 			for (int i = 0; i < values.length; i++)
-			{
 				values[i] = evaluate(x.get(i), variables[0], variables[1]);
-			}
 			return values;
 		}
 	}
@@ -1808,7 +1770,7 @@ public class PCPALMFitting implements PlugIn
 			lastValue = new double[x.size()];
 
 			final double delta = 0.001;
-			double[][] d = new double[variables.length][variables.length];
+			final double[][] d = new double[variables.length][variables.length];
 			for (int i = 0; i < variables.length; i++)
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
@@ -1882,11 +1844,9 @@ public class PCPALMFitting implements PlugIn
 		public double[] value(double[] variables)
 		{
 			increment();
-			double[] values = new double[x.size()];
+			final double[] values = new double[x.size()];
 			for (int i = 0; i < values.length; i++)
-			{
 				values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2], variables[3]);
-			}
 			return values;
 		}
 	}
@@ -2224,11 +2184,9 @@ public class PCPALMFitting implements PlugIn
 		public double[] value(double[] variables)
 		{
 			increment();
-			double[] values = new double[x.size()];
+			final double[] values = new double[x.size()];
 			for (int i = 0; i < values.length; i++)
-			{
 				values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2], variables[3], variables[4]);
-			}
 			return values;
 		}
 	}
@@ -2237,7 +2195,7 @@ public class PCPALMFitting implements PlugIn
 	{
 		if (resultsTable == null || !resultsTable.isVisible())
 		{
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("Model\t");
 			sb.append("Colour\t");
 			sb.append("Valid\t");
@@ -2256,7 +2214,7 @@ public class PCPALMFitting implements PlugIn
 	private static void addResult(String model, String resultColour, boolean valid, double precision, double density,
 			double domainRadius, double domainDensity, double nCluster, double coherence, double ic)
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(model).append('\t');
 		sb.append(resultColour.toString()).append('\t');
 		sb.append(valid).append('\t');

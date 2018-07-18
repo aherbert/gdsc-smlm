@@ -194,14 +194,14 @@ public abstract class ImageModel
 
 		// Sum the fractions
 		double total = 0;
-		for (CompoundMoleculeModel c : compounds)
+		for (final CompoundMoleculeModel c : compounds)
 		{
 			//System.out.printf("Compound fraction %f\n", c.getFraction());
 			total += c.getFraction();
 			c.centre();
 		}
 
-		ArrayList<CompoundMoleculeModel> molecules = new ArrayList<>(particles);
+		final ArrayList<CompoundMoleculeModel> molecules = new ArrayList<>(particles);
 		//int[] count = new int[compounds.size()];
 		for (int i = 1; i <= particles; i++)
 		{
@@ -209,7 +209,7 @@ public abstract class ImageModel
 			double d = random.nextDouble() * total;
 			for (int j = 0; j < compounds.size(); j++)
 			{
-				CompoundMoleculeModel c = compounds.get(j);
+				final CompoundMoleculeModel c = compounds.get(j);
 				d -= c.getFraction();
 				if (d <= 0)
 				{
@@ -218,7 +218,7 @@ public abstract class ImageModel
 						return molecules;
 
 					//count[j]++;
-					CompoundMoleculeModel m = new CompoundMoleculeModel(i, xyz, copyMolecules(c), false);
+					final CompoundMoleculeModel m = new CompoundMoleculeModel(i, xyz, copyMolecules(c), false);
 					m.setLabel(j);
 					m.setDiffusionRate(c.getDiffusionRate());
 					m.setDiffusionType(c.getDiffusionType());
@@ -238,10 +238,10 @@ public abstract class ImageModel
 	private static List<MoleculeModel> copyMolecules(CompoundMoleculeModel c)
 	{
 		int n = c.getSize();
-		List<MoleculeModel> list = new ArrayList<>(n);
+		final List<MoleculeModel> list = new ArrayList<>(n);
 		while (n-- > 0)
 		{
-			MoleculeModel m = c.getMolecule(n);
+			final MoleculeModel m = c.getMolecule(n);
 			list.add(new MoleculeModel(n + 1, m.getMass(), Arrays.copyOf(m.getCoordinates(), 3)));
 		}
 		return list;
@@ -300,12 +300,12 @@ public abstract class ImageModel
 			int frames)
 	{
 		frameLimit = frames;
-		ArrayList<FluorophoreSequenceModel> list = new ArrayList<>(molecules.size());
+		final ArrayList<FluorophoreSequenceModel> list = new ArrayList<>(molecules.size());
 		for (int i = 0; i < molecules.size();)
 		{
-			CompoundMoleculeModel c = molecules.get(i);
-			List<FluorophoreSequenceModel> fluorophores = new ArrayList<>(c.getSize());
-			List<MoleculeModel> removed = new ArrayList<>(c.getSize());
+			final CompoundMoleculeModel c = molecules.get(i);
+			final List<FluorophoreSequenceModel> fluorophores = new ArrayList<>(c.getSize());
+			final List<MoleculeModel> removed = new ArrayList<>(c.getSize());
 			for (int n = c.getSize(); n-- > 0;)
 			{
 				// Molecule Id is ignored since we renumber the sorted collection at the end
@@ -321,23 +321,19 @@ public abstract class ImageModel
 					fluorophores.add(f);
 				}
 				else
-				{
 					// If we remove the molecule from the compound then the rotation will not be around
 					// the true COM but the new COM of the reduced size compound. Keep these molecules
 					// so the rotation is valid.
 					// Note: Fluorophores have mass zero. If this changes then this will have to be updated.
 					removed.add(new MoleculeModel(0, c.getRelativeCoordinates(n)));
-				}
 			}
 			if (fluorophores.isEmpty())
-			{
 				molecules.remove(i);
 				// No increment as the list has been reduced in size
-			}
 			else
 			{
 				removed.addAll(fluorophores);
-				CompoundMoleculeModel newC = new CompoundMoleculeModel(c.getId(), c.getCoordinates(), removed, false);
+				final CompoundMoleculeModel newC = new CompoundMoleculeModel(c.getId(), c.getCoordinates(), removed, false);
 				newC.setDiffusionRate(c.getDiffusionRate());
 				newC.setDiffusionType(c.getDiffusionType());
 				molecules.set(i, newC);
@@ -358,7 +354,7 @@ public abstract class ImageModel
 		Collections.sort(list);
 		// Renumber
 		int id = 1;
-		for (FluorophoreSequenceModel f : list)
+		for (final FluorophoreSequenceModel f : list)
 			f.setId(id++);
 		return list;
 	}
@@ -414,8 +410,8 @@ public abstract class ImageModel
 	{
 		for (int i = 0; i < bursts.size(); i++)
 		{
-			double[] burst = bursts.get(i);
-			int on = (int) (burst[0] / frameInterval) - sequenceStartT;
+			final double[] burst = bursts.get(i);
+			final int on = (int) (burst[0] / frameInterval) - sequenceStartT;
 			int off = (int) (burst[1] / frameInterval) - sequenceStartT;
 
 			// If the off-time is truncated the modulus function used below is
@@ -437,7 +433,6 @@ public abstract class ImageModel
 				state[on] |= LocalisationModel.SINGLE;
 			}
 			else
-			{
 				for (int t = on; t <= off; t++)
 				{
 					if (t > on)
@@ -447,23 +442,17 @@ public abstract class ImageModel
 
 					// Get signal on-time
 					if (t == on)
-					{
 						// Signal turned on this frame
 						onTime[t] += frameInterval - (burst[0] % frameInterval);
-					}
 					else if (t == off)
 					{
 						// Signal turned off this frame
 						if (offTimeTrucated)
-						{
 							// The off-time was truncated so the burst is on for
 							// the entire duration
 							onTime[t] += 1;
-						}
 						else
-						{
 							onTime[t] += (burst[1] % frameInterval);
-						}
 					}
 					else
 					{
@@ -472,7 +461,6 @@ public abstract class ImageModel
 						state[t] |= LocalisationModel.CONTINUOUS;
 					}
 				}
-			}
 		}
 	}
 
@@ -539,17 +527,13 @@ public abstract class ImageModel
 	public List<LocalisationModel> createImage(List<CompoundMoleculeModel> compoundFluorophores, double fixedFraction,
 			int maxFrames, double photonBudget, double correlation, boolean rotate)
 	{
-		List<LocalisationModel> localisations = new ArrayList<>();
+		final List<LocalisationModel> localisations = new ArrayList<>();
 		// Extract the fluorophores in all the compounds
-		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>(compoundFluorophores.size());
-		for (CompoundMoleculeModel c : compoundFluorophores)
-		{
+		final ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>(compoundFluorophores.size());
+		for (final CompoundMoleculeModel c : compoundFluorophores)
 			for (int i = c.getSize(); i-- > 0;)
 				if (c.getMolecule(i) instanceof FluorophoreSequenceModel)
-				{
 					fluorophores.add((FluorophoreSequenceModel) c.getMolecule(i));
-				}
-		}
 		final int nMolecules = fluorophores.size();
 
 		// Check the correlation bounds.
@@ -562,7 +546,7 @@ public abstract class ImageModel
 			r = (correlation < 0) ? 0 : (correlation > 1) ? 1 : correlation;
 
 		// Create a photon budget for each fluorophore
-		double[] photons = new double[nMolecules];
+		final double[] photons = new double[nMolecules];
 
 		// Generate a second set of on times using the desired correlation
 		if (r != 0)
@@ -581,10 +565,10 @@ public abstract class ImageModel
 			//PearsonsCorrelation c = new PearsonsCorrelation();
 
 			// Create a second set of fluorophores. This is used to generate the correlated photon data
-			List<FluorophoreSequenceModel> fluorophores2 = new ArrayList<>();
+			final List<FluorophoreSequenceModel> fluorophores2 = new ArrayList<>();
 			while (fluorophores2.size() < fluorophores.size())
 			{
-				FluorophoreSequenceModel f = createFluorophore(0, new double[] { 0, 0, 0 }, maxFrames);
+				final FluorophoreSequenceModel f = createFluorophore(0, new double[] { 0, 0, 0 }, maxFrames);
 				if (f != null)
 					fluorophores2.add(f);
 			}
@@ -593,7 +577,7 @@ public abstract class ImageModel
 
 			// Q - How to generate a negative correlation?
 			// Generate a positive correlation then invert the data and shift to the same range
-			boolean invert = (r < 0);
+			final boolean invert = (r < 0);
 			r = Math.abs(r);
 
 			StoredDataStatistics correlatedOnTime = new StoredDataStatistics();
@@ -609,11 +593,9 @@ public abstract class ImageModel
 			{
 				final double min = correlatedOnTime.getStatistics().getMin();
 				final double range = correlatedOnTime.getStatistics().getMax() - min;
-				StoredDataStatistics newCorrelatedOnTime = new StoredDataStatistics();
-				for (double d : correlatedOnTime.getValues())
-				{
+				final StoredDataStatistics newCorrelatedOnTime = new StoredDataStatistics();
+				for (final double d : correlatedOnTime.getValues())
 					newCorrelatedOnTime.add(range - d + min);
-				}
 				correlatedOnTime = newCorrelatedOnTime;
 			}
 
@@ -622,11 +604,11 @@ public abstract class ImageModel
 			final double averageTotalTOn = correlatedOnTime.getMean();
 
 			// Now create the localisations
-			double[] correlatedOnTimes = correlatedOnTime.getValues();
+			final double[] correlatedOnTimes = correlatedOnTime.getValues();
 			for (int i = 0; i < nMolecules; i++)
 			{
 				// Generate photons using the correlated on time data
-				double p = photonBudget * correlatedOnTimes[i] / averageTotalTOn;
+				final double p = photonBudget * correlatedOnTimes[i] / averageTotalTOn;
 
 				//final double X = getTotalOnTime(fluorophores.get(i));
 				//double p = (X > 0) ? photonBudget * correlatedOnTimes[i] / X : 0;
@@ -640,46 +622,33 @@ public abstract class ImageModel
 			//System.out.printf("t = %f, p = %f, R = %f\n", averageTotalTOn, allPhotons.getMean(),
 			//		c.correlation(onTime.getValues(), allPhotons.getValues()));
 		}
-		else
+		else // Sample from the provided distribution. Do not over-write the class level distribution to allow
+		// running again with a different shape parameter / photon budget.
+		if (photonDistribution != null)
 		{
-			// Sample from the provided distribution. Do not over-write the class level distribution to allow
-			// running again with a different shape parameter / photon budget.
-			if (photonDistribution != null)
-			{
-				// Ensure the custom distribution is scaled to the correct photon budget
-				final double photonScale = photonBudget / photonDistribution.getNumericalMean();
+			// Ensure the custom distribution is scaled to the correct photon budget
+			final double photonScale = photonBudget / photonDistribution.getNumericalMean();
 
-				// Generate photons sampling from the photon budget
-				for (int i = 0; i < nMolecules; i++)
-				{
-					photons[i] = photonDistribution.sample() * photonScale;
-				}
-			}
-			else
-			{
-				// No distribution so use the same number for all
-				Arrays.fill(photons, photonBudget);
-			}
+			// Generate photons sampling from the photon budget
+			for (int i = 0; i < nMolecules; i++)
+				photons[i] = photonDistribution.sample() * photonScale;
 		}
+		else
+			// No distribution so use the same number for all
+			Arrays.fill(photons, photonBudget);
 
 		int photonIndex = 0;
 		if (fixedFraction > 0)
-		{
-			for (CompoundMoleculeModel c : compoundFluorophores)
+			for (final CompoundMoleculeModel c : compoundFluorophores)
 			{
 				final boolean fixed = random.nextDouble() < fixedFraction;
 				photonIndex += createLocalisation(c, localisations, fixed, maxFrames, photons, photonIndex,
 						!fixed && rotate);
 			}
-		}
 		else
-		{
 			// No fixed molecules
-			for (CompoundMoleculeModel c : compoundFluorophores)
-			{
+			for (final CompoundMoleculeModel c : compoundFluorophores)
 				photonIndex += createLocalisation(c, localisations, false, maxFrames, photons, photonIndex, rotate);
-			}
-		}
 
 		sortByTime(localisations);
 
@@ -722,29 +691,27 @@ public abstract class ImageModel
 		final double frameInterval = 1;
 
 		// Extract the fluorophores
-		ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>();
+		final ArrayList<FluorophoreSequenceModel> fluorophores = new ArrayList<>();
 		for (int i = compound.getSize(); i-- > 0;)
 			if (compound.getMolecule(i) instanceof FluorophoreSequenceModel)
-			{
 				fluorophores.add((FluorophoreSequenceModel) compound.getMolecule(i));
-			}
 		final int nFluorophores = fluorophores.size();
 
 		// Get the duration of each fluorophore sequence
-		List<List<double[]>> bursts = new ArrayList<>(nFluorophores);
-		int[] sequenceStartT = new int[nFluorophores];
-		int[] sequenceEndT = new int[nFluorophores];
+		final List<List<double[]>> bursts = new ArrayList<>(nFluorophores);
+		final int[] sequenceStartT = new int[nFluorophores];
+		final int[] sequenceEndT = new int[nFluorophores];
 
 		for (int i = 0; i < nFluorophores; i++)
 		{
-			FluorophoreSequenceModel fluorophore = fluorophores.get(i);
+			final FluorophoreSequenceModel fluorophore = fluorophores.get(i);
 			bursts.add(fluorophore.getBurstSequence());
 			sequenceStartT[i] = (int) (fluorophore.getStartTime() / frameInterval);
 			sequenceEndT[i] = (int) (fluorophore.getEndTime() / frameInterval);
 		}
 
 		// Get the maximum and minimum start and end times
-		int sequenceStart = Maths.min(sequenceStartT);
+		final int sequenceStart = Maths.min(sequenceStartT);
 		int sequenceEnd = Maths.max(sequenceEndT);
 
 		// Time-range check. Note that the final frames are 1-based
@@ -755,10 +722,10 @@ public abstract class ImageModel
 
 		// For each fluorophore build a graph of on-time in frame intervals
 		final int nSteps = sequenceEnd - sequenceStart + 1;
-		double[][] onTime = new double[nFluorophores][nSteps];
-		int[][] state = new int[nFluorophores][nSteps];
-		double[] totalOnTime = new double[nFluorophores];
-		double[] photonBudget = new double[nFluorophores];
+		final double[][] onTime = new double[nFluorophores][nSteps];
+		final int[][] state = new int[nFluorophores][nSteps];
+		final double[] totalOnTime = new double[nFluorophores];
+		final double[] photonBudget = new double[nFluorophores];
 		for (int i = 0; i < nFluorophores; i++)
 		{
 			generateOnTimes(maxFrames, frameInterval, bursts.get(i), sequenceStart, onTime[i], state[i]);
@@ -770,40 +737,32 @@ public abstract class ImageModel
 		final double diffusionRate;
 		double[] axis = null;
 		if (fixed)
-		{
 			diffusionRate = 0;
+		else if (compound.getDiffusionType() == DiffusionType.LINEAR_WALK)
+		{
+			diffusionRate = (diffusion2D) ? getRandomMoveDistance2D(compound.getDiffusionRate())
+					: getRandomMoveDistance3D(compound.getDiffusionRate());
+			// Create a random unit vector using 2/3 Gaussian variables
+			axis = new double[3];
+			double length = 0;
+			while (length == 0) // Check the vector has a length
+			{
+				axis[0] = random.nextGaussian();
+				axis[1] = random.nextGaussian();
+				if (!diffusion2D)
+					axis[2] = random.nextGaussian();
+				length = axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2];
+			}
+			length = Math.sqrt(length);
+			for (int i = 0; i < 3; i++)
+				axis[i] /= length;
 		}
 		else
-		{
-			if (compound.getDiffusionType() == DiffusionType.LINEAR_WALK)
-			{
-				diffusionRate = (diffusion2D) ? getRandomMoveDistance2D(compound.getDiffusionRate())
-						: getRandomMoveDistance3D(compound.getDiffusionRate());
-				// Create a random unit vector using 2/3 Gaussian variables
-				axis = new double[3];
-				double length = 0;
-				while (length == 0) // Check the vector has a length
-				{
-					axis[0] = random.nextGaussian();
-					axis[1] = random.nextGaussian();
-					if (!diffusion2D)
-						axis[2] = random.nextGaussian();
-					length = axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2];
-				}
-				length = Math.sqrt(length);
-				for (int i = 0; i < 3; i++)
-					axis[i] /= length;
-			}
-			else
-			{
-				diffusionRate = getRandomMoveDistance(compound.getDiffusionRate());
-			}
-		}
-		//System.out.printf("N=%d, rate=%f\n", compound.getSize(), diffusionRate);
+			diffusionRate = getRandomMoveDistance(compound.getDiffusionRate());
 
 		// For the duration of the sequence, move the molecule and output
 		// position and intensity
-		LocalisationModel[][] models = new LocalisationModel[nFluorophores][nSteps];
+		final LocalisationModel[][] models = new LocalisationModel[nFluorophores][nSteps];
 
 		if (confinementDistribution != null)
 			confinementDistribution.initialise(compound.getCoordinates());
@@ -812,46 +771,32 @@ public abstract class ImageModel
 		for (int t = sequenceStart, step = 0; t <= sequenceEnd; t++, step++)
 		{
 			for (int i = 0; i < nFluorophores; i++)
-			{
 				if (onTime[i][step] > 0 && photonBudget[i] > 0)
 				{
 					final double intensity;
 					if (photonBudgetPerFrame)
-					{
-						// -=-=-
-						// Photon budget is the rate per frame
-						// -=-=-
-						// This suffers from the exponential distribution of the tOn which destroys the
-						// shape of the gamma distribution when tOn is short, i.e. may onTime values are less than 1
-						//intensity = randomGenerator.nextPoisson(photonBudget * onTime[i]);
-
 						// Ignore the time that the fluorophore is on and simply use the random sample.
 						// This allows the simulation to match observed experimental data.
 						intensity = randomGenerator.nextPoisson(photonBudget[i]);
-					}
 					else
-					{
 						// -=-=-
 						// When photon budget is for the entire lifetime then allocate proportionately
 						// using the time fraction
 						// -=-=-
 						intensity = randomGenerator.nextPoisson(photonBudget[i] * onTime[i][step] / totalOnTime[i]);
-					}
 
 					// TODO - Is this useful? Add orientation brightness
 					//intensity *= randomGenerator.nextUniform(0.7, 1.3);
 
 					//rawPhotons.add(intensity);
-					LocalisationModel model = new LocalisationModel(fluorophores.get(i).getId(), t + 1,
+					final LocalisationModel model = new LocalisationModel(fluorophores.get(i).getId(), t + 1,
 							compound.getCoordinates(i), intensity, state[i][step]);
 					model.setLabel(compound.getLabel());
 					models[i][step] = model;
 				}
-			}
 
 			// Move the compound
 			if (diffusionRate > 0)
-			{
 				if (confinementDistribution != null)
 				{
 					// TODO
@@ -860,19 +805,17 @@ public abstract class ImageModel
 					// should be reflected back into the allowed region using the vector of the original move.
 
 					// This only works because the coordinates are a reference
-					double[] xyz = compound.getCoordinates();
-					double[] originalXyz = Arrays.copyOf(xyz, 3);
+					final double[] xyz = compound.getCoordinates();
+					final double[] originalXyz = Arrays.copyOf(xyz, 3);
 					boolean stationary = true;
 					for (int n = confinementAttempts; n-- > 0 && stationary;)
 					{
 						diffuse(compound, diffusionRate, axis);
 						if (!confinementDistribution.isWithin(compound.getCoordinates()))
-						{
 							//fail++;
 							// Reset position
 							for (int j = 0; j < 3; j++)
 								xyz[j] = originalXyz[j];
-						}
 						else
 						{
 							//pass++;
@@ -884,10 +827,7 @@ public abstract class ImageModel
 					//if (stationary)	System.out.printf("Failed to move %s\n", Arrays.toString(xyz));
 				}
 				else
-				{
 					diffuse(compound, diffusionRate, axis);
-				}
-			}
 
 			if (rotate)
 				rotate(compound);
@@ -895,9 +835,7 @@ public abstract class ImageModel
 		//System.out.printf("Pass = %d, fail = %d\n", pass, fail);
 
 		for (int i = 0; i < nFluorophores; i++)
-		{
 			linkLocalisations(localisations, models[i]);
-		}
 
 		return nFluorophores;
 	}

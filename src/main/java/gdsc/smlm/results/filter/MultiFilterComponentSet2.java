@@ -29,7 +29,7 @@ package gdsc.smlm.results.filter;
 public class MultiFilterComponentSet2 extends MultiFilterComponentSet
 {
 	private MultiFilterComponent component0;
-	private MultiFilterComponent component1;
+	private final MultiFilterComponent component1;
 
 	/**
 	 * Instantiates a new multi filter component set for 2 components.

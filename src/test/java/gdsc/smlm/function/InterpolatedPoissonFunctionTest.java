@@ -136,8 +136,8 @@ public class InterpolatedPoissonFunctionTest
 			for (int i = 0; i < photons.length; i++)
 			{
 				int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
-				//TestSettings.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
-				//TestSettings.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
+    			//TestSettings.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
+    			//TestSettings.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
 			}
 	}
 
@@ -150,14 +150,14 @@ public class InterpolatedPoissonFunctionTest
 					cumulativeProbabilityIsOneWithRealAbove4(gain[j], photons[i], minRange[j][i], maxRange[j][i] + 1);
 	}
 
-	private int[] cumulativeProbabilityIsOneWithInteger(final double gain, final double mu)
+	private static int[] cumulativeProbabilityIsOneWithInteger(final double gain, final double mu)
 	{
 		final double o = mu;
 
-		InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, false);
+		final InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, false);
 		double p = 0;
 
-		TDoubleArrayList values = new TDoubleArrayList();
+		final TDoubleArrayList values = new TDoubleArrayList();
 
 		double maxp = 0;
 		int maxc = 0;
@@ -166,7 +166,7 @@ public class InterpolatedPoissonFunctionTest
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 
-		int[] range = getRange(gain, mu);
+		final int[] range = getRange(gain, mu);
 		int min = range[0];
 		int max = range[1];
 		for (int x = min; x <= max; x++)
@@ -224,12 +224,10 @@ public class InterpolatedPoissonFunctionTest
 		}
 
 		// Find the range for 99.5% of the sum
-		double[] h = values.toArray();
+		final double[] h = values.toArray();
 		// Find cumulative
 		for (int i = 1; i < h.length; i++)
-		{
 			h[i] += h[i - 1];
-		}
 		int minx = 0, maxx = h.length - 1;
 		while (h[minx + 1] < 0.0025)
 			minx++;
@@ -249,19 +247,19 @@ public class InterpolatedPoissonFunctionTest
 		// Evaluate an initial range.
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		double range = Math.max(1, Math.sqrt(mu));
-		int min = Math.max(0, (int) Math.floor(gain * (mu - 3 * range)));
-		int max = (int) Math.ceil(gain * (mu + 3 * range));
+		final double range = Math.max(1, Math.sqrt(mu));
+		final int min = Math.max(0, (int) Math.floor(gain * (mu - 3 * range)));
+		final int max = (int) Math.ceil(gain * (mu + 3 * range));
 		return new int[] { min, max };
 	}
 
-	private void cumulativeProbabilityIsOneWithRealAbove4(final double gain, final double mu, int min, int max)
+	private static void cumulativeProbabilityIsOneWithRealAbove4(final double gain, final double mu, int min, int max)
 	{
 		final double o = mu;
 
 		final InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, true);
 		double p = 0;
-		SimpsonIntegrator in = new SimpsonIntegrator(3, 30);
+		final SimpsonIntegrator in = new SimpsonIntegrator(3, 30);
 
 		try
 		{
@@ -277,7 +275,7 @@ public class InterpolatedPoissonFunctionTest
 			TestSettings.info("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
 			//Assert.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			//double inc = max / 20000.0;
 			//for (double x = 0; x <= max; x += inc)
@@ -296,9 +294,7 @@ public class InterpolatedPoissonFunctionTest
 	{
 		for (int j = 0; j < gain.length; j++)
 			for (int i = 0; i < photons.length; i++)
-			{
 				canComputeGradient(gain[j], photons[i], false);
-			}
 	}
 
 	@Test
@@ -309,34 +305,34 @@ public class InterpolatedPoissonFunctionTest
 				canComputeGradient(gain[j], photons[i], true);
 	}
 
-	private void canComputeGradient(final double gain, final double mu, boolean nonInteger)
+	private static void canComputeGradient(final double gain, final double mu, boolean nonInteger)
 	{
 		final double o = mu;
-		double delta = 1e-3;
-		double uo = o + delta;
-		double lo = o - delta;
-		double diff = uo - lo;
+		final double delta = 1e-3;
+		final double uo = o + delta;
+		final double lo = o - delta;
+		final double diff = uo - lo;
 
-		InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, nonInteger);
+		final InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, nonInteger);
 
-		int[] range = getRange(gain, mu);
-		int min = range[0];
-		int max = range[1];
-		double[] dp_dt = new double[1];
-		double step = (nonInteger) ? 0.5 : 1;
+		final int[] range = getRange(gain, mu);
+		final int min = range[0];
+		final int max = range[1];
+		final double[] dp_dt = new double[1];
+		final double step = (nonInteger) ? 0.5 : 1;
 		for (double x = min; x <= max; x += step)
 		{
-			double p1 = f.likelihood(x, o);
-			double p2 = f.likelihood(x, o, dp_dt);
+			final double p1 = f.likelihood(x, o);
+			final double p2 = f.likelihood(x, o, dp_dt);
 			Assert.assertEquals(p1, p2, 0);
 
-			double up = f.likelihood(x, uo);
-			double lp = f.likelihood(x, lo);
+			final double up = f.likelihood(x, uo);
+			final double lp = f.likelihood(x, lo);
 
-			double eg = dp_dt[0];
-			double g = (up - lp) / diff;
-			double error = DoubleEquality.relativeError(g, eg);
-			double ox = x / gain;
+			final double eg = dp_dt[0];
+			final double g = (up - lp) / diff;
+			final double error = DoubleEquality.relativeError(g, eg);
+			final double ox = x / gain;
 			//TestSettings.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
 			//		error);
 
@@ -355,9 +351,7 @@ public class InterpolatedPoissonFunctionTest
 				//Assert.assertTrue(error < 0.5);
 			}
 			else
-			{
 				Assert.assertTrue(error < 1e-3);
-			}
 		}
 	}
 }

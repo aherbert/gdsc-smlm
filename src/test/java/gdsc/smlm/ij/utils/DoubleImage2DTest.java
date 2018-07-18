@@ -31,7 +31,7 @@ public class DoubleImage2DTest extends Image2DTest
 	@Override
 	protected DoubleImage2D createData(int w, int h)
 	{
-		double[] data = SimpleArrayUtils.newArray(w * h, 1.0, 1.0);
+		final double[] data = SimpleArrayUtils.newArray(w * h, 1.0, 1.0);
 		return new DoubleImage2D(w, h, data);
 	}
 

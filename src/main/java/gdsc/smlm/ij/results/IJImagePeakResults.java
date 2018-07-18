@@ -140,28 +140,28 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * {@link #mapY(float)}.
 	 */
 	protected final float scale;
-	
+
 	/** The number of results. */
 	protected int size = 0;
-	
+
 	/** The image data. */
 	protected double[] data;
-	
+
 	/** The xlimit. This is {@link #imageWidth} -1 */
 	protected final float xlimit;
-	
+
 	/** The ylimit. This is {@link #imageHeight} -1 */
 	protected final float ylimit;
-	
+
 	/** The image. */
 	protected ImagePlus imp = null;
-	
+
 	/** Set to true is the image is active. */
 	protected boolean imageActive = false;
-	
+
 	/** The display flags controlling the rendering. */
 	protected int displayFlags = 0;
-	
+
 	private int rollingWindowSize = 0;
 	private boolean displayImage = true;
 	private boolean liveImage = true;
@@ -172,7 +172,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private int nextRepaintSize = 0;
 	private long nextPaintTime = 0;
 	private Object pixels;
-	private SimpleLock imageLock = new SimpleLock();
+	private final SimpleLock imageLock = new SimpleLock();
 	private double repaintInterval = 0.1;
 	private long repaintDelay = 1000;
 	private int currentFrame;
@@ -258,7 +258,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		preBegin();
 
 		// Handle invalid bounds with an empty single pixel image
-		boolean validBounds = imageWidth > 0 && imageHeight > 0 &&
+		final boolean validBounds = imageWidth > 0 && imageHeight > 0 &&
 				(double) imageWidth * (double) imageHeight < Integer.MAX_VALUE;
 		int w, h;
 		if (validBounds)
@@ -276,7 +276,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		// Q. Should this be changed to handle the data in non-pixel distances.
 		// At the moment we hope that the results IO can work out the units and convert them during load.
-		boolean validCalibration = isUncalibrated() || (hasCalibration() && getCalibrationReader().hasDistanceUnit() &&
+		final boolean validCalibration = isUncalibrated() || (hasCalibration() && getCalibrationReader().hasDistanceUnit() &&
 				getCalibrationReader().getDistanceUnit() == DistanceUnit.PIXEL);
 
 		size = 0;
@@ -295,14 +295,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		imp = WindowManager.getImage(title);
 		currentFrame = 1;
 
-		ImageProcessor ip = createNewProcessor(w, h);
+		final ImageProcessor ip = createNewProcessor(w, h);
 
 		if (imp == null)
 		{
 			imp = new ImagePlus(title, ip);
 			// Apply the fire lookup table
 			WindowManager.setTempCurrentImage(imp);
-			LutLoader lut = new LutLoader();
+			final LutLoader lut = new LutLoader();
 			lut.run(lutName);
 			WindowManager.setTempCurrentImage(null);
 
@@ -313,7 +313,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		{
 			// Copy the lookup table
 			ip.setColorModel(imp.getProcessor().getColorModel());
-			ImageStack stack = createNewImageStack(w, h);
+			final ImageStack stack = createNewImageStack(w, h);
 			stack.addSlice(null, ip);
 			// If resizing then remove adornments
 			if (stack.getWidth() != imp.getWidth() || stack.getHeight() != imp.getHeight())
@@ -333,7 +333,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		if (hasCalibration() && getCalibrationReader().hasNmPerPixel())
 		{
-			Calibration cal = new Calibration();
+			final Calibration cal = new Calibration();
 
 			// This assumes the input data is in pixels
 
@@ -355,7 +355,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	private String createInfo()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		if (getSource() != null)
 			sb.append("Source: ").append(getSource().toXML()).append("\n");
 		if (getBounds() != null)
@@ -382,10 +382,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// Signal is OK to be equalised
 		}
 		else
-		{
 			// Peak and localisation should not use equalisation
 			displayFlags &= ~DISPLAY_EQUALIZED;
-		}
 
 		// The following cannot use weighting and should show the exact value so use replace
 		if ((displayFlags & (DISPLAY_PEAK | DISPLAY_ERROR | DISPLAY_Z_POSITION)) != 0)
@@ -422,14 +420,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// Zero is mapped to 0 in the LUT.
 			if ((displayFlags & DISPLAY_MAPPED) != 0)
 			{
-				MappedFloatProcessor fp = new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
+				final MappedFloatProcessor fp = new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
 				fp.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
 				return fp;
 			}
 			// -Infinity is mapped to 0 in the LUT.
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
 			{
-				InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight,
+				final InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight,
 						(float[]) pixels, null);
 				return fp;
 			}
@@ -442,13 +440,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	{
 		if ((displayFlags & DISPLAY_MAPPED) != 0)
 		{
-			MappedImageStack stack = new MappedImageStack(w, h);
+			final MappedImageStack stack = new MappedImageStack(w, h);
 			stack.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
 			return stack;
 		}
 		if ((displayFlags & DISPLAY_NEGATIVES) != 0)
 		{
-			InfinityMappedImageStack stack = new InfinityMappedImageStack(w, h);
+			final InfinityMappedImageStack stack = new InfinityMappedImageStack(w, h);
 			return stack;
 		}
 		return new ImageStack(w, h);
@@ -478,16 +476,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// Get the current maximum
 			double max = data[0];
 			for (int i = 1; i < data.length; i++)
-			{
 				if (max < data[i])
 					max = data[i];
-			}
 
 			// Compress into 16-bit image if necessary
-			int K = 65535;
-			double norm = K / max;
+			final int K = 65535;
+			final double norm = K / max;
 
-			short[] pixels = (short[]) this.pixels;
+			final short[] pixels = (short[]) this.pixels;
 
 			for (int i = 0; i < pixels.length; i++)
 			{
@@ -498,7 +494,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			}
 
 			// Get the histogram
-			int[] H = new int[K + 1];
+			final int[] H = new int[K + 1];
 			for (int i = 0; i < pixels.length; i++)
 				H[pixels[i] & 0xffff]++;
 
@@ -510,7 +506,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			// Perform weighted histogram equalisation
 			// See: ij.plugin.ContrastEnhancer
-			double[] sqrt = new double[H.length];
+			final double[] sqrt = new double[H.length];
 			sqrt[start] = Math.sqrt(H[start]);
 			double sum = sqrt[start];
 			for (int i = start + 1; i < K; i++)
@@ -520,15 +516,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			}
 			sum += Math.sqrt(H[K]);
 
-			double scale = K / sum;
+			final double scale = K / sum;
 
-			int[] lut = new int[K + 1];
+			final int[] lut = new int[K + 1];
 
 			lut[0] = 0;
 			sum = sqrt[start];
 			for (int i = start + 1; i < K; i++)
 			{
-				double delta = sqrt[i];
+				final double delta = sqrt[i];
 				sum += delta;
 				lut[i] = (int) (sum * scale + 0.5);
 				sum += delta;
@@ -543,7 +539,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		else
 		{
 			// 32-bit image. Just copy the data but find the maximum
-			float[] pixels = (float[]) this.pixels;
+			final float[] pixels = (float[]) this.pixels;
 			double max, min;
 
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
@@ -567,9 +563,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 					{
 						// Check for NaN
 						if (data[i] != data[i])
-						{
 							pixels[i] = Float.NEGATIVE_INFINITY;
-						}
 						else
 						{
 							if (max < data[i])
@@ -627,8 +621,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		checkAndUpdateToFrame(peak);
 
-		int[] indices = new int[5];
-		float[] values = new float[4];
+		final int[] indices = new int[5];
+		final float[] values = new float[4];
 
 		getValue(peak, params, error, x, y, indices, values);
 
@@ -645,22 +639,16 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			size += nPoints;
 
 			if ((displayFlags & DISPLAY_REPLACE) != 0)
-			{
 				// Replace the data
 				for (int i = 0; i < nValues; i++)
 					data[indices[i]] = values[i];
-			}
 			else if ((displayFlags & DISPLAY_MAX) != 0)
-			{
 				for (int i = 0; i < nValues; i++)
 					data[indices[i]] = max(data[indices[i]], values[i]);
-			}
 			else
-			{
 				// Add the data
 				for (int i = 0; i < nValues; i++)
 					data[indices[i]] += values[i];
-			}
 		}
 	}
 
@@ -722,28 +710,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		// Use the signal for the count
 		if ((displayFlags & DISPLAY_SIGNAL) != 0)
-		{
 			v = params[PeakResult.INTENSITY];
-		}
-		// Use the peak number for the count
 		else if ((displayFlags & DISPLAY_PEAK) != 0)
-		{
 			v = peak;
-		}
-		// Use the peak number for the count
 		else if ((displayFlags & DISPLAY_Z_POSITION) != 0)
-		{
 			v = params[PeakResult.Z];
-		}
-		// Use the peak number for the count
 		else if ((displayFlags & DISPLAY_ERROR) != 0)
-		{
 			v = (float) error;
-		}
 		else
-		{
 			v = 1;
-		}
 
 		getValue(v, x, y, indices, value);
 	}
@@ -805,26 +780,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// Interpolate to the lower x pixel
 			wx = 0.5f + dx;
 			if (x1 == 0)
-			{
 				xDelta = 0;
-			}
 			else
-			{
 				xDelta = -1;
-			}
 		}
 		else
 		{
 			// Interpolate to the upper x pixel
 			wx = 1.5f - dx;
 			if (x1 == xlimit)
-			{
 				xDelta = 0;
-			}
 			else
-			{
 				xDelta = 1;
-			}
 		}
 
 		if (dy < 0.5f)
@@ -832,26 +799,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// Interpolate to the lower y pixel
 			wy = 0.5f + dy;
 			if (y1 == 0)
-			{
 				yDelta = 0;
-			}
 			else
-			{
 				yDelta = -imageWidth;
-			}
 		}
 		else
 		{
 			// Interpolate to the upper y pixel
 			wy = 1.5f - dy;
 			if (y1 == ylimit)
-			{
 				yDelta = 0;
-			}
 			else
-			{
 				yDelta = imageWidth;
-			}
 		}
 
 		indices[0] = index;
@@ -894,8 +853,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		checkAndUpdateToFrame(peak);
 
-		int[] indices = new int[5];
-		float[] values = new float[4];
+		final int[] indices = new int[5];
+		final float[] values = new float[4];
 
 		getValue(v, x, y, indices, values);
 
@@ -926,8 +885,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 			return;
 
-		int[] indices = new int[5];
-		float[] values = new float[4];
+		final int[] indices = new int[5];
+		final float[] values = new float[4];
 
 		getValue(v, x, y, indices, values);
 
@@ -953,27 +912,27 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (!imageActive)
 			return;
 
-		int[] indices = new int[5];
-		float[] values = new float[4];
+		final int[] indices = new int[5];
+		final float[] values = new float[4];
 
 		int nPoints = 0;
 		int nValues = 0;
 
 		// Buffer output in batches
-		int[] allIndices = new int[100];
-		float[] allValues = new float[allIndices.length];
+		final int[] allIndices = new int[100];
+		final float[] allValues = new float[allIndices.length];
 
 		// Not sure why the image was forced to update with replace
 		//boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
-		int limit = allIndices.length - 4;
+		final int limit = allIndices.length - 4;
 
 		for (int j = 0; j < allx.length; j++)
 		{
-			float x = mapX(allx[j]);
-			float y = mapY(ally[j]);
-			int peak = allpeak[j];
+			final float x = mapX(allx[j]);
+			final float y = mapY(ally[j]);
+			final int peak = allpeak[j];
 
 			// Check bounds
 			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
@@ -1030,25 +989,25 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (!imageActive)
 			return;
 
-		int[] indices = new int[5];
-		float[] values = new float[4];
+		final int[] indices = new int[5];
+		final float[] values = new float[4];
 
 		int nPoints = 0;
 		int nValues = 0;
 
 		// Buffer output in batches
-		int[] allIndices = new int[100];
-		float[] allValues = new float[allIndices.length];
+		final int[] allIndices = new int[100];
+		final float[] allValues = new float[allIndices.length];
 
 		//boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
-		int limit = allIndices.length - 4;
+		final int limit = allIndices.length - 4;
 
 		for (int j = 0; j < allx.length; j++)
 		{
-			float x = mapX(allx[j]);
-			float y = mapY(ally[j]);
+			final float x = mapX(allx[j]);
+			final float y = mapY(ally[j]);
 
 			// Check bounds
 			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
@@ -1119,19 +1078,17 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		synchronized (data) // Stop other threads adding more data
 		{
 			int i = 0;
-			ImageStack stack = imp.getStack();
+			final ImageStack stack = imp.getStack();
 			peak -= rollingWindowSize;
 			while (peak >= currentFrame)
 			{
 				//System.out.printf("%d => %d (%d)\n", currentFrame, currentFrame + rollingWindowSize, peak+rollingWindowSize);
 				if (i++ == 0)
-				{
 					// Draw all current data for first time we move forward.
 					// Force repaint
 					forceUpdateImage();
-				}
 
-				ImageProcessor ip = createNewProcessor(stack.getWidth(), stack.getHeight());
+				final ImageProcessor ip = createNewProcessor(stack.getWidth(), stack.getHeight());
 				stack.addSlice(null, ip);
 				currentFrame += rollingWindowSize;
 			}
@@ -1175,25 +1132,25 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (!imageActive)
 			return;
 
-		int[] indices = new int[5];
-		float[] values = new float[4];
+		final int[] indices = new int[5];
+		final float[] values = new float[4];
 
 		int nPoints = 0;
 		int nValues = 0;
 
 		// Buffer output in batches
-		int[] allIndices = new int[100];
-		float[] allValues = new float[allIndices.length];
+		final int[] allIndices = new int[100];
+		final float[] allValues = new float[allIndices.length];
 
 		//boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
-		int limit = allIndices.length - 4;
+		final int limit = allIndices.length - 4;
 
-		for (PeakResult result : results)
+		for (final PeakResult result : results)
 		{
-			float x = mapX(result.getXPosition());
-			float y = mapY(result.getYPosition());
+			final float x = mapX(result.getXPosition());
+			final float y = mapY(result.getYPosition());
 
 			// Check bounds
 			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
@@ -1253,27 +1210,25 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		if (repaintDelay != 0)
 		{
-			long time = System.currentTimeMillis();
+			final long time = System.currentTimeMillis();
 
 			if (time < nextPaintTime)
 			{
 				// Get the amount of time it took to acquire the data
-				int n = size - lastPaintSize;
-				long elapsed = time - (nextPaintTime - repaintDelay);
+				final int n = size - lastPaintSize;
+				final long elapsed = time - (nextPaintTime - repaintDelay);
 
 				if (elapsed > 0)
 				{
 					// Set the next repaint size using linear scaling
-					long remaining = nextPaintTime - time;
-					int extra = (int) (n * ((double) remaining / elapsed));
+					final long remaining = nextPaintTime - time;
+					final int extra = (int) (n * ((double) remaining / elapsed));
 					//System.out.printf("Updating next paint size: %d : %d -> %d\n", lastPaintSize, nextRepaintSize,
 					//		nextRepaintSize + extra);
 					nextRepaintSize += extra;
 				}
 				else
-				{
 					setNextRepaintSize(size);
-				}
 				return;
 			}
 		}
@@ -1306,7 +1261,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private void drawImage()
 	{
 		if (imageLock.acquire())
-		{
 			try
 			{
 				createImage();
@@ -1322,7 +1276,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			{
 				imageLock.release();
 			}
-		}
 	}
 
 	/*
@@ -1346,17 +1299,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	{
 		// Wait for previous image to finish rendering
 		while (!imageLock.acquire())
-		{
 			try
 			{
 				System.out.printf("Waiting for final image\n");
 				Thread.sleep(50);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				// Ignore
 			}
-		}
 
 		// We have the lock
 		try
@@ -1370,9 +1321,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		}
 
 		if (rollingWindowSize > 0)
-		{
 			imp.setDimensions(1, 1, imp.getStackSize());
-		}
 
 		imageActive = false;
 	}

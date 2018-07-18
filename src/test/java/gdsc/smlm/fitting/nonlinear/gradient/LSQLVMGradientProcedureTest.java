@@ -72,7 +72,7 @@ public class LSQLVMGradientProcedureTest
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
-		double[] y = new double[0];
+		final double[] y = new double[0];
 		Assert.assertEquals(
 				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
 				LSQLVMGradientProcedureMatrix6.class);
@@ -153,37 +153,37 @@ public class LSQLVMGradientProcedureTest
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams,
 			BaseLSQLVMGradientProcedureFactory factory)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		double[][] alpha = new double[nparams][nparams];
-		double[] beta = new double[nparams];
+		final double[][] alpha = new double[nparams][nparams];
+		final double[] beta = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createFakeData(nparams, iter, paramsList, yList);
-		int n = x.length;
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final int[] x = createFakeData(nparams, iter, paramsList, yList);
+		final int n = x.length;
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
-		String name = factory.getClass().getSimpleName();
+		final String name = factory.getClass().getSimpleName();
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			final BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
 			p.gradient(paramsList.get(i));
-			double s = p.value;
-			double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
+			final double s = p.value;
+			final double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 			// Exactly the same ...
 			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 0);
 			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p.beta, beta, 0);
 
-			double[] al = p.getAlphaLinear();
+			final double[] al = p.getAlphaLinear();
 			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al, new DenseMatrix64F(alpha).data,
 					0);
 
-			double[][] am = p.getAlphaMatrix();
+			final double[][] am = p.getAlphaMatrix();
 			for (int j = 0; j < nparams; j++)
 				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], alpha[j], 0);
 		}
@@ -209,7 +209,7 @@ public class LSQLVMGradientProcedureTest
 			long t1 = time();
 			for (int i = 0; i < 10; i++)
 			{
-				long t2 = t1;
+				final long t2 = t1;
 				t1 = time();
 				if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) // 2% difference
 					break;
@@ -243,18 +243,18 @@ public class LSQLVMGradientProcedureTest
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createFakeData(nparams, iter, paramsList, yList);
+		final int[] x = createFakeData(nparams, iter, paramsList, yList);
 		final int n = x.length;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			final BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
 			p.gradient(paramsList.get(i));
 		}
 
@@ -262,35 +262,35 @@ public class LSQLVMGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+					final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 					for (int j = loops; j-- > 0;)
 						calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
+					final BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : %s %d = %d : %fx\n", time1,
 				factory.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
@@ -308,22 +308,22 @@ public class LSQLVMGradientProcedureTest
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		String name = GradientCalculator.class.getSimpleName();
+		final String name = GradientCalculator.class.getSimpleName();
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), func);
+			final BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 
-			BaseLSQLVMGradientProcedure p2 = new LSQLVMGradientProcedure(yList.get(i), func);
+			final BaseLSQLVMGradientProcedure p2 = new LSQLVMGradientProcedure(yList.get(i), func);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
@@ -333,8 +333,8 @@ public class LSQLVMGradientProcedureTest
 			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getAlphaLinear(),
 					p2.getAlphaLinear(), 0);
 
-			double[][] am1 = p1.getAlphaMatrix();
-			double[][] am2 = p2.getAlphaMatrix();
+			final double[][] am1 = p1.getAlphaMatrix();
+			final double[][] am2 = p2.getAlphaMatrix();
 			for (int j = 0; j < nparams; j++)
 				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am1[j], am2[j], 0);
 		}
@@ -384,11 +384,11 @@ public class LSQLVMGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+			final BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
 			p.gradient(paramsList.get(i));
 			p.gradient(paramsList.get(i));
 
-			BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+			final BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
@@ -401,35 +401,35 @@ public class LSQLVMGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+					final BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+					final BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p2.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(!doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx\n",
 				factory1.getClass().getSimpleName(), time1, factory2.getClass().getSimpleName(), nparams, time2,
@@ -444,53 +444,53 @@ public class LSQLVMGradientProcedureTest
 
 	private void gradientProcedureComputesGradient(ErfGaussian2DFunction func)
 	{
-		int nparams = func.getNumberOfGradients();
-		int[] indices = func.gradientIndices();
+		final int nparams = func.getNumberOfGradients();
+		final int[] indices = func.gradientIndices();
 
-		int iter = 100;
+		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList, true);
 
 		// for the gradients
-		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+		final double delta = 1e-4;
+		final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
 		// Must compute most of the time
-		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-		TestCounter failCounter = new TestCounter(failureLimit, nparams);
+		final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		final TestCounter failCounter = new TestCounter(failureLimit, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final int ii = i;
-			double[] y = yList.get(i);
-			double[] a = paramsList.get(i);
-			double[] a2 = a.clone();
-			BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
+			final double[] y = yList.get(i);
+			final double[] a = paramsList.get(i);
+			final double[] a2 = a.clone();
+			final BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 			p.gradient(a);
 			//double s = p.ssx;
-			double[] beta = p.beta.clone();
+			final double[] beta = p.beta.clone();
 			for (int j = 0; j < nparams; j++)
 			{
 				final int jj = j;
-				int k = indices[j];
-				double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
+				final int k = indices[j];
+				final double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
 				a2[k] = a[k] + d;
 				p.value(a2);
-				double s1 = p.value;
+				final double s1 = p.value;
 				a2[k] = a[k] - d;
 				p.value(a2);
-				double s2 = p.value;
+				final double s2 = p.value;
 				a2[k] = a[k];
 
 				// Apply a factor of -2 to compute the actual gradients:
 				// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
 				beta[j] *= -2;
 
-				double gradient = (s1 - s2) / (2 * d);
+				final double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
 				//		gradient);
 				failCounter.run(j, () -> {
@@ -506,42 +506,40 @@ public class LSQLVMGradientProcedureTest
 	@Test
 	public void gradientProcedureComputesSameOutputWithBias()
 	{
-		ErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth);
-		int nparams = func.getNumberOfGradients();
+		final ErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth);
+		final int nparams = func.getNumberOfGradients();
 
-		int iter = 100;
+		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		ArrayList<double[]> alphaList = new ArrayList<>(iter);
-		ArrayList<double[]> betaList = new ArrayList<>(iter);
-		ArrayList<double[]> xList = new ArrayList<>(iter);
+		final ArrayList<double[]> alphaList = new ArrayList<>(iter);
+		final ArrayList<double[]> betaList = new ArrayList<>(iter);
+		final ArrayList<double[]> xList = new ArrayList<>(iter);
 
 		// Manipulate the background
-		double defaultBackground = Background;
+		final double defaultBackground = Background;
 		try
 		{
 			Background = 1e-2;
 			createData(1, iter, paramsList, yList, true);
 
-			EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
+			final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{
-				double[] y = yList.get(i);
-				double[] a = paramsList.get(i);
-				BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
+				final double[] y = yList.get(i);
+				final double[] a = paramsList.get(i);
+				final BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 				p.gradient(a);
-				double[] beta = p.beta;
+				final double[] beta = p.beta;
 				alphaList.add(p.getAlphaLinear());
 				betaList.add(beta.clone());
 				for (int j = 0; j < nparams; j++)
-				{
 					if (Math.abs(beta[j]) < 1e-6)
 						TestSettings.info("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
-				}
 				// Solve
 				if (!solver.solve(p.getAlphaMatrix(), beta))
 					throw new AssertionError();
@@ -550,10 +548,10 @@ public class LSQLVMGradientProcedureTest
 			}
 
 			//for (int b = 1; b < 1000; b *= 2)
-			for (double b : new double[] { -500, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 500 })
+			for (final double b : new double[] { -500, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 500 })
 			{
-				Statistics[] rel = new Statistics[nparams];
-				Statistics[] abs = new Statistics[nparams];
+				final Statistics[] rel = new Statistics[nparams];
+				final Statistics[] abs = new Statistics[nparams];
 				for (int i = 0; i < nparams; i++)
 				{
 					rel[i] = new Statistics();
@@ -562,15 +560,15 @@ public class LSQLVMGradientProcedureTest
 
 				for (int i = 0; i < paramsList.size(); i++)
 				{
-					double[] y = add(yList.get(i), b);
-					double[] a = paramsList.get(i).clone();
+					final double[] y = add(yList.get(i), b);
+					final double[] a = paramsList.get(i).clone();
 					a[0] += b;
-					BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
+					final BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 					p.gradient(a);
-					double[] beta = p.beta;
-					double[] alpha2 = alphaList.get(i);
-					double[] beta2 = betaList.get(i);
-					double[] x2 = xList.get(i);
+					final double[] beta = p.beta;
+					final double[] alpha2 = alphaList.get(i);
+					final double[] beta2 = betaList.get(i);
+					final double[] x2 = xList.get(i);
 
 					Assert.assertArrayEquals("Beta", beta2, beta, 1e-10);
 					Assert.assertArrayEquals("Alpha", alpha2, p.getAlphaLinear(), 1e-10);
@@ -621,10 +619,10 @@ public class LSQLVMGradientProcedureTest
 	 */
 	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
 	{
-		int n = blockWidth * blockWidth;
+		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
+		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
@@ -636,13 +634,11 @@ public class LSQLVMGradientProcedureTest
 			params[j + 5] = random(Ywidth);
 		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
-		{
 			// Add random Poisson noise
 			y[i] = rdg.nextPoisson(func.eval(i));
-		}
 
 		if (randomiseParams)
 		{
@@ -673,13 +669,13 @@ public class LSQLVMGradientProcedureTest
 	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
 			boolean randomiseParams)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + 6 * npeaks];
-			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
+			final double[] params = new double[1 + 6 * npeaks];
+			final double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -688,13 +684,13 @@ public class LSQLVMGradientProcedureTest
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
-			double[] y = createFakeData(params);
+			final double[] params = new double[nparams];
+			final double[] y = createFakeData(params);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -703,36 +699,30 @@ public class LSQLVMGradientProcedureTest
 
 	private double[] createFakeData(double[] params)
 	{
-		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
+		final int n = blockWidth * blockWidth;
+		final RandomGenerator r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] = r.nextDouble();
-		}
 
 		return y;
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
+		final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
-		{
 			params2List.add(copydouble(paramsList.get(i)));
-		}
 		return params2List;
 	}
 
 	private static double[] copydouble(double[] d)
 	{
-		double[] d2 = new double[d.length];
+		final double[] d2 = new double[d.length];
 		for (int i = 0; i < d.length; i++)
 			d2[i] = d[i];
 		return d2;

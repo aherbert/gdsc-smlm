@@ -36,7 +36,7 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
  */
 public class PeakResultsList extends AbstractPeakResults implements PeakResults
 {
-	private List<PeakResults> results = new ArrayList<>();
+	private final List<PeakResults> results = new ArrayList<>();
 
 	/**
 	 * Add a result format to the output. If a PeakResultsList is passed then it will be
@@ -51,10 +51,8 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void addOutput(PeakResults peakResults)
 	{
 		if (peakResults instanceof PeakResultsList)
-		{
-			for (PeakResults r : ((PeakResultsList) peakResults).results)
+			for (final PeakResults r : ((PeakResultsList) peakResults).results)
 				addOutput(r);
-		}
 		else
 		{
 			peakResults.copySettings(this);
@@ -98,7 +96,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	@Override
 	public void begin()
 	{
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.begin();
 	}
 
@@ -111,28 +109,28 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
 			float[] params, float[] paramsStdDev)
 	{
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.add(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
 	}
 
 	@Override
 	public void add(PeakResult result)
 	{
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.add(result);
 	}
 
 	@Override
 	public void addAll(PeakResult[] results)
 	{
-		for (PeakResults peakResults : this.results)
+		for (final PeakResults peakResults : this.results)
 			peakResults.addAll(results);
 	}
 
 	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
-		for (PeakResults peakResults : this.results)
+		for (final PeakResults peakResults : this.results)
 			peakResults.addAll(results);
 	}
 
@@ -155,7 +153,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	@Override
 	public void end()
 	{
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.end();
 	}
 
@@ -167,7 +165,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	@Override
 	public boolean isActive()
 	{
-		for (PeakResults peakResults : this.results)
+		for (final PeakResults peakResults : this.results)
 			if (peakResults.isActive())
 				return true;
 		return false;
@@ -181,17 +179,12 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	 */
 	public PeakResultsList getThreadSafeList()
 	{
-		PeakResultsList newList = new PeakResultsList();
+		final PeakResultsList newList = new PeakResultsList();
 		newList.copySettings(this);
-		for (PeakResults peakResults : this.results)
-		{
-			// This will copy the settings
-			//newList.addOutput(peakResults);
-
+		for (final PeakResults peakResults : this.results)
 			// This assumes the settings are OK, i.e. the result was added
 			// using addOutput(...).
 			newList.results.add(SynchronizedPeakResults.create(peakResults));
-		}
 		return newList;
 	}
 
@@ -202,7 +195,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void setSource(ImageSource source)
 	{
 		super.setSource(source);
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.setSource(source);
 	}
 
@@ -210,7 +203,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void setBounds(Rectangle bounds)
 	{
 		super.setBounds(bounds);
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.setBounds(bounds);
 	}
 
@@ -218,7 +211,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void setCalibration(Calibration calibration)
 	{
 		super.setCalibration(calibration);
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.setCalibration(calibration);
 	}
 
@@ -226,7 +219,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void setPSF(PSF psf)
 	{
 		super.setPSF(psf);
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.setPSF(psf);
 	}
 
@@ -234,7 +227,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void setConfiguration(String configuration)
 	{
 		super.setConfiguration(configuration);
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.setConfiguration(configuration);
 	}
 
@@ -242,7 +235,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void setName(String name)
 	{
 		super.setName(name);
-		for (PeakResults peakResults : results)
+		for (final PeakResults peakResults : results)
 			peakResults.setName(name);
 	}
 
@@ -250,7 +243,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void copySettings(PeakResults results)
 	{
 		super.copySettings(results);
-		for (PeakResults peakResults : this.results)
+		for (final PeakResults peakResults : this.results)
 			peakResults.copySettings(results);
 	}
 }

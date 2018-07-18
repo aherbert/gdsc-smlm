@@ -45,7 +45,7 @@ public class Gaussian2DFitter
 	/** Allow calculation of residuals to be turned off (overwrite constructor fit configuration) */
 	protected boolean computeResiduals = true;
 	/** The lower bounds for function solvers. */
-	protected double[] lower; 
+	protected double[] lower;
 	/** The upper bounds for function solvers. */
 	protected double[] upper;
 
@@ -58,9 +58,7 @@ public class Gaussian2DFitter
 	public Gaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration)
 	{
 		if (fitConfiguration == null)
-		{
 			throw new NullPointerException("No fit configuration");
-		}
 		this.fitConfiguration = fitConfiguration;
 		computeResiduals = fitConfiguration.isComputeResiduals();
 	}
@@ -69,8 +67,8 @@ public class Gaussian2DFitter
 			int dirn, double background)
 	{
 		int i, i_start, i_end, i_step;
-		double v = data[index];
-		double v_half = 0.5f * (v + background);
+		final double v = data[index];
+		final double v_half = 0.5f * (v + background);
 		double v_prev = v, v_this;
 		int jump;
 
@@ -183,11 +181,11 @@ public class Gaussian2DFitter
 	 */
 	public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks, double[] heights)
 	{
-		int npeaks = peaks.length;
+		final int npeaks = peaks.length;
 
 		final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
 
-		double[] params = new double[1 + paramsPerPeak * npeaks];
+		final double[] params = new double[1 + paramsPerPeak * npeaks];
 
 		// Get peak heights (if multiple peaks)
 		if (npeaks > 1 && (heights == null || heights.length != peaks.length))
@@ -214,16 +212,14 @@ public class Gaussian2DFitter
 			params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
 		}
 		else
-		{
 			for (int i = 0, j = 0; i < peaks.length; i++, j += paramsPerPeak)
 			{
-				int index = peaks[i];
+				final int index = peaks[i];
 				params[j + Gaussian2DFunction.SIGNAL] = heights[i] - background;
 				params[j + Gaussian2DFunction.X_POSITION] = index % maxx;
 				params[j + Gaussian2DFunction.Y_POSITION] = index / maxx;
 				amplitudeEstimate[i] = true;
 			}
-		}
 
 		// We have estimated the background already
 		return fit(data, maxx, maxy, npeaks, params, amplitudeEstimate, true);
@@ -457,10 +453,8 @@ public class Gaussian2DFitter
 		// Check all the heights are valid first
 		int zeroHeight = 0;
 		for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += paramsPerPeak)
-		{
 			if (params[j] <= 0)
 				zeroHeight++;
-		}
 
 		// Check there are peaks to fit
 		if (zeroHeight == npeaks)
@@ -473,10 +467,8 @@ public class Gaussian2DFitter
 			// Amplitude estimates
 			double max = 0;
 			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
-			{
 				if (amplitudeEstimate[i] && max < params[j])
 					max = params[j];
-			}
 			if (max == 0)
 			{
 				max = y[0];
@@ -487,18 +479,14 @@ public class Gaussian2DFitter
 			}
 			max *= 0.1; // Use fraction of the max peak
 			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
-			{
 				if (amplitudeEstimate[i] && params[j] <= 0)
 					params[j] = max;
-			}
 
 			// Signal estimates
 			max = 0;
 			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
-			{
 				if (!amplitudeEstimate[i] && max < params[j])
 					max = params[j];
-			}
 			if (max == 0)
 			{
 				for (int i = maxx * maxy; --i > 0;)
@@ -507,18 +495,14 @@ public class Gaussian2DFitter
 			}
 			max *= 0.1; // Use fraction of the max peak
 			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
-			{
 				if (!amplitudeEstimate[i] && params[j] <= 0)
 					params[j] = max;
-			}
 		}
 
 		if (!checkParameters(maxx, maxy, npeaks, params, amplitudeEstimate, ySize, y, paramsPerPeak, background,
 				initialParams))
-		{
 			return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, Double.NaN, initialParams, null, null, npeaks,
 					0, null, 0, 0);
-		}
 
 		// Re-copy the parameters now they have all been set
 		initialParams = params.clone();
@@ -532,16 +516,12 @@ public class Gaussian2DFitter
 
 		// Bounds are more restrictive than constraints
 		if (solver.isBounded())
-		{
 			// Input configured bounds
 			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, this.lower, this.upper);
-		}
 		else if (solver.isConstrained())
-		{
 			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
-		}
 
-		double[] paramsDev = (fitConfiguration.isComputeDeviations()) ? new double[params.length] : null;
+		final double[] paramsDev = (fitConfiguration.isComputeDeviations()) ? new double[params.length] : null;
 		if (computeResiduals)
 			residuals = new double[ySize];
 		FitStatus result = solver.fit(y, residuals, params, paramsDev);
@@ -556,18 +536,14 @@ public class Gaussian2DFitter
 
 			// Re-assemble all the parameters
 			if (fitConfiguration.isXSDFitting())
-			{
 				if (fitConfiguration.isYSDFitting())
-				{
 					// Ensure widths are positive
 					for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 					{
 						params[j + Gaussian2DFunction.X_SD] = Math.abs(params[j + Gaussian2DFunction.X_SD]);
 						params[j + Gaussian2DFunction.Y_SD] = Math.abs(params[j + Gaussian2DFunction.Y_SD]);
 					}
-				}
 				else
-				{
 					// Ensure Y width is updated with the fitted X width
 					for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 					{
@@ -577,16 +553,10 @@ public class Gaussian2DFitter
 						if (paramsDev != null)
 							paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
 					}
-				}
-			}
 			if (fitConfiguration.isAngleFitting())
-			{
 				// Ensure the angle is within the correct bounds
 				for (int i = Gaussian2DFunction.ANGLE; i < params.length; i += paramsPerPeak)
-				{
 					correctAngle(i, params, paramsDev);
-				}
-			}
 
 			Object statusData = null;
 			if (fitConfiguration.isFitValidation())
@@ -596,10 +566,8 @@ public class Gaussian2DFitter
 			}
 
 			if (residuals != null)
-			{
 				for (int i = 0; i < residuals.length; i++)
 					residuals[i] = y[i] - residuals[i];
-			}
 
 			return new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
 					solver.getValue(), initialParams, params, paramsDev, npeaks, solver.getNumberOfFittedParameters(),
@@ -656,7 +624,7 @@ public class Gaussian2DFitter
 			// Set-up for estimating peak width at half maximum
 			position[0] = (int) Math.round(xpos);
 			position[1] = (int) Math.round(ypos);
-			int index = position[1] * maxx + position[0];
+			final int index = position[1] * maxx + position[0];
 
 			double sx, sy, angle;
 			if (fitConfiguration.isZFitting())
@@ -678,11 +646,8 @@ public class Gaussian2DFitter
 				angle = params[j + Gaussian2DFunction.ANGLE];
 
 				if (sx == 0)
-				{
 					if (fitConfiguration.getInitialXSD() > 0)
-					{
 						sx = fitConfiguration.getInitialXSD();
-					}
 					else
 					{
 						// Fail if the width cannot be estimated due to out of bounds
@@ -691,16 +656,12 @@ public class Gaussian2DFitter
 
 						sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
 					}
-				}
 
 				if (sy == 0)
-				{
 					if (fitConfiguration.isYSDFitting())
 					{
 						if (fitConfiguration.getInitialYSD() > 0)
-						{
 							sy = fitConfiguration.getInitialYSD();
-						}
 						else
 						{
 							// Fail if the width cannot be estimated
@@ -711,24 +672,15 @@ public class Gaussian2DFitter
 						}
 					}
 					else
-					{
 						sy = sx;
-					}
-				}
 
 				// Guess the initial angle if input angle is out-of-bounds
 				if (angle == 0)
-				{
 					if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI &&
 							fitConfiguration.getInitialAngle() <= -Math.PI)
-					{
 						if (sx != sy)
-						{
 							// There is no angle gradient information if the widths are equal. Zero and it will be ignored
 							angle = fitConfiguration.getInitialAngle();
-						}
-					}
-				}
 
 			}
 
@@ -778,8 +730,8 @@ public class Gaussian2DFitter
 	static double[] findCentreOfMass(final double[] subImage, final int[] dimensions, final int range,
 			final int[] centre)
 	{
-		int[] min = new int[2];
-		int[] max = new int[2];
+		final int[] min = new int[2];
+		final int[] max = new int[2];
 		for (int i = 2; i-- > 0;)
 		{
 			min[i] = centre[i] - range;
@@ -790,14 +742,14 @@ public class Gaussian2DFitter
 				max[i] = dimensions[i] - 1;
 		}
 
-		double[] newCom = new double[2];
+		final double[] newCom = new double[2];
 		double sum = 0;
 		for (int y = min[1]; y <= max[1]; y++)
 		{
 			int index = dimensions[0] * y + min[0];
 			for (int x = min[0]; x <= max[0]; x++, index++)
 			{
-				double value = subImage[index];
+				final double value = subImage[index];
 				sum += value;
 				newCom[0] += x * value;
 				newCom[1] += y * value;
@@ -805,9 +757,7 @@ public class Gaussian2DFitter
 		}
 
 		for (int i = 2; i-- > 0;)
-		{
 			newCom[i] /= sum;
-		}
 
 		return newCom;
 	}
@@ -838,17 +788,15 @@ public class Gaussian2DFitter
 			final int ySize, final int paramsPerPeak, double[] lower2, double[] upper2)
 	{
 		// Create appropriate bounds for the parameters
-		double[] lower = new double[params.length];
-		double[] upper = new double[lower.length];
+		final double[] lower = new double[params.length];
+		final double[] upper = new double[lower.length];
 		double yMax = y[0];
 		double yMin = y[0];
 		for (int i = 1; i < ySize; i++)
-		{
 			if (yMax < y[i])
 				yMax = y[i];
 			else if (yMin > y[i])
 				yMin = y[i];
-		}
 		if (fitConfiguration.isBackgroundFitting())
 		{
 			if (yMax > params[Gaussian2DFunction.BACKGROUND])
@@ -864,11 +812,9 @@ public class Gaussian2DFitter
 						(yMin - params[Gaussian2DFunction.BACKGROUND]);
 
 			if (lower[Gaussian2DFunction.BACKGROUND] < 0)
-			{
 				// This is a problem for MLE fitting
 				if (solver.isStrictlyPositiveFunction())
 					lower[Gaussian2DFunction.BACKGROUND] = 0;
-			}
 		}
 
 		// Configure the bounds for the width.
@@ -909,10 +855,8 @@ public class Gaussian2DFitter
 			//System.out.printf("%f or %f\n", upper[Gaussian2DFunction.SIGNAL], factor * params[Gaussian2DFunction.X_SD] *
 			//		params[Gaussian2DFunction.Y_SD]);
 			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
-			{
 				upper[j + Gaussian2DFunction.SIGNAL] = factor * params[j + Gaussian2DFunction.X_SD] *
 						params[j + Gaussian2DFunction.Y_SD];
-			}
 		}
 
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
@@ -922,15 +866,11 @@ public class Gaussian2DFitter
 				lower[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] -
 						(lower[j + Gaussian2DFunction.SIGNAL] - params[j + Gaussian2DFunction.SIGNAL]);
 			if (lower[j + Gaussian2DFunction.SIGNAL] <= 0)
-			{
 				// This is a problem for MLE fitting
 				if (solver.isStrictlyPositiveFunction())
-				{
 					// If this is zero it causes problems when computing gradients since the
 					// Gaussian function may not exist. So use a small value instead.
 					lower[j + Gaussian2DFunction.SIGNAL] = 0; //.1;
-				}
-			}
 			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
 				upper[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] +
 						(params[j + Gaussian2DFunction.SIGNAL] - upper[j + Gaussian2DFunction.SIGNAL]);
@@ -973,9 +913,6 @@ public class Gaussian2DFitter
 		}
 
 		if (solver.isStrictlyPositiveFunction())
-		{
-			// This is a problem for MLE fitting
-
 			// If the lower bounds are zero it causes problems when computing gradients since
 			// the Gaussian function may not exist. So use a small value instead.
 			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
@@ -990,25 +927,16 @@ public class Gaussian2DFitter
 						lower[j + Gaussian2DFunction.Y_SD] = 0.01;
 				}
 			}
-		}
 
 		// Check against the configured bounds
 		if (lower2 != null)
-		{
 			for (int i = Math.max(lower.length, lower2.length); i-- > 0;)
-			{
 				if (lower[i] < lower2[i])
 					lower[i] = lower2[i];
-			}
-		}
 		if (upper2 != null)
-		{
 			for (int i = Math.max(upper.length, upper2.length); i-- > 0;)
-			{
 				if (upper[i] > upper2[i])
 					upper[i] = upper2[i];
-			}
-		}
 
 		// Debug check
 		for (int i = (fitConfiguration.isBackgroundFitting()) ? 0 : 1; i < params.length; i++)
@@ -1036,11 +964,9 @@ public class Gaussian2DFitter
 	private double getMinWidthFactor()
 	{
 		if (fitConfiguration.getMinWidthFactor() < 1 && fitConfiguration.getMinWidthFactor() >= 0)
-		{
 			// Add some buffer to allow fitting to go past then come back to the limit
 			// This also allows fitting to fail if the spot is definitely smaller than the configured limits.
 			return fitConfiguration.getMinWidthFactor() * 0.7;
-		}
 		return 0;
 	}
 
@@ -1052,11 +978,9 @@ public class Gaussian2DFitter
 	private double getMaxWidthFactor()
 	{
 		if (fitConfiguration.getMaxWidthFactor() > 1)
-		{
 			// Add some buffer to allow fitting to go past then come back to the limit.
 			// This also allows fitting to fail if the spot is definitely bigger than the configured limits.
 			return fitConfiguration.getMaxWidthFactor() * 1.5;
-		}
 		return Double.MAX_VALUE;
 	}
 
@@ -1083,8 +1007,8 @@ public class Gaussian2DFitter
 			final double[] y, final int ySize, final int paramsPerPeak)
 	{
 		// Create appropriate bounds for the parameters
-		double[] lower = new double[params.length];
-		double[] upper = new double[lower.length];
+		final double[] lower = new double[params.length];
+		final double[] upper = new double[lower.length];
 		Arrays.fill(lower, Float.NEGATIVE_INFINITY);
 		Arrays.fill(upper, Float.POSITIVE_INFINITY);
 
@@ -1094,10 +1018,8 @@ public class Gaussian2DFitter
 		{
 			double yMin = 0;
 			for (int i = 0; i < ySize; i++)
-			{
 				if (yMin > y[i])
 					yMin = y[i];
-			}
 			if (yMin < params[Gaussian2DFunction.BACKGROUND])
 				lower[Gaussian2DFunction.BACKGROUND] = yMin;
 			else
@@ -1106,9 +1028,7 @@ public class Gaussian2DFitter
 		}
 
 		for (int j = Gaussian2DFunction.SIGNAL; j < lower.length; j += paramsPerPeak)
-		{
 			lower[j] = 0;
-		}
 		solver.setConstraints(lower, upper);
 	}
 
@@ -1130,9 +1050,7 @@ public class Gaussian2DFitter
 		final double twicePI = 2 * Math.PI;
 		double fixed = (angle + Math.PI) % twicePI;
 		if (fixed < 0)
-		{
 			fixed += twicePI;
-		}
 		angle = fixed - Math.PI;
 
 		//		// Angle should now be in -180 - 180 degrees domain
@@ -1142,10 +1060,10 @@ public class Gaussian2DFitter
 		//		}
 
 		// Commented out as this interferes with the PSF Estimator
-		int ix = i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE;
-		int iy = i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE;
-		double xWidth = params[ix];
-		double yWidth = params[iy];
+		final int ix = i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE;
+		final int iy = i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE;
+		final double xWidth = params[ix];
+		final double yWidth = params[iy];
 		// The fit will compute the angle from the major axis.
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)
@@ -1158,9 +1076,7 @@ public class Gaussian2DFitter
 			angle += Math.PI / 2.0;
 			// Check domain
 			if (angle > Math.PI)
-			{
 				angle -= 2 * Math.PI;
-			}
 		}
 
 		// Return in 0 - 180 degrees domain since the Gaussian has 2-fold symmetry,
@@ -1170,7 +1086,7 @@ public class Gaussian2DFitter
 
 	private static void swap(final int i, final int j, final double[] params)
 	{
-		double tmp = params[i];
+		final double tmp = params[i];
 		params[i] = params[j];
 		params[j] = tmp;
 	}
@@ -1313,7 +1229,7 @@ public class Gaussian2DFitter
 	{
 		final int ySize = maxx * maxy;
 		// The solvers require y to be the correct length
-		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
+		final double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
 		residuals = (computeResiduals) ? new double[ySize] : null;
 
 		// -----------------------
@@ -1328,13 +1244,9 @@ public class Gaussian2DFitter
 		final boolean result = solver.evaluate(y, residuals, params);
 
 		if (result)
-		{
 			if (residuals != null)
-			{
 				for (int i = 0; i < residuals.length; i++)
 					residuals[i] = y[i] - residuals[i];
-			}
-		}
 
 		return result;
 	}
@@ -1362,7 +1274,7 @@ public class Gaussian2DFitter
 	{
 		final int ySize = maxx * maxy;
 		// The solvers require y to be the correct length
-		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
+		final double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
 
 		// -----------------------
 		// Use alternative fitters
@@ -1376,17 +1288,11 @@ public class Gaussian2DFitter
 		final boolean result = solver.computeDeviations(y, params, paramsDev);
 
 		if (result)
-		{
 			// Ensure the deviations are copied for a symmetric Gaussian
 			if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
-			{
 				// Ensure Y deviation is updated with the X deviation
 				for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
-				{
 					paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
-				}
-			}
-		}
 
 		return result;
 	}

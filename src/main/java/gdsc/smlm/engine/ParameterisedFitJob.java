@@ -35,7 +35,7 @@ import gdsc.smlm.results.filter.MultiPathFitResult;
  */
 public class ParameterisedFitJob extends FitJob
 {
-	private FitParameters parameters;
+	private final FitParameters parameters;
 	private List<PeakResult> peakResults;
 	private int[] indices = new int[0];
 	private FitResult[] fitResults = null;

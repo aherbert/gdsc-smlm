@@ -247,7 +247,6 @@ public class GaussianFunctionFactory
 	{
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
-		{
 			if (nPeaks == 1)
 			{
 				if ((flags & FIT_BACKGROUND) != 0)
@@ -292,7 +291,6 @@ public class GaussianFunctionFactory
 				if ((flags & FIT_X_WIDTH) != 0)
 					return new MultiNBCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 			}
-		}
 
 		// Legacy simple Gaussian functions
 		if (nPeaks == 1)
@@ -378,7 +376,7 @@ public class GaussianFunctionFactory
 	{
 		if (a == null)
 			throw new IllegalArgumentException("Parameter array is null");
-		int nPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+		final int nPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		// Check the array length is correct (including the background at position 0)
 		if (a.length != 1 + nPeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			throw new IllegalArgumentException("Incorrect array size for the number of peaks");

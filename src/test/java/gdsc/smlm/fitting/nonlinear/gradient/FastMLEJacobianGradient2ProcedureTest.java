@@ -105,19 +105,19 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 
 	private void gradientProcedureComputesSameAsBaseGradientProcedure(int nparams)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
-			FastMLEJacobianGradient2Procedure p2 = new FastMLEJacobianGradient2Procedure(yList.get(i), func);
+			final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			final FastMLEJacobianGradient2Procedure p2 = new FastMLEJacobianGradient2Procedure(yList.get(i), func);
 			p.computeSecondDerivative(paramsList.get(i));
 			p2.computeSecondDerivative(paramsList.get(i));
 			// Virtually the same ...
@@ -134,15 +134,15 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		gradientCalculatorComputesGradient(2, new MultiFreeCircularErfGaussian2DFunction(2, blockWidth, blockWidth));
 
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-		double sx = 1.08;
-		double sy = 1.01;
-		double gamma = 0.389;
-		double d = 0.531;
-		double Ax = -0.0708;
-		double Bx = -0.073;
-		double Ay = 0.164;
-		double By = 0.0417;
-		HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
+		final double sx = 1.08;
+		final double sy = 1.01;
+		final double gamma = 0.389;
+		final double d = 0.531;
+		final double Ax = -0.0708;
+		final double Bx = -0.073;
+		final double Ay = 0.164;
+		final double By = 0.0417;
+		final HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
 		gradientCalculatorComputesGradient(1,
 				new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
@@ -151,56 +151,56 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 	private void gradientCalculatorComputesGradient(int nPeaks, ErfGaussian2DFunction func)
 	{
 		// Check the first and second derivatives
-		int nparams = func.getNumberOfGradients();
-		int[] indices = func.gradientIndices();
+		final int nparams = func.getNumberOfGradients();
+		final int[] indices = func.gradientIndices();
 
-		int iter = 100;
+		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(nPeaks, iter, paramsList, yList, true);
 
 		// for the gradients
-		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+		final double delta = 1e-4;
+		final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
 		// Must compute most of the time
-		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
 		//failureLimit = 0;
-		TestCounter failCounter = new TestCounter(failureLimit, 2 * nparams);
-		TestCounter failCounter2 = new TestCounter(failureLimit, nparams * nparams);
+		final TestCounter failCounter = new TestCounter(failureLimit, 2 * nparams);
+		final TestCounter failCounter2 = new TestCounter(failureLimit, nparams * nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final int ii = i;
-			double[] y = yList.get(i);
-			double[] a = paramsList.get(i);
-			double[] a2 = a.clone();
-			FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y, func);
+			final double[] y = yList.get(i);
+			final double[] a = paramsList.get(i);
+			final double[] a2 = a.clone();
+			final FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y, func);
 			//double ll = p.computeLogLikelihood(a);
 			p.computeJacobian(a);
-			double[] d1 = p.d1.clone();
-			double[] d2 = p.d2.clone();
-			DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
+			final double[] d1 = p.d1.clone();
+			final double[] d2 = p.d2.clone();
+			final DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
 			for (int j = 0; j < nparams; j++)
 			{
 				final int j_ = j;
-				int k = indices[j];
-				double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
+				final int k = indices[j];
+				final double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
 				a2[k] = a[k] + d;
-				double llh = p.computeLogLikelihood(a2);
+				final double llh = p.computeLogLikelihood(a2);
 				p.computeFirstDerivative(a2);
 				double[] d1h = p.d1.clone();
 				a2[k] = a[k] - d;
-				double lll = p.computeLogLikelihood(a2);
+				final double lll = p.computeLogLikelihood(a2);
 				p.computeFirstDerivative(a2);
 				double[] d1l = p.d1.clone();
 				a2[k] = a[k];
 
-				double gradient1 = (llh - lll) / (2 * d);
-				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
+				final double gradient1 = (llh - lll) / (2 * d);
+				final double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
 				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d,
 				//		gradient1, d1[j], gradient2, d2[j]);
 				failCounter.run(j, () -> {
@@ -228,8 +228,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					}
 
 					final int jj_ = jj;
-					int kk = indices[jj];
-					double dd = Precision.representableDelta(a[kk], (a[kk] == 0) ? delta : a[kk] * delta);
+					final int kk = indices[jj];
+					final double dd = Precision.representableDelta(a[kk], (a[kk] == 0) ? delta : a[kk] * delta);
 					a2[kk] = a[kk] + dd;
 					p.computeFirstDerivative(a2);
 					d1h = p.d1.clone();
@@ -239,7 +239,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					a2[kk] = a[kk];
 
 					// Use index j even though we adjusted index jj
-					double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
+					final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
 					final boolean ok = eq.almostEqualRelativeOrAbsolute(gradient3, J.get(j, jj));
 					//System.out.printf("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b\n", i, k, kk, func.getName(k),
 					//		a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);

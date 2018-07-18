@@ -48,14 +48,14 @@ public class JTransformsTest
 {
 	private static FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
 	{
-		ByteProcessor bp = new ByteProcessor(size, size);
+		final ByteProcessor bp = new ByteProcessor(size, size);
 		bp.setColor(255);
 		bp.fillOval(x, y, w, h);
-		EDM e = new EDM();
-		FloatProcessor fp = e.makeFloatEDM(bp, 0, true);
+		final EDM e = new EDM();
+		final FloatProcessor fp = e.makeFloatEDM(bp, 0, true);
 		if (r != null)
 		{
-			float[] d = (float[]) fp.getPixels();
+			final float[] d = (float[]) fp.getPixels();
 			for (int i = 0; i < d.length; i++)
 				d[i] += r.nextFloat() * 0.01;
 		}
@@ -76,25 +76,25 @@ public class JTransformsTest
 
 	private static void canComputeUsingFFT(boolean convolution)
 	{
-		int size = 16;
-		int ex = 5, ey = 7;
-		int ox = 1, oy = 2;
-		FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, null);
-		FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, null);
+		final int size = 16;
+		final int ex = 5, ey = 7;
+		final int ox = 1, oy = 2;
+		final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, null);
+		final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, null);
 
-		float[] input1 = (float[]) fp1.getPixels();
-		float[] input2 = (float[]) fp2.getPixels();
+		final float[] input1 = (float[]) fp1.getPixels();
+		final float[] input2 = (float[]) fp2.getPixels();
 
-		FHTFilter ff = new FHTFilter(input2.clone(), size, size);
+		final FHTFilter ff = new FHTFilter(input2.clone(), size, size);
 		ff.setOperation((convolution) ? Operation.CONVOLUTION : Operation.CORRELATION);
-		float[] e = input1.clone();
+		final float[] e = input1.clone();
 		ff.filter(e, size, size);
 
 		// Do the same with JTransforms
-		float[] data1 = new float[input1.length * 2];
-		FloatFFT_2D fft = new FloatFFT_2D(size, size);
+		final float[] data1 = new float[input1.length * 2];
+		final FloatFFT_2D fft = new FloatFFT_2D(size, size);
 		System.arraycopy(input1, 0, data1, 0, input1.length);
-		float[] data2 = new float[data1.length];
+		final float[] data2 = new float[data1.length];
 		System.arraycopy(input2, 0, data2, 0, input2.length);
 
 		fft.realForwardFull(data1);
@@ -104,17 +104,17 @@ public class JTransformsTest
 		// https://en.wikipedia.org/wiki/Complex_number#Multiplication_and_division
 		for (int i = 0; i < data2.length; i += 2)
 		{
-			float a = data1[i];
-			float b = data1[i + 1];
-			float c = data2[i];
-			float d = (convolution) ? data2[i + 1] : -data2[i + 1]; // Get the conjugate for correlation
+			final float a = data1[i];
+			final float b = data1[i + 1];
+			final float c = data2[i];
+			final float d = (convolution) ? data2[i + 1] : -data2[i + 1]; // Get the conjugate for correlation
 			data1[i] = a * c - b * d;
 			data1[i + 1] = b * c + a * d;
 		}
 
 		fft.complexInverse(data1, true);
 
-		float[] o = new float[e.length];
+		final float[] o = new float[e.length];
 		for (int i = 0, j = 0; i < o.length; i++, j += 2)
 			o[i] = data1[j];
 		FHT2.swapQuadrants(new FloatProcessor(size, size, o));
@@ -128,23 +128,23 @@ public class JTransformsTest
 		// Note: no need to test the correlation as the transformed data
 		// is the same format as FHT so we just test that.
 
-		int size = 16;
-		int ex = 5, ey = 7;
-		int ox = 1, oy = 2;
-		FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, null);
-		FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, null);
+		final int size = 16;
+		final int ex = 5, ey = 7;
+		final int ox = 1, oy = 2;
+		final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, null);
+		final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, null);
 
-		float[] input1 = (float[]) fp1.getPixels();
-		float[] input2 = (float[]) fp2.getPixels();
+		final float[] input1 = (float[]) fp1.getPixels();
+		final float[] input2 = (float[]) fp2.getPixels();
 
-		FHT2 fht1 = new FHT2(input1.clone(), size, false);
-		FHT2 fht2 = new FHT2(input2.clone(), size, false);
+		final FHT2 fht1 = new FHT2(input1.clone(), size, false);
+		final FHT2 fht2 = new FHT2(input2.clone(), size, false);
 
 		fht1.transform();
 		fht2.transform();
 
 		// Do the same with JTransforms
-		FloatDHT_2D dht = new FloatDHT_2D(size, size);
+		final FloatDHT_2D dht = new FloatDHT_2D(size, size);
 
 		dht.forward(input1);
 		dht.forward(input2);
@@ -179,7 +179,7 @@ public class JTransformsTest
 
 		private float[][] clone(float[][] data)
 		{
-			float[][] data2 = new float[data.length][];
+			final float[][] data2 = new float[data.length][];
 			for (int i = 0; i < data.length; i++)
 				data2[i] = data[i].clone();
 			return data2;
@@ -298,33 +298,33 @@ public class JTransformsTest
 
 		// Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 
-		int size = 256;
-		int w = size / 4;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		RandomDataGenerator rdg = new RandomDataGenerator(r);
+		final int size = 256;
+		final int w = size / 4;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 
 		// Blob in the centre
 		FloatProcessor fp = createProcessor(size, size / 2 - w / 2, size / 2 - w / 2, w, w, null);
-		FHT2 fht2 = new FHT2((float[]) fp.getPixels(), size, false);
+		final FHT2 fht2 = new FHT2((float[]) fp.getPixels(), size, false);
 		fht2.transform();
 		fht2.initialiseFastMultiply();
 
 		// Random blobs, original and correlated
-		int N = 40;
-		float[][] data = new float[N * 2][];
-		int lower = w;
-		int upper = size - w;
+		final int N = 40;
+		final float[][] data = new float[N * 2][];
+		final int lower = w;
+		final int upper = size - w;
 		for (int i = 0, j = 0; i < N; i++)
 		{
-			int x = rdg.nextInt(lower, upper);
-			int y = rdg.nextInt(lower, upper);
+			final int x = rdg.nextInt(lower, upper);
+			final int y = rdg.nextInt(lower, upper);
 			fp = createProcessor(size, x, y, w, w, r);
-			float[] pixels = (float[]) fp.getPixels();
+			final float[] pixels = (float[]) fp.getPixels();
 			data[j++] = pixels.clone();
-			FHT2 fht1 = new FHT2(pixels, size, false);
+			final FHT2 fht1 = new FHT2(pixels, size, false);
 			fht1.copyTables(fht2);
 			fht2.transform();
-			float[] pixels2 = new float[pixels.length];
+			final float[] pixels2 = new float[pixels.length];
 			fht2.conjugateMultiply(fht2, pixels2);
 			data[j++] = pixels2;
 		}
@@ -333,7 +333,7 @@ public class JTransformsTest
 		//CommonUtils.setThreadsBeginN_1D_FFT_4Threads(Long.MAX_VALUE);
 		CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
 
-		TimingService ts = new TimingService();
+		final TimingService ts = new TimingService();
 		ts.execute(new IJFHTSpeedTask(size, data));
 		ts.execute(new IJFHT2SpeedTask(size, data));
 		ts.execute(new JTransformsDHTSpeedTask(size, data));
@@ -343,8 +343,8 @@ public class JTransformsTest
 
 		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 
-		double t1 = ts.get(-1).getMean();
-		double t2 = ts.get(-2).getMean();
+		final double t1 = ts.get(-1).getMean();
+		final double t2 = ts.get(-2).getMean();
 		TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-2).getTask().getName(), t2,
 				ts.get(-1).getTask().getName(), t1, t2 / t1);
 

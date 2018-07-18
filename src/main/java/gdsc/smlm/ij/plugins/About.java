@@ -113,7 +113,7 @@ public class About implements PlugIn, MacroExtension
 
 		if (arg.equals("config"))
 		{
-			int result = installResource("/gdsc/smlm/plugins.config", "plugins", "smlm.config",
+			final int result = installResource("/gdsc/smlm/plugins.config", "plugins", "smlm.config",
 					"SMLM Tools Configuration",
 					"The configuration file is used to specify which plugins to display on the SMLM Tools window. Creating a custom file will need to be repeated when the available plugins change.",
 					ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
@@ -150,12 +150,12 @@ public class About implements PlugIn, MacroExtension
 	public static void showAbout()
 	{
 		// Locate the README.txt file and load that into the dialog. Include revision
-		Class<About> resourceClass = About.class;
+		final Class<About> resourceClass = About.class;
 
 		StringBuilder msg = new StringBuilder();
 		String helpURL = HELP_URL;
-		String version = Version.getVersion();
-		String buildDate = Version.getBuildDate();
+		final String version = Version.getVersion();
+		final String buildDate = Version.getBuildDate();
 
 		try (BufferedReader input = new BufferedReader(
 				new UnicodeReader(resourceClass.getResourceAsStream("/gdsc/smlm/README.txt"), null)))
@@ -163,20 +163,16 @@ public class About implements PlugIn, MacroExtension
 			// Read the contents of the README file
 			String line;
 			while ((line = input.readLine()) != null)
-			{
 				if (line.contains("http:"))
-				{
 					helpURL = line;
-				}
 				else
 				{
 					if (line.equals(""))
 						line = " "; // Required to insert a line in the GenericDialog
 					msg.append(line).append("\n");
 				}
-			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Default message
 			msg.append("GDSC SMLM Plugins for ImageJ\n");
@@ -197,7 +193,7 @@ public class About implements PlugIn, MacroExtension
 		if (helpURL != null)
 			msg.append("\n \n(Click help for more information)");
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage(msg.toString());
 		gd.addHelp(helpURL);
 		gd.hideCancelButton();
@@ -224,21 +220,21 @@ public class About implements PlugIn, MacroExtension
 	private static int installResource(String resource, String ijDirectory, String destinationName,
 			String resourceTitle, String notes, ConfigureOption... options)
 	{
-		Class<About> resourceClass = About.class;
+		final Class<About> resourceClass = About.class;
 
-		String dir = IJ.getDirectory(ijDirectory);
+		final String dir = IJ.getDirectory(ijDirectory);
 		if (dir == null)
 		{
 			IJ.error("Unable to locate " + ijDirectory + " directory");
 			return -1;
 		}
 
-		EnumSet<ConfigureOption> opt = EnumSet.of(options[0], options);
+		final EnumSet<ConfigureOption> opt = EnumSet.of(options[0], options);
 
 		GenericDialog gd = new GenericDialog(TITLE);
-		String filename = dir + destinationName;
-		boolean fileExists = new File(filename).exists();
-		StringBuilder sb = new StringBuilder();
+		final String filename = dir + destinationName;
+		final boolean fileExists = new File(filename).exists();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Configure resource '").append(resourceTitle).append("' at:\n \n").append(filename);
 		if (notes != null)
 			sb.append("\n \n").append(gdsc.core.utils.XmlUtils.lineWrap(notes, 80, 0, null));
@@ -247,7 +243,7 @@ public class About implements PlugIn, MacroExtension
 
 		// Configure the options
 		String[] choices = new String[3];
-		ConfigureOption[] optChoices = new ConfigureOption[choices.length];
+		final ConfigureOption[] optChoices = new ConfigureOption[choices.length];
 		int count = 0;
 		if (opt.contains(ConfigureOption.INSTALL))
 		{
@@ -282,7 +278,7 @@ public class About implements PlugIn, MacroExtension
 		if (gd.wasCanceled())
 			return -1;
 
-		ConfigureOption choice = optChoices[gd.getNextChoiceIndex()];
+		final ConfigureOption choice = optChoices[gd.getNextChoiceIndex()];
 
 		if (choice == ConfigureOption.REMOVE)
 		{
@@ -291,7 +287,7 @@ public class About implements PlugIn, MacroExtension
 				new File(filename).delete();
 				return 1;
 			}
-			catch (SecurityException e)
+			catch (final SecurityException e)
 			{
 				IJ.error("Unable to remove existing file");
 			}
@@ -299,17 +295,15 @@ public class About implements PlugIn, MacroExtension
 		}
 
 		// Read the file
-		LinkedList<String> contents = new LinkedList<>();
+		final LinkedList<String> contents = new LinkedList<>();
 		try (BufferedReader input = new BufferedReader(
 				new UnicodeReader(resourceClass.getResourceAsStream(resource), null)))
 		{
 			String line;
 			while ((line = input.readLine()) != null)
-			{
 				contents.add(line);
-			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
 			return -1;
@@ -321,15 +315,15 @@ public class About implements PlugIn, MacroExtension
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Edit the file contents before install:");
 			sb.setLength(0);
-			for (String line : contents)
+			for (final String line : contents)
 				sb.append(line).append("\n");
 			gd.addTextAreas(sb.toString(), null, 20, 80);
 			gd.showDialog();
 			if (gd.wasOKed())
 			{
 				contents.clear();
-				String text = gd.getNextText();
-				for (String line : text.split("\n"))
+				final String text = gd.getNextText();
+				for (final String line : text.split("\n"))
 					contents.add(line);
 			}
 		}
@@ -339,15 +333,15 @@ public class About implements PlugIn, MacroExtension
 		try
 		{
 			// Write
-			FileOutputStream fos = new FileOutputStream(filename);
+			final FileOutputStream fos = new FileOutputStream(filename);
 			output = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
-			for (String content : contents)
+			for (final String content : contents)
 			{
 				output.write(content);
 				output.newLine();
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
 		}
@@ -361,15 +355,14 @@ public class About implements PlugIn, MacroExtension
 	private static void close(BufferedWriter output)
 	{
 		if (output != null)
-		{
 			try
 			{
 				output.close();
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
+				// Ignore
 			}
-		}
 	}
 
 	private void setupExtensions()
@@ -388,21 +381,13 @@ public class About implements PlugIn, MacroExtension
 		if (name == null)
 			return "";
 		if (name.equals("getNumberOfSpecies"))
-		{
 			return TraceDiffusion.getNumberOfSpecies(args);
-		}
 		if (name.equals("getD"))
-		{
 			return TraceDiffusion.getD(args);
-		}
 		if (name.equals("getF"))
-		{
 			return TraceDiffusion.getF(args);
-		}
 		if (name.equals("getSpecies"))
-		{
 			return TraceDiffusion.getSpecies(args);
-		}
 		return "";
 	}
 
@@ -414,7 +399,7 @@ public class About implements PlugIn, MacroExtension
 	@Override
 	public ExtensionDescriptor[] getExtensionFunctions()
 	{
-		ArrayList<ExtensionDescriptor> list = new ArrayList<>(3);
+		final ArrayList<ExtensionDescriptor> list = new ArrayList<>(3);
 		list.add(ExtensionDescriptor.newDescriptor("getNumberOfSpecies", this,
 				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
 		list.add(ExtensionDescriptor.newDescriptor("getD", this, MacroExtension.ARG_NUMBER,

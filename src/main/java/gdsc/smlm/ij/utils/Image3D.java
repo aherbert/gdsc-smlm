@@ -62,7 +62,7 @@ public abstract class Image3D
 				throw new IllegalArgumentException("Negative dimensions");
 			return -1;
 		}
-		long size = (long) ns * nr * nc;
+		final long size = (long) ns * nr * nc;
 		if (size > MAX_SIZE_OF_32_BIT_ARRAY)
 		{
 			if (raiseException)
@@ -119,21 +119,15 @@ public abstract class Image3D
 		createData(checkSize(nc, nr, ns, true));
 		nr_by_nc = nr * nc;
 		if (stack.getBitDepth() == 32)
-		{
 			for (int s = 0; s < ns; s++)
-			{
 				copyFrom((float[]) stack.getPixels(s + 1), 0, nr_by_nc, s * nr_by_nc);
-			}
-		}
 		else
-		{
 			for (int s = 1, i = 0; s <= ns; s++)
 			{
-				ImageProcessor ip = stack.getProcessor(s);
+				final ImageProcessor ip = stack.getProcessor(s);
 				for (int j = 0; i < nr_by_nc; j++)
 					setf(i++, ip.getf(j));
 			}
-		}
 	}
 
 	/**
@@ -289,10 +283,10 @@ public abstract class Image3D
 	 */
 	public ImageStack getImageStack()
 	{
-		ImageStack stack = new ImageStack(nc, nr);
+		final ImageStack stack = new ImageStack(nc, nr);
 		for (int s = 0; s < ns; s++)
 		{
-			float[] pixels = new float[nr_by_nc];
+			final float[] pixels = new float[nr_by_nc];
 			copyTo(s * nr_by_nc, pixels, 0, nr_by_nc);
 			stack.addSlice(null, pixels);
 		}
@@ -312,9 +306,9 @@ public abstract class Image3D
 	{
 		if (i < 0 || i >= getDataLength())
 			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + getDataLength());
-		int[] xyz = new int[3];
+		final int[] xyz = new int[3];
 		xyz[2] = i / nr_by_nc;
-		int j = i % nr_by_nc;
+		final int j = i % nr_by_nc;
 		xyz[1] = j / nc;
 		xyz[0] = j % nc;
 		return xyz;
@@ -335,7 +329,7 @@ public abstract class Image3D
 		if (i < 0 || i >= getDataLength())
 			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + getDataLength());
 		xyz[2] = i / nr_by_nc;
-		int j = i % nr_by_nc;
+		final int j = i % nr_by_nc;
 		xyz[1] = j / nc;
 		xyz[0] = j % nc;
 	}
@@ -415,9 +409,9 @@ public abstract class Image3D
 	public Image3D crop(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
-		int d = image.getSize();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
+		final int d = image.getSize();
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
@@ -459,12 +453,12 @@ public abstract class Image3D
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = w * h;
-		ImageStack stack = new ImageStack(w, h, d);
+		final int size = w * h;
+		final ImageStack stack = new ImageStack(w, h, d);
 		for (int s = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;
-			float[] region = new float[size];
+			final float[] region = new float[size];
 			for (int r = 0, i = 0; r < h; r++)
 			{
 				copyTo(base, region, i, w);
@@ -500,18 +494,18 @@ public abstract class Image3D
 	public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d)
 			throws IllegalArgumentException
 	{
-		int nc = stack.getWidth();
-		int nr = stack.getHeight();
-		int ns = stack.getSize();
+		final int nc = stack.getWidth();
+		final int nr = stack.getHeight();
+		final int ns = stack.getSize();
 
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		ImageStack stack2 = new ImageStack(w, h, d);
+		final ImageStack stack2 = new ImageStack(w, h, d);
 		for (int s = 0; s < d; s++, z++)
 		{
-			ImageProcessor ip = stack.getProcessor(1 + z);
+			final ImageProcessor ip = stack.getProcessor(1 + z);
 			ip.setRoi(x, y, w, h);
 			stack2.setPixels(ip.crop().getPixels(), 1 + s);
 		}
@@ -535,9 +529,9 @@ public abstract class Image3D
 	public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
-		int d = image.getSize();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
+		final int d = image.getSize();
 		if (w < 1 || h < 1 || d < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
@@ -571,19 +565,19 @@ public abstract class Image3D
 	public void insert(int x, int y, int z, ImageStack stack) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = stack.getWidth();
-		int h = stack.getHeight();
-		int d = stack.getSize();
+		final int w = stack.getWidth();
+		final int h = stack.getHeight();
+		final int d = stack.getSize();
 		if (w < 1 || h < 1 || d < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		boolean isFloat = stack.getBitDepth() == 32;
-		FloatProcessor fp = (isFloat) ? new FloatProcessor(w, h) : null;
+		final boolean isFloat = stack.getBitDepth() == 32;
+		final FloatProcessor fp = (isFloat) ? new FloatProcessor(w, h) : null;
 		for (int s = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;
-			float[] region = (float[]) ((isFloat) ? stack.getPixels(1 + s)
+			final float[] region = (float[]) ((isFloat) ? stack.getPixels(1 + s)
 					: stack.getProcessor(1 + s).toFloat(0, fp).getPixels());
 			for (int r = 0, i = 0; r < h; r++)
 			{
@@ -611,15 +605,15 @@ public abstract class Image3D
 	public void insert(int x, int y, int z, ImageProcessor image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
 		if (w < 1 || h < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || z >= ns)
 			throw new IllegalArgumentException("Region not within the data");
-		boolean isFloat = image.getBitDepth() == 32;
+		final boolean isFloat = image.getBitDepth() == 32;
 		int base = z * nr_by_nc + y * nc + x;
-		float[] region = (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
+		final float[] region = (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
 		for (int r = 0, i = 0; r < h; r++)
 		{
 			copyFrom(region, i, w, base);
@@ -667,9 +661,9 @@ public abstract class Image3D
 			z = subtract(z, d);
 		}
 		// Compute 3D intersect with this object
-		int x2 = clip(nc, x, w);
-		int y2 = clip(nr, y, h);
-		int z2 = clip(ns, z, d);
+		final int x2 = clip(nc, x, w);
+		final int y2 = clip(nr, y, h);
+		final int z2 = clip(ns, z, d);
 		x = clip(nc, x);
 		y = clip(nr, y);
 		z = clip(ns, z);
@@ -717,9 +711,9 @@ public abstract class Image3D
 			z = subtract(z, d);
 		}
 		// Compute 3D intersect with this object
-		int x2 = clip(nc, x, w);
-		int y2 = clip(nr, y, h);
-		int z2 = clip(ns, z, d);
+		final int x2 = clip(nc, x, w);
+		final int y2 = clip(nr, y, h);
+		final int z2 = clip(ns, z, d);
 		x = clip(nc, x);
 		y = clip(nr, y);
 		z = clip(ns, z);
@@ -757,7 +751,7 @@ public abstract class Image3D
 	private static int subtract(int value, int subtraction)
 	{
 		// Avoid underflow
-		long v = (long) value - subtraction;
+		final long v = (long) value - subtraction;
 		return (v < Integer.MIN_VALUE) ? Integer.MIN_VALUE : (int) v;
 	}
 
@@ -775,7 +769,7 @@ public abstract class Image3D
 	private static int clip(int upper, int value, int addition)
 	{
 		// Avoid overflow
-		long v = (long) value + addition;
+		final long v = (long) value + addition;
 		if (v < 0)
 			return 0;
 		if (v > upper)
@@ -821,7 +815,7 @@ public abstract class Image3D
 	public int findMinIndex(int x, int y, int z, int w, int h, int d)
 			throws IllegalArgumentException, IllegalStateException
 	{
-		int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
+		final int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
 		x = intersect[0];
 		y = intersect[1];
 		z = intersect[2];
@@ -871,7 +865,7 @@ public abstract class Image3D
 	public int findMaxIndex(int x, int y, int z, int w, int h, int d)
 			throws IllegalArgumentException, IllegalStateException
 	{
-		int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
+		final int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
 		x = intersect[0];
 		y = intersect[1];
 		z = intersect[2];
@@ -886,13 +880,11 @@ public abstract class Image3D
 			for (int r = 0; r < h; r++)
 			{
 				for (int j = 0; j < w; j++)
-				{
 					if (get(base + j) > max)
 					{
 						index = base + j;
 						max = get(index);
 					}
-				}
 				base += nc;
 			}
 		}
@@ -957,7 +949,7 @@ public abstract class Image3D
 	 */
 	public double computeSum(int x, int y, int z, int w, int h, int d)
 	{
-		int[] intersect = computeIntersect(x, y, z, w, h, d);
+		final int[] intersect = computeIntersect(x, y, z, w, h, d);
 		w = intersect[3];
 		h = intersect[4];
 		d = intersect[5];
@@ -1056,7 +1048,7 @@ public abstract class Image3D
 	 */
 	public double computeSum(double[] table, int x, int y, int z, int w, int h, int d)
 	{
-		int[] intersect = computeIntersect(x, y, z, w, h, d);
+		final int[] intersect = computeIntersect(x, y, z, w, h, d);
 		w = intersect[3];
 		h = intersect[4];
 		d = intersect[5];
@@ -1084,16 +1076,16 @@ public abstract class Image3D
 		// j = jmax when j>jmax
 		// k = kmax when k>kmax
 
-		int x_1 = intersect[0] - 1;
-		int y_1 = intersect[1] - 1;
-		int z_1 = intersect[2] - 1;
+		final int x_1 = intersect[0] - 1;
+		final int y_1 = intersect[1] - 1;
+		final int z_1 = intersect[2] - 1;
 		// The intersect has already checked the bounds
 		//int x_w_1 = Math.min(x_1 + w, nc);
 		//int y_h_1 = Math.min(y_1 + h, nr);
 		//int z_d_1 = Math.min(z_1 + d, ns);
-		int x_w_1 = x_1 + w;
-		int y_h_1 = y_1 + h;
-		int z_d_1 = z_1 + d;
+		final int x_w_1 = x_1 + w;
+		final int y_h_1 = y_1 + h;
+		final int z_d_1 = z_1 + d;
 
 		//double sum = table[index(x_w_1, y_h_1, z_d_1)];
 		//if (y_1 >= 0)
@@ -1123,14 +1115,14 @@ public abstract class Image3D
 		//return sum;
 
 		// This has been ordered to use the smallest sums first (i.e. closer to x,y,z than x+w,y+h,z+d)
-		int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
+		final int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
 		if (z_1 >= 0)
 		{
-			int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+			final int xw_yh_z = xw_yh_zd - d * nr_by_nc;
 			double sum = 0;
 			if (y_1 >= 0)
 			{
-				int h_ = h * nc;
+				final int h_ = h * nc;
 				if (x_1 >= 0)
 					sum = table[xw_yh_zd - w - h_] - table[xw_yh_z - w - h_] - table[xw_yh_zd - w] + table[xw_yh_z - w];
 				sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
@@ -1142,7 +1134,7 @@ public abstract class Image3D
 		double sum = 0;
 		if (y_1 >= 0)
 		{
-			int h_ = h * nc;
+			final int h_ = h * nc;
 			if (x_1 >= 0)
 				sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
 			sum -= table[xw_yh_zd - h_];
@@ -1244,14 +1236,14 @@ public abstract class Image3D
 		z_d_1--;
 
 		// This has been ordered to use the smallest sums first (i.e. closer to x,y,z than x+w,y+h,z+d)
-		int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
+		final int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
 		if (z_1 >= 0)
 		{
-			int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+			final int xw_yh_z = xw_yh_zd - d * nr_by_nc;
 			double sum = 0;
 			if (y_1 >= 0)
 			{
-				int h_ = h * nc;
+				final int h_ = h * nc;
 				if (x_1 >= 0)
 					sum = table[xw_yh_zd - w - h_] - table[xw_yh_z - w - h_] - table[xw_yh_zd - w] + table[xw_yh_z - w];
 				sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
@@ -1263,7 +1255,7 @@ public abstract class Image3D
 		double sum = 0;
 		if (y_1 >= 0)
 		{
-			int h_ = h * nc;
+			final int h_ = h * nc;
 			if (x_1 >= 0)
 				sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
 			sum -= table[xw_yh_zd - h_];
@@ -1304,7 +1296,7 @@ public abstract class Image3D
 	 */
 	public void fill(int x, int y, int z, int w, int h, int d, double value)
 	{
-		int[] intersect = computeIntersect(x, y, z, w, h, d);
+		final int[] intersect = computeIntersect(x, y, z, w, h, d);
 		w = intersect[3];
 		h = intersect[4];
 		d = intersect[5];
@@ -1357,7 +1349,7 @@ public abstract class Image3D
 	 */
 	public void fillOutside(int x, int y, int z, int w, int h, int d, double value)
 	{
-		int[] intersect = computeIntersect(x, y, z, w, h, d);
+		final int[] intersect = computeIntersect(x, y, z, w, h, d);
 		w = intersect[3];
 		h = intersect[4];
 		d = intersect[5];
@@ -1378,14 +1370,14 @@ public abstract class Image3D
 		if (z + d < ns)
 			fill((z + d) * nr_by_nc, (ns - z - d) * nr_by_nc, value);
 
-		int y_p_h = y + h;
-		int fillYBefore = y * nc;
-		int yAfter = y_p_h * nc;
-		int fillYAfter = (nr - y_p_h) * nc;
+		final int y_p_h = y + h;
+		final int fillYBefore = y * nc;
+		final int yAfter = y_p_h * nc;
+		final int fillYAfter = (nr - y_p_h) * nc;
 
-		int x_p_w = x + w;
-		int fillXBefore = x;
-		int fillXAfter = (nc - x_p_w);
+		final int x_p_w = x + w;
+		final int fillXBefore = x;
+		final int fillXAfter = (nc - x_p_w);
 
 		for (int s = 0; s < d; s++, z++)
 		{

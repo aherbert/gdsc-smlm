@@ -154,7 +154,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	@Override
 	public List<String> getParameters()
 	{
-		ArrayList<String> list = new ArrayList<>();
+		final ArrayList<String> list = new ArrayList<>();
 		list.add("search = " + search);
 		list.add("border = " + border);
 		return list;
@@ -168,7 +168,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	@Override
 	public MaximaSpotFilter clone()
 	{
-		MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
+		final MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.nms = nms.clone();
 		f.data2 = null;

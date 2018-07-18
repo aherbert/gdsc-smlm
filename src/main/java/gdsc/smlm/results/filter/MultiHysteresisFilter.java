@@ -45,47 +45,47 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	/** The strict signal. */
 	@XStreamAsAttribute
 	final double strictSignal;
-	
+
 	/** The strict snr. */
 	@XStreamAsAttribute
 	final float strictSnr;
-	
+
 	/** The strict min width. */
 	@XStreamAsAttribute
 	final double strictMinWidth;
-	
+
 	/** The strict max width. */
 	@XStreamAsAttribute
 	final double strictMaxWidth;
-	
+
 	/** The strict shift. */
 	@XStreamAsAttribute
 	final double strictShift;
-	
+
 	/** The strict precision. */
 	@XStreamAsAttribute
 	final double strictPrecision;
-	
+
 	/** The range signal. */
 	@XStreamAsAttribute
 	final double rangeSignal;
-	
+
 	/** The range snr. */
 	@XStreamAsAttribute
 	final float rangeSnr;
-	
+
 	/** The range min width. */
 	@XStreamAsAttribute
 	final double rangeMinWidth;
-	
+
 	/** The range max width. */
 	@XStreamAsAttribute
 	final double rangeMaxWidth;
-	
+
 	/** The range shift. */
 	@XStreamAsAttribute
 	final double rangeShift;
-	
+
 	/** The range precision. */
 	@XStreamAsAttribute
 	final double rangePrecision;
@@ -93,43 +93,43 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	/** The strict signal threshold. */
 	@XStreamOmitField
 	float strictSignalThreshold;
-	
+
 	/** The weak signal threshold. */
 	@XStreamOmitField
 	float weakSignalThreshold;
-	
+
 	/** The weak snr. */
 	@XStreamOmitField
 	float weakSnr;
-	
+
 	/** The strict min sigma threshold. */
 	@XStreamOmitField
 	float strictMinSigmaThreshold;
-	
+
 	/** The weak min sigma threshold. */
 	@XStreamOmitField
 	float weakMinSigmaThreshold;
-	
+
 	/** The strict max sigma threshold. */
 	@XStreamOmitField
 	float strictMaxSigmaThreshold;
-	
+
 	/** The weak max sigma threshold. */
 	@XStreamOmitField
 	float weakMaxSigmaThreshold;
-	
+
 	/** The strict offset. */
 	@XStreamOmitField
 	float strictOffset;
-	
+
 	/** The weak offset. */
 	@XStreamOmitField
 	float weakOffset;
-	
+
 	/** The strict variance. */
 	@XStreamOmitField
 	double strictVariance;
-	
+
 	/** The weak variance. */
 	@XStreamOmitField
 	double weakVariance;
@@ -220,7 +220,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		// Set the shift limit
 		strictOffset = weakOffset = Float.POSITIVE_INFINITY;
 
-		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		final double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
 		strictMinSigmaThreshold = (float) (s * strictMinWidth);
 		strictMaxSigmaThreshold = Filter.getUpperLimit(s * strictMaxWidth);
 		weakMinSigmaThreshold = (float) (s * (strictMinWidth - rangeMinWidth));
@@ -333,9 +333,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	protected double getParameterValueInternal(int index)
 	{
 		if (index < super.getNumberOfParameters())
-		{
 			return super.getParameterValueInternal(index);
-		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
@@ -370,9 +368,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	public double getParameterIncrement(int index)
 	{
 		if (index < super.getNumberOfParameters())
-		{
 			return super.getParameterValueInternal(index);
-		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
@@ -413,9 +409,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	{
 		checkIndex(index);
 		if (index < super.getNumberOfParameters())
-		{
 			return super.getParameterType(index);
-		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
@@ -485,7 +479,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		// No adjustment of the mode parameters
 		if (index == 1 || index == 3)
 			return this;
-		double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
+		final double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
 				strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
 				rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision };
 		if (index == 0)

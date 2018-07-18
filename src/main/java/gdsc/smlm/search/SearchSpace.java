@@ -45,9 +45,9 @@ public class SearchSpace
 	private double[][] seed;
 
 	private double[][] scoredSearchSpace;
-	private ArrayList<String> scoredSearchSpaceHash = new ArrayList<>();
-	private HashSet<String> coveredSpace = new HashSet<>();
-	private StringBuilder sb = new StringBuilder();
+	private final ArrayList<String> scoredSearchSpaceHash = new ArrayList<>();
+	private final HashSet<String> coveredSpace = new HashSet<>();
+	private final StringBuilder sb = new StringBuilder();
 
 	// This introduces a dependency on another gdsc.smlm package
 	private TrackProgress tracker = null;
@@ -89,7 +89,7 @@ public class SearchSpace
 	{
 		if (dimensions == null)
 			return null;
-		SearchDimension[] dimensions2 = new SearchDimension[dimensions.length];
+		final SearchDimension[] dimensions2 = new SearchDimension[dimensions.length];
 		for (int i = 0; i < dimensions.length; i++)
 			dimensions2[i] = dimensions[i].clone();
 		return dimensions2;
@@ -197,7 +197,7 @@ public class SearchSpace
 		reset();
 
 		// Find the best individual
-		SearchResult<T> current = findOptimum(dimensions, scoreFunction, null);
+		final SearchResult<T> current = findOptimum(dimensions, scoreFunction, null);
 
 		return current;
 	}
@@ -222,19 +222,17 @@ public class SearchSpace
 		scoredSearchSpace = searchSpace;
 		scoredSearchSpaceHash.clear();
 
-		SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
+		final SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
 
 		// Re-centre on the seed
 		if (optimum != null)
 		{
 			final double[] p = optimum.getPoint();
 			for (int i = 0; i < dimensions.length; i++)
-			{
 				dimensions[i].setCentre(p[i]);
 				// In-case the seed was not on the min interval grid
 				// Should not happen as we now map the seed to the min interval
 				//p[i] = dimensions[i].getCentre();
-			}
 		}
 
 		end();
@@ -252,7 +250,6 @@ public class SearchSpace
 		final double[] min = new double[dimensions.length];
 		final double[] max = new double[dimensions.length];
 		for (int i = 0; i < dimensions.length; i++)
-		{
 			if (dimensions[i].isActive())
 			{
 				min[size] = dimensions[i].getMin();
@@ -261,9 +258,8 @@ public class SearchSpace
 				if (!dimensions[i].canRound())
 					dimensions[i] = nonRoundingDimension;
 			}
-		}
 
-		for (double[] p : seed)
+		for (final double[] p : seed)
 		{
 			// Check the seed has the correct dimensions
 			if (p == null || p.length != indices.length)
@@ -336,20 +332,16 @@ public class SearchSpace
 			scoredSearchSpace = Arrays.copyOf(scoredSearchSpace, size);
 		}
 
-		SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
+		final SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
 		if (optimum != null)
-		{
 			//System.out.printf("Optimum = %s\n", optimum.score);
 			//if (current != null)
 			//	System.out.printf("Current = %s\n", current.score);
 			// Replace if better
 			if (optimum.compareTo(current) < 0)
-			{
 				current = optimum;
 				//if (searchMode == REFINE)
 				//	System.out.printf("Refine improved = %s\n", current.score);
-			}
-		}
 
 		end();
 		return current;
@@ -408,13 +400,12 @@ public class SearchSpace
 		final double[][] dimensionValues = new double[dimensions.length][];
 		for (int i = 0; i < dimensions.length; i++)
 		{
-			double[] values = dimensions[i].values();
+			final double[] values = dimensions[i].values();
 			// Find the range values either side of the point value
-			double v = point[i];
+			final double v = point[i];
 			double min = v;
 			double max = v;
 			for (int j = 0; j < values.length; j++)
-			{
 				if (values[j] < v)
 					min = values[j];
 				else if (values[j] > v)
@@ -422,7 +413,6 @@ public class SearchSpace
 					max = values[j];
 					break;
 				}
-			}
 			// Create a sequence from min to max.
 			// Add option to configure the number of steps?
 			dimensionValues[i] = dimensions[i].enumerate(min, max, 100);
@@ -444,9 +434,7 @@ public class SearchSpace
 		// Get the values
 		int combinations = 0;
 		for (int i = 0; i < dimensionValues.length; i++)
-		{
 			combinations += dimensionValues[i].length;
-		}
 
 		// This will be a list of points enumerating the entire range
 		// of the dimensions
@@ -486,13 +474,12 @@ public class SearchSpace
 		final double[][] dimensionValues = new double[dimensions.length][];
 		for (int i = 0; i < dimensions.length; i++)
 		{
-			double[] values = dimensions[i].values();
+			final double[] values = dimensions[i].values();
 			// Find the range values either side of the point value
-			double v = point[i];
+			final double v = point[i];
 			double min = v;
 			double max = v;
 			for (int j = 0; j < values.length; j++)
-			{
 				if (values[j] < v)
 					min = values[j];
 				else if (values[j] > v)
@@ -500,7 +487,6 @@ public class SearchSpace
 					max = values[j];
 					break;
 				}
-			}
 			// Create a sequence from min to max
 			dimensionValues[i] = dimensions[i].enumerate(min, max);
 		}
@@ -519,10 +505,8 @@ public class SearchSpace
 		// Get the values
 		final double[][] dimensionValues = new double[dimensions.length][];
 		for (int i = 0; i < dimensions.length; i++)
-		{
 			dimensionValues[i] = dimensions[i].values();
 			//System.out.printf(" [%d] %.3f-%.3f", i, dimensions[i].getLower(), dimensions[i].getUpper());
-		}
 		//System.out.println();
 		return createSearchSpace(dimensionValues);
 	}
@@ -538,9 +522,7 @@ public class SearchSpace
 	{
 		long combinations = 1;
 		for (int i = 0; i < dimensions.length; i++)
-		{
 			combinations *= dimensions[i].values().length;
-		}
 		return combinations;
 	}
 
@@ -598,7 +580,7 @@ public class SearchSpace
 				}
 			}
 		}
-		catch (ArrayIndexOutOfBoundsException e)
+		catch (final ArrayIndexOutOfBoundsException e)
 		{
 			// Return false
 			e.printStackTrace();
@@ -642,13 +624,11 @@ public class SearchSpace
 
 			// Move to the centre using the current optimum
 			for (int i = 0; i < dimensions.length; i++)
-			{
 				if (p[i] != dimensions[i].getCentre())
 				{
 					changed = true;
 					dimensions[i].setCentre(p[i]);
 				}
-			}
 
 			if (searchMode == RefinementMode.SINGLE_DIMENSION)
 			{
@@ -699,11 +679,9 @@ public class SearchSpace
 				// If changed then we stick to the current range.
 				// Store all the scored search space so we do not recompute it.
 				if (scoredSearchSpaceHash.isEmpty())
-				{
 					// Compute the hash for each item scored
 					for (int i = 0; i < scoredSearchSpace.length; i++)
 						coveredSpace.add(generateHashString(scoredSearchSpace[i]));
-				}
 				else
 				{
 					// Hash was already computed
@@ -719,9 +697,7 @@ public class SearchSpace
 
 				// Move to the centre using the current optimum
 				for (int i = 0; i < dimensions.length; i++)
-				{
 					dimensions[i].setCentre(p[i]);
-				}
 
 				// Clear the memory of the space that has been searched
 				// (as the search space is about to be altered so the values may not overlap).
@@ -734,9 +710,7 @@ public class SearchSpace
 					changed = true;
 				}
 				else
-				{
 					changed = reduceRange(dimensions);
-				}
 			}
 		}
 
@@ -766,19 +740,15 @@ public class SearchSpace
 		// If not then return false as nothing can be changed.
 		boolean reduced = false;
 		for (int i = 0; i < dimensions.length; i++)
-		{
 			if (dimensions[i].canReduce())
 			{
 				reduced = true;
 				break;
 			}
-		}
 		if (reduced)
-		{
 			// Reduce the range
 			for (int i = 0; i < dimensions.length; i++)
 				dimensions[i].reduce();
-		}
 		return reduced;
 	}
 
@@ -936,7 +906,7 @@ public class SearchSpace
 			if (scores == null)
 				break;
 
-			SearchResult<T> optimum = scores[0];
+			final SearchResult<T> optimum = scores[0];
 			if (optimum.compareTo(current) < 0)
 				current = optimum;
 			if (checker != null)
@@ -972,21 +942,21 @@ public class SearchSpace
 			return null;
 
 		// Pad search space with more samples
-		int remaining = samples - searchSpace.length;
+		final int remaining = samples - searchSpace.length;
 		if (remaining > 0)
 		{
-			double[][] sample = sample(dimensions, remaining, generator);
-			ArrayList<double[]> merged = new ArrayList<>(sample.length + searchSpace.length);
+			final double[][] sample = sample(dimensions, remaining, generator);
+			final ArrayList<double[]> merged = new ArrayList<>(sample.length + searchSpace.length);
 			merged.addAll(Arrays.asList(searchSpace));
 			merged.addAll(Arrays.asList(sample));
 			searchSpace = merged.toArray(new double[merged.size()][]);
 		}
 
 		// Score
-		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
+		final SearchResult<T>[] scores = scoreFunction.score(searchSpace);
 
 		// Get the top fraction
-		int size = (int) Math.ceil(samples * fraction);
+		final int size = (int) Math.ceil(samples * fraction);
 
 		return scoreFunction.cut(scores, size);
 	}
@@ -1014,10 +984,10 @@ public class SearchSpace
 		searchSpace = sample(dimensions, samples, generator);
 
 		// Score
-		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
+		final SearchResult<T>[] scores = scoreFunction.score(searchSpace);
 
 		// Get the top fraction
-		int size = (int) Math.ceil(scores.length * fraction);
+		final int size = (int) Math.ceil(scores.length * fraction);
 
 		return scoreFunction.cut(scores, size);
 	}
@@ -1098,7 +1068,7 @@ public class SearchSpace
 	private static double[][] sampleWithRounding(int samples, RandomVectorGenerator[] generator, final int[] indices,
 			final Dimension[] dimensions, int size, final double[] centre, final double[] lower, final double[] range)
 	{
-		RandomVectorGenerator g = createGenerator(generator, size);
+		final RandomVectorGenerator g = createGenerator(generator, size);
 
 		// Generate random points
 		final double[][] searchSpace = new double[samples][];
@@ -1107,10 +1077,8 @@ public class SearchSpace
 			final double[] r = g.nextVector();
 			final double[] p = centre.clone();
 			for (int j = 0; j < size; j++)
-			{
 				// Ensure the min interval is respected
 				p[indices[j]] = dimensions[j].round(lower[j] + r[j] * range[j]);
-			}
 			searchSpace[i] = p;
 		}
 		return searchSpace;
@@ -1123,9 +1091,7 @@ public class SearchSpace
 			generator = new RandomVectorGenerator[1];
 		RandomVectorGenerator g = generator[0];
 		if (g == null || g.nextVector().length != size)
-		{
 			generator[0] = g = new HaltonSequenceGenerator(size);
-		}
 		return g;
 	}
 
@@ -1175,7 +1141,7 @@ public class SearchSpace
 	private static double[][] sampleWithoutRounding(int samples, RandomVectorGenerator[] generator, final int[] indices,
 			int size, final double[] centre, final double[] lower, final double[] range)
 	{
-		RandomVectorGenerator g = createGenerator(generator, size);
+		final RandomVectorGenerator g = createGenerator(generator, size);
 
 		// Generate random points
 		final double[][] searchSpace = new double[samples][];
@@ -1184,10 +1150,8 @@ public class SearchSpace
 			final double[] r = g.nextVector();
 			final double[] p = centre.clone();
 			for (int j = 0; j < size; j++)
-			{
 				// Ensure the min interval is respected
 				p[indices[j]] = lower[j] + r[j] * range[j];
-			}
 			searchSpace[i] = p;
 		}
 		return searchSpace;
@@ -1228,20 +1192,16 @@ public class SearchSpace
 
 		// Pad the range
 		if (padding > 0)
-		{
 			for (int j = 0; j < lower.length; j++)
 			{
 				final double range = padding * (upper[j] - lower[j]);
 				lower[j] -= range;
 				upper[j] += range;
 			}
-		}
 
 		// Create new dimensions
 		for (int j = 0; j < lower.length; j++)
-		{
 			dimensions[j] = dimensions[j].create(lower[j], upper[j]);
-		}
 
 		return dimensions;
 	}

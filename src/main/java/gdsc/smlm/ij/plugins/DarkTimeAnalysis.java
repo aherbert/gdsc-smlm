@@ -61,9 +61,9 @@ public class DarkTimeAnalysis implements PlugIn
 			ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY };
 	static
 	{
-		ArrayList<String> methods = new ArrayList<>();
+		final ArrayList<String> methods = new ArrayList<>();
 		methods.add("Tracing");
-		for (ClusteringAlgorithm c : algorithms)
+		for (final ClusteringAlgorithm c : algorithms)
 			methods.add("Clustering (" + c.toString() + ")");
 		METHOD = methods.toArray(new String[methods.size()]);
 	}
@@ -97,7 +97,7 @@ public class DarkTimeAnalysis implements PlugIn
 			return;
 
 		// Assume pixels for now
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, DistanceUnit.PIXEL);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, DistanceUnit.PIXEL);
 		IJ.showStatus("");
 		if (results == null || results.size() == 0)
 		{
@@ -122,7 +122,7 @@ public class DarkTimeAnalysis implements PlugIn
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the cumulative dark-time histogram");
@@ -151,7 +151,7 @@ public class DarkTimeAnalysis implements PlugIn
 			Parameters.isAboveZero("Search distance", searchDistance);
 			Parameters.isPositive("Percentile", percentile);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -164,17 +164,17 @@ public class DarkTimeAnalysis implements PlugIn
 	{
 		// Find min and max time frames
 		results.sort();
-		int min = results.getFirstFrame();
-		int max = results.getLastFrame();
+		final int min = results.getFirstFrame();
+		final int max = results.getLastFrame();
 
 		// Trace results:
 		// TODO - The search distance could have units to avoid assuming the results are in pixels
-		double d = searchDistance / results.getCalibrationReader().getNmPerPixel();
+		final double d = searchDistance / results.getCalibrationReader().getNmPerPixel();
 		int range = max - min + 1;
 		if (maxDarkTime > 0)
 			range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
 
-		IJTrackProgress tracker = new IJTrackProgress();
+		final IJTrackProgress tracker = new IJTrackProgress();
 		tracker.status("Analysing ...");
 		tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...", Utils.rounded(searchDistance),
 				Utils.rounded(d), Utils.rounded(range * msPerFrame / 1000.0), range);
@@ -182,41 +182,37 @@ public class DarkTimeAnalysis implements PlugIn
 		Trace[] traces;
 		if (method == 0)
 		{
-			TraceManager tm = new TraceManager(results);
+			final TraceManager tm = new TraceManager(results);
 			tm.setTracker(tracker);
 			tm.traceMolecules(d, range);
 			traces = tm.getTraces();
 		}
 		else
 		{
-			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
-			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d, range);
+			final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
+			final ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d, range);
 			traces = TraceMolecules.convertToTraces(results, clusters);
 		}
 
 		tracker.status("Computing histogram ...");
 
 		// Build dark-time histogram
-		int[] times = new int[range];
-		StoredData stats = new StoredData();
-		for (Trace trace : traces)
-		{
+		final int[] times = new int[range];
+		final StoredData stats = new StoredData();
+		for (final Trace trace : traces)
 			if (trace.getNBlinks() > 1)
 			{
-				for (int t : trace.getOffTimes())
-				{
+				for (final int t : trace.getOffTimes())
 					times[t]++;
-				}
 				stats.add(trace.getOffTimes());
 			}
-		}
 
 		plotDarkTimeHistogram(stats);
 
 		// Cumulative histogram
 		for (int i = 1; i < times.length; i++)
 			times[i] += times[i - 1];
-		int total = times[times.length - 1];
+		final int total = times[times.length - 1];
 
 		// Plot dark-time up to 100%
 		double[] x = new double[range];
@@ -238,20 +234,18 @@ public class DarkTimeAnalysis implements PlugIn
 			y = Arrays.copyOf(y, truncate);
 		}
 
-		String title = "Cumulative Dark-time";
-		Plot2 plot = new Plot2(title, "Time (ms)", "Percentile", x, y);
+		final String title = "Cumulative Dark-time";
+		final Plot2 plot = new Plot2(title, "Time (ms)", "Percentile", x, y);
 		Utils.display(title, plot);
 
 		// Report percentile
 		for (int i = 0; i < y.length; i++)
-		{
 			if (y[i] >= percentile)
 			{
 				Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, Utils.rounded(x[i]),
 						Utils.rounded(x[i] / 1000));
 				break;
 			}
-		}
 
 		tracker.status("");
 	}
@@ -261,7 +255,7 @@ public class DarkTimeAnalysis implements PlugIn
 		if (nBins >= 0)
 		{
 			// Convert the X-axis to milliseconds
-			double[] xValues = stats.getValues();
+			final double[] xValues = stats.getValues();
 			for (int i = 0; i < xValues.length; i++)
 				xValues[i] *= msPerFrame;
 

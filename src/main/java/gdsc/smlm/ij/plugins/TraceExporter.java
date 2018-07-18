@@ -61,7 +61,7 @@ public class TraceExporter implements PlugIn
 	{
 		SPOT_ON("Spot-On");
 
-		private String name;
+		private final String name;
 
 		ExportFormat(String name)
 		{
@@ -103,7 +103,7 @@ public class TraceExporter implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		MemoryResultsItems items = new MemoryResultsItems(new MultiDialog.MemoryResultsFilter()
+		final MemoryResultsItems items = new MemoryResultsItems(new MultiDialog.MemoryResultsFilter()
 		{
 			@Override
 			public boolean accept(MemoryPeakResults results)
@@ -122,7 +122,7 @@ public class TraceExporter implements PlugIn
 		if (!showDialog())
 			return;
 
-		ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
+		final ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
 
 		// Pick multiple input datasets together using a list box.
 		if (!showMultiDialog(allResults, items))
@@ -130,17 +130,15 @@ public class TraceExporter implements PlugIn
 
 		exportFormat = getExportFormat();
 
-		for (MemoryPeakResults results : allResults)
+		for (final MemoryPeakResults results : allResults)
 			export(results);
 	}
 
 	private static boolean showDialog()
 	{
 		if (FORMAT_NAMES == null)
-		{
 			FORMAT_NAMES = SettingsManager.getNames((Object[]) ExportFormat.values());
-		}
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Export traces to a directory");
 		gd.addDirectoryField("Directory", directory, 30);
 		gd.addNumericField("Min_length", minLength, 0);
@@ -163,7 +161,7 @@ public class TraceExporter implements PlugIn
 	private static boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults, MemoryResultsItems items)
 	{
 		// Show a list box containing all the results. This should remember the last set of chosen items.
-		MultiDialog md = new MultiDialog(TITLE, items);
+		final MultiDialog md = new MultiDialog(TITLE, items);
 		md.addSelected(selected);
 
 		md.showDialog();
@@ -178,9 +176,9 @@ public class TraceExporter implements PlugIn
 			return false;
 		}
 
-		for (String name : selected)
+		for (final String name : selected)
 		{
-			MemoryPeakResults r = MemoryPeakResults.getResults(name);
+			final MemoryPeakResults r = MemoryPeakResults.getResults(name);
 			if (r != null)
 				allResults.add(r);
 		}
@@ -251,7 +249,7 @@ public class TraceExporter implements PlugIn
 		if (wobble > 0)
 		{
 			// Just leave any exceptions to trickle up and kill the plugin
-			TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
+			final TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
 			final double w = c.convertBack(wobble);
 			final RandomGenerator r = new Well19937c();
 			final boolean is3D = results.is3D();
@@ -284,42 +282,36 @@ public class TraceExporter implements PlugIn
 			return results;
 
 		int id = 0;
-		int lastT = 0;
+		final int lastT = 0;
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
-			PeakResult r = results.get(i);
+			final PeakResult r = results.get(i);
 			if (r.getId() != id)
-			{
 				id = r.getId();
-			}
 			else if (r.getFrame() - lastT > maxJump)
-			{
 				return doSplit(results);
-			}
 		}
 		return results;
 	}
 
 	private static MemoryPeakResults doSplit(MemoryPeakResults results)
 	{
-		MemoryPeakResults results2 = new MemoryPeakResults(results.size());
+		final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
 		results2.copySettings(results);
 		int nextId = results.getLast().getId();
 		int id = 0, idOut = 0;
 		int lastT = 0;
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
-			PeakResult r = results.get(i);
+			final PeakResult r = results.get(i);
 			if (r.getId() != id)
 			{
 				id = r.getId();
 				idOut = id;
 			}
 			else if (r.getFrame() - lastT > maxJump)
-			{
 				idOut = ++nextId;
-			}
-			AttributePeakResult r2 = new AttributePeakResult(r);
+			final AttributePeakResult r2 = new AttributePeakResult(r);
 			r2.setId(idOut);
 			results2.add(r2);
 			lastT = r.getEndFrame();
@@ -352,9 +344,9 @@ public class TraceExporter implements PlugIn
 					{
 						if (result.hasEndFrame())
 						{
-							String sId = Integer.toString(result.getId());
-							String sx = Float.toString(x);
-							String sy = Float.toString(y);
+							final String sId = Integer.toString(result.getId());
+							final String sx = Float.toString(x);
+							final String sy = Float.toString(y);
 							for (int t = result.getFrame(); t <= result.getEndFrame(); t++)
 							{
 								writer.write(Integer.toString(t));
@@ -383,7 +375,7 @@ public class TraceExporter implements PlugIn
 							writer.newLine();
 						}
 					}
-					catch (IOException e)
+					catch (final IOException e)
 					{
 						// Allow clean-up by passing the exception up
 						throw new RuntimeException(e);
@@ -391,7 +383,7 @@ public class TraceExporter implements PlugIn
 				}
 			});
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			e.printStackTrace();
 		}

@@ -41,9 +41,9 @@ public class SphericalDistributionTest
 	@Test
 	public void canSampleUsingTransformationMethod()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		double radius = 10 + rg.nextDouble() * 10;
-		SphericalDistribution dist = new SphericalDistribution(radius, rg);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final double radius = 10 + rg.nextDouble() * 10;
+		final SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(false);
 		for (int i = 100; i-- > 0;)
 			dist.next();
@@ -52,9 +52,9 @@ public class SphericalDistributionTest
 	@Test
 	public void canSampleUsingRejectionMethod()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		double radius = 10 + rg.nextDouble() * 10;
-		SphericalDistribution dist = new SphericalDistribution(radius, rg);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final double radius = 10 + rg.nextDouble() * 10;
+		final SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(true);
 		for (int i = 100; i-- > 0;)
 			dist.next();
@@ -65,9 +65,9 @@ public class SphericalDistributionTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		double radius = 10 + rg.nextDouble() * 10;
-		SphericalDistribution dist = new SphericalDistribution(radius, rg);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final double radius = 10 + rg.nextDouble() * 10;
+		final SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(false);
 		for (int i = 100; i-- > 0;)
 			dist.next();
@@ -76,16 +76,16 @@ public class SphericalDistributionTest
 			dist.next();
 
 		dist.setUseRejectionMethod(false);
-		long time1 = getRunTime(dist);
+		final long time1 = getRunTime(dist);
 		dist.setUseRejectionMethod(true);
-		long time2 = getRunTime(dist);
+		final long time2 = getRunTime(dist);
 		TestAssert.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d\n", time2, time1);
 		TestSettings.info("Rejection = %d, Transformation = %d\n", time2, time1);
 	}
 
-	private long getRunTime(SphericalDistribution dist)
+	private static long getRunTime(SphericalDistribution dist)
 	{
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		for (int i = 1000000; i-- > 0;)
 			dist.next();
 		return System.nanoTime() - start;
@@ -106,28 +106,28 @@ public class SphericalDistributionTest
 		drawImage(false);
 	}
 
-	private void drawImage(boolean useRejctionMethod)
+	private static void drawImage(boolean useRejctionMethod)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults results = new MemoryPeakResults();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults results = new MemoryPeakResults();
 		results.setSortAfterEnd(true);
-		int radius = 10;
-		Rectangle bounds = new Rectangle(0, 0, radius * 2, radius * 2);
-		SphericalDistribution dist = new SphericalDistribution(radius, rg);
+		final int radius = 10;
+		final Rectangle bounds = new Rectangle(0, 0, radius * 2, radius * 2);
+		final SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(useRejctionMethod);
-		float scale = 10;
+		final float scale = 10;
 		results.begin();
-		float intensity = 1;
+		final float intensity = 1;
 		for (int i = 100000; i-- > 0;)
 		{
-			double[] xyz = dist.next();
-			int frame = (int) (1 + scale * radius + Math.round(scale * xyz[2]));
-			float x = radius + (float) xyz[0];
-			float y = radius + (float) xyz[1];
+			final double[] xyz = dist.next();
+			final int frame = (int) (1 + scale * radius + Math.round(scale * xyz[2]));
+			final float x = radius + (float) xyz[0];
+			final float y = radius + (float) xyz[1];
 			results.add(new PeakResult(frame, x, y, intensity));
 		}
 		results.end();
-		IJImagePeakResults image = new IJImagePeakResults(
+		final IJImagePeakResults image = new IJImagePeakResults(
 				(useRejctionMethod) ? "Rejection Method" : "Transformation Method", bounds, scale);
 		image.setRollingWindowSize(1);
 		image.begin();

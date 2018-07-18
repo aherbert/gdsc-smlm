@@ -43,7 +43,7 @@ public class PeakResultsDigest
 	private int size;
 
 	/** The digest. */
-	private PeakResultDigest digest = new PeakResultDigest();
+	private final PeakResultDigest digest = new PeakResultDigest();
 
 	/** The digest of 1 result */
 	private String value1;
@@ -88,9 +88,7 @@ public class PeakResultsDigest
 			digest.update(peakResults[0]);
 			value1 = digest.snapshot();
 			for (int i = 1; i < peakResults.length; i++)
-			{
 				digest.update(peakResults[i]);
-			}
 			value = digest.digest();
 		}
 		size = peakResults.length;
@@ -158,9 +156,7 @@ public class PeakResultsDigest
 		if (value1.equals(digest.snapshot()))
 			return true;
 		for (int i = 1; i < peakResults.length; i++)
-		{
 			digest.update(peakResults[i]);
-		}
 		return (this.value.equals(digest.digest()));
 	}
 

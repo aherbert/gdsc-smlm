@@ -94,9 +94,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 		// Divide by the uncertainty in the individual measurements yi to get the chi-squared
 		if (noise > 0)
-		{
 			error /= numberOfFittedPoints * noise * noise;
-		}
 
 		// This updates the chi-squared value to the average error for a single fitted
 		// point using the degrees of freedom (N-M)?
@@ -120,9 +118,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	public double getTotalSumOfSquares()
 	{
 		if (Double.isNaN(totalSumOfSquares) && lastY != null)
-		{
 			totalSumOfSquares = getTotalSumOfSquares(lastY);
-		}
 		return totalSumOfSquares;
 	}
 
@@ -198,31 +194,25 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 */
 	public static double[][] covariance(double[][] I, double[][] E)
 	{
-		int n = I.length;
+		final int n = I.length;
 
 		// Invert the matrix
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 		if (!solver.invert(I))
 			return null;
 
 		// Note that I now refers to I^-1 in the Mortensen notation
 
-		double[][] covar = new double[n][n];
+		final double[][] covar = new double[n][n];
 		for (int a = 0; a < n; a++)
-		{
 			for (int b = 0; b < n; b++)
 			{
 				double v = 0;
 				for (int ap = 0; ap < n; ap++)
-				{
 					for (int bp = 0; bp < n; bp++)
-					{
 						v += I[a][ap] * E[ap][bp] * I[bp][b];
-					}
-				}
 				covar[a][b] = v;
 			}
-		}
 
 		return covar;
 	}
@@ -253,27 +243,23 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 */
 	public static double[] variance(double[][] I, double[][] E)
 	{
-		int n = I.length;
+		final int n = I.length;
 
 		// Invert the matrix
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 		if (!solver.invert(I))
 			return null;
 
 		// Note that I now refers to I^-1 in the Mortensen notation
 
-		double[] covar = new double[n];
+		final double[] covar = new double[n];
 		for (int a = 0; a < n; a++)
 		{
 			// Note: b==a as we only do the diagonal
 			double v = 0;
 			for (int ap = 0; ap < n; ap++)
-			{
 				for (int bp = 0; bp < n; bp++)
-				{
 					v += I[a][ap] * E[ap][bp] * I[bp][a];
-				}
-			}
 			covar[a] = v;
 		}
 

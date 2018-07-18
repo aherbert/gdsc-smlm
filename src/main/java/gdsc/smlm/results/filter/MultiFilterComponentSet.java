@@ -65,7 +65,7 @@ public abstract class MultiFilterComponentSet implements Cloneable
 		{
 			return (MultiFilterComponentSet) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

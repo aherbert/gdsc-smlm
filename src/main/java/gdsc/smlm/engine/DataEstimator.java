@@ -167,15 +167,11 @@ public class DataEstimator
 			// Check if background region is large enough
 			estimate[ESTIMATE_BACKGROUND_SIZE] = stats.getN();
 			if (stats.getN() > fraction * data.length)
-			{
 				// Background region is large enough
 				estimate[ESTIMATE_LARGE_ENOUGH] = 1;
-			}
 			else
-			{
 				// Recompute with all the data
 				stats = new Statistics(data);
-			}
 
 			estimate[ESTIMATE_BACKGROUND] = (float) stats.getMean();
 			estimate[ESTIMATE_NOISE] = (float) stats.getStandardDeviation();
@@ -191,7 +187,7 @@ public class DataEstimator
 	 */
 	public float getNoise(NoiseEstimator.Method method)
 	{
-		NoiseEstimator ne = new NoiseEstimator(data, width, height);
+		final NoiseEstimator ne = new NoiseEstimator(data, width, height);
 		return (float) ne.getNoise(method);
 	}
 

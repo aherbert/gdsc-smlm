@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "javadoc"})
+@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method"})
 public final class FitProtos {
   private FitProtos() {}
   public static void registerAllExtensions(
@@ -141,10 +141,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -200,13 +199,11 @@ public final class FitProtos {
 
     public static FitSolver valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -379,10 +376,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -440,13 +436,11 @@ public final class FitProtos {
 
     public static SearchMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -528,10 +522,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -584,13 +577,11 @@ public final class FitProtos {
 
     public static LineSearchMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -727,10 +718,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -784,13 +774,11 @@ public final class FitProtos {
 
     public static PrecisionMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -867,10 +855,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -923,13 +910,11 @@ public final class FitProtos {
 
     public static DataFilterType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -1038,10 +1023,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -1096,13 +1080,11 @@ public final class FitProtos {
 
     public static DataFilterMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -1259,10 +1241,9 @@ public final class FitProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -1320,13 +1301,11 @@ public final class FitProtos {
 
     public static NoiseEstimatorMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -1607,15 +1586,14 @@ public final class FitProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -1634,7 +1612,7 @@ public final class FitProtos {
               break;
             }
             case 32: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               fitSolver_ = rawValue;
               break;
@@ -1675,7 +1653,7 @@ public final class FitProtos {
               break;
             }
             case 96: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               searchMethod_ = rawValue;
               break;
@@ -1714,35 +1692,33 @@ public final class FitProtos {
               break;
             }
             case 146: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
+              final int length = input.readRawVarint32();
+              final int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00020000) == 0x00020000) && input.getBytesUntilLimit() > 0) {
                 clampValues_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00020000;
               }
-              while (input.getBytesUntilLimit() > 0) {
-                clampValues_.add(input.readDouble());
-              }
+              while (input.getBytesUntilLimit() > 0)
+				clampValues_.add(input.readDouble());
               input.popLimit(limit);
               break;
             }
             case 152: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               lineSearchMethod_ = rawValue;
               break;
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00020000) == 0x00020000)) {
-          clampValues_ = java.util.Collections.unmodifiableList(clampValues_);
-        }
+        if (((mutable_bitField0_ & 0x00020000) == 0x00020000))
+			clampValues_ = java.util.Collections.unmodifiableList(clampValues_);
         makeExtensionsImmutable();
       }
     }
@@ -1824,7 +1800,7 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
-      gdsc.smlm.data.config.FitProtos.FitSolver result = gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
+      final gdsc.smlm.data.config.FitProtos.FitSolver result = gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
       return result == null ? gdsc.smlm.data.config.FitProtos.FitSolver.UNRECOGNIZED : result;
     }
 
@@ -1949,7 +1925,7 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
-      gdsc.smlm.data.config.FitProtos.SearchMethod result = gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
+      final gdsc.smlm.data.config.FitProtos.SearchMethod result = gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.SearchMethod.UNRECOGNIZED : result;
     }
 
@@ -2084,14 +2060,14 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
-      gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
+      final gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -2103,67 +2079,48 @@ public final class FitProtos {
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (fixedPsf_ != false) {
-        output.writeBool(1, fixedPsf_);
-      }
-      if (disableBackgroundFitting_ != false) {
-        output.writeBool(2, disableBackgroundFitting_);
-      }
-      if (disableSignalFitting_ != false) {
-        output.writeBool(3, disableSignalFitting_);
-      }
-      if (fitSolver_ != gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber()) {
-        output.writeEnum(4, fitSolver_);
-      }
-      if (fixedIterations_ != false) {
-        output.writeBool(5, fixedIterations_);
-      }
-      if (maxIterations_ != 0) {
-        output.writeInt32(6, maxIterations_);
-      }
-      if (relativeThreshold_ != 0D) {
-        output.writeDouble(7, relativeThreshold_);
-      }
-      if (absoluteThreshold_ != 0D) {
-        output.writeDouble(8, absoluteThreshold_);
-      }
-      if (parameterRelativeThreshold_ != 0D) {
-        output.writeDouble(9, parameterRelativeThreshold_);
-      }
-      if (parameterAbsoluteThreshold_ != 0D) {
-        output.writeDouble(10, parameterAbsoluteThreshold_);
-      }
-      if (lambda_ != 0D) {
-        output.writeDouble(11, lambda_);
-      }
-      if (searchMethod_ != gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber()) {
-        output.writeEnum(12, searchMethod_);
-      }
-      if (gradientLineMinimisation_ != false) {
-        output.writeBool(13, gradientLineMinimisation_);
-      }
-      if (modelCamera_ != false) {
-        output.writeBool(14, modelCamera_);
-      }
-      if (maxFunctionEvaluations_ != 0) {
-        output.writeInt32(15, maxFunctionEvaluations_);
-      }
-      if (useClamping_ != false) {
-        output.writeBool(16, useClamping_);
-      }
-      if (useDynamicClamping_ != false) {
-        output.writeBool(17, useDynamicClamping_);
-      }
+      if (fixedPsf_ != false)
+		output.writeBool(1, fixedPsf_);
+      if (disableBackgroundFitting_ != false)
+		output.writeBool(2, disableBackgroundFitting_);
+      if (disableSignalFitting_ != false)
+		output.writeBool(3, disableSignalFitting_);
+      if (fitSolver_ != gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber())
+		output.writeEnum(4, fitSolver_);
+      if (fixedIterations_ != false)
+		output.writeBool(5, fixedIterations_);
+      if (maxIterations_ != 0)
+		output.writeInt32(6, maxIterations_);
+      if (relativeThreshold_ != 0D)
+		output.writeDouble(7, relativeThreshold_);
+      if (absoluteThreshold_ != 0D)
+		output.writeDouble(8, absoluteThreshold_);
+      if (parameterRelativeThreshold_ != 0D)
+		output.writeDouble(9, parameterRelativeThreshold_);
+      if (parameterAbsoluteThreshold_ != 0D)
+		output.writeDouble(10, parameterAbsoluteThreshold_);
+      if (lambda_ != 0D)
+		output.writeDouble(11, lambda_);
+      if (searchMethod_ != gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber())
+		output.writeEnum(12, searchMethod_);
+      if (gradientLineMinimisation_ != false)
+		output.writeBool(13, gradientLineMinimisation_);
+      if (modelCamera_ != false)
+		output.writeBool(14, modelCamera_);
+      if (maxFunctionEvaluations_ != 0)
+		output.writeInt32(15, maxFunctionEvaluations_);
+      if (useClamping_ != false)
+		output.writeBool(16, useClamping_);
+      if (useDynamicClamping_ != false)
+		output.writeBool(17, useDynamicClamping_);
       if (getClampValuesList().size() > 0) {
         output.writeUInt32NoTag(146);
         output.writeUInt32NoTag(clampValuesMemoizedSerializedSize);
       }
-      for (int i = 0; i < clampValues_.size(); i++) {
-        output.writeDoubleNoTag(clampValues_.get(i));
-      }
-      if (lineSearchMethod_ != gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber()) {
-        output.writeEnum(19, lineSearchMethod_);
-      }
+      for (int i = 0; i < clampValues_.size(); i++)
+		output.writeDoubleNoTag(clampValues_.get(i));
+      if (lineSearchMethod_ != gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber())
+		output.writeEnum(19, lineSearchMethod_);
     }
 
     @Override
@@ -2172,74 +2129,57 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (fixedPsf_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fixedPsf_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, fixedPsf_);
-      }
-      if (disableBackgroundFitting_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (disableBackgroundFitting_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, disableBackgroundFitting_);
-      }
-      if (disableSignalFitting_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (disableSignalFitting_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, disableSignalFitting_);
-      }
-      if (fitSolver_ != gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitSolver_ != gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, fitSolver_);
-      }
-      if (fixedIterations_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fixedIterations_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, fixedIterations_);
-      }
-      if (maxIterations_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxIterations_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, maxIterations_);
-      }
-      if (relativeThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (relativeThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, relativeThreshold_);
-      }
-      if (absoluteThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (absoluteThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(8, absoluteThreshold_);
-      }
-      if (parameterRelativeThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (parameterRelativeThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, parameterRelativeThreshold_);
-      }
-      if (parameterAbsoluteThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (parameterAbsoluteThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(10, parameterAbsoluteThreshold_);
-      }
-      if (lambda_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (lambda_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, lambda_);
-      }
-      if (searchMethod_ != gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (searchMethod_ != gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(12, searchMethod_);
-      }
-      if (gradientLineMinimisation_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (gradientLineMinimisation_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(13, gradientLineMinimisation_);
-      }
-      if (modelCamera_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (modelCamera_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(14, modelCamera_);
-      }
-      if (maxFunctionEvaluations_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxFunctionEvaluations_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(15, maxFunctionEvaluations_);
-      }
-      if (useClamping_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (useClamping_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(16, useClamping_);
-      }
-      if (useDynamicClamping_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (useDynamicClamping_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(17, useDynamicClamping_);
-      }
       {
         int dataSize = 0;
         dataSize = 8 * getClampValuesList().size();
@@ -2251,10 +2191,9 @@ public final class FitProtos {
         }
         clampValuesMemoizedSerializedSize = dataSize;
       }
-      if (lineSearchMethod_ != gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (lineSearchMethod_ != gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(19, lineSearchMethod_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -2262,13 +2201,11 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FitSolverSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.FitSolverSettings other = (gdsc.smlm.data.config.FitProtos.FitSolverSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FitSolverSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.FitSolverSettings other = (gdsc.smlm.data.config.FitProtos.FitSolverSettings) obj;
 
       boolean result = true;
       result = result && (getFixedPsf()
@@ -2321,9 +2258,8 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + FIXED_PSF_FIELD_NUMBER;
@@ -2471,7 +2407,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -2570,18 +2506,17 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSolverSettings build() {
-        gdsc.smlm.data.config.FitProtos.FitSolverSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.FitSolverSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSolverSettings buildPartial() {
-        gdsc.smlm.data.config.FitProtos.FitSolverSettings result = new gdsc.smlm.data.config.FitProtos.FitSolverSettings(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        final gdsc.smlm.data.config.FitProtos.FitSolverSettings result = new gdsc.smlm.data.config.FitProtos.FitSolverSettings(this);
+        final int from_bitField0_ = bitField0_;
+        final int to_bitField0_ = 0;
         result.fixedPsf_ = fixedPsf_;
         result.disableBackgroundFitting_ = disableBackgroundFitting_;
         result.disableSignalFitting_ = disableSignalFitting_;
@@ -2644,9 +2579,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.FitSolverSettings) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.FitSolverSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.FitSolverSettings)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.FitSolverSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -2654,57 +2589,40 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.FitSolverSettings other) {
         if (other == gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance()) return this;
-        if (other.getFixedPsf() != false) {
-          setFixedPsf(other.getFixedPsf());
-        }
-        if (other.getDisableBackgroundFitting() != false) {
-          setDisableBackgroundFitting(other.getDisableBackgroundFitting());
-        }
-        if (other.getDisableSignalFitting() != false) {
-          setDisableSignalFitting(other.getDisableSignalFitting());
-        }
-        if (other.fitSolver_ != 0) {
-          setFitSolverValue(other.getFitSolverValue());
-        }
-        if (other.getFixedIterations() != false) {
-          setFixedIterations(other.getFixedIterations());
-        }
-        if (other.getMaxIterations() != 0) {
-          setMaxIterations(other.getMaxIterations());
-        }
-        if (other.getRelativeThreshold() != 0D) {
-          setRelativeThreshold(other.getRelativeThreshold());
-        }
-        if (other.getAbsoluteThreshold() != 0D) {
-          setAbsoluteThreshold(other.getAbsoluteThreshold());
-        }
-        if (other.getParameterRelativeThreshold() != 0D) {
-          setParameterRelativeThreshold(other.getParameterRelativeThreshold());
-        }
-        if (other.getParameterAbsoluteThreshold() != 0D) {
-          setParameterAbsoluteThreshold(other.getParameterAbsoluteThreshold());
-        }
-        if (other.getLambda() != 0D) {
-          setLambda(other.getLambda());
-        }
-        if (other.searchMethod_ != 0) {
-          setSearchMethodValue(other.getSearchMethodValue());
-        }
-        if (other.getGradientLineMinimisation() != false) {
-          setGradientLineMinimisation(other.getGradientLineMinimisation());
-        }
-        if (other.getModelCamera() != false) {
-          setModelCamera(other.getModelCamera());
-        }
-        if (other.getMaxFunctionEvaluations() != 0) {
-          setMaxFunctionEvaluations(other.getMaxFunctionEvaluations());
-        }
-        if (other.getUseClamping() != false) {
-          setUseClamping(other.getUseClamping());
-        }
-        if (other.getUseDynamicClamping() != false) {
-          setUseDynamicClamping(other.getUseDynamicClamping());
-        }
+        if (other.getFixedPsf() != false)
+			setFixedPsf(other.getFixedPsf());
+        if (other.getDisableBackgroundFitting() != false)
+			setDisableBackgroundFitting(other.getDisableBackgroundFitting());
+        if (other.getDisableSignalFitting() != false)
+			setDisableSignalFitting(other.getDisableSignalFitting());
+        if (other.fitSolver_ != 0)
+			setFitSolverValue(other.getFitSolverValue());
+        if (other.getFixedIterations() != false)
+			setFixedIterations(other.getFixedIterations());
+        if (other.getMaxIterations() != 0)
+			setMaxIterations(other.getMaxIterations());
+        if (other.getRelativeThreshold() != 0D)
+			setRelativeThreshold(other.getRelativeThreshold());
+        if (other.getAbsoluteThreshold() != 0D)
+			setAbsoluteThreshold(other.getAbsoluteThreshold());
+        if (other.getParameterRelativeThreshold() != 0D)
+			setParameterRelativeThreshold(other.getParameterRelativeThreshold());
+        if (other.getParameterAbsoluteThreshold() != 0D)
+			setParameterAbsoluteThreshold(other.getParameterAbsoluteThreshold());
+        if (other.getLambda() != 0D)
+			setLambda(other.getLambda());
+        if (other.searchMethod_ != 0)
+			setSearchMethodValue(other.getSearchMethodValue());
+        if (other.getGradientLineMinimisation() != false)
+			setGradientLineMinimisation(other.getGradientLineMinimisation());
+        if (other.getModelCamera() != false)
+			setModelCamera(other.getModelCamera());
+        if (other.getMaxFunctionEvaluations() != 0)
+			setMaxFunctionEvaluations(other.getMaxFunctionEvaluations());
+        if (other.getUseClamping() != false)
+			setUseClamping(other.getUseClamping());
+        if (other.getUseDynamicClamping() != false)
+			setUseDynamicClamping(other.getUseDynamicClamping());
         if (!other.clampValues_.isEmpty()) {
           if (clampValues_.isEmpty()) {
             clampValues_ = other.clampValues_;
@@ -2715,9 +2633,8 @@ public final class FitProtos {
           }
           onChanged();
         }
-        if (other.lineSearchMethod_ != 0) {
-          setLineSearchMethodValue(other.getLineSearchMethodValue());
-        }
+        if (other.lineSearchMethod_ != 0)
+			setLineSearchMethodValue(other.getLineSearchMethodValue());
         onChanged();
         return this;
       }
@@ -2735,13 +2652,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.FitSolverSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.FitSolverSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -2897,7 +2813,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
-        gdsc.smlm.data.config.FitProtos.FitSolver result = gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
+        final gdsc.smlm.data.config.FitProtos.FitSolver result = gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
         return result == null ? gdsc.smlm.data.config.FitProtos.FitSolver.UNRECOGNIZED : result;
       }
       /**
@@ -2908,9 +2824,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder setFitSolver(gdsc.smlm.data.config.FitProtos.FitSolver value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         fitSolver_ = value.getNumber();
         onChanged();
@@ -3239,7 +3154,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
-        gdsc.smlm.data.config.FitProtos.SearchMethod result = gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
+        final gdsc.smlm.data.config.FitProtos.SearchMethod result = gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.SearchMethod.UNRECOGNIZED : result;
       }
       /**
@@ -3250,9 +3165,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder setSearchMethod(gdsc.smlm.data.config.FitProtos.SearchMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         searchMethod_ = value.getNumber();
         onChanged();
@@ -3600,7 +3514,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
-        gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
+        final gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
       }
       /**
@@ -3611,9 +3525,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
       public Builder setLineSearchMethod(gdsc.smlm.data.config.FitProtos.LineSearchMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         lineSearchMethod_ = value.getNumber();
         onChanged();
@@ -3854,19 +3767,18 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -3910,13 +3822,13 @@ public final class FitProtos {
               break;
             }
             case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               smartFilterString_ = s;
               break;
             }
             case 88: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               precisionMethod_ = rawValue;
               break;
@@ -3933,9 +3845,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -4078,13 +3990,13 @@ public final class FitProtos {
      */
     @Override
 	public java.lang.String getSmartFilterString() {
-      java.lang.Object ref = smartFilterString_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = smartFilterString_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         smartFilterString_ = s;
         return s;
       }
@@ -4099,16 +4011,16 @@ public final class FitProtos {
     @Override
 	public com.google.protobuf.ByteString
         getSmartFilterStringBytes() {
-      java.lang.Object ref = smartFilterString_;
+      final java.lang.Object ref = smartFilterString_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         smartFilterString_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int PRECISION_METHOD_FIELD_NUMBER = 11;
@@ -4133,7 +4045,7 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
-      gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+      final gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
     }
 
@@ -4168,7 +4080,7 @@ public final class FitProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -4179,42 +4091,30 @@ public final class FitProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (shiftFactor_ != 0D) {
-        output.writeDouble(1, shiftFactor_);
-      }
-      if (signalStrength_ != 0D) {
-        output.writeDouble(2, signalStrength_);
-      }
-      if (minPhotons_ != 0D) {
-        output.writeDouble(3, minPhotons_);
-      }
-      if (precisionThreshold_ != 0D) {
-        output.writeDouble(4, precisionThreshold_);
-      }
-      if (minWidthFactor_ != 0D) {
-        output.writeDouble(6, minWidthFactor_);
-      }
-      if (maxWidthFactor_ != 0D) {
-        output.writeDouble(7, maxWidthFactor_);
-      }
-      if (disableSimpleFilter_ != false) {
-        output.writeBool(8, disableSimpleFilter_);
-      }
-      if (smartFilter_ != false) {
-        output.writeBool(9, smartFilter_);
-      }
-      if (!getSmartFilterStringBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, smartFilterString_);
-      }
-      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
-        output.writeEnum(11, precisionMethod_);
-      }
-      if (minZ_ != 0D) {
-        output.writeDouble(12, minZ_);
-      }
-      if (maxZ_ != 0D) {
-        output.writeDouble(13, maxZ_);
-      }
+      if (shiftFactor_ != 0D)
+		output.writeDouble(1, shiftFactor_);
+      if (signalStrength_ != 0D)
+		output.writeDouble(2, signalStrength_);
+      if (minPhotons_ != 0D)
+		output.writeDouble(3, minPhotons_);
+      if (precisionThreshold_ != 0D)
+		output.writeDouble(4, precisionThreshold_);
+      if (minWidthFactor_ != 0D)
+		output.writeDouble(6, minWidthFactor_);
+      if (maxWidthFactor_ != 0D)
+		output.writeDouble(7, maxWidthFactor_);
+      if (disableSimpleFilter_ != false)
+		output.writeBool(8, disableSimpleFilter_);
+      if (smartFilter_ != false)
+		output.writeBool(9, smartFilter_);
+      if (!getSmartFilterStringBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 10, smartFilterString_);
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber())
+		output.writeEnum(11, precisionMethod_);
+      if (minZ_ != 0D)
+		output.writeDouble(12, minZ_);
+      if (maxZ_ != 0D)
+		output.writeDouble(13, maxZ_);
     }
 
     @Override
@@ -4223,53 +4123,41 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (shiftFactor_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (shiftFactor_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, shiftFactor_);
-      }
-      if (signalStrength_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (signalStrength_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, signalStrength_);
-      }
-      if (minPhotons_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minPhotons_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, minPhotons_);
-      }
-      if (precisionThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (precisionThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, precisionThreshold_);
-      }
-      if (minWidthFactor_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minWidthFactor_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, minWidthFactor_);
-      }
-      if (maxWidthFactor_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxWidthFactor_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, maxWidthFactor_);
-      }
-      if (disableSimpleFilter_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (disableSimpleFilter_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, disableSimpleFilter_);
-      }
-      if (smartFilter_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (smartFilter_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, smartFilter_);
-      }
-      if (!getSmartFilterStringBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, smartFilterString_);
-      }
-      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getSmartFilterStringBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, smartFilterString_);
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(11, precisionMethod_);
-      }
-      if (minZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (minZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, minZ_);
-      }
-      if (maxZ_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (maxZ_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, maxZ_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -4277,13 +4165,11 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FilterSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.FilterSettings other = (gdsc.smlm.data.config.FitProtos.FilterSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FilterSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.FilterSettings other = (gdsc.smlm.data.config.FitProtos.FilterSettings) obj;
 
       boolean result = true;
       result = result && (
@@ -4330,9 +4216,8 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SHIFT_FACTOR_FIELD_NUMBER;
@@ -4461,7 +4346,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -4546,16 +4431,15 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FilterSettings build() {
-        gdsc.smlm.data.config.FitProtos.FilterSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.FilterSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FilterSettings buildPartial() {
-        gdsc.smlm.data.config.FitProtos.FilterSettings result = new gdsc.smlm.data.config.FitProtos.FilterSettings(this);
+        final gdsc.smlm.data.config.FitProtos.FilterSettings result = new gdsc.smlm.data.config.FitProtos.FilterSettings(this);
         result.shiftFactor_ = shiftFactor_;
         result.signalStrength_ = signalStrength_;
         result.minPhotons_ = minPhotons_;
@@ -4606,9 +4490,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.FilterSettings) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.FilterSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.FilterSettings)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.FilterSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -4616,43 +4500,32 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.FilterSettings other) {
         if (other == gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance()) return this;
-        if (other.getShiftFactor() != 0D) {
-          setShiftFactor(other.getShiftFactor());
-        }
-        if (other.getSignalStrength() != 0D) {
-          setSignalStrength(other.getSignalStrength());
-        }
-        if (other.getMinPhotons() != 0D) {
-          setMinPhotons(other.getMinPhotons());
-        }
-        if (other.getPrecisionThreshold() != 0D) {
-          setPrecisionThreshold(other.getPrecisionThreshold());
-        }
-        if (other.getMinWidthFactor() != 0D) {
-          setMinWidthFactor(other.getMinWidthFactor());
-        }
-        if (other.getMaxWidthFactor() != 0D) {
-          setMaxWidthFactor(other.getMaxWidthFactor());
-        }
-        if (other.getDisableSimpleFilter() != false) {
-          setDisableSimpleFilter(other.getDisableSimpleFilter());
-        }
-        if (other.getSmartFilter() != false) {
-          setSmartFilter(other.getSmartFilter());
-        }
+        if (other.getShiftFactor() != 0D)
+			setShiftFactor(other.getShiftFactor());
+        if (other.getSignalStrength() != 0D)
+			setSignalStrength(other.getSignalStrength());
+        if (other.getMinPhotons() != 0D)
+			setMinPhotons(other.getMinPhotons());
+        if (other.getPrecisionThreshold() != 0D)
+			setPrecisionThreshold(other.getPrecisionThreshold());
+        if (other.getMinWidthFactor() != 0D)
+			setMinWidthFactor(other.getMinWidthFactor());
+        if (other.getMaxWidthFactor() != 0D)
+			setMaxWidthFactor(other.getMaxWidthFactor());
+        if (other.getDisableSimpleFilter() != false)
+			setDisableSimpleFilter(other.getDisableSimpleFilter());
+        if (other.getSmartFilter() != false)
+			setSmartFilter(other.getSmartFilter());
         if (!other.getSmartFilterString().isEmpty()) {
           smartFilterString_ = other.smartFilterString_;
           onChanged();
         }
-        if (other.precisionMethod_ != 0) {
-          setPrecisionMethodValue(other.getPrecisionMethodValue());
-        }
-        if (other.getMinZ() != 0D) {
-          setMinZ(other.getMinZ());
-        }
-        if (other.getMaxZ() != 0D) {
-          setMaxZ(other.getMaxZ());
-        }
+        if (other.precisionMethod_ != 0)
+			setPrecisionMethodValue(other.getPrecisionMethodValue());
+        if (other.getMinZ() != 0D)
+			setMinZ(other.getMinZ());
+        if (other.getMaxZ() != 0D)
+			setMaxZ(other.getMaxZ());
         onChanged();
         return this;
       }
@@ -4670,13 +4543,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.FilterSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.FilterSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -5003,16 +4875,16 @@ public final class FitProtos {
        */
       @Override
 	public java.lang.String getSmartFilterString() {
-        java.lang.Object ref = smartFilterString_;
+        final java.lang.Object ref = smartFilterString_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           smartFilterString_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -5024,16 +4896,16 @@ public final class FitProtos {
       @Override
 	public com.google.protobuf.ByteString
           getSmartFilterStringBytes() {
-        java.lang.Object ref = smartFilterString_;
+        final java.lang.Object ref = smartFilterString_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           smartFilterString_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -5044,9 +4916,8 @@ public final class FitProtos {
        */
       public Builder setSmartFilterString(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         smartFilterString_ = value;
         onChanged();
@@ -5074,9 +4945,8 @@ public final class FitProtos {
        */
       public Builder setSmartFilterStringBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         smartFilterString_ = value;
@@ -5117,7 +4987,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
-        gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+        final gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
       }
       /**
@@ -5128,9 +4998,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
       public Builder setPrecisionMethod(gdsc.smlm.data.config.FitProtos.PrecisionMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         precisionMethod_ = value.getNumber();
         onChanged();
@@ -5363,26 +5232,24 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
               gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder subBuilder = null;
-              if (fitSolverSettings_ != null) {
-                subBuilder = fitSolverSettings_.toBuilder();
-              }
+              if (fitSolverSettings_ != null)
+				subBuilder = fitSolverSettings_.toBuilder();
               fitSolverSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.FitSolverSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitSolverSettings_);
@@ -5393,9 +5260,8 @@ public final class FitProtos {
             }
             case 18: {
               gdsc.smlm.data.config.FitProtos.FilterSettings.Builder subBuilder = null;
-              if (filterSettings_ != null) {
-                subBuilder = filterSettings_.toBuilder();
-              }
+              if (filterSettings_ != null)
+				subBuilder = filterSettings_.toBuilder();
               filterSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.FilterSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(filterSettings_);
@@ -5406,9 +5272,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -5503,7 +5369,7 @@ public final class FitProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -5514,12 +5380,10 @@ public final class FitProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (fitSolverSettings_ != null) {
-        output.writeMessage(1, getFitSolverSettings());
-      }
-      if (filterSettings_ != null) {
-        output.writeMessage(2, getFilterSettings());
-      }
+      if (fitSolverSettings_ != null)
+		output.writeMessage(1, getFitSolverSettings());
+      if (filterSettings_ != null)
+		output.writeMessage(2, getFilterSettings());
     }
 
     @Override
@@ -5528,14 +5392,12 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (fitSolverSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitSolverSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getFitSolverSettings());
-      }
-      if (filterSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (filterSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getFilterSettings());
-      }
       memoizedSize = size;
       return size;
     }
@@ -5543,33 +5405,28 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FitSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.FitSettings other = (gdsc.smlm.data.config.FitProtos.FitSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FitSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.FitSettings other = (gdsc.smlm.data.config.FitProtos.FitSettings) obj;
 
       boolean result = true;
       result = result && (hasFitSolverSettings() == other.hasFitSolverSettings());
-      if (hasFitSolverSettings()) {
-        result = result && getFitSolverSettings()
+      if (hasFitSolverSettings())
+		result = result && getFitSolverSettings()
             .equals(other.getFitSolverSettings());
-      }
       result = result && (hasFilterSettings() == other.hasFilterSettings());
-      if (hasFilterSettings()) {
-        result = result && getFilterSettings()
+      if (hasFilterSettings())
+		result = result && getFilterSettings()
             .equals(other.getFilterSettings());
-      }
       return result;
     }
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasFitSolverSettings()) {
@@ -5672,7 +5529,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -5718,15 +5575,15 @@ public final class FitProtos {
       @Override
 	public Builder clear() {
         super.clear();
-        if (fitSolverSettingsBuilder_ == null) {
-          fitSolverSettings_ = null;
-        } else {
+        if (fitSolverSettingsBuilder_ == null)
+			fitSolverSettings_ = null;
+		else {
           fitSolverSettings_ = null;
           fitSolverSettingsBuilder_ = null;
         }
-        if (filterSettingsBuilder_ == null) {
-          filterSettings_ = null;
-        } else {
+        if (filterSettingsBuilder_ == null)
+			filterSettings_ = null;
+		else {
           filterSettings_ = null;
           filterSettingsBuilder_ = null;
         }
@@ -5746,26 +5603,23 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSettings build() {
-        gdsc.smlm.data.config.FitProtos.FitSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.FitSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSettings buildPartial() {
-        gdsc.smlm.data.config.FitProtos.FitSettings result = new gdsc.smlm.data.config.FitProtos.FitSettings(this);
-        if (fitSolverSettingsBuilder_ == null) {
-          result.fitSolverSettings_ = fitSolverSettings_;
-        } else {
-          result.fitSolverSettings_ = fitSolverSettingsBuilder_.build();
-        }
-        if (filterSettingsBuilder_ == null) {
-          result.filterSettings_ = filterSettings_;
-        } else {
-          result.filterSettings_ = filterSettingsBuilder_.build();
-        }
+        final gdsc.smlm.data.config.FitProtos.FitSettings result = new gdsc.smlm.data.config.FitProtos.FitSettings(this);
+        if (fitSolverSettingsBuilder_ == null)
+			result.fitSolverSettings_ = fitSolverSettings_;
+		else
+			result.fitSolverSettings_ = fitSolverSettingsBuilder_.build();
+        if (filterSettingsBuilder_ == null)
+			result.filterSettings_ = filterSettings_;
+		else
+			result.filterSettings_ = filterSettingsBuilder_.build();
         onBuilt();
         return result;
       }
@@ -5804,9 +5658,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.FitSettings) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.FitSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.FitSettings)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.FitSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -5814,12 +5668,10 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.FitSettings other) {
         if (other == gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance()) return this;
-        if (other.hasFitSolverSettings()) {
-          mergeFitSolverSettings(other.getFitSolverSettings());
-        }
-        if (other.hasFilterSettings()) {
-          mergeFilterSettings(other.getFilterSettings());
-        }
+        if (other.hasFitSolverSettings())
+			mergeFitSolverSettings(other.getFitSolverSettings());
+        if (other.hasFilterSettings())
+			mergeFilterSettings(other.getFilterSettings());
         onChanged();
         return this;
       }
@@ -5837,13 +5689,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.FitSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.FitSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -5871,11 +5722,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
-        if (fitSolverSettingsBuilder_ == null) {
-          return fitSolverSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
-        } else {
-          return fitSolverSettingsBuilder_.getMessage();
-        }
+        if (fitSolverSettingsBuilder_ == null)
+			return fitSolverSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
+		else
+			return fitSolverSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -5886,14 +5736,13 @@ public final class FitProtos {
        */
       public Builder setFitSolverSettings(gdsc.smlm.data.config.FitProtos.FitSolverSettings value) {
         if (fitSolverSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           fitSolverSettings_ = value;
           onChanged();
-        } else {
-          fitSolverSettingsBuilder_.setMessage(value);
         }
+		else
+			fitSolverSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -5909,9 +5758,9 @@ public final class FitProtos {
         if (fitSolverSettingsBuilder_ == null) {
           fitSolverSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          fitSolverSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			fitSolverSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -5924,16 +5773,15 @@ public final class FitProtos {
        */
       public Builder mergeFitSolverSettings(gdsc.smlm.data.config.FitProtos.FitSolverSettings value) {
         if (fitSolverSettingsBuilder_ == null) {
-          if (fitSolverSettings_ != null) {
-            fitSolverSettings_ =
+          if (fitSolverSettings_ != null)
+			fitSolverSettings_ =
               gdsc.smlm.data.config.FitProtos.FitSolverSettings.newBuilder(fitSolverSettings_).mergeFrom(value).buildPartial();
-          } else {
-            fitSolverSettings_ = value;
-          }
+		else
+			fitSolverSettings_ = value;
           onChanged();
-        } else {
-          fitSolverSettingsBuilder_.mergeFrom(value);
         }
+		else
+			fitSolverSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -5976,12 +5824,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
-        if (fitSolverSettingsBuilder_ != null) {
-          return fitSolverSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return fitSolverSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
-        }
+        if (fitSolverSettingsBuilder_ != null)
+			return fitSolverSettingsBuilder_.getMessageOrBuilder();
+		else
+			return fitSolverSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
       }
       /**
        * <pre>
@@ -6026,11 +5873,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
-        if (filterSettingsBuilder_ == null) {
-          return filterSettings_ == null ? gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
-        } else {
-          return filterSettingsBuilder_.getMessage();
-        }
+        if (filterSettingsBuilder_ == null)
+			return filterSettings_ == null ? gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
+		else
+			return filterSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -6041,14 +5887,13 @@ public final class FitProtos {
        */
       public Builder setFilterSettings(gdsc.smlm.data.config.FitProtos.FilterSettings value) {
         if (filterSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           filterSettings_ = value;
           onChanged();
-        } else {
-          filterSettingsBuilder_.setMessage(value);
         }
+		else
+			filterSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -6064,9 +5909,9 @@ public final class FitProtos {
         if (filterSettingsBuilder_ == null) {
           filterSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          filterSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			filterSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -6079,16 +5924,15 @@ public final class FitProtos {
        */
       public Builder mergeFilterSettings(gdsc.smlm.data.config.FitProtos.FilterSettings value) {
         if (filterSettingsBuilder_ == null) {
-          if (filterSettings_ != null) {
-            filterSettings_ =
+          if (filterSettings_ != null)
+			filterSettings_ =
               gdsc.smlm.data.config.FitProtos.FilterSettings.newBuilder(filterSettings_).mergeFrom(value).buildPartial();
-          } else {
-            filterSettings_ = value;
-          }
+		else
+			filterSettings_ = value;
           onChanged();
-        } else {
-          filterSettingsBuilder_.mergeFrom(value);
         }
+		else
+			filterSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -6131,12 +5975,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
-        if (filterSettingsBuilder_ != null) {
-          return filterSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return filterSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
-        }
+        if (filterSettingsBuilder_ != null)
+			return filterSettingsBuilder_.getMessageOrBuilder();
+		else
+			return filterSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
       }
       /**
        * <pre>
@@ -6262,19 +6105,18 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -6289,9 +6131,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -6342,7 +6184,7 @@ public final class FitProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -6353,12 +6195,10 @@ public final class FitProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (value_ != 0D) {
-        output.writeDouble(1, value_);
-      }
-      if (absolute_ != false) {
-        output.writeBool(2, absolute_);
-      }
+      if (value_ != 0D)
+		output.writeDouble(1, value_);
+      if (absolute_ != false)
+		output.writeBool(2, absolute_);
     }
 
     @Override
@@ -6367,14 +6207,12 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (value_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (value_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, value_);
-      }
-      if (absolute_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (absolute_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, absolute_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -6382,13 +6220,11 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.RelativeParameter)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.RelativeParameter other = (gdsc.smlm.data.config.FitProtos.RelativeParameter) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.RelativeParameter))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.RelativeParameter other = (gdsc.smlm.data.config.FitProtos.RelativeParameter) obj;
 
       boolean result = true;
       result = result && (
@@ -6402,9 +6238,8 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
@@ -6505,7 +6340,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -6570,16 +6405,15 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter build() {
-        gdsc.smlm.data.config.FitProtos.RelativeParameter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.RelativeParameter result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter buildPartial() {
-        gdsc.smlm.data.config.FitProtos.RelativeParameter result = new gdsc.smlm.data.config.FitProtos.RelativeParameter(this);
+        final gdsc.smlm.data.config.FitProtos.RelativeParameter result = new gdsc.smlm.data.config.FitProtos.RelativeParameter(this);
         result.value_ = value_;
         result.absolute_ = absolute_;
         onBuilt();
@@ -6620,9 +6454,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.RelativeParameter) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.RelativeParameter)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.RelativeParameter)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.RelativeParameter)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -6630,12 +6464,10 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.RelativeParameter other) {
         if (other == gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance()) return this;
-        if (other.getValue() != 0D) {
-          setValue(other.getValue());
-        }
-        if (other.getAbsolute() != false) {
-          setAbsolute(other.getAbsolute());
-        }
+        if (other.getValue() != 0D)
+			setValue(other.getValue());
+        if (other.getAbsolute() != false)
+			setAbsolute(other.getAbsolute());
         onChanged();
         return this;
       }
@@ -6653,13 +6485,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.RelativeParameter parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.RelativeParameter) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -6898,19 +6729,18 @@ public final class FitProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               dataFilterMethod_ = rawValue;
               break;
@@ -6926,15 +6756,14 @@ public final class FitProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          parameters_ = java.util.Collections.unmodifiableList(parameters_);
-        }
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002))
+			parameters_ = java.util.Collections.unmodifiableList(parameters_);
         makeExtensionsImmutable();
       }
     }
@@ -6974,7 +6803,7 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
-      gdsc.smlm.data.config.FitProtos.DataFilterMethod result = gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
+      final gdsc.smlm.data.config.FitProtos.DataFilterMethod result = gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterMethod.UNRECOGNIZED : result;
     }
 
@@ -7046,7 +6875,7 @@ public final class FitProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -7057,12 +6886,10 @@ public final class FitProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (dataFilterMethod_ != gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber()) {
-        output.writeEnum(1, dataFilterMethod_);
-      }
-      for (int i = 0; i < parameters_.size(); i++) {
-        output.writeMessage(2, parameters_.get(i));
-      }
+      if (dataFilterMethod_ != gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber())
+		output.writeEnum(1, dataFilterMethod_);
+      for (int i = 0; i < parameters_.size(); i++)
+		output.writeMessage(2, parameters_.get(i));
     }
 
     @Override
@@ -7071,14 +6898,12 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (dataFilterMethod_ != gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (dataFilterMethod_ != gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, dataFilterMethod_);
-      }
-      for (int i = 0; i < parameters_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
+      for (int i = 0; i < parameters_.size(); i++)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, parameters_.get(i));
-      }
       memoizedSize = size;
       return size;
     }
@@ -7086,13 +6911,11 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.DataFilter)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.DataFilter other = (gdsc.smlm.data.config.FitProtos.DataFilter) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.DataFilter))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.DataFilter other = (gdsc.smlm.data.config.FitProtos.DataFilter) obj;
 
       boolean result = true;
       result = result && dataFilterMethod_ == other.dataFilterMethod_;
@@ -7103,9 +6926,8 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATA_FILTER_METHOD_FIELD_NUMBER;
@@ -7206,7 +7028,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -7245,9 +7067,8 @@ public final class FitProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getParametersFieldBuilder();
-        }
+                .alwaysUseFieldBuilders)
+			getParametersFieldBuilder();
       }
       @Override
 	public Builder clear() {
@@ -7257,9 +7078,9 @@ public final class FitProtos {
         if (parametersBuilder_ == null) {
           parameters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
-        } else {
-          parametersBuilder_.clear();
         }
+		else
+			parametersBuilder_.clear();
         return this;
       }
 
@@ -7276,18 +7097,17 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilter build() {
-        gdsc.smlm.data.config.FitProtos.DataFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.DataFilter result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilter buildPartial() {
-        gdsc.smlm.data.config.FitProtos.DataFilter result = new gdsc.smlm.data.config.FitProtos.DataFilter(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        final gdsc.smlm.data.config.FitProtos.DataFilter result = new gdsc.smlm.data.config.FitProtos.DataFilter(this);
+        final int from_bitField0_ = bitField0_;
+        final int to_bitField0_ = 0;
         result.dataFilterMethod_ = dataFilterMethod_;
         if (parametersBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002)) {
@@ -7295,9 +7115,9 @@ public final class FitProtos {
             bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.parameters_ = parameters_;
-        } else {
-          result.parameters_ = parametersBuilder_.build();
         }
+		else
+			result.parameters_ = parametersBuilder_.build();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -7337,9 +7157,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.DataFilter) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.DataFilter)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.DataFilter)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.DataFilter)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -7347,9 +7167,8 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.DataFilter other) {
         if (other == gdsc.smlm.data.config.FitProtos.DataFilter.getDefaultInstance()) return this;
-        if (other.dataFilterMethod_ != 0) {
-          setDataFilterMethodValue(other.getDataFilterMethodValue());
-        }
+        if (other.dataFilterMethod_ != 0)
+			setDataFilterMethodValue(other.getDataFilterMethodValue());
         if (parametersBuilder_ == null) {
           if (!other.parameters_.isEmpty()) {
             if (parameters_.isEmpty()) {
@@ -7361,9 +7180,9 @@ public final class FitProtos {
             }
             onChanged();
           }
-        } else {
-          if (!other.parameters_.isEmpty()) {
-            if (parametersBuilder_.isEmpty()) {
+        }
+		else if (!other.parameters_.isEmpty())
+			if (parametersBuilder_.isEmpty()) {
               parametersBuilder_.dispose();
               parametersBuilder_ = null;
               parameters_ = other.parameters_;
@@ -7371,11 +7190,9 @@ public final class FitProtos {
               parametersBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getParametersFieldBuilder() : null;
-            } else {
-              parametersBuilder_.addAllMessages(other.parameters_);
             }
-          }
-        }
+			else
+				parametersBuilder_.addAllMessages(other.parameters_);
         onChanged();
         return this;
       }
@@ -7393,13 +7210,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.DataFilter parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.DataFilter) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -7438,7 +7254,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
-        gdsc.smlm.data.config.FitProtos.DataFilterMethod result = gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
+        final gdsc.smlm.data.config.FitProtos.DataFilterMethod result = gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterMethod.UNRECOGNIZED : result;
       }
       /**
@@ -7449,9 +7265,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
       public Builder setDataFilterMethod(gdsc.smlm.data.config.FitProtos.DataFilterMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         dataFilterMethod_ = value.getNumber();
         onChanged();
@@ -7493,11 +7308,10 @@ public final class FitProtos {
        */
       @Override
 	public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
-        if (parametersBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(parameters_);
-        } else {
-          return parametersBuilder_.getMessageList();
-        }
+        if (parametersBuilder_ == null)
+			return java.util.Collections.unmodifiableList(parameters_);
+		else
+			return parametersBuilder_.getMessageList();
       }
       /**
        * <pre>
@@ -7509,11 +7323,10 @@ public final class FitProtos {
        */
       @Override
 	public int getParametersCount() {
-        if (parametersBuilder_ == null) {
-          return parameters_.size();
-        } else {
-          return parametersBuilder_.getCount();
-        }
+        if (parametersBuilder_ == null)
+			return parameters_.size();
+		else
+			return parametersBuilder_.getCount();
       }
       /**
        * <pre>
@@ -7525,11 +7338,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
-        if (parametersBuilder_ == null) {
-          return parameters_.get(index);
-        } else {
-          return parametersBuilder_.getMessage(index);
-        }
+        if (parametersBuilder_ == null)
+			return parameters_.get(index);
+		else
+			return parametersBuilder_.getMessage(index);
       }
       /**
        * <pre>
@@ -7542,15 +7354,14 @@ public final class FitProtos {
       public Builder setParameters(
           int index, gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (parametersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureParametersIsMutable();
           parameters_.set(index, value);
           onChanged();
-        } else {
-          parametersBuilder_.setMessage(index, value);
         }
+		else
+			parametersBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -7567,9 +7378,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.set(index, builderForValue.build());
           onChanged();
-        } else {
-          parametersBuilder_.setMessage(index, builderForValue.build());
         }
+		else
+			parametersBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -7582,15 +7393,14 @@ public final class FitProtos {
        */
       public Builder addParameters(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (parametersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureParametersIsMutable();
           parameters_.add(value);
           onChanged();
-        } else {
-          parametersBuilder_.addMessage(value);
         }
+		else
+			parametersBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -7604,15 +7414,14 @@ public final class FitProtos {
       public Builder addParameters(
           int index, gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (parametersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureParametersIsMutable();
           parameters_.add(index, value);
           onChanged();
-        } else {
-          parametersBuilder_.addMessage(index, value);
         }
+		else
+			parametersBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -7629,9 +7438,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.add(builderForValue.build());
           onChanged();
-        } else {
-          parametersBuilder_.addMessage(builderForValue.build());
         }
+		else
+			parametersBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -7648,9 +7457,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.add(index, builderForValue.build());
           onChanged();
-        } else {
-          parametersBuilder_.addMessage(index, builderForValue.build());
         }
+		else
+			parametersBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -7668,9 +7477,9 @@ public final class FitProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, parameters_);
           onChanged();
-        } else {
-          parametersBuilder_.addAllMessages(values);
         }
+		else
+			parametersBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -7686,9 +7495,9 @@ public final class FitProtos {
           parameters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
-        } else {
-          parametersBuilder_.clear();
         }
+		else
+			parametersBuilder_.clear();
         return this;
       }
       /**
@@ -7704,9 +7513,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.remove(index);
           onChanged();
-        } else {
-          parametersBuilder_.remove(index);
         }
+		else
+			parametersBuilder_.remove(index);
         return this;
       }
       /**
@@ -7732,10 +7541,10 @@ public final class FitProtos {
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
           int index) {
-        if (parametersBuilder_ == null) {
-          return parameters_.get(index);  } else {
-          return parametersBuilder_.getMessageOrBuilder(index);
-        }
+        if (parametersBuilder_ == null)
+			return parameters_.get(index);
+		else
+			return parametersBuilder_.getMessageOrBuilder(index);
       }
       /**
        * <pre>
@@ -7748,11 +7557,10 @@ public final class FitProtos {
       @Override
 	public java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
            getParametersOrBuilderList() {
-        if (parametersBuilder_ != null) {
-          return parametersBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(parameters_);
-        }
+        if (parametersBuilder_ != null)
+			return parametersBuilder_.getMessageOrBuilderList();
+		else
+			return java.util.Collections.unmodifiableList(parameters_);
       }
       /**
        * <pre>
@@ -7956,19 +7764,18 @@ public final class FitProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               dataFilterType_ = rawValue;
               break;
@@ -7984,15 +7791,14 @@ public final class FitProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          dataFilters_ = java.util.Collections.unmodifiableList(dataFilters_);
-        }
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002))
+			dataFilters_ = java.util.Collections.unmodifiableList(dataFilters_);
         makeExtensionsImmutable();
       }
     }
@@ -8032,7 +7838,7 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
-      gdsc.smlm.data.config.FitProtos.DataFilterType result = gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
+      final gdsc.smlm.data.config.FitProtos.DataFilterType result = gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
       return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterType.UNRECOGNIZED : result;
     }
 
@@ -8099,7 +7905,7 @@ public final class FitProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -8110,12 +7916,10 @@ public final class FitProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (dataFilterType_ != gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber()) {
-        output.writeEnum(1, dataFilterType_);
-      }
-      for (int i = 0; i < dataFilters_.size(); i++) {
-        output.writeMessage(2, dataFilters_.get(i));
-      }
+      if (dataFilterType_ != gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber())
+		output.writeEnum(1, dataFilterType_);
+      for (int i = 0; i < dataFilters_.size(); i++)
+		output.writeMessage(2, dataFilters_.get(i));
     }
 
     @Override
@@ -8124,14 +7928,12 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (dataFilterType_ != gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (dataFilterType_ != gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, dataFilterType_);
-      }
-      for (int i = 0; i < dataFilters_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
+      for (int i = 0; i < dataFilters_.size(); i++)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, dataFilters_.get(i));
-      }
       memoizedSize = size;
       return size;
     }
@@ -8139,13 +7941,11 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.DataFilterSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.DataFilterSettings other = (gdsc.smlm.data.config.FitProtos.DataFilterSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.DataFilterSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.DataFilterSettings other = (gdsc.smlm.data.config.FitProtos.DataFilterSettings) obj;
 
       boolean result = true;
       result = result && dataFilterType_ == other.dataFilterType_;
@@ -8156,9 +7956,8 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATA_FILTER_TYPE_FIELD_NUMBER;
@@ -8259,7 +8058,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -8298,9 +8097,8 @@ public final class FitProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getDataFiltersFieldBuilder();
-        }
+                .alwaysUseFieldBuilders)
+			getDataFiltersFieldBuilder();
       }
       @Override
 	public Builder clear() {
@@ -8310,9 +8108,9 @@ public final class FitProtos {
         if (dataFiltersBuilder_ == null) {
           dataFilters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
-        } else {
-          dataFiltersBuilder_.clear();
         }
+		else
+			dataFiltersBuilder_.clear();
         return this;
       }
 
@@ -8329,18 +8127,17 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterSettings build() {
-        gdsc.smlm.data.config.FitProtos.DataFilterSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.DataFilterSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterSettings buildPartial() {
-        gdsc.smlm.data.config.FitProtos.DataFilterSettings result = new gdsc.smlm.data.config.FitProtos.DataFilterSettings(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        final gdsc.smlm.data.config.FitProtos.DataFilterSettings result = new gdsc.smlm.data.config.FitProtos.DataFilterSettings(this);
+        final int from_bitField0_ = bitField0_;
+        final int to_bitField0_ = 0;
         result.dataFilterType_ = dataFilterType_;
         if (dataFiltersBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002)) {
@@ -8348,9 +8145,9 @@ public final class FitProtos {
             bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.dataFilters_ = dataFilters_;
-        } else {
-          result.dataFilters_ = dataFiltersBuilder_.build();
         }
+		else
+			result.dataFilters_ = dataFiltersBuilder_.build();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -8390,9 +8187,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.DataFilterSettings) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.DataFilterSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.DataFilterSettings)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.DataFilterSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -8400,9 +8197,8 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.DataFilterSettings other) {
         if (other == gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance()) return this;
-        if (other.dataFilterType_ != 0) {
-          setDataFilterTypeValue(other.getDataFilterTypeValue());
-        }
+        if (other.dataFilterType_ != 0)
+			setDataFilterTypeValue(other.getDataFilterTypeValue());
         if (dataFiltersBuilder_ == null) {
           if (!other.dataFilters_.isEmpty()) {
             if (dataFilters_.isEmpty()) {
@@ -8414,9 +8210,9 @@ public final class FitProtos {
             }
             onChanged();
           }
-        } else {
-          if (!other.dataFilters_.isEmpty()) {
-            if (dataFiltersBuilder_.isEmpty()) {
+        }
+		else if (!other.dataFilters_.isEmpty())
+			if (dataFiltersBuilder_.isEmpty()) {
               dataFiltersBuilder_.dispose();
               dataFiltersBuilder_ = null;
               dataFilters_ = other.dataFilters_;
@@ -8424,11 +8220,9 @@ public final class FitProtos {
               dataFiltersBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataFiltersFieldBuilder() : null;
-            } else {
-              dataFiltersBuilder_.addAllMessages(other.dataFilters_);
             }
-          }
-        }
+			else
+				dataFiltersBuilder_.addAllMessages(other.dataFilters_);
         onChanged();
         return this;
       }
@@ -8446,13 +8240,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.DataFilterSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.DataFilterSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -8491,7 +8284,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
-        gdsc.smlm.data.config.FitProtos.DataFilterType result = gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
+        final gdsc.smlm.data.config.FitProtos.DataFilterType result = gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
         return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterType.UNRECOGNIZED : result;
       }
       /**
@@ -8502,9 +8295,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
       public Builder setDataFilterType(gdsc.smlm.data.config.FitProtos.DataFilterType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         dataFilterType_ = value.getNumber();
         onChanged();
@@ -8545,11 +8337,10 @@ public final class FitProtos {
        */
       @Override
 	public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
-        if (dataFiltersBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(dataFilters_);
-        } else {
-          return dataFiltersBuilder_.getMessageList();
-        }
+        if (dataFiltersBuilder_ == null)
+			return java.util.Collections.unmodifiableList(dataFilters_);
+		else
+			return dataFiltersBuilder_.getMessageList();
       }
       /**
        * <pre>
@@ -8560,11 +8351,10 @@ public final class FitProtos {
        */
       @Override
 	public int getDataFiltersCount() {
-        if (dataFiltersBuilder_ == null) {
-          return dataFilters_.size();
-        } else {
-          return dataFiltersBuilder_.getCount();
-        }
+        if (dataFiltersBuilder_ == null)
+			return dataFilters_.size();
+		else
+			return dataFiltersBuilder_.getCount();
       }
       /**
        * <pre>
@@ -8575,11 +8365,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
-        if (dataFiltersBuilder_ == null) {
-          return dataFilters_.get(index);
-        } else {
-          return dataFiltersBuilder_.getMessage(index);
-        }
+        if (dataFiltersBuilder_ == null)
+			return dataFilters_.get(index);
+		else
+			return dataFiltersBuilder_.getMessage(index);
       }
       /**
        * <pre>
@@ -8591,15 +8380,14 @@ public final class FitProtos {
       public Builder setDataFilters(
           int index, gdsc.smlm.data.config.FitProtos.DataFilter value) {
         if (dataFiltersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDataFiltersIsMutable();
           dataFilters_.set(index, value);
           onChanged();
-        } else {
-          dataFiltersBuilder_.setMessage(index, value);
         }
+		else
+			dataFiltersBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -8615,9 +8403,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.set(index, builderForValue.build());
           onChanged();
-        } else {
-          dataFiltersBuilder_.setMessage(index, builderForValue.build());
         }
+		else
+			dataFiltersBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -8629,15 +8417,14 @@ public final class FitProtos {
        */
       public Builder addDataFilters(gdsc.smlm.data.config.FitProtos.DataFilter value) {
         if (dataFiltersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDataFiltersIsMutable();
           dataFilters_.add(value);
           onChanged();
-        } else {
-          dataFiltersBuilder_.addMessage(value);
         }
+		else
+			dataFiltersBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -8650,15 +8437,14 @@ public final class FitProtos {
       public Builder addDataFilters(
           int index, gdsc.smlm.data.config.FitProtos.DataFilter value) {
         if (dataFiltersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDataFiltersIsMutable();
           dataFilters_.add(index, value);
           onChanged();
-        } else {
-          dataFiltersBuilder_.addMessage(index, value);
         }
+		else
+			dataFiltersBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -8674,9 +8460,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.add(builderForValue.build());
           onChanged();
-        } else {
-          dataFiltersBuilder_.addMessage(builderForValue.build());
         }
+		else
+			dataFiltersBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -8692,9 +8478,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.add(index, builderForValue.build());
           onChanged();
-        } else {
-          dataFiltersBuilder_.addMessage(index, builderForValue.build());
         }
+		else
+			dataFiltersBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -8711,9 +8497,9 @@ public final class FitProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, dataFilters_);
           onChanged();
-        } else {
-          dataFiltersBuilder_.addAllMessages(values);
         }
+		else
+			dataFiltersBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -8728,9 +8514,9 @@ public final class FitProtos {
           dataFilters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
-        } else {
-          dataFiltersBuilder_.clear();
         }
+		else
+			dataFiltersBuilder_.clear();
         return this;
       }
       /**
@@ -8745,9 +8531,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.remove(index);
           onChanged();
-        } else {
-          dataFiltersBuilder_.remove(index);
         }
+		else
+			dataFiltersBuilder_.remove(index);
         return this;
       }
       /**
@@ -8771,10 +8557,10 @@ public final class FitProtos {
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
           int index) {
-        if (dataFiltersBuilder_ == null) {
-          return dataFilters_.get(index);  } else {
-          return dataFiltersBuilder_.getMessageOrBuilder(index);
-        }
+        if (dataFiltersBuilder_ == null)
+			return dataFilters_.get(index);
+		else
+			return dataFiltersBuilder_.getMessageOrBuilder(index);
       }
       /**
        * <pre>
@@ -8786,11 +8572,10 @@ public final class FitProtos {
       @Override
 	public java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
            getDataFiltersOrBuilderList() {
-        if (dataFiltersBuilder_ != null) {
-          return dataFiltersBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(dataFilters_);
-        }
+        if (dataFiltersBuilder_ != null)
+			return dataFiltersBuilder_.getMessageOrBuilderList();
+		else
+			return java.util.Collections.unmodifiableList(dataFilters_);
       }
       /**
        * <pre>
@@ -9146,26 +8931,24 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
               gdsc.smlm.data.config.FitProtos.FitSettings.Builder subBuilder = null;
-              if (fitSettings_ != null) {
-                subBuilder = fitSettings_.toBuilder();
-              }
+              if (fitSettings_ != null)
+				subBuilder = fitSettings_.toBuilder();
               fitSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.FitSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitSettings_);
@@ -9175,16 +8958,15 @@ public final class FitProtos {
               break;
             }
             case 16: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               noiseMethod_ = rawValue;
               break;
             }
             case 26: {
               gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder subBuilder = null;
-              if (dataFilterSettings_ != null) {
-                subBuilder = dataFilterSettings_.toBuilder();
-              }
+              if (dataFilterSettings_ != null)
+				subBuilder = dataFilterSettings_.toBuilder();
               dataFilterSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.DataFilterSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(dataFilterSettings_);
@@ -9195,9 +8977,8 @@ public final class FitProtos {
             }
             case 34: {
               gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (search_ != null) {
-                subBuilder = search_.toBuilder();
-              }
+              if (search_ != null)
+				subBuilder = search_.toBuilder();
               search_ = input.readMessage(gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(search_);
@@ -9208,9 +8989,8 @@ public final class FitProtos {
             }
             case 42: {
               gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (border_ != null) {
-                subBuilder = border_.toBuilder();
-              }
+              if (border_ != null)
+				subBuilder = border_.toBuilder();
               border_ = input.readMessage(gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(border_);
@@ -9221,9 +9001,8 @@ public final class FitProtos {
             }
             case 50: {
               gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (fitting_ != null) {
-                subBuilder = fitting_.toBuilder();
-              }
+              if (fitting_ != null)
+				subBuilder = fitting_.toBuilder();
               fitting_ = input.readMessage(gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitting_);
@@ -9249,9 +9028,8 @@ public final class FitProtos {
             }
             case 82: {
               gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (duplicateDistance_ != null) {
-                subBuilder = duplicateDistance_.toBuilder();
-              }
+              if (duplicateDistance_ != null)
+				subBuilder = duplicateDistance_.toBuilder();
               duplicateDistance_ = input.readMessage(gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(duplicateDistance_);
@@ -9272,9 +9050,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -9352,7 +9130,7 @@ public final class FitProtos {
      */
     @Override
 	public gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
-      gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
+      final gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.UNRECOGNIZED : result;
     }
 
@@ -9611,7 +9389,7 @@ public final class FitProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -9622,42 +9400,30 @@ public final class FitProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (fitSettings_ != null) {
-        output.writeMessage(1, getFitSettings());
-      }
-      if (noiseMethod_ != gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber()) {
-        output.writeEnum(2, noiseMethod_);
-      }
-      if (dataFilterSettings_ != null) {
-        output.writeMessage(3, getDataFilterSettings());
-      }
-      if (search_ != null) {
-        output.writeMessage(4, getSearch());
-      }
-      if (border_ != null) {
-        output.writeMessage(5, getBorder());
-      }
-      if (fitting_ != null) {
-        output.writeMessage(6, getFitting());
-      }
-      if (includeNeighbours_ != false) {
-        output.writeBool(7, includeNeighbours_);
-      }
-      if (neighbourHeightThreshold_ != 0D) {
-        output.writeDouble(8, neighbourHeightThreshold_);
-      }
-      if (residualsThreshold_ != 0D) {
-        output.writeDouble(9, residualsThreshold_);
-      }
-      if (duplicateDistance_ != null) {
-        output.writeMessage(10, getDuplicateDistance());
-      }
-      if (failuresLimit_ != 0) {
-        output.writeInt32(11, failuresLimit_);
-      }
-      if (passRate_ != 0D) {
-        output.writeDouble(12, passRate_);
-      }
+      if (fitSettings_ != null)
+		output.writeMessage(1, getFitSettings());
+      if (noiseMethod_ != gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber())
+		output.writeEnum(2, noiseMethod_);
+      if (dataFilterSettings_ != null)
+		output.writeMessage(3, getDataFilterSettings());
+      if (search_ != null)
+		output.writeMessage(4, getSearch());
+      if (border_ != null)
+		output.writeMessage(5, getBorder());
+      if (fitting_ != null)
+		output.writeMessage(6, getFitting());
+      if (includeNeighbours_ != false)
+		output.writeBool(7, includeNeighbours_);
+      if (neighbourHeightThreshold_ != 0D)
+		output.writeDouble(8, neighbourHeightThreshold_);
+      if (residualsThreshold_ != 0D)
+		output.writeDouble(9, residualsThreshold_);
+      if (duplicateDistance_ != null)
+		output.writeMessage(10, getDuplicateDistance());
+      if (failuresLimit_ != 0)
+		output.writeInt32(11, failuresLimit_);
+      if (passRate_ != 0D)
+		output.writeDouble(12, passRate_);
     }
 
     @Override
@@ -9666,54 +9432,42 @@ public final class FitProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (fitSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getFitSettings());
-      }
-      if (noiseMethod_ != gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (noiseMethod_ != gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, noiseMethod_);
-      }
-      if (dataFilterSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (dataFilterSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getDataFilterSettings());
-      }
-      if (search_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (search_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getSearch());
-      }
-      if (border_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (border_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getBorder());
-      }
-      if (fitting_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitting_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getFitting());
-      }
-      if (includeNeighbours_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (includeNeighbours_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, includeNeighbours_);
-      }
-      if (neighbourHeightThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (neighbourHeightThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(8, neighbourHeightThreshold_);
-      }
-      if (residualsThreshold_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (residualsThreshold_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, residualsThreshold_);
-      }
-      if (duplicateDistance_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (duplicateDistance_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, getDuplicateDistance());
-      }
-      if (failuresLimit_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (failuresLimit_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(11, failuresLimit_);
-      }
-      if (passRate_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (passRate_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, passRate_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -9721,41 +9475,34 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FitEngineSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.FitProtos.FitEngineSettings other = (gdsc.smlm.data.config.FitProtos.FitEngineSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.FitProtos.FitEngineSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.FitProtos.FitEngineSettings other = (gdsc.smlm.data.config.FitProtos.FitEngineSettings) obj;
 
       boolean result = true;
       result = result && (hasFitSettings() == other.hasFitSettings());
-      if (hasFitSettings()) {
-        result = result && getFitSettings()
+      if (hasFitSettings())
+		result = result && getFitSettings()
             .equals(other.getFitSettings());
-      }
       result = result && noiseMethod_ == other.noiseMethod_;
       result = result && (hasDataFilterSettings() == other.hasDataFilterSettings());
-      if (hasDataFilterSettings()) {
-        result = result && getDataFilterSettings()
+      if (hasDataFilterSettings())
+		result = result && getDataFilterSettings()
             .equals(other.getDataFilterSettings());
-      }
       result = result && (hasSearch() == other.hasSearch());
-      if (hasSearch()) {
-        result = result && getSearch()
+      if (hasSearch())
+		result = result && getSearch()
             .equals(other.getSearch());
-      }
       result = result && (hasBorder() == other.hasBorder());
-      if (hasBorder()) {
-        result = result && getBorder()
+      if (hasBorder())
+		result = result && getBorder()
             .equals(other.getBorder());
-      }
       result = result && (hasFitting() == other.hasFitting());
-      if (hasFitting()) {
-        result = result && getFitting()
+      if (hasFitting())
+		result = result && getFitting()
             .equals(other.getFitting());
-      }
       result = result && (getIncludeNeighbours()
           == other.getIncludeNeighbours());
       result = result && (
@@ -9767,10 +9514,9 @@ public final class FitProtos {
           == java.lang.Double.doubleToLongBits(
               other.getResidualsThreshold()));
       result = result && (hasDuplicateDistance() == other.hasDuplicateDistance());
-      if (hasDuplicateDistance()) {
-        result = result && getDuplicateDistance()
+      if (hasDuplicateDistance())
+		result = result && getDuplicateDistance()
             .equals(other.getDuplicateDistance());
-      }
       result = result && (getFailuresLimit()
           == other.getFailuresLimit());
       result = result && (
@@ -9782,9 +9528,8 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasFitSettings()) {
@@ -9919,7 +9664,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -9966,35 +9711,35 @@ public final class FitProtos {
       @Override
 	public Builder clear() {
         super.clear();
-        if (fitSettingsBuilder_ == null) {
-          fitSettings_ = null;
-        } else {
+        if (fitSettingsBuilder_ == null)
+			fitSettings_ = null;
+		else {
           fitSettings_ = null;
           fitSettingsBuilder_ = null;
         }
         noiseMethod_ = 0;
 
-        if (dataFilterSettingsBuilder_ == null) {
-          dataFilterSettings_ = null;
-        } else {
+        if (dataFilterSettingsBuilder_ == null)
+			dataFilterSettings_ = null;
+		else {
           dataFilterSettings_ = null;
           dataFilterSettingsBuilder_ = null;
         }
-        if (searchBuilder_ == null) {
-          search_ = null;
-        } else {
+        if (searchBuilder_ == null)
+			search_ = null;
+		else {
           search_ = null;
           searchBuilder_ = null;
         }
-        if (borderBuilder_ == null) {
-          border_ = null;
-        } else {
+        if (borderBuilder_ == null)
+			border_ = null;
+		else {
           border_ = null;
           borderBuilder_ = null;
         }
-        if (fittingBuilder_ == null) {
-          fitting_ = null;
-        } else {
+        if (fittingBuilder_ == null)
+			fitting_ = null;
+		else {
           fitting_ = null;
           fittingBuilder_ = null;
         }
@@ -10004,9 +9749,9 @@ public final class FitProtos {
 
         residualsThreshold_ = 0D;
 
-        if (duplicateDistanceBuilder_ == null) {
-          duplicateDistance_ = null;
-        } else {
+        if (duplicateDistanceBuilder_ == null)
+			duplicateDistance_ = null;
+		else {
           duplicateDistance_ = null;
           duplicateDistanceBuilder_ = null;
         }
@@ -10030,50 +9775,43 @@ public final class FitProtos {
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettings build() {
-        gdsc.smlm.data.config.FitProtos.FitEngineSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.FitProtos.FitEngineSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettings buildPartial() {
-        gdsc.smlm.data.config.FitProtos.FitEngineSettings result = new gdsc.smlm.data.config.FitProtos.FitEngineSettings(this);
-        if (fitSettingsBuilder_ == null) {
-          result.fitSettings_ = fitSettings_;
-        } else {
-          result.fitSettings_ = fitSettingsBuilder_.build();
-        }
+        final gdsc.smlm.data.config.FitProtos.FitEngineSettings result = new gdsc.smlm.data.config.FitProtos.FitEngineSettings(this);
+        if (fitSettingsBuilder_ == null)
+			result.fitSettings_ = fitSettings_;
+		else
+			result.fitSettings_ = fitSettingsBuilder_.build();
         result.noiseMethod_ = noiseMethod_;
-        if (dataFilterSettingsBuilder_ == null) {
-          result.dataFilterSettings_ = dataFilterSettings_;
-        } else {
-          result.dataFilterSettings_ = dataFilterSettingsBuilder_.build();
-        }
-        if (searchBuilder_ == null) {
-          result.search_ = search_;
-        } else {
-          result.search_ = searchBuilder_.build();
-        }
-        if (borderBuilder_ == null) {
-          result.border_ = border_;
-        } else {
-          result.border_ = borderBuilder_.build();
-        }
-        if (fittingBuilder_ == null) {
-          result.fitting_ = fitting_;
-        } else {
-          result.fitting_ = fittingBuilder_.build();
-        }
+        if (dataFilterSettingsBuilder_ == null)
+			result.dataFilterSettings_ = dataFilterSettings_;
+		else
+			result.dataFilterSettings_ = dataFilterSettingsBuilder_.build();
+        if (searchBuilder_ == null)
+			result.search_ = search_;
+		else
+			result.search_ = searchBuilder_.build();
+        if (borderBuilder_ == null)
+			result.border_ = border_;
+		else
+			result.border_ = borderBuilder_.build();
+        if (fittingBuilder_ == null)
+			result.fitting_ = fitting_;
+		else
+			result.fitting_ = fittingBuilder_.build();
         result.includeNeighbours_ = includeNeighbours_;
         result.neighbourHeightThreshold_ = neighbourHeightThreshold_;
         result.residualsThreshold_ = residualsThreshold_;
-        if (duplicateDistanceBuilder_ == null) {
-          result.duplicateDistance_ = duplicateDistance_;
-        } else {
-          result.duplicateDistance_ = duplicateDistanceBuilder_.build();
-        }
+        if (duplicateDistanceBuilder_ == null)
+			result.duplicateDistance_ = duplicateDistance_;
+		else
+			result.duplicateDistance_ = duplicateDistanceBuilder_.build();
         result.failuresLimit_ = failuresLimit_;
         result.passRate_ = passRate_;
         onBuilt();
@@ -10114,9 +9852,9 @@ public final class FitProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitProtos.FitEngineSettings) {
-          return mergeFrom((gdsc.smlm.data.config.FitProtos.FitEngineSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.FitProtos.FitEngineSettings)
+			return mergeFrom((gdsc.smlm.data.config.FitProtos.FitEngineSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -10124,42 +9862,30 @@ public final class FitProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitProtos.FitEngineSettings other) {
         if (other == gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance()) return this;
-        if (other.hasFitSettings()) {
-          mergeFitSettings(other.getFitSettings());
-        }
-        if (other.noiseMethod_ != 0) {
-          setNoiseMethodValue(other.getNoiseMethodValue());
-        }
-        if (other.hasDataFilterSettings()) {
-          mergeDataFilterSettings(other.getDataFilterSettings());
-        }
-        if (other.hasSearch()) {
-          mergeSearch(other.getSearch());
-        }
-        if (other.hasBorder()) {
-          mergeBorder(other.getBorder());
-        }
-        if (other.hasFitting()) {
-          mergeFitting(other.getFitting());
-        }
-        if (other.getIncludeNeighbours() != false) {
-          setIncludeNeighbours(other.getIncludeNeighbours());
-        }
-        if (other.getNeighbourHeightThreshold() != 0D) {
-          setNeighbourHeightThreshold(other.getNeighbourHeightThreshold());
-        }
-        if (other.getResidualsThreshold() != 0D) {
-          setResidualsThreshold(other.getResidualsThreshold());
-        }
-        if (other.hasDuplicateDistance()) {
-          mergeDuplicateDistance(other.getDuplicateDistance());
-        }
-        if (other.getFailuresLimit() != 0) {
-          setFailuresLimit(other.getFailuresLimit());
-        }
-        if (other.getPassRate() != 0D) {
-          setPassRate(other.getPassRate());
-        }
+        if (other.hasFitSettings())
+			mergeFitSettings(other.getFitSettings());
+        if (other.noiseMethod_ != 0)
+			setNoiseMethodValue(other.getNoiseMethodValue());
+        if (other.hasDataFilterSettings())
+			mergeDataFilterSettings(other.getDataFilterSettings());
+        if (other.hasSearch())
+			mergeSearch(other.getSearch());
+        if (other.hasBorder())
+			mergeBorder(other.getBorder());
+        if (other.hasFitting())
+			mergeFitting(other.getFitting());
+        if (other.getIncludeNeighbours() != false)
+			setIncludeNeighbours(other.getIncludeNeighbours());
+        if (other.getNeighbourHeightThreshold() != 0D)
+			setNeighbourHeightThreshold(other.getNeighbourHeightThreshold());
+        if (other.getResidualsThreshold() != 0D)
+			setResidualsThreshold(other.getResidualsThreshold());
+        if (other.hasDuplicateDistance())
+			mergeDuplicateDistance(other.getDuplicateDistance());
+        if (other.getFailuresLimit() != 0)
+			setFailuresLimit(other.getFailuresLimit());
+        if (other.getPassRate() != 0D)
+			setPassRate(other.getPassRate());
         onChanged();
         return this;
       }
@@ -10177,13 +9903,12 @@ public final class FitProtos {
         gdsc.smlm.data.config.FitProtos.FitEngineSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitProtos.FitEngineSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -10211,11 +9936,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
-        if (fitSettingsBuilder_ == null) {
-          return fitSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
-        } else {
-          return fitSettingsBuilder_.getMessage();
-        }
+        if (fitSettingsBuilder_ == null)
+			return fitSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
+		else
+			return fitSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -10226,14 +9950,13 @@ public final class FitProtos {
        */
       public Builder setFitSettings(gdsc.smlm.data.config.FitProtos.FitSettings value) {
         if (fitSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           fitSettings_ = value;
           onChanged();
-        } else {
-          fitSettingsBuilder_.setMessage(value);
         }
+		else
+			fitSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -10249,9 +9972,9 @@ public final class FitProtos {
         if (fitSettingsBuilder_ == null) {
           fitSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          fitSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			fitSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10264,16 +9987,15 @@ public final class FitProtos {
        */
       public Builder mergeFitSettings(gdsc.smlm.data.config.FitProtos.FitSettings value) {
         if (fitSettingsBuilder_ == null) {
-          if (fitSettings_ != null) {
-            fitSettings_ =
+          if (fitSettings_ != null)
+			fitSettings_ =
               gdsc.smlm.data.config.FitProtos.FitSettings.newBuilder(fitSettings_).mergeFrom(value).buildPartial();
-          } else {
-            fitSettings_ = value;
-          }
+		else
+			fitSettings_ = value;
           onChanged();
-        } else {
-          fitSettingsBuilder_.mergeFrom(value);
         }
+		else
+			fitSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10316,12 +10038,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
-        if (fitSettingsBuilder_ != null) {
-          return fitSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return fitSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
-        }
+        if (fitSettingsBuilder_ != null)
+			return fitSettingsBuilder_.getMessageOrBuilder();
+		else
+			return fitSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
       }
       /**
        * <pre>
@@ -10376,7 +10097,7 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
-        gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
+        final gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.UNRECOGNIZED : result;
       }
       /**
@@ -10387,9 +10108,8 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder setNoiseMethod(gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         noiseMethod_ = value.getNumber();
         onChanged();
@@ -10432,11 +10152,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
-        if (dataFilterSettingsBuilder_ == null) {
-          return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
-        } else {
-          return dataFilterSettingsBuilder_.getMessage();
-        }
+        if (dataFilterSettingsBuilder_ == null)
+			return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
+		else
+			return dataFilterSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -10447,14 +10166,13 @@ public final class FitProtos {
        */
       public Builder setDataFilterSettings(gdsc.smlm.data.config.FitProtos.DataFilterSettings value) {
         if (dataFilterSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           dataFilterSettings_ = value;
           onChanged();
-        } else {
-          dataFilterSettingsBuilder_.setMessage(value);
         }
+		else
+			dataFilterSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -10470,9 +10188,9 @@ public final class FitProtos {
         if (dataFilterSettingsBuilder_ == null) {
           dataFilterSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          dataFilterSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			dataFilterSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10485,16 +10203,15 @@ public final class FitProtos {
        */
       public Builder mergeDataFilterSettings(gdsc.smlm.data.config.FitProtos.DataFilterSettings value) {
         if (dataFilterSettingsBuilder_ == null) {
-          if (dataFilterSettings_ != null) {
-            dataFilterSettings_ =
+          if (dataFilterSettings_ != null)
+			dataFilterSettings_ =
               gdsc.smlm.data.config.FitProtos.DataFilterSettings.newBuilder(dataFilterSettings_).mergeFrom(value).buildPartial();
-          } else {
-            dataFilterSettings_ = value;
-          }
+		else
+			dataFilterSettings_ = value;
           onChanged();
-        } else {
-          dataFilterSettingsBuilder_.mergeFrom(value);
         }
+		else
+			dataFilterSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10537,12 +10254,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
-        if (dataFilterSettingsBuilder_ != null) {
-          return dataFilterSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return dataFilterSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
-        }
+        if (dataFilterSettingsBuilder_ != null)
+			return dataFilterSettingsBuilder_.getMessageOrBuilder();
+		else
+			return dataFilterSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
       }
       /**
        * <pre>
@@ -10587,11 +10303,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
-        if (searchBuilder_ == null) {
-          return search_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
-        } else {
-          return searchBuilder_.getMessage();
-        }
+        if (searchBuilder_ == null)
+			return search_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
+		else
+			return searchBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -10602,14 +10317,13 @@ public final class FitProtos {
        */
       public Builder setSearch(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (searchBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           search_ = value;
           onChanged();
-        } else {
-          searchBuilder_.setMessage(value);
         }
+		else
+			searchBuilder_.setMessage(value);
 
         return this;
       }
@@ -10625,9 +10339,9 @@ public final class FitProtos {
         if (searchBuilder_ == null) {
           search_ = builderForValue.build();
           onChanged();
-        } else {
-          searchBuilder_.setMessage(builderForValue.build());
         }
+		else
+			searchBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10640,16 +10354,15 @@ public final class FitProtos {
        */
       public Builder mergeSearch(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (searchBuilder_ == null) {
-          if (search_ != null) {
-            search_ =
+          if (search_ != null)
+			search_ =
               gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(search_).mergeFrom(value).buildPartial();
-          } else {
-            search_ = value;
-          }
+		else
+			search_ = value;
           onChanged();
-        } else {
-          searchBuilder_.mergeFrom(value);
         }
+		else
+			searchBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10692,12 +10405,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
-        if (searchBuilder_ != null) {
-          return searchBuilder_.getMessageOrBuilder();
-        } else {
-          return search_ == null ?
-              gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
-        }
+        if (searchBuilder_ != null)
+			return searchBuilder_.getMessageOrBuilder();
+		else
+			return search_ == null ?
+			      gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
       }
       /**
        * <pre>
@@ -10742,11 +10454,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
-        if (borderBuilder_ == null) {
-          return border_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
-        } else {
-          return borderBuilder_.getMessage();
-        }
+        if (borderBuilder_ == null)
+			return border_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
+		else
+			return borderBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -10757,14 +10468,13 @@ public final class FitProtos {
        */
       public Builder setBorder(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (borderBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           border_ = value;
           onChanged();
-        } else {
-          borderBuilder_.setMessage(value);
         }
+		else
+			borderBuilder_.setMessage(value);
 
         return this;
       }
@@ -10780,9 +10490,9 @@ public final class FitProtos {
         if (borderBuilder_ == null) {
           border_ = builderForValue.build();
           onChanged();
-        } else {
-          borderBuilder_.setMessage(builderForValue.build());
         }
+		else
+			borderBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10795,16 +10505,15 @@ public final class FitProtos {
        */
       public Builder mergeBorder(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (borderBuilder_ == null) {
-          if (border_ != null) {
-            border_ =
+          if (border_ != null)
+			border_ =
               gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(border_).mergeFrom(value).buildPartial();
-          } else {
-            border_ = value;
-          }
+		else
+			border_ = value;
           onChanged();
-        } else {
-          borderBuilder_.mergeFrom(value);
         }
+		else
+			borderBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10847,12 +10556,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
-        if (borderBuilder_ != null) {
-          return borderBuilder_.getMessageOrBuilder();
-        } else {
-          return border_ == null ?
-              gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
-        }
+        if (borderBuilder_ != null)
+			return borderBuilder_.getMessageOrBuilder();
+		else
+			return border_ == null ?
+			      gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
       }
       /**
        * <pre>
@@ -10897,11 +10605,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
-        if (fittingBuilder_ == null) {
-          return fitting_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
-        } else {
-          return fittingBuilder_.getMessage();
-        }
+        if (fittingBuilder_ == null)
+			return fitting_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
+		else
+			return fittingBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -10912,14 +10619,13 @@ public final class FitProtos {
        */
       public Builder setFitting(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (fittingBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           fitting_ = value;
           onChanged();
-        } else {
-          fittingBuilder_.setMessage(value);
         }
+		else
+			fittingBuilder_.setMessage(value);
 
         return this;
       }
@@ -10935,9 +10641,9 @@ public final class FitProtos {
         if (fittingBuilder_ == null) {
           fitting_ = builderForValue.build();
           onChanged();
-        } else {
-          fittingBuilder_.setMessage(builderForValue.build());
         }
+		else
+			fittingBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10950,16 +10656,15 @@ public final class FitProtos {
        */
       public Builder mergeFitting(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (fittingBuilder_ == null) {
-          if (fitting_ != null) {
-            fitting_ =
+          if (fitting_ != null)
+			fitting_ =
               gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(fitting_).mergeFrom(value).buildPartial();
-          } else {
-            fitting_ = value;
-          }
+		else
+			fitting_ = value;
           onChanged();
-        } else {
-          fittingBuilder_.mergeFrom(value);
         }
+		else
+			fittingBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -11002,12 +10707,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
-        if (fittingBuilder_ != null) {
-          return fittingBuilder_.getMessageOrBuilder();
-        } else {
-          return fitting_ == null ?
-              gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
-        }
+        if (fittingBuilder_ != null)
+			return fittingBuilder_.getMessageOrBuilder();
+		else
+			return fitting_ == null ?
+			      gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
       }
       /**
        * <pre>
@@ -11169,11 +10873,10 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
-        if (duplicateDistanceBuilder_ == null) {
-          return duplicateDistance_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
-        } else {
-          return duplicateDistanceBuilder_.getMessage();
-        }
+        if (duplicateDistanceBuilder_ == null)
+			return duplicateDistance_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
+		else
+			return duplicateDistanceBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -11184,14 +10887,13 @@ public final class FitProtos {
        */
       public Builder setDuplicateDistance(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (duplicateDistanceBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           duplicateDistance_ = value;
           onChanged();
-        } else {
-          duplicateDistanceBuilder_.setMessage(value);
         }
+		else
+			duplicateDistanceBuilder_.setMessage(value);
 
         return this;
       }
@@ -11207,9 +10909,9 @@ public final class FitProtos {
         if (duplicateDistanceBuilder_ == null) {
           duplicateDistance_ = builderForValue.build();
           onChanged();
-        } else {
-          duplicateDistanceBuilder_.setMessage(builderForValue.build());
         }
+		else
+			duplicateDistanceBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -11222,16 +10924,15 @@ public final class FitProtos {
        */
       public Builder mergeDuplicateDistance(gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (duplicateDistanceBuilder_ == null) {
-          if (duplicateDistance_ != null) {
-            duplicateDistance_ =
+          if (duplicateDistance_ != null)
+			duplicateDistance_ =
               gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(duplicateDistance_).mergeFrom(value).buildPartial();
-          } else {
-            duplicateDistance_ = value;
-          }
+		else
+			duplicateDistance_ = value;
           onChanged();
-        } else {
-          duplicateDistanceBuilder_.mergeFrom(value);
         }
+		else
+			duplicateDistanceBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -11274,12 +10975,11 @@ public final class FitProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
-        if (duplicateDistanceBuilder_ != null) {
-          return duplicateDistanceBuilder_.getMessageOrBuilder();
-        } else {
-          return duplicateDistance_ == null ?
-              gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
-        }
+        if (duplicateDistanceBuilder_ != null)
+			return duplicateDistanceBuilder_.getMessageOrBuilder();
+		else
+			return duplicateDistance_ == null ?
+			      gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
       }
       /**
        * <pre>
@@ -11480,7 +11180,7 @@ public final class FitProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    final java.lang.String[] descriptorData = {
       "\n\tfit.proto\022\025gdsc.smlm.data.config\"\215\005\n\021F" +
       "itSolverSettings\022\021\n\tfixed_psf\030\001 \001(\010\022\"\n\032d" +
       "isable_background_fitting\030\002 \001(\010\022\036\n\026disab" +
@@ -11559,7 +11259,7 @@ public final class FitProtos {
       "F_SQUARES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEA" +
       "N_OF_SQUARES\020\007B\013B\tFitProtosb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
           @Override
 		public com.google.protobuf.ExtensionRegistry assignDescriptors(

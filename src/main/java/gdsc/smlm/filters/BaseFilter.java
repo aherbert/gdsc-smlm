@@ -40,7 +40,7 @@ public abstract class BaseFilter implements Cloneable
 		{
 			return (BaseFilter) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			// Ignore
 		}

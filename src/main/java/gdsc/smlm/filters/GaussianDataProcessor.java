@@ -134,7 +134,7 @@ public class GaussianDataProcessor extends DataProcessor
 	@Override
 	public GaussianDataProcessor clone()
 	{
-		GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
+		final GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.filter = filter.clone();
 		return f;
@@ -159,7 +159,7 @@ public class GaussianDataProcessor extends DataProcessor
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("sigma = " + Utils.rounded(sigma));
 		list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
 		return list;

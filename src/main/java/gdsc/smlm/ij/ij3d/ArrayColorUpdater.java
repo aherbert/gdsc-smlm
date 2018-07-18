@@ -254,9 +254,7 @@ public abstract class ArrayColorUpdater
 		public float[] getColors(float alpha)
 		{
 			for (int i = 3; i < pointColor.length; i += 4)
-			{
 				pointColor[i] = alpha;
-			}
 			return pointColor;
 		}
 	}

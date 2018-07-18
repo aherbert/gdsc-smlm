@@ -102,7 +102,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private TextPanel tp;
 	private ImageROIPainter roiPainter;
 	private boolean addCounter = false;
-	
+
 	/** Set to true if the table is active. */
 	protected boolean tableActive = false;
 	private int nextRepaintSize = 0;
@@ -181,35 +181,29 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (hasCalibration())
 		{
 			if (showPrecision)
-			{
 				if (computePrecision)
-				{
 					try
 					{
 						calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
 								Gaussian2DPeakResultHelper.LSE_PRECISION);
 						canComputePrecision = true;
 					}
-					catch (ConfigurationException e)
+					catch (final ConfigurationException e)
 					{
 						// Cannot compute precision
 					}
-					catch (ConversionException e)
+					catch (final ConversionException e)
 					{
 						// Cannot compute precision
 					}
-				}
-			}
 
 			try
 			{
 				if (helper.hasDistanceConverter())
-				{
 					toPixelConverter = UnitConverterFactory.createConverter(distanceUnit, DistanceUnit.PIXEL,
 							getCalibrationReader().getNmPerPixel());
-				}
 			}
-			catch (ConversionException e)
+			catch (final ConversionException e)
 			{
 				// Gracefully fail so ignore this
 			}
@@ -219,7 +213,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
 		if (!showZ)
 		{
-			TIntArrayList list = new TIntArrayList(outIndices);
+			final TIntArrayList list = new TIntArrayList(outIndices);
 			list.remove(PeakResult.Z);
 			outIndices = list.toArray();
 		}
@@ -230,9 +224,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		createSourceText();
 		createResultsWindow();
 		if (clearAtStart)
-		{
 			tp.clear();
-		}
 		size = 0;
 		// Let some results appear before drawing.
 		// ImageJ will auto-layout columns if it has less than 10 rows
@@ -257,17 +249,16 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 */
 	private void createResultsWindow()
 	{
-		String header = createResultsHeader();
+		final String header = createResultsHeader();
 
 		roiPainter = null;
-		for (Frame f : WindowManager.getNonImageWindows())
-		{
+		for (final Frame f : WindowManager.getNonImageWindows())
 			if (f != null && tableTitle.equals(f.getTitle()) && f instanceof TextWindow)
 			{
 				resultsWindow = (TextWindow) f;
 
 				// Check if the existing table matches the desired header
-				String currentHeader = resultsWindow.getTextPanel().getColumnHeadings();
+				final String currentHeader = resultsWindow.getTextPanel().getColumnHeadings();
 				if (!currentHeader.startsWith(header))
 				{
 					resultsWindow = null;
@@ -277,7 +268,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				roiPainter = map.get(resultsWindow.getTextPanel());
 				break;
 			}
-		}
 
 		newWindow = false;
 		if (resultsWindow == null || !resultsWindow.isShowing())
@@ -302,7 +292,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			roiPainter.setCoordProvider(this);
 
 			// Get the headings for extracting the coordinates
-			String[] headings = tp.getColumnHeadings().split("\t");
+			final String[] headings = tp.getColumnHeadings().split("\t");
 			indexT = indexX = indexY = -1;
 			for (int i = 0; i < headings.length; i++)
 			{
@@ -338,10 +328,10 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private String createResultsHeader()
 	{
-		String[] names = helper.getNames();
-		String[] unitNames = helper.getUnitNames();
+		final String[] names = helper.getNames();
+		final String[] unitNames = helper.getUnitNames();
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		if (addCounter)
 			sb.append("#\t");
 		if (sourceText != null)
@@ -377,9 +367,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			addDeviation(sb);
 		}
 		if (showPrecision)
-		{
 			sb.append("\tPrecision (nm)");
-		}
 		return sb.toString();
 	}
 
@@ -390,7 +378,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sourceText = null;
 			return;
 		}
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		if (source != null)
 			sb.append(source);
 		else if (getSource() != null)
@@ -432,33 +420,26 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (!tableActive)
 			return;
 
-		StringBuilder sb = addStandardData(frame, endFrame, id, origX, origY, origValue, error, noise, meanIntensity);
+		final StringBuilder sb = addStandardData(frame, endFrame, id, origX, origY, origValue, error, noise, meanIntensity);
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
-			{
 				for (int i = 0; i < outIndices.length; i++)
 				{
 					add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
 					add(sb, converters[outIndices[i]].convert(paramsStdDev[outIndices[i]]));
 				}
-			}
 			else
-			{
 				for (int i = 0; i < outIndices.length; i++)
 				{
 					add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
 					sb.append("\t0");
 				}
-			}
 		}
 		else
-		{
 			for (int i = 0; i < outIndices.length; i++)
 				add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
-		}
 		if (isShowPrecision())
-		{
 			// The default precision in a peak result is NaN so this compare will be false
 			if (precision >= 0)
 				addPrecision(sb, precision, false);
@@ -466,14 +447,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				addPrecision(sb, calculator.getLSEPrecision(params, noise), true);
 			else
 				sb.append("\t0");
-		}
 		append(sb.toString());
 	}
 
 	private StringBuilder addStandardData(int frame, int endFrame, int id, int origX, int origY, float origValue,
 			double error, float noise, float meanIntensity)
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		if (addCounter)
 			sb.append(size + 1).append('\t');
 		if (sourceText != null)
@@ -580,7 +560,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (!tableActive)
 			return;
 		int n = 0;
-		for (PeakResult result : results)
+		for (final PeakResult result : results)
 		{
 			addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
 					result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
@@ -765,19 +745,19 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public double[] getCoordinates(String line)
 	{
 		// Extract the startT and x,y coordinates from the PeakResult line
-		String[] fields = line.split("\t");
+		final String[] fields = line.split("\t");
 		try
 		{
-			int startT = Integer.valueOf(fields[indexT]);
-			double x = Double.valueOf(fields[indexX]);
-			double y = Double.valueOf(fields[indexY]);
+			final int startT = Integer.valueOf(fields[indexT]);
+			final double x = Double.valueOf(fields[indexX]);
+			final double y = Double.valueOf(fields[indexY]);
 			return new double[] { startT, toPixelConverter.convert(x), toPixelConverter.convert(y) };
 		}
-		catch (ArrayIndexOutOfBoundsException e)
+		catch (final ArrayIndexOutOfBoundsException e)
 		{
 			// Will happen if any index is still at the default of -1 or if there are not enough fields
 		}
-		catch (NumberFormatException e)
+		catch (final NumberFormatException e)
 		{
 			// In case any field is not a number
 		}

@@ -428,7 +428,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (resultsMap.isEmpty())
 			return true;
-		for (MemoryPeakResults r : resultsMap.values())
+		for (final MemoryPeakResults r : resultsMap.values())
 			if (!r.isEmpty())
 				return false;
 		return true;
@@ -442,10 +442,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public static int countMemorySize()
 	{
 		int size = 0;
-		for (MemoryPeakResults r : resultsMap.values())
-		{
+		for (final MemoryPeakResults r : resultsMap.values())
 			size += r.size();
-		}
 		return size;
 	}
 
@@ -465,10 +463,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public static long estimateMemorySize()
 	{
 		long memorySize = 0;
-		for (MemoryPeakResults r : resultsMap.values())
-		{
+		for (final MemoryPeakResults r : resultsMap.values())
 			memorySize += estimateMemorySize(r);
-		}
 		return memorySize;
 	}
 
@@ -498,7 +494,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		long memorySize = 0;
 		if (r != null && r.size() > 0)
 		{
-			boolean includeDeviations = r.getf(0).hasParameterDeviations();
+			final boolean includeDeviations = r.getf(0).hasParameterDeviations();
 			memorySize = MemoryPeakResults.estimateMemorySize(r.size(), includeDeviations);
 		}
 		return memorySize;
@@ -575,9 +571,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			}
 		}
 		runGC();
-		long heap2 = usedMemory(); // Take an after heap snapshot:
+		final long heap2 = usedMemory(); // Take an after heap snapshot:
 
-		long memorySize = Math.round(((double) (heap2 - heap1)) / count);
+		final long memorySize = Math.round(((double) (heap2 - heap1)) / count);
 		//System.out.println("'before' heap: " + heap1 + ", 'after' heap: " + heap2);
 		//System.out.println("heap delta: " + (heap2 - heap1) + ", {" + objects[0].getClass() + "} size = " + memorySize +
 		//		" bytes");
@@ -729,14 +725,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			bounds = new Rectangle();
 			// Note: The bounds should be in pixels
-			Rectangle2D.Float b = getDataBounds(DistanceUnit.PIXEL);
+			final Rectangle2D.Float b = getDataBounds(DistanceUnit.PIXEL);
 
 			// Round to integer
 			bounds.x = (int) Math.floor(b.x);
 			bounds.y = (int) Math.floor(b.y);
 
-			int maxX = (int) Math.ceil(b.x + b.width);
-			int maxY = (int) Math.ceil(b.y + b.height);
+			final int maxX = (int) Math.ceil(b.x + b.width);
+			final int maxY = (int) Math.ceil(b.y + b.height);
 
 			// For compatibility with drawing images add one to the limits if they are integers
 			// Q. Is this still necessary since drawing images has been re-written to handle edge cases?
@@ -770,22 +766,18 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		// Create this first to throw an exception if invalid
 		final TypeConverter<DistanceUnit> c;
 		if (distanceUnit == null)
-		{
 			c = new IdentityTypeConverter<>(null);
-		}
 		else
-		{
 			c = CalibrationHelper.getDistanceConverter(getCalibration(), distanceUnit);
-		}
 
 		// Get the native bounds
 		float minX = getf(0).getXPosition(), maxX = minX;
 		float minY = getf(0).getYPosition(), maxY = minY;
 		for (int i = 1, size = size(); i < size; i++)
 		{
-			PeakResult p = getf(i);
-			float x = p.getXPosition();
-			float y = p.getYPosition();
+			final PeakResult p = getf(i);
+			final float x = p.getXPosition();
+			final float y = p.getYPosition();
 			if (minX > x)
 				minX = x;
 			else if (maxX < x)
@@ -850,7 +842,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			return (MemoryPeakResults) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			// This should not happen so ignore
 		}
@@ -878,7 +870,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public MemoryPeakResults copy(boolean copyResults)
 	{
-		MemoryPeakResults copy = clone();
+		final MemoryPeakResults copy = clone();
 		if (copy != null)
 		{
 			// Deep copy the objects that are not immutable
@@ -917,10 +909,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasBackground()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (getf(i).getBackground() != 0)
 				return true;
-		}
 		return false;
 	}
 
@@ -932,10 +922,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasNoise()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (getf(i).hasNoise())
 				return true;
-		}
 		return false;
 	}
 
@@ -947,10 +935,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasMeanIntensity()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (getf(i).hasMeanIntensity())
 				return true;
-		}
 		return false;
 	}
 
@@ -962,10 +948,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasIntensity()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (getf(i).getIntensity() > 0)
 				return true;
-		}
 		return false;
 	}
 
@@ -977,10 +961,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasDeviations()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (!getf(i).hasParameterDeviations())
 				return false;
-		}
 		return !isEmpty();
 	}
 
@@ -992,10 +974,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasEndFrame()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (getf(i).getFrame() != getf(i).getEndFrame())
 				return true;
-		}
 		return false;
 	}
 
@@ -1007,10 +987,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasId()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (getf(i).getId() != 0)
 				return true;
-		}
 		return false;
 	}
 
@@ -1028,12 +1006,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			return getf(0).getId() != 0;
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			int id = getf(i).getId();
+			final int id = getf(i).getId();
 			if (id != 0)
 			{
 				while (++i < size)
 				{
-					int id2 = getf(i).getId();
+					final int id2 = getf(i).getId();
 					if (id2 != 0 && id2 != id)
 						return true;
 				}
@@ -1173,10 +1151,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasNullResults()
 	{
 		for (int i = 0; i < size(); i++)
-		{
 			if (getf(i) == null)
 				return true;
-		}
 		return false;
 	}
 
@@ -1243,7 +1219,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (!hasCalibration())
 			return false;
 
-		PeakResultConversionHelper helper = new PeakResultConversionHelper(getCalibration(), getPSF());
+		final PeakResultConversionHelper helper = new PeakResultConversionHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		if (PSFHelper.hasAngleParameters(getPSF()))
@@ -1251,35 +1227,29 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		final Converter[] converters = helper.getConverters();
 
 		if (!helper.isCalibrationChanged())
-		{
 			// Check if already in the specified units
 			return helper.isValidConversion();
-		}
 
 		// Update the calibration
 		setCalibration(helper.getCalibration());
 
 		// We must convert the noise and mean intensity
-		Converter intensityConverter = converters[PeakResult.INTENSITY];
+		final Converter intensityConverter = converters[PeakResult.INTENSITY];
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			PeakResult p = getfX(i);
+			final PeakResult p = getfX(i);
 			p.setNoise(intensityConverter.convert(p.getNoise()));
 			p.setMeanIntensity(intensityConverter.convert(p.getMeanIntensity()));
 			if (p.hasParameterDeviations())
-			{
 				for (int j = 0; j < converters.length; j++)
 				{
 					p.setParameter(j, converters[j].convert(p.getParameter(j)));
 					p.setParameterDeviation(j, converters[j].convert(p.getParameterDeviation(j)));
 				}
-			}
 			else
-			{
 				for (int j = 0; j < converters.length; j++)
 					p.setParameter(j, converters[j].convert(p.getParameter(j)));
-			}
 		}
 
 		return true;
@@ -1303,9 +1273,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(PeakResultProcedure procedure)
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			procedure.execute(getfX(i));
-		}
 	}
 
 	/**
@@ -1331,10 +1299,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean forEach(PeakResultProcedureX procedure)
 	{
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			if (procedure.execute(getfX(i)))
 				return true;
-		}
 		return false;
 	}
 
@@ -1489,12 +1455,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, BResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			procedure.executeB(ic.convert(getf(i).getBackground()));
-		}
 	}
 
 	/**
@@ -1514,7 +1478,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, BIRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1547,8 +1511,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1582,8 +1546,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1621,22 +1585,22 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		checkCalibration();
 
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+		final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 
 		final int isx = indices[0];
 		final int isy = indices[1];
 		final double twoPi = 2 * Math.PI;
 
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(DistanceUnit.PIXEL);
+		final TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(DistanceUnit.PIXEL);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getf(i);
 
 			// Convert the widths to pixels
-			float sx = dc.convert(r.getParameter(isx));
-			float sy = dc.convert(r.getParameter(isy));
+			final float sx = dc.convert(r.getParameter(isx));
+			final float sy = dc.convert(r.getParameter(isy));
 
 			//@formatter:off
 			procedure.executeH(
@@ -1662,7 +1626,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1693,8 +1657,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1727,8 +1691,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1762,8 +1726,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1797,8 +1761,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYZRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1857,7 +1821,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1893,15 +1857,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		// Note that in the future we may support more than just Gaussian2D PSF
 		// so this may have to change
 
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+		final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 
 		final int isx = indices[0];
 		final int isy = indices[1];
 
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		if (isx == isy)
-		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
 				final PeakResult r = getf(i);
@@ -1910,20 +1873,17 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
     					dc.convert(r.getParameter(isx)));
     			//@formatter:on
 			}
-		}
 		else
-		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
 				final PeakResult r = getf(i);
 				// Convert the separate widths into a single width
-				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(isx), r.getParameter(isy));
+				final double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(isx), r.getParameter(isy));
 				//@formatter:off
     			procedure.executeW(
     					(float)dc.convert(s));
     			//@formatter:on
 			}
-		}
 	}
 
 	/**
@@ -1948,12 +1908,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		// Note that in the future we may support more than just Gaussian2D PSF
 		// so this may have to change
 
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+		final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 
 		final int isx = indices[0];
 		final int isy = indices[1];
 
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1983,7 +1943,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -2015,7 +1975,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -2046,7 +2006,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -2077,7 +2037,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYZRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -2109,7 +2069,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, ZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+		final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -2151,7 +2111,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		checkCalibration();
 
-		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+		final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.LSE_PRECISION);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -2177,13 +2137,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		checkCalibration();
 
-		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+		final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			procedure.executeLSEPrecisionB(calculator.getLSEPrecision(getf(i).getParameters()));
-		}
 	}
 
 	/**
@@ -2202,7 +2160,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		checkCalibration();
 
-		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+		final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.MLE_PRECISION);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -2228,13 +2186,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		checkCalibration();
 
-		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+		final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.MLE_PRECISION_X);
 
 		for (int i = 0, size = size(); i < size; i++)
-		{
 			procedure.executeMLEPrecisionB(calculator.getMLEPrecision(getf(i).getParameters()));
-		}
 	}
 
 	/**
@@ -2258,7 +2214,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		checkCalibration();
 
-		Rectangle bounds = getBounds();
+		final Rectangle bounds = getBounds();
 		if (bounds != null)
 		{
 			bounds.x += x;
@@ -2267,9 +2223,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 
 		// Convert the pixel shift to the units of the results
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(getDistanceUnit());
-		float xx = dc.convert(x);
-		float yy = dc.convert(y);
+		final TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(getDistanceUnit());
+		final float xx = dc.convert(x);
+		final float yy = dc.convert(y);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -2293,10 +2249,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public DistanceUnit getDistanceUnit()
 	{
 		if (hasCalibration())
-		{
 			if (getCalibrationReader().hasDistanceUnit())
 				return getCalibrationReader().getDistanceUnit();
-		}
 		return null;
 	}
 
@@ -2308,10 +2262,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public IntensityUnit getIntensityUnit()
 	{
 		if (hasCalibration())
-		{
 			if (getCalibrationReader().hasIntensityUnit())
 				return getCalibrationReader().getIntensityUnit();
-		}
 		return null;
 	}
 
@@ -2323,10 +2275,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public AngleUnit getAngleUnit()
 	{
 		if (hasCalibration())
-		{
 			if (getCalibrationReader().hasAngleUnit())
 				return getCalibrationReader().getAngleUnit();
-		}
 		return null;
 	}
 
@@ -2413,7 +2363,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void setZeroBackground(IntensityUnit intensityUnit, float newBackground)
 			throws ConversionException, ConfigurationException
 	{
-		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 		newBackground = ic.convertBack(newBackground);
 		for (int i = 0, size = size(); i < size; i++)
 		{

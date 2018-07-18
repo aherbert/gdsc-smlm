@@ -94,21 +94,15 @@ public class FloatImage3D extends Image3D
 		this.data = data;
 
 		if (stack.getBitDepth() == 32)
-		{
 			for (int s = 0; s < ns; s++)
-			{
 				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_by_nc, nr_by_nc);
-			}
-		}
 		else
-		{
 			for (int s = 1, i = 0; s <= ns; s++)
 			{
-				ImageProcessor ip = stack.getProcessor(s);
+				final ImageProcessor ip = stack.getProcessor(s);
 				for (int j = 0; i < nr_by_nc; j++)
 					data[i++] = ip.getf(j);
 			}
-		}
 	}
 
 	/**
@@ -225,7 +219,7 @@ public class FloatImage3D extends Image3D
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = d * h * w;
+		final int size = d * h * w;
 		if (region == null || region.length != size)
 			region = new float[size];
 		for (int s = 0, i = 0; s < d; s++, z++)
@@ -267,40 +261,35 @@ public class FloatImage3D extends Image3D
 	public static FloatImage3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, float[] region)
 			throws IllegalArgumentException
 	{
-		int nc = stack.getWidth();
-		int nr = stack.getHeight();
-		int ns = stack.getSize();
+		final int nc = stack.getWidth();
+		final int nr = stack.getHeight();
+		final int ns = stack.getSize();
 
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
 				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = checkSize(w, h, d, true);
+		final int size = checkSize(w, h, d, true);
 		if (region == null || region.length != size)
 			region = new float[size];
 
 		if (stack.getBitDepth() != 32)
-		{
 			// Handle non-float data
 			for (int s = 0, i = 0; s < d; s++, z++)
 			{
-				ImageProcessor ip = stack.getProcessor(1 + z);
+				final ImageProcessor ip = stack.getProcessor(1 + z);
 				int base = y * nc + x;
 				for (int r = 0; r < h; r++)
 				{
 					for (int c = 0; c < w; c++)
-					{
 						region[i++] = ip.getf(base + c);
-					}
 					base += nc;
 				}
 			}
-		}
 		else
-		{
 			for (int s = 0, i = 0; s < d; s++, z++)
 			{
-				float[] data = (float[]) stack.getPixels(1 + z);
+				final float[] data = (float[]) stack.getPixels(1 + z);
 				int base = y * nc + x;
 				for (int r = 0; r < h; r++)
 				{
@@ -309,7 +298,6 @@ public class FloatImage3D extends Image3D
 					i += w;
 				}
 			}
-		}
 		return new FloatImage3D(w, h, d, w * h, region);
 	}
 
@@ -317,13 +305,9 @@ public class FloatImage3D extends Image3D
 	public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
 		if (image instanceof FloatImage3D)
-		{
 			insert(x, y, z, (FloatImage3D) image);
-		}
 		else
-		{
 			super.insert(x, y, z, image);
-		}
 	}
 
 	/**
@@ -343,14 +327,14 @@ public class FloatImage3D extends Image3D
 	public void insert(int x, int y, int z, FloatImage3D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
-		int d = image.getSize();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
+		final int d = image.getSize();
 		if (w < 1 || h < 1 || d < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		float[] region = image.data;
+		final float[] region = image.data;
 		for (int s = 0, i = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;

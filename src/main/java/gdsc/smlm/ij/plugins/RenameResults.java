@@ -68,17 +68,15 @@ public class RenameResults implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("To rename the results in memory update the second name field as desired.\n" +
 				"(Note the semi-colon at the end of the line is needed for macro recording.)");
 
-		StringBuilder sb = new StringBuilder();
-		for (String name : MemoryPeakResults.getResultNames())
-		{
+		final StringBuilder sb = new StringBuilder();
+		for (final String name : MemoryPeakResults.getResultNames())
 			sb.append(name).append(" = ").append(name).append(";\n");
-		}
 
 		gd.addTextAreas(sb.toString(), null, 20, 80);
 
@@ -94,19 +92,19 @@ public class RenameResults implements PlugIn
 	private int renameResults()
 	{
 		// Start with the original names for the mapping from old to new
-		HashMap<String, String> mappedNames = new HashMap<>();
-		for (String name : MemoryPeakResults.getResultNames())
+		final HashMap<String, String> mappedNames = new HashMap<>();
+		for (final String name : MemoryPeakResults.getResultNames())
 			mappedNames.put(name, name);
 
 		// Get the new names
-		String[] lines = renameText.split("[;\n]");
-		for (String line : lines)
+		final String[] lines = renameText.split("[;\n]");
+		for (final String line : lines)
 		{
-			String[] fields = line.split("[=]");
+			final String[] fields = line.split("[=]");
 			if (fields.length == 2)
 			{
-				String oldName = fields[0].trim();
-				String newName = fields[1].trim();
+				final String oldName = fields[0].trim();
+				final String newName = fields[1].trim();
 
 				if (!mappedNames.containsKey(oldName))
 				{
@@ -123,8 +121,8 @@ public class RenameResults implements PlugIn
 		}
 
 		// Check the new names are unique
-		Set<String> newNames = new HashSet<>();
-		for (String newName : mappedNames.values())
+		final Set<String> newNames = new HashSet<>();
+		for (final String newName : mappedNames.values())
 		{
 			if (newNames.contains(newName))
 			{
@@ -135,13 +133,13 @@ public class RenameResults implements PlugIn
 		}
 
 		// Rename
-		List<MemoryPeakResults> renamedResults = new LinkedList<>();
-		for (Entry<String, String> entry : mappedNames.entrySet())
+		final List<MemoryPeakResults> renamedResults = new LinkedList<>();
+		for (final Entry<String, String> entry : mappedNames.entrySet())
 		{
 			if (entry.getKey().equals(entry.getValue()))
 				continue;
 			// Remove from memory and store in a list
-			MemoryPeakResults results = MemoryPeakResults.removeResults(entry.getKey());
+			final MemoryPeakResults results = MemoryPeakResults.removeResults(entry.getKey());
 			if (results != null)
 			{
 				results.setName(entry.getValue());
@@ -150,7 +148,7 @@ public class RenameResults implements PlugIn
 		}
 
 		// Add back to memory
-		for (MemoryPeakResults results : renamedResults)
+		for (final MemoryPeakResults results : renamedResults)
 			MemoryPeakResults.addResults(results);
 
 		return renamedResults.size();

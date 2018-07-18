@@ -232,7 +232,7 @@ public class TraceMolecules implements PlugIn
 			if (!showClusterDialog())
 				return;
 
-			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
+			final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
 					getClusteringAlgorithm(settings.getClusteringAlgorithm()), new IJTrackProgress());
 
 			if (settings.getSplitPulses())
@@ -241,7 +241,7 @@ public class TraceMolecules implements PlugIn
 				limitTimeThreshold(settings.getPulseInterval());
 			}
 
-			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
+			final ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
 					getDistance(settings.getDistanceThreshold(), results.getCalibration()), timeThresholdInFrames());
 
 			if (clusters == null)
@@ -262,17 +262,15 @@ public class TraceMolecules implements PlugIn
 			if (!showDialog())
 				return;
 
-			TraceManager manager = new TraceManager(results);
+			final TraceManager manager = new TraceManager(results);
 			manager.setTraceMode(getTraceMode(settings.getTraceMode()));
 			manager.setActivationFrameInterval(settings.getPulseInterval());
 			manager.setActivationFrameWindow(settings.getPulseWindow());
 			manager.setDistanceExclusion(getDistance(settings.getDistanceExclusion(), results.getCalibration()));
 
 			if (settings.getOptimise())
-			{
 				// Optimise before configuring for a pulse interval
 				runOptimiser(manager);
-			}
 
 			if (settings.getSplitPulses())
 			{
@@ -296,12 +294,12 @@ public class TraceMolecules implements PlugIn
 
 		// Save singles + single localisations in a trace
 		saveCentroidResults(results, getSingles(traces), outputName + " Singles");
-		Trace[] multiTraces = getTraces(traces);
+		final Trace[] multiTraces = getTraces(traces);
 		saveResults(results, multiTraces, outputName + " Multi");
 
 		// Save centroids
 		outputName += " Centroids";
-		MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
+		final MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
 
 		// Save traces separately
 		saveCentroidResults(results, multiTraces, outputName + " Multi");
@@ -326,7 +324,7 @@ public class TraceMolecules implements PlugIn
 	private static double getDistance(double distanceThreshold, CalibrationOrBuilder calibration)
 	{
 		// Convert from NM to native units
-		Converter c = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
+		final Converter c = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
 		return c.convertBack(distanceThreshold);
 	}
 
@@ -343,20 +341,16 @@ public class TraceMolecules implements PlugIn
 
 		double limit;
 		if (settings.getTimeUnit() == TimeUnit.FRAME)
-		{
 			limit = settings.getPulseInterval();
-		}
 		else
 		{
-			TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME,
+			final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME,
 					settings.getTimeUnit(), exposureTime);
 			limit = convert.convert(pulseInterval);
 		}
 
 		if (settings.getTimeThreshold() > limit)
-		{
 			settings.setTimeThreshold(limit);
-		}
 	}
 
 	private List<ClusterPoint> convertToClusterPoints()
@@ -403,17 +397,15 @@ public class TraceMolecules implements PlugIn
 	 */
 	public static Trace[] convertToTraces(MemoryPeakResults results, ArrayList<Cluster> clusters)
 	{
-		Trace[] traces = new Trace[clusters.size()];
+		final Trace[] traces = new Trace[clusters.size()];
 		int i = 0;
-		for (Cluster cluster : clusters)
+		for (final Cluster cluster : clusters)
 		{
-			Trace trace = new Trace();
+			final Trace trace = new Trace();
 			trace.setId(i + 1);
 			for (ClusterPoint point = cluster.head; point != null; point = point.next)
-			{
 				// The point Id was the position in the original results array
 				trace.add(results.get(point.id));
-			}
 			traces[i++] = trace;
 		}
 		return traces;
@@ -427,7 +419,7 @@ public class TraceMolecules implements PlugIn
 	 */
 	static void sortByTime(Trace[] traces)
 	{
-		for (Trace t : traces)
+		for (final Trace t : traces)
 			t.sort();
 		Arrays.sort(traces, new Comparator<Trace>()
 		{
@@ -452,7 +444,7 @@ public class TraceMolecules implements PlugIn
 	 */
 	static MemoryPeakResults saveResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
 	{
-		MemoryPeakResults tracedResults = TraceManager.convertToPeakResults(sourceResults, traces);
+		final MemoryPeakResults tracedResults = TraceManager.convertToPeakResults(sourceResults, traces);
 		tracedResults.setName(sourceResults.getName() + " " + name);
 		MemoryPeakResults.addResults(tracedResults);
 		return tracedResults;
@@ -460,7 +452,7 @@ public class TraceMolecules implements PlugIn
 
 	private static MemoryPeakResults saveCentroidResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
 	{
-		MemoryPeakResults tracedResults = TraceManager.convertToCentroidPeakResults(sourceResults, traces);
+		final MemoryPeakResults tracedResults = TraceManager.convertToCentroidPeakResults(sourceResults, traces);
 		tracedResults.setName(sourceResults.getName() + " " + name);
 		MemoryPeakResults.addResults(tracedResults);
 		return tracedResults;
@@ -468,8 +460,8 @@ public class TraceMolecules implements PlugIn
 
 	private static Trace[] getSingles(Trace[] traces)
 	{
-		ArrayList<Trace> result = new ArrayList<>();
-		for (Trace t : traces)
+		final ArrayList<Trace> result = new ArrayList<>();
+		for (final Trace t : traces)
 			if (t.size() == 1)
 				result.add(t);
 		return result.toArray(new Trace[result.size()]);
@@ -477,8 +469,8 @@ public class TraceMolecules implements PlugIn
 
 	private static Trace[] getTraces(Trace[] traces)
 	{
-		ArrayList<Trace> result = new ArrayList<>();
-		for (Trace t : traces)
+		final ArrayList<Trace> result = new ArrayList<>();
+		for (final Trace t : traces)
 			if (t.size() != 1)
 				result.add(t);
 		return result.toArray(new Trace[result.size()]);
@@ -514,7 +506,7 @@ public class TraceMolecules implements PlugIn
 		if (id > 0)
 		{
 			title += id;
-			String regex = "\\.[0-9]+\\.";
+			final String regex = "\\.[0-9]+\\.";
 			if (filename.matches(regex))
 				filename.replaceAll(regex, "." + (id) + ".");
 			else
@@ -525,19 +517,17 @@ public class TraceMolecules implements PlugIn
 		{
 			filename = Utils.replaceExtension(filename, "xls");
 
-			boolean showDeviations = sourceResults.hasDeviations();
+			final boolean showDeviations = sourceResults.hasDeviations();
 			// Assume that are results are from a single frame but store the trace ID
-			TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations, false, true);
+			final TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations, false, true);
 			traceResults.copySettings(sourceResults);
 			traceResults.begin();
 			if (!traceResults.isActive())
-			{
 				IJ.error("Failed to write to file: " + filename);
-			}
 			else
 			{
 				traceResults.addComment(comment);
-				for (Trace trace : traces)
+				for (final Trace trace : traces)
 					traceResults.addTrace(trace);
 				traceResults.end();
 			}
@@ -559,21 +549,19 @@ public class TraceMolecules implements PlugIn
 		// Create summary table
 		createSummaryTable();
 
-		Statistics[] stats = new Statistics[NAMES.length];
+		final Statistics[] stats = new Statistics[NAMES.length];
 		for (int i = 0; i < stats.length; i++)
-		{
 			stats[i] = (settings.getShowHistograms() || settings.getSaveTraceData()) ? new StoredDataStatistics()
 					: new Statistics();
-		}
 		int singles = 0;
-		for (Trace trace : traces)
+		for (final Trace trace : traces)
 		{
-			int nBlinks = trace.getNBlinks() - 1;
+			final int nBlinks = trace.getNBlinks() - 1;
 			stats[BLINKS].add(nBlinks);
-			int[] onTimes = trace.getOnTimes();
-			int[] offTimes = trace.getOffTimes();
+			final int[] onTimes = trace.getOnTimes();
+			final int[] offTimes = trace.getOffTimes();
 			double tOn = 0;
-			for (int t : onTimes)
+			for (final int t : onTimes)
 			{
 				stats[T_ON].add(t * exposureTime);
 				tOn += t * exposureTime;
@@ -582,7 +570,7 @@ public class TraceMolecules implements PlugIn
 			if (offTimes != null)
 			{
 				double tOff = 0;
-				for (int t : offTimes)
+				for (final int t : offTimes)
 				{
 					stats[T_OFF].add(t * exposureTime);
 					tOff += t * exposureTime;
@@ -597,7 +585,7 @@ public class TraceMolecules implements PlugIn
 		}
 
 		// Add to the summary table
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(results.getName()).append('\t');
 		sb.append(outputName.equals("Cluster") ? getClusteringAlgorithm(settings.getClusteringAlgorithm())
 				: getTraceMode(settings.getTraceMode())).append('\t');
@@ -613,18 +601,14 @@ public class TraceMolecules implements PlugIn
 		sb.append(singles).append('\t');
 		sb.append(traces.length - singles).append('\t');
 		for (int i = 0; i < stats.length; i++)
-		{
 			sb.append(Utils.rounded(stats[i].getMean(), 3)).append('\t');
-		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
 			IJ.log(sb.toString());
 			return;
 		}
 		else
-		{
 			summaryTable.append(sb.toString());
-		}
 
 		if (settings.getShowHistograms())
 		{
@@ -635,7 +619,6 @@ public class TraceMolecules implements PlugIn
 
 			boolean requireRetile = false;
 			for (int i = 0; i < NAMES.length; i++)
-			{
 				if (displayHistograms[i])
 				{
 					idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
@@ -644,7 +627,6 @@ public class TraceMolecules implements PlugIn
 							settings.getHistogramBins());
 					requireRetile = requireRetile || Utils.isNewWindow();
 				}
-			}
 
 			if (count > 0 && requireRetile)
 			{
@@ -654,9 +636,7 @@ public class TraceMolecules implements PlugIn
 		}
 
 		if (settings.getSaveTraceData())
-		{
 			saveTraceData(stats);
-		}
 
 		IJ.showStatus("");
 	}
@@ -671,24 +651,19 @@ public class TraceMolecules implements PlugIn
 				IJ.log(header);
 			}
 		}
-		else
+		else if (summaryTable == null || !summaryTable.isVisible())
 		{
-			if (summaryTable == null || !summaryTable.isVisible())
-			{
-				summaryTable = new TextWindow(TITLE + " Data Summary", createHeader(), "", 800, 300);
-				summaryTable.setVisible(true);
-			}
+			summaryTable = new TextWindow(TITLE + " Data Summary", createHeader(), "", 800, 300);
+			summaryTable.setVisible(true);
 		}
 	}
 
 	private static String createHeader()
 	{
-		StringBuilder sb = new StringBuilder(
+		final StringBuilder sb = new StringBuilder(
 				"Dataset\tAlgorithm\tExposure time (ms)\tD-threshold (nm)\tT-threshold (s)\t(Frames)\tMolecules\tFiltered\tSingles\tClusters");
 		for (int i = 0; i < NAMES.length; i++)
-		{
 			sb.append('\t').append(NAMES[i]);
-		}
 		return sb.toString();
 	}
 
@@ -696,7 +671,7 @@ public class TraceMolecules implements PlugIn
 	{
 		// Get the directory
 		IJ.showStatus("Saving trace data");
-		String directory = Utils.getDirectory("Trace_data_directory", settings.getTraceDataDirectory());
+		final String directory = Utils.getDirectory("Trace_data_directory", settings.getTraceDataDirectory());
 		if (directory != null)
 		{
 			settings.setTraceDataDirectory(directory);
@@ -715,13 +690,13 @@ public class TraceMolecules implements PlugIn
 			file.append(name);
 			file.newLine();
 
-			for (double d : s.getValues())
+			for (final double d : s.getValues())
 			{
 				file.append(Utils.rounded(d, 4));
 				file.newLine();
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Q. Add better handling of errors?
 			e.printStackTrace();
@@ -732,7 +707,7 @@ public class TraceMolecules implements PlugIn
 	private boolean showDialog()
 	{
 		TITLE = outputName + " Molecules";
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -743,7 +718,7 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Distance_Exclusion", settings.getDistanceExclusion(), 2, 6, "nm");
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
 		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
-		String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
+		final String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
 		gd.addChoice("Trace_mode", traceModes, traceModes[getTraceMode(settings.getTraceMode()).ordinal()]);
 		gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
 		gd.addNumericField("Pulse_window", settings.getPulseWindow(), 0, 6, "Frames");
@@ -754,9 +729,7 @@ public class TraceMolecules implements PlugIn
 		gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
 		//gd.addCheckbox("Refit_option", settings.refitOption);
 		if (altKeyDown)
-		{
 			gd.addCheckbox("Debug", inputDebugMode);
-		}
 
 		gd.showDialog();
 
@@ -798,9 +771,7 @@ public class TraceMolecules implements PlugIn
 		settings.setSaveTraceData(gd.getNextBoolean());
 		//settings.refitOption = gd.getNextBoolean();
 		if (altKeyDown)
-		{
 			debugMode = inputDebugMode = gd.getNextBoolean();
-		}
 
 		if (gd.invalidNumber())
 			return false;
@@ -831,7 +802,7 @@ public class TraceMolecules implements PlugIn
 			Parameters.isPositive("Pulse window", settings.getPulseWindow());
 			//Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -843,7 +814,7 @@ public class TraceMolecules implements PlugIn
 	private boolean showClusterDialog()
 	{
 		TITLE = outputName + " Molecules";
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -853,7 +824,7 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
 		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
-		String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
+		final String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 		gd.addChoice("Clustering_algorithm", algorithm,
 				algorithm[getClusteringAlgorithm(settings.getClusteringAlgorithm()).ordinal()]);
 		gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
@@ -863,9 +834,7 @@ public class TraceMolecules implements PlugIn
 		gd.addCheckbox("Save_cluster_data", settings.getSaveTraceData());
 		gd.addCheckbox("Refit_option", settings.getRefitOption());
 		if (altKeyDown)
-		{
 			gd.addCheckbox("Debug", inputDebugMode);
-		}
 
 		gd.showDialog();
 
@@ -904,9 +873,7 @@ public class TraceMolecules implements PlugIn
 		settings.setSaveTraceData(gd.getNextBoolean());
 		settings.setRefitOption(gd.getNextBoolean());
 		if (altKeyDown)
-		{
 			debugMode = inputDebugMode = gd.getNextBoolean();
-		}
 
 		if (gd.invalidNumber())
 			return false;
@@ -932,7 +899,7 @@ public class TraceMolecules implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Distance threshold", settings.getDistanceThreshold());
-			ClusteringAlgorithm clusteringAlgorithm = getClusteringAlgorithm(settings.getClusteringAlgorithm());
+			final ClusteringAlgorithm clusteringAlgorithm = getClusteringAlgorithm(settings.getClusteringAlgorithm());
 			if (clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY ||
 					clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY)
 			{
@@ -941,7 +908,7 @@ public class TraceMolecules implements PlugIn
 			}
 			//Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -953,16 +920,16 @@ public class TraceMolecules implements PlugIn
 	private void runOptimiser(TraceManager manager)
 	{
 		// Get an estimate of the number of molecules without blinking
-		Statistics stats = new Statistics();
+		final Statistics stats = new Statistics();
 		final double nmPerPixel = this.results.getNmPerPixel();
-		PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+		final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
 		pp.getPrecision();
 		stats.add(pp.precision);
 		// Use twice the precision to get the initial distance threshold
 
 		// Use 2.5x sigma as per the PC-PALM protocol in Sengupta, et al (2013) Nature Protocols 8, 345
-		double dEstimate = stats.getMean() * 2.5 / nmPerPixel;
-		int n = manager.traceMolecules(dEstimate, 1);
+		final double dEstimate = stats.getMean() * 2.5 / nmPerPixel;
+		final int n = manager.traceMolecules(dEstimate, 1);
 		//for (double d : new double[] { 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4 })
 		//	System.out.printf("d=%.2f, estimate=%d\n", d,
 		//			manager.traceMolecules(stats.getMean() * d / this.results.getNmPerPixel(), 1));
@@ -971,7 +938,7 @@ public class TraceMolecules implements PlugIn
 			return;
 
 		// TODO - Convert the distance threshold to use nm instead of pixels?
-		List<double[]> results = runTracing(manager, settings.getMinDistanceThreshold(),
+		final List<double[]> results = runTracing(manager, settings.getMinDistanceThreshold(),
 				settings.getMaxDistanceThreshold(), settings.getMinTimeThreshold(), settings.getMaxTimeThreshold(),
 				settings.getOptimiserSteps());
 
@@ -993,17 +960,15 @@ public class TraceMolecules implements PlugIn
 					nReference));
 		}
 
-		for (double[] result : results)
-		{
+		for (final double[] result : results)
 			//System.out.printf("%g %g = %g\n", result[0], result[1], result[2]);
 			if (optimiseBlinkingRate)
 				result[2] = (nReference - result[statistic]) / nReference;
 			else
 				result[2] = (result[statistic] - nReference) / nReference;
-		}
 
 		// Locate the optimal parameters with a fit of the zero contour
-		boolean found = findOptimalParameters(results);
+		final boolean found = findOptimalParameters(results);
 
 		createPlotResults(results);
 
@@ -1011,19 +976,19 @@ public class TraceMolecules implements PlugIn
 			return;
 
 		// Make fractional difference absolute so that lowest is best
-		for (double[] result : results)
+		for (final double[] result : results)
 			result[2] = Math.abs(result[2]);
 
 		// Set the optimal thresholds using the lowest value
 		double[] best = new double[] { 0, 0, Double.MAX_VALUE };
-		for (double[] result : results)
+		for (final double[] result : results)
 			if (best[2] > result[2])
 				best = result;
 
 		settings.setDistanceThreshold(best[0]);
 
 		// The optimiser works using frames so convert back to the correct units
-		TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
+		final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
 				exposureTime);
 		settings.setTimeThreshold(convert.convert(best[1]));
 
@@ -1034,9 +999,9 @@ public class TraceMolecules implements PlugIn
 
 	private boolean getParameters(int n, double d)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Optimiser");
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Optimiser");
 
-		String msg = String.format("Estimate %d molecules at d=%f, t=1", n, d);
+		final String msg = String.format("Estimate %d molecules at d=%f, t=1", n, d);
 		IJ.log(msg);
 		gd.addMessage(msg);
 		gd.addNumericField("Min_Distance_Threshold (px)", settings.getMinDistanceThreshold(), 2);
@@ -1045,7 +1010,7 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Max_Time_Threshold (frames)", settings.getMaxTimeThreshold(), 0);
 		gd.addSlider("Steps", 1, 20, settings.getOptimiserSteps());
 		gd.addNumericField("Blinking_rate", settings.getBlinkingRate(), 2);
-		String[] plotNames = SettingsManager.getNames((Object[]) OptimiserPlot.values());
+		final String[] plotNames = SettingsManager.getNames((Object[]) OptimiserPlot.values());
 		gd.addChoice("Plot", plotNames, plotNames[OptimiserPlot.get(settings.getOptimiserPlot()).ordinal()]);
 		if (altKeyDown)
 			gd.addCheckbox("Optimise_blinking", inputOptimiseBlinkingRate);
@@ -1063,9 +1028,7 @@ public class TraceMolecules implements PlugIn
 		settings.setBlinkingRate(gd.getNextNumber());
 		settings.setOptimiserPlot(gd.getNextChoiceIndex());
 		if (altKeyDown)
-		{
 			optimiseBlinkingRate = inputOptimiseBlinkingRate = gd.getNextBoolean();
-		}
 
 		if (gd.invalidNumber())
 			return false;
@@ -1172,8 +1135,8 @@ public class TraceMolecules implements PlugIn
 		dThresholds = getIntervals(minDistanceThreshold, maxDistanceThreshold, optimiserSteps);
 		tThresholds = convert(getIntervals(minTimeThreshold, maxTimeThreshold, optimiserSteps));
 
-		int total = dThresholds.length * tThresholds.length;
-		ArrayList<double[]> results = new ArrayList<>(total);
+		final int total = dThresholds.length * tThresholds.length;
+		final ArrayList<double[]> results = new ArrayList<>(total);
 
 		IJ.showStatus("Optimising tracing (" + total + " steps) ...");
 
@@ -1181,16 +1144,14 @@ public class TraceMolecules implements PlugIn
 			IJ.log("Optimising tracing ...");
 
 		int step = 0;
-		for (double d : dThresholds)
-			for (int t : tThresholds)
+		for (final double d : dThresholds)
+			for (final int t : tThresholds)
 			{
 				IJ.showProgress(step++, total);
-				int n = manager.traceMolecules(d, t);
+				final int n = manager.traceMolecules(d, t);
 				results.add(new double[] { d, t, n, getBlinkingRate(manager.getTraces()) });
 				if (debugMode)
-				{
 					summarise(manager.getTraces(), manager.getTotalFiltered(), d, t);
-				}
 			}
 
 		if (debugMode)
@@ -1204,10 +1165,10 @@ public class TraceMolecules implements PlugIn
 
 	private static double getBlinkingRate(Trace[] traces)
 	{
-		SummaryStatistics stats = new SummaryStatistics();
-		for (Trace trace : traces)
+		final SummaryStatistics stats = new SummaryStatistics();
+		for (final Trace trace : traces)
 			stats.addValue(trace.getNBlinks());
-		double blinkingRate = stats.getMean();
+		final double blinkingRate = stats.getMean();
 		return blinkingRate;
 	}
 
@@ -1215,15 +1176,15 @@ public class TraceMolecules implements PlugIn
 	{
 		if (max < min)
 		{
-			double tmp = max;
+			final double tmp = max;
 			max = min;
 			min = tmp;
 		}
-		double range = max - min;
+		final double range = max - min;
 		if (range == 0)
 			return new double[] { min };
 
-		double[] values = new double[optimiserSteps + ((min != 0) ? 1 : 0)];
+		final double[] values = new double[optimiserSteps + ((min != 0) ? 1 : 0)];
 		int j = 0;
 		if (min != 0)
 			values[j++] = min;
@@ -1252,13 +1213,13 @@ public class TraceMolecules implements PlugIn
 
 	private static int[] convert(double[] intervals)
 	{
-		TIntHashSet set = new TIntHashSet(intervals.length);
-		for (double d : intervals)
+		final TIntHashSet set = new TIntHashSet(intervals.length);
+		for (final double d : intervals)
 			set.add((int) Math.round(d));
 
 		set.remove(0); // Do not allow zero
 
-		int[] values = set.toArray();
+		final int[] values = set.toArray();
 		Arrays.sort(values);
 		return values;
 	}
@@ -1277,8 +1238,8 @@ public class TraceMolecules implements PlugIn
 		// cover enough of the search space to go from above zero (i.e. not enough traces)
 		// to below zero (i.e. too many traces)
 
-		int maxx = tThresholds.length;
-		int maxy = dThresholds.length;
+		final int maxx = tThresholds.length;
+		final int maxy = dThresholds.length;
 
 		// --------
 		// Find zero crossings using linear interpolation
@@ -1291,14 +1252,14 @@ public class TraceMolecules implements PlugIn
 		for (int x = 0; x < maxx; x++)
 		{
 			// Find zero crossings on distance points
-			double[] data = new double[maxy];
+			final double[] data = new double[maxy];
 			for (int y = 0; y < maxy; y++)
 			{
-				int i = y * maxx + x;
-				double[] result = results.get(i);
+				final int i = y * maxx + x;
+				final double[] result = results.get(i);
 				data[y] = result[2];
 			}
-			double zeroCrossing = findZeroCrossing(data, dThresholds);
+			final double zeroCrossing = findZeroCrossing(data, dThresholds);
 			if (zeroCrossing > 0)
 				zeroCrossingPoints.add(new double[] { tThresholds[x], zeroCrossing });
 			else if (x == 0)
@@ -1322,14 +1283,14 @@ public class TraceMolecules implements PlugIn
 		double minD = Double.MAX_VALUE;
 		final double maxTimeThresholdInFrames = settings.getMaxTimeThreshold();
 		// The optimiser works using frames so convert back to the correct units
-		TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
+		final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
 				exposureTime);
 
-		for (double[] point : zeroCrossingPoints)
+		for (final double[] point : zeroCrossingPoints)
 		{
-			double dx = point[0] / maxTimeThresholdInFrames;
-			double dy = point[1] / settings.getMaxDistanceThreshold();
-			double d = dx * dx + dy * dy;
+			final double dx = point[0] / maxTimeThresholdInFrames;
+			final double dy = point[1] / settings.getMaxDistanceThreshold();
+			final double d = dx * dx + dy * dy;
 			if (d < minD)
 			{
 				minD = d;
@@ -1345,18 +1306,18 @@ public class TraceMolecules implements PlugIn
 		// Pass across all distance points
 		boolean noZeroCrossingAtD0 = false;
 		boolean noZeroCrossingAtDN = false;
-		double[] tThresholdsD = toDouble(tThresholds);
+		final double[] tThresholdsD = toDouble(tThresholds);
 		for (int y = 0; y < maxy; y++)
 		{
 			// Find zero crossings on time points
-			double[] data = new double[maxx];
+			final double[] data = new double[maxx];
 			for (int x = 0; x < maxx; x++)
 			{
-				int i = y * maxx + x;
-				double[] result = results.get(i);
+				final int i = y * maxx + x;
+				final double[] result = results.get(i);
 				data[x] = result[2];
 			}
-			double zeroCrossing = findZeroCrossing(data, tThresholdsD);
+			final double zeroCrossing = findZeroCrossing(data, tThresholdsD);
 			if (zeroCrossing > 0)
 				zeroCrossingPoints.add(new double[] { zeroCrossing, dThresholds[y] });
 			else if (y == 0)
@@ -1370,7 +1331,7 @@ public class TraceMolecules implements PlugIn
 		// --------
 		// Output a message suggesting if the limits should be updated.
 		// --------
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		boolean reduceTime = false;
 		boolean reduceDistance = false;
 		if (noZeroCrossingAtDN && settings.getMinTimeThreshold() > 1)
@@ -1423,13 +1384,11 @@ public class TraceMolecules implements PlugIn
 		if (data[0] < 0)
 			return -1;
 		for (int i = 1; i < data.length; i++)
-		{
 			if (data[i] < 0)
 			{
-				double fraction = data[i - 1] / (data[i - 1] - data[i]);
+				final double fraction = data[i - 1] / (data[i - 1] - data[i]);
 				return fraction * axis[i] + (1 - fraction) * axis[i - 1];
 			}
-		}
 
 		return -1;
 	}
@@ -1458,22 +1417,20 @@ public class TraceMolecules implements PlugIn
 	@SuppressWarnings("unused")
 	private void interpolateZeroCrossingPoints()
 	{
-		double[] x = new double[zeroCrossingPoints.size()];
-		double[] y = new double[zeroCrossingPoints.size()];
+		final double[] x = new double[zeroCrossingPoints.size()];
+		final double[] y = new double[zeroCrossingPoints.size()];
 		for (int i = 0; i < x.length; i++)
 		{
-			double[] point = zeroCrossingPoints.get(i);
+			final double[] point = zeroCrossingPoints.get(i);
 			x[i] = point[0];
 			y[i] = point[1];
 		}
-		PolynomialSplineFunction fx = new SplineInterpolator().interpolate(x, y);
+		final PolynomialSplineFunction fx = new SplineInterpolator().interpolate(x, y);
 		double minX = x[0];
-		double maxX = x[x.length - 1];
-		double xinc = (maxX - minX) / 50;
+		final double maxX = x[x.length - 1];
+		final double xinc = (maxX - minX) / 50;
 		for (minX = minX + xinc; minX < maxX; minX += xinc)
-		{
 			zeroCrossingPoints.add(new double[] { minX, fx.value(minX) });
-		}
 		sortPoints();
 	}
 
@@ -1485,7 +1442,7 @@ public class TraceMolecules implements PlugIn
 	 */
 	private void createPlotResults(List<double[]> results)
 	{
-		int w = 400, h = 400;
+		final int w = 400, h = 400;
 		switch (OptimiserPlot.get(settings.getOptimiserPlot()))
 		{
 			case NONE:
@@ -1499,8 +1456,8 @@ public class TraceMolecules implements PlugIn
 
 		// Create a calibration to map the pixel position back to distance/time
 		cal = new Calibration();
-		double xRange = getRange(settings.getMaxTimeThreshold(), settings.getMinTimeThreshold(), origX, w);
-		double yRange = getRange(settings.getMaxDistanceThreshold(), settings.getMinDistanceThreshold(), origY, h);
+		final double xRange = getRange(settings.getMaxTimeThreshold(), settings.getMinTimeThreshold(), origX, w);
+		final double yRange = getRange(settings.getMaxDistanceThreshold(), settings.getMinDistanceThreshold(), origY, h);
 		cal.pixelWidth = xRange / w;
 		cal.pixelHeight = yRange / h;
 		cal.xOrigin = origX - settings.getMinTimeThreshold() / cal.pixelWidth;
@@ -1520,7 +1477,7 @@ public class TraceMolecules implements PlugIn
 			return;
 
 		// Display the image
-		String title = TITLE + ": | N - N_actual | / N_actual";
+		final String title = TITLE + ": | N - N_actual | / N_actual";
 		ImagePlus imp = WindowManager.getImage(title);
 		if (imp != null)
 		{
@@ -1532,7 +1489,7 @@ public class TraceMolecules implements PlugIn
 			imp = new ImagePlus(title, fp);
 			imp.show();
 			WindowManager.setTempCurrentImage(imp);
-			LutLoader lut = new LutLoader();
+			final LutLoader lut = new LutLoader();
 			lut.run("fire");
 			WindowManager.setTempCurrentImage(null);
 		}
@@ -1548,13 +1505,13 @@ public class TraceMolecules implements PlugIn
 		imp.setRoi(roi);
 		if (zeroCrossingPoints == null || zeroCrossingPoints.isEmpty())
 			return;
-		Calibration cal = imp.getCalibration();
-		int nPoints = zeroCrossingPoints.size();
-		float[] xPoints = new float[nPoints];
-		float[] yPoints = new float[nPoints];
+		final Calibration cal = imp.getCalibration();
+		final int nPoints = zeroCrossingPoints.size();
+		final float[] xPoints = new float[nPoints];
+		final float[] yPoints = new float[nPoints];
 		for (int i = 0; i < nPoints; i++)
 		{
-			double[] point = zeroCrossingPoints.get(i);
+			final double[] point = zeroCrossingPoints.get(i);
 			// Convert to pixel coordinates.
 			xPoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
 			yPoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
@@ -1565,46 +1522,42 @@ public class TraceMolecules implements PlugIn
 
 	private FloatProcessor createNNPlot(List<double[]> results, int w, int h)
 	{
-		FloatProcessor fp = new FloatProcessor(w, h);
+		final FloatProcessor fp = new FloatProcessor(w, h);
 
 		// Create lookup table that map the tested threshold values to a position in the image
-		int[] xLookup = createLookup(tThresholds, settings.getMinTimeThreshold(), w);
-		int[] yLookup = createLookup(dThresholds, settings.getMinDistanceThreshold(), h);
+		final int[] xLookup = createLookup(tThresholds, settings.getMinTimeThreshold(), w);
+		final int[] yLookup = createLookup(dThresholds, settings.getMinDistanceThreshold(), h);
 		origX = (settings.getMinTimeThreshold() != 0) ? xLookup[1] : 0;
 		origY = (settings.getMinDistanceThreshold() != 0) ? yLookup[1] : 0;
 
-		int gridWidth = tThresholds.length;
-		int gridHeight = dThresholds.length;
+		final int gridWidth = tThresholds.length;
+		final int gridHeight = dThresholds.length;
 		for (int y = 0, i = 0; y < gridHeight; y++)
-		{
 			for (int x = 0; x < gridWidth; x++, i++)
 			{
-				int x1 = xLookup[x];
-				int x2 = xLookup[x + 1];
-				int y1 = yLookup[y];
-				int y2 = yLookup[y + 1];
-				double[] result = results.get(i);
+				final int x1 = xLookup[x];
+				final int x2 = xLookup[x + 1];
+				final int y1 = yLookup[y];
+				final int y2 = yLookup[y + 1];
+				final double[] result = results.get(i);
 				fp.setValue(Math.abs(result[2]));
 				fp.setRoi(x1, y1, x2 - x1, y2 - y1);
 				fp.fill();
 			}
-		}
 		return fp;
 	}
 
 	private static int[] createLookup(int[] values, int min, int scale)
 	{
-		double[] newValues = toDouble(values);
+		final double[] newValues = toDouble(values);
 		return createLookup(newValues, min, scale);
 	}
 
 	private static double[] toDouble(int[] values)
 	{
-		double[] newValues = new double[values.length];
+		final double[] newValues = new double[values.length];
 		for (int i = 0; i < values.length; i++)
-		{
 			newValues[i] = values[i];
-		}
 		return newValues;
 	}
 
@@ -1613,62 +1566,58 @@ public class TraceMolecules implements PlugIn
 		// To allow the lowest result to be plotted, add space at the edge
 		// equal to the next interval
 		if (min != 0 && values.length > 1)
-		{
 			min -= values[1] - values[0];
-		}
 
-		int[] lookup = new int[values.length + 1];
-		double range = values[values.length - 1] - min;
-		double scaleFactor = scale / range;
+		final int[] lookup = new int[values.length + 1];
+		final double range = values[values.length - 1] - min;
+		final double scaleFactor = scale / range;
 		for (int i = 1; i < values.length; i++)
-		{
 			lookup[i] = (int) Math.round(scaleFactor * (values[i - 1] - min));
-		}
 		lookup[values.length] = scale;
 		return lookup;
 	}
 
 	private FloatProcessor createBilinearPlot(List<double[]> results, int w, int h)
 	{
-		FloatProcessor fp = new FloatProcessor(w, h);
+		final FloatProcessor fp = new FloatProcessor(w, h);
 
 		// Create lookup table that map the tested threshold values to a position in the image
-		int[] xLookup = createLookup(tThresholds, settings.getMinTimeThreshold(), w);
-		int[] yLookup = createLookup(dThresholds, settings.getMinDistanceThreshold(), h);
+		final int[] xLookup = createLookup(tThresholds, settings.getMinTimeThreshold(), w);
+		final int[] yLookup = createLookup(dThresholds, settings.getMinDistanceThreshold(), h);
 		origX = (settings.getMinTimeThreshold() != 0) ? xLookup[1] : 0;
 		origY = (settings.getMinDistanceThreshold() != 0) ? yLookup[1] : 0;
 
-		int gridWidth = tThresholds.length;
-		int gridHeight = dThresholds.length;
+		final int gridWidth = tThresholds.length;
+		final int gridHeight = dThresholds.length;
 		for (int y = 0, prevY = 0; y < gridHeight; y++)
 		{
 			for (int x = 0, prevX = 0; x < gridWidth; x++)
 			{
 				// Get the 4 flanking values
-				double x1y1 = results.get(prevY * gridWidth + prevX)[2];
-				double x1y2 = results.get(y * gridWidth + prevX)[2];
-				double x2y1 = results.get(prevY * gridWidth + x)[2];
-				double x2y2 = results.get(y * gridWidth + x)[2];
+				final double x1y1 = results.get(prevY * gridWidth + prevX)[2];
+				final double x1y2 = results.get(y * gridWidth + prevX)[2];
+				final double x2y1 = results.get(prevY * gridWidth + x)[2];
+				final double x2y2 = results.get(y * gridWidth + x)[2];
 
 				// Pixel range
-				int x1 = xLookup[x];
-				int x2 = xLookup[x + 1];
-				int y1 = yLookup[y];
-				int y2 = yLookup[y + 1];
+				final int x1 = xLookup[x];
+				final int x2 = xLookup[x + 1];
+				final int y1 = yLookup[y];
+				final int y2 = yLookup[y + 1];
 
-				double xRange = x2 - x1;
-				double yRange = y2 - y1;
+				final double xRange = x2 - x1;
+				final double yRange = y2 - y1;
 
 				for (int yy = y1; yy < y2; yy++)
 				{
-					double yFraction = (yy - y1) / yRange;
+					final double yFraction = (yy - y1) / yRange;
 					for (int xx = x1; xx < x2; xx++)
 					{
 						// Interpolate
-						double xFraction = (xx - x1) / xRange;
-						double v1 = x1y1 * (1 - xFraction) + x2y1 * xFraction;
-						double v2 = x1y2 * (1 - xFraction) + x2y2 * xFraction;
-						double value = v1 * (1 - yFraction) + v2 * yFraction;
+						final double xFraction = (xx - x1) / xRange;
+						final double v1 = x1y1 * (1 - xFraction) + x2y1 * xFraction;
+						final double v2 = x1y2 * (1 - xFraction) + x2y2 * xFraction;
+						final double value = v1 * (1 - yFraction) + v2 * yFraction;
 						fp.setf(xx, yy, (float) value);
 					}
 				}
@@ -1679,7 +1628,7 @@ public class TraceMolecules implements PlugIn
 		}
 
 		// Convert to absolute for easier visualisation
-		float[] data = (float[]) fp.getPixels();
+		final float[] data = (float[]) fp.getPixels();
 		for (int i = 0; i < data.length; i++)
 			data[i] = Math.abs(data[i]);
 
@@ -2084,7 +2033,7 @@ public class TraceMolecules implements PlugIn
 		final int h = source.getHeight();
 
 		// Get the coordinates and the spot bounds
-		float[] centre = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
+		final float[] centre = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
 		int minX = (int) Math.floor(centre[0] - fitWidth);
 		int maxX = (int) Math.ceil(centre[0] + fitWidth);
 		int minY = (int) Math.floor(centre[1] - fitWidth);
@@ -2096,13 +2045,11 @@ public class TraceMolecules implements PlugIn
 		minY = FastMath.max(0, minY);
 		maxY = FastMath.min(h, maxY);
 
-		int width = maxX - minX;
-		int height = maxY - minY;
+		final int width = maxX - minX;
+		final int height = maxY - minY;
 		if (width <= 0 || height <= 0)
-		{
 			// The centre must be outside the image width and height
 			return null;
-		}
 		bounds.x = minX;
 		bounds.y = minY;
 		bounds.width = width;
@@ -2112,21 +2059,19 @@ public class TraceMolecules implements PlugIn
 			slices = new ImageStack(width, height);
 
 		// Combine the images. Subtract the fitted background to zero the image.
-		float[] data = new float[width * height];
+		final float[] data = new float[width * height];
 		float sumBackground = 0;
 		double noise = 0;
 		for (int i = 0; i < trace.size(); i++)
 		{
-			PeakResult result = trace.get(i);
+			final PeakResult result = trace.get(i);
 			noise += result.getNoise() * result.getNoise();
 
-			float[] sourceData = source.get(result.getFrame(), bounds);
+			final float[] sourceData = source.get(result.getFrame(), bounds);
 			final float background = result.getBackground();
 			sumBackground += background;
 			for (int j = 0; j < data.length; j++)
-			{
 				data[j] += sourceData[j] - background;
-			}
 			if (createStack)
 				slices.addSlice(new FloatProcessor(width, height, sourceData, null));
 		}
@@ -2134,7 +2079,7 @@ public class TraceMolecules implements PlugIn
 		{
 			// Add a final image that is the average of the individual slices. This allows
 			// it to be visualised in the same intensity scale.
-			float[] data2 = Arrays.copyOf(data, data.length);
+			final float[] data2 = Arrays.copyOf(data, data.length);
 			final int size = slices.getSize();
 			sumBackground /= size;
 			for (int i = 0; i < data2.length; i++)
@@ -2154,7 +2099,7 @@ public class TraceMolecules implements PlugIn
 		double noise = 0;
 		for (int i = 0; i < trace.size(); i++)
 		{
-			PeakResult result = trace.get(i);
+			final PeakResult result = trace.get(i);
 			noise += result.getNoise() * result.getNoise();
 		}
 		// Combined noise is the sqrt of the sum-of-squares

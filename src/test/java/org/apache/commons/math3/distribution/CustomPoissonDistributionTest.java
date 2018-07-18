@@ -85,13 +85,11 @@ public class CustomPoissonDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			long[] e = new long[n * m];
+			final long[] e = new long[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
 				for (int j = 0; j < m; j++, k++)
-				{
 					e[k] = rdg.nextPoisson(mean);
-				}
 				mean += 1;
 			}
 			return e;
@@ -111,14 +109,12 @@ public class CustomPoissonDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			long[] e = new long[n * m];
+			final long[] e = new long[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
 				dist.setMean(mean);
 				for (int j = 0; j < m; j++, k++)
-				{
 					e[k] = dist.sample();
-				}
 				mean += 1;
 			}
 			return e;
@@ -128,13 +124,13 @@ public class CustomPoissonDistributionTest
 	@Test
 	public void canCreateSamples()
 	{
-		StaticTimingTask t1 = new StaticTimingTask(0.5, 60);
+		final StaticTimingTask t1 = new StaticTimingTask(0.5, 60);
 		t1.getData(0);
-		long[] e = (long[]) t1.run(null);
+		final long[] e = (long[]) t1.run(null);
 
-		InstanceTimingTask t2 = new InstanceTimingTask(0.5, 60);
+		final InstanceTimingTask t2 = new InstanceTimingTask(0.5, 60);
 		t2.getData(0);
-		long[] o = (long[]) t2.run(null);
+		final long[] o = (long[]) t2.run(null);
 
 		Assert.assertArrayEquals(e, o);
 	}
@@ -142,18 +138,18 @@ public class CustomPoissonDistributionTest
 	@Test
 	public void customDistributionIsFasterWithTinyMean()
 	{
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask(0.5, 10));
 		ts.execute(new InstanceTimingTask(0.5, 10));
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
 		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		double t1 = ts.get(-1).getMean();
-		double t2 = ts.get(-2).getMean();
+		final double t1 = ts.get(-1).getMean();
+		final double t2 = ts.get(-2).getMean();
 		TestSettings.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
 				t1, t2 / t1);
 	}
@@ -161,18 +157,18 @@ public class CustomPoissonDistributionTest
 	@Test
 	public void customDistributionIsFasterWithSmallMean()
 	{
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask(10, 38));
 		ts.execute(new InstanceTimingTask(10, 38));
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
 		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		double t1 = ts.get(-1).getMean();
-		double t2 = ts.get(-2).getMean();
+		final double t1 = ts.get(-1).getMean();
+		final double t2 = ts.get(-2).getMean();
 		TestSettings.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
 				t1, t2 / t1);
 	}
@@ -186,18 +182,18 @@ public class CustomPoissonDistributionTest
 		// then Apache commons may have changed their implementation and the custom
 		// class should be updated.
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask(40.5, 60));
 		ts.execute(new InstanceTimingTask(40.5, 60));
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
 		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		double t1 = ts.get(-1).getMean();
-		double t2 = ts.get(-2).getMean();
+		final double t1 = ts.get(-1).getMean();
+		final double t2 = ts.get(-2).getMean();
 		TestSettings.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
 				t1, t2 / t1);
 	}

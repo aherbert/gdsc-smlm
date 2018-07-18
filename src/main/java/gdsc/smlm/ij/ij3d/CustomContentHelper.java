@@ -71,11 +71,9 @@ public class CustomContentHelper
 	{
 		ImageProcessor ip = imp.getProcessor();
 		if (imp.getType() != ImagePlus.COLOR_RGB)
-		{
 			ip = ip.duplicate().convertToRGB();
-		}
 		// Create a stack
-		ImageStack stack = new ImageStack(ip.getWidth(), ip.getHeight());
+		final ImageStack stack = new ImageStack(ip.getWidth(), ip.getHeight());
 		stack.addSlice(ip);
 		stack.addSlice(ip);
 		final Calibration cal = imp.getCalibration();
@@ -108,8 +106,8 @@ public class CustomContentHelper
 	{
 		// Compact the vertices to a set of vertices and faces
 		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
-		TurboList<Point3f> vertices = new TurboList<>(list.size());
-		TIntArrayList faces = new TIntArrayList(list.size());
+		final TurboList<Point3f> vertices = new TurboList<>(list.size());
+		final TIntArrayList faces = new TIntArrayList(list.size());
 		int index = 0;
 		// Process triangles
 		for (int i = 0; i < list.size(); i += 3)
@@ -199,7 +197,7 @@ public class CustomContentHelper
 		//center.z = (max.z + min.z) / 2;
 
 		// Weighted
-		int n = points.length;
+		final int n = points.length;
 		center.set((float) (sumx / n), (float) (sumy / n), (float) (sumz / n));
 	}
 }

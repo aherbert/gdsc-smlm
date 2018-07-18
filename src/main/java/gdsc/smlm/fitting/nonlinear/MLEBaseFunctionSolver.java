@@ -82,8 +82,8 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implement
 			// i.e., have the same or greater log-likelihood—than the model with fewer parameters
 			// (here null)
 
-			double llAlternative = computeObservedLogLikelihood(lastY, lastA);
-			double llNull = getLogLikelihood();
+			final double llAlternative = computeObservedLogLikelihood(lastY, lastA);
+			final double llNull = getLogLikelihood();
 
 			// The alternative should always fit better (higher value) than the null model
 			if (llAlternative < llNull)

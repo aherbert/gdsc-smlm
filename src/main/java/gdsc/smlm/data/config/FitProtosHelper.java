@@ -50,7 +50,7 @@ public class FitProtosHelper
 	public static final FitSolverSettings defaultFitSolverSettings;
 	static
 	{
-		FitSolverSettings.Builder builder = FitSolverSettings.newBuilder();
+		final FitSolverSettings.Builder builder = FitSolverSettings.newBuilder();
 		builder.setFixedPsf(false);
 		builder.setDisableBackgroundFitting(false);
 		builder.setDisableSignalFitting(false);
@@ -93,7 +93,7 @@ public class FitProtosHelper
 	public static final FilterSettings defaultFilterSettings;
 	static
 	{
-		FilterSettings.Builder builder = FilterSettings.newBuilder();
+		final FilterSettings.Builder builder = FilterSettings.newBuilder();
 		builder.setShiftFactor(1);
 		builder.setSignalStrength(5);
 		builder.setMinPhotons(30);
@@ -111,7 +111,7 @@ public class FitProtosHelper
 	public static final FitSettings defaultFitSettings;
 	static
 	{
-		FitSettings.Builder builder = FitSettings.newBuilder();
+		final FitSettings.Builder builder = FitSettings.newBuilder();
 		builder.setFitSolverSettings(defaultFitSolverSettings);
 		builder.setFilterSettings(defaultFilterSettings);
 		defaultFitSettings = builder.build();
@@ -133,16 +133,16 @@ public class FitProtosHelper
 		// *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a
 		// depth of up to 1380nm (the PSF limit).
 
-		FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();
+		final FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();
 		builder.setFitSettings(defaultFitSettings);
 
 		builder.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 
-		RelativeParameter.Builder rp = RelativeParameter.newBuilder();
+		final RelativeParameter.Builder rp = RelativeParameter.newBuilder();
 
-		DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
+		final DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
 		dfs.setDataFilterType(DataFilterType.SINGLE);
-		DataFilter.Builder dfb = dfs.addDataFiltersBuilder();
+		final DataFilter.Builder dfb = dfs.addDataFiltersBuilder();
 		dfb.setDataFilterMethod(DataFilterMethod.MEAN);
 		rp.setAbsolute(false);
 		rp.setValue(1.2);

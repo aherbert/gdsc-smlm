@@ -70,7 +70,7 @@ public class ResultsImageSampler
 			data[size++] = p;
 			if (size == data.length)
 			{
-				PeakResult[] data2 = new PeakResult[size * 2];
+				final PeakResult[] data2 = new PeakResult[size * 2];
 				System.arraycopy(data, 0, data2, 0, size);
 				data = data2;
 			}
@@ -128,7 +128,7 @@ public class ResultsImageSampler
 		@Override
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = compareInt(o1.size(), o2.size());
+			final int result = compareInt(o1.size(), o2.size());
 			if (result == 0)
 				// Use index if the same count
 				return Long.compare(o1.index, o2.index);
@@ -141,7 +141,7 @@ public class ResultsImageSampler
 		@Override
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = compareInt(o2.size(), o1.size());
+			final int result = compareInt(o2.size(), o1.size());
 			if (result == 0)
 				// Use index if the same count
 				return Long.compare(o1.index, o2.index);
@@ -178,7 +178,7 @@ public class ResultsImageSampler
 	private long[] no;
 	private ResultsSample[] data;
 	private int lower, upper;
-	private TurboList<ResultsSample> list = new TurboList<>();
+	private final TurboList<ResultsSample> list = new TurboList<>();
 	private RandomGenerator r = new Well19937c();
 
 	/**
@@ -200,12 +200,12 @@ public class ResultsImageSampler
 		this.stack = stack;
 		this.size = size;
 
-		Rectangle bounds = results.getBounds(true);
+		final Rectangle bounds = results.getBounds(true);
 		// Round the image dimensions to the nearest block interval
 		lx = size * (bounds.x / size);
 		ly = size * (bounds.y / size);
-		int ux = size * (int) Math.ceil((double) (bounds.x + bounds.width) / size);
-		int uy = size * (int) Math.ceil((double) (bounds.y + bounds.height) / size);
+		final int ux = size * (int) Math.ceil((double) (bounds.x + bounds.width) / size);
+		final int uy = size * (int) Math.ceil((double) (bounds.y + bounds.height) / size);
 		xblocks = (ux - lx) / size;
 		yblocks = (uy - ly) / size;
 		xy_blocks = xblocks * yblocks;
@@ -256,13 +256,11 @@ public class ResultsImageSampler
 	private void createEmptySampleIndices()
 	{
 		// Create the empty blocks
-		long total = stack.getSize() * xy_blocks;
-		long empty = total - data.length;
+		final long total = stack.getSize() * xy_blocks;
+		final long empty = total - data.length;
 		if (empty == 0)
-		{
 			// All indices are used
 			no = new long[0];
-		}
 		else
 		{
 			// Sort by index
@@ -274,11 +272,11 @@ public class ResultsImageSampler
 				// Just enumerate the first N. Since they are empty it should not matter
 				// unless the noise characteristics change over the image duration.
 				long emptyCandidate = 0;
-				long[] list = new long[(int) Math.min(empty, maxNumberOfEmptySamples)];
+				final long[] list = new long[(int) Math.min(empty, maxNumberOfEmptySamples)];
 				int c = 0;
 				OUTER: for (int i = 0; i < data.length; i++)
 				{
-					long current = data[i].index;
+					final long current = data[i].index;
 					// If the current index is bigger than the candidate then it must be empty
 					while (current > emptyCandidate)
 					{
@@ -295,20 +293,18 @@ public class ResultsImageSampler
 			else
 			{
 				// Sample throughout the localisation time course
-				TLongArrayList list = new TLongArrayList(data.length);
+				final TLongArrayList list = new TLongArrayList(data.length);
 				if (empty < data.length)
 				{
 					// We can pick all the indices that are missing
 					long emptyCandidate = 0;
 					for (int i = 0; i < data.length; i++)
 					{
-						long current = data[i].index;
+						final long current = data[i].index;
 						// If the current index is bigger than the candidate then it must be empty
 						while (current > emptyCandidate)
-						{
 							// Add all those that are empty
 							list.add(emptyCandidate++);
-						}
 						// Set the next candidate
 						emptyCandidate = current + 1;
 					}
@@ -320,14 +316,12 @@ public class ResultsImageSampler
 					long emptyCandidate = 1;
 					for (int i = 0; i < data.length; i++)
 					{
-						long current = data[i].index;
+						final long current = data[i].index;
 						// If the current index is bigger than the candidate then it must be empty
 						if (current > emptyCandidate)
-						{
 							// Note: we only sample the next empty index after an index with data
 							// This means the number of frames could be lower
 							list.add(emptyCandidate);
-						}
 						// Set the next candidate
 						emptyCandidate = current + 1;
 					}
@@ -343,14 +337,14 @@ public class ResultsImageSampler
 	 */
 	private void createResultSamples()
 	{
-		TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<>(results.size());
+		final TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<>(results.size());
 		ResultsSample next = ResultsSample.create(-1);
-		for (PeakResult p : results.toArray())
+		for (final PeakResult p : results.toArray())
 		{
 			// Avoid invalid slices
 			if (p.getFrame() < 1 || p.getFrame() > stack.getSize())
 				continue;
-			long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
+			final long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
 
 			ResultsSample current = map.putIfAbsent(index, next);
 			if (current == null)
@@ -409,7 +403,7 @@ public class ResultsImageSampler
 	private int[] getXYZ(long index, int[] xyz)
 	{
 		xyz[2] = (int) (index / (xy_blocks));
-		int mod = (int) (index % (xy_blocks));
+		final int mod = (int) (index % (xy_blocks));
 		xyz[1] = mod / xblocks;
 		xyz[0] = mod % xblocks;
 
@@ -485,20 +479,20 @@ public class ResultsImageSampler
 	 */
 	public ImagePlus getSample(int nNo, int nLow, int nHigh)
 	{
-		ImageStack out = new ImageStack(size, size);
+		final ImageStack out = new ImageStack(size, size);
 		if (!isValid())
 			return null;
 
 		list.clearf();
 
 		// empty
-		for (int i : Random.sample(nNo, no.length, r))
+		for (final int i : Random.sample(nNo, no.length, r))
 			list.add(ResultsSample.createEmpty(no[i]));
 		// low
-		for (int i : Random.sample(nLow, lower, r))
+		for (final int i : Random.sample(nLow, lower, r))
 			list.add(data[i]);
 		// high
-		for (int i : Random.sample(nHigh, upper, r))
+		for (final int i : Random.sample(nHigh, upper, r))
 			list.add(data[i + lower]);
 
 		if (list.isEmpty())
@@ -507,28 +501,26 @@ public class ResultsImageSampler
 		double nmPerPixel = 1;
 		if (results.hasCalibration())
 		{
-			CalibrationReader calibration = results.getCalibrationReader();
+			final CalibrationReader calibration = results.getCalibrationReader();
 			if (calibration.hasNmPerPixel())
-			{
 				nmPerPixel = calibration.getNmPerPixel();
-			}
 		}
 
 		// Sort descending by number in the frame
-		ResultsSample[] sample = list.toArray(new ResultsSample[list.size()]);
+		final ResultsSample[] sample = list.toArray(new ResultsSample[list.size()]);
 		Arrays.sort(sample, rcc);
 
-		int[] xyz = new int[3];
-		Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
-		Overlay overlay = new Overlay();
-		float[] ox = new float[10], oy = new float[10];
-		StringBuilder sb = new StringBuilder();
+		final int[] xyz = new int[3];
+		final Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
+		final Overlay overlay = new Overlay();
+		final float[] ox = new float[10], oy = new float[10];
+		final StringBuilder sb = new StringBuilder();
 		if (nmPerPixel == 1)
 			sb.append("Sample X Y Z Signal\n");
 		else
 			sb.append("Sample X(nm) Y(nm) Z(nm) Signal\n");
 
-		for (ResultsSample s : sample)
+		for (final ResultsSample s : sample)
 		{
 			getXYZ(s.index, xyz);
 
@@ -539,26 +531,24 @@ public class ResultsImageSampler
 				continue;
 
 			// Extract the frame
-			int slice = xyz[2];
-			ImageProcessor ip = stack.getProcessor(slice);
+			final int slice = xyz[2];
+			final ImageProcessor ip = stack.getProcessor(slice);
 
 			// Cut out the desired pixels (some may be blank if the block overruns the source image)
-			ImageProcessor ip2 = ip.createProcessor(size, size);
+			final ImageProcessor ip2 = ip.createProcessor(size, size);
 			for (int y = 0; y < target.height; y++)
 				for (int x = 0, i = y * size, index = (y + target.y) * ip.getWidth() +
 						target.x; x < target.width; x++, i++, index++)
-				{
 					ip2.setf(i, ip.getf(index));
-				}
 
-			int size = s.size();
+			final int size = s.size();
 			if (size > 0)
 			{
-				int position = out.getSize() + 1;
+				final int position = out.getSize() + 1;
 				// Create an ROI with the localisations
 				for (int i = 0; i < size; i++)
 				{
-					PeakResult p = s.list.get(i);
+					final PeakResult p = s.list.get(i);
 					ox[i] = p.getXPosition() - xyz[0];
 					oy[i] = p.getYPosition() - xyz[1];
 					sb.append(position).append(' ');
@@ -567,7 +557,7 @@ public class ResultsImageSampler
 					sb.append(Utils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
 					sb.append(Utils.rounded(p.getIntensity())).append('\n');
 				}
-				PointRoi roi = new PointRoi(ox, oy, size);
+				final PointRoi roi = new PointRoi(ox, oy, size);
 				roi.setPosition(position);
 				overlay.add(roi);
 			}
@@ -578,13 +568,13 @@ public class ResultsImageSampler
 		if (out.getSize() == 0)
 			return null;
 
-		ImagePlus imp = new ImagePlus("Sample", out);
+		final ImagePlus imp = new ImagePlus("Sample", out);
 		imp.setOverlay(overlay);
 		// Note: Only the info property can be saved to a TIFF file
 		imp.setProperty("Info", sb.toString());
 		if (nmPerPixel != 1)
 		{
-			ij.measure.Calibration cal = new ij.measure.Calibration();
+			final ij.measure.Calibration cal = new ij.measure.Calibration();
 			cal.setUnit("nm");
 			cal.pixelHeight = cal.pixelWidth = nmPerPixel;
 			imp.setCalibration(cal);

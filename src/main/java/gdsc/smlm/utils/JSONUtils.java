@@ -42,26 +42,24 @@ public class JSONUtils
 	{
 		if (json == null || json.length() == 0)
 			return "";
-		char[] chars = json.toCharArray();
-		char[] newChars = new char[chars.length];
+		final char[] chars = json.toCharArray();
+		final char[] newChars = new char[chars.length];
 		int length = 0;
 		// Scan for first double quote
-		int i = 0, size = chars.length;
+		int i = 0;
+		final int size = chars.length;
 		while (i < size)
-		{
 			if (isDoubleQuote(chars, i))
 			{
-				int start = i;
+				final int start = i;
 				// Scan for end double quote
 				int end = -1;
 				for (int j = i + 1; j < size; j++)
-				{
 					if (isDoubleQuote(chars, j))
 					{
 						end = j;
 						break;
 					}
-				}
 				if (end > start)
 				{
 					// We have a terminating double quote.
@@ -74,26 +72,19 @@ public class JSONUtils
 						continue;
 					}
 					else
-					{
 						// Cannot remove the quotes so advance to copy all the chars
 						end++;
-					}
 				}
 				else
-				{
 					// No terminating double quote so this is the end of the string
 					end = size;
-				}
 
 				// We cannot simplify so copy all the characters
 				for (i = start; i < end; i++)
 					newChars[length++] = chars[i];
 			}
 			else
-			{
 				newChars[length++] = chars[i++];
-			}
-		}
 		return new String(newChars, 0, length);
 	}
 
@@ -106,10 +97,8 @@ public class JSONUtils
 	private static boolean canSimplify(char[] chars, int start, int end)
 	{
 		for (int j = start; j < end; j++)
-		{
 			if (!Character.isLetterOrDigit(chars[j]))
 				return false;
-		}
 		return true;
 	}
 }

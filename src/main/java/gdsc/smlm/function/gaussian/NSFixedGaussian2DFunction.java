@@ -79,7 +79,7 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	protected static final int AA = 2;
 	/** The index for the x0 position gradient pre-factor */
 	protected static final int AA2 = 3;
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -193,9 +193,7 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final int x0 = x % maxx;
 
 		for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK)
-		{
 			y += gaussian(x0, x1, apos, peakFactors[j]);
-		}
 
 		return y;
 	}

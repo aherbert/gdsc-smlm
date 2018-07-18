@@ -98,7 +98,7 @@ public class BinomialFitter
 	 */
 	public static double[] getHistogram(int[] data, boolean cumulative)
 	{
-		double[] newData = new double[data.length];
+		final double[] newData = new double[data.length];
 		for (int i = 0; i < data.length; i++)
 		{
 			if (data[i] < 0)
@@ -144,20 +144,20 @@ public class BinomialFitter
 	 */
 	private static double[] calculateHistogram(double[] data, boolean cumulative)
 	{
-		double[][] histogram = Maths.cumulativeHistogram(data, true);
+		final double[][] histogram = Maths.cumulativeHistogram(data, true);
 		if (histogram[0].length == 0)
 			return new double[] { 1 };
 		// Pad to include all values
-		double[] nValues = histogram[0];
-		double[] pValues = histogram[1];
-		int N = (int) nValues[nValues.length - 1];
-		double[] p = new double[N + 1];
+		final double[] nValues = histogram[0];
+		final double[] pValues = histogram[1];
+		final int N = (int) nValues[nValues.length - 1];
+		final double[] p = new double[N + 1];
 
 		// Pad the histogram out for any missing values between 0 and N
 		for (int i = 1; i < nValues.length; i++)
 		{
-			int j = (int) nValues[i - 1];
-			int k = (int) nValues[i];
+			final int j = (int) nValues[i - 1];
+			final int k = (int) nValues[i];
 			for (int ii = j; ii < k; ii++)
 				p[ii] = pValues[i - 1];
 		}
@@ -165,12 +165,8 @@ public class BinomialFitter
 
 		// We need the original histogram, not the cumulative histogram
 		if (!cumulative)
-		{
 			for (int i = p.length; i-- > 1;)
-			{
 				p[i] -= p[i - 1];
-			}
-		}
 
 		return p;
 	}
@@ -204,25 +200,21 @@ public class BinomialFitter
 		if (minN < 1)
 			minN = 1;
 		if (maxN > 0)
-		{
 			if (N > maxN)
-			{
 				// Limit the number fitted to maximum
 				N = maxN;
-			}
 			else if (N < maxN)
 			{
 				// Expand the histogram to the maximum
 				histogram = Arrays.copyOf(histogram, maxN + 1);
 				N = maxN;
 			}
-		}
 		if (minN > N)
 			minN = N;
 
 		final double mean = getMean(histogram);
 
-		String name = (zeroTruncated) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
+		final String name = (zeroTruncated) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
 
 		log("Mean cluster size = %s", Utils.rounded(mean));
 		log("Fitting cumulative " + name);
@@ -232,11 +224,11 @@ public class BinomialFitter
 		// score several times in succession)
 		for (int n = minN; n <= N; n++)
 		{
-			PointValuePair solution = fitBinomial(histogram, mean, n, zeroTruncated);
+			final PointValuePair solution = fitBinomial(histogram, mean, n, zeroTruncated);
 			if (solution == null)
 				continue;
 
-			double p = solution.getPointRef()[0];
+			final double p = solution.getPointRef()[0];
 
 			log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
 
@@ -247,10 +239,8 @@ public class BinomialFitter
 				worse = 0;
 			}
 			else if (bestSS != initialSS)
-			{
 				if (++worse >= 3)
 					break;
-			}
 		}
 
 		return parameters;
@@ -311,7 +301,7 @@ public class BinomialFitter
 				histogram[i] /= cumul;
 		}
 
-		int nFittedPoints = Math.min(histogram.length, n + 1) - ((zeroTruncated) ? 1 : 0);
+		final int nFittedPoints = Math.min(histogram.length, n + 1) - ((zeroTruncated) ? 1 : 0);
 		if (nFittedPoints < 1)
 		{
 			log("No points to fit (%d): Histogram.length = %d, n = %d, zero-truncated = %b", nFittedPoints,
@@ -321,14 +311,14 @@ public class BinomialFitter
 
 		// The model is only fitting the probability p
 		// For a binomial n*p = mean => p = mean/n
-		double[] initialSolution = new double[] { FastMath.min(mean / n, 1) };
+		final double[] initialSolution = new double[] { FastMath.min(mean / n, 1) };
 
 		// Create the function
-		BinomialModelFunction function = new BinomialModelFunction(histogram, n, zeroTruncated);
+		final BinomialModelFunction function = new BinomialModelFunction(histogram, n, zeroTruncated);
 
-		double[] lB = new double[1];
-		double[] uB = new double[] { 1 };
-		SimpleBounds bounds = new SimpleBounds(lB, uB);
+		final double[] lB = new double[1];
+		final double[] uB = new double[] { 1 };
+		final SimpleBounds bounds = new SimpleBounds(lB, uB);
 
 		// Fit
 		// CMAESOptimizer or BOBYQAOptimizer support bounds
@@ -336,17 +326,17 @@ public class BinomialFitter
 		// CMAESOptimiser based on Matlab code:
 		// https://www.lri.fr/~hansen/cmaes.m
 		// Take the defaults from the Matlab documentation
-		int maxIterations = 2000;
-		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
-		boolean isActiveCMA = true;
-		int diagonalOnly = 0;
-		int checkFeasableCount = 1;
-		RandomGenerator random = new Well19937c();
-		boolean generateStatistics = false;
-		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
+		final int maxIterations = 2000;
+		final double stopFitness = 0; //Double.NEGATIVE_INFINITY;
+		final boolean isActiveCMA = true;
+		final int diagonalOnly = 0;
+		final int checkFeasableCount = 1;
+		final RandomGenerator random = new Well19937c();
+		final boolean generateStatistics = false;
+		final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
 		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
-		OptimizationData sigma = new CMAESOptimizer.Sigma(new double[] { (uB[0] - lB[0]) / 3 });
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(2))));
+		final OptimizationData sigma = new CMAESOptimizer.Sigma(new double[] { (uB[0] - lB[0]) / 3 });
+		final OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(2))));
 
 		try
 		{
@@ -360,31 +350,29 @@ public class BinomialFitter
 			}
 			else
 			{
-				GoalType goalType = (maximumLikelihood) ? GoalType.MAXIMIZE : GoalType.MINIMIZE;
+				final GoalType goalType = (maximumLikelihood) ? GoalType.MAXIMIZE : GoalType.MINIMIZE;
 
 				// Iteratively fit
-				CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
+				final CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
 						checkFeasableCount, random, generateStatistics, checker);
 				for (int iteration = 0; iteration <= fitRestarts; iteration++)
 				{
 					try
 					{
 						// Start from the initial solution
-						PointValuePair result = opt.optimize(new InitialGuess(initialSolution),
+						final PointValuePair result = opt.optimize(new InitialGuess(initialSolution),
 								new ObjectiveFunction(function), goalType, bounds, sigma, popSize,
 								new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
 						//System.out.printf("CMAES Iter %d initial = %g (%d)\n", iteration, result.getValue(),
 						//		opt.getEvaluations());
 						if (solution == null || result.getValue() < solution.getValue())
-						{
 							solution = result;
-						}
 					}
-					catch (TooManyEvaluationsException e)
+					catch (final TooManyEvaluationsException e)
 					{
 						// No solution
 					}
-					catch (TooManyIterationsException e)
+					catch (final TooManyIterationsException e)
 					{
 						// No solution
 					}
@@ -393,21 +381,19 @@ public class BinomialFitter
 					try
 					{
 						// Also restart from the current optimum
-						PointValuePair result = opt.optimize(new InitialGuess(solution.getPointRef()),
+						final PointValuePair result = opt.optimize(new InitialGuess(solution.getPointRef()),
 								new ObjectiveFunction(function), goalType, bounds, sigma, popSize,
 								new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
 						//System.out.printf("CMAES Iter %d restart = %g (%d)\n", iteration, result.getValue(),
 						//		opt.getEvaluations());
 						if (result.getValue() < solution.getValue())
-						{
 							solution = result;
-						}
 					}
-					catch (TooManyEvaluationsException e)
+					catch (final TooManyEvaluationsException e)
 					{
 						// No solution
 					}
-					catch (TooManyIterationsException e)
+					catch (final TooManyIterationsException e)
 					{
 						// No solution
 					}
@@ -420,10 +406,10 @@ public class BinomialFitter
 			{
 				// Although we fit the log-likelihood, return the sum-of-squares to allow
 				// comparison across different n
-				double p = solution.getPointRef()[0];
+				final double p = solution.getPointRef()[0];
 				double ss = 0;
-				double[] obs = function.p;
-				double[] exp = function.getP(p);
+				final double[] obs = function.p;
+				final double[] exp = function.getP(p);
 				for (int i = 0; i < obs.length; i++)
 					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 				return new PointValuePair(solution.getPointRef(), ss);
@@ -432,7 +418,7 @@ public class BinomialFitter
 			else if (nFittedPoints > 1)
 			{
 				// Improve SS fit with a gradient based LVM optimizer
-				LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+				final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
 				try
 				{
@@ -440,7 +426,7 @@ public class BinomialFitter
 							n, zeroTruncated);
 
 					//@formatter:off
-					LeastSquaresProblem problem = new LeastSquaresBuilder()
+					final LeastSquaresProblem problem = new LeastSquaresBuilder()
 							.maxEvaluations(Integer.MAX_VALUE)
 							.maxIterations(3000)
 							.start(solution.getPointRef())
@@ -456,37 +442,35 @@ public class BinomialFitter
 							.build();
 					//@formatter:on
 
-					Optimum lvmSolution = optimizer.optimize(problem);
+					final Optimum lvmSolution = optimizer.optimize(problem);
 
 					// Check the pValue is valid since the LVM is not bounded.
-					double p = lvmSolution.getPoint().getEntry(0);
+					final double p = lvmSolution.getPoint().getEntry(0);
 					if (p <= 1 && p >= 0)
 					{
 						// True if the weights are 1
-						double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+						final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 						//double ss = 0;
 						//double[] obs = gradientFunction.p;
 						//double[] exp = gradientFunction.value(lvmSolution.getPoint().toArray());
 						//for (int i = 0; i < obs.length; i++)
 						//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 						if (ss < solution.getValue())
-						{
 							//log("Re-fitting improved the SS from %s to %s (-%s%%)",
 							//		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
 							//		Utils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
 							return new PointValuePair(lvmSolution.getPoint().toArray(), ss);
-						}
 					}
 				}
-				catch (TooManyIterationsException e)
+				catch (final TooManyIterationsException e)
 				{
 					log("Failed to re-fit: Too many iterations: %s", e.getMessage());
 				}
-				catch (ConvergenceException e)
+				catch (final ConvergenceException e)
 				{
 					log("Failed to re-fit: %s", e.getMessage());
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					// Ignore this ...
 				}
@@ -494,7 +478,7 @@ public class BinomialFitter
 
 			return solution;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			log("Failed to fit Binomial distribution with N=%d : %s", n, e.getMessage());
 		}
@@ -517,7 +501,7 @@ public class BinomialFitter
 			sum += histogram[i] * i;
 			count += histogram[i];
 		}
-		double mean = sum / count;
+		final double mean = sum / count;
 		return mean;
 	}
 
@@ -557,7 +541,7 @@ public class BinomialFitter
 		 */
 		public double[] getP(double pValue)
 		{
-			BinomialDistribution dist = new BinomialDistribution(trials, pValue);
+			final BinomialDistribution dist = new BinomialDistribution(trials, pValue);
 
 			// Optionally ignore x=0 since we cannot see a zero size cluster.
 			// This is done by re-normalising the cumulative probability excluding x=0
@@ -568,20 +552,16 @@ public class BinomialFitter
 			// pi = 1 / ( 1 - f(0) )
 			// Fzt(x) = pi . F(x)
 
-			double[] p2 = new double[p.length];
+			final double[] p2 = new double[p.length];
 			for (int i = startIndex; i <= trials; i++)
-			{
 				p2[i] = dist.probability(i);
-			}
 
 			// Renormalise if necessary
 			if (startIndex == 1)
 			{
 				final double pi = 1.0 / (1.0 - dist.probability(0));
 				for (int i = 1; i <= trials; i++)
-				{
 					p2[i] *= pi;
-				}
 			}
 
 			return p2;
@@ -616,19 +596,17 @@ public class BinomialFitter
 		@Override
 		public double value(double[] parameters)
 		{
-			double[] p2 = getP(parameters[0]);
+			final double[] p2 = getP(parameters[0]);
 			if (maximumLikelihood)
 			{
 				// Calculate the log-likelihood
 				double ll = 0;
 				// We cannot produce a likelihood for any n>N
-				int limit = trials + 1; // p.length
+				final int limit = trials + 1; // p.length
 				for (int i = startIndex; i < limit; i++)
-				{
 					// Sum for all observations the probability of the observation.
 					// Use p[i] to indicate the frequency of this observation.
 					ll += p[i] * Math.log(p2[i]);
-				}
 				//System.out.printf("%f => %f\n", parameters[0], ll);
 				return ll;
 			}
@@ -675,14 +653,12 @@ public class BinomialFitter
 			final int n = trials;
 			nC = new long[n + 1];
 			for (int k = 0; k <= n; k++)
-			{
 				nC[k] = CombinatoricsUtils.binomialCoefficient(n, k);
-			}
 		}
 
 		private double[] getWeights()
 		{
-			double[] w = new double[p.length];
+			final double[] w = new double[p.length];
 			Arrays.fill(w, 1);
 			return w;
 		}
@@ -706,7 +682,7 @@ public class BinomialFitter
 			//        nCk * p^k * (n-k) * (1-p)^(n-k-1) * -1
 
 			final double p = variables[0];
-			double[][] jacobian = new double[this.p.length][1];
+			final double[][] jacobian = new double[this.p.length][1];
 
 			// Compute the gradient using analytical differentiation
 			final int n = trials;
@@ -714,7 +690,6 @@ public class BinomialFitter
 			// Note FastMath has specific case for integer power argument which is faster.
 
 			if (startIndex == 0)
-			{
 				for (int k = 0; k <= n; ++k)
 				{
 					//jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) +
@@ -728,7 +703,6 @@ public class BinomialFitter
 					final double q_n_k = q * q_n_k_1;
 					jacobian[k][0] = nC[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
 				}
-			}
 			else
 			{
 				// Account for zero-truncated distribution

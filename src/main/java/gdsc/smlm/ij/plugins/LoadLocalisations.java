@@ -75,7 +75,7 @@ public class LoadLocalisations implements PlugIn
 		tUnits = new String[set.size()];
 		tUnitValues = new TimeUnit[set.size()];
 		int i = 0;
-		for (TimeUnit t : set)
+		for (final TimeUnit t : set)
 		{
 			tUnits[i] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
 			tUnitValues[i] = t;
@@ -141,18 +141,18 @@ public class LoadLocalisations implements PlugIn
 		 */
 		public MemoryPeakResults toPeakResults(String name)
 		{
-			CalibrationWriter calibrationWriter = new CalibrationWriter(this.calibration);
+			final CalibrationWriter calibrationWriter = new CalibrationWriter(this.calibration);
 
 			// Convert exposure time to milliseconds
-			TypeConverter<TimeUnit> timeConverter = calibrationWriter.getTimeConverter(TimeUnit.MILLISECOND);
+			final TypeConverter<TimeUnit> timeConverter = calibrationWriter.getTimeConverter(TimeUnit.MILLISECOND);
 			calibrationWriter.setExposureTime(timeConverter.convert(calibrationWriter.getExposureTime()));
 			// This is currently not a method as it is assumed to be milliseconds.
 			//calibration.setTimeUnit(TimeUnit.MILLISECOND);
 
 			// Convert precision to nm
-			TypeConverter<DistanceUnit> distanceConverter = calibrationWriter.getDistanceConverter(DistanceUnit.NM);
+			final TypeConverter<DistanceUnit> distanceConverter = calibrationWriter.getDistanceConverter(DistanceUnit.NM);
 
-			MemoryPeakResults results = new MemoryPeakResults();
+			final MemoryPeakResults results = new MemoryPeakResults();
 			results.setName(name);
 			if (!hasPrecision())
 				calibrationWriter.setPrecisionMethod(null);
@@ -167,19 +167,17 @@ public class LoadLocalisations implements PlugIn
 				{
 					psfType = PSFType.ONE_AXIS_GAUSSIAN_2D;
 					if (l.sy != -1)
-					{
 						psfType = PSFType.TWO_AXIS_GAUSSIAN_2D;
-					}
 				}
 				results.setPSF(PSFHelper.create(psfType));
 
 				for (int i = 0; i < size(); i++)
 				{
 					l = get(i);
-					float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
-					float x = (l.x);
-					float y = (l.y);
-					float z = (l.z);
+					final float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
+					final float x = (l.x);
+					final float y = (l.y);
+					final float z = (l.z);
 
 					float[] params;
 					switch (psfType)
@@ -196,7 +194,7 @@ public class LoadLocalisations implements PlugIn
 						default:
 							throw new NotImplementedException("Unsupported PSF type: " + psfType);
 					}
-					AttributePeakResult peakResult = new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, 0, params,
+					final AttributePeakResult peakResult = new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, 0, params,
 							null);
 					peakResult.setId(l.id);
 					if (l.precision > 0)
@@ -233,16 +231,16 @@ public class LoadLocalisations implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
+		final LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(settings.getLocalisationsFilename());
-		OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(settings.getLocalisationsFilename());
+		final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
 		if (chooser.getFileName() == null)
 			return;
 
 		settings.setLocalisationsFilename(chooser.getDirectory() + chooser.getFileName());
 
-		LocalisationList localisations = loadLocalisations(settings);
+		final LocalisationList localisations = loadLocalisations(settings);
 
 		SettingsManager.writeSettings(settings.build());
 
@@ -256,15 +254,13 @@ public class LoadLocalisations implements PlugIn
 			return;
 		}
 
-		MemoryPeakResults results = localisations.toPeakResults(settings.getName());
+		final MemoryPeakResults results = localisations.toPeakResults(settings.getName());
 
 		// Create the in-memory results
 		if (results.size() > 0)
-		{
 			MemoryPeakResults.addResults(results);
-		}
 
-		String msg = "Loaded " + TextUtils.pleural(results.size(), "localisation");
+		final String msg = "Loaded " + TextUtils.pleural(results.size(), "localisation");
 		IJ.showStatus(msg);
 		Utils.log(msg);
 	}
@@ -281,7 +277,7 @@ public class LoadLocalisations implements PlugIn
 		if (!getFields(settings))
 			return null;
 
-		LocalisationList localisations = new LocalisationList(settings.getCalibration());
+		final LocalisationList localisations = new LocalisationList(settings.getCalibration());
 
 		final String comment = settings.getComment();
 		final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
@@ -292,7 +288,7 @@ public class LoadLocalisations implements PlugIn
 		try (BufferedReader input = new BufferedReader(
 				new UnicodeReader(new FileInputStream(settings.getLocalisationsFilename()), null)))
 		{
-			Pattern p = Pattern.compile(settings.getDelimiter());
+			final Pattern p = Pattern.compile(settings.getDelimiter());
 
 			final int it = settings.getFieldT();
 			final int iid = settings.getFieldId();
@@ -320,7 +316,7 @@ public class LoadLocalisations implements PlugIn
 				count++;
 				final String[] fields = p.split(line);
 
-				Localisation l = new Localisation();
+				final Localisation l = new Localisation();
 				try
 				{
 					if (it >= 0)
@@ -342,19 +338,19 @@ public class LoadLocalisations implements PlugIn
 
 					localisations.add(l);
 				}
-				catch (NumberFormatException e)
+				catch (final NumberFormatException e)
 				{
 					if (errors++ == 0)
 						Utils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
 				}
-				catch (IndexOutOfBoundsException e)
+				catch (final IndexOutOfBoundsException e)
 				{
 					if (errors++ == 0)
 						Utils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
 				}
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			Utils.log("%s IO error: %s", TITLE, e.getMessage());
 		}
@@ -366,15 +362,15 @@ public class LoadLocalisations implements PlugIn
 
 	private static boolean getFields(LoadLocalisationsSettings.Builder settings)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Load delimited localisations");
 		gd.addStringField("Dataset_name", settings.getName(), 30);
 
 		gd.addMessage("Calibration:");
 		// Allow the full camera type top be captured
-		Calibration.Builder calibrationBuilder = settings.getCalibrationBuilder();
-		CalibrationWriter cw = new CalibrationWriter(calibrationBuilder);
+		final Calibration.Builder calibrationBuilder = settings.getCalibrationBuilder();
+		final CalibrationWriter cw = new CalibrationWriter(calibrationBuilder);
 		PeakFit.addCameraOptions(gd, 0, cw);
 		// Only primitive support for other calibration
 		gd.addNumericField("Pixel_size", cw.getNmPerPixel(), 3, 8, "nm");
@@ -382,7 +378,7 @@ public class LoadLocalisations implements PlugIn
 
 		// This is the unit for the exposure time (used to convert the exposure time to milliseconds).
 		// Use the name as the list is a truncated list of the full enum.
-		TimeUnit t = calibrationBuilder.getTimeCalibration().getTimeUnit();
+		final TimeUnit t = calibrationBuilder.getTimeCalibration().getTimeUnit();
 		gd.addChoice("Time_unit", tUnits, SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t)));
 
 		gd.addMessage("Records:");
@@ -406,9 +402,7 @@ public class LoadLocalisations implements PlugIn
 
 		gd.showDialog();
 		if (gd.wasCanceled())
-		{
 			return false;
-		}
 
 		settings.setName(getNextString(gd, settings.getName()));
 		cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
@@ -425,7 +419,7 @@ public class LoadLocalisations implements PlugIn
 		cw.setDistanceUnit(DistanceUnit.forNumber(gd.getNextChoiceIndex()));
 		cw.setIntensityUnit(IntensityUnit.forNumber(gd.getNextChoiceIndex()));
 
-		int[] columns = new int[9];
+		final int[] columns = new int[9];
 		for (int i = 0; i < columns.length; i++)
 			columns[i] = (int) gd.getNextNumber();
 
@@ -496,7 +490,7 @@ public class LoadLocalisations implements PlugIn
 
 	private static String getNextString(GenericDialog gd, String defaultValue)
 	{
-		String value = gd.getNextString();
+		final String value = gd.getNextString();
 		if (TextUtils.isNullOrEmpty(value))
 			return defaultValue;
 		return value;

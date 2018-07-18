@@ -298,7 +298,7 @@ public class CustomContentInstant extends ContentInstant
 	{
 		if (switchMap == null)
 			switchMap = new TIntObjectHashMap<>();
-		int index = switchMap.size();
+		final int index = switchMap.size();
 		final Switch s = new Switch();
 		switchMap.put(index, s);
 		s.setCapability(Switch.ALLOW_SWITCH_WRITE);
@@ -307,7 +307,7 @@ public class CustomContentInstant extends ContentInstant
 		s.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		s.addChild(node);
 		// Only a branch group can be added to a live scene
-		BranchGroup bg = new BranchGroup();
+		final BranchGroup bg = new BranchGroup();
 		bg.addChild(s);
 		if (before)
 		{
@@ -315,9 +315,7 @@ public class CustomContentInstant extends ContentInstant
 			customBefore++;
 		}
 		else
-		{
 			ordered.addChild(bg);
-		}
 		return index; // Account for the standard switches
 	}
 
@@ -333,7 +331,7 @@ public class CustomContentInstant extends ContentInstant
 	{
 		if (switchMap == null)
 			return;
-		Switch s = switchMap.get(which);
+		final Switch s = switchMap.get(which);
 		if (s == null)
 			return;
 		s.setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
@@ -419,9 +417,7 @@ public class CustomContentInstant extends ContentInstant
 		// 		whichChild.set(BB, b && bbVisible);
 		// only if hiding, hide the point list
 		if (!b)
-		{
 			showPointList(false);
-		}
 	}
 
 	@Override
@@ -720,9 +716,7 @@ public class CustomContentInstant extends ContentInstant
 	public void setSaturatedVolumeRendering(final boolean b)
 	{
 		if (contentNode != null && type == VOLUME)
-		{
 			((VoltexGroup) contentNode).getRenderer().getVolume().setSaturatedVolumeRendering(b);
-		}
 	}
 
 	@Override

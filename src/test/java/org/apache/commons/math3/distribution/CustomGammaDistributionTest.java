@@ -77,13 +77,11 @@ public class CustomGammaDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			double[] e = new double[n * m];
+			final double[] e = new double[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
 				for (int j = 0; j < m; j++, k++)
-				{
 					e[k] = rdg.nextGamma(shape, scale);
-				}
 				shape += 1;
 			}
 			return e;
@@ -103,14 +101,12 @@ public class CustomGammaDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			double[] e = new double[n * m];
+			final double[] e = new double[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
 				dist.setShape(shape);
 				for (int j = 0; j < m; j++, k++)
-				{
 					e[k] = dist.sample();
-				}
 				shape += 1;
 			}
 			return e;
@@ -120,13 +116,13 @@ public class CustomGammaDistributionTest
 	@Test
 	public void canCreateSamples()
 	{
-		StaticTimingTask t1 = new StaticTimingTask();
+		final StaticTimingTask t1 = new StaticTimingTask();
 		t1.getData(0);
-		double[] e = (double[]) t1.run(null);
+		final double[] e = (double[]) t1.run(null);
 
-		InstanceTimingTask t2 = new InstanceTimingTask();
+		final InstanceTimingTask t2 = new InstanceTimingTask();
 		t2.getData(0);
-		double[] o = (double[]) t2.run(null);
+		final double[] o = (double[]) t2.run(null);
 
 		Assert.assertArrayEquals(e, o, 0);
 	}
@@ -136,11 +132,11 @@ public class CustomGammaDistributionTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask());
 		ts.execute(new InstanceTimingTask());
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);

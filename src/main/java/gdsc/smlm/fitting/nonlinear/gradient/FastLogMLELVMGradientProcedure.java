@@ -103,9 +103,7 @@ public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure
 			{
 				value += fi;
 				for (int k = 0; k < n; k++)
-				{
 					beta[k] -= dfi_da[k];
-				}
 			}
 		}
 	}
@@ -126,14 +124,10 @@ public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure
 
 			// We assume y[i] is positive but must handle zero
 			if (xi > 0.0)
-			{
 				value += (fi - xi - xi * fastLog.log(fi / xi));
 				//value += (fi - xi * (1 + fastLog.log(fi / xi)));
-			}
 			else
-			{
 				value += fi;
-			}
 		}
 	}
 }

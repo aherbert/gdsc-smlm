@@ -61,20 +61,20 @@ public class FHTFilterTest
 
 	private static void canFilter(Operation operation)
 	{
-		int size = 16;
-		int ex = 5, ey = 7;
-		int ox = 1, oy = 2;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
+		final int size = 16;
+		final int ex = 5, ey = 7;
+		final int ox = 1, oy = 2;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
 		// This is offset from the centre
-		FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);
+		final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);
 
-		float[] input1 = ((float[]) fp1.getPixels()).clone();
-		float[] input2 = ((float[]) fp2.getPixels()).clone();
+		final float[] input1 = ((float[]) fp1.getPixels()).clone();
+		final float[] input2 = ((float[]) fp2.getPixels()).clone();
 
-		FHT fht1 = new FHT(fp1);
+		final FHT fht1 = new FHT(fp1);
 		fht1.transform();
-		FHT fht2 = new FHT(fp2);
+		final FHT fht2 = new FHT(fp2);
 		fht2.transform();
 
 		FHT fhtE;
@@ -95,13 +95,13 @@ public class FHTFilterTest
 		fhtE.inverseTransform();
 		fhtE.swapQuadrants();
 
-		float[] e = (float[]) fhtE.getPixels();
+		final float[] e = (float[]) fhtE.getPixels();
 		if (operation == Operation.CORRELATION)
 		{
 			// Test the max correlation position
-			int max = SimpleArrayUtils.findMaxIndex(e);
-			int x = max % 16;
-			int y = max / 16;
+			final int max = SimpleArrayUtils.findMaxIndex(e);
+			final int x = max % 16;
+			final int y = max / 16;
 
 			Assert.assertEquals(ex, x + ox);
 			Assert.assertEquals(ey, y + oy);
@@ -125,28 +125,28 @@ public class FHTFilterTest
 		}
 
 		// Test the FHT filter
-		FHTFilter ff = new FHTFilter(input2, size, size);
+		final FHTFilter ff = new FHTFilter(input2, size, size);
 		ff.setOperation(operation);
 		ff.filter(input1, size, size);
 
 		// There may be differences due to the use of the JTransforms library
-		double error = (operation == Operation.DECONVOLUTION) ? 5e-2 : 1e-4;
+		final double error = (operation == Operation.DECONVOLUTION) ? 5e-2 : 1e-4;
 
 		// This tests everything and can fail easily depending on the random generator
 		// due to edge artifacts.
 		//TestAssert.assertArrayEqualsRelative(e, input1, error);
 
 		// This tests the centre to ignore edge differences
-		int min = size / 4;
-		int max = size - min;
+		final int min = size / 4;
+		final int max = size - min;
 		int repeats = 0;
 		for (int y = min; y < max; y++)
 			for (int x = min; x < max; x++)
 				repeats++;
 
 		// Use a fail counter for a 'soft' test that detects major problems
-		int failureLimit = TestCounter.computeFailureLimit(repeats, 0.1);
-		TestCounter failCounter = new TestCounter(failureLimit);
+		final int failureLimit = TestCounter.computeFailureLimit(repeats, 0.1);
+		final TestCounter failCounter = new TestCounter(failureLimit);
 
 		for (int y = min; y < max; y++)
 		{
@@ -154,7 +154,7 @@ public class FHTFilterTest
 			for (int x = min; x < max; x++)
 			{
 				final int xx = x;
-				int i = y * size + x;
+				final int i = y * size + x;
 				failCounter.run(() -> {
 					TestAssert.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", xx, yy);
 				});
@@ -164,14 +164,14 @@ public class FHTFilterTest
 
 	private static FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
 	{
-		ByteProcessor bp = new ByteProcessor(size, size);
+		final ByteProcessor bp = new ByteProcessor(size, size);
 		bp.setColor(255);
 		bp.fillOval(x, y, w, h);
-		EDM e = new EDM();
-		FloatProcessor fp = e.makeFloatEDM(bp, 0, true);
+		final EDM e = new EDM();
+		final FloatProcessor fp = e.makeFloatEDM(bp, 0, true);
 		if (r != null)
 		{
-			float[] d = (float[]) fp.getPixels();
+			final float[] d = (float[]) fp.getPixels();
 			for (int i = 0; i < d.length; i++)
 				d[i] += r.nextFloat() * 0.01;
 		}
@@ -181,14 +181,14 @@ public class FHTFilterTest
 	@Test
 	public void canWindow()
 	{
-		int size = 16;
-		float[] in = SimpleArrayUtils.newFloatArray(size * size, 1);
-		FHTFilter f = new FHTFilter(new float[1], 1, 1);
+		final int size = 16;
+		final float[] in = SimpleArrayUtils.newFloatArray(size * size, 1);
+		final FHTFilter f = new FHTFilter(new float[1], 1, 1);
 		for (int i = 1; i < 5; i++)
 		{
-			double[] wx = ImageWindow.tukeyEdge(size, i);
-			float[] e = ImageWindow.applyWindowSeparable(in, size, size, wx, wx);
-			float[] o = in.clone();
+			final double[] wx = ImageWindow.tukeyEdge(size, i);
+			final float[] e = ImageWindow.applyWindowSeparable(in, size, size, wx, wx);
+			final float[] o = in.clone();
 			f.applyBorder(o, size, size, i);
 			Assert.assertArrayEquals(e, o, 0);
 		}

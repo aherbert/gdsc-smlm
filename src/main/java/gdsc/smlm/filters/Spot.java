@@ -30,13 +30,13 @@ public class Spot implements Comparable<Spot>, Cloneable
 {
 	/** The x. */
 	final public int x;
-	
+
 	/** The y. */
 	final public int y;
-	
+
 	/** The intensity. */
 	final public float intensity;
-	
+
 	/** The score. */
 	private float score;
 
@@ -124,7 +124,7 @@ public class Spot implements Comparable<Spot>, Cloneable
 		{
 			return (Spot) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			// Ignore
 		}

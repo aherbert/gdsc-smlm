@@ -39,15 +39,15 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public class GridDistribution implements SpatialDistribution
 {
-	private RandomGenerator randomGenerator;
-	private RandomDataGenerator dataGenerator;
-	private int size, cellSize;
-	private double pBinary;
-	private double minBinaryDistance, maxBinaryDistance;
-	private double min, depth;
+	private final RandomGenerator randomGenerator;
+	private final RandomDataGenerator dataGenerator;
+	private final int size, cellSize;
+	private final double pBinary;
+	private final double minBinaryDistance, maxBinaryDistance;
+	private final double min, depth;
 
 	private int cell = -1;
-	private int nCellsPerRow, nCells;
+	private final int nCellsPerRow, nCells;
 	private double[] previous = null;
 
 	/**
@@ -148,11 +148,10 @@ public class GridDistribution implements SpatialDistribution
 	public double[] next()
 	{
 		if (previous != null)
-		{
 			// See if a binary localisation should be created near the previous spot
 			if (randomGenerator.nextDouble() < pBinary)
 			{
-				double[] xyz = Arrays.copyOf(previous, 3);
+				final double[] xyz = Arrays.copyOf(previous, 3);
 
 				// Create a random unit vector
 				double x = dataGenerator.nextGaussian(0, 1);
@@ -175,13 +174,12 @@ public class GridDistribution implements SpatialDistribution
 				previous = null;
 				return xyz;
 			}
-		}
 		previous = null;
 		// See if any more localisations will fit in the grid
 		if (++cell < nCells)
 		{
-			int cellx = cell % nCellsPerRow;
-			int celly = cell / nCellsPerRow;
+			final int cellx = cell % nCellsPerRow;
+			final int celly = cell / nCellsPerRow;
 
 			previous = new double[3];
 			// Ensure the centre of the distribution is [0,0,0]

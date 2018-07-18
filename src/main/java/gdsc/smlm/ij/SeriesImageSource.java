@@ -212,7 +212,6 @@ public class SeriesImageSource extends ImageSource
 				// We use the opened SeekableStream.
 				// This may be in-memory data or may be from a random access file.
 				if (ss != null)
-				{
 					try
 					{
 						ss.seek(0);
@@ -221,13 +220,12 @@ public class SeriesImageSource extends ImageSource
 						// Store if the stream contains in-memory data
 						this.inMemory = ss instanceof ByteArraySeekableStream;
 					}
-					catch (IOException e)
+					catch (final IOException e)
 					{
 						canRead = false;
 						bytesPerFrame = 0;
 						return;
 					}
-				}
 
 				// Determine the number of images
 				if (info.length > 1)
@@ -282,7 +280,6 @@ public class SeriesImageSource extends ImageSource
 				// We use the opened SeekableStream.
 				// This may be in-memory data or may be from a random access file.
 				if (ss != null)
-				{
 					try
 					{
 						ss.seek(0);
@@ -291,13 +288,12 @@ public class SeriesImageSource extends ImageSource
 						// Store if the stream contains in-memory data
 						this.inMemory = ss instanceof ByteArraySeekableStream;
 					}
-					catch (IOException e)
+					catch (final IOException e)
 					{
 						canRead = false;
 						bytesPerFrame = 0;
 						return;
 					}
-				}
 
 				// Determine number of images
 				if (indexMap.size > 1)
@@ -382,8 +378,8 @@ public class SeriesImageSource extends ImageSource
 		boolean allSameSizeAndType(ExtendedFileInfo[] info)
 		{
 			boolean ok = info[0].nImages == 1;
-			long startingOffset = info[0].getOffset();
-			long size = info[0].width * info[0].height * info[0].getBytesPerPixel();
+			final long startingOffset = info[0].getOffset();
+			final long size = info[0].width * info[0].height * info[0].getBytesPerPixel();
 			for (int i = 1; i < info.length && ok; i++)
 			{
 				ok &= info[i].fileType == info[0].fileType && info[i].width == info[0].width &&
@@ -391,11 +387,9 @@ public class SeriesImageSource extends ImageSource
 				contiguous &= info[i].getOffset() == startingOffset + i * size;
 			}
 			if (ok)
-			{
 				// We can read using only the first ExtendedFileInfo object if this is contiguous
 				if (contiguous)
 					info[0].gapBetweenImages = 0;
-			}
 			return ok;
 		}
 
@@ -449,22 +443,18 @@ public class SeriesImageSource extends ImageSource
 			{
 				// If sequential reading just skip the gap between frames
 				if (frameCount == 0)
-				{
 					// The first frame we know the exact offset
 					skip = fi.getOffset();
-				}
 				else
-				{
 					// If sequential reading just skip the gap between frames
 					skip = fi.gapBetweenImages;
-				}
 			}
 			else
 			{
 				// Adapted from ij.io.Opener.openTiffStack(...)
 
 				// Each image offset is described by a separate ExtendedFileInfo object
-				ExtendedFileInfo fi = getInfo(frameCount);
+				final ExtendedFileInfo fi = getInfo(frameCount);
 				skip = fi.getOffset();
 				this.fi.stripOffsets = fi.stripOffsets;
 				this.fi.stripLengths = fi.stripLengths;
@@ -487,7 +477,7 @@ public class SeriesImageSource extends ImageSource
 
 			// t = System.nanoTime();
 			ss.skip(skip);
-			Object pixels = readPixels();
+			final Object pixels = readPixels();
 			//.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 
 			// The reader now throws exceptions. Ignore setting the canRead flag.
@@ -524,10 +514,8 @@ public class SeriesImageSource extends ImageSource
 				offset = fi.getOffset();
 
 				if (i != 0)
-				{
 					// Skip ahead
 					offset += (bytesPerFrame + fi.gapBetweenImages) * i;
-				}
 			}
 			else
 			{
@@ -547,11 +535,11 @@ public class SeriesImageSource extends ImageSource
 			{
 				//long t = System.nanoTime();
 				ss.seek(offset);
-				Object pixels = readPixels();
+				final Object pixels = readPixels();
 				//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 				return pixels;
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				// The reader now throws exceptions. We could set the canRead flag to prevent further IO.
 				// However do not do this so that an image can be scrolled up to the point at which
@@ -567,13 +555,11 @@ public class SeriesImageSource extends ImageSource
 				return info[i];
 			// We have to read it
 			if (td == null)
-			{
 				// We can clone the in-memory seekable stream
 				if (inMemory)
 					td = FastTiffDecoder.create(((ByteArraySeekableStream) ss).copy(), fi.fileName);
 				else
 					td = FastTiffDecoder.create(getFile());
-			}
 			// If this throws a NullPointerException then it will be handled in getFrame()
 			info[i] = td.getTiffInfo(indexMap, i, true);
 			if (!sameSizeAndType(info[i]))
@@ -591,24 +577,20 @@ public class SeriesImageSource extends ImageSource
 				td = FastTiffDecoder.create(getFile());
 
 			for (int i = 0; i < info.length; i++)
-			{
 				if (info[i] == null)
 				{
 					info[i] = td.getTiffInfo(indexMap, i, true);
 					if (!sameSizeAndType(info[i]))
 						throw new IOException("Not same size and type");
 				}
-			}
 		}
 
 		public boolean isCompleteTiffInfo()
 		{
 			if (!complete)
-			{
 				for (int i = 0; i < info.length; i++)
 					if (info[i] == null)
 						return false;
-			}
 			return complete = true;
 		}
 
@@ -621,16 +603,14 @@ public class SeriesImageSource extends ImageSource
 
 				try
 				{
-					File f = getFile();
+					final File f = getFile();
 					if (validateFileInfo(f, fi))
 						ss = new FileSeekableStream(f);
 				}
 				finally
 				{
 					if (ss == null)
-					{
 						canRead = false;
-					}
 				}
 			}
 			return canRead;
@@ -654,18 +634,14 @@ public class SeriesImageSource extends ImageSource
 		 */
 		boolean validateFileInfo(File f, ExtendedFileInfo fi)
 		{
-			long offset = fi.getOffset();
+			final long offset = fi.getOffset();
 			long length = 0;
 			if (fi.width <= 0 || fi.height <= 0)
-			{
 				return false;
-			}
 			if (offset >= 0 && offset < 1000L)
 				return true;
 			if (offset < 0L)
-			{
 				return false;
-			}
 			if (fi.fileType == FileInfo.BITMAP || fi.compression != FileInfo.COMPRESSION_NONE)
 				return true;
 			length = f.length();
@@ -674,9 +650,7 @@ public class SeriesImageSource extends ImageSource
 			if (fi.height == 1)
 				size = 0; // allows plugins to read info of unknown length at end of file
 			if (offset + size > length)
-			{
 				return false;
-			}
 			return true;
 		}
 
@@ -710,7 +684,7 @@ public class SeriesImageSource extends ImageSource
 				{
 					td.close();
 				}
-				catch (IOException e)
+				catch (final IOException e)
 				{
 					// Ignore
 				}
@@ -724,7 +698,7 @@ public class SeriesImageSource extends ImageSource
 				{
 					ss.close();
 				}
-				catch (IOException e)
+				catch (final IOException e)
 				{
 					// Ignore
 				}
@@ -776,15 +750,15 @@ public class SeriesImageSource extends ImageSource
 						// allow the source to continue queueing frames for processing
 						// even on massive images.
 
-						FastTiffDecoder td = FastTiffDecoder.create(ss, path);
+						final FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 						td.setTrackProgress(trackProgress);
-						IndexMap indexMap = td.getIndexMap();
+						final IndexMap indexMap = td.getIndexMap();
 
 						// Check the image map is the correct size (only if we have sizes)
 						if (indexMap != null && (imageSize == null || indexMap.size == getImageSize(currentImage)))
 						{
 							// We need the first IFD to define the image pixel type and width/height
-							ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, true);
+							final ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, true);
 							image = new TiffImage(indexMap, fi, null);
 							// Store the decoder as it has the opened stream
 							image.td = td;
@@ -799,7 +773,7 @@ public class SeriesImageSource extends ImageSource
 							// This will throw if there is an error and the seekable stream
 							// is closed in the finally block. Otherwise the method will close
 							// the stream.
-							ExtendedFileInfo[] info = td.getTiffInfo(true);
+							final ExtendedFileInfo[] info = td.getTiffInfo(true);
 							ss = null;
 							if (info == null)
 							{
@@ -836,7 +810,7 @@ public class SeriesImageSource extends ImageSource
 						for (int i = 0; i < image.size; i++)
 						{
 							// This should throw if no pixels can be read
-							Object pixels = image.nextFrame();
+							final Object pixels = image.nextFrame();
 
 							// This will block until the queue has capacity or is closed
 							if (!rawFramesQueue.putAndConfirm(pixels))
@@ -850,11 +824,11 @@ public class SeriesImageSource extends ImageSource
 					}
 				}
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				setError(e);
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				setError(new DataException(e));
 			}
@@ -924,12 +898,12 @@ public class SeriesImageSource extends ImageSource
 					trackProgress.log("Reading TIFF into memory %s", path);
 
 					//long start = System.nanoTime();
-					File file = new File(path);
+					final File file = new File(path);
 					fs = new FileSeekableStream(file);
 
 					// We already know they fit into memory (i.e. the size is not zero)
-					int size = (int) imageData[currentImage].fileSize;
-					byte[] buf = new byte[size];
+					final int size = (int) imageData[currentImage].fileSize;
+					final byte[] buf = new byte[size];
 					if (fs.readBytes(buf) != size)
 					{
 						setError(new DataException("Cannot buffer file into memory"));
@@ -951,11 +925,11 @@ public class SeriesImageSource extends ImageSource
 						break;
 				}
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				setError(e);
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				setError(new DataException(e));
 			}
@@ -991,7 +965,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				while (run)
 				{
-					NextSource nextSource = decodeQueue.take();
+					final NextSource nextSource = decodeQueue.take();
 					if (nextSource == null || !run)
 						break;
 					final int currentImage = nextSource.imageId;
@@ -999,6 +973,7 @@ public class SeriesImageSource extends ImageSource
 						break;
 
 					@SuppressWarnings("resource")
+					final
 					ByteArraySeekableStream ss = new ByteArraySeekableStream(nextSource.buffer);
 
 					// Re-use the cache
@@ -1008,11 +983,11 @@ public class SeriesImageSource extends ImageSource
 						final String path = images.get(currentImage);
 						trackProgress.log("Reading TIFF info %s", path);
 
-						FastTiffDecoder td = FastTiffDecoder.create(ss, path);
+						final FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 						td.setTrackProgress(trackProgress);
 
 						// This will close the seekable stream.
-						ExtendedFileInfo[] info = td.getTiffInfo(true);
+						final ExtendedFileInfo[] info = td.getTiffInfo(true);
 
 						if (info == null)
 						{
@@ -1066,11 +1041,11 @@ public class SeriesImageSource extends ImageSource
 						break;
 				}
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				setError(e);
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				setError(new DataException(e));
 			}
@@ -1102,7 +1077,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				while (run)
 				{
-					NextSource nextSource = readQueue.take();
+					final NextSource nextSource = readQueue.take();
 					if (nextSource == null || !run)
 						break;
 					final int currentImage = nextSource.imageId;
@@ -1110,7 +1085,7 @@ public class SeriesImageSource extends ImageSource
 						break;
 
 					// It is assumed we are reading a TIFF series
-					TiffImage image = (TiffImage) nextSource.image;
+					final TiffImage image = (TiffImage) nextSource.image;
 
 					image.reset();
 
@@ -1120,7 +1095,7 @@ public class SeriesImageSource extends ImageSource
 						for (int i = 0; i < image.size; i++)
 						{
 							// This should throw if no pixels can be read
-							Object pixels = image.nextFrame();
+							final Object pixels = image.nextFrame();
 
 							// This may be closed upon error
 							if (!rawFramesQueue.putAndConfirm(pixels))
@@ -1134,11 +1109,11 @@ public class SeriesImageSource extends ImageSource
 					}
 				}
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				setError(e);
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				setError(new DataException(e));
 			}
@@ -1268,12 +1243,12 @@ public class SeriesImageSource extends ImageSource
 	 */
 	private SeekableStream createSeekableStream(String path, long size) throws FileNotFoundException, SecurityException
 	{
-		File file = new File(path);
+		final File file = new File(path);
 
 		// Don't buffer massive images into memory
 		if (belowBufferLimit(size))
 		{
-			SeekableStream ss = readByteArraySeekableStream(file, size);
+			final SeekableStream ss = readByteArraySeekableStream(file, size);
 			if (ss != null)
 				return ss;
 		}
@@ -1302,16 +1277,14 @@ public class SeriesImageSource extends ImageSource
 	private static void closeInputStream(InputStream is)
 	{
 		if (is != null)
-		{
 			try
 			{
 				is.close();
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				// Ignore
 			}
-		}
 	}
 
 	private boolean belowBufferLimit(long size)
@@ -1325,7 +1298,7 @@ public class SeriesImageSource extends ImageSource
 		{
 			return file.length();
 		}
-		catch (SecurityException e)
+		catch (final SecurityException e)
 		{
 			// No file size...
 		}
@@ -1336,11 +1309,11 @@ public class SeriesImageSource extends ImageSource
 	{
 		try (FileSeekableStream fs = new FileSeekableStream(file))
 		{
-			byte[] buf = new byte[(int) size];
+			final byte[] buf = new byte[(int) size];
 			if (fs.readBytes(buf) == size)
 				return new ByteArraySeekableStream(buf);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// This exception is not bubbled up.
 			// At the moment if we ignore this then the ImageWorker will open the file
@@ -1493,7 +1466,7 @@ public class SeriesImageSource extends ImageSource
 	private int lastImageId;
 
 	@XStreamOmitField
-	private long lastTime = 0;
+	private final long lastTime = 0;
 	private int numberOfThreads = 1;
 	private int numberOfImages = 1;
 
@@ -1537,17 +1510,13 @@ public class SeriesImageSource extends ImageSource
 		super(name);
 		if (series != null)
 		{
-			String[] names = series.getImageList();
+			final String[] names = series.getImageList();
 			for (int i = 0; i < names.length; i++)
-			{
 				names[i] = new File(series.getPath(), names[i]).getPath();
-			}
 			isTiffSeries = isTiffSeries(names);
 		}
 		else
-		{
 			isTiffSeries = false;
-		}
 	}
 
 	/**
@@ -1586,7 +1555,7 @@ public class SeriesImageSource extends ImageSource
 
 		for (int i = 0; i < filenames.length; i++)
 		{
-			int fileType = getFileType(filenames[i]);
+			final int fileType = getFileType(filenames[i]);
 			if (fileType != Opener.TIFF)
 				// Only support TIFF images
 				return false;
@@ -1594,9 +1563,7 @@ public class SeriesImageSource extends ImageSource
 
 		// All images are TIFF so store the filenames
 		for (int i = 0; i < filenames.length; i++)
-		{
 			images.add(filenames[i]);
-		}
 
 		return true;
 	}
@@ -1609,8 +1576,8 @@ public class SeriesImageSource extends ImageSource
 	 */
 	private static int getFileType(String filename)
 	{
-		File file = new File(filename);
-		byte[] buf = new byte[132];
+		final File file = new File(filename);
+		final byte[] buf = new byte[132];
 		int read;
 		try (InputStream is = new FileInputStream(file))
 		{
@@ -1618,18 +1585,18 @@ public class SeriesImageSource extends ImageSource
 			if (read < 4)
 				return Opener.UNKNOWN;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			return Opener.UNKNOWN;
 		}
 
-		int b0 = buf[0] & 255, b1 = buf[1] & 255, b2 = buf[2] & 255, b3 = buf[3] & 255;
+		final int b0 = buf[0] & 255, b1 = buf[1] & 255, b2 = buf[2] & 255, b3 = buf[3] & 255;
 
 		// First check it is a possible TIFF:
 		// Little-endian = II + 42 magic number
 		// Big-endian = MM + 42 magic number
-		boolean littleEndian = (b0 == 73 && b1 == 73 && b2 == 42 && b3 == 0);
-		boolean bigEndian = (b0 == 77 && b1 == 77 && b2 == 0 && b3 == 42);
+		final boolean littleEndian = (b0 == 73 && b1 == 73 && b2 == 42 && b3 == 0);
+		final boolean bigEndian = (b0 == 77 && b1 == 77 && b2 == 0 && b3 == 42);
 		if (!(littleEndian || bigEndian))
 			return Opener.UNKNOWN;
 
@@ -1644,7 +1611,7 @@ public class SeriesImageSource extends ImageSource
 		if (read > 131 && buf[128] == 68 && buf[129] == 73 && buf[130] == 67 && buf[131] == 77)
 			return Opener.TIFF_AND_DICOM;
 
-		String name = file.getName();
+		final String name = file.getName();
 		if (name.endsWith(".lsm"))
 			return Opener.UNKNOWN; // The LSM Reader plugin opens these files
 
@@ -1658,35 +1625,35 @@ public class SeriesImageSource extends ImageSource
 	@SuppressWarnings("unused")
 	private static boolean isOMETIFF(byte[] buf, boolean littleEndian)
 	{
-		int b8 = buf[8] & 255;
-		int b9 = buf[9] & 255;
-		int b10 = buf[10] & 255;
-		int b11 = buf[11] & 255;
-		int indexMapOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b8, b9, b10, b11)
+		final int b8 = buf[8] & 255;
+		final int b9 = buf[9] & 255;
+		final int b10 = buf[10] & 255;
+		final int b11 = buf[11] & 255;
+		final int indexMapOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b8, b9, b10, b11)
 				: FastTiffDecoderBE.toInt(b8, b9, b10, b11);
 		if (indexMapOffsetHeader != 54773648)
 			return false;
-		int b16 = buf[16] & 255;
-		int b17 = buf[17] & 255;
-		int b18 = buf[18] & 255;
-		int b19 = buf[19] & 255;
-		int displaySettingsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b16, b17, b18, b19)
+		final int b16 = buf[16] & 255;
+		final int b17 = buf[17] & 255;
+		final int b18 = buf[18] & 255;
+		final int b19 = buf[19] & 255;
+		final int displaySettingsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b16, b17, b18, b19)
 				: FastTiffDecoderBE.toInt(b16, b17, b18, b19);
 		if (displaySettingsOffsetHeader != 483765892)
 			return false;
-		int b24 = buf[24] & 255;
-		int b25 = buf[25] & 255;
-		int b26 = buf[26] & 255;
-		int b27 = buf[27] & 255;
-		int commentsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b24, b25, b26, b27)
+		final int b24 = buf[24] & 255;
+		final int b25 = buf[25] & 255;
+		final int b26 = buf[26] & 255;
+		final int b27 = buf[27] & 255;
+		final int commentsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b24, b25, b26, b27)
 				: FastTiffDecoderBE.toInt(b24, b25, b26, b27);
 		if (commentsOffsetHeader != 99384722)
 			return false;
-		int b32 = buf[32] & 255;
-		int b33 = buf[33] & 255;
-		int b34 = buf[34] & 255;
-		int b35 = buf[35] & 255;
-		int summaryMetadataHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b32, b33, b34, b35)
+		final int b32 = buf[32] & 255;
+		final int b33 = buf[33] & 255;
+		final int b34 = buf[34] & 255;
+		final int b35 = buf[35] & 255;
+		final int summaryMetadataHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b32, b33, b34, b35)
 				: FastTiffDecoderBE.toInt(b32, b33, b34, b35);
 		if (summaryMetadataHeader != 2355492)
 			return false;
@@ -1701,55 +1668,51 @@ public class SeriesImageSource extends ImageSource
 		if (imageData == null)
 		{
 			trackProgress.status("Reading images sizes");
-			Ticker ticker = Ticker.createStarted(trackProgress, images.size(), false);
+			final Ticker ticker = Ticker.createStarted(trackProgress, images.size(), false);
 
 			// All images are TIFF. Get the size of each and count the total frames.
 			imageData = new ImageData[images.size()];
 			imageSize = new int[images.size()];
-			String[] names = new String[images.size()];
+			final String[] names = new String[images.size()];
 			frames = 0;
 			int ok = 0;
 
 			// We can guess for sequential read
-			boolean estimate = getReadHint() == ReadHint.SEQUENTIAL;
+			final boolean estimate = getReadHint() == ReadHint.SEQUENTIAL;
 			boolean exact = true;
 
 			for (int i = 0; i < names.length; i++)
 			{
-				String path = images.get(i);
+				final String path = images.get(i);
 
 				@SuppressWarnings("resource")
 				SeekableStream ss = null;
 				try
 				{
-					File file = new File(path);
+					final File file = new File(path);
 
 					// Get the size of each file so we can determine if
 					// they can fit into memory. We only use pre-loading for
 					// sequential reading if all images fit into memory.
-					long size = getSize(file);
+					final long size = getSize(file);
 
 					//System.out.printf("%s = %d bytes\n", path, size);
 
 					ss = createSeekableStream(path);
-					FastTiffDecoder td = FastTiffDecoder.create(ss, path);
+					final FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 
-					NumberOfImages nImages = td.getNumberOfImages(estimate);
+					final NumberOfImages nImages = td.getNumberOfImages(estimate);
 					if (nImages.exact)
 						trackProgress.log("%s : images=%d (%d bytes)", path, nImages.numberOfImages, size);
 					else
 						trackProgress.log("%s : images=%d (approx) (%d bytes)", path, nImages.numberOfImages, size);
 					if (estimate)
-					{
 						// Track if this is exact
 						exact = exact && nImages.exact;
-					}
 					else if (nImages.numberOfImages <= 0)
-					{
 						// No TIFF images. This will break the non-sequential support
 						// using the cumulative size array so remove the image.
 						continue;
-					}
 
 					frames += nImages.numberOfImages;
 					imageSize[ok] = frames;
@@ -1757,7 +1720,7 @@ public class SeriesImageSource extends ImageSource
 					names[ok] = path;
 					ok++;
 				}
-				catch (Throwable e)
+				catch (final Throwable e)
 				{
 					if (estimate)
 						// This is an untested method so log the error
@@ -1766,16 +1729,14 @@ public class SeriesImageSource extends ImageSource
 				finally
 				{
 					if (ss != null)
-					{
 						try
 						{
 							ss.close();
 						}
-						catch (IOException e1)
+						catch (final IOException e1)
 						{
 							// Ignore
 						}
-					}
 				}
 				ticker.tick();
 			}
@@ -1827,7 +1788,6 @@ public class SeriesImageSource extends ImageSource
 		lastImage = openImage(0, images.get(0));
 		lastImageId = 0;
 		if (lastImage != null && lastImage.size > 0)
-		{
 			try
 			{
 				// Ignore the pixels returned. This will throw if they are null.
@@ -1835,20 +1795,19 @@ public class SeriesImageSource extends ImageSource
 				setDimensions(lastImage.width, lastImage.height);
 
 				// Attempt to get the origin if a MicroManager image
-				Rectangle roi = FastTiffDecoder.getOrigin(((TiffImage) lastImage).info[0]);
+				final Rectangle roi = FastTiffDecoder.getOrigin(((TiffImage) lastImage).info[0]);
 				if (roi != null && roi.width == getWidth() && roi.height == getHeight())
 					setOrigin(roi.x, roi.y);
 
 				return true;
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				// Q. Should the problem be reported. Currently if the exception is
 				// not bubbled up then the source is not opened.
 				if (trackProgress.isLog())
 					trackProgress.log("Failed to open: %s", ExceptionUtils.getStackTrace(e));
 			}
-		}
 		return false;
 	}
 
@@ -1978,11 +1937,9 @@ public class SeriesImageSource extends ImageSource
 		// We should have successfully opened the first image and so find the pixel size
 		if (imageData != null && imageData[0] != null && imageData[0].tiffImage != null &&
 				imageData[0].tiffImage.bytesPerFrame > 0)
-		{
 			bytesPerFrame = imageData[0].tiffImage.bytesPerFrame;
-		}
 		// Now create a queue to hold n images in memory
-		int n = Math.max(2, (int) Math.ceil(sequentialReadBufferLimit / (double) bytesPerFrame));
+		final int n = Math.max(2, (int) Math.ceil(sequentialReadBufferLimit / (double) bytesPerFrame));
 		rawFramesQueue = new CloseableBlockingQueue<>(n);
 
 		if (belowBufferLimit() && images.size() > 1)
@@ -2016,7 +1973,7 @@ public class SeriesImageSource extends ImageSource
 	private void startWorker(BaseWorker worker)
 	{
 		workers.add(worker);
-		Thread thread = new Thread(worker);
+		final Thread thread = new Thread(worker);
 		threads.add(thread);
 		thread.start();
 	}
@@ -2037,7 +1994,7 @@ public class SeriesImageSource extends ImageSource
 		if (threads != null)
 		{
 			// Signal the workers to stop
-			for (BaseWorker worker : workers)
+			for (final BaseWorker worker : workers)
 				worker.run = false;
 
 			// Close the queues. This will wake any thread waiting for them to have capacity.
@@ -2049,20 +2006,18 @@ public class SeriesImageSource extends ImageSource
 			rawFramesQueue.close(false);
 
 			// Join the threads and then set all to null
-			for (Thread thread : threads)
-			{
+			for (final Thread thread : threads)
 				try
 				{
 					// This thread will be waiting on imageQueue.put() (which has been cleared)
 					// or sourceQueue.take() which contains shutdown signals, it should be finished by now
 					thread.join();
 				}
-				catch (InterruptedException e)
+				catch (final InterruptedException e)
 				{
 					// Ignore thread errors
 					//e.printStackTrace();
 				}
-			}
 			threads.clear();
 			threads = null;
 			workers.clear();
@@ -2151,20 +2106,18 @@ public class SeriesImageSource extends ImageSource
 		try
 		{
 			// We can take if closed
-			Object pixels = rawFramesQueue.take();
+			final Object pixels = rawFramesQueue.take();
 			if (pixels != null)
-			{
 				return pixels;
-			}
 			if (error != null)
 				throw error;
 		}
-		catch (IllegalStateException e)
+		catch (final IllegalStateException e)
 		{
 			// We do not expect these as we use the queue without exceptions when closed
 			e.printStackTrace();
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			// Maybe if we forced the threads to stop
 			e.printStackTrace();
@@ -2192,7 +2145,7 @@ public class SeriesImageSource extends ImageSource
 		if (id < 0)
 			id = -(id + 1);
 		// Note that frame is 1-based index and the slice is 0-based.
-		int slice = (id == 0) ? frame - 1 : frame - imageSize[id - 1] - 1;
+		final int slice = (id == 0) ? frame - 1 : frame - imageSize[id - 1] - 1;
 
 		// Return from the cache if it exists
 		if (id != lastImageId || lastImage == null)
@@ -2204,13 +2157,11 @@ public class SeriesImageSource extends ImageSource
 			lastImage = null;
 			if (id < images.size())
 			{
-				String path = images.get(id);
+				final String path = images.get(id);
 				// Check the cache
 				TiffImage tiffImage = imageData[id].tiffImage;
 				if (tiffImage == null)
-				{
 					tiffImage = openImage(id, path);
-				}
 
 				lastImage = tiffImage;
 
@@ -2234,22 +2185,18 @@ public class SeriesImageSource extends ImageSource
 		}
 		lastImageId = id;
 		if (lastImage != null)
-		{
 			if (slice < lastImage.size)
-			{
 				try
 				{
 					return lastImage.getFrame(slice);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					// Q. Should the problem be reported. Currently if the exception is
 					// not bubbled up then the frame will be null.
 					if (trackProgress.isLog())
 						trackProgress.log("Failed to open frame %d: %s", frame, ExceptionUtils.getStackTrace(e));
 				}
-			}
-		}
 		return null;
 	}
 
@@ -2259,7 +2206,7 @@ public class SeriesImageSource extends ImageSource
 
 		// We only need the meta data for the first image. We then assume check
 		// all other images in the series match the pixel type and width of the first.
-		boolean pixelInfoOnly = id != 0;
+		final boolean pixelInfoOnly = id != 0;
 
 		// Open using specialised TIFF reader for better non-sequential support
 		SeekableStream ss = null;
@@ -2267,17 +2214,17 @@ public class SeriesImageSource extends ImageSource
 		{
 			ss = createSeekableStream(path, imageData[id].fileSize);
 
-			FastTiffDecoder td = FastTiffDecoder.create(ss, path);
+			final FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 			td.setTrackProgress(trackProgress);
 
 			// Try and use the index map
-			IndexMap indexMap = td.getIndexMap();
+			final IndexMap indexMap = td.getIndexMap();
 
 			// Check the image map is the correct size (only if we have sizes)
 			if (indexMap != null && (imageSize == null || indexMap.size == getImageSize(id)))
 			{
 				// We need the first IFD to define the image pixel type and width/height
-				ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, pixelInfoOnly);
+				final ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, pixelInfoOnly);
 				// A byte array seekable stream will ignore the close() method so we can re-use it
 				tiffImage = new TiffImage(indexMap, fi, (ss instanceof ByteArraySeekableStream) ? ss : null);
 			}
@@ -2286,15 +2233,13 @@ public class SeriesImageSource extends ImageSource
 				// Reset after reading the index map
 				td.reset();
 				// Read all the IFDs
-				ExtendedFileInfo[] info = td.getTiffInfo(pixelInfoOnly);
+				final ExtendedFileInfo[] info = td.getTiffInfo(pixelInfoOnly);
 				if (info != null)
-				{
 					// A byte array seekable stream will ignore the close() method so we can re-use it
 					tiffImage = new TiffImage(info, (ss instanceof ByteArraySeekableStream) ? ss : null);
-				}
 			}
 		}
-		catch (IOException ioe)
+		catch (final IOException ioe)
 		{
 			// Ignore
 		}
@@ -2304,15 +2249,11 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		if (tiffImage == null)
-		{
 			// Prevent reading again. Skip the storeTiffImage(...) method
 			// as that may be optional and we don't want to repeat the error.
 			imageData[id].tiffImage = new TiffImage();
-		}
 		else
-		{
 			storeTiffImage(id, tiffImage);
-		}
 
 		return tiffImage;
 	}
@@ -2452,11 +2393,9 @@ public class SeriesImageSource extends ImageSource
 	{
 		if (imageData != null && index >= 0 && index < imageData.length)
 		{
-			TiffImage image = imageData[index].tiffImage;
+			final TiffImage image = imageData[index].tiffImage;
 			if (image != null)
-			{
 				return image.info;
-			}
 		}
 		return null;
 	}

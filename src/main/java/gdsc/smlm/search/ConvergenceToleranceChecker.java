@@ -130,12 +130,8 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 	private boolean converged(final double[] p, final double[] c)
 	{
 		for (int i = 0; i < p.length; ++i)
-		{
 			if (!converged(p[i], c[i]))
-			{
 				return false;
-			}
-		}
 		return true;
 	}
 
@@ -153,9 +149,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 		final double difference = Math.abs(p - c);
 		final double size = FastMath.max(Math.abs(p), Math.abs(c));
 		if (difference > size * relative && difference > absolute)
-		{
 			return false;
-		}
 		return true;
 	}
 

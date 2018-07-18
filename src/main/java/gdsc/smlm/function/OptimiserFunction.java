@@ -115,13 +115,13 @@ public abstract class OptimiserFunction
 	}
 
 	/**
-	 * Gets the weights array. This is an array filled with ones. 
+	 * Gets the weights array. This is an array filled with ones.
 	 *
 	 * @return the weights
 	 */
 	public double[] getWeights()
 	{
-		double[] w = new double[y.size()];
+		final double[] w = new double[y.size()];
 		Arrays.fill(w, 1);
 		return w;
 	}

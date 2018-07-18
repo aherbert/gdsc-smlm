@@ -37,23 +37,23 @@ public class InterpolatedPoissonFisherInformationTest
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			double s = (1 << i) * 0.25;
+			final double s = (1 << i) * 0.25;
 			canInterpolateFisherInformation(s);
 		}
 	}
 
-	private void canInterpolateFisherInformation(double s)
+	private static void canInterpolateFisherInformation(double s)
 	{
 		canComputeFisherInformation(new PoissonGaussianApproximationFisherInformation(s));
 	}
 
-	private void canComputeFisherInformation(BasePoissonFisherInformation f)
+	private static void canComputeFisherInformation(BasePoissonFisherInformation f)
 	{
 		// Build a range for the Fisher information
-		int min = -100;
-		int max = 20;
-		double[] logU = new double[max - min + 1];
-		double[] alpha = new double[logU.length];
+		final int min = -100;
+		final int max = 20;
+		final double[] logU = new double[max - min + 1];
+		final double[] alpha = new double[logU.length];
 
 		for (int exp = min, i = 0; exp <= max; exp++, i++)
 		{
@@ -61,16 +61,14 @@ public class InterpolatedPoissonFisherInformationTest
 			alpha[i] = f.getAlpha(FastMath.exp(exp));
 		}
 
-		InterpolatedPoissonFisherInformation fi = new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
+		final InterpolatedPoissonFisherInformation fi = new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
 
 		// No check for beyond the range since a separate test does this.
 		check(f, fi, min, 5e-3);
 
 		// Within
 		for (int exp = min; exp < max; exp++)
-		{
 			check(f, fi, exp + 0.5, 5e-3);
-		}
 
 		// Upper bound
 		check(f, fi, max, 5e-3);
@@ -79,11 +77,11 @@ public class InterpolatedPoissonFisherInformationTest
 		check(f, fi, max + 1, 5e-3);
 	}
 
-	private void check(BasePoissonFisherInformation f, InterpolatedPoissonFisherInformation fi, double logU, double tol)
+	private static void check(BasePoissonFisherInformation f, InterpolatedPoissonFisherInformation fi, double logU, double tol)
 	{
-		double u = FastMath.exp(logU);
-		double e = f.getAlpha(u);
-		double o = fi.getAlpha(u);
+		final double u = FastMath.exp(logU);
+		final double e = f.getAlpha(u);
+		final double o = fi.getAlpha(u);
 		//System.out.printf("logU=%g  u=%g  e=%g  o=%g  error=%g\n", logU, u, e, o, DoubleEquality.relativeError(o, e));
 
 		// Small numbers may have a large relative error but the absolute error is small
@@ -96,23 +94,23 @@ public class InterpolatedPoissonFisherInformationTest
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			double s = (1 << i) * 0.25;
+			final double s = (1 << i) * 0.25;
 			canInterpolateLowerFisherInformation(s);
 		}
 	}
 
-	private void canInterpolateLowerFisherInformation(double s)
+	private static void canInterpolateLowerFisherInformation(double s)
 	{
 		canComputeLowerFisherInformation(new PoissonGaussianApproximationFisherInformation(s));
 	}
 
-	private void canComputeLowerFisherInformation(BasePoissonFisherInformation f)
+	private static void canComputeLowerFisherInformation(BasePoissonFisherInformation f)
 	{
 		// Build a range for the Fisher information where it should plateau
-		int min = -500;
-		int max = min + 4;
-		double[] logU = new double[max - min + 1];
-		double[] alpha = new double[logU.length];
+		final int min = -500;
+		final int max = min + 4;
+		final double[] logU = new double[max - min + 1];
+		final double[] alpha = new double[logU.length];
 
 		for (int exp = min, i = 0; exp <= max; exp++, i++)
 		{
@@ -124,7 +122,7 @@ public class InterpolatedPoissonFisherInformationTest
 		InterpolatedPoissonFisherInformation fi = new InterpolatedPoissonFisherInformation(logU, alpha, true, f);
 
 		final double I = f.getFisherInformation(FastMath.exp(min));
-		BasePoissonFisherInformation fixedI = new BasePoissonFisherInformation()
+		final BasePoissonFisherInformation fixedI = new BasePoissonFisherInformation()
 		{
 			@Override
 			public double getFisherInformation(double t) throws IllegalArgumentException
@@ -141,6 +139,7 @@ public class InterpolatedPoissonFisherInformationTest
 			@Override
 			protected void postClone()
 			{
+				// Do nothing
 			}
 		};
 		check(fixedI, fi, min - 1, 0);
@@ -151,7 +150,7 @@ public class InterpolatedPoissonFisherInformationTest
 		fi = new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
 
 		final double A = alpha[0];
-		BasePoissonFisherInformation fixedA = new BasePoissonFisherInformation()
+		final BasePoissonFisherInformation fixedA = new BasePoissonFisherInformation()
 		{
 			@Override
 			public double getFisherInformation(double t) throws IllegalArgumentException
@@ -168,6 +167,7 @@ public class InterpolatedPoissonFisherInformationTest
 			@Override
 			protected void postClone()
 			{
+				// Do nothing
 			}
 		};
 

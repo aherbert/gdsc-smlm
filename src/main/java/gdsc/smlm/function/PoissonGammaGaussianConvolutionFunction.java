@@ -140,10 +140,8 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 	public double likelihood(final double o, final double e)
 	{
 		if (e <= 0)
-		{
 			// If no Poisson mean then just use the Gaussian
 			return FastMath.exp((-o * o / var_by_2) + logNormalisationGaussian);
-		}
 		else
 		{
 			// Note:
@@ -156,7 +154,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 			// Poisson-Gamma distribution.
 
 			// Use a range to cover the Gaussian convolution
-			double max = o + range;
+			final double max = o + range;
 			if (max < 0)
 				return 0;
 			double min = o - range;
@@ -169,18 +167,16 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 
 	private double computeP(final double o, final double e, double max, double min)
 	{
-		int cmax = (int) Math.ceil(max);
-		int cmin = (int) Math.floor(min);
+		final int cmax = (int) Math.ceil(max);
+		final int cmin = (int) Math.floor(min);
 
 		if (cmin == cmax)
-		{
 			// Edge case with no range
 			return FastMath.exp(
 					// Poisson-Gamma
 					PoissonGammaFunction.logPoissonGamma(cmin, e, g)
 					// Gaussian
 							- (Maths.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
-		}
 
 		double p = 0;
 
@@ -219,13 +215,11 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		//		{
 
 		for (int c = cmin; c <= cmax; c++)
-		{
 			p += FastMath.exp(
 					// Poisson-Gamma
 					PoissonGammaFunction.logPoissonGamma(c, e, g)
 					// Gaussian
 							- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
-		}
 
 		//		}
 
@@ -241,13 +235,11 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 	public double logLikelihood(double o, double e)
 	{
 		if (e <= 0)
-		{
 			// If no Poisson mean then just use the Gaussian
 			return (-o * o / var_by_2) + logNormalisationGaussian;
-		}
 		else
 		{
-			double max = o + range;
+			final double max = o + range;
 			if (max < 0)
 				return Double.NEGATIVE_INFINITY;
 			double min = o - range;

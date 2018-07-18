@@ -168,10 +168,8 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		{
 			final double[] x = new double[n];
 			for (int i = 0; i < n; i++)
-			{
 				// Also ensure the input y is positive
 				x[i] = (y[i] > 0) ? y[i] + w[i] : w[i];
-			}
 			return x;
 		}
 		else
@@ -190,9 +188,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// Huang, et al. (2015) by simply adding the variances to the computed value.
 		f1 = (Gradient1Function) f;
 		if (w != null)
-		{
 			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
-		}
 		if (isFastLog())
 			return MLELVMGradientProcedureFactory.create(y, f1, fastLog);
 		return MLELVMGradientProcedureFactory.create(y, f1);
@@ -217,21 +213,15 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		super.computeValues(yFit);
 
 		// Cache the values to compute the log-likelihood
-		int size = f1.size();
+		final int size = f1.size();
 		if (lastyFit == null)
 			lastyFit = new double[size];
 		if (w != null)
-		{
 			// For the log-likelihood we must add the per observation weights
 			for (int i = 0; i < size; i++)
-			{
 				lastyFit[i] = yFit[i] + w[i];
-			}
-		}
 		else
-		{
 			System.arraycopy(yFit, 0, lastyFit, 0, size);
-		}
 	}
 
 	/*
@@ -249,15 +239,11 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		Gradient1Function f1 = (Gradient1Function) f;
 		// Capture the y-values if necessary
 		if (yFit != null && yFit.length == f1.size())
-		{
 			f1 = new Gradient2FunctionValueStore(f1, yFit);
-		}
 		// Add the weights if necessary
 		if (w != null)
-		{
 			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
-		}
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
+		final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(lastA);
 		if (p.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
@@ -274,10 +260,8 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// We must wrap the gradient function if weights are present.
 		Gradient1Function f1 = (Gradient1Function) f;
 		if (w != null)
-		{
 			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
-		}
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
+		final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(a);
 		if (p.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
@@ -297,18 +281,14 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 			if (lastyFit == null)
 			{
 				// Evaluate the function values if necessary
-				int size = f1.size();
+				final int size = f1.size();
 				lastyFit = new double[size];
 				super.computeValues(lastyFit);
 
 				if (w != null)
-				{
 					// For the log-likelihood we must add the per observation weights
 					for (int i = 0; i < w.length; i++)
-					{
 						lastyFit[i] += w[i];
-					}
-				}
 
 			}
 

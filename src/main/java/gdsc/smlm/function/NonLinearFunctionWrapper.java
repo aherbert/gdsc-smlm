@@ -66,7 +66,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	@Override
 	public void initialise(double[] variables)
 	{
-		int[] gradientIndices = fun.gradientIndices();
+		final int[] gradientIndices = fun.gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
 			a[gradientIndices[i]] = variables[i];
 		fun.initialise(a);
@@ -155,10 +155,8 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 		initialise(variables);
 		final double[] values = new double[n];
 		for (int i = 0; i < values.length; i++)
-		{
 			// Assume linear X from 0..N
 			values[i] = fun.eval(i);
-		}
 		return values;
 	}
 

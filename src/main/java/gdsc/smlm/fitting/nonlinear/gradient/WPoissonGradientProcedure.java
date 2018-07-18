@@ -79,16 +79,12 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 		// Total noise = variance + max(di, 0) + 1
 
 		if (var != null && var.length == n)
-		{
 			// Include the variance in the weight. Assume variance is positive.
 			for (int i = 0; i < n; i++)
 				w[i] = (y[i] > 0) ? 1.0 / (var[i] + y[i] + 1.0) : 1.0 / (var[i] + 1.0);
-		}
 		else
-		{
 			for (int i = 0; i < n; i++)
 				w[i] = (y[i] > 0) ? 1.0 / (y[i] + 1.0) : 1.0;
-		}
 	}
 
 	/**
@@ -165,9 +161,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 		{
 			final double wgt = dy_da[j] * w;
 			for (int k = 0; k <= j; k++)
-			{
 				data[i++] += wgt * dy_da[k];
-			}
 		}
 	}
 
@@ -191,7 +185,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public double[][] getMatrix()
 	{
-		double[][] a = new double[n][n];
+		final double[][] a = new double[n][n];
 		getMatrix(a);
 		return a;
 	}
@@ -214,7 +208,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public double[] getLinear()
 	{
-		double[] a = new double[n * n];
+		final double[] a = new double[n * n];
 		getLinear(a);
 		return a;
 	}

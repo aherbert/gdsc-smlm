@@ -131,13 +131,9 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	public boolean addStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return addArray(results.toArray());
-		}
 	}
 
 	/*
@@ -160,13 +156,9 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	public void remove(int fromIndex, int toIndex)
 	{
 		if (fromIndex > toIndex)
-		{
 			throw new IllegalArgumentException("fromIndex must be <= toIndex");
-		}
 		for (int i = toIndex; i >= fromIndex; i--)
-		{
 			results.remove(i);
-		}
 	}
 
 	/*
@@ -211,13 +203,9 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	public boolean removeStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return removeArray(results.toArray());
-		}
 	}
 
 	/*
@@ -251,13 +239,9 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	public boolean retainStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return retainArray(results.toArray());
-		}
 	}
 
 	/*
@@ -325,7 +309,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	{
 		if (deepCopy)
 		{
-			ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
+			final ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
 			for (int i = 0, size = size(); i < size; i++)
 				copy.add(results.get(i).clone());
 			return copy;
@@ -343,7 +327,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	{
 		// Util we upgrade the Java version to 1.8 the ArrayList does not support
 		// predicates so use a TurboList
-		TurboList<PeakResult> temp = new TurboList<>(this.results);
+		final TurboList<PeakResult> temp = new TurboList<>(this.results);
 		if (temp.removeIf(new SimplePredicate<PeakResult>()
 		{
 			@Override

@@ -67,8 +67,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	/** Working space for beta. */
 	protected double[] da;
 
-	/** The updated parameters a. 
-	 * This is equal to the current parameters a plus the solution x to A x = b 
+	/** The updated parameters a.
+	 * This is equal to the current parameters a plus the solution x to A x = b
 	 * with A = {@link #covar} and b = gradient vector (beta). */
 	protected double[] ap = new double[0];
 
@@ -187,10 +187,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = calculator.findLinearised(n, y, a, alpha, beta, func);
 			initialResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 			if (calculator.isNaNGradients())
-			{
 				//System.out.println("Bad initial gradients");
 				return false;
-			}
 		}
 
 		// Set previous using the current best fit result we have
@@ -209,19 +207,13 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		sumOfSquaresWorking[SUM_OF_SQUARES_NEW] = calculator.findLinearised(n, y, ap, covar, da, func);
 
 		if (calculator.isNaNGradients())
-		{
 			//System.out.println("Bad working gradients");
 			return false; // Stop now
 			//lambda *= 10.0; // Allow to continue
-		}
 		else if (sumOfSquaresWorking[SUM_OF_SQUARES_NEW] < sumOfSquaresWorking[SUM_OF_SQUARES_OLD])
-		{
 			accepted(a, ap, m);
-		}
 		else
-		{
 			increaseLambda();
-		}
 
 		return true;
 	}
@@ -245,13 +237,9 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 				alpha[i][j] = covar[i][j];
 
 		for (int j = m; j-- > 0;)
-		{
 			beta[j] = da[j];
-		}
 		for (int j = a.length; j-- > 0;)
-		{
 			a[j] = ap[j];
-		}
 		sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = sumOfSquaresWorking[SUM_OF_SQUARES_NEW];
 	}
 
@@ -401,19 +389,15 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		}
 
 		if (aDev != null)
-		{
 			if (!computeDeviations(n, y, aDev))
 				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
-		}
 
 		value = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 
 		// Compute fitted data points
 		if (yFit != null)
-		{
 			for (int i = 0; i < n; i++)
 				yFit[i] = func.eval(i);
-		}
 
 		return FitStatus.OK;
 	}
@@ -437,18 +421,18 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			// Compute and invert a matrix related to the Poisson log-likelihood.
 			// This assumes this does achieve the maximum likelihood estimate for a
 			// Poisson process.
-			double[][] I = calculator.fisherInformationMatrix(n, null, func);
+			final double[][] I = calculator.fisherInformationMatrix(n, null, func);
 			if (calculator.isNaNGradients())
 				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 
 			// Use a dedicated solver optimised for inverting the matrix diagonal.
-			FisherInformationMatrix m = new FisherInformationMatrix(I);
+			final FisherInformationMatrix m = new FisherInformationMatrix(I);
 			setDeviations(aDev, m);
 			return true;
 		}
 		else
 		{
-			double[] covar = calculator.variance(n, null, func);
+			final double[] covar = calculator.variance(n, null, func);
 			if (covar != null)
 			{
 				setDeviations(aDev, covar);
@@ -477,7 +461,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	@Override
 	public FitStatus computeFit(double[] y, double[] yFit, final double[] a, final double[] aDev)
 	{
-		int n = y.length;
+		final int n = y.length;
 		final int nparams = f.gradientIndices().length;
 
 		// Create dynamically for the parameter sizes
@@ -517,7 +501,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		this.evaluations = this.iterations = sc.getIteration();
 
 		if (isMLE())
-		{
 			// Ensure we have a private copy of the the yFit since the any calling
 			// code may modify it
 			if (copyYfit)
@@ -526,7 +509,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 					lastyFit = new double[y.length];
 				System.arraycopy(yFit, 0, lastyFit, 0, y.length);
 			}
-		}
 
 		return result;
 	}
@@ -621,9 +603,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		if (mle)
 			setType(FunctionSolverType.MLE);
 		else
-		{
 			setType((func.canComputeWeights()) ? FunctionSolverType.WLSE : FunctionSolverType.LSE);
-		}
 	}
 
 	/*
@@ -654,9 +634,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 				yFit = lastyFit;
 			}
 			else
-			{
 				lastyFit = yFit;
-			}
 		}
 
 		value = calculator.findLinearised(n, y, yFit, a, func);
@@ -670,12 +648,10 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), isMLE());
 
 		if (isMLE())
-		{
 			return super.computeDeviations(y, a, aDev);
-		}
 
 		// LSE computation
-		double[] covar = calculator.variance(y.length, a, func);
+		final double[] covar = calculator.variance(y.length, a, func);
 		if (covar != null)
 		{
 			setDeviations(aDev, covar);
@@ -690,7 +666,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		// Compute and invert a matrix related to the Poisson log-likelihood.
 		// This assumes this does achieve the maximum likelihood estimate for a
 		// Poisson process.
-		double[][] I = calculator.fisherInformationMatrix(y.length, a, func);
+		final double[][] I = calculator.fisherInformationMatrix(y.length, a, func);
 		if (calculator.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		return new FisherInformationMatrix(I);

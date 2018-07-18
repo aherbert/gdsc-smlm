@@ -72,7 +72,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		screenDimension = IJ.getScreenSize();
 	}
 
-	private HashMap<String, String[]> plugins = new HashMap<>();
+	private final HashMap<String, String[]> plugins = new HashMap<>();
 	private boolean addSpacer = false;
 
 	/**
@@ -87,17 +87,13 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 		// Only allow one instance to run
 		if (isFrameVisible())
-		{
 			if (!(instance.getTitle().equals(getTitle())))
-			{
 				closeFrame();
-			}
 			else
 			{
 				instance.toFront();
 				return;
 			}
-		}
 
 		if (!createFrame())
 			return;
@@ -106,13 +102,11 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		WindowManager.addWindow(this);
 
 		pack();
-		Point loc = Prefs.getLocation(OPT_LOCATION);
+		final Point loc = Prefs.getLocation(OPT_LOCATION);
 		if (loc != null)
 			setLocation(loc);
 		else
-		{
 			GUI.center(this);
-		}
 		if (IJ.isMacOSX())
 			setResizable(false);
 		setVisible(true);
@@ -167,7 +161,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 	private boolean createFrame()
 	{
-		ArrayList<String[]> plugins = new ArrayList<>();
+		final ArrayList<String[]> plugins = new ArrayList<>();
 
 		// Locate all the GDSC SMLM plugins using the plugins.config:
 		try (InputStream readmeStream = getToolsPluginsConfig())
@@ -181,20 +175,16 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 				{
 					if (line.startsWith("#"))
 						continue;
-					String[] tokens = line.split(",");
+					final String[] tokens = line.split(",");
 					if (tokens.length == 3)
 					{
 						// Only copy the entries from the Plugins menu
 						if (!ignore(tokens))
 						{
 							if (!plugins.isEmpty())
-							{
 								// Multiple gaps indicates a new column
 								if (gaps > 1)
-								{
 									plugins.add(new String[] { "next", "" });
-								}
-							}
 							gaps = 0;
 							plugins.add(new String[] { tokens[1].trim(), tokens[2].trim() });
 						}
@@ -205,13 +195,11 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 					// Put a spacer between plugins if specified
 					if ((tokens.length == 2 && tokens[0].startsWith("Plugins") && tokens[1].trim().equals("\"-\"")) ||
 							line.length() == 0)
-					{
 						plugins.add(new String[] { "spacer", "" });
-					}
 				}
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Ignore
 		}
@@ -221,17 +209,16 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 		// Put a spacer on the menu
 		ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
-		
+
 		// Arrange on a grid.
-		Panel mainPanel = new Panel();
-		GridBagLayout grid = new GridBagLayout();
+		final Panel mainPanel = new Panel();
+		final GridBagLayout grid = new GridBagLayout();
 
 		mainPanel.setLayout(grid);
 
 		addSpacer = false;
 		int col = 0, row = 0;
-		for (String[] plugin : plugins)
-		{
+		for (final String[] plugin : plugins)
 			if (plugin[0].equals("next"))
 			{
 				col++;
@@ -241,17 +228,16 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 				addSpacer = true;
 			else
 				row = addPlugin(mainPanel, grid, plugin[0], plugin[1], col, row);
-		}
 
 		// Allow scrollbars to handle small screens.
 		// Appropriately size the scrollpane from the default of 100x100.
 		// The preferred size is only obtained if the panel is packed.
 		add(mainPanel);
 		pack();
-		Dimension d = mainPanel.getPreferredSize();
+		final Dimension d = mainPanel.getPreferredSize();
 		remove(0); // Assume this is the only component
 
-		ScrollPane scroll = new ScrollPane();
+		final ScrollPane scroll = new ScrollPane();
 		scroll.getHAdjustable().setUnitIncrement(16);
 		scroll.getVAdjustable().setUnitIncrement(16);
 		scroll.add(mainPanel);
@@ -261,7 +247,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		d.width = Math.min(d.width, screenDimension.width - 100);
 		d.height = Math.min(d.height, screenDimension.height - 150);
 
-		Insets insets = scroll.getInsets();
+		final Insets insets = scroll.getInsets();
 		d.width += insets.left + insets.right;
 		d.height += insets.top + insets.bottom;
 
@@ -269,7 +255,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		{
 			// This is needed as the OSX scroll pane adds scrollbars when the panel
 			// is close in size to the scroll pane
-			int padding = 15;
+			final int padding = 15;
 			d.width += padding;
 			d.height += padding;
 		}
@@ -303,19 +289,17 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	private static InputStream getToolsPluginsConfig()
 	{
 		// Look for smlm.config in the plugin directory
-		String pluginsDir = IJ.getDirectory("plugins");
-		String filename = pluginsDir + File.separator + "smlm.config";
+		final String pluginsDir = IJ.getDirectory("plugins");
+		final String filename = pluginsDir + File.separator + "smlm.config";
 		if (new File(filename).exists())
-		{
 			try
 			{
 				return new FileInputStream(filename);
 			}
-			catch (FileNotFoundException e)
+			catch (final FileNotFoundException e)
 			{
 				// Ignore and resort to default
 			}
-		}
 
 		// Fall back to the embedded config in the jar file
 		return getPluginsConfig();
@@ -329,8 +313,8 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	public static InputStream getPluginsConfig()
 	{
 		// Get the embedded config in the jar file
-		Class<SMLMTools> resourceClass = SMLMTools.class;
-		InputStream readmeStream = resourceClass.getResourceAsStream("/gdsc/smlm/plugins.config");
+		final Class<SMLMTools> resourceClass = SMLMTools.class;
+		final InputStream readmeStream = resourceClass.getResourceAsStream("/gdsc/smlm/plugins.config");
 		return readmeStream;
 	}
 
@@ -341,17 +325,17 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		// Plugins>GDSC SMLM, "Peak Fit", gdsc.smlm.ij.plugins.PeakFit
 
 		commandName = commandName.replaceAll("\"", "");
-		Button button = new Button(commandName);
+		final Button button = new Button(commandName);
 		String className = command;
 		String arg = "";
-		int index = command.indexOf('(');
+		final int index = command.indexOf('(');
 		if (index > 0)
 		{
 			className = command.substring(0, index);
-			int argStart = command.indexOf('"');
+			final int argStart = command.indexOf('"');
 			if (argStart > 0)
 			{
-				int argEnd = command.lastIndexOf('"');
+				final int argEnd = command.lastIndexOf('"');
 				arg = command.substring(argStart + 1, argEnd);
 			}
 		}
@@ -360,16 +344,14 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		if (!ij.Menus.commandInUse(commandName))
 		{
 			if (addSpacer)
-			{
 				try
 				{
 					ij.Menus.getImageJMenu("Plugins").addSeparator();
 				}
-				catch (NoSuchMethodError e)
+				catch (final NoSuchMethodError e)
 				{
 					// Ignore. This ImageJ method is from IJ 1.48+
 				}
-			}
 			ij.Menus.installPlugin(command, ij.Menus.PLUGINS_MENU, commandName, "", IJ.getInstance());
 		}
 
@@ -391,7 +373,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 	private static int add(Panel mainPanel, GridBagLayout grid, Component comp, int col, int row)
 	{
-		GridBagConstraints c = new GridBagConstraints();
+		final GridBagConstraints c = new GridBagConstraints();
 		c.gridx = col;
 		c.gridy = row++;
 		c.fill = GridBagConstraints.BOTH;
@@ -407,8 +389,8 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	public void actionPerformed(ActionEvent e)
 	{
 		// Get the plugin from the button label and run it
-		Button button = (Button) e.getSource();
-		String commandName = button.getLabel();
+		final Button button = (Button) e.getSource();
+		final String commandName = button.getLabel();
 
 		//String[] args = plugins.get(commandName);
 		//IJ.runPlugIn(commandName, args[0], args[1]); // Only in IJ 1.47+

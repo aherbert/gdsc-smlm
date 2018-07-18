@@ -81,13 +81,14 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 			nChildren = Math.max(1, (int) random.nextPoisson(meanChildren));
 
 		@SuppressWarnings("unchecked")
+		final
 		Chromosome<T>[] children = new Chromosome[nChildren];
 		int count = 0;
-		double[] s1 = chromosome1.sequence();
-		double[] s2 = chromosome2.sequence();
+		final double[] s1 = chromosome1.sequence();
+		final double[] s2 = chromosome2.sequence();
 		while (count < nChildren)
 		{
-			ChromosomePair<T> pair = recombine(chromosome1, chromosome2, s1, s2);
+			final ChromosomePair<T> pair = recombine(chromosome1, chromosome2, s1, s2);
 			children[count++] = pair.c1;
 			if (count == nChildren)
 				break;
@@ -108,11 +109,11 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 		for (int i = 0; i < positions.length; i++)
 			positions[i] = i;
 
-		RandomGenerator ran = random.getRandomGenerator();
+		final RandomGenerator ran = random.getRandomGenerator();
 		for (int i = positions.length, n = nCrossovers; i-- > 1 && n-- > 0;)
 		{
-			int j = (ran.nextInt(i + 1));
-			int tmp = positions[i];
+			final int j = (ran.nextInt(i + 1));
+			final int tmp = positions[i];
 			positions[i] = positions[j];
 			positions[j] = tmp;
 		}
@@ -127,13 +128,13 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 		int nextSwap = 0;
 
 		// Create the children by copying the parent, swapping at each crossover position
-		double[] n1 = new double[s1.length];
-		double[] n2 = new double[n1.length];
+		final double[] n1 = new double[s1.length];
+		final double[] n2 = new double[n1.length];
 		for (int i = 0; i < n1.length; i++)
 		{
 			if (positions[nextSwap] == i)
 			{
-				double[] tmp = s1;
+				final double[] tmp = s1;
 				s1 = s2;
 				s2 = tmp;
 				nextSwap++;

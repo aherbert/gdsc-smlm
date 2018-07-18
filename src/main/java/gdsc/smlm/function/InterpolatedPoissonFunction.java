@@ -185,7 +185,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 
 		if (nonInteger)
 		{
-			double loge = Math.log(e);
+			final double loge = Math.log(e);
 			double ll = -e + o * loge - logFactorial(o);
 			lk = FastMath.exp(ll);
 			if (o == e)
@@ -218,13 +218,11 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 				lk_1 = FastMath.exp(ll);
 			}
 			else
-			{
 				lk_1 = 0;
-			}
 		}
 		else
 		{
-			int k = (int) o;
+			final int k = (int) o;
 			pd.setMeanUnsafe(e);
 			lk = pd.probability(k);
 			if (k == e)

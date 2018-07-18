@@ -32,19 +32,19 @@ public class FixedDimension implements Cloneable, Dimension
 {
 	/** The minimum of the range. */
 	public final double min;
-	
+
 	/** The maximum of the range. */
 	public final double max;
-	
+
 	/** The current lower bound of the range (will be clipped to min/max). */
 	public final double lower;
-	
+
 	/** The current upper bound of the range (will be clipped to min/max). */
 	public final double upper;
-	
+
 	/** The min increment to use around the centre. */
 	public final double minIncrement;
-	
+
 	/** Set to true if {@link #min} &lt; {@link #max}. */
 	public final boolean active;
 
@@ -165,10 +165,8 @@ public class FixedDimension implements Cloneable, Dimension
 	public SearchDimension create(int nIncrement)
 	{
 		if (nIncrement <= 0)
-		{
 			// Compute the maximum number of increments to cover the range from the centre
 			nIncrement = (int) Math.ceil(Math.ceil((max - min) / minIncrement) / 2);
-		}
 		return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
 	}
 
@@ -260,7 +258,7 @@ public class FixedDimension implements Cloneable, Dimension
 		{
 			return (FixedDimension) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

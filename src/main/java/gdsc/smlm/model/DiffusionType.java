@@ -71,13 +71,9 @@ public enum DiffusionType
 		if (text != null)
 		{
 			text = text.trim();
-			for (DiffusionType type : DiffusionType.values())
-			{
+			for (final DiffusionType type : DiffusionType.values())
 				if (text.equalsIgnoreCase(type.getName()))
-				{
 					return type;
-				}
-			}
 		}
 		return null;
 	}

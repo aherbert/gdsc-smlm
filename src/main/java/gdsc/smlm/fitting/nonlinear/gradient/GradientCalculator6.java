@@ -87,7 +87,7 @@ public class GradientCalculator6 extends GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			double[] w = new double[1];
+			final double[] w = new double[1];
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da, w);
@@ -126,7 +126,6 @@ public class GradientCalculator6 extends GradientCalculator
 			}
 		}
 		else
-		{
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da);
@@ -162,7 +161,6 @@ public class GradientCalculator6 extends GradientCalculator
 
 				ssx += dy * dy;
 			}
-		}
 
 		// Generate symmetric matrix
 		//		for (int i = 0; i < m - 1; i++)
@@ -233,7 +231,7 @@ public class GradientCalculator6 extends GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			double[] w = new double[1];
+			final double[] w = new double[1];
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da, w);
@@ -272,10 +270,9 @@ public class GradientCalculator6 extends GradientCalculator
 			}
 		}
 		else
-		{
 			for (int i = 0; i < n; i++)
 			{
-				double dy = y[i] - func.eval(i, dy_da);
+				final double dy = y[i] - func.eval(i, dy_da);
 
 				alpha[0][0] += dy_da[0] * dy_da[0];
 				alpha[1][0] += dy_da[1] * dy_da[0];
@@ -308,7 +305,6 @@ public class GradientCalculator6 extends GradientCalculator
 
 				ssx += dy * dy;
 			}
-		}
 
 		// Generate symmetric matrix
 		//		for (int i = 0; i < m - 1; i++)

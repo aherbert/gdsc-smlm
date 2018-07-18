@@ -105,7 +105,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public void setTransparency(final float transparency)
 	{
-		TransparencyAttributes ta = getTransparencyAttributes();
+		final TransparencyAttributes ta = getTransparencyAttributes();
 		if (ta == null)
 			return;
 		if (transparency == 0f)
@@ -134,7 +134,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public float getTransparency()
 	{
-		TransparencyAttributes ta = getTransparencyAttributes();
+		final TransparencyAttributes ta = getTransparencyAttributes();
 		if (ta == null)
 			return 0f;
 		return ta.getTransparency();
@@ -147,7 +147,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public boolean isTransparent()
 	{
-		TransparencyAttributes ta = getTransparencyAttributes();
+		final TransparencyAttributes ta = getTransparencyAttributes();
 		if (ta == null)
 			return false;
 		return ta.getTransparency() != 0f && ta.getTransparencyMode() != TransparencyAttributes.NONE;
@@ -161,10 +161,10 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public void setShaded(boolean shaded)
 	{
-		PolygonAttributes pa = getPolygonAttributes();
+		final PolygonAttributes pa = getPolygonAttributes();
 		if (pa == null)
 			return;
-		int mode = (shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE;
+		final int mode = (shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE;
 		if (pa.getPolygonMode() != mode)
 			pa.setPolygonMode(mode);
 	}
@@ -183,7 +183,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public boolean isShaded()
 	{
-		PolygonAttributes pa = getPolygonAttributes();
+		final PolygonAttributes pa = getPolygonAttributes();
 		if (pa == null)
 			return false;
 		return pa.getPolygonMode() == PolygonAttributes.POLYGON_FILL;
@@ -197,7 +197,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public void setPointSize(float pointSize)
 	{
-		PointAttributes pa = getPointAttributes();
+		final PointAttributes pa = getPointAttributes();
 		if (pa == null)
 			return;
 		pa.setPointSize(pointSize);
@@ -217,7 +217,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 */
 	public float getPointSize()
 	{
-		PointAttributes pa = getPointAttributes();
+		final PointAttributes pa = getPointAttributes();
 		if (pa == null)
 			return 0f;
 		return pa.getPointSize();

@@ -46,16 +46,16 @@ public class Version
 	static
 	{
 		// Locate the version file
-		Class<Version> resourceClass = Version.class;
+		final Class<Version> resourceClass = Version.class;
 		try (final InputStream propertiesStream = resourceClass.getResourceAsStream("/gdsc/core/Version.txt"))
 		{
 			// Read the version properties
-			Properties props = new Properties();
+			final Properties props = new Properties();
 			props.load(propertiesStream);
 			version = props.getProperty("version");
 			buildDate = props.getProperty("build.date");
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Ignore
 		}
@@ -74,8 +74,8 @@ public class Version
 	 */
 	public static void main(String[] args)
 	{
-		StringBuilder msg = new StringBuilder();
-		String newLine = System.getProperty("line.separator");
+		final StringBuilder msg = new StringBuilder();
+		final String newLine = System.getProperty("line.separator");
 		msg.append("Version : ").append(version).append(newLine);
 		msg.append("Build Date : ").append(buildDate).append(newLine);
 		System.out.print(msg.toString());
@@ -108,8 +108,8 @@ public class Version
 	 */
 	public static int getMajorVersion()
 	{
-		Pattern p = Pattern.compile("^\\d+");
-		Matcher m = p.matcher(version);
+		final Pattern p = Pattern.compile("^\\d+");
+		final Matcher m = p.matcher(version);
 		if (m.find())
 			return Integer.parseInt(m.group());
 		return 0;
@@ -122,8 +122,8 @@ public class Version
 	 */
 	public static int getMinorVersion()
 	{
-		Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
-		Matcher m = p.matcher(version);
+		final Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
+		final Matcher m = p.matcher(version);
 		if (m.find())
 			return Integer.parseInt(m.group(1));
 		return 0;
@@ -136,8 +136,8 @@ public class Version
 	 */
 	public static int getPatchVersion()
 	{
-		Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
-		Matcher m = p.matcher(version);
+		final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
+		final Matcher m = p.matcher(version);
 		if (m.find())
 			return Integer.parseInt(m.group(1));
 		return 0;
@@ -150,8 +150,8 @@ public class Version
 	 */
 	public static String getMajorMinorPatch()
 	{
-		Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
-		Matcher m = p.matcher(version);
+		final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
+		final Matcher m = p.matcher(version);
 		if (m.find())
 			return m.group();
 		return "";

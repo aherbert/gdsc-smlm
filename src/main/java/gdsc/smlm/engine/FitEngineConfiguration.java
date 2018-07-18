@@ -453,11 +453,11 @@ public class FitEngineConfiguration implements Cloneable
 		// manually passed in. Either would allow more complex fail counters to be used.
 		if (failCounter == null)
 		{
-			int failuresLimit = getFailuresLimit();
-			FailCounter f1 = (failuresLimit >= 1) ? ConsecutiveFailCounter.create(failuresLimit) : null;
-			double passRate = getPassRate();
+			final int failuresLimit = getFailuresLimit();
+			final FailCounter f1 = (failuresLimit >= 1) ? ConsecutiveFailCounter.create(failuresLimit) : null;
+			final double passRate = getPassRate();
 			// TODO - the allowed counts could be an input
-			FailCounter f2 = (passRate > 0) ? PassRateFailCounter.create(5, passRate) : null;
+			final FailCounter f2 = (passRate > 0) ? PassRateFailCounter.create(5, passRate) : null;
 
 			// All fail counters must pass to continue fitting
 			failCounter = CombinedAndFailCounter.join(f1, f2);
@@ -627,7 +627,7 @@ public class FitEngineConfiguration implements Cloneable
 	public FitEngineConfiguration clone()
 	{
 		// Manual copy using the current proto objects
-		FitEngineConfiguration clone = new FitEngineConfiguration(getFitEngineSettings(),
+		final FitEngineConfiguration clone = new FitEngineConfiguration(getFitEngineSettings(),
 				getFitConfiguration().getCalibration(), getFitConfiguration().getPSF());
 		// Copy anything else not in a proto object
 		clone.getFitConfiguration().copySettings(getFitConfiguration());
@@ -668,7 +668,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilterType(DataFilterType dataFilterType)
 	{
-		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
 		b.setDataFilterType(dataFilterType);
 
 		// Resize the filter arrays to discard unused filters
@@ -703,11 +703,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilterType(int dataFilterType)
 	{
-		DataFilterType t = DataFilterType.forNumber(dataFilterType);
+		final DataFilterType t = DataFilterType.forNumber(dataFilterType);
 		if (t != null)
-		{
 			setDataFilterType(t);
-		}
 	}
 
 	//	/**
@@ -851,12 +849,12 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, boolean absolute, int n)
 	{
-		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
 		//truncateFilters(b, n + 1);
-		DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
+		final DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
 		b2.setDataFilterMethod(dataFilterMethod);
 		b2.clearParameters();
-		RelativeParameter.Builder b3 = b2.addParametersBuilder();
+		final RelativeParameter.Builder b3 = b2.addParametersBuilder();
 		b3.setValue(smooth);
 		b3.setAbsolute(absolute);
 	}
@@ -875,11 +873,11 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, int n)
 	{
-		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
 		//truncateFilters(b, n + 1);
-		DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
+		final DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
 		b2.setDataFilterMethod(dataFilterMethod);
-		RelativeParameter.Builder b3 = (b2.getParametersCount() == 0) ? b2.addParametersBuilder()
+		final RelativeParameter.Builder b3 = (b2.getParametersCount() == 0) ? b2.addParametersBuilder()
 				: b2.getParametersBuilder(0);
 		b3.setValue(smooth);
 	}
@@ -899,11 +897,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilter(int dataFilter, double smooth, boolean absolute, int n)
 	{
-		DataFilterMethod m = DataFilterMethod.forNumber(dataFilter);
+		final DataFilterMethod m = DataFilterMethod.forNumber(dataFilter);
 		if (m != null)
-		{
 			setDataFilter(m, smooth, absolute, n);
-		}
 	}
 
 	/**
@@ -920,11 +916,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilter(int dataFilter, double smooth, int n)
 	{
-		DataFilterMethod m = DataFilterMethod.forNumber(dataFilter);
+		final DataFilterMethod m = DataFilterMethod.forNumber(dataFilter);
 		if (m != null)
-		{
 			setDataFilter(m, smooth, n);
-		}
 	}
 
 	/**
@@ -938,7 +932,7 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		if (n < 1)
 			n = 1;
-		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
 		// Truncate the filter
 		truncateFilters(b, n);
 	}
@@ -979,8 +973,8 @@ public class FitEngineConfiguration implements Cloneable
 		// Respect the absolute parameter absolute flag for all the distances.
 
 		// Get the half-width at half maximum
-		double hwhmMin = getHWHMMin();
-		double hwhmMax = getHWHMMax();
+		final double hwhmMin = getHWHMMin();
+		final double hwhmMax = getHWHMMax();
 
 		// Note: rounding to 2 decimal places is a simple method for removing small errors
 		// in floating point precision from creating an incorrect integer
@@ -995,8 +989,8 @@ public class FitEngineConfiguration implements Cloneable
 		if (border < 0)
 			border = 0;
 
-		DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
-		DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
+		final DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
+		final DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
 		final int nFilters = f.getDataFiltersCount();
 
 		final MaximaSpotFilter spotFilter;
@@ -1005,7 +999,7 @@ public class FitEngineConfiguration implements Cloneable
 			case JURY:
 				if (nFilters > 1)
 				{
-					DataProcessor[] processors = new DataProcessor[nFilters];
+					final DataProcessor[] processors = new DataProcessor[nFilters];
 					processors[0] = processor0;
 					for (int i = 1; i < nFilters; i++)
 						processors[i] = createDataProcessor(border, i, hwhmMin);
@@ -1016,7 +1010,7 @@ public class FitEngineConfiguration implements Cloneable
 			case DIFFERENCE:
 				if (nFilters > 1)
 				{
-					DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
+					final DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
 					spotFilter = new DifferenceSpotFilter(search, border, processor0, processor1);
 					break;
 				}
@@ -1031,7 +1025,7 @@ public class FitEngineConfiguration implements Cloneable
 			if (!spotFilter.isWeighted())
 				throw new IllegalStateException(
 						"Camera type requires a weighted spot filter: " + fitConfiguration.getCameraType());
-			CameraModel model = fitConfiguration.getCameraModel();
+			final CameraModel model = fitConfiguration.getCameraModel();
 			if (model == null || !model.isPerPixelModel())
 				throw new IllegalStateException("Weighted spot filter requires a per-pixel camera model");
 		}
@@ -1049,7 +1043,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSDMin()
 	{
-		double[] w = fitConfiguration.getGaussian2DWxWy();
+		final double[] w = fitConfiguration.getGaussian2DWxWy();
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];
@@ -1089,7 +1083,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSDMax()
 	{
-		double[] w = fitConfiguration.getGaussian2DWxWy();
+		final double[] w = fitConfiguration.getGaussian2DWxWy();
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];
@@ -1192,21 +1186,17 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public int getNumberOfFilters()
 	{
-		DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
+		final DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
 		final int nFilters = f.getDataFiltersCount();
 		switch (f.getDataFilterType())
 		{
 			case JURY:
 				if (nFilters > 1)
-				{
 					return nFilters;
-				}
 
 			case DIFFERENCE:
 				if (nFilters > 1)
-				{
 					return 2;
-				}
 
 			case SINGLE:
 			default:
@@ -1217,7 +1207,7 @@ public class FitEngineConfiguration implements Cloneable
 	private static double getSmoothingWindow(DataFilter f, double hwhmMin)
 	{
 		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
-		RelativeParameter rp = f.getParameters(0);
+		final RelativeParameter rp = f.getParameters(0);
 
 		// Q. Why is this rounded. Is it just to make a nicer number?
 		return convert(rp, hwhmMin, 2);
@@ -1227,7 +1217,7 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFiltersCount())
 		{
-			DataFilter f = fitEngineSettings.getDataFilterSettings().getDataFilters(n);
+			final DataFilter f = fitEngineSettings.getDataFilterSettings().getDataFilters(n);
 			return createDataProcessor(border, f.getDataFilterMethod(), getSmoothingWindow(f, hwhm));
 		}
 		return null;
@@ -1288,9 +1278,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void configureOutputUnits()
 	{
-		FitConfiguration fitConfig = getFitConfiguration();
+		final FitConfiguration fitConfig = getFitConfiguration();
 		// If there is no calibration then the writer will just have the defaults
-		CalibrationWriter calibration = fitConfig.getCalibrationWriterReference();
+		final CalibrationWriter calibration = fitConfig.getCalibrationWriterReference();
 
 		// Fitting is always done pixels and radians
 		calibration.setDistanceUnit(DistanceUnit.PIXEL);

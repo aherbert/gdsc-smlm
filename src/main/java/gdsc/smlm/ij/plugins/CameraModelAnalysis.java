@@ -183,7 +183,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		public static Model forNumber(int number)
 		{
-			Model[] values = Model.values();
+			final Model[] values = Model.values();
 			if (number < 0 || number >= values.length)
 				number = 0;
 			return values[number];
@@ -223,7 +223,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		{
 			currentSeed = settings.getSeed();
 			// Ensure some bits are set in the default seed of zero
-			long seed = (currentSeed == 0) ? Double.doubleToRawLongBits(Math.PI) : currentSeed;
+			final long seed = (currentSeed == 0) ? Double.doubleToRawLongBits(Math.PI) : currentSeed;
 			random = new CachedRandomGenerator(settings.getSamples(), new Well19937c(seed));
 		}
 		return random;
@@ -276,8 +276,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 			private boolean collectOptions(boolean silent)
 			{
-				int mode = settings.getMode();
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				final int mode = settings.getMode();
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 				if (mode == MODE_CCD)
 				{
 					egd.addNumericField("Gain", settings.getGain(), 2, 6, "Count/electrons");
@@ -358,9 +358,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		settings.setModel(gd.getNextChoiceIndex());
 		settings.setSimpsonIntegration(gd.getNextBoolean());
 		if (gd.getPreviewCheckbox().getState())
-		{
 			return execute();
-		}
 		return true;
 	}
 
@@ -374,7 +372,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			{
 				ok = execute();
 			}
-			catch (Exception ex)
+			catch (final Exception ex)
 			{
 				// Catch as this is run within a AWT dispatch thread
 				Utils.log(TITLE + "Error: " + ex.getMessage());
@@ -416,7 +414,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		dirty = false;
 
-		CameraModelAnalysisSettings settings = this.settings.build();
+		final CameraModelAnalysisSettings settings = this.settings.build();
 		if (!(getGain(settings) > 0))
 		{
 			Utils.log(TITLE + "Error: No total gain");
@@ -432,41 +430,41 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			return true;
 		lastSettings = settings;
 
-		IntHistogram h = getHistogram(settings);
+		final IntHistogram h = getHistogram(settings);
 
 		// Build cumulative distribution
-		double[][] cdf1 = cumulativeHistogram(h);
-		double[] x1 = cdf1[0];
-		double[] y1 = cdf1[1];
+		final double[][] cdf1 = cumulativeHistogram(h);
+		final double[] x1 = cdf1[0];
+		final double[] y1 = cdf1[1];
 
 		// Interpolate to 300 steps faster evaluation?
 
 		// Get likelihood function
-		LikelihoodFunction f = getLikelihoodFunction(settings);
+		final LikelihoodFunction f = getLikelihoodFunction(settings);
 
 		// Create likelihood cumulative distribution
-		double[][] cdf2 = cumulativeDistribution(settings, cdf1, f);
+		final double[][] cdf2 = cumulativeDistribution(settings, cdf1, f);
 
 		// Compute Komolgorov distance
-		double[] distanceAndValue = getDistance(cdf1, cdf2);
-		double distance = distanceAndValue[0];
-		double value = distanceAndValue[1];
-		double area = distanceAndValue[2];
+		final double[] distanceAndValue = getDistance(cdf1, cdf2);
+		final double distance = distanceAndValue[0];
+		final double value = distanceAndValue[1];
+		final double area = distanceAndValue[2];
 
-		double[] x2 = cdf2[0];
-		double[] y2 = cdf2[1];
+		final double[] x2 = cdf2[0];
+		final double[] y2 = cdf2[1];
 
 		// Fill y1
 		int offset = 0;
 		while (x2[offset] < x1[0])
 			offset++;
-		double[] y1b = new double[y2.length];
+		final double[] y1b = new double[y2.length];
 		System.arraycopy(y1, 0, y1b, offset, y1.length);
 		Arrays.fill(y1b, offset + y1.length, y2.length, y1[y1.length - 1]);
 
 		// KolmogorovSmirnovTest
 		// n is the number of samples used to build the probability distribution.
-		int n = (int) Maths.sum(h.h);
+		final int n = (int) Maths.sum(h.h);
 
 		// From KolmogorovSmirnovTest.kolmogorovSmirnovTest(RealDistribution distribution, double[] data, boolean exact):
 		// Returns the p-value associated with the null hypothesis that data is a sample from distribution.
@@ -476,16 +474,16 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		{
 			p = 1d - kolmogorovSmirnovTest.cdf(distance, n);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore
 		}
 
 		// Plot
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 		String title = TITLE + " CDF";
 		Plot2 plot = new Plot2(title, "Count", "CDF");
-		double max = 1.05 * Maths.maxDefault(1, y2);
+		final double max = 1.05 * Maths.maxDefault(1, y2);
 		plot.setLimits(x2[0], x2[x2.length - 1], 0, max);
 		plot.setColor(Color.blue);
 		//plot.addPoints(x2, y1b, Plot2.LINE);
@@ -513,9 +511,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		plot.addPoints(x1, SimpleArrayUtils.toDouble(h.h), Plot2.BAR);
 
 		plot.setColor(Color.red);
-		double[] x = floatHistogram[0].clone();
-		double[] y = floatHistogram[1].clone();
-		double scale = n / (Maths.sum(y) * (x[1] - x[0]));
+		final double[] x = floatHistogram[0].clone();
+		final double[] y = floatHistogram[1].clone();
+		final double scale = n / (Maths.sum(y) * (x[1] - x[0]));
 		for (int i = 0; i < y.length; i++)
 			y[i] *= scale;
 		plot.addPoints(x, y, Plot.LINE);
@@ -534,8 +532,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		if (lastHistogram == null || newSimulationSettings(settings, lastSimulationSettings))
 		{
 			IJ.showStatus("Simulating histogram ...");
-			StopWatch sw = StopWatch.createStarted();
-			CachedRandomGenerator random = getRandomGenerator();
+			final StopWatch sw = StopWatch.createStarted();
+			final CachedRandomGenerator random = getRandomGenerator();
 			lastHistogram = simulateHistogram(settings, random);
 			lastSimulationSettings = settings;
 			IJ.showStatus("Simulated in " + sw.toString());
@@ -632,28 +630,27 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private static IntHistogram simulatePoissonGammaGaussian(CameraModelAnalysisSettings settings,
 			CachedRandomGenerator random)
 	{
-		int[] poissonSample = simulatePoisson(settings, random);
+		final int[] poissonSample = simulatePoisson(settings, random);
 
 		// Randomly sample re-using the sequence
-		RandomGenerator random2 = random.getPseudoRandomGenerator();
+		final RandomGenerator random2 = random.getPseudoRandomGenerator();
 
 		final double gain = getGain(settings);
 
 		// Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
 		// is the same as applying the total gain in the gamma distribution and no camera gain
 		// later, i.e. the Gamma distribution is just squeezed.
-		CustomGammaDistribution gamma = new CustomGammaDistribution(random.getPseudoRandomGenerator(), 1, gain,
+		final CustomGammaDistribution gamma = new CustomGammaDistribution(random.getPseudoRandomGenerator(), 1, gain,
 				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 		final double noise = getReadNoise(settings);
 		final int samples = settings.getSamples();
 		final int emSamples = settings.getEmSamples();
 		final int noiseSamples = (noise > 0) ? settings.getNoiseSamples() : 1;
-		int[] sample = new int[samples * emSamples * noiseSamples];
+		final int[] sample = new int[samples * emSamples * noiseSamples];
 		int count = 0;
-		Round round = getRound(settings);
+		final Round round = getRound(settings);
 		for (int n = poissonSample.length; n-- > 0;)
-		{
 			if (poissonSample[n] != 0)
 			{
 				// Gamma
@@ -689,26 +686,17 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 					// Over-sample the Gaussian
 					for (int j = noiseSamples; j-- > 0;)
-					{
 						// Convert the sample to a count
 						sample[count++] = round.round(d2 + noise * random2.nextGaussian());
-					}
 				}
 			}
 			else
-			{
 				// Still over-sample the Gamma even though it was zero
 				for (int k = emSamples; k-- > 0;)
-				{
 					// Over-sample the Gaussian
 					for (int j = noiseSamples; j-- > 0;)
-					{
 						// Convert the sample to a count
 						sample[count++] = round.round(noise * random2.nextGaussian());
-					}
-				}
-			}
-		}
 
 		return createHistogram(sample, count);
 	}
@@ -717,7 +705,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		// Ensure we reuse random numbers if possible
 		random.reset();
-		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
+		final PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
 				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 		return poisson.sample(settings.getSamples());
 	}
@@ -734,29 +722,27 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private static IntHistogram simulatePoissonGaussian(CameraModelAnalysisSettings settings,
 			CachedRandomGenerator random)
 	{
-		int[] poissonSample = simulatePoisson(settings, random);
+		final int[] poissonSample = simulatePoisson(settings, random);
 
 		// Randomly sample re-using the sequence
-		PseudoRandomGenerator random2 = random.getPseudoRandomGenerator();
+		final PseudoRandomGenerator random2 = random.getPseudoRandomGenerator();
 
 		final double gain = getGain(settings);
 		final double noise = getReadNoise(settings);
 		final int samples = settings.getSamples();
 		final int noiseSamples = (noise > 0) ? settings.getNoiseSamples() : 1;
-		int[] sample = new int[samples * noiseSamples];
+		final int[] sample = new int[samples * noiseSamples];
 		int count = 0;
-		Round round = getRound(settings);
+		final Round round = getRound(settings);
 		for (int n = poissonSample.length; n-- > 0;)
 		{
 			// Fixed camera gain
-			double d = poissonSample[n] * gain;
+			final double d = poissonSample[n] * gain;
 
 			// Over-sample the Gaussian
 			for (int j = noiseSamples; j-- > 0;)
-			{
 				// Convert the sample to a count
 				sample[count++] = round.round(d + noise * random2.nextGaussian());
-			}
 		}
 
 		return createHistogram(sample, count);
@@ -764,11 +750,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	private static IntHistogram createHistogram(int[] sample, int count)
 	{
-		int[] limits = Maths.limits(sample);
-		int min = limits[0];
-		int max = limits[1];
+		final int[] limits = Maths.limits(sample);
+		final int min = limits[0];
+		final int max = limits[1];
 
-		int[] h = new int[max - min + 1];
+		final int[] h = new int[max - min + 1];
 		for (int i = count; i-- > 0;)
 			h[sample[i] - min]++;
 		return new IntHistogram(h, min);
@@ -787,14 +773,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		final double UPPER = 1 - LOWER;
 
 		// Find the range of the Poisson
-		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
+		final PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
 				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-		int maxn = poisson.inverseCumulativeProbability(UPPER);
+		final int maxn = poisson.inverseCumulativeProbability(UPPER);
 
 		final double gain = getGain(settings);
 		final double noise = getReadNoise(settings);
 
-		boolean debug = false;
+		final boolean debug = false;
 
 		// Build the Probabity Mass/Density Function (PDF) of the distribution:
 		// either a Poisson (PMF) or Poisson-Gamma (PDF). The PDF is 0 at all
@@ -802,7 +788,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Note: The Poisson-Gamm is computed without the Dirac delta contribution
 		// at c=0. This allows correct convolution with the Gaussian of the dirac delta
 		// and the rest of the Poisson-Gamma (so matching the simulation).
-		TDoubleArrayList list = new TDoubleArrayList();
+		final TDoubleArrayList list = new TDoubleArrayList();
 		double step;
 		String name;
 
@@ -825,7 +811,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			// Note: The delta function at c=0 is from the PMF of the Poisson. So it is
 			// a discrete contribution. This is omitted from the PDF and handled in
 			// a separate convolution.
-			boolean discrete = false; // noise != 0;
+			final boolean discrete = false; // noise != 0;
 			if (discrete)
 			{
 				// Note: This is obsolete as the Poisson-Gamma function is continuous.
@@ -834,7 +820,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 				step = 1.0;
 
-				CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
+				final CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
 						GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 				double upper;
@@ -845,9 +831,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					upper = settings.getPhotons() + Math.sqrt(settings.getPhotons());
 
 				gamma.setShapeUnsafe(upper);
-				int maxc = (int) gamma.inverseCumulativeProbability(0.999);
+				final int maxc = (int) gamma.inverseCumulativeProbability(0.999);
 
-				int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
+				final int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
 
 				// See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 
@@ -858,7 +844,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// The count=0 is a special case.
 				list.add(PoissonGammaFunction.poissonGammaN(0, p, m));
 
-				long total = (maxn - minn) * (long) maxc;
+				final long total = (maxn - minn) * (long) maxc;
 
 				if (total < 1000000)
 				{
@@ -871,13 +857,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					// Note: Both methods work
 
 					LogFactorial.increaseTableMaxN(maxn);
-					double[] f = new double[maxn + 1];
+					final double[] f = new double[maxn + 1];
 					final double logm = Math.log(m);
 					final double logp = Math.log(p);
 					for (int n = minn; n <= maxn; n++)
-					{
 						f[n] = -LogFactorial.logF(n) + n * logp - p - LogFactorial.logF(n - 1) - n * logm;
-					}
 
 					// Use Poisson + Gamma distribution
 					//double[] pd = new double[maxn + 1];
@@ -896,10 +880,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 						final double c_m = c / m;
 						final double logc = Math.log(c);
 						for (int n = minn; n <= maxn; n++)
-						{
 							sum += FastMath.exp(f[n] + (n - 1) * logc - c_m);
 							//sum2 += pd[n] * gd[n].density(c);
-						}
 						list.add(sum);
 						//total += sum;
 
@@ -914,11 +896,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					//		gdsc.core.utils.DoubleEquality.relativeError(total, total2));
 				}
 				else
-				{
 					// Approximate
 					for (int c = 1; c <= maxc; c++)
 						list.add(PoissonGammaFunction.poissonGammaN(c, p, m));
-				}
 			}
 			else
 			{
@@ -929,7 +909,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 				// Compute the integral of [-step/2:step/2] for each point.
 				// Use trapezoid integration.
-				double step_2 = step / 2;
+				final double step_2 = step / 2;
 				double prev = PoissonGammaFunction.poissonGammaN(0, p, m);
 				double next = PoissonGammaFunction.poissonGammaN(step_2, p, m);
 				list.add((prev + next) * 0.25);
@@ -939,7 +919,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					// Each remaining point is modelling a PMF for the range [-step/2:step/2]
 					prev = next;
 					next = PoissonGammaFunction.poissonGammaN(i * step + step_2, p, m);
-					double pp = (prev + next) * 0.5;
+					final double pp = (prev + next) * 0.5;
 					if (max < pp)
 						max = pp;
 					if (pp / max < 1e-5)
@@ -954,21 +934,21 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			}
 
 			// Ensure the combined sum of PDF and Dirac is 1
-			double expected = 1 - dirac;
+			final double expected = 1 - dirac;
 			// Compute the sum using Simpson's rule:
 			// Require an odd number to get an even number (n) of sub-intervals:
 			if (list.size() % 2 == 0)
 				list.add(0);
-			double[] g = list.toArray();
+			final double[] g = list.toArray();
 			// Number of sub intervals
-			int n = g.length - 1;
-			double h = 1; // h = (a-b) / n = sub-interval width
+			final int n = g.length - 1;
+			final double h = 1; // h = (a-b) / n = sub-interval width
 			double sum2 = 0, sum4 = 0;
 			for (int j = 1; j <= n / 2 - 1; j++)
 				sum2 += g[2 * j];
 			for (int j = 1; j <= n / 2; j++)
 				sum4 += g[2 * j - 1];
-			double sum = (h / 3) * (g[0] + 2 * sum2 + 4 * sum4 + g[n]);
+			final double sum = (h / 3) * (g[0] + 2 * sum2 + 4 * sum4 + g[n]);
 			// Check
 			//System.out.printf("Sum=%g Expected=%g\n", sum * step, expected);
 			SimpleArrayUtils.multiply(g, expected / sum);
@@ -982,10 +962,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			step = gain;
 
 			for (int n = 0; n <= maxn; n++)
-			{
 				list.add(poisson.probability(n));
-			}
-			double p = poisson.probability(list.size());
+			final double p = poisson.probability(list.size());
 			if (p != 0)
 				list.add(p);
 		}
@@ -993,8 +971,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Debug
 		if (debug)
 		{
-			String title = name;
-			Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, step), list.toArray());
+			final String title = name;
+			final Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, step), list.toArray());
 			Utils.display(title, plot);
 		}
 
@@ -1008,35 +986,28 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			g = list.toArray();
 
 			// Convolve with Gaussian kernel
-			double[] kernel = GaussianKernel.makeGaussianKernel(Math.abs(noise) / step, 6, true);
+			final double[] kernel = GaussianKernel.makeGaussianKernel(Math.abs(noise) / step, 6, true);
 
 			if (upsample != 1)
-			{
 				// Use scaled convolution. This is faster that zero filling distribution g.
 				g = Convolution.convolve(kernel, g, upsample);
-			}
+			else // The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT.
+			// This is a problem if most of the probability is in the Dirac.
+			// Otherwise it can be ignored.
+			if (dirac > 0.01)
+				g = Convolution.convolve(kernel, g);
 			else
-			{
-				// The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT.
-				// This is a problem if most of the probability is in the Dirac.
-				// Otherwise it can be ignored.
-				if (dirac > 0.01)
-					g = Convolution.convolve(kernel, g);
-				else
-					g = Convolution.convolveFast(kernel, g);
-			}
+				g = Convolution.convolveFast(kernel, g);
 
 			// The convolution will have created a larger array so we must adjust the offset for this
-			int radius = kernel.length / 2;
+			final int radius = kernel.length / 2;
 			zero -= radius * step;
 
 			// Add convolution of the dirac delta function.
 			if (dirac != 0)
-			{
 				// We only need to convolve the Gaussian at c=0
 				for (int i = 0; i < kernel.length; i++)
 					g[i] += kernel[i] * dirac;
-			}
 
 			// Debug
 			if (debug)
@@ -1057,64 +1028,57 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			zero = (int) Math.floor(zero);
 			step = 1.0;
 		}
-		else
+		else // No convolution means we have the Poisson PMF/Poisson-Gamma PDF already
+		if (step != 1)
 		{
-			// No convolution means we have the Poisson PMF/Poisson-Gamma PDF already
-			if (step != 1)
+			// Sample to 1.0 pixel step interval.
+			if (settings.getMode() == MODE_EM_CCD)
 			{
-				// Sample to 1.0 pixel step interval.
-				if (settings.getMode() == MODE_EM_CCD)
+				// Poisson-Gamma PDF
+				zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1 - dirac);
+				g = list.toArray();
+				zero = (int) Math.floor(zero);
+
+				// Add the dirac delta function.
+				if (dirac != 0)
 				{
-					// Poisson-Gamma PDF
-					zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1 - dirac);
-					g = list.toArray();
-					zero = (int) Math.floor(zero);
-
-					// Add the dirac delta function.
-					if (dirac != 0)
-					{
-						// Note: zero is the start of the x-axis. This value should be -1.
-						assert (int) zero == -1;
-						// Use as an offset to find the actual zero.
-						g[-(int) zero] += dirac;
-					}
+					// Note: zero is the start of the x-axis. This value should be -1.
+					assert (int) zero == -1;
+					// Use as an offset to find the actual zero.
+					g[-(int) zero] += dirac;
 				}
-				else
-				{
-					// Poisson PMF
-
-					// Simple non-interpolated expansion.
-					// This should be used when there is no Gaussian convolution.
-					double[] pd = g;
-					list.resetQuick();
-
-					// Account for rounding.
-					Round round = getRound(settings);
-
-					int maxc = round.round(pd.length * step + 1);
-					g = new double[maxc];
-					for (int n = pd.length; n-- > 0;)
-					{
-						g[round.round(n * step)] += pd[n];
-					}
-
-					if (g[0] != 0)
-					{
-						list.add(0);
-						list.add(g);
-						g = list.toArray();
-						zero--;
-					}
-				}
-
-				step = 1.0;
 			}
 			else
 			{
-				// Add the dirac delta function.
-				list.setQuick(0, list.getQuick(0) + dirac);
+				// Poisson PMF
+
+				// Simple non-interpolated expansion.
+				// This should be used when there is no Gaussian convolution.
+				final double[] pd = g;
+				list.resetQuick();
+
+				// Account for rounding.
+				final Round round = getRound(settings);
+
+				final int maxc = round.round(pd.length * step + 1);
+				g = new double[maxc];
+				for (int n = pd.length; n-- > 0;)
+					g[round.round(n * step)] += pd[n];
+
+				if (g[0] != 0)
+				{
+					list.add(0);
+					list.add(g);
+					g = list.toArray();
+					zero--;
+				}
 			}
+
+			step = 1.0;
 		}
+		else
+			// Add the dirac delta function.
+			list.setQuick(0, list.getQuick(0) + dirac);
 
 		return new double[][] { SimpleArrayUtils.newArray(g.length, zero, step), g };
 	}
@@ -1135,7 +1099,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			g[i] *= sum / lowerSum;
 		g[g.length - 1] = sum;
 
-		double offset = (settings.getRoundDown()) ? 0 : -0.5;
+		final double offset = (settings.getRoundDown()) ? 0 : -0.5;
 
 		// Note the interpolation of the CDF is good when the step is much smaller than 1.
 		// When the step is above 1 then the gain is likely to be very low and thus
@@ -1145,7 +1109,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// to get the discrete PMF
 
 		//		// Pad the CDF to avoid index-out-of bounds during interpolation
-		int padSize = 0;
+		final int padSize = 0;
 		//		padSize = (int) Math.ceil(1 / step) + 2;
 		//		list.resetQuick();
 		//		list.add(new double[padSize]);
@@ -1153,33 +1117,33 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		//		for (int i = padSize; i-- > 0;)
 		//			list.add(1);
 		//double[] pd = list.toArray();
-		double[] pd = g;
+		final double[] pd = g;
 
 		list.resetQuick();
 
-		double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
+		final double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
 
 		// Q. If the EM-CCD the distribution may have a Dirac delta at c=0 which
 		// could break interpolation using a spline?
-		UnivariateInterpolator in =
+		final UnivariateInterpolator in =
 				//(settings.getMode() == MODE_EM_CCD) ? new LinearInterpolator() :
 				new SplineInterpolator();
-		UnivariateFunction f = in.interpolate(x, pd);
+		final UnivariateFunction f = in.interpolate(x, pd);
 
 		int bound = (int) Math.floor(zero);
 
 		list.add(0);
 		zero--;
 		double upperSum = 0;
-		double min = x[0];
-		double max = x[x.length - 1];
+		final double min = x[0];
+		final double max = x[x.length - 1];
 		while (upperSum < sum)
 		{
 			bound++;
 
 			// Find the point at which the CDF should be computed
 			lowerSum = upperSum;
-			double point = bound + offset;
+			final double point = bound + offset;
 			if (point < min)
 				upperSum = 0;
 			else if (point > max)
@@ -1194,9 +1158,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	private static LikelihoodFunction getLikelihoodFunction(CameraModelAnalysisSettings settings)
 	{
-		double alpha = 1.0 / getGain(settings);
-		double noise = getReadNoise(settings);
-		Model model = Model.forNumber(settings.getModel());
+		final double alpha = 1.0 / getGain(settings);
+		final double noise = getReadNoise(settings);
+		final Model model = Model.forNumber(settings.getModel());
 		switch (model)
 		{
 			case POISSON_PMF:
@@ -1207,7 +1171,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				return new InterpolatedPoissonFunction(alpha, true);
 			case POISSON_GAUSSIAN_PDF:
 			case POISSON_GAUSSIAN_PMF:
-				PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction
+				final PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction
 						.createWithStandardDeviation(alpha, noise);
 				f1.setComputePMF(model == Model.POISSON_GAUSSIAN_PMF);
 				return f1;
@@ -1227,7 +1191,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			case POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION:
 			case POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION:
 			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:
-				PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(alpha, noise);
+				final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(alpha, noise);
 				f2.setMinimumProbability(0);
 				f2.setConvolutionMode(getConvolutionMode(model));
 				// The function should return a PMF/PDF depending on how it is used
@@ -1242,7 +1206,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	private static boolean isPoissonGammaLikelihoodFunction(CameraModelAnalysisSettings settings)
 	{
-		Model model = Model.forNumber(settings.getModel());
+		final Model model = Model.forNumber(settings.getModel());
 		switch (model)
 		{
 			case POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION:
@@ -1311,9 +1275,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	private static double[][] cumulativeHistogram(IntHistogram histogram)
 	{
-		int[] h = histogram.h;
-		double[] x = new double[h.length];
-		double[] y = new double[x.length];
+		final int[] h = histogram.h;
+		final double[] x = new double[h.length];
+		final double[] y = new double[x.length];
 		double sum = 0;
 		for (int i = 0; i < x.length; i++)
 		{
@@ -1326,9 +1290,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			y[i] = sum;
 		}
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] /= sum;
-		}
 		y[y.length - 1] = 1; // Ensure total is 1
 		return new double[][] { x, y };
 	}
@@ -1348,7 +1310,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		@Override
 		public double value(double x)
 		{
-			double v = fun.likelihood(x, p);
+			final double v = fun.likelihood(x, p);
 			list.add(x);
 			list.add(v);
 			return v;
@@ -1373,7 +1335,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// The simplest is a flat-top integration.
 
 		// Compute the probability at each value
-		double e = settings.getPhotons();
+		final double e = settings.getPhotons();
 		double[] x = cdf[0];
 		double[] y = new double[x.length];
 		for (int i = 0; i < x.length; i++)
@@ -1381,10 +1343,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Add more until the probability change is marginal
 		final double delta = 1e-6;
 		double sum = Maths.sum(y);
-		TDoubleArrayList list = new TDoubleArrayList(y);
+		final TDoubleArrayList list = new TDoubleArrayList(y);
 		for (int o = (int) x[x.length - 1] + 1;; o++)
 		{
-			double p = fun.likelihood(o, e);
+			final double p = fun.likelihood(o, e);
 			list.add(p);
 			if (p == 0)
 				break;
@@ -1392,10 +1354,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			if (p / sum < delta)
 				break;
 		}
-		TDoubleArrayList list2 = new TDoubleArrayList(10);
+		final TDoubleArrayList list2 = new TDoubleArrayList(10);
 		for (int o = (int) x[0] - 1;; o--)
 		{
-			double p = fun.likelihood(o, e);
+			final double p = fun.likelihood(o, e);
 			list2.add(p);
 			if (p == 0)
 				break;
@@ -1428,7 +1390,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// This breaks integration, especially when noise < 0.1.
 				// Fix by integrating around c=0 fully then integrating the rest.
 				c0 = Arrays.binarySearch(x, 0);
-				double noise = getReadNoise(settings);
+				final double noise = getReadNoise(settings);
 				final double p = settings.getPhotons();
 				if (noise == 0)
 				{
@@ -1451,14 +1413,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			// Use Simpson's integration with n=4 to get the integral of the probability
 			// over the range of each count.
 			int n = 4;
-			int n_2 = n / 2;
-			double h = 1.0 / n;
+			final int n_2 = n / 2;
+			final double h = 1.0 / n;
 
 			// Note the Poisson-Gamma function cannot be integrated with the
 			// Dirac delta function at c==0
 
 			// Compute the extra function points
-			double[] f = new double[y.length * n + 1];
+			final double[] f = new double[y.length * n + 1];
 			{
 				int i = f.length;
 
@@ -1478,29 +1440,27 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				}
 
 				while (i-- > 0)
-				{
 					if (i % n == mod)
 						f[i] = y[i / n];
 					else
 						f[i] = fun.likelihood(start + i * h, e);
-				}
 			}
 
 			// Compute indices for the integral
-			TIntArrayList tmp = new TIntArrayList(n);
+			final TIntArrayList tmp = new TIntArrayList(n);
 			for (int j = 1; j <= n_2 - 1; j++)
 				tmp.add(2 * j);
-			int[] i2 = tmp.toArray();
+			final int[] i2 = tmp.toArray();
 			tmp.resetQuick();
 			for (int j = 1; j <= n_2; j++)
 				tmp.add(2 * j - 1);
-			int[] i4 = tmp.toArray();
+			final int[] i4 = tmp.toArray();
 
 			// Compute integral
 			for (int i = 0; i < y.length; i++)
 			{
-				int a = i * n;
-				int b = a + n;
+				final int a = i * n;
+				final int b = a + n;
 				double s = f[a] + f[b];
 				for (int j = i2.length; j-- > 0;)
 					s += 2 * f[a + i2[j]];
@@ -1513,16 +1473,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 			// Fix Poisson-Gamma ...
 			if (c0 != -1)
-			{
 				if (uf != null)
 				{
 					// Convolved Poisson-Gamma. Fix in the range of the Gaussian around c=0
 					final double relativeAccuracy = 1e-4;
 					final double absoluteAccuracy = 1e-8;
-					CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, 3,
+					final CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, 3,
 							CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-					double lower = (settings.getRoundDown()) ? 0 : -0.5;
-					double upper = lower + 1;
+					final double lower = (settings.getRoundDown()) ? 0 : -0.5;
+					final double upper = lower + 1;
 					// Switch from c<=maxc to c<maxc. Avoid double computation at minc==maxc
 					if (maxc != minc)
 						maxc++;
@@ -1534,14 +1493,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 						{
 							y[i] = in.integrate(2000, uf, c + lower, c + upper);
 						}
-						catch (TooManyEvaluationsException ex)
+						catch (final TooManyEvaluationsException ex)
 						{
 							//System.out.printf("Integration failed: c=%g-%g\n", c + lower, c + upper);
 							// Q. Is the last sum valid?
 							if (in.getLastSum() > 0)
-							{
 								y[i] = in.getLastSum();
-							}
 							else
 							{
 								// Otherwise use all the cached values to compute a sum
@@ -1549,8 +1506,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 								// Note: The Simpson integrator will have computed the edge values
 								// as the first two values in the cache.
-								double[] g = uf.list.toArray();
-								double dx = (g[3] - g[1]) / in.getN();
+								final double[] g = uf.list.toArray();
+								final double dx = (g[3] - g[1]) / in.getN();
 								n = 1 + 2 * ((int) in.getN());
 								sum = 0;
 								for (int j = 4; j < n; j += 2)
@@ -1561,11 +1518,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					}
 				}
 				else
-				{
 					// Pure Poisson-Gamma. Just add back the delta.
 					y[c0] += dirac;
-				}
-			}
 		}
 
 		// Simple flat-top integration
@@ -1599,10 +1553,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		// Find the offset
 		int offset = 0;
-		double[] x1 = cdf1[0];
-		double[] x2 = cdf2[0];
-		double[] y1 = cdf1[1];
-		double[] y2 = cdf2[1];
+		final double[] x1 = cdf1[0];
+		final double[] x2 = cdf2[0];
+		final double[] y1 = cdf1[1];
+		final double[] y2 = cdf2[1];
 		while (x2[offset] < x1[0])
 			offset++;
 		double distance = 0;
@@ -1610,7 +1564,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double area = 0;
 		for (int i = 0; i < x1.length; i++)
 		{
-			double d = Math.abs(y1[i] - y2[offset++]);
+			final double d = Math.abs(y1[i] - y2[offset++]);
 			if (distance < d)
 			{
 				distance = d;
@@ -1640,13 +1594,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Check if they cross
 		if (!((y1 > y4 && y2 > y3) || (y1 < y4 && y2 < y3)))
 		{
-			double[] intersection = new double[2];
+			final double[] intersection = new double[2];
 			if (Geometry.getIntersection(0, y1, 1, y2, 1, y3, 0, y4, intersection))
-			{
 				// Compute area as two triangles
 				return Geometry.getArea(0, y1, 0, y4, intersection[0], intersection[1]) +
 						Geometry.getArea(1, y2, 1, y3, intersection[0], intersection[1]);
-			}
 		}
 
 		return Math.abs(Geometry.getArea(areaX, new double[] { y1, y2, y3, y4 }));

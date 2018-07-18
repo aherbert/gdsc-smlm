@@ -42,18 +42,18 @@ public class PoissonGaussianFunction2Test
 	@Test
 	public void cumulativeProbabilityIsOneWithPicard()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					cumulativeProbabilityIsOne(g, p, s, true);
 	}
 
 	@Test
 	public void cumulativeProbabilityIsOneWithPade()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					cumulativeProbabilityIsOne(g, p, s, false);
 	}
 
@@ -85,22 +85,22 @@ public class PoissonGaussianFunction2Test
 	@Test
 	public void probabilityMatchesLogProbability()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 				{
 					probabilityMatchesLogProbability(g, p, s, true);
 					probabilityMatchesLogProbability(g, p, s, false);
 				}
 	}
 
-	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
+	private static void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
 	{
-		double p2 = cumulativeProbability(gain, mu, s, usePicard);
+		final double p2 = cumulativeProbability(gain, mu, s, usePicard);
 		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
-	private double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)
+	private static double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)
 	{
 		// Note: The input s parameter is pre-gain.
 		final PoissonGaussianFunction2 f = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / gain, s * gain);
@@ -122,7 +122,7 @@ public class PoissonGaussianFunction2Test
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
-			int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
+			final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
 			min = range[0];
 			max = range[1];
 			for (int x = min; x <= max; x++)
@@ -160,7 +160,7 @@ public class PoissonGaussianFunction2Test
 
 		// Do a formal integration
 		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		final UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
 			@Override
@@ -176,22 +176,22 @@ public class PoissonGaussianFunction2Test
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, final double s, final boolean usePicard)
+	private static void probabilityMatchesLogProbability(final double gain, double mu, final double s, final boolean usePicard)
 	{
 		// Note: The input s parameter is pre-gain.
-		PoissonGaussianFunction2 f = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / gain, s * gain);
+		final PoissonGaussianFunction2 f = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / gain, s * gain);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
-		int min = range[0];
-		int max = range[1];
+		final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
+		final int min = range[0];
+		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		final String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);

@@ -63,7 +63,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 {
 	/** The gradient function. */
 	protected final Gradient1Function gf;
-	
+
 	/** The Fisher information for each evaluated point in the function. */
 	protected final FisherInformation[] fi;
 
@@ -131,23 +131,17 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 				// Get the Fisher information of the value
 				final double f = fi[k].getFisherInformation(v);
 				if (f == 0)
-				{
 					// No summation
 					return;
-				}
 				if (f == Double.POSITIVE_INFINITY)
-				{
 					throw new DataException("Fisher information is infinite at f(" + k + ")");
-				}
 
 				// Compute the actual matrix data
 				for (int i = 0, c = 0; i < n; i++)
 				{
 					final double wgt = f * dv_dt[i];
 					for (int j = 0; j <= i; j++)
-					{
 						data[c++] += wgt * dv_dt[j];
-					}
 				}
 			}
 		});

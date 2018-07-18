@@ -42,7 +42,7 @@ import gdsc.smlm.function.Gradient2FunctionValueStore;
 public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements LSEFunctionSolver
 {
 	/**
-	 * The solver used to invert the Fisher information matrix to find 
+	 * The solver used to invert the Fisher information matrix to find
 	 * the Cramér–Rao lower bound (CRLB).
 	 */
 	protected EJMLLinearSolver inversionSolver;
@@ -147,10 +147,8 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		Gradient1Function f1 = (Gradient1Function) this.f;
 		// Capture the y-values if necessary
 		if (yFit != null && yFit.length == f1.size())
-		{
 			f1 = new Gradient2FunctionValueStore(f1, yFit);
-		}
-		LSQVarianceGradientProcedure p = createVarianceProcedure(f1);
+		final LSQVarianceGradientProcedure p = createVarianceProcedure(f1);
 		if (p.variance(null) == LSQVarianceGradientProcedure.STATUS_OK)
 			setDeviations(aDev, p.variance);
 	}
@@ -165,7 +163,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	@Override
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
-		LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) f);
+		final LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) f);
 		if (p.variance(a) == LSQVarianceGradientProcedure.STATUS_OK)
 		{
 			setDeviations(aDev, p.variance);
@@ -223,9 +221,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	public double getTotalSumOfSquares()
 	{
 		if (Double.isNaN(totalSumOfSquares) && lastY != null)
-		{
 			totalSumOfSquares = LSEBaseFunctionSolver.getTotalSumOfSquares(lastY);
-		}
 		return totalSumOfSquares;
 	}
 

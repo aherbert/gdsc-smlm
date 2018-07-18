@@ -36,11 +36,11 @@ public class PrecomputedFunctionTest
 	@Test
 	public void precomputedValueFunctionWrapsPrecomputedValues()
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		int size = 100;
-		double[] v = new PseudoRandomGenerator(size, r).getSequence();
-		ValueFunction f = new PrecomputedValueFunction(v);
-		double[] vo = evaluateValueFunction(f);
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final int size = 100;
+		final double[] v = new PseudoRandomGenerator(size, r).getSequence();
+		final ValueFunction f = new PrecomputedValueFunction(v);
+		final double[] vo = evaluateValueFunction(f);
 		Assert.assertArrayEquals("values", v, vo, 0);
 	}
 
@@ -64,23 +64,19 @@ public class PrecomputedFunctionTest
 	@Test
 	public void precomputedGradient1FunctionWrapsPrecomputedValues()
 	{
-		int n = 3;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		int size = 100;
-		double[] v = new PseudoRandomGenerator(size, r).getSequence();
-		double[][] g1 = new double[size][];
+		final int n = 3;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final int size = 100;
+		final double[] v = new PseudoRandomGenerator(size, r).getSequence();
+		final double[][] g1 = new double[size][];
 		for (int i = 0; i < g1.length; i++)
-		{
 			g1[i] = new PseudoRandomGenerator(n, r).getSequence();
-		}
-		Gradient1Function f = new PrecomputedGradient1Function(v, g1);
-		double[][] g1o = new double[size][];
-		double[] vo = evaluateGradient1Function(f, g1o);
+		final Gradient1Function f = new PrecomputedGradient1Function(v, g1);
+		final double[][] g1o = new double[size][];
+		final double[] vo = evaluateGradient1Function(f, g1o);
 		Assert.assertArrayEquals("values", v, vo, 0);
 		for (int i = 0; i < vo.length; i++)
-		{
 			Assert.assertArrayEquals("g2", g1[i], g1o[i], 0);
-		}
 	}
 
 	private static double[] evaluateGradient1Function(Gradient1Function f, final double[][] g1)
@@ -105,21 +101,21 @@ public class PrecomputedFunctionTest
 	@Test
 	public void precomputedGradient2FunctionWrapsPrecomputedValues()
 	{
-		int n = 3;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		int size = 100;
-		double[] v = new PseudoRandomGenerator(size, r).getSequence();
-		double[][] g1 = new double[size][];
-		double[][] g2 = new double[size][];
+		final int n = 3;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final int size = 100;
+		final double[] v = new PseudoRandomGenerator(size, r).getSequence();
+		final double[][] g1 = new double[size][];
+		final double[][] g2 = new double[size][];
 		for (int i = 0; i < g1.length; i++)
 		{
 			g1[i] = new PseudoRandomGenerator(n, r).getSequence();
 			g2[i] = new PseudoRandomGenerator(n, r).getSequence();
 		}
-		Gradient2Function f = new PrecomputedGradient2Function(v, g1, g2);
-		double[][] g1o = new double[size][];
-		double[][] g2o = new double[size][];
-		double[] vo = evaluateGradient2Function(f, g1o, g2o);
+		final Gradient2Function f = new PrecomputedGradient2Function(v, g1, g2);
+		final double[][] g1o = new double[size][];
+		final double[][] g2o = new double[size][];
+		final double[] vo = evaluateGradient2Function(f, g1o, g2o);
 		Assert.assertArrayEquals("values", v, vo, 0);
 		for (int i = 0; i < vo.length; i++)
 		{

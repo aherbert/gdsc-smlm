@@ -34,16 +34,16 @@ public class SearchDimension implements Cloneable, Dimension
 {
 	/** The minimum of the range. */
 	public final double min;
-	
+
 	/** The maximum of the range. */
 	public final double max;
-	
+
 	/** The min increment to use around the centre. */
 	public final double minIncrement;
 
 	/** The number of increments to use around the centre. */
 	public final int nIncrement;
-	
+
 	/** Set to true if {@link #min} &lt; {@link #max}. */
 	public final boolean active;
 
@@ -336,9 +336,7 @@ public class SearchDimension implements Cloneable, Dimension
 		{
 			// Not at the limit
 			for (int i = nIncrement; i >= 1; i--)
-			{
 				values[size++] = round(centre - i * increment);
-			}
 
 			values[size++] = centre; // Already rounded and within range
 		}
@@ -364,14 +362,12 @@ public class SearchDimension implements Cloneable, Dimension
 
 		// Check for duplicates if at the limits
 		if (size != values.length)
-		{
 			// Option to pad in the opposite direction
 			if (pad)
 			{
 				if (values[0] == min)
 				{
 					if (values[size - 1] != max)
-					{
 						// Pad up
 						for (int i = nIncrement + 1; size < values.length; i++)
 						{
@@ -383,7 +379,6 @@ public class SearchDimension implements Cloneable, Dimension
 							}
 							values[size++] = value;
 						}
-					}
 				}
 				else
 				{
@@ -408,11 +403,8 @@ public class SearchDimension implements Cloneable, Dimension
 					values = Arrays.copyOf(values, size);
 			}
 			else
-			{
 				// No padding so truncate
 				values = Arrays.copyOf(values, size);
-			}
-		}
 
 		return values;
 	}
@@ -478,7 +470,7 @@ public class SearchDimension implements Cloneable, Dimension
 		{
 			return (SearchDimension) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}
@@ -549,9 +541,7 @@ public class SearchDimension implements Cloneable, Dimension
 
 		double inc = (upper - lower) / (steps - 1);
 		if (inc < minIncrement)
-		{
 			inc = minIncrement;
-		}
 		steps = 1 + (int) Math.ceil((upper - lower) / inc);
 
 		final double[] values = new double[steps];

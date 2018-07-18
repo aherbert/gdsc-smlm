@@ -191,12 +191,8 @@ public class ToleranceChecker
 	public static boolean areEqual(final double[] p, final double[] c, double absolute, double relative)
 	{
 		for (int i = 0; i < p.length; ++i)
-		{
 			if (!areEqual(p[i], c[i], absolute, relative))
-			{
 				return false;
-			}
-		}
 		return true;
 	}
 

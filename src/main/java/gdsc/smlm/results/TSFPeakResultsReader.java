@@ -98,20 +98,14 @@ public class TSFPeakResultsReader
 			{
 				// the file has an initial 0, then the offset (as long)
 				// to the position of spotList
-				int magic = di.readInt();
+				final int magic = di.readInt();
 				if (magic != 0)
-				{
 					throw new RuntimeException("Magic number is not 0 (required for a TSF file)");
-				}
 				if (fi.available() == 0)
-				{
 					throw new RuntimeException("Cannot read offset");
-				}
-				long offset = di.readLong();
+				final long offset = di.readLong();
 				if (offset == 0)
-				{
 					throw new RuntimeException("Offset is 0, cannot find header data in this file");
-				}
 				fi.skip(offset);
 				spotList = SpotList.parseDelimitedFrom(fi);
 
@@ -120,7 +114,7 @@ public class TSFPeakResultsReader
 				isMulti = isMulti(spotList);
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("Failed to read SpotList message");
 			e.printStackTrace();
@@ -165,30 +159,24 @@ public class TSFPeakResultsReader
 			{
 				// the file has an initial 0, then the offset (as long)
 				// to the position of spotList
-				int magic = di.readInt();
+				final int magic = di.readInt();
 				if (magic != 0)
-				{
 					// Magic number should be zero
 					return false;
-				}
 				if (fi.available() == 0)
-				{
 					// No more contents
 					return false;
-				}
-				long offset = di.readLong();
+				final long offset = di.readLong();
 				if (offset == 0)
-				{
 					// No offset record
 					return false;
-				}
 				fi.skip(offset);
-				SpotList spotList = SpotList.parseDelimitedFrom(fi);
+				final SpotList spotList = SpotList.parseDelimitedFrom(fi);
 				if (spotList != null)
 					return true;
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Fail
 		}
@@ -207,7 +195,7 @@ public class TSFPeakResultsReader
 		if (spotList == null)
 			return null;
 
-		MemoryPeakResults results = createResults();
+		final MemoryPeakResults results = createResults();
 
 		// Used in the exception handler to check the correct number of spots were read
 		long expectedSpots = -1;
@@ -217,10 +205,10 @@ public class TSFPeakResultsReader
 		{
 			fi.skip(12); // size of int + size of long
 
-			LocationUnits locationUnits = spotList.getLocationUnits();
+			final LocationUnits locationUnits = spotList.getLocationUnits();
 			boolean locationUnitsWarning = false;
 
-			IntensityUnits intensityUnits = spotList.getIntensityUnits();
+			final IntensityUnits intensityUnits = spotList.getIntensityUnits();
 			boolean intensityUnitsWarning = false;
 
 			FitMode fitMode = FitMode.ONEAXIS;
@@ -231,8 +219,8 @@ public class TSFPeakResultsReader
 			final boolean filterSlice = slice > 0;
 
 			// Set up to read two-axis and theta data
-			PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
-			int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+			final PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+			final int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 			final int isx = indices[0];
 			final int isy = indices[1];
 			final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
@@ -255,7 +243,7 @@ public class TSFPeakResultsReader
 			{
 				totalSpots++;
 
-				Spot spot = Spot.parseDelimitedFrom(fi);
+				final Spot spot = Spot.parseDelimitedFrom(fi);
 
 				// Only read the specified channel, position, slice and fluorophore type
 				if (spot.getChannel() != channel)
@@ -281,9 +269,9 @@ public class TSFPeakResultsReader
 				}
 
 				// Required fields
-				int frame = spot.getFrame();
+				final int frame = spot.getFrame();
 
-				float[] params = new float[nParams];
+				final float[] params = new float[nParams];
 				params[PeakResult.X] = spot.getX();
 				params[PeakResult.Y] = spot.getY();
 				params[PeakResult.INTENSITY] = spot.getIntensity();
@@ -294,32 +282,26 @@ public class TSFPeakResultsReader
 
 				// Support different Gaussian shapes
 				if (fitMode == FitMode.ONEAXIS)
-				{
 					params[isx] = (float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR);
-				}
 				else
 				{
 					if (!spot.hasA())
-					{
 						params[isx] = params[isy] = (float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR);
-					}
 					else
 					{
-						double a = Math.sqrt(spot.getA());
-						double sd = spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
+						final double a = Math.sqrt(spot.getA());
+						final double sd = spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
 						params[isx] = (float) (sd * a);
 						params[isy] = (float) (sd / a);
 					}
 
 					if (fitMode == FitMode.TWOAXISANDTHETA && spot.hasTheta())
-					{
 						params[ia] = spot.getTheta();
-					}
 				}
 
 				// We can use the original position in pixels used for fitting
-				int origX = (spot.hasXPosition()) ? spot.getXPosition() : 0;
-				int origY = (spot.hasYPosition()) ? spot.getYPosition() : 0;
+				final int origX = (spot.hasXPosition()) ? spot.getXPosition() : 0;
+				final int origY = (spot.hasYPosition()) ? spot.getYPosition() : 0;
 
 				// Q. Should we use the required field 'molecule'?
 
@@ -348,12 +330,10 @@ public class TSFPeakResultsReader
 				}
 				// Use the standard cluster field for the ID
 				else if (spot.hasCluster())
-				{
 					id = spot.getCluster();
-				}
 
 				// Allow storing any of the optional attributes
-				AttributePeakResult peakResult = new AttributePeakResult(frame, origX, origY, origValue, error, noise,
+				final AttributePeakResult peakResult = new AttributePeakResult(frame, origX, origY, origValue, error, noise,
 						meanIntensity, params, paramsStdDev);
 
 				peakResult.setEndFrame(endFrame);
@@ -378,19 +358,17 @@ public class TSFPeakResultsReader
 				results.add(peakResult);
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			System.err.println("Failed to read TSF file: " + filename);
 			e.printStackTrace();
 
 			if (expectedSpots == -1)
-			{
 				// No attempt to read the spots was made.
 				// The exception was created during set-up.
 				return null;
-			}
 
-			// If expectedSpots==0 then the number of spots was unknown and the file was 
+			// If expectedSpots==0 then the number of spots was unknown and the file was
 			// read until the EOF.
 			// Only fail if there is a number of expected spots.
 			if (expectedSpots != 0)
@@ -400,7 +378,7 @@ public class TSFPeakResultsReader
 			}
 		}
 
-		// Do log a warning if the expected spots does not match the size. 
+		// Do log a warning if the expected spots does not match the size.
 		// The spots may be from multiple channels. etc.
 
 		return results;
@@ -442,11 +420,10 @@ public class TSFPeakResultsReader
 		int capacity = 1000;
 		if (spotList.hasNrSpots())
 			capacity = (int) Math.min(100000, spotList.getNrSpots());
-		MemoryPeakResults results = new MemoryPeakResults(capacity);
+		final MemoryPeakResults results = new MemoryPeakResults(capacity);
 
 		// Create the type of Gaussian PSF
 		if (spotList.hasFitMode())
-		{
 			switch (spotList.getFitMode())
 			{
 				case ONEAXIS:
@@ -461,23 +438,16 @@ public class TSFPeakResultsReader
 				default:
 					break;
 			}
-		}
 
 		// Generic reconstruction
 		String name;
 		if (spotList.hasName())
-		{
 			name = spotList.getName();
-		}
 		else
-		{
 			name = new File(filename).getName();
-		}
 		// Append these if not using the defaults
 		if (channel != 1 || slice != 0 || position != 0 || fluorophoreType != 1)
-		{
 			name = String.format("%s c=%d, s=%d, p=%d, ft=%d", name, channel, slice, position, fluorophoreType);
-		}
 		results.setName(name);
 
 		//		if (spotList.hasNrPixelsX() && spotList.hasNrPixelsY())
@@ -487,18 +457,16 @@ public class TSFPeakResultsReader
 		//			results.setBounds(new Rectangle(0, 0, spotList.getNrPixelsX(), spotList.getNrPixelsY()));
 		//		}
 
-		CalibrationWriter cal = new CalibrationWriter();
+		final CalibrationWriter cal = new CalibrationWriter();
 
 		if (spotList.hasPixelSize())
-		{
 			cal.setNmPerPixel(spotList.getPixelSize());
-		}
 		if (spotList.getEcfCount() >= channel)
 		{
 			// ECF is per channel
-			double ecf = spotList.getEcf(channel - 1);
+			final double ecf = spotList.getEcf(channel - 1);
 			// QE is per fluorophore type
-			double qe = (spotList.getQeCount() >= fluorophoreType) ? spotList.getQe(fluorophoreType - 1) : 1;
+			final double qe = (spotList.getQeCount() >= fluorophoreType) ? spotList.getQe(fluorophoreType - 1) : 1;
 			// e-/photon / e-/count => count/photon
 			cal.setCountPerPhoton(qe / ecf);
 			cal.setQuantumEfficiency(qe);
@@ -510,14 +478,12 @@ public class TSFPeakResultsReader
 			// perfect dataset reconstruction
 
 			if (spotList.hasSource())
-			{
 				// Deserialise
 				results.setSource(ImageSource.fromXML(spotList.getSource()));
-			}
 
 			if (spotList.hasRoi())
 			{
-				ROI roi = spotList.getRoi();
+				final ROI roi = spotList.getRoi();
 				if (roi.hasX() && roi.hasY() && roi.hasXWidth() && roi.hasYWidth())
 					results.setBounds(new Rectangle(roi.getX(), roi.getY(), roi.getXWidth(), roi.getYWidth()));
 			}
@@ -536,25 +502,21 @@ public class TSFPeakResultsReader
 				cal.setCameraType(null);
 
 			if (spotList.hasConfiguration())
-			{
 				results.setConfiguration(spotList.getConfiguration());
-			}
 			// Allow restoring the GDSC PSF exactly
 			if (spotList.hasPSF())
-			{
 				try
 				{
-					Parser parser = JsonFormat.parser();
-					PSF.Builder psfBuilder = PSF.newBuilder();
+					final Parser parser = JsonFormat.parser();
+					final PSF.Builder psfBuilder = PSF.newBuilder();
 					parser.merge(spotList.getPSF(), psfBuilder);
 					results.setPSF(psfBuilder.build());
 				}
-				catch (InvalidProtocolBufferException e)
+				catch (final InvalidProtocolBufferException e)
 				{
 					// This should be OK
 					System.err.println("Unable to deserialise the PSF settings");
 				}
-			}
 		}
 
 		if (spotList.hasLocationUnits())
@@ -572,19 +534,15 @@ public class TSFPeakResultsReader
 		{
 			cal.setIntensityUnit(intensityUnitsMap[spotList.getIntensityUnits().ordinal()]);
 			if (!spotList.hasGain() && spotList.getIntensityUnits() != IntensityUnits.COUNTS)
-			{
 				System.err.println(
 						"TSF intensity units are not counts and no gain calibration is available. The dataset will be constructed in the native units: " +
 								spotList.getIntensityUnits());
-			}
 		}
 		else
 			cal.setIntensityUnit(null);
 
 		if (spotList.hasThetaUnits())
-		{
 			cal.setAngleUnit(thetaUnitsMap[spotList.getThetaUnits().ordinal()]);
-		}
 		else
 			cal.setAngleUnit(null);
 
@@ -715,28 +673,22 @@ public class TSFPeakResultsReader
 		if (!isMulti())
 			return null;
 
-		ResultOption[] options = new ResultOption[4];
+		final ResultOption[] options = new ResultOption[4];
 		int count = 0;
 
 		if (spotList.getNrChannels() > 1)
-		{
 			options[count++] = createOption(1, "Channel", spotList.getNrChannels(), 1, false);
-		}
 		if (spotList.getNrSlices() > 1)
-		{
 			options[count++] = createOption(2, "Slice", spotList.getNrSlices(), 0, true);
-		}
 		if (spotList.getNrPos() > 1)
-		{
 			options[count++] = createOption(3, "Position", spotList.getNrPos(), 0, true);
-		}
 		if (spotList.getFluorophoreTypesCount() > 1)
 		{
 			// Build a string for the allowed value to provide space for the description
-			String[] values = new String[spotList.getFluorophoreTypesCount()];
+			final String[] values = new String[spotList.getFluorophoreTypesCount()];
 			for (int i = 0; i < spotList.getFluorophoreTypesCount(); i++)
 			{
-				FluorophoreType type = spotList.getFluorophoreTypes(i);
+				final FluorophoreType type = spotList.getFluorophoreTypes(i);
 				String value = Integer.toString(type.getId());
 				if (type.hasDescription())
 					value += ":" + type.getDescription();
@@ -752,11 +704,9 @@ public class TSFPeakResultsReader
 
 	private static ResultOption createOption(int id, String name, int total, int value, boolean allowZero)
 	{
-		Integer[] values = new Integer[total + ((allowZero) ? 1 : 0)];
+		final Integer[] values = new Integer[total + ((allowZero) ? 1 : 0)];
 		for (int v = (allowZero) ? 0 : 1, i = 0; v <= total; v++)
-		{
 			values[i++] = v;
-		}
 		return new ResultOption(id, name, new Integer(value), values);
 	}
 
@@ -770,8 +720,7 @@ public class TSFPeakResultsReader
 	{
 		if (options == null)
 			return;
-		for (ResultOption option : options)
-		{
+		for (final ResultOption option : options)
 			switch (option.id)
 			{
 				case 1:
@@ -786,12 +735,11 @@ public class TSFPeakResultsReader
 				case 4:
 					String value = (String) option.getValue();
 					// Remove the appended description
-					int index = value.indexOf(':');
+					final int index = value.indexOf(':');
 					if (index != -1)
 						value = value.substring(0, index);
 					setFluorophoreType(Integer.parseInt(value));
 					break;
 			}
-		}
 	}
 }

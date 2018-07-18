@@ -198,7 +198,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	{
 		if (flags == 0)
 			return "";
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		//@formatter:off
 		if (areSet(flags, V_AMPLITUDE))	             append(sb, "Amplitude",        peak.getAmplitude());
 		if (areSet(flags, V_PHOTONS))                append(sb, "Signal",           peak.getSignal());
@@ -244,7 +244,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	{
 		if (flags == 0)
 			return "";
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		//@formatter:off
 		if (areSet(flags, V_AMPLITUDE))	             append(sb, "Amplitude");
 		if (areSet(flags, V_PHOTONS))                append(sb, "Signal");
@@ -317,7 +317,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	public float computeStrength(double[] lower, double[] upper)
 	{
 		double s = 0;
-		double[] p = getParameters();
+		final double[] p = getParameters();
 		for (int i = 0; i < p.length; i++)
 		{
 			final double range = upper[i] - lower[i];
@@ -326,13 +326,9 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 				continue;
 			final int o = lowerBoundOrientation(i);
 			if (o < 0)
-			{
 				s += (p[i] - lower[i]) / range;
-			}
 			else if (o > 0)
-			{
 				s += (upper[i] - p[i]) / range;
-			}
 		}
 		return (float) s;
 	}
@@ -379,17 +375,13 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		//int result = super.weakestUnsafe(o);
 
 		if (this.strength < o.strength)
-		{
 			//if (result >= 0)
 			//	System.out.println("Strength not same as weakest");
 			return -1;
-		}
 		if (this.strength > o.strength)
-		{
 			//if (result <= 0)
 			//	System.out.println("Strength not same as weakest");
 			return 1;
-		}
 		return super.weakestUnsafe(o);
 	}
 }

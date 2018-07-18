@@ -33,7 +33,7 @@ import org.apache.commons.math3.util.FastMath;
 public class SphericalDistribution implements SpatialDistribution
 {
 	private final double radius, r2, range;
-	private RandomGenerator randomGenerator;
+	private final RandomGenerator randomGenerator;
 	private boolean useRejectionMethod = true;
 	private final double[] origin = new double[3];
 
@@ -76,12 +76,8 @@ public class SphericalDistribution implements SpatialDistribution
 	@Override
 	public double[] next()
 	{
-		double[] xyz = new double[3];
+		final double[] xyz = new double[3];
 		if (radius > 0)
-		{
-			// See: http://math.stackexchange.com/questions/87230/
-			// picking-random-points-in-the-volume-of-sphere-with-uniform-probability
-
 			if (useRejectionMethod)
 			{
 				// -=-=-=-
@@ -92,11 +88,9 @@ public class SphericalDistribution implements SpatialDistribution
 				do
 				{
 					for (int i = 0; i < 3; i++)
-					{
 						//xyz[i] = randomGenerator.nextDouble() * ((randomGenerator.nextBoolean()) ? -radius : radius);
 						// Avoid extra call to the random generator
 						xyz[i] = randomGenerator.nextDouble() * range - radius;
-					}
 					d2 = xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2];
 				} while (d2 > r2);
 			}
@@ -109,9 +103,7 @@ public class SphericalDistribution implements SpatialDistribution
 
 				// Generate a random unit vector: X1, X2, X3 sampled with mean 0 and variance 1
 				for (int i = 0; i < 3; i++)
-				{
 					xyz[i] = randomGenerator.nextGaussian();
-				}
 
 				// Calculate the distance: RsU^1/3 / length
 				final double d = (radius * FastMath.cbrt(randomGenerator.nextDouble())) /
@@ -119,7 +111,6 @@ public class SphericalDistribution implements SpatialDistribution
 				for (int i = 0; i < 3; i++)
 					xyz[i] *= d;
 			}
-		}
 		return xyz;
 	}
 
@@ -176,9 +167,7 @@ public class SphericalDistribution implements SpatialDistribution
 	public void initialise(double[] xyz)
 	{
 		if (xyz != null && xyz.length > 2)
-		{
 			for (int i = 0; i < 3; i++)
 				origin[i] = xyz[i];
-		}
 	}
 }

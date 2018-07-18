@@ -76,7 +76,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public boolean isWeighted()
 	{
-		for (DataProcessor processor : processors)
+		for (final DataProcessor processor : processors)
 			if (processor.isWeighted())
 				return true;
 		return false;
@@ -90,7 +90,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
-		for (DataProcessor processor : processors)
+		for (final DataProcessor processor : processors)
 			processor.setWeights(weights, width, height);
 	}
 
@@ -102,7 +102,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public boolean hasWeights()
 	{
-		for (DataProcessor processor : processors)
+		for (final DataProcessor processor : processors)
 			if (processor.hasWeights())
 				return true;
 		return false;
@@ -126,9 +126,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 				sum[j] += data2[j];
 			final int[] maxIndices = getMaxima(data2, width, height);
 			for (final int index : maxIndices)
-			{
 				intensity[index] += data2[index];
-			}
 		}
 
 		// Note: A simple jury using any non-zero point in the maxima intensity will work if the background
@@ -145,14 +143,12 @@ public final class JurySpotFilter extends MaximaSpotFilter
 		int count = 0;
 		final Spot[] spots = new Spot[maxIndices.length];
 		for (int n = 0; n < maxIndices.length; n++)
-		{
 			if (intensity[maxIndices[n]] > 0)
 			{
 				final int y = maxIndices[n] / width;
 				final int x = maxIndices[n] % width;
 				spots[count++] = new Spot(x, y, sum[maxIndices[n]] * divisor);
 			}
-		}
 		return Arrays.copyOf(spots, count);
 	}
 
@@ -187,7 +183,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public JurySpotFilter clone()
 	{
-		JurySpotFilter f = (JurySpotFilter) super.clone();
+		final JurySpotFilter f = (JurySpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.processors = processors.clone();
 		for (int i = 0; i < processors.length; i++)
@@ -214,7 +210,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		for (int i = 0; i < processors.length; i++)
 			list.add("Filter = " + processors[i].getDescription());
 		return list;

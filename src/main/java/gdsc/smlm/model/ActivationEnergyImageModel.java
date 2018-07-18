@@ -116,10 +116,8 @@ public class ActivationEnergyImageModel extends ImageModel
 
 			e += photons[1]; // during energy
 			if (e > activation)
-			{
 				// Interpolate
 				return t + 1 - (e - activation) / photons[1];
-			}
 		}
 		return frames; // default to the number of frames.
 	}

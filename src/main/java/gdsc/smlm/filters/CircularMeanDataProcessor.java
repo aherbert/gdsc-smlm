@@ -100,7 +100,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
@@ -137,7 +137,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public CircularMeanDataProcessor clone()
 	{
-		CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
+		final CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.filter = filter.clone();
 		return f;
@@ -162,7 +162,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("radius = " + Utils.rounded(radius));
 		return list;
 	}

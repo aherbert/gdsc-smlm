@@ -83,26 +83,24 @@ public class MedianFilter implements PlugInFilter
 	@Override
 	public void run(ImageProcessor ip)
 	{
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 
-		ImageStack stack = imp.getImageStack();
+		final ImageStack stack = imp.getImageStack();
 
 		final int width = stack.getWidth();
 		final int height = stack.getHeight();
 		size = width * height;
-		float[][] imageStack = new float[stack.getSize()][];
-		float[] mean = new float[imageStack.length];
+		final float[][] imageStack = new float[stack.getSize()][];
+		final float[] mean = new float[imageStack.length];
 
 		// Get the mean for each frame and normalise the data using the mean
-		ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+		final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 		List<Future<?>> futures = new LinkedList<>();
 
 		counter = 0;
 		IJ.showStatus("Calculating means...");
 		for (int n = 1; n <= stack.getSize(); n++)
-		{
 			futures.add(threadPool.submit(new ImageNormaliser(stack, imageStack, mean, n)));
-		}
 
 		// Finish processing data
 		Utils.waitForCompletion(futures);
@@ -112,9 +110,7 @@ public class MedianFilter implements PlugInFilter
 		counter = 0;
 		IJ.showStatus("Calculating medians...");
 		for (int i = 0; i < size; i += blockSize)
-		{
 			futures.add(threadPool.submit(new ImageGenerator(imageStack, mean, i, FastMath.min(i + blockSize, size))));
-		}
 
 		// Finish processing data
 		Utils.waitForCompletion(futures);
@@ -127,33 +123,29 @@ public class MedianFilter implements PlugInFilter
 			counter = 0;
 			IJ.showStatus("Subtracting medians...");
 			for (int n = 1; n <= stack.getSize(); n++)
-			{
 				futures.add(threadPool.submit(new ImageFilter(stack, imageStack, n)));
-			}
 
 			// Finish processing data
 			Utils.waitForCompletion(futures);
 		}
 
 		// Update the image
-		ImageStack outputStack = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
+		final ImageStack outputStack = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
 		for (int n = 1; n <= stack.getSize(); n++)
-		{
 			outputStack.setPixels(imageStack[n - 1], n);
-		}
 
 		imp.setStack(outputStack);
 		imp.updateAndDraw();
 
 		IJ.showTime(imp, start, "Completed");
-		long milliseconds = System.currentTimeMillis() - start;
+		final long milliseconds = System.currentTimeMillis() - start;
 		Utils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius, interval, blockSize,
 				Utils.timeToString(milliseconds), Utils.timeToString((double) milliseconds / imp.getStackSize()));
 	}
 
 	private int showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(
@@ -234,11 +226,11 @@ public class MedianFilter implements PlugInFilter
 		{
 			showProgressSingle();
 
-			float[] data = imageStack[n - 1] = IJImageConverter.getData(inputStack.getProcessor(n));
+			final float[] data = imageStack[n - 1] = IJImageConverter.getData(inputStack.getProcessor(n));
 			double sum = 0;
-			for (float f : data)
+			for (final float f : data)
 				sum += f;
-			float av = mean[n - 1] = (float) (sum / data.length);
+			final float av = mean[n - 1] = (float) (sum / data.length);
 			for (int i = 0; i < data.length; i++)
 				data[i] /= av;
 		}
@@ -288,21 +280,17 @@ public class MedianFilter implements PlugInFilter
 					// The rolling window operates effectively in linear time so use this with an interval of 1.
 					// There is no need for interpolation and the data can be written directly to the output.
 					final int window = 2 * radius + 1;
-					float[] data = new float[window];
+					final float[] data = new float[window];
 					for (int slice = 0; slice < window; slice++)
-					{
 						data[slice] = imageStack[slice][start];
-					}
 
 					// Initialise the window with the first n frames.
-					MedianWindowDLLFloat mw = new MedianWindowDLLFloat(data);
+					final MedianWindowDLLFloat mw = new MedianWindowDLLFloat(data);
 
 					// Get the early medians.
 					int slice = 0;
 					for (; slice < radius; slice++)
-					{
 						imageStack[slice][start] = mw.getMedianOldest(slice + 1 + radius) * mean[slice];
-					}
 
 					// Then increment through the data getting the median when required.
 					for (int j = mw.getSize(); j < nSlices; j++, slice++)
@@ -313,20 +301,16 @@ public class MedianFilter implements PlugInFilter
 
 					// Then get the later medians as required.
 					for (int i = 2 * radius + 1; slice < nSlices; i--, slice++)
-					{
 						imageStack[slice][start] = mw.getMedianYoungest(i) * mean[slice];
-					}
 				}
 				else
 				{
-					float[] data = new float[nSlices];
+					final float[] data = new float[nSlices];
 					for (int slice = 0; slice < nSlices; slice++)
-					{
 						data[slice] = imageStack[slice][start];
-					}
 
 					// Create median window filter
-					MedianWindowFloat mw = new MedianWindowFloat(data.clone(), radius);
+					final MedianWindowFloat mw = new MedianWindowFloat(data.clone(), radius);
 
 					// Produce the medians
 					for (int slice = 0; slice < nSlices; slice += interval)
@@ -344,133 +328,102 @@ public class MedianFilter implements PlugInFilter
 					// Interpolate
 					for (int slice = 0; slice < nSlices; slice += interval)
 					{
-						int end = FastMath.min(slice + interval, nSlices - 1);
+						final int end = FastMath.min(slice + interval, nSlices - 1);
 						final float increment = (data[end] - data[slice]) / (end - slice);
 						for (int s = slice + 1, i = 1; s < end; s++, i++)
-						{
 							data[s] = data[slice] + increment * i;
-						}
 					}
 
 					// Put back in the image re-scaling using the image mean
 					for (int slice = 0; slice < nSlices; slice++)
-					{
 						imageStack[slice][start] = data[slice] * mean[slice];
-					}
 				}
+			}
+			else if (interval == 1)
+			{
+				// The rolling window operates effectively in linear time so use this with an interval of 1.
+				// There is no need for interpolation and the data can be written directly to the output.
+				final int window = 2 * radius + 1;
+				final float[][] data = new float[nPixels][window];
+				for (int slice = 0; slice < window; slice++)
+				{
+					final float[] sliceData = imageStack[slice];
+					for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
+						data[pixel][slice] = sliceData[i];
+				}
+
+				// Initialise the window with the first n frames.
+				final MedianWindowDLLFloat[] mw = new MedianWindowDLLFloat[nPixels];
+				for (int pixel = 0; pixel < nPixels; pixel++)
+					mw[pixel] = new MedianWindowDLLFloat(data[pixel]);
+
+				// Get the early medians.
+				int slice = 0;
+				for (; slice < radius; slice++)
+					for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
+						imageStack[slice][i] = mw[pixel].getMedianOldest(slice + 1 + radius) * mean[slice];
+
+				// Then increment through the data getting the median when required.
+				for (int j = mw[0].getSize(); j < nSlices; j++, slice++)
+					for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
+					{
+						imageStack[slice][i] = mw[pixel].getMedian() * mean[slice];
+						mw[pixel].add(imageStack[j][i]);
+					}
+
+				// Then get the later medians as required.
+				for (int i = 2 * radius + 1; slice < nSlices; i--, slice++)
+					for (int pixel = 0, ii = start; pixel < nPixels; pixel++, ii++)
+						imageStack[slice][ii] = mw[pixel].getMedianYoungest(i) * mean[slice];
 			}
 			else
 			{
-				if (interval == 1)
+				final float[][] data = new float[nPixels][nSlices];
+				for (int slice = 0; slice < nSlices; slice++)
 				{
-					// The rolling window operates effectively in linear time so use this with an interval of 1.
-					// There is no need for interpolation and the data can be written directly to the output.
-					final int window = 2 * radius + 1;
-					float[][] data = new float[nPixels][window];
-					for (int slice = 0; slice < window; slice++)
-					{
-						float[] sliceData = imageStack[slice];
-						for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
-						{
-							data[pixel][slice] = sliceData[i];
-						}
-					}
-
-					// Initialise the window with the first n frames.
-					MedianWindowDLLFloat[] mw = new MedianWindowDLLFloat[nPixels];
-					for (int pixel = 0; pixel < nPixels; pixel++)
-					{
-						mw[pixel] = new MedianWindowDLLFloat(data[pixel]);
-					}
-
-					// Get the early medians.
-					int slice = 0;
-					for (; slice < radius; slice++)
-					{
-						for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
-						{
-							imageStack[slice][i] = mw[pixel].getMedianOldest(slice + 1 + radius) * mean[slice];
-						}
-					}
-
-					// Then increment through the data getting the median when required.
-					for (int j = mw[0].getSize(); j < nSlices; j++, slice++)
-					{
-						for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
-						{
-							imageStack[slice][i] = mw[pixel].getMedian() * mean[slice];
-							mw[pixel].add(imageStack[j][i]);
-						}
-					}
-
-					// Then get the later medians as required.
-					for (int i = 2 * radius + 1; slice < nSlices; i--, slice++)
-					{
-						for (int pixel = 0, ii = start; pixel < nPixels; pixel++, ii++)
-							imageStack[slice][ii] = mw[pixel].getMedianYoungest(i) * mean[slice];
-					}
+					final float[] sliceData = imageStack[slice];
+					for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
+						data[pixel][slice] = sliceData[i];
 				}
-				else
-				{
-					float[][] data = new float[nPixels][nSlices];
-					for (int slice = 0; slice < nSlices; slice++)
-					{
-						float[] sliceData = imageStack[slice];
-						for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
-						{
-							data[pixel][slice] = sliceData[i];
-						}
-					}
 
-					// Create median window filter
-					MedianWindowFloat[] mw = new MedianWindowFloat[nPixels];
+				// Create median window filter
+				final MedianWindowFloat[] mw = new MedianWindowFloat[nPixels];
+				for (int pixel = 0; pixel < nPixels; pixel++)
+					mw[pixel] = new MedianWindowFloat(data[pixel].clone(), radius);
+
+				// Produce the medians
+				for (int slice = 0; slice < nSlices; slice += interval)
 					for (int pixel = 0; pixel < nPixels; pixel++)
 					{
-						mw[pixel] = new MedianWindowFloat(data[pixel].clone(), radius);
+						data[pixel][slice] = mw[pixel].getMedian();
+						mw[pixel].increment(interval);
+					}
+				// Final position if necessary
+				if (mw[0].getPosition() != nSlices + interval - 1)
+					for (int pixel = 0; pixel < nPixels; pixel++)
+					{
+						mw[pixel].setPosition(nSlices - 1);
+						data[pixel][nSlices - 1] = mw[pixel].getMedian();
 					}
 
-					// Produce the medians
-					for (int slice = 0; slice < nSlices; slice += interval)
-					{
+				// Interpolate
+				final float[] increment = new float[nPixels];
+				for (int slice = 0; slice < nSlices; slice += interval)
+				{
+					final int end = FastMath.min(slice + interval, nSlices - 1);
+					for (int pixel = 0; pixel < nPixels; pixel++)
+						increment[pixel] = (data[pixel][end] - data[pixel][slice]) / (end - slice);
+					for (int s = slice + 1, i = 1; s < end; s++, i++)
 						for (int pixel = 0; pixel < nPixels; pixel++)
-						{
-							data[pixel][slice] = mw[pixel].getMedian();
-							mw[pixel].increment(interval);
-						}
-					}
-					// Final position if necessary
-					if (mw[0].getPosition() != nSlices + interval - 1)
-					{
-						for (int pixel = 0; pixel < nPixels; pixel++)
-						{
-							mw[pixel].setPosition(nSlices - 1);
-							data[pixel][nSlices - 1] = mw[pixel].getMedian();
-						}
-					}
+							data[pixel][s] = data[pixel][slice] + increment[pixel] * i;
+				}
 
-					// Interpolate
-					float[] increment = new float[nPixels];
-					for (int slice = 0; slice < nSlices; slice += interval)
-					{
-						int end = FastMath.min(slice + interval, nSlices - 1);
-						for (int pixel = 0; pixel < nPixels; pixel++)
-							increment[pixel] = (data[pixel][end] - data[pixel][slice]) / (end - slice);
-						for (int s = slice + 1, i = 1; s < end; s++, i++)
-						{
-							for (int pixel = 0; pixel < nPixels; pixel++)
-								data[pixel][s] = data[pixel][slice] + increment[pixel] * i;
-						}
-					}
-
-					// Put back in the image re-scaling using the image mean
-					for (int slice = 0; slice < nSlices; slice++)
-					{
-						float[] sliceData = imageStack[slice];
-						for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
-						{
-							sliceData[i] = data[pixel][slice] * mean[slice];
-						}
-					}
+				// Put back in the image re-scaling using the image mean
+				for (int slice = 0; slice < nSlices; slice++)
+				{
+					final float[] sliceData = imageStack[slice];
+					for (int pixel = 0, i = start; pixel < nPixels; pixel++, i++)
+						sliceData[i] = data[pixel][slice] * mean[slice];
 				}
 			}
 		}

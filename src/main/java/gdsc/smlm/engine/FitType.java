@@ -191,7 +191,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #MULTI} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getMulti()
@@ -201,7 +201,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #MULTI_OK} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getMultiOK()
@@ -211,7 +211,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #MULTI_DOUBLET} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getMultiDoublet()
@@ -221,7 +221,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #MULTI_DOUBLET_OK} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getMultiDoubletOK()
@@ -231,7 +231,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #DOUBLET} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getDoublet()
@@ -241,7 +241,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #DOUBLET_OK} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getDoubletOK()
@@ -251,7 +251,7 @@ public class FitType implements Cloneable
 
 	/**
 	 * Gets whether the {@link #OK} flag is set to enabled/disabled.
-	 * 
+	 *
 	 * @return Set to true if enabled
 	 */
 	public boolean getOK()
@@ -264,7 +264,7 @@ public class FitType implements Cloneable
 	{
 		if (flags == 0)
 			return "None";
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		append(sb, getMulti(), "Multi");
 		append(sb, getMultiOK(), "MultiOK");
 		append(sb, getMultiDoublet(), "MultiDoublet");
@@ -300,7 +300,7 @@ public class FitType implements Cloneable
 		{
 			return (FitType) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

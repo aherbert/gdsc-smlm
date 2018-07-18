@@ -74,7 +74,7 @@ public class GUIProtosHelper
 	public static final PSFCalculatorSettings defaultPSFCalculatorSettings;
 	static
 	{
-		PSFCalculatorSettings.Builder builder = PSFCalculatorSettings.newBuilder();
+		final PSFCalculatorSettings.Builder builder = PSFCalculatorSettings.newBuilder();
 		builder.setPixelPitch(6.45);
 		builder.setMagnification(63);
 		builder.setBeamExpander(1);
@@ -89,7 +89,7 @@ public class GUIProtosHelper
 	public static final PSFEstimatorSettings defaultPSFEstimatorSettings;
 	static
 	{
-		PSFEstimatorSettings.Builder builder = PSFEstimatorSettings.newBuilder();
+		final PSFEstimatorSettings.Builder builder = PSFEstimatorSettings.newBuilder();
 		builder.setNumberOfPeaks(1000);
 		builder.setPValue(0.01);
 		builder.setUpdatePreferences(true);
@@ -104,7 +104,7 @@ public class GUIProtosHelper
 	public static final CreateDataSettings defaultCreateDataSettings;
 	static
 	{
-		CreateDataSettings.Builder builder = CreateDataSettings.newBuilder();
+		final CreateDataSettings.Builder builder = CreateDataSettings.newBuilder();
 		builder.setSize(512);
 		builder.setDepth(3000);
 		builder.setSeconds(100);
@@ -152,7 +152,7 @@ public class GUIProtosHelper
 	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings;
 	static
 	{
-		LoadLocalisationsSettings.Builder builder = LoadLocalisationsSettings.newBuilder();
+		final LoadLocalisationsSettings.Builder builder = LoadLocalisationsSettings.newBuilder();
 		builder.setFieldT(0);
 		builder.setFieldId(-1);
 		builder.setFieldX(1);
@@ -173,7 +173,7 @@ public class GUIProtosHelper
 	public static final ClusteringSettings defaultClusteringSettings;
 	static
 	{
-		ClusteringSettings.Builder builder = ClusteringSettings.newBuilder();
+		final ClusteringSettings.Builder builder = ClusteringSettings.newBuilder();
 		builder.setDistanceThreshold(50);
 		builder.setDistanceExclusion(0);
 		builder.setTimeThreshold(1);
@@ -201,7 +201,7 @@ public class GUIProtosHelper
 	public static final OpticsSettings defaultOpticsSettings;
 	static
 	{
-		OpticsSettings.Builder builder = OpticsSettings.newBuilder();
+		final OpticsSettings.Builder builder = OpticsSettings.newBuilder();
 		builder.setOpticsMode(OpticsMode.FAST_OPTICS.ordinal());
 		builder.setSampleMode(SampleMode.RANDOM.ordinal());
 		builder.setMinPoints(4);
@@ -218,7 +218,7 @@ public class GUIProtosHelper
 		builder.setOutlineMode(OutlineMode.COLOURED_BY_CLUSTER.ordinal());
 		builder.setSpanningTreeMode(SpanningTreeMode.OFF.ordinal());
 		builder.setLambda(3);
-		OpticsEventSettings.Builder b = builder.getOpticsEventSettingsBuilder();
+		final OpticsEventSettings.Builder b = builder.getOpticsEventSettingsBuilder();
 		b.setShowSelectionTable(true);
 		b.setTableCreateSelection(true);
 		b.setTableShowSelection(true);
@@ -233,7 +233,7 @@ public class GUIProtosHelper
 	public static final ConfigurationTemplateSettings defaultConfigurationTemplateSettings;
 	static
 	{
-		ConfigurationTemplateSettings.Builder builder = ConfigurationTemplateSettings.newBuilder();
+		final ConfigurationTemplateSettings.Builder builder = ConfigurationTemplateSettings.newBuilder();
 		builder.setSelectStandardTemplates(true);
 		builder.setSelectCustomDirectory(false);
 		builder.setConfigurationDirectory(System.getProperty("user.home") + File.separator + "gdsc.smlm");
@@ -244,7 +244,7 @@ public class GUIProtosHelper
 	public static final NucleusMaskSettings defaultNucleusMaskSettings;
 	static
 	{
-		NucleusMaskSettings.Builder builder = NucleusMaskSettings.newBuilder();
+		final NucleusMaskSettings.Builder builder = NucleusMaskSettings.newBuilder();
 		builder.setMode(1);
 		builder.setFieldWidth(512);
 		builder.setYDither(4);
@@ -259,7 +259,7 @@ public class GUIProtosHelper
 	public static final PSFCreatorSettings defaultPSFCreatorSettings;
 	static
 	{
-		PSFCreatorSettings.Builder builder = PSFCreatorSettings.newBuilder();
+		final PSFCreatorSettings.Builder builder = PSFCreatorSettings.newBuilder();
 		builder.setRadius(10);
 		builder.setAmplitudeFraction(0.2);
 		builder.setStartBackgroundFrames(5);
@@ -300,7 +300,7 @@ public class GUIProtosHelper
 	public static final CameraModelAnalysisSettings defaultCameraModelAnalysisSettings;
 	static
 	{
-		CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
+		final CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
 		builder.setPhotons(10);
 		// Note that the total gain is likely to be very different if using EM-CCD/CCD/sCMOS
 		// so these are separate.
@@ -328,7 +328,7 @@ public class GUIProtosHelper
 	public static final CameraModelFisherInformationAnalysisSettings defaultCameraModelFisherInformationAnalysisSettings;
 	static
 	{
-		CameraModelFisherInformationAnalysisSettings.Builder builder = CameraModelFisherInformationAnalysisSettings
+		final CameraModelFisherInformationAnalysisSettings.Builder builder = CameraModelFisherInformationAnalysisSettings
 				.newBuilder();
 		builder.setMinExponent(-6);
 		builder.setMaxExponent(2);
@@ -346,7 +346,7 @@ public class GUIProtosHelper
 	public static final CubicSplineManagerSettings defaultCubicSplineManagerSettings;
 	static
 	{
-		CubicSplineManagerSettings.Builder builder = CubicSplineManagerSettings.newBuilder();
+		final CubicSplineManagerSettings.Builder builder = CubicSplineManagerSettings.newBuilder();
 		builder.setMagnification(3);
 		builder.setScale(2);
 		defaultCubicSplineManagerSettings = builder.build();
@@ -356,7 +356,7 @@ public class GUIProtosHelper
 	public static final FailCountManagerSettings defaultFailCountManagerSettings;
 	static
 	{
-		FailCountManagerSettings.Builder builder = FailCountManagerSettings.newBuilder();
+		final FailCountManagerSettings.Builder builder = FailCountManagerSettings.newBuilder();
 		builder.setMaxFrames(100);
 		builder.setFailCountLimit(50);
 		builder.setTargetPassFraction(0.9);
@@ -391,18 +391,18 @@ public class GUIProtosHelper
 	public static final AstigmatismModelManagerSettings defaultAstigmatismModelManagerSettings;
 	static
 	{
-		AstigmatismModelManagerSettings.Builder builder = AstigmatismModelManagerSettings.newBuilder();
+		final AstigmatismModelManagerSettings.Builder builder = AstigmatismModelManagerSettings.newBuilder();
 		builder.setSmoothing(0.2);
 		builder.setWeightedFit(true);
 		builder.setSaveFitWidth(true);
 		builder.setSaveModel(true);
-		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
+		final FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
 
 		// Adjust for a wider fit range
 		b.getFittingBuilder().setValue(10).setAbsolute(true);
 
 		// Simple filter
-		FilterSettings.Builder fb = b.getFitSettingsBuilder().getFilterSettingsBuilder();
+		final FilterSettings.Builder fb = b.getFitSettingsBuilder().getFilterSettingsBuilder();
 		fb.setSmartFilter(false);
 		fb.setDisableSimpleFilter(false);
 		fb.setShiftFactor(2);
@@ -423,7 +423,7 @@ public class GUIProtosHelper
 	public static final ImageJ3DResultsViewerSettings defaultImageJ3DResultsViewerSettings;
 	static
 	{
-		ImageJ3DResultsViewerSettings.Builder builder = ImageJ3DResultsViewerSettings.newBuilder();
+		final ImageJ3DResultsViewerSettings.Builder builder = ImageJ3DResultsViewerSettings.newBuilder();
 		builder.setNewWindow(false);
 		builder.setTransparency(0.65);
 		builder.setLut(LutColour.FIRE_GLOW.ordinal());
@@ -441,7 +441,7 @@ public class GUIProtosHelper
 		builder.setDitherSeed(123456789);
 		builder.setNameOption(1);
 		builder.setNameSuffix(" Cropped");
-		ResultsTableSettings.Builder resultsTableSettings = builder.getResultsTableSettingsBuilder();
+		final ResultsTableSettings.Builder resultsTableSettings = builder.getResultsTableSettingsBuilder();
 		resultsTableSettings.setDistanceUnit(DistanceUnit.NM);
 		resultsTableSettings.setShowTable(true);
 		defaultImageJ3DResultsViewerSettings = builder.build();
@@ -451,7 +451,7 @@ public class GUIProtosHelper
 	public static final SpotFitSettings defaultSpotFitSettings;
 	static
 	{
-		SpotFitSettings.Builder builder = SpotFitSettings.newBuilder();
+		final SpotFitSettings.Builder builder = SpotFitSettings.newBuilder();
 		builder.setChannel(1);
 		builder.setSearchRadius(3);
 		builder.setFitRadius(10);

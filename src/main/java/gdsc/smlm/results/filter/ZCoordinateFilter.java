@@ -59,7 +59,7 @@ public class ZCoordinateFilter extends DirectFilter
 	{
 		if (maxZ < minZ)
 		{
-			float f = maxZ;
+			final float f = maxZ;
 			maxZ = minZ;
 			minZ = f;
 		}

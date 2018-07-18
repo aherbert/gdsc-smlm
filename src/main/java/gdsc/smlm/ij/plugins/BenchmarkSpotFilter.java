@@ -316,9 +316,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.param = param;
 			this.search = search;
 			if (param2 > 0)
-			{
 				this.param2 = param2;
-			}
 		}
 
 		public double getScore(int i)
@@ -359,12 +357,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		public String getName()
 		{
 			if (param2 > 0)
-			{
 				return String.format("Difference %s (@%s):%d", dataFilter.toString(),
 						// param2 was absolute so convert to relative since the name is used in relative plots
 						Maths.roundUsingDecimalPlacesToBigDecimal(param2 / config.getHWHMMin(), 3).toPlainString(),
 						search);
-			}
 			return String.format("Single %s:%d", dataFilter.toString(), search);
 		}
 	}
@@ -602,7 +598,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			{
 				while (true)
 				{
-					Integer job = jobs.take();
+					final Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
 						break;
 					if (!finished)
@@ -610,7 +606,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						run(job.intValue());
 				}
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				System.out.println(e.toString());
 				throw new RuntimeException(e);
@@ -632,7 +628,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			showProgress();
 
 			// Extract the data
-			PSFSpot[] actual = getCoordinates(originalCoordinates, frame);
+			final PSFSpot[] actual = getCoordinates(originalCoordinates, frame);
 			coordinates.put(frame, actual);
 
 			if (actual.length == 0)
@@ -644,8 +640,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			// In practice this will be any spot within 2SD1 + 2SD2.
 
 			// Pre-compute the adjusted pixel widths for each PSF
-			double[] sa = new double[actual.length];
-			double[] sa2 = new double[actual.length];
+			final double[] sa = new double[actual.length];
+			final double[] sa2 = new double[actual.length];
 			for (int i = 0; i < actual.length; i++)
 			{
 				sa[i] = PSFCalculator.squarePixelAdjustment(
@@ -653,7 +649,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				sa2[i] = 2 * sa[i];
 			}
 
-			double[] allParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * actual.length];
+			final double[] allParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * actual.length];
 			final int flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;
 			for (int i = 0; i < actual.length; i++)
 			{
@@ -680,12 +676,12 @@ public class BenchmarkSpotFilter implements PlugIn
 						// Initialise a Gaussian2D function for i
 						if (overlapAnalysis == null)
 						{
-							double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+							final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 							params[Gaussian2DFunction.SIGNAL] = actual[i].peakResult.getIntensity();
 							params[Gaussian2DFunction.X_POSITION] = cx;
 							params[Gaussian2DFunction.Y_POSITION] = cy;
 							params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sa[i];
-							int maxx = GaussianOverlapAnalysis.getRange(sa[i], 2);
+							final int maxx = GaussianOverlapAnalysis.getRange(sa[i], 2);
 							overlapAnalysis = new GaussianOverlapAnalysis(flags, null, params, maxx, maxx);
 						}
 
@@ -724,27 +720,25 @@ public class BenchmarkSpotFilter implements PlugIn
 		 */
 		public PSFSpot[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t)
 		{
-			ArrayList<Coordinate> list1 = coords.get(t);
+			final ArrayList<Coordinate> list1 = coords.get(t);
 			if (list1 != null)
 			{
-				PSFSpot[] list2 = new PSFSpot[list1.size()];
+				final PSFSpot[] list2 = new PSFSpot[list1.size()];
 				int i = 0;
-				for (Coordinate c : list1)
+				for (final Coordinate c : list1)
 				{
-					PeakResultPoint p = (PeakResultPoint) c;
-					PSFSpot spot = new PSFSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
+					final PeakResultPoint p = (PeakResultPoint) c;
+					final PSFSpot spot = new PSFSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
 					list2[i++] = spot;
 
 					// Compute the amplitude.
-					float[] params = spot.peakResult.getParameters();
+					final float[] params = spot.peakResult.getParameters();
 					spot.amplitude = calculator.getPixelAmplitude(params);
 				}
 				return list2;
 			}
 			else
-			{
 				return new PSFSpot[0];
-			}
 		}
 	}
 
@@ -773,9 +767,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Do not assume that cloning will preserve the weights
 			if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
-			{
 				this.spotFilter.setWeights(weights, bounds.width, bounds.height);
-			}
 		}
 
 		/*
@@ -790,7 +782,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			{
 				while (true)
 				{
-					Integer job = jobs.take();
+					final Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
 						break;
 					if (!finished)
@@ -798,7 +790,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						run(job.intValue());
 				}
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				System.out.println(e.toString());
 				throw new RuntimeException(e);
@@ -834,7 +826,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			cameraModel.removeBiasAndGain(data);
 
-			long start = System.nanoTime();
+			final long start = System.nanoTime();
 			Spot[] spots = spotFilter.rank(data, stack.getWidth(), stack.getHeight());
 			time += System.nanoTime() - start;
 
@@ -870,7 +862,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				final int ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
 				// Create a Tukey window weighting from the border to the edge.
 				// The type of weighting could be user configurable, e.g. Hard, Tukey, Linear, etc.
-				RampedScore weighting = new RampedScore(0, analysisBorder);
+				final RampedScore weighting = new RampedScore(0, analysisBorder);
 				for (int i = 0; i < actual.length; i++)
 				{
 					final PSFSpot c = actual[i];
@@ -890,7 +882,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Create smaller arrays using only those with a weighting of 1.
 				if (hardBorder)
 				{
-					PSFSpot[] actual2 = new PSFSpot[actual.length];
+					final PSFSpot[] actual2 = new PSFSpot[actual.length];
 					int j = 0;
 					for (int i = 0; i < actual.length; i++)
 						if (actualWeight[i] == 1)
@@ -900,7 +892,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						}
 					actual = Arrays.copyOf(actual2, j);
 
-					Spot[] spots2 = new Spot[spots.length];
+					final Spot[] spots2 = new Spot[spots.length];
 					j = 0;
 					for (int i = 0; i < spots.length; i++)
 						if (spotsWeight[i] == 1)
@@ -921,7 +913,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				Arrays.fill(spotsWeight, 1);
 			}
 
-			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
+			final ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			FractionClassificationResult result;
 
 			// Store the count of false positives since the last true positive
@@ -931,7 +923,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			final boolean[] actualAssignment = new boolean[nActual];
 			if (actual.length > 0)
 			{
-				SpotCoordinate[] predicted = getCoordinates(spots);
+				final SpotCoordinate[] predicted = getCoordinates(spots);
 
 				// Use the distance to the true location to score the candidate
 				final RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
@@ -944,7 +936,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// This is used to raise the spot intensity when computing the signal factor.
 
 				// Compute assignments
-				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(predicted.length * 3);
+				final TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(predicted.length * 3);
 
 				final double dmin = matchDistance * matchDistance;
 				final int nPredicted = predicted.length;
@@ -980,13 +972,11 @@ public class BenchmarkSpotFilter implements PlugIn
 
 							double distance = 1 - s;
 							if (distance == 0)
-							{
 								// In the case of a match below the distance and signal factor thresholds
 								// the distance will be 0. To distinguish between candidates all below
 								// the thresholds just take the closest.
 								// We know d2 is below dmin so we subtract the delta.
 								distance -= (dmin - d2);
-							}
 
 							// Store the match
 							fractionalAssignments.add(new ImmutableFractionalAssignment(i, j, distance, s));
@@ -994,7 +984,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					}
 				}
 
-				FractionalAssignment[] assignments = fractionalAssignments
+				final FractionalAssignment[] assignments = fractionalAssignments
 						.toArray(new FractionalAssignment[fractionalAssignments.size()]);
 				// sort the assignments
 				AssignmentComparator.sort(assignments);
@@ -1008,7 +998,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					// Spots can match as many actual results as they can, first match wins
 					int nA = nActual;
 
-					for (FractionalAssignment a : assignments)
+					for (final FractionalAssignment a : assignments)
 					{
 						final int i = a.getTargetId();
 						if (!actualAssignment[i])
@@ -1040,7 +1030,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					{
 						processAgain = false;
 						final boolean[] predictedAssignment = new boolean[nPredicted];
-						for (FractionalAssignment a : assignments)
+						for (final FractionalAssignment a : assignments)
 						{
 							final int i = a.getTargetId();
 							if (!actualAssignment[i])
@@ -1076,7 +1066,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					int nP = nPredicted;
 					int nA = nActual;
 
-					for (FractionalAssignment a : assignments)
+					for (final FractionalAssignment a : assignments)
 					{
 						final int i = a.getTargetId();
 						if (!actualAssignment[i])
@@ -1125,23 +1115,17 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				// Store the number of fails (negatives) before each positive
 				for (int i = 0; i < spots.length; i++)
-				{
 					if (scoredSpots[i] == null)
-					{
 						scoredSpots[i] = new ScoredSpot(false, spots[i], background, fails++);
-					}
 					else
 					{
 						scoredSpots[i].fails = fails++;
 						if (scoredSpots[i].match)
-						{
 							//if (fails > 60)
 							//	System.out.printf("%d @ %d : %d,%d\n", fails, frame, scoredSpots[i].spot.x,
 							//		scoredSpots[i].spot.y);
 							fails = 0;
-						}
 					}
-				}
 			}
 			else
 			{
@@ -1149,16 +1133,12 @@ public class BenchmarkSpotFilter implements PlugIn
 				// All spots are false positives
 				result = new FractionClassificationResult(0, spotsLength, 0, 0);
 				for (int i = 0; i < spots.length; i++)
-				{
 					scoredSpots[i] = new ScoredSpot(false, spots[i], background, fails++);
-				}
 			}
 
 			if (debug)
-			{
 				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame, actualLength,
 						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
-			}
 
 			results.put(frame, new FilterResult(frame, result, scoredSpots, actual, actualAssignment));
 		}
@@ -1188,7 +1168,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		private SpotCoordinate[] getCoordinates(Spot[] spots)
 		{
-			SpotCoordinate[] coords = new SpotCoordinate[spots.length];
+			final SpotCoordinate[] coords = new SpotCoordinate[spots.length];
 			for (int i = 0; i < spots.length; i++)
 				coords[i] = new SpotCoordinate(spots[i]);
 			return coords;
@@ -1251,12 +1231,12 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// This plugin is heavily reliant on the results being represented as a
 			// Gaussian2D function.
-			int flags = Gaussian2DPeakResultHelper.AMPLITUDE | Gaussian2DPeakResultHelper.PIXEL_AMPLITUDE;
+			final int flags = Gaussian2DPeakResultHelper.AMPLITUDE | Gaussian2DPeakResultHelper.PIXEL_AMPLITUDE;
 			calculator = Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
 
 			cameraModel = CreateData.getCameraModel(simulationParameters);
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			IJ.error(TITLE, "Bad configuration: " + e.getMessage());
 			return;
@@ -1283,18 +1263,18 @@ public class BenchmarkSpotFilter implements PlugIn
 			final int limit = (int) Math.floor(3 * sd);
 
 			// This should be in integers otherwise we may repeat search box sizes
-			int[] searchParam = SimpleArrayUtils.newArray(maxSearch - minSearch + 1, minSearch, 1);
+			final int[] searchParam = SimpleArrayUtils.newArray(maxSearch - minSearch + 1, minSearch, 1);
 
 			// Continuous parameters
-			double[] pEmpty = new double[0];
-			double[] mParam = (batchMean) ? getRange(limit, 0.05) : pEmpty;
-			double[] gParam = (batchGaussian) ? getRange(limit, 0.05) : pEmpty;
+			final double[] pEmpty = new double[0];
+			final double[] mParam = (batchMean) ? getRange(limit, 0.05) : pEmpty;
+			final double[] gParam = (batchGaussian) ? getRange(limit, 0.05) : pEmpty;
 
 			// Less continuous parameters
-			double[] cParam = (batchCircular) ? getRange(limit, 0.5) : pEmpty;
+			final double[] cParam = (batchCircular) ? getRange(limit, 0.5) : pEmpty;
 
 			// Discrete parameters
-			double[] medParam = (batchMedian) ? getRange(limit, 1) : pEmpty;
+			final double[] medParam = (batchMedian) ? getRange(limit, 1) : pEmpty;
 
 			setupProgress(imp.getImageStackSize() * searchParam.length *
 					(mParam.length + gParam.length + cParam.length + medParam.length), "Frame");
@@ -1304,22 +1284,16 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (differenceFilter && differenceSmooth > 0)
 			{
 				if (filterRelativeDistances)
-				{
 					// Convert to absolute for batch run
 					param2 = Maths.roundUsingDecimalPlaces(differenceSmooth * config.getHWHMMin(), 3);
-				}
 				else
-				{
 					// Already an absolute value
 					param2 = differenceSmooth;
-				}
 				config.setDataFilterType(DataFilterType.DIFFERENCE);
 			}
 			else
-			{
 				config.setDataFilterType(DataFilterType.SINGLE);
-			}
-			for (int search : searchParam)
+			for (final int search : searchParam)
 			{
 				// Batch runs use absolute distance
 				config.setSearch(search, true);
@@ -1342,8 +1316,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				return;
 
 			// Analysis options
-			GenericDialog gd = new GenericDialog(TITLE);
-			boolean haveCached = cachedBatchResults.size() > batchResults.size();
+			final GenericDialog gd = new GenericDialog(TITLE);
+			final boolean haveCached = cachedBatchResults.size() > batchResults.size();
 			if (haveCached)
 				gd.addCheckbox("Use_cached_results", useCached);
 
@@ -1421,7 +1395,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private BatchResult[] addToCache(DataFilterMethod dataFilter, double[] param, int search, double param2)
 	{
-		for (BatchResult[] batchResult : cachedBatchResults)
+		for (final BatchResult[] batchResult : cachedBatchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
@@ -1429,7 +1403,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					batchResult[0].param2 == param2)
 				return batchResult;
 		}
-		BatchResult[] batchResult = run(dataFilter, param, search, param2);
+		final BatchResult[] batchResult = run(dataFilter, param, search, param2);
 		if (batchResult != null)
 			cachedBatchResults.add(batchResult);
 		return batchResult;
@@ -1440,18 +1414,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (!batchPlot[i])
 			return;
 
-		Color[] colors = new Color[] { Color.red, Color.gray, Color.green, Color.blue, Color.magenta };
+		final Color[] colors = new Color[] { Color.red, Color.gray, Color.green, Color.blue, Color.magenta };
 
-		String name = batchPlotNames[i];
-		String title = TITLE + " Performance " + name;
-		Plot plot = new Plot(title, "Relative width", name);
+		final String name = batchPlotNames[i];
+		final String title = TITLE + " Performance " + name;
+		final Plot plot = new Plot(title, "Relative width", name);
 		final double scale = 1.0 / config.getHWHMMin();
-		for (BatchResult[] batchResult : batchResults)
+		for (final BatchResult[] batchResult : batchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
-			float[][] data = extractData(batchResult, i, scale);
-			int colorIndex = batchResult[0].dataFilter.ordinal();
+			final float[][] data = extractData(batchResult, i, scale);
+			final int colorIndex = batchResult[0].dataFilter.ordinal();
 			plot.setColor(colors[colorIndex]);
 			colors[colorIndex] = colors[colorIndex].darker();
 			plot.addPoints(data[0], data[1], null, (batchResult.length > 1) ? Plot.LINE : Plot.CIRCLE,
@@ -1461,7 +1435,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.addLegend(null);
 		if (name.contains("Time"))
 			plot.setAxisYLog(true);
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		plot.setLimitsToFit(true); // Seems to only work after drawing
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw);
@@ -1469,7 +1443,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static float[][] extractData(BatchResult[] batchResult, int index, double scale)
 	{
-		float[][] data = new float[2][batchResult.length];
+		final float[][] data = new float[2][batchResult.length];
 		for (int i = 0; i < batchResult.length; i++)
 		{
 			data[0][i] = (float) (batchResult[i].param * scale);
@@ -1482,21 +1456,19 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		// Support z-score of AUC and Max. Jaccard combined.
 		// For this wee need the statistics of the population of scores.
-		double[][] stats = getStats(batchResults);
+		final double[][] stats = getStats(batchResults);
 
 		double max = 0;
 		BatchResult best = null;
-		for (BatchResult[] batchResult : batchResults)
+		for (final BatchResult[] batchResult : batchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
-			double[] data = extractData(batchResult, selection, stats);
+			final double[] data = extractData(batchResult, selection, stats);
 			int maxi = 0;
 			for (int i = 1; i < batchResult.length; i++)
-			{
 				if (data[maxi] < data[i])
 					maxi = i;
-			}
 			if (max < data[maxi])
 			{
 				max = data[maxi];
@@ -1510,13 +1482,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Support difference filters second parameter
 			if (best.param2 > 0)
-			{
 				config.setDataFilterType(DataFilterType.DIFFERENCE);
-			}
 			else
-			{
 				config.setDataFilterType(DataFilterType.SINGLE);
-			}
 
 			// Note: All batch runs use absolute distances for search and filter smoothing parameters.
 			// The border parameter is already set as relative/absolute.
@@ -1531,10 +1499,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Convert the absolute distance to be relative to the PSF width
 				config.setDataFilter(best.dataFilter, Maths.roundUsingDecimalPlaces(best.param / hwhmMin, 3), false, 0);
 				if (best.param2 > 0)
-				{
 					config.setDataFilter(best.dataFilter, Maths.roundUsingDecimalPlaces(best.param2 / hwhmMin, 3),
 							false, 1);
-				}
 			}
 			else
 			{
@@ -1544,7 +1510,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					config.setDataFilter(best.dataFilter, best.param2, true, 1);
 			}
 
-			BenchmarkFilterResult result = run(config, true);
+			final BenchmarkFilterResult result = run(config, true);
 			getTable(true).flush();
 			return result;
 		}
@@ -1557,18 +1523,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (selection < 2)
 			return null;
 
-		double[][] stats = new double[2][2];
+		final double[][] stats = new double[2][2];
 		for (int index = 0; index < stats.length; index++)
 		{
-			Statistics s = new Statistics();
-			for (BatchResult[] batchResult : batchResults)
+			final Statistics s = new Statistics();
+			for (final BatchResult[] batchResult : batchResults)
 			{
 				if (batchResult == null || batchResult.length == 0)
 					continue;
 				for (int i = 0; i < batchResult.length; i++)
-				{
 					s.add(batchResult[i].getScore(index));
-				}
 			}
 			stats[index][0] = s.getMean();
 			stats[index][1] = s.getStandardDeviation();
@@ -1578,11 +1542,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static double[] extractData(BatchResult[] batchResult, int index, double[][] stats)
 	{
-		double[] data = new double[batchResult.length];
+		final double[] data = new double[batchResult.length];
 		for (int i = 0; i < batchResult.length; i++)
-		{
 			data[i] = getScore(batchResult[i], index, stats);
-		}
 		return data;
 	}
 
@@ -1600,19 +1562,17 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double[] getRange(final int limit, final double interval)
 	{
 		double[] param;
-		int c = (int) (limit / interval);
+		final int c = (int) (limit / interval);
 		param = new double[c];
 		for (int i = 1; i <= c; i++)
-		{
 			param[i - 1] = i * interval;
-		}
 		return param;
 	}
 
 	private BatchResult[] run(DataFilterMethod dataFilter, double[] param, int search, double param2)
 	{
 		progressPrefix = new BatchResult(null, dataFilter, 0, search, param2).getName();
-		TurboList<BatchResult> result = new TurboList<>();
+		final TurboList<BatchResult> result = new TurboList<>();
 
 		// Note: All batch runs use absolute distances for filter smoothing parameters
 
@@ -1629,11 +1589,11 @@ public class BenchmarkSpotFilter implements PlugIn
 			config.setDataFilter(dataFilter, param[i], true, 0);
 			try
 			{
-				BenchmarkFilterResult filterResult = run(config, false);
+				final BenchmarkFilterResult filterResult = run(config, false);
 				if (filterResult != null)
 					result.add(new BatchResult(filterResult, dataFilter, param[i], search, param2));
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				// This can occur during batch processing when the param2 argument is smaller than param
 				break;
@@ -1644,10 +1604,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
 		final double s = simulationParameters.s / simulationParameters.a;
 		final double sa = getSa() / simulationParameters.a;
@@ -1721,7 +1681,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Here we use PSF stored in the results if supported (i.e. a Gaussian).
 		// The results are likely to come from the CreateData simulation.
-		PSF psf = results.getPSF();
+		final PSF psf = results.getPSF();
 		if (PSFHelper.isGaussian2D(psf))
 			fitConfig.setPSF(results.getPSF());
 		else
@@ -1788,14 +1748,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (batchMode)
 		{
 			// Clear the cached results if the setting changed
-			Settings settings = new Settings(simulationParameters.id, filterRelativeDistances,
+			final Settings settings = new Settings(simulationParameters.id, filterRelativeDistances,
 					//search, maxSearch, // Ignore search distance for smart caching
 					border, scoreRelativeDistances, sAnalysisBorder, hardBorder, matchingMethod, upperDistance,
 					lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
 			if (!settings.equals(batchSettings))
-			{
 				cachedBatchResults.clear();
-			}
 			batchSettings = settings;
 		}
 		else
@@ -1825,14 +1783,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		if (analysisBorder > 0)
-		{
 			lastAnalysisBorder = new Rectangle(analysisBorder, analysisBorder, imp.getWidth() - 2 * analysisBorder,
 					imp.getHeight() - 2 * analysisBorder);
-		}
 		else
-		{
 			lastAnalysisBorder = new Rectangle(imp.getWidth(), imp.getHeight());
-		}
 
 		return true;
 	}
@@ -1861,11 +1815,9 @@ public class BenchmarkSpotFilter implements PlugIn
 	private synchronized void showProgress()
 	{
 		if (progress % stepProgress == 0)
-		{
 			//if (Utils.showStatus(String.format("%s: %d / %d", progressPrefix, progress, totalProgress)))
 			if (Utils.showStatus(progressPrefix))
 				IJ.showProgress(progress, totalProgress);
-		}
 		progress++;
 	}
 
@@ -1879,7 +1831,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (Utils.isInterrupted())
 			return null;
 
-		MaximaSpotFilter spotFilter = config.createSpotFilter();
+		final MaximaSpotFilter spotFilter = config.createSpotFilter();
 		//System.out.println(spotFilter.getDescription());
 
 		// Extract all the results in memory into a list per frame. This can be cached
@@ -1887,7 +1839,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// Always use float coordinates.
 			// The Worker adds a pixel offset for the spot coordinates.
-			TIntObjectHashMap<ArrayList<Coordinate>> coordinates = ResultsMatchCalculator.getCoordinates(results,
+			final TIntObjectHashMap<ArrayList<Coordinate>> coordinates = ResultsMatchCalculator.getCoordinates(results,
 					false);
 			actualCoordinates = new TIntObjectHashMap<>();
 			lastId = simulationParameters.id;
@@ -1903,12 +1855,12 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			final int nThreads = Prefs.getThreads();
 			final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-			List<OverlapWorker> workers = new LinkedList<>();
-			List<Thread> threads = new LinkedList<>();
+			final List<OverlapWorker> workers = new LinkedList<>();
+			final List<Thread> threads = new LinkedList<>();
 			for (int i = 0; i < nThreads; i++)
 			{
-				OverlapWorker worker = new OverlapWorker(jobs, coordinates);
-				Thread t = new Thread(worker);
+				final OverlapWorker worker = new OverlapWorker(jobs, coordinates);
+				final Thread t = new Thread(worker);
 				workers.add(worker);
 				threads.add(t);
 				t.start();
@@ -1929,9 +1881,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			});
 			// Finish all the worker threads by passing in a null job
 			for (int i = 0; i < threads.size(); i++)
-			{
 				put(jobs, -1);
-			}
 
 			// Wait for all to finish
 			for (int i = 0; i < threads.size(); i++)
@@ -1940,7 +1890,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				{
 					threads.get(i).join();
 				}
-				catch (InterruptedException e)
+				catch (final InterruptedException e)
 				{
 					e.printStackTrace();
 				}
@@ -1949,12 +1899,10 @@ public class BenchmarkSpotFilter implements PlugIn
 			threads.clear();
 
 			// For testing
-			SimpleRegression regression = new SimpleRegression(false);
-			for (PSFSpot[] spots : actualCoordinates.valueCollection())
-			{
-				for (PSFSpot spot : spots)
+			final SimpleRegression regression = new SimpleRegression(false);
+			for (final PSFSpot[] spots : actualCoordinates.valueCollection())
+				for (final PSFSpot spot : spots)
 					regression.addData(spot.amplitude, calculator.getAmplitude(spot.peakResult.getParameters()));
-			}
 			System.out.printf("PixelAmplitude vs Amplitude = %f, slope=%f, n=%d\n", regression.getR(),
 					regression.getSlope(), regression.getN());
 
@@ -1976,7 +1924,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// To allow the signal factor to be computed we need to lower the image by the background so
 				// that the intensities correspond to the results amplitude.
 				// Just assume the simulation background is uniform.
-				StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
+				final StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
 				s.getB();
 				resultsBackground = (float) (Maths.sum(s.background) / results.size());
 			}
@@ -1984,23 +1932,21 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		// Create the weights if needed
 		if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
-		{
 			if (weights == null)
 			{
 				bounds = cameraModel.getBounds();
 				weights = cameraModel.getNormalisedWeights(bounds);
 			}
-		}
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-		List<Worker> workers = new TurboList<>(nThreads);
-		List<Thread> threads = new TurboList<>(nThreads);
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		final List<Worker> workers = new TurboList<>(nThreads);
+		final List<Thread> threads = new TurboList<>(nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, spotFilter, background);
-			Thread t = new Thread(worker);
+			final Worker worker = new Worker(jobs, stack, spotFilter, background);
+			final Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
 			t.start();
@@ -2008,27 +1954,21 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Fit the frames
 		for (int i = 1; i <= stack.getSize(); i++)
-		{
 			put(jobs, i);
-		}
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
-		{
 			put(jobs, -1);
-		}
 
 		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
-		{
 			try
 			{
 				threads.get(i).join();
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
-		}
 		threads.clear();
 
 		if (Utils.isInterrupted())
@@ -2044,12 +1984,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		time = 0;
 		for (int i = 0; i < workers.size(); i++)
 		{
-			Worker w = workers.get(i);
+			final Worker w = workers.get(i);
 			time += w.time;
 			if (filterResults == null)
-			{
 				filterResults = w.results;
-			}
 			else
 			{
 				filterResults.putAll(w.results);
@@ -2065,7 +2003,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showStatus("Summarising results ...");
 
 		// Show a table of the results
-		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, batchSummary);
+		final BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, batchSummary);
 
 		if (!batchMode)
 			IJ.showStatus("");
@@ -2088,15 +2026,13 @@ public class BenchmarkSpotFilter implements PlugIn
 			@Override
 			public boolean execute(int peak, FilterResult filterResult)
 			{
-				for (ScoredSpot spot : filterResult.spots)
-				{
+				for (final ScoredSpot spot : filterResult.spots)
 					if (spot.match)
 					{
 						final float[] params = new float[] { 0, spot.getIntensity(), 0, spot.spot.x, spot.spot.y, 0,
 								0 };
 						results.add(peak, spot.spot.x, spot.spot.y, spot.getIntensity(), 0d, 0f, 0f, params, null);
 					}
-				}
 				return true;
 			}
 		});
@@ -2118,18 +2054,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			@Override
 			public boolean execute(int peak, FilterResult filterResult)
 			{
-				for (ScoredSpot spot : filterResult.spots)
-				{
+				for (final ScoredSpot spot : filterResult.spots)
 					if (spot.match)
-					{
 						data.add(spot.fails);
-					}
-				}
 				return true;
 			}
 		});
 
-		double[][] h = Maths.cumulativeHistogram(data.getValues(), true);
+		final double[][] h = Maths.cumulativeHistogram(data.getValues(), true);
 
 		filterResult.cumul = h;
 		filterResult.stats = data;
@@ -2139,23 +2071,23 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private void showFailuresPlot(BenchmarkFilterResult filterResult)
 	{
-		double[][] h = filterResult.cumul;
-		StoredData data = filterResult.stats;
+		final double[][] h = filterResult.cumul;
+		final StoredData data = filterResult.stats;
 
-		String xTitle = "Failures";
+		final String xTitle = "Failures";
 		final int id = Utils.showHistogram(TITLE, data, xTitle, 1, 0, 0);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(id);
 
-		String title = TITLE + " " + xTitle + " Cumulative";
-		Plot2 plot = new Plot2(title, xTitle, "Frequency");
-		double xMin = (data.size() == 0) ? 1 : h[0][0];
-		double xMax = (data.size() == 0) ? 1 : h[0][h[0].length - 1] + 1;
-		double xPadding = 0.05 * (xMax - xMin);
+		final String title = TITLE + " " + xTitle + " Cumulative";
+		final Plot2 plot = new Plot2(title, xTitle, "Frequency");
+		final double xMin = (data.size() == 0) ? 1 : h[0][0];
+		final double xMax = (data.size() == 0) ? 1 : h[0][h[0].length - 1] + 1;
+		final double xPadding = 0.05 * (xMax - xMin);
 		plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
 		plot.setColor(Color.blue);
 		plot.addPoints(h[0], h[1], Plot2.BAR);
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw);
 	}
@@ -2166,7 +2098,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			jobs.put(i);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			throw new RuntimeException("Unexpected interruption", e);
 		}
@@ -2175,7 +2107,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private BenchmarkFilterResult summariseResults(TIntObjectHashMap<FilterResult> filterResults,
 			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean batchSummary)
 	{
-		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
+		final BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
 
 		// Note:
 		// Although we can compute the TP/FP score as each additional spot is added
@@ -2195,7 +2127,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		// allow assessment of the candidate set handed to PeakFit. E.g. Threshold the image
 		// and only use candidates that are in the foreground region.
 
-		double[][] cumul = histogramFailures(filterResult);
+		final double[][] cumul = histogramFailures(filterResult);
 
 		// Create the overall match score
 		final double[] total = new double[3];
@@ -2212,14 +2144,15 @@ public class BenchmarkSpotFilter implements PlugIn
 				return true;
 			}
 		});
-		double tp = total[0], fp = total[1], fn = total[2];
-		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
+		double tp = total[0], fp = total[1];
+		final double fn = total[2];
+		final FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
 		// The number of actual results
 		final double n = (tp + fn);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
-		double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
+		final double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
 
 		// Create the benchmark settings and the fitting settings
 		sb.append(imp.getStackSize()).append('\t');
@@ -2228,7 +2161,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(w).append('\t');
 		sb.append(h).append('\t');
 		sb.append(Utils.rounded(n)).append('\t');
-		double density = (n / imp.getStackSize()) / (w * h) / (simulationParameters.a * simulationParameters.a / 1e6);
+		final double density = (n / imp.getStackSize()) / (w * h) / (simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append('\t');
 		sb.append(Utils.rounded(signal)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.s)).append('\t');
@@ -2250,8 +2183,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(spotFilter.getBorder()).append('\t');
 		sb.append(Utils.rounded(spotFilter.getSpread())).append('\t');
 		sb.append(config.getDataFilterMethod(0)).append('\t');
-		double param = config.getDataFilterParameterValue(0);
-		boolean absolute = config.getDataFilterParameterAbsolute(0);
+		final double param = config.getDataFilterParameterValue(0);
+		final boolean absolute = config.getDataFilterParameterAbsolute(0);
 		final double hwhmMin = config.getHWHMMin();
 		if (absolute)
 		{
@@ -2280,24 +2213,24 @@ public class BenchmarkSpotFilter implements PlugIn
 		Collections.sort(allSpots);
 
 		// Produce Recall, Precision, Jaccard for each cut of the spot candidates
-		double[] r = new double[allSpots.size() + 1];
-		double[] p = new double[r.length];
-		double[] j = new double[r.length];
-		double[] c = new double[r.length];
-		double[] truePositives = new double[r.length];
-		double[] falsePositives = new double[r.length];
-		double[] intensity = new double[r.length];
+		final double[] r = new double[allSpots.size() + 1];
+		final double[] p = new double[r.length];
+		final double[] j = new double[r.length];
+		final double[] c = new double[r.length];
+		final double[] truePositives = new double[r.length];
+		final double[] falsePositives = new double[r.length];
+		final double[] intensity = new double[r.length];
 		// Note: fn = n - tp
 		tp = fp = 0;
 		int i = 1;
 		p[0] = 1;
-		FastCorrelator corr = new FastCorrelator();
+		final FastCorrelator corr = new FastCorrelator();
 		double lastC = 0;
 		double[] i1 = new double[r.length];
 		double[] i2 = new double[r.length];
 		int ci = 0;
-		SimpleRegression regression = new SimpleRegression(false);
-		for (ScoredSpot s : allSpots)
+		final SimpleRegression regression = new SimpleRegression(false);
+		for (final ScoredSpot s : allSpots)
 		{
 			if (s.match)
 			{
@@ -2340,9 +2273,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			target *= recallFraction / 100.0;
 		int fractionIndex = 0;
 		while (fractionIndex < r.length && r[fractionIndex] < target)
-		{
 			fractionIndex++;
-		}
 		if (fractionIndex == r.length)
 			fractionIndex--;
 		sb.append('\t');
@@ -2352,10 +2283,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Output the match results at the maximum jaccard score
 		int maxIndex = 0;
 		for (int ii = 1; ii < r.length; ii++)
-		{
 			if (j[maxIndex] < j[ii])
 				maxIndex = ii;
-		}
 		sb.append('\t');
 		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0,
 				n - truePositives[maxIndex]), c[maxIndex]);
@@ -2391,7 +2320,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		else
 			sb.append("\t\t\t\t\t");
 
-		BufferedTextWindow resultsTable = getTable(batchSummary);
+		final BufferedTextWindow resultsTable = getTable(batchSummary);
 		resultsTable.append(sb.toString());
 
 		// Store results
@@ -2441,8 +2370,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					fy = new float[size];
 				}
 				int t = 0, f = 0;
-				for (ScoredSpot s : result.spots)
-				{
+				for (final ScoredSpot s : result.spots)
 					if (s.match)
 					{
 						if (showTP)
@@ -2451,15 +2379,11 @@ public class BenchmarkSpotFilter implements PlugIn
 							ty[t++] = s.spot.y + 0.5f;
 						}
 					}
-					else
+					else if (showFP)
 					{
-						if (showFP)
-						{
-							fx[f] = s.spot.x + 0.5f;
-							fy[f++] = s.spot.y + 0.5f;
-						}
+						fx[f] = s.spot.x + 0.5f;
+						fy[f++] = s.spot.y + 0.5f;
 					}
-				}
 				//tp += t;
 				//fp += f;
 				if (showTP)
@@ -2476,13 +2400,11 @@ public class BenchmarkSpotFilter implements PlugIn
 					final float[] ny = new float[actual.length];
 					int n = 0;
 					for (int i = 0; i < actual.length; i++)
-					{
 						if (!actualAssignment[i])
 						{
 							nx[n] = actual[i].getX();
 							ny[n++] = actual[i].getY();
 						}
-					}
 					//fn += n;
 					SpotFinderPreview.addRoi(result.frame, o, nx, ny, n, Color.yellow);
 				}
@@ -2497,32 +2419,30 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private void showPlot(BenchmarkFilterResult filterResult)
 	{
-		double[] r = filterResult.r;
-		double[] p = filterResult.p;
-		double[] j = filterResult.j;
-		double[] c = filterResult.c;
-		int fractionIndex = filterResult.fractionIndex;
-		int maxIndex = filterResult.maxIndex;
-		double auc = filterResult.auc;
-		double auc2 = filterResult.auc2;
-		double slope = filterResult.slope;
-		double[] i1 = filterResult.i1;
-		double[] i2 = filterResult.i2;
-		double[] intensity = filterResult.intensity;
+		final double[] r = filterResult.r;
+		final double[] p = filterResult.p;
+		final double[] j = filterResult.j;
+		final double[] c = filterResult.c;
+		final int fractionIndex = filterResult.fractionIndex;
+		final int maxIndex = filterResult.maxIndex;
+		final double auc = filterResult.auc;
+		final double auc2 = filterResult.auc2;
+		final double slope = filterResult.slope;
+		final double[] i1 = filterResult.i1;
+		final double[] i2 = filterResult.i2;
+		final double[] intensity = filterResult.intensity;
 
-		double[] rank = new double[intensity.length];
+		final double[] rank = new double[intensity.length];
 		final double topIntensity = (intensity.length == 1) ? 0 : intensity[1];
 		for (int i = 1; i < rank.length; i++)
-		{
 			if (rankByIntensity)
 				rank[i] = topIntensity - intensity[i];
 			else
 				rank[i] = i;
-		}
 
 		String title = TITLE + " Performance";
 		Plot2 plot = new Plot2(title, (rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
-		double[] limits = Maths.limits(rank);
+		final double[] limits = Maths.limits(rank);
 		plot.setLimits(limits[0], limits[1], 0, 1.05);
 		plot.setColor(Color.blue);
 		plot.addPoints(rank, p, Plot.LINE);
@@ -2542,7 +2462,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
 
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw);
 
@@ -2556,14 +2476,14 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
-		PlotWindow pw2 = Utils.display(title, plot);
+		final PlotWindow pw2 = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw2);
 
 		title = TITLE + " Intensity";
 		plot = new Plot2(title, "Candidate", "Spot");
-		double[] limits1 = Maths.limits(i1);
-		double[] limits2 = Maths.limits(i2);
+		final double[] limits1 = Maths.limits(i1);
+		final double[] limits2 = Maths.limits(i2);
 		plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
 		plot.addLabel(0, 0,
 				String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]), Utils.rounded(slope)));
@@ -2573,7 +2493,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
 		else
 			plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
-		PlotWindow pw3 = Utils.display(title, plot);
+		final PlotWindow pw3 = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw3);
 	}
@@ -2601,17 +2521,12 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		// Check if the double holds an integer count
 		if ((int) value == value)
-		{
 			sb.append((int) value);
-		}
+		else // Otherwise add the counts using at least 2 dp
+		if (value > 100)
+			sb.append(IJ.d2s(value));
 		else
-		{
-			// Otherwise add the counts using at least 2 dp
-			if (value > 100)
-				sb.append(IJ.d2s(value));
-			else
-				sb.append(Utils.rounded(value));
-		}
+			sb.append(Utils.rounded(value));
 		sb.append('\t');
 	}
 
@@ -2621,7 +2536,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (batchSummaryTable == null || !batchSummaryTable.isVisible())
 			{
-				TextWindow table = new TextWindow(TITLE + " Batch", createHeader(), "", 1000, 300);
+				final TextWindow table = new TextWindow(TITLE + " Batch", createHeader(), "", 1000, 300);
 				table.setVisible(true);
 				batchSummaryTable = new BufferedTextWindow(table);
 			}
@@ -2631,7 +2546,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (summaryTable == null || !summaryTable.isVisible())
 			{
-				TextWindow table = new TextWindow(TITLE, createHeader(), "", 1000, 300);
+				final TextWindow table = new TextWindow(TITLE, createHeader(), "", 1000, 300);
 				table.setVisible(true);
 				summaryTable = new BufferedTextWindow(table);
 			}
@@ -2641,7 +2556,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static String createHeader()
 	{
-		StringBuilder sb = new StringBuilder(
+		final StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tCamera\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
 		sb.append(
 				"Type\tSearch\tBorder\tWidth\tFilter\tAbs.Param\tRel.Param\tDescription\tA.Border\tMatching\tlower d\td\tlower sf\tsf");
@@ -2670,13 +2585,13 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (filterResult == null)
 			return false;
 
-		FitEngineConfiguration config = filterResult.config;
+		final FitEngineConfiguration config = filterResult.config;
 
 		pConfig.setDataFilterType(config.getDataFilterType());
 		final int nFilters = config.getNumberOfFilters();
 		for (int n = 0; n < nFilters; n++)
 		{
-			RelativeParameter p = config.getDataFilterParameter(n);
+			final RelativeParameter p = config.getDataFilterParameter(n);
 			pConfig.setDataFilter(config.getDataFilterMethod(n), p.getValue(), p.getAbsolute(), n);
 		}
 		pConfig.setSearch(config.getSearch(), config.getSearchAbsolute());

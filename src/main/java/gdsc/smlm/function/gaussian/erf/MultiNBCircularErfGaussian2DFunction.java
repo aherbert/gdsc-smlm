@@ -166,7 +166,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 	public void forEach(ValueProcedure procedure)
 	{
 		if (tB == 0 && nPeaks == 2)
-		{
 			// Specialised implementation without a background.
 			// (This function is likely to be used to compute the Gaussian integral
 			// without a background.)
@@ -177,15 +176,10 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 				final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
 				for (int x = 0; x < maxx; x++)
-				{
 					procedure.execute(tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
-				}
 			}
-		}
 		else
-		{
 			super.forEach(procedure);
-		}
 	}
 
 	/*
@@ -198,7 +192,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 	{
 		final double[] duda = new double[getNumberOfGradients()];
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -213,7 +206,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 				//invalidGradients(duda);
 				procedure.execute(I, duda);
 			}
-		}
 	}
 
 	/*
@@ -294,7 +286,7 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 					// Compute all the partial second order derivatives
 					final double tI = this.tI[n];
 
-					int k = a * ng + a;
+					final int k = a * ng + a;
 					// Signal,X
 					d2udadb[k + 1] = duda[a + 1] / tI;
 					// Signal,Y
@@ -304,7 +296,7 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 
 					a += 4;
 
-					int kk = k + ng;
+					final int kk = k + ng;
 					// X,Signal
 					d2udadb[kk] = d2udadb[k + 1];
 					// X,X
@@ -314,7 +306,7 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 					// X,X SD
 					d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx] + du_dtx[xx] * du_dtsy_tI[n];
 
-					int kkk = kk + ng;
+					final int kkk = kk + ng;
 					// Y,Signal
 					d2udadb[kkk] = d2udadb[k + 2];
 					// Y,X
@@ -324,7 +316,7 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 					// Y,X SD
 					d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx] + deltaEx[xx] * d2deltaEy_dtsydy[yy];
 
-					int kkkk = kkk + ng;
+					final int kkkk = kkk + ng;
 					// X SD,Signal
 					d2udadb[kkkk] = d2udadb[k + 3];
 					// X SD,X

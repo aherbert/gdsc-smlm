@@ -103,13 +103,13 @@ public class ResultsManagerTest
 	@SuppressWarnings("null")
 	private static void writeTSFMatchesRead(int channels, int slices, int positions, int types)
 	{
-		String filename = createFile();
+		final String filename = createFile();
 		FileOutputStream out = null;
 		try
 		{
 			out = new FileOutputStream(filename);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			closeOutput(out);
 			e.printStackTrace();
@@ -120,11 +120,12 @@ public class ResultsManagerTest
 		try
 		{
 			@SuppressWarnings("resource")
+			final
 			DataOutputStream dos = new DataOutputStream(out);
 			dos.writeInt(0);
 			dos.writeLong(0);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			closeOutput(out);
 			e.printStackTrace();
@@ -132,12 +133,12 @@ public class ResultsManagerTest
 		}
 
 		// Generate random spots
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		int size = 100;
-		Spot[] spots = new Spot[size];
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final int size = 100;
+		final Spot[] spots = new Spot[size];
 		for (int i = 1; i <= size; i++)
 		{
-			Spot.Builder builder = Spot.newBuilder();
+			final Spot.Builder builder = Spot.newBuilder();
 			builder.setChannel(nextInt(rand, channels));
 			builder.setSlice(nextInt(rand, slices));
 			builder.setPos(nextInt(rand, positions));
@@ -155,13 +156,13 @@ public class ResultsManagerTest
 			builder.setZ(rand.nextFloat());
 			builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR * rand.nextDouble()));
 
-			Spot spot = builder.build();
+			final Spot spot = builder.build();
 			spots[i - 1] = spot;
 			try
 			{
 				spot.writeDelimitedTo(out);
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				closeOutput(out);
 				e.printStackTrace();
@@ -179,7 +180,7 @@ public class ResultsManagerTest
 			//out.flush();
 			offset = out.getChannel().position() - 12;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			closeOutput(out);
 			e.printStackTrace();
@@ -187,7 +188,7 @@ public class ResultsManagerTest
 		}
 
 		// Record the SpotList message
-		SpotList.Builder builder = SpotList.newBuilder();
+		final SpotList.Builder builder = SpotList.newBuilder();
 
 		builder.setApplicationId(1);
 		builder.setNrSpots(size);
@@ -200,19 +201,19 @@ public class ResultsManagerTest
 		builder.setNrPos(positions);
 		for (int type = 1; type <= types; type++)
 		{
-			FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
+			final FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
 			typeBuilder.setId(type);
 			typeBuilder.setDescription("Type " + type);
 			typeBuilder.setIsFiducial(rand.nextDouble() < 0.5);
 			builder.addFluorophoreTypes(typeBuilder.build());
 		}
 
-		SpotList spotList = builder.build();
+		final SpotList spotList = builder.build();
 		try
 		{
 			spotList.writeDelimitedTo(out);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
@@ -228,7 +229,7 @@ public class ResultsManagerTest
 			f.seek(4);
 			f.writeLong(offset);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
@@ -240,7 +241,7 @@ public class ResultsManagerTest
 				for (int position = 1; position <= positions; position++)
 					for (int type = 1; type <= types; type++)
 					{
-						StringBuilder sb = new StringBuilder();
+						final StringBuilder sb = new StringBuilder();
 						sb.append(" channel=").append(channel);
 						sb.append(" slice=").append(slice);
 						sb.append(" position=").append(position);
@@ -252,7 +253,7 @@ public class ResultsManagerTest
 						Macro.setOptions(sb.toString());
 
 						ResultsManager.setInputFilename(filename);
-						MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false, null,
+						final MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false, null,
 								null);
 						checkEqual(spots, channel, slice, position, type, in);
 					}
@@ -272,7 +273,7 @@ public class ResultsManagerTest
 		{
 			out.close();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore exception
 		}
@@ -287,18 +288,18 @@ public class ResultsManagerTest
 	{
 		Assert.assertNotNull("Input results are null", actualResults);
 
-		MemoryPeakResults expectedResults = extract(spots, channel, slice, position, type);
+		final MemoryPeakResults expectedResults = extract(spots, channel, slice, position, type);
 
 		Assert.assertEquals("Size differ", expectedResults.size(), actualResults.size());
 
 		final float delta = 0;
 
-		PeakResult[] expected = expectedResults.toArray();
-		PeakResult[] actual = actualResults.toArray();
+		final PeakResult[] expected = expectedResults.toArray();
+		final PeakResult[] actual = actualResults.toArray();
 		for (int i = 0; i < actualResults.size(); i++)
 		{
-			PeakResult p1 = expected[i];
-			PeakResult p2 = actual[i];
+			final PeakResult p1 = expected[i];
+			final PeakResult p2 = actual[i];
 
 			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
 
@@ -315,9 +316,7 @@ public class ResultsManagerTest
 			Assert.assertEquals("YPosition mismatch @ " + i, p1.getYPosition(), p2.getYPosition(), delta);
 			Assert.assertEquals("ZPosition mismatch @ " + i, p1.getZPosition(), p2.getZPosition(), delta);
 			for (int j = PeakResult.STANDARD_PARAMETERS, size = p1.getNumberOfParameters(); j < size; j++)
-			{
 				Assert.assertEquals("Parameter mismatch @ " + i, p1.getParameter(j), p2.getParameter(j), 1e-6);
-			}
 
 			Assert.assertEquals("ID mismatch @ " + i, p1.getId(), p2.getId());
 		}
@@ -325,28 +324,26 @@ public class ResultsManagerTest
 
 	private static MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position, int type)
 	{
-		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
-		for (Spot spot : spots)
-		{
+		final MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
+		for (final Spot spot : spots)
 			if (spot.getChannel() == channel && spot.getSlice() == slice && spot.getPos() == position &&
 					spot.getFluorophoreType() == type)
 			{
-				int id = spot.getCluster();
-				int startFrame = spot.getFrame();
-				int origX = spot.getXPosition();
-				int origY = spot.getYPosition();
-				float origValue = 0;
-				double error = 0;
-				float noise = 0;
-				float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(spot.getBackground(),
+				final int id = spot.getCluster();
+				final int startFrame = spot.getFrame();
+				final int origX = spot.getXPosition();
+				final int origY = spot.getYPosition();
+				final float origValue = 0;
+				final double error = 0;
+				final float noise = 0;
+				final float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(spot.getBackground(),
 						spot.getIntensity(), spot.getX(), spot.getY(), spot.getZ(),
 						(float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR));
-				float[] paramsStdDev = null;
-				IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, 0, params,
+				final float[] paramsStdDev = null;
+				final IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, 0, params,
 						paramsStdDev, id);
 				results.add(peak);
 			}
-		}
 		return results;
 	}
 
@@ -357,10 +354,10 @@ public class ResultsManagerTest
 		{
 			file = File.createTempFile("test", null);
 			file.deleteOnExit();
-			String filename = file.getPath();
+			final String filename = file.getPath();
 			return filename;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			Assert.fail("Cannot create temp files for IO testing");
 		}

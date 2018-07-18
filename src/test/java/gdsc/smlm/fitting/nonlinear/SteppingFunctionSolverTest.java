@@ -187,7 +187,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		{
 			fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.EMCCD);
 		}
-		catch (AssertionError e)
+		catch (final AssertionError e)
 		{
 			TestSettings.logFailure(e);
 		}
@@ -419,7 +419,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		{
 			fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.SCMOS);
 		}
-		catch (AssertionError e)
+		catch (final AssertionError e)
 		{
 			TestSettings.logFailure(e);
 		}
@@ -459,7 +459,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 			NoiseModel noiseModel)
 	{
 		//org.junit.Assume.assumeTrue(false);
-		SteppingFunctionSolver solver = getSolver(clamp, type);
+		final SteppingFunctionSolver solver = getSolver(clamp, type);
 		canFitSingleGaussian(solver, bounded, noiseModel);
 	}
 
@@ -594,8 +594,8 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 			SteppingFunctionSolverType type, NoiseModel noiseModel)
 	{
 		TestSettings.assumeMediumComplexity();
-		SteppingFunctionSolver solver = getSolver(clamp, type);
-		SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
+		final SteppingFunctionSolver solver = getSolver(clamp, type);
+		final SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getName(bounded, clamp, type),
 				getName(bounded2, clamp2, type2), noiseModel);
 	}
@@ -686,9 +686,9 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 
 	private void canFitAndComputeDeviations(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
-		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		final SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		fitAndComputeDeviationsMatch(rg, solver1, solver2, noiseModel, useWeights);
 	}
 
@@ -778,9 +778,9 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 
 	private void canFitAndComputeValue(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
-		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		final SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		fitAndComputeValueMatch(rg, solver1, solver2, noiseModel, useWeights);
 	}
 }

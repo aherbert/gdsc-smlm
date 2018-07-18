@@ -212,7 +212,7 @@ public class PCPALMMolecules implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		// Require some fit results and selected regions
-		boolean resultsAvailable = MemoryPeakResults.countMemorySize() > 0;
+		final boolean resultsAvailable = MemoryPeakResults.countMemorySize() > 0;
 
 		if (!getRunMode(resultsAvailable))
 			return;
@@ -304,8 +304,8 @@ public class PCPALMMolecules implements PlugIn
 		// Use a second plugin filter that will work on a region drawn on the binary image
 		// and compute the PALM analysis
 
-		double seconds = (System.currentTimeMillis() - start) / 1000.0;
-		String msg = TITLE + " complete : " + seconds + "s";
+		final double seconds = (System.currentTimeMillis() - start) / 1000.0;
+		final String msg = TITLE + " complete : " + seconds + "s";
 		IJ.showStatus(msg);
 		log(msg);
 	}
@@ -316,10 +316,10 @@ public class PCPALMMolecules implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<>();
-		for (int imageID : Utils.getIDList())
+		final List<String> titles = new LinkedList<>();
+		for (final int imageID : Utils.getIDList())
 		{
-			ImagePlus imp = WindowManager.getImage(imageID);
+			final ImagePlus imp = WindowManager.getImage(imageID);
 			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
 				titles.add(imp.getTitle());
 		}
@@ -410,7 +410,7 @@ public class PCPALMMolecules implements PlugIn
 			Parameters.isAbove("Image scale", lowResolutionImageSize, 1);
 			Parameters.isAboveZero("ROI size", roiSizeInUm);
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			IJ.error(TITLE, ex.getMessage());
 			return false;
@@ -425,7 +425,7 @@ public class PCPALMMolecules implements PlugIn
 			}
 			else
 			{
-				String[] items = titles.toArray(new String[titles.size()]);
+				final String[] items = titles.toArray(new String[titles.size()]);
 				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
@@ -434,22 +434,18 @@ public class PCPALMMolecules implements PlugIn
 					return false;
 				roiImage = gd.getNextChoice();
 			}
-			ImagePlus imp = WindowManager.getImage(roiImage);
+			final ImagePlus imp = WindowManager.getImage(roiImage);
 
 			roiBounds = imp.getRoi().getBounds();
 			roiImageWidth = imp.getWidth();
 			roiImageHeight = imp.getHeight();
 		}
 		else
-		{
 			roiBounds = null;
-		}
 
 		if (!resultsAvailable)
-		{
 			if (!getPValue())
 				return false;
-		}
 
 		if (clearResults)
 		{
@@ -462,16 +458,14 @@ public class PCPALMMolecules implements PlugIn
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
 	{
-		Rectangle bounds = results.getBounds(true);
+		final Rectangle bounds = results.getBounds(true);
 		area = (bounds.width * bounds.height * results.getNmPerPixel() * results.getNmPerPixel()) / 1e6;
 		if (roiBounds == null)
-		{
 			return results;
-		}
 
 		// Adjust bounds relative to input results image
-		double xscale = (double) roiImageWidth / bounds.width;
-		double yscale = (double) roiImageHeight / bounds.height;
+		final double xscale = (double) roiImageWidth / bounds.width;
+		final double yscale = (double) roiImageHeight / bounds.height;
 		roiBounds.x /= xscale;
 		roiBounds.width /= xscale;
 		roiBounds.y /= yscale;
@@ -513,12 +507,12 @@ public class PCPALMMolecules implements PlugIn
 
 		// Follow the PC-PALM protocol
 		log("Fitting localisation precision...");
-		ArrayList<Molecule> localisations = extractLocalisations(results);
-		double sigmaRaw = calculateAveragePrecision(localisations, "Localisations");
+		final ArrayList<Molecule> localisations = extractLocalisations(results);
+		final double sigmaRaw = calculateAveragePrecision(localisations, "Localisations");
 		log("%d localisations with an average precision of %.2f", results.size(), sigmaRaw);
 
 		log("Fitting molecule precision...");
-		ArrayList<Molecule> singles = new ArrayList<>();
+		final ArrayList<Molecule> singles = new ArrayList<>();
 		molecules = extractMolecules(results, sigmaRaw, singles);
 		if (singlesModeIndex == 1)
 			molecules.addAll(singles);
@@ -542,7 +536,7 @@ public class PCPALMMolecules implements PlugIn
 
 	private static boolean showPCPALMDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(
@@ -573,7 +567,7 @@ public class PCPALMMolecules implements PlugIn
 			Parameters.isAbove("Histogram bins", histogramBins, 1);
 			Parameters.isEqualOrAbove("Blinking rate", blinkingRate, 1);
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			IJ.error(TITLE, ex.getMessage());
 			return false;
@@ -596,18 +590,16 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results) throws DataException
 	{
-		ArrayList<Molecule> molecules = new ArrayList<>(results.size());
+		final ArrayList<Molecule> molecules = new ArrayList<>(results.size());
 
 		// Access calibrated data
-		StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
+		final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
 		sp.getXY();
-		PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+		final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
 		pp.getPrecision();
 
 		for (int i = 0, size = pp.size(); i < size; i++)
-		{
 			molecules.add(new Molecule(sp.x[i], sp.y[i], pp.precision[i], sp.intensity[i]));
-		}
 		return molecules;
 	}
 
@@ -622,7 +614,7 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	private double calculateAveragePrecision(ArrayList<Molecule> molecules, String subTitle)
 	{
-		String title = (showHistograms) ? TITLE + " Histogram " + subTitle : null;
+		final String title = (showHistograms) ? TITLE + " Histogram " + subTitle : null;
 		return calculateAveragePrecision(molecules, title, histogramBins, true, true);
 	}
 
@@ -648,8 +640,8 @@ public class PCPALMMolecules implements PlugIn
 			boolean logFitParameters, boolean removeOutliers)
 	{
 		// Plot histogram of the precision
-		float[] data = new float[molecules.size()];
-		DescriptiveStatistics stats = new DescriptiveStatistics();
+		final float[] data = new float[molecules.size()];
+		final DescriptiveStatistics stats = new DescriptiveStatistics();
 		double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
 		for (int i = 0; i < data.length; i++)
 		{
@@ -660,8 +652,8 @@ public class PCPALMMolecules implements PlugIn
 		// Set the min and max y-values using 1.5 x IQR
 		if (removeOutliers)
 		{
-			double lower = stats.getPercentile(25);
-			double upper = stats.getPercentile(75);
+			final double lower = stats.getPercentile(25);
+			final double upper = stats.getPercentile(75);
 			if (Double.isNaN(lower) || Double.isNaN(upper))
 			{
 				if (logFitParameters)
@@ -669,7 +661,7 @@ public class PCPALMMolecules implements PlugIn
 			}
 			else
 			{
-				double iqr = upper - lower;
+				final double iqr = upper - lower;
 
 				yMin = FastMath.max(lower - iqr, stats.getMin());
 				yMax = FastMath.min(upper + iqr, stats.getMax());
@@ -689,17 +681,17 @@ public class PCPALMMolecules implements PlugIn
 				Utils.log("  Data range: %f - %f", yMin, yMax);
 		}
 
-		float[][] hist = Utils.calcHistogram(data, yMin, yMax, histogramBins);
+		final float[][] hist = Utils.calcHistogram(data, yMin, yMax, histogramBins);
 
 		Plot2 plot = null;
 		if (title != null)
 		{
 			plot = new Plot2(title, "Precision", "Frequency");
-			float[] xValues = hist[0];
-			float[] yValues = hist[1];
+			final float[] xValues = hist[0];
+			final float[] yValues = hist[1];
 			if (xValues.length > 0)
 			{
-				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
+				final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
 				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
 						Maths.max(yValues) * 1.05);
 			}
@@ -711,7 +703,7 @@ public class PCPALMMolecules implements PlugIn
 		float[] x = Arrays.copyOf(hist[0], hist[0].length);
 		float[] y = hist[1];
 		int count = 0;
-		float dx = (x[1] - x[0]) * 0.5f;
+		final float dx = (x[1] - x[0]) * 0.5f;
 		for (int i = 0; i < y.length; i++)
 			if (y[i] > 0)
 			{
@@ -723,13 +715,13 @@ public class PCPALMMolecules implements PlugIn
 		y = Arrays.copyOf(y, count);
 
 		// Sense check to fitted data. Get mean and SD of histogram
-		double[] stats2 = Utils.getHistogramStatistics(x, y);
+		final double[] stats2 = Utils.getHistogramStatistics(x, y);
 		double mean = stats2[0];
 		if (logFitParameters)
 			log("  Initial Statistics: %f +/- %f", stats2[0], stats2[1]);
 
 		// Standard Gaussian fit
-		double[] parameters = fitGaussian(x, y);
+		final double[] parameters = fitGaussian(x, y);
 		if (parameters == null)
 		{
 			log("  Failed to fit initial Gaussian");
@@ -753,17 +745,17 @@ public class PCPALMMolecules implements PlugIn
 		if (logFitParameters)
 			log("  Initial Gaussian: %f @ %f +/- %f", parameters[0], parameters[1], parameters[2]);
 
-		double[] initialSolution = new double[] { parameters[0], parameters[1], parameters[2], -1 };
+		final double[] initialSolution = new double[] { parameters[0], parameters[1], parameters[2], -1 };
 
 		// Fit to a skewed Gaussian (or appropriate function)
-		double[] skewParameters = fitSkewGaussian(x, y, initialSolution);
+		final double[] skewParameters = fitSkewGaussian(x, y, initialSolution);
 		if (skewParameters == null)
 		{
 			log("  Failed to fit Skewed Gaussian");
 			return mean;
 		}
 
-		SkewNormalFunction sn = new SkewNormalFunction(skewParameters);
+		final SkewNormalFunction sn = new SkewNormalFunction(skewParameters);
 		if (logFitParameters)
 			log("  Skewed Gaussian: %f @ %f +/- %f (a = %f) => %f +/- %f", skewParameters[0], skewParameters[1],
 					skewParameters[2], skewParameters[3], sn.getMean(), Math.sqrt(sn.getVariance()));
@@ -800,25 +792,25 @@ public class PCPALMMolecules implements PlugIn
 
 	private static double[] fitGaussian(float[] x, float[] y)
 	{
-		WeightedObservedPoints obs = new WeightedObservedPoints();
+		final WeightedObservedPoints obs = new WeightedObservedPoints();
 		for (int i = 0; i < x.length; i++)
 			obs.add(x[i], y[i]);
 
-		Collection<WeightedObservedPoint> observations = obs.toList();
-		GaussianCurveFitter fitter = GaussianCurveFitter.create().withMaxIterations(2000);
-		GaussianCurveFitter.ParameterGuesser guess = new GaussianCurveFitter.ParameterGuesser(observations);
+		final Collection<WeightedObservedPoint> observations = obs.toList();
+		final GaussianCurveFitter fitter = GaussianCurveFitter.create().withMaxIterations(2000);
+		final GaussianCurveFitter.ParameterGuesser guess = new GaussianCurveFitter.ParameterGuesser(observations);
 		double[] initialGuess = null;
 		try
 		{
 			initialGuess = guess.guess();
 			return fitter.withStartPoint(initialGuess).fit(observations);
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			// Use the initial estimate
 			return initialGuess;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Just in case there is another exception type, or the initial estimate failed
 			return null;
@@ -829,11 +821,11 @@ public class PCPALMMolecules implements PlugIn
 	{
 		try
 		{
-			double[] skewParameters = (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
+			final double[] skewParameters = (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
 					: optimiseLeastSquares(x, y, initialSolution);
 			return skewParameters;
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			return null;
 		}
@@ -845,10 +837,10 @@ public class PCPALMMolecules implements PlugIn
 		final SkewNormalDifferentiableFunction function = new SkewNormalDifferentiableFunction(initialSolution);
 		function.addData(x, y);
 
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+		final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
 		//@formatter:off
-		LeastSquaresProblem problem = new LeastSquaresBuilder()
+		final LeastSquaresProblem problem = new LeastSquaresBuilder()
 				.maxEvaluations(Integer.MAX_VALUE)
 				.maxIterations(3000)
 				.start(initialSolution)
@@ -863,23 +855,23 @@ public class PCPALMMolecules implements PlugIn
 				.build();
 		//@formatter:on
 
-		Optimum optimum = optimizer.optimize(problem);
+		final Optimum optimum = optimizer.optimize(problem);
 
-		double[] skewParameters = optimum.getPoint().toArray();
+		final double[] skewParameters = optimum.getPoint().toArray();
 		return skewParameters;
 	}
 
 	private double[] optimiseSimplex(float[] x, float[] y, double[] initialSolution)
 	{
 		// Simplex optimisation
-		SkewNormalMultivariateFunction sn2 = new SkewNormalMultivariateFunction(initialSolution);
+		final SkewNormalMultivariateFunction sn2 = new SkewNormalMultivariateFunction(initialSolution);
 		sn2.addData(x, y);
-		NelderMeadSimplex simplex = new NelderMeadSimplex(4);
-		SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
-		PointValuePair solution = opt.optimize(new MaxEval(1000), new InitialGuess(initialSolution), simplex,
+		final NelderMeadSimplex simplex = new NelderMeadSimplex(4);
+		final SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
+		final PointValuePair solution = opt.optimize(new MaxEval(1000), new InitialGuess(initialSolution), simplex,
 				new ObjectiveFunction(sn2), GoalType.MINIMIZE);
 
-		double[] skewParameters2 = solution.getPointRef();
+		final double[] skewParameters2 = solution.getPointRef();
 		return skewParameters2;
 	}
 
@@ -897,8 +889,8 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	private static void addToPlot(Plot2 plot, float[] x, double[] parameters, int shape)
 	{
-		SkewNormalFunction sn = new SkewNormalFunction(parameters);
-		float[] y = new float[x.length];
+		final SkewNormalFunction sn = new SkewNormalFunction(parameters);
+		final float[] y = new float[x.length];
 		for (int i = 0; i < x.length; i++)
 			y[i] = (float) sn.evaluate(x[i]);
 		plot.addPoints(x, y, shape);
@@ -937,21 +929,21 @@ public class PCPALMMolecules implements PlugIn
 	private static ArrayList<Molecule> traceMolecules(MemoryPeakResults results, double distance, int time,
 			ArrayList<Molecule> singles)
 	{
-		TraceManager tm = new TraceManager(results);
-		double distanceThreshold = distance / results.getNmPerPixel();
+		final TraceManager tm = new TraceManager(results);
+		final double distanceThreshold = distance / results.getNmPerPixel();
 		tm.traceMolecules(distanceThreshold, time);
-		Trace[] traces = tm.getTraces();
-		ArrayList<Molecule> molecules = new ArrayList<>(traces.length);
+		final Trace[] traces = tm.getTraces();
+		final ArrayList<Molecule> molecules = new ArrayList<>(traces.length);
 
 		// These plugins are not really supported so just leave them to throw an exception if
 		// the data cannot be handled
-		TypeConverter<IntensityUnit> ic = results.getCalibrationReader().getIntensityConverter(IntensityUnit.PHOTON);
-		TypeConverter<DistanceUnit> dc = results.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
+		final TypeConverter<IntensityUnit> ic = results.getCalibrationReader().getIntensityConverter(IntensityUnit.PHOTON);
+		final TypeConverter<DistanceUnit> dc = results.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
 
-		for (Trace t : traces)
+		for (final Trace t : traces)
 		{
-			double p = t.getLocalisationPrecision(dc);
-			float[] centroid = t.getCentroid();
+			final double p = t.getLocalisationPrecision(dc);
+			final float[] centroid = t.getCentroid();
 			singles.add(new Molecule(dc.convert(centroid[0]), dc.convert(centroid[1]), p, ic.convert(t.getSignal())));
 		}
 		log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
@@ -985,13 +977,11 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	private static ArrayList<Molecule> filterMolecules(ArrayList<Molecule> molecules, double sigmaS)
 	{
-		ArrayList<Molecule> newMolecules = new ArrayList<>(molecules.size());
+		final ArrayList<Molecule> newMolecules = new ArrayList<>(molecules.size());
 		final double limit = 3 * sigmaS;
-		for (Molecule m : molecules)
-		{
+		for (final Molecule m : molecules)
 			if (m.precision <= limit)
 				newMolecules.add(m);
-		}
 		return newMolecules;
 	}
 
@@ -1003,17 +993,17 @@ public class PCPALMMolecules implements PlugIn
 		startLog();
 
 		// Convert seconds to frames
-		int timeInFrames = FastMath.max(1,
+		final int timeInFrames = FastMath.max(1,
 				(int) Math.round(tThreshold * 1000.0 / results.getCalibrationReader().getExposureTime()));
 
-		ArrayList<Molecule> singles = new ArrayList<>();
+		final ArrayList<Molecule> singles = new ArrayList<>();
 		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
 		molecules.addAll(singles);
 	}
 
 	private static boolean showManualTracingDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Use distance and time thresholds to trace localisations into molecules.");
@@ -1035,7 +1025,7 @@ public class PCPALMMolecules implements PlugIn
 			Parameters.isAboveZero("Distance threshold", dThreshold);
 			Parameters.isAboveZero("Time threshold", tThreshold);
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			IJ.error(TITLE, ex.getMessage());
 			return false;
@@ -1086,9 +1076,9 @@ public class PCPALMMolecules implements PlugIn
 		// Allow a border of 3 x sigma for +/- precision
 		//if (blinkingRate > 1)
 		width -= 3 * sigmaS;
-		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-		RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
-		UniformDistribution dist = new UniformDistribution(null, new double[] { width, width, 0 },
+		final RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		final RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
+		final UniformDistribution dist = new UniformDistribution(null, new double[] { width, width, 0 },
 				randomGenerator.nextInt());
 
 		molecules = new ArrayList<>(nMolecules);
@@ -1100,11 +1090,11 @@ public class PCPALMMolecules implements PlugIn
 		int count = 0;
 
 		// Generate a sequence of coordinates
-		ArrayList<double[]> xyz = new ArrayList<>((int) (nMolecules * 1.1));
+		final ArrayList<double[]> xyz = new ArrayList<>((int) (nMolecules * 1.1));
 
-		Statistics statsRadius = new Statistics();
-		Statistics statsSize = new Statistics();
-		String maskTitle = TITLE + " Cluster Mask";
+		final Statistics statsRadius = new Statistics();
+		final Statistics statsSize = new Statistics();
+		final String maskTitle = TITLE + " Cluster Mask";
 		ByteProcessor bp = null;
 		double maskScale = 0;
 
@@ -1132,7 +1122,7 @@ public class PCPALMMolecules implements PlugIn
 			int[] mask = null;
 			maskScale = width / maskSize; // scale is in nm/pixel
 
-			ArrayList<double[]> clusterCentres = new ArrayList<>();
+			final ArrayList<double[]> clusterCentres = new ArrayList<>();
 			int totalSteps = 1 + (int) Math.ceil(nMolecules / clusterNumber);
 			if (clusterSimulation == 2 || clusterSimulation == 3)
 			{
@@ -1152,15 +1142,13 @@ public class PCPALMMolecules implements PlugIn
 						maskScale, randomGenerator);
 				double[] centre;
 				IJ.showStatus("Computing clusters mask");
-				int roiRadius = (int) Math.round((clusterRadius * 2) / maskScale);
+				final int roiRadius = (int) Math.round((clusterRadius * 2) / maskScale);
 
 				if (clusterSimulation == 3)
-				{
 					// Generate a mask of circles then sample from that.
 					// If we want to fill the mask completely then adjust the total steps to be the number of
 					// circles that can fit inside the mask.
 					totalSteps = (int) (maskSize * maskSize / (Math.PI * Maths.pow2(clusterRadius / maskScale)));
-				}
 
 				while ((centre = maskDistribution.next()) != null && clusterCentres.size() < totalSteps)
 				{
@@ -1171,8 +1159,8 @@ public class PCPALMMolecules implements PlugIn
 					clusterCentres.add(centre);
 
 					// Fill in the mask around the centre to exclude any more circles that could overlap
-					double cx = centre[0] / maskScale;
-					double cy = centre[1] / maskScale;
+					final double cx = centre[0] / maskScale;
+					final double cy = centre[1] / maskScale;
 					fillMask(mask, maskSize, (int) cx, (int) cy, roiRadius, 0);
 					//log("[%.1f,%.1f] @ [%.1f,%.1f]", centre[0], centre[1], cx, cy);
 					//Utils.display("Mask", new ColorProcessor(maskSize, maskSize, mask));
@@ -1181,7 +1169,7 @@ public class PCPALMMolecules implements PlugIn
 						maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale, maskScale,
 								randomGenerator);
 					}
-					catch (IllegalArgumentException e)
+					catch (final IllegalArgumentException e)
 					{
 						// This can happen when there are no more non-zero pixels
 						log("WARNING: No more room for clusters on the mask area (created %d of estimated %d)",
@@ -1193,13 +1181,9 @@ public class PCPALMMolecules implements PlugIn
 				IJ.showStatus("");
 			}
 			else
-			{
-				// Clusters are overlapping circles
-
 				// Pick centres randomly from the distribution
 				while (clusterCentres.size() < totalSteps)
 					clusterCentres.add(dist.next());
-			}
 
 			if (showClusterMask || clusterSimulation == 3)
 			{
@@ -1208,27 +1192,27 @@ public class PCPALMMolecules implements PlugIn
 					mask = new int[maskSize * maskSize];
 				else
 					Arrays.fill(mask, 0);
-				int roiRadius = (int) Math.round((clusterRadius) / maskScale);
-				for (double[] c : clusterCentres)
+				final int roiRadius = (int) Math.round((clusterRadius) / maskScale);
+				for (final double[] c : clusterCentres)
 				{
-					double cx = c[0] / maskScale;
-					double cy = c[1] / maskScale;
+					final double cx = c[0] / maskScale;
+					final double cy = c[1] / maskScale;
 					fillMask(mask, maskSize, (int) cx, (int) cy, roiRadius, 1);
 				}
 
 				if (clusterSimulation == 3)
 				{
 					// We have the mask. Now pick points at random from the mask.
-					MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale,
+					final MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale,
 							maskScale, randomGenerator);
 
 					// Allocate each molecule position to a parent circle so defining clusters.
-					int[][] clusters = new int[clusterCentres.size()][];
-					int[] clusterSize = new int[clusters.length];
+					final int[][] clusters = new int[clusterCentres.size()][];
+					final int[] clusterSize = new int[clusters.length];
 
 					for (int i = 0; i < nMolecules; i++)
 					{
-						double[] centre = maskDistribution.next();
+						final double[] centre = maskDistribution.next();
 						// The mask returns the coordinates with the centre of the image at 0,0
 						centre[0] += width / 2;
 						centre[1] += width / 2;
@@ -1240,7 +1224,7 @@ public class PCPALMMolecules implements PlugIn
 						int cluster = 0;
 						for (int j = 1; j < clusterCentres.size(); j++)
 						{
-							double d2 = distance2(centre, clusterCentres.get(j));
+							final double d2 = distance2(centre, clusterCentres.get(j));
 							if (d2 < max)
 							{
 								max = d2;
@@ -1252,14 +1236,10 @@ public class PCPALMMolecules implements PlugIn
 						centre[2] = cluster;
 
 						if (clusterSize[cluster] == 0)
-						{
 							clusters[cluster] = new int[10];
-						}
 						if (clusters[cluster].length <= clusterSize[cluster])
-						{
 							clusters[cluster] = Arrays.copyOf(clusters[cluster],
 									(int) (clusters[cluster].length * 1.5));
-						}
 						clusters[cluster][clusterSize[cluster]++] = i;
 					}
 
@@ -1279,10 +1259,10 @@ public class PCPALMMolecules implements PlugIn
 						}
 
 						// Find centre of cluster and add the distance to each point
-						double[] com = new double[2];
+						final double[] com = new double[2];
 						for (int n = 0; n < size; n++)
 						{
-							double[] xy = xyz.get(clusters[j][n]);
+							final double[] xy = xyz.get(clusters[j][n]);
 							for (int k = 0; k < 2; k++)
 								com[k] += xy[k];
 						}
@@ -1290,8 +1270,8 @@ public class PCPALMMolecules implements PlugIn
 							com[k] /= size;
 						for (int n = 0; n < size; n++)
 						{
-							double dx = xyz.get(clusters[j][n])[0] - com[0];
-							double dy = xyz.get(clusters[j][n])[1] - com[1];
+							final double dx = xyz.get(clusters[j][n])[0] - com[0];
+							final double dy = xyz.get(clusters[j][n])[1] - com[1];
 							statsRadius.add(Math.sqrt(dx * dx + dy * dy));
 						}
 					}
@@ -1309,10 +1289,9 @@ public class PCPALMMolecules implements PlugIn
 
 			// Use the simulated cluster centres to create clusters of the desired size
 			if (clusterSimulation == 1 || clusterSimulation == 2)
-			{
-				for (double[] clusterCentre : clusterCentres)
+				for (final double[] clusterCentre : clusterCentres)
 				{
-					int clusterN = (int) Math
+					final int clusterN = (int) Math
 							.round((clusterNumberSD > 0) ? dataGenerator.nextGaussian(clusterNumber, clusterNumberSD)
 									: clusterNumber);
 					if (clusterN < 1)
@@ -1329,18 +1308,18 @@ public class PCPALMMolecules implements PlugIn
 					{
 						// Generate N random points within a circle of the chosen cluster radius.
 						// Locate the centre-of-mass and the average distance to the centre.
-						double[] com = new double[3];
+						final double[] com = new double[3];
 						int j = 0;
 						while (j < clusterN)
 						{
 							// Generate a random point within a circle uniformly
 							// http://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
-							double t = 2.0 * Math.PI * randomGenerator.nextDouble();
-							double u = randomGenerator.nextDouble() + randomGenerator.nextDouble();
-							double r = clusterRadius * ((u > 1) ? 2 - u : u);
-							double x = r * Math.cos(t);
-							double y = r * Math.sin(t);
-							double[] xy = new double[] { clusterCentre[0] + x, clusterCentre[1] + y };
+							final double t = 2.0 * Math.PI * randomGenerator.nextDouble();
+							final double u = randomGenerator.nextDouble() + randomGenerator.nextDouble();
+							final double r = clusterRadius * ((u > 1) ? 2 - u : u);
+							final double x = r * Math.cos(t);
+							final double y = r * Math.sin(t);
+							final double[] xy = new double[] { clusterCentre[0] + x, clusterCentre[1] + y };
 							xyz.add(xy);
 							for (int k = 0; k < 2; k++)
 								com[k] += xy[k];
@@ -1350,31 +1329,26 @@ public class PCPALMMolecules implements PlugIn
 						// Note this does not account for the movement due to precision.
 						statsSize.add(j);
 						if (j == 1)
-						{
 							statsRadius.add(0);
-						}
 						else
 						{
 							for (int k = 0; k < 2; k++)
 								com[k] /= j;
 							while (j > 0)
 							{
-								double dx = xyz.get(xyz.size() - j)[0] - com[0];
-								double dy = xyz.get(xyz.size() - j)[1] - com[1];
+								final double dx = xyz.get(xyz.size() - j)[0] - com[0];
+								final double dy = xyz.get(xyz.size() - j)[1] - com[1];
 								statsRadius.add(Math.sqrt(dx * dx + dy * dy));
 								j--;
 							}
 						}
 					}
 				}
-			}
 		}
 		else
-		{
 			// Random distribution
 			for (int i = 0; i < nMolecules; i++)
 				xyz.add(dist.next());
-		}
 
 		// The Gaussian sigma should be applied so the overall distance from the centre
 		// ( sqrt(x^2+y^2) ) has a standard deviation of sigmaS?
@@ -1385,12 +1359,12 @@ public class PCPALMMolecules implements PlugIn
 		StoredData blinks = null;
 		if (showHistograms)
 		{
-			int capacity = (int) (xyz.size() * blinkingRate);
+			final int capacity = (int) (xyz.size() * blinkingRate);
 			intraDistances = new StoredDataStatistics(capacity);
 			blinks = new StoredData(capacity);
 		}
 
-		Statistics statsSigma = new Statistics();
+		final Statistics statsSigma = new Statistics();
 		for (int i = 0; i < xyz.size(); i++)
 		{
 			int nOccurrences = getBlinks(dataGenerator, blinkingRate);
@@ -1403,10 +1377,8 @@ public class PCPALMMolecules implements PlugIn
 			final double[] moleculeXyz = xyz.get(i);
 
 			if (bp != null && nOccurrences > 0)
-			{
 				bp.putPixel((int) Math.round(moleculeXyz[0] / maskScale), (int) Math.round(moleculeXyz[1] / maskScale),
 						255);
-			}
 
 			while (nOccurrences-- > 0)
 			{
@@ -1428,9 +1400,9 @@ public class PCPALMMolecules implements PlugIn
 				molecules.add(new Molecule(x, y, i, 1));
 
 				// Store in pixels
-				float xx = (float) (x / nmPerPixel);
-				float yy = (float) (y / nmPerPixel);
-				float[] params = PeakResult.createParams(0, 0, xx, yy, 0);
+				final float xx = (float) (x / nmPerPixel);
+				final float yy = (float) (y / nmPerPixel);
+				final float[] params = PeakResult.createParams(0, 0, xx, yy, 0);
 				results.add(i + 1, (int) xx, (int) yy, 0, 0, 0, 0, params, null);
 			}
 
@@ -1439,24 +1411,20 @@ public class PCPALMMolecules implements PlugIn
 				count++;
 				if (intraDistances != null)
 				{
-					int newCount = molecules.size() - size;
+					final int newCount = molecules.size() - size;
 					if (newCount == 1)
-					{
 						// No intra-molecule distances
 						//intraDistances.add(0);
 						continue;
-					}
 
 					// Get the distance matrix between these molecules
-					double[][] matrix = new double[newCount][newCount];
+					final double[][] matrix = new double[newCount][newCount];
 					for (int ii = size, x = 0; ii < molecules.size(); ii++, x++)
-					{
 						for (int jj = size + 1, y = 1; jj < molecules.size(); jj++, y++)
 						{
 							final double d2 = molecules.get(ii).distance2(molecules.get(jj));
 							matrix[x][y] = matrix[y][x] = d2;
 						}
-					}
 
 					// Get the maximum distance for particle linkage clustering of this molecule
 					double max = 0;
@@ -1498,7 +1466,6 @@ public class PCPALMMolecules implements PlugIn
 		log("  * Precision (Mean-displacement) = %s nm",
 				(statsSigma.getN() > 0) ? Utils.rounded(Math.sqrt(statsSigma.getMean()), 4) : "0");
 		if (intraDistances != null)
-		{
 			if (intraDistances.getN() == 0)
 			{
 				log("  * Mean Intra-Molecule particle linkage distance = 0 nm");
@@ -1507,12 +1474,12 @@ public class PCPALMMolecules implements PlugIn
 			else
 			{
 				plot(blinks, "Blinks/Molecule", true);
-				double[][] intraHist = plot(intraDistances, "Intra-molecule particle linkage distance", false);
+				final double[][] intraHist = plot(intraDistances, "Intra-molecule particle linkage distance", false);
 
 				// Determine 95th and 99th percentile
 				int p99 = intraHist[0].length - 1;
-				double limit1 = 0.99 * intraHist[1][p99];
-				double limit2 = 0.95 * intraHist[1][p99];
+				final double limit1 = 0.99 * intraHist[1][p99];
+				final double limit2 = 0.95 * intraHist[1][p99];
 				while (intraHist[1][p99] > limit1 && p99 > 0)
 					p99--;
 				int p95 = p99;
@@ -1524,11 +1491,8 @@ public class PCPALMMolecules implements PlugIn
 						Utils.rounded(intraHist[0][p99], 4), Utils.rounded(intraHist[0][intraHist[0].length - 1], 4));
 
 				if (distanceAnalysis)
-				{
 					performDistanceAnalysis(intraHist, p99);
-				}
 			}
-		}
 		if (clusterSimulation > 0)
 		{
 			log("  * Cluster number = %s +/- %s", Utils.rounded(statsSize.getMean(), 4),
@@ -1540,22 +1504,20 @@ public class PCPALMMolecules implements PlugIn
 
 	private static double[][] plot(DoubleData stats, String label, boolean integerBins)
 	{
-		String title = TITLE + " " + label;
+		final String title = TITLE + " " + label;
 		Plot2 plot;
 		double[][] hist = null;
 		if (integerBins)
-		{
 			// The histogram is not need for the return statement
 			Utils.showHistogram(title, stats, label, 1, 0, 0);
-		}
 		else
 		{
 			// Show a cumulative histogram so that the bin size is not relevant
 			hist = Maths.cumulativeHistogram(stats.values(), false);
 
 			// Create the axes
-			double[] xValues = hist[0];
-			double[] yValues = hist[1];
+			final double[] xValues = hist[0];
+			final double[] yValues = hist[1];
 
 			// Plot
 			plot = new Plot2(title, label, "Frequency", xValues, yValues);
@@ -1573,33 +1535,33 @@ public class PCPALMMolecules implements PlugIn
 		// links that are inter and intra.
 
 		// Convert molecules for clustering
-		ArrayList<ClusterPoint> points = new ArrayList<>(molecules.size());
-		for (Molecule m : molecules)
+		final ArrayList<ClusterPoint> points = new ArrayList<>(molecules.size());
+		for (final Molecule m : molecules)
 			// Precision was used to store the molecule ID
 			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
-		ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE,
+		final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE,
 				new IJTrackProgress());
 		IJ.showStatus("Clustering to check inter-molecule distances");
 		engine.setTrackJoins(true);
-		ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
+		final ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
 		IJ.showStatus("");
 		if (clusters != null)
 		{
-			double[] intraIdDistances = engine.getIntraIdDistances();
-			double[] interIdDistances = engine.getInterIdDistances();
+			final double[] intraIdDistances = engine.getIntraIdDistances();
+			final double[] interIdDistances = engine.getInterIdDistances();
 
-			int all = interIdDistances.length + intraIdDistances.length;
+			final int all = interIdDistances.length + intraIdDistances.length;
 
 			log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%", Utils.rounded(intraHist[0][p99], 4),
 					(all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
 
 			// Show a double cumulative histogram plot
-			double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
-			double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
+			final double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
+			final double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
 
 			// Plot
-			String title = TITLE + " molecule linkage distance";
-			Plot2 plot = new Plot2(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
+			final String title = TITLE + " molecule linkage distance";
+			final Plot2 plot = new Plot2(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
 			double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
 			if (interIdHist[1].length > 0)
 				max = FastMath.max(max, interIdHist[1][interIdHist[1].length - 1]);
@@ -1610,9 +1572,7 @@ public class PCPALMMolecules implements PlugIn
 			Utils.display(title, plot);
 		}
 		else
-		{
 			log("Aborted clustering to check inter-molecule distances");
-		}
 	}
 
 	private static double distance2(double[] centre1, double[] centre2)
@@ -1643,8 +1603,8 @@ public class PCPALMMolecules implements PlugIn
 	{
 		int minx = cx - roiRadius;
 		int maxx = cx + roiRadius;
-		int miny = cy - roiRadius;
-		int maxy = cy + roiRadius;
+		final int miny = cy - roiRadius;
+		final int maxy = cy + roiRadius;
 		final int r2 = roiRadius * roiRadius;
 
 		// Pre-calculate x range
@@ -1656,14 +1616,11 @@ public class PCPALMMolecules implements PlugIn
 			return;
 
 		int n = 0;
-		int[] dx2 = new int[roiRadius * 2 + 1];
+		final int[] dx2 = new int[roiRadius * 2 + 1];
 		for (int x = minx; x <= maxx; x++)
-		{
 			dx2[n++] = (cx - x) * (cx - x);
-		}
 
 		if (miny < 0 || maxy >= maskSize)
-		{
 			for (int y = miny, dy = -roiRadius; y <= maxy; y++, dy++)
 			{
 				if (y < 0)
@@ -1672,24 +1629,17 @@ public class PCPALMMolecules implements PlugIn
 					break;
 				final int limit = r2 - (dy * dy);
 				for (int i = y * maskSize + minx, nn = 0; nn < n; i++, nn++)
-				{
 					if (dx2[nn] <= limit)
 						mask[i] = fill;
-				}
 			}
-		}
 		else
-		{
 			for (int y = miny, dy = -roiRadius; y <= maxy; y++, dy++)
 			{
 				final int limit = r2 - (dy * dy);
 				for (int i = y * maskSize + minx, nn = 0; nn < n; i++, nn++)
-				{
 					if (dx2[nn] <= limit)
 						mask[i] = fill;
-				}
 			}
-		}
 
 	}
 
@@ -1712,7 +1662,7 @@ public class PCPALMMolecules implements PlugIn
 
 	private static boolean showSimulationDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Simulate a random distribution of molecules.");
@@ -1757,7 +1707,7 @@ public class PCPALMMolecules implements PlugIn
 			Parameters.isEqualOrAbove("Blinking rate", blinkingRate, 1);
 			Parameters.isEqualOrAbove("Cluster number", clusterNumber, 1);
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			IJ.error(TITLE, ex.getMessage());
 			return false;
@@ -1770,7 +1720,7 @@ public class PCPALMMolecules implements PlugIn
 	{
 		if (blinkingDistribution == 3)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			final GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Binomial distribution requires a p-value");
 			gd.addSlider("p-Value (%)", 0, 100, 100 * p);
 			gd.showDialog();
@@ -1812,7 +1762,7 @@ public class PCPALMMolecules implements PlugIn
 			return;
 		}
 		int start = results.getFirstFrame(), end = start;
-		FrameProcedure p = new FrameProcedure(start, end);
+		final FrameProcedure p = new FrameProcedure(start, end);
 		results.forEach(p);
 		start = p.start;
 		end = p.end;
@@ -1863,8 +1813,8 @@ public class PCPALMMolecules implements PlugIn
 		final double yBinSize = (maxy - miny) / gridSize;
 		final int nXBins = 1 + (int) ((maxx - minx) / xBinSize);
 		final int nYBins = 1 + (int) ((maxy - miny) / yBinSize);
-		Molecule[][] grid = new Molecule[nXBins][nYBins];
-		for (Molecule m : molecules)
+		final Molecule[][] grid = new Molecule[nXBins][nYBins];
+		for (final Molecule m : molecules)
 		{
 			final int xBin = (int) ((m.x - minx) / xBinSize);
 			final int yBin = (int) ((m.y - miny) / yBinSize);
@@ -1878,9 +1828,8 @@ public class PCPALMMolecules implements PlugIn
 
 		IJ.showStatus("Computing minimum distance ...");
 		IJ.showProgress(0);
-		Molecule[] neighbours = new Molecule[5];
+		final Molecule[] neighbours = new Molecule[5];
 		for (int yBin = 0, currentIndex = 0, finalIndex = nXBins * nYBins; yBin < nYBins; yBin++)
-		{
 			for (int xBin = 0; xBin < nXBins; xBin++)
 			{
 				IJ.showProgress(currentIndex, finalIndex);
@@ -1910,16 +1859,11 @@ public class PCPALMMolecules implements PlugIn
 
 					// Compare to neighbours
 					while (count-- > 0)
-					{
 						for (Molecule m2 = neighbours[count]; m2 != null; m2 = m2.next)
-						{
 							if (dMin > m1.distance2(m2))
 								dMin = m1.distance2(m2);
-						}
-					}
 				}
 			}
-		}
 		IJ.showStatus("");
 		IJ.showProgress(1);
 
@@ -1940,7 +1884,7 @@ public class PCPALMMolecules implements PlugIn
 
 		// Compute the minimum size we can use and stay within memory.
 		// Assume a 4um x 4um analysis section with 800nm feature radius.
-		double limit = (4000.0 + 800.0 + 1) / 4096;
+		final double limit = (4000.0 + 800.0 + 1) / 4096;
 		if (nmPerPixel < limit)
 		{
 			log("Minimum distance adjusted to %.2f nm to fit in memory", limit);
@@ -1950,25 +1894,21 @@ public class PCPALMMolecules implements PlugIn
 
 		// Construct a binary representation
 
-		String namePrefix = results.getName() + " " + ((binaryImage) ? "Binary" : "Count") + " Image";
+		final String namePrefix = results.getName() + " " + ((binaryImage) ? "Binary" : "Count") + " Image";
 
 		double lowResNmPerPixel;
-		double xrange = maxx - minx;
-		double yrange = maxy - miny;
+		final double xrange = maxx - minx;
+		final double yrange = maxy - miny;
 		if (xrange > 0 || yrange > 0)
-		{
 			lowResNmPerPixel = FastMath.max(xrange, yrange) / lowResolutionImageSize;
-		}
 		else
-		{
 			// The resolution does not matter
 			lowResNmPerPixel = 100;
-		}
-		ImagePlus imp = displayImage(namePrefix + " (low res)", molecules, minx, miny, maxx, maxy, lowResNmPerPixel,
+		final ImagePlus imp = displayImage(namePrefix + " (low res)", molecules, minx, miny, maxx, maxy, lowResNmPerPixel,
 				false, binaryImage);
 
 		// Add an ROI to allow the user to select regions. PC-PALM recommends 2x2 to 4x4 um^2
-		int size = (int) (roiSizeInUm * 1000.0 / lowResNmPerPixel);
+		final int size = (int) (roiSizeInUm * 1000.0 / lowResNmPerPixel);
 		imp.setRoi(new Rectangle(0, 0, size, size));
 
 		if (showHighResolutionImage)
@@ -2005,10 +1945,10 @@ public class PCPALMMolecules implements PlugIn
 	static ImageProcessor drawImage(ArrayList<Molecule> molecules, double minx, double miny, double maxx, double maxy,
 			double nmPerPixel, boolean checkBounds, boolean binary)
 	{
-		double scalex = maxx - minx;
-		double scaley = maxy - miny;
-		int width = (int) Math.round(scalex / nmPerPixel) + 1;
-		int height = (int) Math.round(scaley / nmPerPixel) + 1;
+		final double scalex = maxx - minx;
+		final double scaley = maxy - miny;
+		final int width = (int) Math.round(scalex / nmPerPixel) + 1;
+		final int height = (int) Math.round(scaley / nmPerPixel) + 1;
 
 		// ***
 		// The PC-PALM + PLoS One papers describe using a binary image.
@@ -2018,49 +1958,45 @@ public class PCPALMMolecules implements PlugIn
 		// ***
 		if (binary)
 		{
-			byte[] data = new byte[width * height];
-			for (Molecule m : molecules)
+			final byte[] data = new byte[width * height];
+			for (final Molecule m : molecules)
 			{
 				if (checkBounds)
-				{
 					if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)
 						continue;
-				}
 
 				// Shift to the origin. This makes the image more memory efficient.
-				int x = (int) Math.round((m.x - minx) / nmPerPixel);
-				int y = (int) Math.round((m.y - miny) / nmPerPixel);
-				int index = y * width + x;
+				final int x = (int) Math.round((m.x - minx) / nmPerPixel);
+				final int y = (int) Math.round((m.y - miny) / nmPerPixel);
+				final int index = y * width + x;
 
 				// Construct a binary image
 				data[index] = (byte) 1;
 			}
 
-			ByteProcessor ip = new ByteProcessor(width, height, data, null);
+			final ByteProcessor ip = new ByteProcessor(width, height, data, null);
 			ip.setMinAndMax(0, 1);
 			return ip;
 		}
 		else
 		{
-			short[] data = new short[width * height];
-			for (Molecule m : molecules)
+			final short[] data = new short[width * height];
+			for (final Molecule m : molecules)
 			{
 				if (checkBounds)
-				{
 					if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)
 						continue;
-				}
 
 				// Shift to the origin. This makes the image more memory efficient.
-				int x = (int) Math.round((m.x - minx) / nmPerPixel);
-				int y = (int) Math.round((m.y - miny) / nmPerPixel);
-				int index = y * width + x;
+				final int x = (int) Math.round((m.x - minx) / nmPerPixel);
+				final int y = (int) Math.round((m.y - miny) / nmPerPixel);
+				final int index = y * width + x;
 
 				// Construct a count image
 				data[index]++;
 			}
 
-			ShortProcessor ip = new ShortProcessor(width, height, data, null);
+			final ShortProcessor ip = new ShortProcessor(width, height, data, null);
 			ip.setMinAndMax(0, Maths.max(data));
 			return ip;
 		}
@@ -2079,8 +2015,8 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	static ImagePlus displayImage(String title, ImageProcessor ip, double nmPerPixel)
 	{
-		ImagePlus imp = Utils.display(title, ip);
-		Calibration cal = new Calibration();
+		final ImagePlus imp = Utils.display(title, ip);
+		final Calibration cal = new Calibration();
 		cal.setUnit("um");
 		cal.pixelWidth = cal.pixelHeight = nmPerPixel / 1000;
 		imp.setCalibration(cal);
@@ -2113,7 +2049,7 @@ public class PCPALMMolecules implements PlugIn
 	static ImagePlus displayImage(String title, ArrayList<Molecule> molecules, double minx, double miny, double maxx,
 			double maxy, double nmPerPixel, boolean checkBounds, boolean binary)
 	{
-		ImageProcessor ip = drawImage(molecules, minx, miny, maxx, maxy, nmPerPixel, checkBounds, binary);
+		final ImageProcessor ip = drawImage(molecules, minx, miny, maxx, maxy, nmPerPixel, checkBounds, binary);
 		return displayImage(title, ip, nmPerPixel);
 	}
 
@@ -2148,11 +2084,9 @@ public class PCPALMMolecules implements PlugIn
 
 		public double[] calculateWeights()
 		{
-			double[] w = new double[y.size()];
+			final double[] w = new double[y.size()];
 			for (int i = 0; i < y.size(); i++)
-			{
 				w[i] = 1;
-			}
 			return w;
 		}
 	}
@@ -2175,18 +2109,18 @@ public class PCPALMMolecules implements PlugIn
 		{
 			// Compute the gradients using numerical differentiation
 
-			double[][] jacobian = new double[x.size()][4];
+			final double[][] jacobian = new double[x.size()][4];
 			final double delta = 0.001;
-			double[][] d = new double[variables.length][variables.length];
+			final double[][] d = new double[variables.length][variables.length];
 			for (int i = 0; i < variables.length; i++)
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double x = this.x.getQuick(i);
-				double value = evaluate(x, variables);
+				final double x = this.x.getQuick(i);
+				final double value = evaluate(x, variables);
 				for (int j = 0; j < variables.length; j++)
 				{
-					double value2 = evaluate(x, variables[0] + d[0][j], variables[1] + d[1][j], variables[2] + d[2][j],
+					final double value2 = evaluate(x, variables[0] + d[0][j], variables[1] + d[1][j], variables[2] + d[2][j],
 							variables[3] + d[3][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
@@ -2202,7 +2136,7 @@ public class PCPALMMolecules implements PlugIn
 		@Override
 		public double[] value(double[] variables)
 		{
-			double[] values = new double[x.size()];
+			final double[] values = new double[x.size()];
 			for (int i = 0; i < values.length; i++)
 				values[i] = evaluate(x.getQuick(i), variables);
 			return values;
@@ -2231,7 +2165,7 @@ public class PCPALMMolecules implements PlugIn
 			double ss = 0;
 			for (int i = x.size(); i-- > 0;)
 			{
-				double dx = y.get(i) - evaluate(x.getQuick(i), point);
+				final double dx = y.get(i) - evaluate(x.getQuick(i), point);
 				ss += dx * dx;
 			}
 			return ss;

@@ -60,12 +60,12 @@ public class DepthMask implements PlugIn
 
 	private static boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Create a mask stack using XY, XZ and YZ mask images");
 
-		String[] maskList = Utils.getImageList(Utils.SINGLE);
+		final String[] maskList = Utils.getImageList(Utils.SINGLE);
 		gd.addChoice("Mask_XY", maskList, titleXY);
 		gd.addChoice("Mask_XZ", maskList, titleXZ);
 		gd.addChoice("Mask_YZ", maskList, titleYZ);
@@ -84,9 +84,9 @@ public class DepthMask implements PlugIn
 
 	private static void createMask()
 	{
-		ImagePlus impXY = WindowManager.getImage(titleXY);
-		ImagePlus impXZ = WindowManager.getImage(titleXZ);
-		ImagePlus impYZ = WindowManager.getImage(titleYZ);
+		final ImagePlus impXY = WindowManager.getImage(titleXY);
+		final ImagePlus impXZ = WindowManager.getImage(titleXZ);
+		final ImagePlus impYZ = WindowManager.getImage(titleYZ);
 		if (impXY == null)
 		{
 			IJ.error(TITLE, "No XY mask");
@@ -121,13 +121,13 @@ public class DepthMask implements PlugIn
 		final int maxx = impXY.getWidth();
 		final int maxy = impXY.getHeight();
 		final int maxz = impXZ.getHeight();
-		ImageStack stack = new ImageStack(maxx, maxy, maxz);
-		byte[] maskXY = getMask(impXY);
-		byte[] maskXZ = getMask(impXZ);
-		byte[] maskYZ = getMask(impYZ);
+		final ImageStack stack = new ImageStack(maxx, maxy, maxz);
+		final byte[] maskXY = getMask(impXY);
+		final byte[] maskXZ = getMask(impXZ);
+		final byte[] maskYZ = getMask(impYZ);
 		for (int z = 0; z < maxz; z++)
 		{
-			byte[] mask = maskXY.clone();
+			final byte[] mask = maskXY.clone();
 
 			//// Simple method
 			//for (int y = 0, i = 0; y < maxy; y++, i++)
@@ -140,24 +140,16 @@ public class DepthMask implements PlugIn
 			//	}
 
 			for (int x = 0, i = maxx * z; x < maxx; x++, i++)
-			{
 				if (maskXZ[i] == 0)
-				{
 					// Blank all the (x,y) for this X
 					for (int y = 0, xy = x; y < maxy; y++, xy += maxx)
 						mask[xy] = 0;
-				}
-			}
 
 			for (int y = 0, i = maxy * z; y < maxy; y++, i++)
-			{
 				if (maskYZ[i] == 0)
-				{
 					// Blank all the (x,y) for this Y
 					for (int x = 0, xy = y * maxx; x < maxx; x++, xy++)
 						mask[xy] = 0;
-				}
-			}
 
 			stack.setPixels(mask, z + 1);
 		}

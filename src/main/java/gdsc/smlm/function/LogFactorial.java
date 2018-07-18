@@ -67,17 +67,15 @@ public class LogFactorial
 	public static void increaseTableMaxN(int n)
 	{
 		if (getTableMaxN() < n)
-		{
 			synchronized (lock)
 			{
 				table = increaseSize(table, n);
 			}
-		}
 	}
 
 	private static double[] increaseSize(double[] table, int n)
 	{
-		double[] newTable = Arrays.copyOf(table, n + 1);
+		final double[] newTable = Arrays.copyOf(table, n + 1);
 
 		// Using gamma for consistency with non-tabulated values
 		int k = table.length - 1;
@@ -121,7 +119,7 @@ public class LogFactorial
 	 */
 	public static double logF(int n) throws ArrayIndexOutOfBoundsException
 	{
-		double[] logF = table;
+		final double[] logF = table;
 		if (n < logF.length)
 			return logF[n];
 		return Gamma.logGamma(n + 1);
@@ -169,7 +167,7 @@ public class LogFactorial
 			throw new IllegalArgumentException("N must be positive");
 
 		// Copy the static values already present
-		double[] masterTable = LogFactorial.table;
+		final double[] masterTable = LogFactorial.table;
 		objectTable = Arrays.copyOf(masterTable, n + 1);
 
 		// Fill in the rest (if required)
@@ -200,12 +198,10 @@ public class LogFactorial
 	public void increaseMaxN(int n)
 	{
 		if (getMaxN() < n)
-		{
 			synchronized (objectLock)
 			{
 				objectTable = increaseSize(objectTable, n);
 			}
-		}
 	}
 
 	/**
@@ -220,23 +216,19 @@ public class LogFactorial
 	public void ensureRange(int minN, int maxN)
 	{
 		if (getMaxN() < maxN)
-		{
 			synchronized (objectLock)
 			{
 				// Resize but do not compute.
 				// Use the master table if it is bigger as that has all values pre-computed.
-				double[] masterTable = LogFactorial.table;
+				final double[] masterTable = LogFactorial.table;
 				objectTable = Arrays.copyOf((masterTable.length > objectTable.length) ? masterTable : objectTable,
 						maxN + 1);
 			}
-		}
 
 		// Check range has pre-computed values
 		for (int n = Math.max(2, minN); n <= maxN; n++)
-		{
 			if (objectTable[n] == 0)
 				objectTable[n] = Gamma.logGamma(n + 1);
-		}
 	}
 
 	/**

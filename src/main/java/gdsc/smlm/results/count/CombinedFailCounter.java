@@ -52,7 +52,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
 	@Override
 	protected String generateDescription()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		add(sb, c1);
 		sb.append(" ").append(getOperator()).append(" ");
 		add(sb, c2);
@@ -68,9 +68,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
 			sb.append(")");
 		}
 		else
-		{
 			sb.append(c.getDescription());
-		}
 	}
 
 	/**

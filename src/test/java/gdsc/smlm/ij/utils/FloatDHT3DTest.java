@@ -41,26 +41,26 @@ import ij.process.FloatProcessor;
 @SuppressWarnings({ "javadoc" })
 public class FloatDHT3DTest
 {
-	int size = 16;
-	double centre = (size - 1) / 2.0;
+	static int size = 16;
+	static double centre = (size - 1) / 2.0;
 
 	final static double gamma = 2;
 	final static int zDepth = 5;
-	protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
+	static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-	private FloatDHT3D createData(double cx, double cy, double cz)
+	private static FloatDHT3D createData(double cx, double cy, double cz)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ASTIGMATISM,
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ASTIGMATISM,
 				zModel);
-		int length = size * size;
-		float[] data = new float[size * length];
-		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final int length = size * size;
+		final float[] data = new float[size * length];
+		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.SIGNAL] = 1;
 		a[Gaussian2DFunction.X_POSITION] = cx;
 		a[Gaussian2DFunction.Y_POSITION] = cy;
 		a[Gaussian2DFunction.X_SD] = 1;
 		a[Gaussian2DFunction.Y_SD] = 1;
-		StandardFloatValueProcedure p = new StandardFloatValueProcedure();
+		final StandardFloatValueProcedure p = new StandardFloatValueProcedure();
 		for (int z = 0; z < size; z++)
 		{
 			a[Gaussian2DFunction.Z_POSITION] = z - cz;
@@ -69,24 +69,24 @@ public class FloatDHT3DTest
 		return new FloatDHT3D(size, size, size, data, false);
 	}
 
-	private FloatDHT3D createData()
+	private static FloatDHT3D createData()
 	{
 		return createData(centre, centre, centre);
 	}
 
-	private FloatDHT3D createOctants(int w, int h, int d)
+	private static FloatDHT3D createOctants(int w, int h, int d)
 	{
 		return new FloatDHT3D(createOctantsStack(w, h, d));
 	}
 
 	static ImageStack createOctantsStack(int w, int h, int d)
 	{
-		int w_2 = w / 2;
-		int h_2 = h / 2;
-		int d_2 = d / 2;
-		ImageStack stack = new ImageStack(w, h, d);
-		FloatProcessor fp = new FloatProcessor(w, h);
-		float[] pixels = (float[]) fp.getPixels();
+		final int w_2 = w / 2;
+		final int h_2 = h / 2;
+		final int d_2 = d / 2;
+		final ImageStack stack = new ImageStack(w, h, d);
+		final FloatProcessor fp = new FloatProcessor(w, h);
+		final float[] pixels = (float[]) fp.getPixels();
 		fill(fp, w_2, 0, w_2, h_2, 1);
 		fill(fp, 0, 0, w_2, h_2, 2);
 		fill(fp, 0, h_2, w_2, h_2, 3);
@@ -115,28 +115,28 @@ public class FloatDHT3DTest
 		FloatDHT3D dht;
 
 		// Simple test
-		float[] data = new float[] { 2, 1, 3, 4, 6, 5, 7, 8 };
+		final float[] data = new float[] { 2, 1, 3, 4, 6, 5, 7, 8 };
 		dht = new FloatDHT3D(2, 2, 2, data.clone(), false);
 		dht.swapOctants();
 		checkOctants(data, dht.getData());
 
-		int[] test = new int[] { 2, 4, 6 };
-		for (int w : test)
-			for (int h : test)
-				for (int d : test)
+		final int[] test = new int[] { 2, 4, 6 };
+		for (final int w : test)
+			for (final int h : test)
+				for (final int d : test)
 				{
 					dht = createOctants(w, h, d);
 
-					float[] in = dht.getData().clone();
+					final float[] in = dht.getData().clone();
 
 					// This just tests that the swap of the DHT and the stack matches
-					ImageStack stack = dht.getImageStack();
+					final ImageStack stack = dht.getImageStack();
 					//gdsc.core.ij.Utils.display("Test", stack);
 					dht.swapOctants();
 					FloatDHT3D.swapOctants(stack);
 
-					float[] e = new FloatDHT3D(stack).getData();
-					float[] o = dht.getData();
+					final float[] e = new FloatDHT3D(stack).getData();
+					final float[] o = dht.getData();
 
 					checkOctants(in, o);
 
@@ -144,9 +144,9 @@ public class FloatDHT3DTest
 				}
 	}
 
-	private void checkOctants(float[] in, float[] out)
+	private static void checkOctants(float[] in, float[] out)
 	{
-		int[] swap = new int[9];
+		final int[] swap = new int[9];
 		swap[1] = 7;
 		swap[2] = 8;
 		swap[3] = 5;
@@ -162,18 +162,18 @@ public class FloatDHT3DTest
 	@Test
 	public void canConvolveAndDeconvolve()
 	{
-		FloatDHT3D dht = createData();
-		float[] pixels = dht.getData().clone();
+		final FloatDHT3D dht = createData();
+		final float[] pixels = dht.getData().clone();
 		dht.transform();
 
-		FloatDHT3D copy = dht.copy();
+		final FloatDHT3D copy = dht.copy();
 		copy.initialiseFastMultiply();
 
-		FloatDHT3D convolved = dht.multiply(dht);
-		FloatDHT3D deconvolved = convolved.divide(dht);
+		final FloatDHT3D convolved = dht.multiply(dht);
+		final FloatDHT3D deconvolved = convolved.divide(dht);
 
-		FloatDHT3D convolved2 = dht.multiply(copy);
-		FloatDHT3D deconvolved2 = convolved.divide(copy);
+		final FloatDHT3D convolved2 = dht.multiply(copy);
+		final FloatDHT3D deconvolved2 = convolved.divide(copy);
 
 		Assert.assertArrayEquals(convolved.getData(), convolved2.getData(), 0);
 		Assert.assertArrayEquals(deconvolved.getData(), deconvolved2.getData(), 0);
@@ -196,39 +196,39 @@ public class FloatDHT3DTest
 	@Test
 	public void canCorrelate()
 	{
-		FloatDHT3D dht = createData();
+		final FloatDHT3D dht = createData();
 		dht.transform();
 
-		FloatDHT3D copy = dht.copy();
+		final FloatDHT3D copy = dht.copy();
 		copy.initialiseFastMultiply();
 
 		// Centre of power spectrum
-		int icentre = size / 2;
+		final int icentre = size / 2;
 
 		for (int z = -1; z <= 1; z++)
 			for (int y = -1; y <= 1; y++)
 				for (int x = -1; x <= 1; x++)
 				{
-					FloatDHT3D dht2 = createData(centre + x, centre + y, centre + z);
+					final FloatDHT3D dht2 = createData(centre + x, centre + y, centre + z);
 					dht2.transform();
 
-					FloatDHT3D correlation = dht2.conjugateMultiply(dht);
-					FloatDHT3D correlation2 = dht2.conjugateMultiply(copy);
+					final FloatDHT3D correlation = dht2.conjugateMultiply(dht);
+					final FloatDHT3D correlation2 = dht2.conjugateMultiply(copy);
 					Assert.assertArrayEquals(correlation.getData(), correlation2.getData(), 0);
 
 					correlation.inverseTransform();
 					correlation.swapOctants();
 
-					float[] pixels = correlation.getData();
+					final float[] pixels = correlation.getData();
 
-					int i = SimpleArrayUtils.findMaxIndex(pixels);
-					int[] xyz = correlation.getXYZ(i);
+					final int i = SimpleArrayUtils.findMaxIndex(pixels);
+					final int[] xyz = correlation.getXYZ(i);
 
 					// This is how far dht has to move to align with dht2.
 					// To align dht2 with dht would be the opposite sign.
-					int ox = xyz[0] - icentre;
-					int oy = xyz[1] - icentre;
-					int oz = xyz[2] - icentre;
+					final int ox = xyz[0] - icentre;
+					final int oy = xyz[1] - icentre;
+					final int oz = xyz[2] - icentre;
 					//System.out.printf("Shift [%d,%d,%d], centre [%d,%d,%d]\n", x, y, z, xyz[0], xyz[1], xyz[2]);
 					Assert.assertEquals(x, ox);
 					Assert.assertEquals(y, oy);
@@ -239,30 +239,30 @@ public class FloatDHT3DTest
 	@Test
 	public void canConvertToDFT()
 	{
-		FloatDHT3D dht = createData();
-		float[] input = dht.getData().clone();
+		final FloatDHT3D dht = createData();
+		final float[] input = dht.getData().clone();
 		dht.transform();
 
-		FloatImage3D[] result = dht.toDFT(null, null);
+		final FloatImage3D[] result = dht.toDFT(null, null);
 
-		float rel = 1e-6f;
-		float abs = 1e-6f;
+		final float rel = 1e-6f;
+		final float abs = 1e-6f;
 
 		// Test reverse transform
-		FloatDHT3D dht2 = FloatDHT3D.fromDFT(result[0], result[1], null);
+		final FloatDHT3D dht2 = FloatDHT3D.fromDFT(result[0], result[1], null);
 
-		float[] e = dht.getData();
-		float[] o = dht2.getData();
+		final float[] e = dht.getData();
+		final float[] o = dht2.getData();
 		for (int i = 0; i < e.length; i++)
 			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
 
 		// Test verses full forward transform
-		FloatFFT_3D fft = new FloatFFT_3D(dht.ns, dht.nr, dht.nc);
-		float[] dft = Arrays.copyOf(input, 2 * e.length);
+		final FloatFFT_3D fft = new FloatFFT_3D(dht.ns, dht.nr, dht.nc);
+		final float[] dft = Arrays.copyOf(input, 2 * e.length);
 		fft.realForwardFull(dft);
 
-		float[] or = result[0].getData();
-		float[] oi = result[1].getData();
+		final float[] or = result[0].getData();
+		final float[] oi = result[1].getData();
 		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
 		{
 			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));

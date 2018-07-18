@@ -170,7 +170,6 @@ public class QuadrantAnalysis
 		C = 0;
 		D = 0;
 		for (int y = cy, x1 = cx, x2 = cx; y < height; y++, x1--, x2++)
-		{
 			for (int x = 0, index = y * width; x < width; x++, index++)
 			{
 				ABCD += Math.abs(residuals[index]);
@@ -183,9 +182,7 @@ public class QuadrantAnalysis
 				else
 					ABCD -= Math.abs(residuals[index]);
 			}
-		}
 		for (int y = cy - 1, x1 = cx - 1, x2 = cx + 1; y >= 0; y--, x1--, x2++)
-		{
 			for (int x = 0, index = y * width; x < width; x++, index++)
 			{
 				ABCD += Math.abs(residuals[index]);
@@ -198,7 +195,6 @@ public class QuadrantAnalysis
 				else
 					ABCD -= Math.abs(residuals[index]);
 			}
-		}
 
 		// Similar for + quadrants:
 		// AA.BB
@@ -212,7 +208,6 @@ public class QuadrantAnalysis
 		C2 = 0;
 		D2 = 0;
 		for (int y = cy + 1; y < height; y++)
-		{
 			for (int x = 0, index = y * width; x < width; x++, index++)
 			{
 				ABCD2 += Math.abs(residuals[index]);
@@ -221,9 +216,7 @@ public class QuadrantAnalysis
 				else if (x > cx)
 					C2 += residuals[index];
 			}
-		}
 		for (int y = cy - 1; y >= 0; y--)
-		{
 			for (int x = 0, index = y * width; x < width; x++, index++)
 			{
 				ABCD2 += Math.abs(residuals[index]);
@@ -232,7 +225,6 @@ public class QuadrantAnalysis
 				else if (x > cx)
 					B2 += residuals[index];
 			}
-		}
 
 		// X quadrant:
 		// .AAA.
@@ -386,13 +378,9 @@ public class QuadrantAnalysis
 			final double cosang = sum / (d1 * d2);
 
 			if (cosang > 1.0)
-			{
 				return 0;
-			}
 			else if (cosang < -1.0)
-			{
 				return Math.PI;
-			}
 
 			return Math.acos(cosang);
 		}
@@ -420,13 +408,9 @@ public class QuadrantAnalysis
 			final double cosang = sum / (d1 * d2);
 
 			if (cosang > 1.0)
-			{
 				return 0;
-			}
 			else if (cosang < -1.0)
-			{
 				return Math.PI;
-			}
 
 			return Math.acos(cosang);
 		}

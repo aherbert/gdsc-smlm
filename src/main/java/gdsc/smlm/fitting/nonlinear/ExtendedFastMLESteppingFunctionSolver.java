@@ -158,18 +158,14 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 		if (solver != null)
 		{
 			if (w != null)
-			{
 				f2 = OffsetExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) f, w);
-			}
 			jacobian = new double[f2.size()];
 			return jacobianGradientProcedure = new FastMLEJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2);
 		}
 		else
 		{
 			if (w != null)
-			{
 				f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
-			}
 			return FastMLEGradient2ProcedureFactory.create(y, f2);
 		}
 	}
@@ -214,13 +210,13 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 			for (int i = 0; i < step.length; i++)
 				step[i] = -d1[i];
 			jacobianGradientProcedure.getJacobianLinear(jacobian);
-			DenseMatrix64F m = DenseMatrix64F.wrap(d1.length, d1.length, jacobian);
+			final DenseMatrix64F m = DenseMatrix64F.wrap(d1.length, d1.length, jacobian);
 			System.out.println(m.toString());
 			System.out.println(Arrays.toString(d2));
 			if (solver.solve(jacobian, step))
 			{
 				// XXX - debug the difference
-				double[] step2 = new double[d1.length];
+				final double[] step2 = new double[d1.length];
 				for (int i = 0; i < step.length; i++)
 					step2[i] = -d1[i] / d2[i];
 				System.out.printf("[%d] Jacobian Step %s vs %s\n", tc.getIterations(), Arrays.toString(step),

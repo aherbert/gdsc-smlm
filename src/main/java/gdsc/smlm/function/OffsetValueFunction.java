@@ -119,9 +119,7 @@ public class OffsetValueFunction extends PrecomputedValueFunction
 		{
 			// Avoid multiple wrapping
 			if (func instanceof OffsetValueFunction)
-			{
 				return new OffsetValueFunction((OffsetValueFunction) func, b);
-			}
 			return new OffsetValueFunction(func, b);
 		}
 		return func;
@@ -136,9 +134,7 @@ public class OffsetValueFunction extends PrecomputedValueFunction
 	public String getParameterName(int i)
 	{
 		if (f instanceof NamedFunction)
-		{
 			return ((NamedFunction) f).getParameterName(i);
-		}
 		return "Unknown";
 	}
 }

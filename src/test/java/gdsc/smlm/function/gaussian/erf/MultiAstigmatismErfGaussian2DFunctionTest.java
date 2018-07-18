@@ -34,14 +34,14 @@ public class MultiAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunc
 	{
 		flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-		double sx = 1.08;
-		double sy = 1.01;
-		double gamma = 0.389;
-		double d = 0.531;
-		double Ax = -0.0708;
-		double Bx = -0.073;
-		double Ay = 0.164;
-		double By = 0.0417;
+		final double sx = 1.08;
+		final double sy = 1.01;
+		final double gamma = 0.389;
+		final double d = 0.531;
+		final double Ax = -0.0708;
+		final double Bx = -0.073;
+		final double Ay = 0.164;
+		final double By = 0.0417;
 		zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 		f1 = new MultiAstigmatismErfGaussian2DFunction(1, maxx, maxy, zModel);
 		f2 = new MultiAstigmatismErfGaussian2DFunction(2, maxx, maxy, zModel);

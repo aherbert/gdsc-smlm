@@ -45,8 +45,8 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  */
 public class PeakResultConversionHelper
 {
-	private Calibration calibration;
-	private PSF psf;
+	private final Calibration calibration;
+	private final PSF psf;
 
 	/**
 	 * Instantiates a new peak result conversion helper.
@@ -119,10 +119,8 @@ public class PeakResultConversionHelper
 	public TypeConverter<IntensityUnit> getIntensityConverter()
 	{
 		if (intensityConverter == null)
-		{
 			intensityConverter = (calibration == null) ? new IdentityTypeConverter<>(null)
 					: CalibrationHelper.getIntensityConverterSafe(calibration, intensityUnit);
-		}
 		return intensityConverter;
 	}
 
@@ -183,10 +181,8 @@ public class PeakResultConversionHelper
 	public TypeConverter<DistanceUnit> getDistanceConverter()
 	{
 		if (distanceConverter == null)
-		{
 			distanceConverter = (calibration == null) ? new IdentityTypeConverter<>(null)
 					: CalibrationHelper.getDistanceConverterSafe(calibration, distanceUnit);
-		}
 		return distanceConverter;
 	}
 
@@ -247,10 +243,8 @@ public class PeakResultConversionHelper
 	public TypeConverter<AngleUnit> getAngleConverter()
 	{
 		if (angleConverter == null)
-		{
 			angleConverter = (calibration == null) ? new IdentityTypeConverter<>(null)
 					: CalibrationHelper.getAngleConverterSafe(calibration, angleUnit);
-		}
 		return angleConverter;
 	}
 
@@ -262,7 +256,7 @@ public class PeakResultConversionHelper
 	 */
 	public Converter[] getConverters()
 	{
-		TurboList<Converter> list = new TurboList<>(5);
+		final TurboList<Converter> list = new TurboList<>(5);
 
 		getIntensityConverter();
 		getDistanceConverter();
@@ -273,11 +267,9 @@ public class PeakResultConversionHelper
 		list.add(distanceConverter);
 		list.add(distanceConverter);
 		if (psf != null)
-		{
 			try
 			{
-				for (PSFParameter p : PSFHelper.getParameters(psf))
-				{
+				for (final PSFParameter p : PSFHelper.getParameters(psf))
 					switch (p.getUnit())
 					{
 						case DISTANCE:
@@ -292,13 +284,11 @@ public class PeakResultConversionHelper
 						default:
 							list.add(new IdentityTypeConverter<>(p.getUnit()));
 					}
-				}
 			}
-			catch (ConfigurationException e)
+			catch (final ConfigurationException e)
 			{
 				// Ignore
 			}
-		}
 		return list.toArray(new Converter[list.size()]);
 	}
 
@@ -310,7 +300,7 @@ public class PeakResultConversionHelper
 	 */
 	public String[] getNames()
 	{
-		TurboList<String> list = new TurboList<>(5);
+		final TurboList<String> list = new TurboList<>(5);
 
 		list.add("Background");
 		list.add("Intensity");
@@ -318,20 +308,18 @@ public class PeakResultConversionHelper
 		list.add("Y");
 		list.add("Z");
 		if (psf != null)
-		{
 			try
 			{
-				for (PSFParameter p : PSFHelper.getParameters(psf))
+				for (final PSFParameter p : PSFHelper.getParameters(psf))
 				{
-					String name = p.getName();
+					final String name = p.getName();
 					list.add(TextUtils.isNullOrEmpty(name) ? "unknown" : name);
 				}
 			}
-			catch (ConfigurationException e)
+			catch (final ConfigurationException e)
 			{
 				// Ignore
 			}
-		}
 		return list.toArray(new String[list.size()]);
 	}
 
@@ -343,14 +331,14 @@ public class PeakResultConversionHelper
 	 */
 	public String[] getUnitNames()
 	{
-		TurboList<String> list = new TurboList<>(5);
+		final TurboList<String> list = new TurboList<>(5);
 
 		getIntensityConverter();
 		getDistanceConverter();
 
-		String intensityUnit = (intensityConverter.to() != null) ? UnitHelper.getShortName(intensityConverter.to())
+		final String intensityUnit = (intensityConverter.to() != null) ? UnitHelper.getShortName(intensityConverter.to())
 				: "";
-		String distanceUnit = (distanceConverter.to() != null) ? UnitHelper.getShortName(distanceConverter.to()) : "";
+		final String distanceUnit = (distanceConverter.to() != null) ? UnitHelper.getShortName(distanceConverter.to()) : "";
 		String angleUnit = null;
 
 		list.add(intensityUnit);
@@ -359,11 +347,9 @@ public class PeakResultConversionHelper
 		list.add(distanceUnit);
 		list.add(distanceUnit);
 		if (psf != null)
-		{
 			try
 			{
-				for (PSFParameter p : PSFHelper.getParameters(psf))
-				{
+				for (final PSFParameter p : PSFHelper.getParameters(psf))
 					switch (p.getUnit())
 					{
 						case DISTANCE:
@@ -378,13 +364,11 @@ public class PeakResultConversionHelper
 						default:
 							list.add("");
 					}
-				}
 			}
-			catch (ConfigurationException e)
+			catch (final ConfigurationException e)
 			{
 				// Ignore
 			}
-		}
 		return list.toArray(new String[list.size()]);
 	}
 
@@ -450,7 +434,7 @@ public class PeakResultConversionHelper
 		if (calibration == null)
 			return null;
 
-		CalibrationWriter calibration = new CalibrationWriter(this.calibration);
+		final CalibrationWriter calibration = new CalibrationWriter(this.calibration);
 		if (hasIntensityConverter())
 			calibration.setIntensityUnit(getIntensityConverter().to());
 		if (hasDistanceConverter())

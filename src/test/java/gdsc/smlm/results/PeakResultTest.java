@@ -36,8 +36,8 @@ public class PeakResultTest
 	public void sameResultsIsEqual()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
-		PeakResult p = r1[0];
+		final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
+		final PeakResult p = r1[0];
 		Assert.assertTrue("Same object", PeakResult.equals(p, p));
 		Assert.assertTrue("Null object", PeakResult.equals(null, null));
 	}
@@ -46,19 +46,19 @@ public class PeakResultTest
 	public void sameResultsAreEqual()
 	{
 		RandomGenerator r;
-		int size = 10;
-		int n = 5;
-		boolean[] both = { true, false };
-		for (boolean withDeviations : both)
-			for (boolean withId : both)
-				for (boolean withEndFrame : both)
-					for (boolean withPrecision : both)
+		final int size = 10;
+		final int n = 5;
+		final boolean[] both = { true, false };
+		for (final boolean withDeviations : both)
+			for (final boolean withId : both)
+				for (final boolean withEndFrame : both)
+					for (final boolean withPrecision : both)
 					{
 						r = TestSettings.getRandomGenerator();
-						PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
+						final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						r = TestSettings.getRandomGenerator();
-						PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
+						final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						for (int i = 0; i < r1.length; i++)
 							Assert.assertTrue(PeakResult.equals(r1[i], r2[i]));
@@ -69,33 +69,33 @@ public class PeakResultTest
 	public void differentResultsAreNotEqual()
 	{
 		RandomGenerator r;
-		int size = 1;
-		int n = 5;
-		boolean[] both = { true, false };
-		for (boolean withDeviations : both)
-			for (boolean withId : both)
-				for (boolean withEndFrame : both)
-					for (boolean withPrecision : both)
+		final int size = 1;
+		final int n = 5;
+		final boolean[] both = { true, false };
+		for (final boolean withDeviations : both)
+			for (final boolean withId : both)
+				for (final boolean withEndFrame : both)
+					for (final boolean withPrecision : both)
 					{
 						r = TestSettings.getRandomGenerator();
-						PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
+						final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
-						PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
+						final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						for (int i = 0; i < r1.length; i++)
 							Assert.assertFalse(PeakResult.equals(r1[i], r2[i]));
 					}
 	}
 
-	private PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations, boolean withId,
+	private static PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations, boolean withId,
 			boolean withEndFrame, boolean withPrecision)
 	{
 		final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
 		while (size-- > 0)
 		{
-			float[] params = createParams(n, r);
-			float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
-			AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
+			final float[] params = createParams(n, r);
+			final float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
+			final AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
 					r.nextDouble(), r.nextFloat(), r.nextFloat(), params, paramsDev);
 			if (withId)
 				p.setId(r.nextInt());
@@ -109,9 +109,9 @@ public class PeakResultTest
 		return store.toArray();
 	}
 
-	private float[] createParams(int n, RandomGenerator r)
+	private static float[] createParams(int n, RandomGenerator r)
 	{
-		float[] p = new float[n];
+		final float[] p = new float[n];
 		while (n-- > 0)
 			p[n] = r.nextFloat();
 		return p;

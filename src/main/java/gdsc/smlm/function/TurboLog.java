@@ -156,14 +156,14 @@ public class TurboLog extends FastLog
 		qd = 52 - n;
 		int x = 0x3F800000; // Set the exponent to 0 so the float value=1.0
 		//assert Float.intBitsToFloat(x) == 1.0f : "value is not 1.0f";
-		int inc = 1 << q; // Amount to increase the mantissa
+		final int inc = 1 << q; // Amount to increase the mantissa
 
 		final int size = 1 << n;
 		logMantissa = new float[size];
 		for (int i = 0; i < size; i++)
 		{
-			float value = Float.intBitsToFloat(x);
-			float logv = (float) Math.log(value);
+			final float value = Float.intBitsToFloat(x);
+			final float logv = (float) Math.log(value);
 			logMantissa[i] = logv;
 			x += inc;
 
@@ -207,10 +207,8 @@ public class TurboLog extends FastLog
 
 		// Edge case for negatives
 		if ((bits & 0x80000000) != 0)
-		{
 			// Only allow -0
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		// Note the documentation from Float.intBitsToFloat(int):
 		// int s = ((bits >> 31) == 0) ? 1 : -1;
@@ -236,9 +234,7 @@ public class TurboLog extends FastLog
 
 		// When the value is close to 1 then the relative error can be very large
 		if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF))
-		{
 			return (float) Math.log(x);
-		}
 
 		return logMantissa[m >>> q] + logExpF[e];
 	}
@@ -298,9 +294,7 @@ public class TurboLog extends FastLog
 		if (e == 0)
 			return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
 		if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF))
-		{
 			return (float) Math.log(x);
-		}
 		return logMantissa[m >>> q] + logExpF[e];
 	}
 
@@ -321,10 +315,8 @@ public class TurboLog extends FastLog
 
 		// Edge case for negatives
 		if ((bits & 0x8000000000000000L) != 0L)
-		{
 			// Only allow -0
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		// Note the documentation from Double.longBitsToDouble(int):
 		// int s = ((bits >> 63) == 0) ? 1 : -1;
@@ -349,9 +341,7 @@ public class TurboLog extends FastLog
 
 		// When the value is close to 1 then the relative error can be very large
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return (float) Math.log(x);
-		}
 
 		return logMantissa[(int) (m >>> qd)] + logExpD[e];
 	}
@@ -411,9 +401,7 @@ public class TurboLog extends FastLog
 		if (e == 0)
 			return (m == 0L) ? Float.NEGATIVE_INFINITY : computeSubnormalF(m << 1);
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return (float) Math.log(x);
-		}
 		return logMantissa[(int) (m >>> qd)] + logExpD[e];
 	}
 
@@ -434,10 +422,8 @@ public class TurboLog extends FastLog
 
 		// Edge case for negatives
 		if ((bits & 0x8000000000000000L) != 0L)
-		{
 			// Only allow -0
 			return (e == 0 && m == 0L) ? Double.NEGATIVE_INFINITY : Double.NaN;
-		}
 
 		// Note the documentation from Double.longBitsToDouble(int):
 		// int s = ((bits >> 63) == 0) ? 1 : -1;
@@ -462,9 +448,7 @@ public class TurboLog extends FastLog
 
 		// When the value is close to 1 then the relative error can be very large
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return Math.log(x);
-		}
 
 		//return logMantissa[(int) (m >>> qd)] + logExpD[e];
 		return logMantissa[(int) (m >>> qd)] + (e - 1023) * LN2;
@@ -525,9 +509,7 @@ public class TurboLog extends FastLog
 		if (e == 0)
 			return (m == 0L) ? Double.NEGATIVE_INFINITY : computeSubnormal(m << 1);
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return Math.log(x);
-		}
 		//return logMantissa[(int) (m >>> qd)] + logExpD[e];
 		return logMantissa[(int) (m >>> qd)] + (e - 1023) * LN2;
 	}

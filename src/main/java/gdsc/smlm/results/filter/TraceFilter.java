@@ -81,19 +81,13 @@ public class TraceFilter extends Filter
 		ok = new HashSet<>();
 
 		// Trace molecules. Anything that is part of a trace is OK
-		TraceManager tm = new TraceManager(peakResults);
+		final TraceManager tm = new TraceManager(peakResults);
 		tm.traceMolecules(d, t);
-		Trace[] traces = tm.getTraces();
-		for (Trace trace : traces)
-		{
+		final Trace[] traces = tm.getTraces();
+		for (final Trace trace : traces)
 			if (trace.size() > 1)
-			{
 				for (int i = 0; i < trace.size(); i++)
-				{
 					ok.add(trace.get(i));
-				}
-			}
-		}
 	}
 
 	/**

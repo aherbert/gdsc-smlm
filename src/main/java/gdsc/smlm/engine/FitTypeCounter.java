@@ -32,7 +32,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class FitTypeCounter
 {
-	private AtomicInteger[] count;
+	private final AtomicInteger[] count;
 
 	/**
 	 * Instantiates a new fit type counter.
@@ -118,17 +118,13 @@ public class FitTypeCounter
 	{
 		int total = 0;
 		if (flags == 0)
-		{
 			// Count all but zero
 			for (int i = 1; i < count.length; i++)
 				total += count[i].get();
-		}
 		else
-		{
 			for (int i = 0; i < count.length; i++)
 				if ((i & flags) == 0)
 					total += count[i].get();
-		}
 		return total;
 	}
 

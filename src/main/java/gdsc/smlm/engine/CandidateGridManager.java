@@ -38,7 +38,7 @@ class CandidateGridManager
 	private CandidateList neighbourCache = null;
 	private Candidate neighbourCacheCandidate = null;
 
-	private CandidateList fitted = new CandidateList();
+	private final CandidateList fitted = new CandidateList();
 
 	/**
 	 * Clear the cache. This should be called when more data has been added to the grid.
@@ -254,17 +254,15 @@ class CandidateGridManager
 		{
 			size = list.length;
 			for (int i = 0; i < size; i++)
-			{
 				if (list[i].index == candidate.index)
 				{
-					int remaining = list.length - i - 1;
+					final int remaining = list.length - i - 1;
 					if (remaining != 0)
 						System.arraycopy(list, i + 1, list, i, remaining);
 					size--;
 					// Assume a unique candidate index
 					break;
 				}
-			}
 		}
 
 		neighbourCache = new CandidateList(size, list);
@@ -299,18 +297,13 @@ class CandidateGridManager
 		final int ymax = Math.min(yBlocks, yBlock + 2);
 
 		for (int xx = xmin; xx < xmax; xx++)
-		{
 			for (int yy = ymin; yy < ymax; yy++)
-			{
 				size += grid[xx][yy].getSize();
-			}
-		}
 		final Candidate[] list = new Candidate[size];
 		if (size != 0)
 		{
 			size = 0;
 			for (int xx = xmin; xx < xmax; xx++)
-			{
 				for (int yy = ymin; yy < ymax; yy++)
 				{
 					if (grid[xx][yy].getSize() == 0)
@@ -318,7 +311,6 @@ class CandidateGridManager
 					grid[xx][yy].copyTo(list, size);
 					size += grid[xx][yy].getSize();
 				}
-			}
 		}
 
 		return list;

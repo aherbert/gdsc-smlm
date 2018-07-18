@@ -89,72 +89,72 @@ public class BlinkEstimatorTest
 	@Test
 	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndMediumOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndMediumOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndMediumOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndHighOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[LOW], tOn[HIGH], tOff[HIGH], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndHighOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndHighOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[HIGH], tOn[HIGH], tOff[HIGH], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndLowOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[LOW], tOn[LOW], tOff[LOW], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndLowOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[MEDIUM], tOn[LOW], tOff[LOW], particles, fixedFraction, false, true);
 	}
 
 	@Test
 	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndLowOnOffTimesWithFixedMolecules()
 	{
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 		estimateBlinking(null, nBlinks[HIGH], tOn[LOW], tOff[LOW], particles, fixedFraction, false, true);
 	}
 
@@ -163,23 +163,21 @@ public class BlinkEstimatorTest
 	{
 		// Skip this as it is slow
 		Assume.assumeTrue(false);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		int particles = 1000;
-		double fixedFraction = 1;
+		final int particles = 1000;
+		final double fixedFraction = 1;
 
-		for (boolean timeAtLowerBound : new boolean[] { false })
+		for (final boolean timeAtLowerBound : new boolean[] { false })
 		{
 			final int[] count = new int[MAX_FITTED_POINTS + 1];
 			int tests = 0;
 			for (int run = 0; run < 3; run++)
-			{
-				for (double n : nBlinks)
-				{
+				for (final double n : nBlinks)
 					for (int i = 0; i < tOn.length; i++)
 					{
 						tests++;
-						TIntHashSet ok = estimateBlinking(rg, n, tOn[i], tOff[i], particles, fixedFraction,
+						final TIntHashSet ok = estimateBlinking(rg, n, tOn[i], tOff[i], particles, fixedFraction,
 								timeAtLowerBound, false);
 						ok.forEach(new TIntProcedure()
 						{
@@ -191,8 +189,6 @@ public class BlinkEstimatorTest
 							}
 						});
 					}
-				}
-			}
 			System.out.printf("Time@LowerBound = %b\n", timeAtLowerBound);
 			for (int nFittedPoints = MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS; nFittedPoints++)
 			{
@@ -211,30 +207,30 @@ public class BlinkEstimatorTest
 		if (rg == null)
 			rg = TestSettings.getRandomGenerator();
 
-		SpatialIllumination activationIllumination = new UniformIllumination(100);
+		final SpatialIllumination activationIllumination = new UniformIllumination(100);
 		int totalSteps = 100;
-		double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
+		final double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
-		ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, tOn, 0, tOff, 0, nBlinks);
+		final ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, tOn, 0, tOff, 0, nBlinks);
 		imageModel.setRandomGenerator(rg);
 
-		double[] max = new double[] { 256, 256, 32 };
-		double[] min = new double[3];
-		SpatialDistribution distribution = new UniformDistribution(min, max, rg.nextInt());
-		List<CompoundMoleculeModel> compounds = new ArrayList<>(1);
-		CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0, Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
+		final double[] max = new double[] { 256, 256, 32 };
+		final double[] min = new double[3];
+		final SpatialDistribution distribution = new UniformDistribution(min, max, rg.nextInt());
+		final List<CompoundMoleculeModel> compounds = new ArrayList<>(1);
+		final CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0, Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 		c.setDiffusionRate(diffusionRate);
 		c.setDiffusionType(DiffusionType.RANDOM_WALK);
 		compounds.add(c);
 
-		List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, particles, distribution, false);
+		final List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, particles, distribution, false);
 
 		// Activate fluorophores
-		List<? extends FluorophoreSequenceModel> fluorophores = imageModel.createFluorophores(molecules, totalSteps);
+		final List<? extends FluorophoreSequenceModel> fluorophores = imageModel.createFluorophores(molecules, totalSteps);
 
 		totalSteps = checkTotalSteps(totalSteps, fluorophores);
 
-		List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps, photons,
+		final List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps, photons,
 				0.5, false);
 
 		//		// Remove localisations to simulate missed counts.
@@ -261,24 +257,26 @@ public class BlinkEstimatorTest
 		//		}
 		//		fluorophores = newFluorophores;
 
-		MemoryPeakResults results = new MemoryPeakResults();
-		CalibrationWriter calibration = new CalibrationWriter();
+		final MemoryPeakResults results = new MemoryPeakResults();
+		final CalibrationWriter calibration = new CalibrationWriter();
 		calibration.setNmPerPixel(pixelPitch);
 		calibration.setExposureTime(msPerFrame);
 		calibration.setCountPerPhoton(1);
 		results.setCalibration(calibration.getCalibration());
 		results.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
-		float b = 0, intensity, z = 0;
-		for (LocalisationModel l : localisations)
+		final float b = 0;
+		float intensity;
+		final float z = 0;
+		for (final LocalisationModel l : localisations)
 		{
 			// Remove by intensity threshold and optionally at random.
 			if (l.getIntensity() < minPhotons || rg.nextDouble() < pDelete)
 				continue;
-			int frame = l.getTime();
+			final int frame = l.getTime();
 			intensity = (float) l.getIntensity();
-			float x = (float) l.getX();
-			float y = (float) l.getY();
-			float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
+			final float x = (float) l.getX();
+			final float y = (float) l.getY();
+			final float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
 			results.add(frame, 0, 0, 0, 0, 0, 0, params, null);
 		}
 
@@ -287,26 +285,26 @@ public class BlinkEstimatorTest
 		intensity = (float) photons;
 		for (int i = (int) (localisations.size() * pAdd); i-- > 0;)
 		{
-			int frame = 1 + rg.nextInt(totalSteps);
-			float x = (float) (rg.nextDouble() * max[0]);
-			float y = (float) (rg.nextDouble() * max[1]);
-			float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
+			final int frame = 1 + rg.nextInt(totalSteps);
+			final float x = (float) (rg.nextDouble() * max[0]);
+			final float y = (float) (rg.nextDouble() * max[1]);
+			final float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
 			results.add(frame, 0, 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Get actual simulated stats ...
-		Statistics statsNBlinks = new Statistics();
-		Statistics statsTOn = new Statistics();
-		Statistics statsTOff = new Statistics();
-		Statistics statsSampledNBlinks = new Statistics();
-		Statistics statsSampledTOn = new Statistics();
-		StoredDataStatistics statsSampledTOff = new StoredDataStatistics();
-		for (FluorophoreSequenceModel f : fluorophores)
+		final Statistics statsNBlinks = new Statistics();
+		final Statistics statsTOn = new Statistics();
+		final Statistics statsTOff = new Statistics();
+		final Statistics statsSampledNBlinks = new Statistics();
+		final Statistics statsSampledTOn = new Statistics();
+		final StoredDataStatistics statsSampledTOff = new StoredDataStatistics();
+		for (final FluorophoreSequenceModel f : fluorophores)
 		{
 			statsNBlinks.add(f.getNumberOfBlinks());
 			statsTOn.add(f.getOnTimes());
 			statsTOff.add(f.getOffTimes());
-			int[] on = f.getSampledOnTimes();
+			final int[] on = f.getSampledOnTimes();
 			statsSampledNBlinks.add(on.length);
 			statsSampledTOn.add(on);
 			statsSampledTOff.add(f.getSampledOffTimes());
@@ -320,11 +318,11 @@ public class BlinkEstimatorTest
 				statsSampledTOff.getStatistics().getMax());
 		System.out.printf("-=-=--=-\n");
 
-		BlinkEstimator be = new BlinkEstimator();
+		final BlinkEstimator be = new BlinkEstimator();
 		be.maxDarkTime = (int) (tOff * 10);
 		be.msPerFrame = msPerFrame;
 		be.relativeDistance = false;
-		double d = ImageModel.getRandomMoveDistance(diffusionRate);
+		final double d = ImageModel.getRandomMoveDistance(diffusionRate);
 		be.searchDistance = (fixedFraction < 1) ? Math.sqrt(2 * d * d) * 3 : 0;
 		be.timeAtLowerBound = timeAtLowerBound;
 		be.showPlots = false;
@@ -332,7 +330,7 @@ public class BlinkEstimatorTest
 		//Assert.assertTrue("Max dark time must exceed the dark time of the data (otherwise no plateau)",
 		//		be.maxDarkTime > statsSampledTOff.getStatistics().getMax());
 
-		int nMolecules = fluorophores.size();
+		final int nMolecules = fluorophores.size();
 		if (usePopulationStatistics)
 		{
 			nBlinks = statsNBlinks.getMean();
@@ -345,15 +343,15 @@ public class BlinkEstimatorTest
 		}
 
 		// See if any fitting regime gets a correct answer
-		TIntHashSet ok = new TIntHashSet();
+		final TIntHashSet ok = new TIntHashSet();
 		for (int nFittedPoints = MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS; nFittedPoints++)
 		{
 			be.nFittedPoints = nFittedPoints;
 			be.computeBlinkingRate(results, true);
 
-			double moleculesError = DoubleEquality.relativeError(nMolecules, be.getNMolecules());
-			double blinksError = DoubleEquality.relativeError(nBlinks, be.getNBlinks());
-			double offError = DoubleEquality.relativeError(tOff * msPerFrame, be.getTOff());
+			final double moleculesError = DoubleEquality.relativeError(nMolecules, be.getNMolecules());
+			final double blinksError = DoubleEquality.relativeError(nBlinks, be.getNBlinks());
+			final double offError = DoubleEquality.relativeError(tOff * msPerFrame, be.getTOff());
 			System.out.printf("Error %d: N = %f, blinks = %f, tOff = %f : %f\n", nFittedPoints, moleculesError,
 					blinksError, offError, (moleculesError + blinksError + offError) / 3);
 
@@ -383,11 +381,9 @@ public class BlinkEstimatorTest
 
 	private static int checkTotalSteps(int totalSteps, List<? extends FluorophoreSequenceModel> fluorophores)
 	{
-		for (FluorophoreSequenceModel f : fluorophores)
-		{
+		for (final FluorophoreSequenceModel f : fluorophores)
 			if (totalSteps < f.getEndTime())
 				totalSteps = (int) (f.getEndTime() + 1);
-		}
 		return totalSteps;
 	}
 }

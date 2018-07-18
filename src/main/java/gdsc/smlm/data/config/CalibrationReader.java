@@ -209,7 +209,7 @@ public class CalibrationReader
 	 */
 	public double getNmPerPixel()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getNmPerPixel() : 0;
 	}
 
@@ -230,7 +230,7 @@ public class CalibrationReader
 	 */
 	public double getCountPerPhoton()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getCountPerPhoton() : 0;
 	}
 
@@ -251,7 +251,7 @@ public class CalibrationReader
 	 */
 	public double getExposureTime()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasTimeCalibration()) ? c.getTimeCalibration().getExposureTime() : 0;
 	}
 
@@ -272,7 +272,7 @@ public class CalibrationReader
 	 */
 	public double getReadNoise()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getReadNoise() : 0;
 	}
 
@@ -293,7 +293,7 @@ public class CalibrationReader
 	 */
 	public double getBias()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getBias() : 0;
 	}
 
@@ -305,7 +305,7 @@ public class CalibrationReader
 	public boolean hasBias()
 	{
 		// Bias can be zero (the default) so check for a camera calibration first
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return c.hasCameraCalibration() && c.getCameraCalibration().getBias() >= 0;
 	}
 
@@ -316,7 +316,7 @@ public class CalibrationReader
 	 */
 	public CameraType getCameraType()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraType() : CameraType.CAMERA_TYPE_NA;
 	}
 
@@ -327,7 +327,7 @@ public class CalibrationReader
 	 */
 	public int getCameraTypeValue()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraTypeValue()
 				: CameraType.CAMERA_TYPE_NA_VALUE;
 	}
@@ -359,11 +359,9 @@ public class CalibrationReader
 	 */
 	public boolean isCCDCamera()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		if (c.hasCameraCalibration())
-		{
 			return CalibrationProtosHelper.isCCDCameraType(c.getCameraCalibration().getCameraType());
-		}
 		return false;
 	}
 
@@ -412,7 +410,7 @@ public class CalibrationReader
 	 */
 	public double getQuantumEfficiency()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? Maths.clip(0, 1, c.getCameraCalibration().getQuantumEfficiency()) : 0;
 	}
 
@@ -423,7 +421,7 @@ public class CalibrationReader
 	 */
 	public boolean hasQuantumEfficiency()
 	{
-		double qe = getQuantumEfficiency();
+		final double qe = getQuantumEfficiency();
 		return qe > 0 && qe <= 1;
 	}
 
@@ -440,7 +438,7 @@ public class CalibrationReader
 	 */
 	public double getCountPerElectron()
 	{
-		double countPerPhoton = getCountPerPhoton();
+		final double countPerPhoton = getCountPerPhoton();
 		if (countPerPhoton > 0)
 		{
 			double qe = getQuantumEfficiency();
@@ -470,7 +468,7 @@ public class CalibrationReader
 	 */
 	public String getCameraModelName()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraModelName() : null;
 	}
 
@@ -491,7 +489,7 @@ public class CalibrationReader
 	 */
 	public DistanceUnit getDistanceUnit()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getDistanceUnit()
 				: DistanceUnit.DISTANCE_UNIT_NA;
 	}
@@ -503,7 +501,7 @@ public class CalibrationReader
 	 */
 	public int getDistanceUnitValue()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getDistanceUnitValue()
 				: DistanceUnit.DISTANCE_UNIT_NA_VALUE;
 	}
@@ -525,7 +523,7 @@ public class CalibrationReader
 	 */
 	public IntensityUnit getIntensityUnit()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getIntensityUnit()
 				: IntensityUnit.INTENSITY_UNIT_NA;
 	}
@@ -537,7 +535,7 @@ public class CalibrationReader
 	 */
 	public int getIntensityUnitValue()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getIntensityUnitValue()
 				: IntensityUnit.INTENSITY_UNIT_NA_VALUE;
 	}
@@ -559,7 +557,7 @@ public class CalibrationReader
 	 */
 	public AngleUnit getAngleUnit()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasAngleCalibration()) ? c.getAngleCalibration().getAngleUnit() : AngleUnit.ANGLE_UNIT_NA;
 	}
 
@@ -570,7 +568,7 @@ public class CalibrationReader
 	 */
 	public int getAngleUnitValue()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasAngleCalibration()) ? c.getAngleCalibration().getAngleUnitValue() : AngleUnit.ANGLE_UNIT_NA_VALUE;
 	}
 
@@ -591,7 +589,7 @@ public class CalibrationReader
 	 */
 	public PrecisionMethod getPrecisionMethod()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethod()
 				: PrecisionMethod.PRECISION_METHOD_NA;
 	}
@@ -603,7 +601,7 @@ public class CalibrationReader
 	 */
 	public int getPrecisionMethodValue()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		final CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethodValue()
 				: PrecisionMethod.PRECISION_METHOD_NA_VALUE;
 	}

@@ -28,7 +28,7 @@ package gdsc.smlm.function;
  */
 public class ValueFunctionStore implements ValueFunction, ValueProcedure
 {
-	private ValueFunction f;
+	private final ValueFunction f;
 	private ValueProcedure procedure;
 
 	/** The counter i. */

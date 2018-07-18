@@ -130,7 +130,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			createCameraModel();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return DONE;
@@ -146,7 +146,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			gd = new ExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
-			String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
+			final String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
 
 			gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
 			gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
@@ -178,14 +178,12 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			case SCMOS:
 				cameraModel = CameraModelManager.load(calibration.getCameraModelName());
 				if (cameraModel == null)
-				{
 					throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
-				}
 				cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), null, false);
 				// Store for next time
-				Rectangle bounds = cameraModel.getBounds();
-				int ox = bounds.x;
-				int oy = bounds.y;
+				final Rectangle bounds = cameraModel.getBounds();
+				final int ox = bounds.x;
+				final int oy = bounds.y;
 				// Reset origin for filtering
 				if (ox != 0 || oy != 0)
 				{
@@ -226,35 +224,35 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 */
 	private void drawPlot()
 	{
-		NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
-		NoiseEstimator.Method method1 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm]);
-		NoiseEstimator.Method method2 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm2]);
+		final NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
+		final NoiseEstimator.Method method1 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm]);
+		final NoiseEstimator.Method method2 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm2]);
 		IJ.showStatus("Estimating noise ...");
 
-		boolean twoMethods = method1 != method2;
-		boolean preserveResiduals = method1.name().contains("Residuals") && method2.name().contains("Residuals") &&
+		final boolean twoMethods = method1 != method2;
+		final boolean preserveResiduals = method1.name().contains("Residuals") && method2.name().contains("Residuals") &&
 				twoMethods;
 
-		int current = imp.getCurrentSlice();
-		int stackSize = imp.getStackSize();
-		int preview = 100;
+		final int current = imp.getCurrentSlice();
+		final int stackSize = imp.getStackSize();
+		final int preview = 100;
 		int start = current;
 		int end = current + preview;
 		if (end > stackSize)
 		{
-			int shift = end - stackSize;
+			final int shift = end - stackSize;
 			start -= shift;
 			end = stackSize;
 			start = Math.max(1, start);
 		}
 
-		int size = end - start + 1;
-		double[] xValues = new double[size];
-		double[] yValues1 = new double[size];
-		double[] yValues2 = (twoMethods) ? new double[size] : null;
+		final int size = end - start + 1;
+		final double[] xValues = new double[size];
+		final double[] yValues1 = new double[size];
+		final double[] yValues2 = (twoMethods) ? new double[size] : null;
 
-		ImageStack stack = imp.getImageStack();
-		Rectangle bounds = imp.getProcessor().getRoi();
+		final ImageStack stack = imp.getImageStack();
+		final Rectangle bounds = imp.getProcessor().getRoi();
 		float[] buffer = null;
 		for (int slice = start, i = 0; slice <= end; slice++, i++)
 		{
@@ -275,17 +273,17 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		IJ.showStatus("Plotting noise ...");
 
 		// Get limits
-		double[] a = Tools.getMinMax(xValues);
-		double[] b1 = Tools.getMinMax(yValues1);
+		final double[] a = Tools.getMinMax(xValues);
+		final double[] b1 = Tools.getMinMax(yValues1);
 		if (twoMethods)
 		{
-			double[] b2 = Tools.getMinMax(yValues2);
+			final double[] b2 = Tools.getMinMax(yValues2);
 			b1[0] = FastMath.min(b1[0], b2[0]);
 			b1[1] = FastMath.max(b1[1], b2[1]);
 		}
 
-		String title = imp.getTitle() + " Noise";
-		Plot2 plot = new Plot2(title, "Slice", yAxisTitle);
+		final String title = imp.getTitle() + " Noise";
+		final Plot2 plot = new Plot2(title, "Slice", yAxisTitle);
 		double range = b1[1] - b1[0];
 		if (range == 0)
 			range = 1;
@@ -324,18 +322,16 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	public void run(ImageProcessor ip)
 	{
 		// Perform all methods and add to the results
-		double[] result = new double[NoiseEstimator.Method.values().length + 1];
+		final double[] result = new double[NoiseEstimator.Method.values().length + 1];
 		int i = 0;
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
-		Rectangle bounds = ip.getRoi();
-		float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+		final Rectangle bounds = ip.getRoi();
+		final float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
 		cameraModel.removeBiasAndGain(bounds, buffer);
-		NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
+		final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 		ne.preserveResiduals = true;
-		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
-		{
+		for (final NoiseEstimator.Method m : NoiseEstimator.Method.values())
 			result[i++] = ne.getNoise(m);
-		}
 		results.add(result);
 	}
 
@@ -363,30 +359,24 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		});
 
 		// Slow when there are lots of results ... Could change the output options in the future
-		TextWindow tw = new TextWindow(imp.getTitle() + " Noise", createHeader(), "", 800, 400);
-		for (double[] result : results)
-		{
+		final TextWindow tw = new TextWindow(imp.getTitle() + " Noise", createHeader(), "", 800, 400);
+		for (final double[] result : results)
 			tw.append(createResult(result));
-		}
 	}
 
 	private static String createHeader()
 	{
-		StringBuilder sb = new StringBuilder("Slice");
-		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
-		{
+		final StringBuilder sb = new StringBuilder("Slice");
+		for (final NoiseEstimator.Method m : NoiseEstimator.Method.values())
 			sb.append('\t').append(m);
-		}
 		return sb.toString();
 	}
 
 	private static String createResult(double[] result)
 	{
-		StringBuilder sb = new StringBuilder("" + (int) result[0]);
+		final StringBuilder sb = new StringBuilder("" + (int) result[0]);
 		for (int i = 1; i < result.length; i++)
-		{
 			sb.append('\t').append(result[i]);
-		}
 		return sb.toString();
 	}
 }

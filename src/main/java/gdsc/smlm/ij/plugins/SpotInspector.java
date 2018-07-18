@@ -190,14 +190,14 @@ public class SpotInspector implements PlugIn, MouseListener
 			@Override
 			public void execute(PeakResult r)
 			{
-				float[] score = getScore(r, c.getAndIncrement(), pp, sp, wp, hp, stdDevMax);
+				final float[] score = getScore(r, c.getAndIncrement(), pp, sp, wp, hp, stdDevMax);
 				rankedResults.add(new PeakResultRank(r, score[0], score[1]));
 			}
 		});
 		Collections.sort(rankedResults);
 
 		// Prepare results table
-		IJTablePeakResults table = new IJTablePeakResults(false, results.getName(), true);
+		final IJTablePeakResults table = new IJTablePeakResults(false, results.getName(), true);
 		table.copySettings(results);
 		table.setTableTitle(TITLE);
 		table.setAddCounter(true);
@@ -227,7 +227,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 		// Add results to the table
 		int n = 0;
-		for (PeakResultRank rank : rankedResults)
+		for (final PeakResultRank rank : rankedResults)
 		{
 			rank.rank = n++;
 			table.add(rank.peakResult);
@@ -243,21 +243,21 @@ public class SpotInspector implements PlugIn, MouseListener
 			int spotNumber = 0;
 			xValues = new float[rankedResults.size()];
 			yValues = new float[xValues.length];
-			for (PeakResultRank rank : rankedResults)
+			for (final PeakResultRank rank : rankedResults)
 			{
 				xValues[spotNumber] = spotNumber + 1;
 				yValues[spotNumber++] = recoverScore(rank.score);
 			}
 
 			// Set the min and max y-values using 1.5 x IQR
-			DescriptiveStatistics stats = new DescriptiveStatistics();
-			for (float v : yValues)
+			final DescriptiveStatistics stats = new DescriptiveStatistics();
+			for (final float v : yValues)
 				stats.addValue(v);
 			if (removeOutliers)
 			{
-				double lower = stats.getPercentile(25);
-				double upper = stats.getPercentile(75);
-				double iqr = upper - lower;
+				final double lower = stats.getPercentile(25);
+				final double upper = stats.getPercentile(75);
+				final double iqr = upper - lower;
 
 				yMin = FastMath.max(lower - iqr, stats.getMin());
 				yMax = FastMath.min(upper + iqr, stats.getMax());
@@ -281,7 +281,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		final int w = source.getWidth();
 		final int h = source.getHeight();
 		final int size = 2 * radius + 1;
-		ImageStack spots = new ImageStack(size, size, rankedResults.size());
+		final ImageStack spots = new ImageStack(size, size, rankedResults.size());
 
 		// To assist the extraction of data from the image source, process them in time order to allow
 		// frame caching. Then set the appropriate slice in the result stack
@@ -298,9 +298,9 @@ public class SpotInspector implements PlugIn, MouseListener
 			}
 		});
 
-		for (PeakResultRank rank : rankedResults)
+		for (final PeakResultRank rank : rankedResults)
 		{
-			PeakResult r = rank.peakResult;
+			final PeakResult r = rank.peakResult;
 
 			// Extract image
 			// Note that the coordinates are relative to the middle of the pixel (0.5 offset)
@@ -311,8 +311,8 @@ public class SpotInspector implements PlugIn, MouseListener
 			// Extract a region but crop to the image bounds
 			int minX = x - radius;
 			int minY = y - radius;
-			int maxX = FastMath.min(x + radius + 1, w);
-			int maxY = FastMath.min(y + radius + 1, h);
+			final int maxX = FastMath.min(x + radius + 1, w);
+			final int maxY = FastMath.min(y + radius + 1, h);
 
 			int padX = 0, padY = 0;
 			if (minX < 0)
@@ -325,8 +325,8 @@ public class SpotInspector implements PlugIn, MouseListener
 				padY = -minY;
 				minY = 0;
 			}
-			int sizeX = maxX - minX;
-			int sizeY = maxY - minY;
+			final int sizeX = maxX - minX;
+			final int sizeY = maxY - minY;
 
 			float[] data = source.get(r.getFrame(), new Rectangle(minX, minY, sizeX, sizeY));
 			// Prevent errors with missing data
@@ -337,18 +337,18 @@ public class SpotInspector implements PlugIn, MouseListener
 			// Pad if necessary, i.e. the crop is too small for the stack
 			if (padX > 0 || padY > 0 || sizeX < size || sizeY < size)
 			{
-				ImageProcessor spotIp2 = spotIp.createProcessor(size, size);
+				final ImageProcessor spotIp2 = spotIp.createProcessor(size, size);
 				spotIp2.insert(spotIp, padX, padY);
 				spotIp = spotIp2;
 			}
-			int slice = rank.rank + 1;
+			final int slice = rank.rank + 1;
 			spots.setPixels(spotIp.getPixels(), slice);
 			spots.setSliceLabel(Utils.rounded(rank.originalScore), slice);
 		}
 
 		source.close();
 
-		ImagePlus imp = Utils.display(TITLE, spots);
+		final ImagePlus imp = Utils.display(TITLE, spots);
 		imp.setRoi((PointRoi) null);
 
 		// Make bigger
@@ -361,10 +361,10 @@ public class SpotInspector implements PlugIn, MouseListener
 		// Standard deviation is only needed for the width filtering
 		if (sortOrderIndex != 8)
 			return 0;
-		PSF psf = results2.getPSF();
+		final PSF psf = results2.getPSF();
 		if (!PSFHelper.isGaussian2D(psf))
 			return -1;
-		FitConfiguration fitConfig = new FitConfiguration();
+		final FitConfiguration fitConfig = new FitConfiguration();
 		fitConfig.setPSF(psf);
 		return (float) Maths.max(1, fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
 	}
@@ -373,8 +373,8 @@ public class SpotInspector implements PlugIn, MouseListener
 	{
 		if (plotScore)
 		{
-			String title = TITLE + " Score";
-			Plot2 plot = new Plot2(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
+			final String title = TITLE + " Score";
+			final Plot2 plot = new Plot2(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
 			plot.setLimits(1, xValues.length, yMin, yMax);
 
 			Utils.display(title, plot);
@@ -385,7 +385,7 @@ public class SpotInspector implements PlugIn, MouseListener
 	{
 		if (plotHistogram)
 		{
-			String title = TITLE + " Histogram";
+			final String title = TITLE + " Histogram";
 			Utils.showHistogram(title, new StoredDataStatistics(data), SORT_ORDER[sortOrderIndex], 0,
 					(removeOutliers) ? 1 : 0, histogramBins);
 		}
@@ -506,7 +506,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -539,7 +539,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			Parameters.isAboveZero("Radius", radius);
 			Parameters.isAbove("Histogram bins", histogramBins, 1);
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			IJ.error(TITLE, ex.getMessage());
 			return false;
@@ -556,10 +556,10 @@ public class SpotInspector implements PlugIn, MouseListener
 		// Show the result that was double clicked in the result table
 		if (e.getClickCount() > 1)
 		{
-			int rank = textPanel.getSelectionStart() + 1;
+			final int rank = textPanel.getSelectionStart() + 1;
 
 			// Show the spot that was double clicked
-			ImagePlus imp = WindowManager.getImage(TITLE);
+			final ImagePlus imp = WindowManager.getImage(TITLE);
 			if (imp != null && rank > 0 && rank <= imp.getStackSize())
 			{
 				imp.setSlice(rank);
@@ -567,7 +567,7 @@ public class SpotInspector implements PlugIn, MouseListener
 					imp.getWindow().toFront();
 
 				// Add an ROI to to the image containing all the spots in that part of the frame
-				PeakResult r = rankedResults.get(rank - 1).peakResult;
+				final PeakResult r = rankedResults.get(rank - 1).peakResult;
 
 				final int x = (int) (r.getXPosition());
 				final int y = (int) (r.getYPosition());
@@ -596,9 +596,9 @@ public class SpotInspector implements PlugIn, MouseListener
 					}
 				});
 
-				int points = spots.size();
-				float[] ox = new float[points];
-				float[] oy = new float[points];
+				final int points = spots.size();
+				final float[] ox = new float[points];
+				final float[] oy = new float[points];
 				for (int i = 0; i < points; i++)
 				{
 					ox[i] = spots.get(i)[0];
@@ -611,7 +611,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 	private static boolean contains(ArrayList<float[]> spots, float xPosition, float yPosition)
 	{
-		for (float[] data : spots)
+		for (final float[] data : spots)
 			if (data[0] == xPosition && data[1] == yPosition)
 				return true;
 		return false;

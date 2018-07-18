@@ -46,17 +46,15 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canComputeCRLB()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
-		{
 			canComputeCRLB(rg, n, 0, true);
-		}
 	}
 
 	@Test
 	public void canComputeCRLBWithZeros()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (int n = 2; n < 10; n++)
 		{
 			canComputeCRLB(rg, n, 1, true);
@@ -67,17 +65,15 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canComputeCRLBWithReciprocal()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
-		{
 			canComputeCRLB(rg, n, 0, false);
-		}
 	}
 
 	@Test
 	public void canComputeCRLBWithReciprocalWithZeros()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (int n = 2; n < 10; n++)
 		{
 			canComputeCRLB(rg, n, 1, false);
@@ -88,12 +84,12 @@ public class FisherInformationMatrixTest
 	@Test
 	public void inversionDoesNotMatchReciprocal()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
 		{
-			FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
-			double[] crlb = m.crlb();
-			double[] crlb2 = m.crlbReciprocal();
+			final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
+			final double[] crlb = m.crlb();
+			final double[] crlb2 = m.crlbReciprocal();
 			// These increasingly do not match with increasing number of parameters.
 			TestSettings.info("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
 			if (n > 1)
@@ -102,22 +98,22 @@ public class FisherInformationMatrixTest
 		}
 	}
 
-	private double[] canComputeCRLB(RandomGenerator rg, int n, int k, boolean invert)
+	private static double[] canComputeCRLB(RandomGenerator rg, int n, int k, boolean invert)
 	{
-		FisherInformationMatrix m = createFisherInformationMatrix(rg, n, k);
+		final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, k);
 
 		// Invert for CRLB
-		double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
+		final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
 		TestSettings.info("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
 		Assert.assertNotNull("CRLB failed", crlb);
 		return crlb;
 	}
 
-	private FisherInformationMatrix createFisherInformationMatrix(RandomGenerator rg, int n, int k)
+	private static FisherInformationMatrix createFisherInformationMatrix(RandomGenerator rg, int n, int k)
 	{
-		int maxx = 10;
-		int size = maxx * maxx;
-		RandomDataGenerator rdg = new RandomDataGenerator(rg);
+		final int maxx = 10;
+		final int size = maxx * maxx;
+		final RandomDataGenerator rdg = new RandomDataGenerator(rg);
 
 		// Use a real Gaussian function here to compute the Fisher information.
 		// The matrix may be sensitive to the type of equation used.
@@ -129,7 +125,7 @@ public class FisherInformationMatrixTest
 			f = createFunction(maxx, npeaks);
 		}
 
-		double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
@@ -142,7 +138,7 @@ public class FisherInformationMatrixTest
 		}
 		f.initialise(a);
 
-		GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
+		final GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
 		double[][] I = c.fisherInformationMatrix(size, a, f);
 
 		//TestSettings.debug("n=%d, k=%d, I=\n", n, k);
@@ -157,14 +153,10 @@ public class FisherInformationMatrixTest
 		// Zero selected columns
 		if (k > 0)
 		{
-			int[] zero = Random.sample(k, n, rg); // new RandomDataGenerator(randomGenerator).nextPermutation(n, k);
-			for (int i : zero)
-			{
+			final int[] zero = Random.sample(k, n, rg); // new RandomDataGenerator(randomGenerator).nextPermutation(n, k);
+			for (final int i : zero)
 				for (int j = 0; j < n; j++)
-				{
 					I[i][j] = I[j][i] = 0;
-				}
-			}
 		}
 
 		//TestSettings.debug("n=%d, k=%d\n", n, k);
@@ -175,9 +167,9 @@ public class FisherInformationMatrixTest
 		return new FisherInformationMatrix(I, 1e-3);
 	}
 
-	private Gaussian2DFunction createFunction(int maxx, int npeaks)
+	private static Gaussian2DFunction createFunction(int maxx, int npeaks)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		return f;
 	}
@@ -190,32 +182,30 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canProduceSubset()
 	{
-		int k = 5;
-		int n = 10;
+		final int k = 5;
+		final int n = 10;
 
-		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
-		FisherInformationMatrix m = createRandomMatrix(randomGenerator, n);
-		DenseMatrix64F e = m.getMatrix();
+		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final FisherInformationMatrix m = createRandomMatrix(randomGenerator, n);
+		final DenseMatrix64F e = m.getMatrix();
 		TestSettings.infoln(e);
 
 		for (int run = 1; run < 10; run++)
 		{
-			int[] indices = Random.sample(k, n, randomGenerator);
+			final int[] indices = Random.sample(k, n, randomGenerator);
 			Arrays.sort(indices);
-			DenseMatrix64F o = m.subset(indices).getMatrix();
+			final DenseMatrix64F o = m.subset(indices).getMatrix();
 			TestSettings.infoln(Arrays.toString(indices));
 			TestSettings.infoln(o);
 			for (int i = 0; i < indices.length; i++)
 				for (int j = 0; j < indices.length; j++)
-				{
 					Assert.assertEquals(e.get(indices[i], indices[j]), o.get(i, j), 0);
-				}
 		}
 	}
 
-	private FisherInformationMatrix createRandomMatrix(RandomGenerator randomGenerator, int n)
+	private static FisherInformationMatrix createRandomMatrix(RandomGenerator randomGenerator, int n)
 	{
-		double[] data = new double[n * n];
+		final double[] data = new double[n * n];
 		for (int i = 0; i < data.length; i++)
 			data[i] = randomGenerator.nextDouble();
 		return new FisherInformationMatrix(data, n);
@@ -224,26 +214,26 @@ public class FisherInformationMatrixTest
 	@Test
 	public void computeWithSubsetReducesTheCRLB()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		Gaussian2DFunction f = createFunction(10, 1);
-		int perPeak = f.getGradientParametersPerPeak();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final Gaussian2DFunction f = createFunction(10, 1);
+		final int perPeak = f.getGradientParametersPerPeak();
 		// Create a matrix with 2 peaks + background
-		FisherInformationMatrix m = createFisherInformationMatrix(rg, 1 + 2 * perPeak, 0);
+		final FisherInformationMatrix m = createFisherInformationMatrix(rg, 1 + 2 * perPeak, 0);
 		// Subset each peak
-		int[] indices = SimpleArrayUtils.newArray(1 + perPeak, 0, 1);
-		FisherInformationMatrix m1 = m.subset(indices);
+		final int[] indices = SimpleArrayUtils.newArray(1 + perPeak, 0, 1);
+		final FisherInformationMatrix m1 = m.subset(indices);
 		for (int i = 1; i < indices.length; i++)
 			indices[i] += perPeak;
-		FisherInformationMatrix m2 = m.subset(indices);
+		final FisherInformationMatrix m2 = m.subset(indices);
 
 		//TestSettings.debugln(m.getMatrix());
 		//TestSettings.debugln(m1.getMatrix());
 		//TestSettings.debugln(m2.getMatrix());
 
-		double[] crlb = m.crlb();
-		double[] crlb1 = m1.crlb();
-		double[] crlb2 = m2.crlb();
-		double[] crlbB = Arrays.copyOf(crlb1, crlb.length);
+		final double[] crlb = m.crlb();
+		final double[] crlb1 = m1.crlb();
+		final double[] crlb2 = m2.crlb();
+		final double[] crlbB = Arrays.copyOf(crlb1, crlb.length);
 		System.arraycopy(crlb2, 1, crlbB, crlb1.length, perPeak);
 
 		//TestSettings.debugln(Arrays.toString(crlb));

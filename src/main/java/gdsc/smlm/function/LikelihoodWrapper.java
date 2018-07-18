@@ -274,7 +274,7 @@ public abstract class LikelihoodWrapper
 	{
 		initialiseFunction(variables);
 
-		double[] du_da = new double[nVariables];
+		final double[] du_da = new double[nVariables];
 
 		final double[][] I = new double[nVariables][nVariables];
 
@@ -284,11 +284,9 @@ public abstract class LikelihoodWrapper
 			final double yk = 1 / uk;
 			for (int i = 0; i < nVariables; i++)
 			{
-				double du_dai = yk * du_da[i];
+				final double du_dai = yk * du_da[i];
 				for (int j = 0; j <= i; j++)
-				{
 					I[i][j] += du_dai * du_da[j];
-				}
 			}
 		}
 
@@ -334,7 +332,7 @@ public abstract class LikelihoodWrapper
 	 */
 	public double[] crlb(final double[] variables, boolean allowReciprocal)
 	{
-		double[][] I = fisherInformation(variables);
+		final double[][] I = fisherInformation(variables);
 		return new FisherInformationMatrix(I).crlb(allowReciprocal);
 	}
 }

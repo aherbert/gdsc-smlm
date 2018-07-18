@@ -42,7 +42,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	/** The number of peaks. */
 	protected int peaks;
-	
+
 	/** The function. */
 	protected Gaussian2DFunction func;
 
@@ -70,13 +70,11 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	@Override
 	public void evaluate(double oldError, double newError, double[] a)
 	{
-		StringBuilder sb = logParameters(oldError, newError, a);
+		final StringBuilder sb = logParameters(oldError, newError, a);
 
 		if (newError > oldError)
-		{
 			// Fit is worse
 			increment(a, false);
-		}
 		else
 		{
 			// Fit is improved - Check if the movement is negligible
@@ -101,9 +99,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 			{
 				notSatisfied = false;
 				if (log != null)
-				{
 					sb.append(" Bad Coords: ").append(Arrays.toString(a));
-				}
 			}
 
 			increment(a, true);
@@ -131,11 +127,10 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		if (log != null)
 		{
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError).append(" -> ")
 					.append(newError);
 			if (newError <= oldError)
-			{
 				for (int i = 0; i < peaks; i++)
 				{
 					sb.append(", Peak").append(i + 1).append("=[");
@@ -148,7 +143,6 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 					}
 					sb.append("]");
 				}
-			}
 			return sb;
 		}
 		return null;
@@ -164,15 +158,11 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	protected boolean noCoordinateChange(double[] a)
 	{
 		for (int i = 0; i < peaks; i++)
-		{
 			for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
 					Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
-			{
 				// Check if the coordinates have moved less than the delta limit
 				if (Math.abs(bestA[k] - a[k]) > delta)
 					return false;
-			}
-		}
 		return true;
 	}
 
@@ -221,13 +211,9 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	private static boolean isBelow(double[] threshold, double[] params, int paramIndex)
 	{
 		if (threshold != null)
-		{
 			for (int j = 0; j < 2; j++, paramIndex++)
-			{
 				if (params[paramIndex] < threshold[j])
 					return true;
-			}
-		}
 		return false;
 	}
 
@@ -245,13 +231,9 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	private static boolean isAbove(double[] threshold, double[] params, int paramIndex)
 	{
 		if (threshold != null)
-		{
 			for (int j = 0; j < 2; j++, paramIndex++)
-			{
 				if (params[paramIndex] > threshold[j])
 					return true;
-			}
-		}
 		return false;
 	}
 

@@ -38,28 +38,28 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		BlockSumFilter filter = new BlockSumFilter();
-		BlockMeanFilter filter2 = new BlockMeanFilter();
+		final BlockSumFilter filter = new BlockSumFilter();
+		final BlockMeanFilter filter2 = new BlockMeanFilter();
 
-		int iter = 50;
-		ArrayList<float[]> dataSet = getSpeedData(iter);
+		final int iter = 50;
+		final ArrayList<float[]> dataSet = getSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -67,22 +67,22 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -111,28 +111,28 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		BlockMeanFilter filter1 = new BlockMeanFilter();
-		MedianFilter filter2 = new MedianFilter();
+		final BlockMeanFilter filter1 = new BlockMeanFilter();
+		final MedianFilter filter2 = new MedianFilter();
 
-		int iter = 10;
-		ArrayList<float[]> dataSet = getSpeedData(iter);
+		final int iter = 10;
+		final ArrayList<float[]> dataSet = getSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.blockMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -140,22 +140,22 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.blockMedianNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -184,28 +184,28 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		BlockMeanFilter filter1 = new BlockMeanFilter();
-		MedianFilter filter2 = new MedianFilter();
+		final BlockMeanFilter filter1 = new BlockMeanFilter();
+		final MedianFilter filter2 = new MedianFilter();
 
-		int iter = 10;
-		ArrayList<float[]> dataSet = getSpeedData(iter);
+		final int iter = 10;
+		final ArrayList<float[]> dataSet = getSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.rollingMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -213,22 +213,22 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.rollingMedianNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -257,28 +257,28 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		BlockMeanFilter filter1 = new BlockMeanFilter();
-		GaussianFilter filter2 = new GaussianFilter();
+		final BlockMeanFilter filter1 = new BlockMeanFilter();
+		final GaussianFilter filter2 = new GaussianFilter();
 
-		int iter = 10;
-		ArrayList<float[]> dataSet = getSpeedData(iter);
+		final int iter = 10;
+		final ArrayList<float[]> dataSet = getSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.convolveInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] / 3.0);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -286,22 +286,22 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.convolveInternal(data, width, height, boxSize / 3.0);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -330,31 +330,31 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		BlockMeanFilter filter1 = new BlockMeanFilter();
-		AreaAverageFilter filter2 = new AreaAverageFilter();
+		final BlockMeanFilter filter1 = new BlockMeanFilter();
+		final AreaAverageFilter filter2 = new AreaAverageFilter();
 
-		int iter = 10;
-		ArrayList<float[]> dataSet = getSpeedData(iter);
+		final int iter = 10;
+		final ArrayList<float[]> dataSet = getSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		//filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		//filter2.areaFilterInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] - 0.05);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					// Initialise
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter1.rollingBlockFilterNxNInternal(data.clone(), width, height, boxSize);
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -362,25 +362,25 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					// Initialise
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.areaAverageUsingAveragesInternal(data.clone(), width, height, boxSize - 0.05);
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.areaAverageUsingAveragesInternal(data, width, height, boxSize - 0.05);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -409,32 +409,32 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		BlockMeanFilter filter1 = new BlockMeanFilter();
-		AreaAverageFilter filter2 = new AreaAverageFilter();
+		final BlockMeanFilter filter1 = new BlockMeanFilter();
+		final AreaAverageFilter filter2 = new AreaAverageFilter();
 
-		int iter = 10;
-		ArrayList<float[]> dataSet = getSpeedData(iter);
+		final int iter = 10;
+		final ArrayList<float[]> dataSet = getSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		//filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		//filter2.areaFilterInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] - 0.05);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					// Initialise
-					float w = (float) (boxSize - 0.05);
-					for (float[] data : dataSet2)
+					final float w = (float) (boxSize - 0.05);
+					for (final float[] data : dataSet2)
 						filter1.stripedBlockFilterNxNInternal(data.clone(), width, height, w);
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter1.stripedBlockFilterNxNInternal(data, width, height, w);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -442,25 +442,25 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					// Initialise
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.areaAverageUsingAveragesInternal(data.clone(), width, height, boxSize - 0.05);
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.areaAverageUsingAveragesInternal(data, width, height, boxSize - 0.05);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -490,28 +490,28 @@ public class FilterSpeedTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		SumFilter filter = new SumFilter();
-		BlockSumFilter filter2 = new BlockSumFilter();
+		final SumFilter filter = new SumFilter();
+		final BlockSumFilter filter2 = new BlockSumFilter();
 
-		int iter = 50;
-		ArrayList<int[]> dataSet = getIntSpeedData(iter);
+		final int iter = 50;
+		final ArrayList<int[]> dataSet = getIntSpeedData(iter);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
-		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final int boxSize : boxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
-					for (int[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
+					for (final int[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -519,22 +519,22 @@ public class FilterSpeedTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (int boxSize : boxSizes)
+		for (final int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<>(iter);
-					for (int[] data : dataSet)
+					final ArrayList<int[]> dataSet2 = new ArrayList<>(iter);
+					for (final int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
 					long time = System.nanoTime();
-					for (int[] data : dataSet2)
+					for (final int[] data : dataSet2)
 						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;

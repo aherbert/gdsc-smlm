@@ -277,7 +277,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
-			double x_u_m12 = x_u_p12;
+			final double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
 			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
@@ -390,7 +390,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
-			double x_u_m12 = x_u_p12;
+			final double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
 			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
@@ -520,7 +520,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
-			double x_u_m12 = x_u_p12;
+			final double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
 			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
@@ -689,8 +689,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		//		else
 		//		{
 		for (int y = 0; y < maxy; y++)
-		{
-			for (int x = 0; x < maxx; x++)
+		 for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
 				for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy)
@@ -704,8 +703,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 				}
 				procedure.execute(I, duda);
 			}
-		}
-		//		}
 	}
 
 	/*
@@ -720,7 +717,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		final double[] d2uda2 = new double[getNumberOfGradients()];
 		duda[0] = 1.0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -739,7 +735,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 				}
 				procedure.execute(I, duda, d2uda2);
 			}
-		}
 	}
 
 	/*
@@ -784,7 +779,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 					// Background are all 0
 
-					int k = a * ng + a;
+					final int k = a * ng + a;
 					// Signal,X
 					d2udadb[k + 1] = duda[a + 1] / tI;
 					// Signal,Y
@@ -796,7 +791,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 					a += 5;
 
-					int kk = k + ng;
+					final int kk = k + ng;
 					// X,Signal
 					d2udadb[kk] = d2udadb[k + 1];
 					// X,X
@@ -808,7 +803,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 					// X,Y SD
 					d2udadb[kk + 4] = du_dtx[xx] * du_dtsy_tI[n];
 
-					int kkk = kk + ng;
+					final int kkk = kk + ng;
 					// Y,Signal
 					d2udadb[kkk] = d2udadb[k + 2];
 					// Y,X
@@ -820,7 +815,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 					// Y,Y SD
 					d2udadb[kkk + 4] = deltaEx[xx] * d2deltaEy_dtsydy[yy];
 
-					int kkkk = kkk + ng;
+					final int kkkk = kkk + ng;
 					// X SD,Signal
 					d2udadb[kkkk] = d2udadb[k + 3];
 					// X SD,X
@@ -832,7 +827,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 					// X SD,Y SD
 					d2udadb[kkkk + 4] = du_dtsy[yy] * du_dtsx_tI[xx];
 
-					int kkkkk = kkkk + ng;
+					final int kkkkk = kkkk + ng;
 					// Y SD,Signal
 					d2udadb[kkkkk] = d2udadb[k + 4];
 					// Y SD,X

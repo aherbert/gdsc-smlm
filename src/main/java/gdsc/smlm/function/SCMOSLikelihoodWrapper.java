@@ -117,8 +117,8 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public static double[] compute_var_g2(float[] var, float[] g)
 	{
-		int n = Math.min(var.length, g.length);
-		double[] var_g2 = new double[n];
+		final int n = Math.min(var.length, g.length);
+		final double[] var_g2 = new double[n];
 		for (int i = 0; i < n; i++)
 			var_g2[i] = var[i] / (g[i] * g[i]);
 		return var_g2;
@@ -133,8 +133,8 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public static double[] compute_logG(float[] g)
 	{
-		int n = g.length;
-		double[] logG = new double[n];
+		final int n = g.length;
+		final double[] logG = new double[n];
 		for (int i = 0; i < n; i++)
 			logG[i] = Math.log(g[i]);
 		return logG;
@@ -155,12 +155,10 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public static double[] computeX(double[] k, float[] var_g2, float[] g, float[] o)
 	{
-		int n = k.length;
-		double[] x = new double[n];
+		final int n = k.length;
+		final double[] x = new double[n];
 		for (int i = 0; i < n; i++)
-		{
 			x[i] = FastMath.max(0, (k[i] - o[i]) / g[i] + var_g2[i]);
-		}
 		return x;
 	}
 
@@ -198,9 +196,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		// Pre-compute the sum over the data
 		double sum = 0;
 		for (int i = 0; i < n; i++)
-		{
 			sum += logGamma1(x[i]) + logG[i];
-		}
 
 		logNormalisation = sum;
 	}
@@ -269,7 +265,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 			if (u < 0)
 				u = 0;
 
-			double l = u + var_g2[i];
+			final double l = u + var_g2[i];
 
 			ll += l;
 			if (x[i] != 0)
@@ -306,7 +302,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 				//double l = u + var_g2[i];
 
 				// We can do this in one step ...
-				double l = (x[i] < var_g2[i]) ? var_g2[i] : x[i];
+				final double l = (x[i] < var_g2[i]) ? var_g2[i] : x[i];
 
 				ll += l;
 				if (x[i] != 0)
@@ -332,7 +328,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		// i.e., have the same or greater log-likelihood—than the model with fewer parameters
 		// (here null)
 
-		double llAlternative = computeObservedLikelihood();
+		final double llAlternative = computeObservedLikelihood();
 		double llNull = ll;
 
 		// The alternative should always fit better than the null model
@@ -354,8 +350,8 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public double computeQValue(double ll)
 	{
-		double llr = computeLogLikelihoodRatio(ll);
-		int degreesOfFreedom = x.length - nVariables;
+		final double llr = computeLogLikelihoodRatio(ll);
+		final int degreesOfFreedom = x.length - nVariables;
 		return ChiSquaredDistributionTable.computeQValue(llr, degreesOfFreedom);
 	}
 
@@ -385,7 +381,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		double ll = 0;
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
-		double[] dl_da = new double[nVariables];
+		final double[] dl_da = new double[nVariables];
 		for (int i = 0; i < n; i++)
 		{
 			double u = f.eval(i, dl_da);
@@ -393,7 +389,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 			if (u < 0)
 				u = 0;
 
-			double l = u + var_g2[i];
+			final double l = u + var_g2[i];
 
 			ll += l;
 			if (x[i] != 0)
@@ -402,9 +398,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 			// Note: if l==0 then we get divide by zero and a NaN value
 			final double factor = (1 - x[i] / l);
 			for (int j = 0; j < gradient.length; j++)
-			{
 				gradient[j] += dl_da[j] * factor;
-			}
 		}
 		return ll + logNormalisation;
 	}
@@ -422,7 +416,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		if (u < 0)
 			u = 0;
 
-		double l = u + var_g2[i];
+		final double l = u + var_g2[i];
 
 		double ll = l + logG[i];
 		if (x[i] != 0)
@@ -441,20 +435,18 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	{
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
-		double[] dl_da = new double[nVariables];
+		final double[] dl_da = new double[nVariables];
 
 		double u = f.eval(i, dl_da);
 
 		if (u < 0)
 			u = 0;
 
-		double l = u + var_g2[i];
+		final double l = u + var_g2[i];
 
 		final double factor = (1 - x[i] / l);
 		for (int j = 0; j < gradient.length; j++)
-		{
 			gradient[j] = dl_da[j] * factor;
-		}
 
 		double ll = l + logG[i];
 		if (x[i] != 0)
@@ -487,11 +479,11 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public static double negativeLogLikelihood(double u, float var, float g, float o, double k)
 	{
-		double var_g2 = var / (g * g);
-		double x = Math.max(0, (k - o) / g + var_g2);
+		final double var_g2 = var / (g * g);
+		final double x = Math.max(0, (k - o) / g + var_g2);
 		if (u < 0)
 			u = 0;
-		double l = u + var_g2;
+		final double l = u + var_g2;
 		// Note we need the Math.log(g) to normalise the Poisson distribution to 1
 		// since the observed values (k) are scaled by the gain
 		double ll = l + Math.log(g);
@@ -557,7 +549,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	{
 		initialiseFunction(variables);
 
-		double[] du_da = new double[nVariables];
+		final double[] du_da = new double[nVariables];
 
 		final double[][] I = new double[nVariables][nVariables];
 
@@ -567,11 +559,9 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 			final double yk = 1 / (uk + var_g2[k]);
 			for (int i = 0; i < nVariables; i++)
 			{
-				double du_dai = yk * du_da[i];
+				final double du_dai = yk * du_da[i];
 				for (int j = 0; j <= i; j++)
-				{
 					I[i][j] += du_dai * du_da[j];
-				}
 			}
 		}
 

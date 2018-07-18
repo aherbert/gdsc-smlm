@@ -58,13 +58,9 @@ public class SMLMUsageTracker implements PlugIn
 
 		final String[] pair = map.get(ImageJAnalyticsTracker.getKey(clazz.getName(), argument));
 		if (pair == null)
-		{
 			recordPlugin(clazz.getName().replace('.', '/'), argument);
-		}
 		else
-		{
 			trackPageView(pair[0], pair[1]);
-		}
 	}
 
 	/**

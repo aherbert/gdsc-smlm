@@ -97,10 +97,8 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 		positions = new int[step.length];
 		positionsCount = 0;
 		for (int i = 0; i < step.length; i++)
-		{
 			if (step[i] > 0)
 				positions[positionsCount++] = i;
-		}
 	}
 
 	/**
@@ -148,15 +146,11 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 				sequence[i] = random.nextGaussian(sequence[i], step[i]);
 				// Check limits
 				if (min != null)
-				{
 					if (sequence[i] < min[i])
 						sequence[i] = min[i];
-				}
 				if (max != null)
-				{
 					if (sequence[i] > max[i])
 						sequence[i] = max[i];
-				}
 			}
 		}
 

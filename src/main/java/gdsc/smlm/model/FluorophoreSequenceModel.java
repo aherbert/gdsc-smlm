@@ -135,11 +135,9 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	public List<double[]> getBurstSequence()
 	{
-		ArrayList<double[]> data = new ArrayList<>(blinks + 1);
+		final ArrayList<double[]> data = new ArrayList<>(blinks + 1);
 		for (int i = 0; i <= blinks; i++)
-		{
 			data.add(new double[] { burstSequence[i * 2], burstSequence[i * 2 + 1] });
-		}
 		return data;
 	}
 
@@ -150,11 +148,9 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	public List<int[]> getSampledBurstSequence()
 	{
-		ArrayList<int[]> data = new ArrayList<>(blinks + 1);
+		final ArrayList<int[]> data = new ArrayList<>(blinks + 1);
 		for (int i = 0; i <= blinks; i++)
-		{
 			data.add(new int[] { (int) (burstSequence[i * 2]), (int) (burstSequence[i * 2 + 1]) });
-		}
 		return data;
 	}
 
@@ -179,11 +175,9 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	public double[] getOnTimes()
 	{
-		double[] onTimes = new double[blinks + 1];
+		final double[] onTimes = new double[blinks + 1];
 		for (int i = 0; i <= blinks; i++)
-		{
 			onTimes[i] = burstSequence[i * 2 + 1] - burstSequence[i * 2];
-		}
 		return onTimes;
 	}
 
@@ -197,11 +191,9 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 		if (blinks < 1)
 			return new double[0];
 
-		double[] offTimes = new double[blinks];
+		final double[] offTimes = new double[blinks];
 		for (int i = 1; i <= blinks; i++)
-		{
 			offTimes[i - 1] = burstSequence[i * 2] - burstSequence[i * 2 - 1];
-		}
 		return offTimes;
 	}
 
@@ -217,13 +209,13 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 
 		// Process all blinks. Join together blinks with an off-time that would not be noticed,
 		// i.e. where the molecule was on in consecutive frames.
-		int[] onTimes = new int[blinks + 1];
+		final int[] onTimes = new int[blinks + 1];
 		int n = 0;
 		int tStart = (int) burstSequence[0];
 		for (int i = 0; i < blinks; i++)
 		{
-			int end1 = end(burstSequence[i * 2 + 1]);
-			int start2 = start(burstSequence[(i + 1) * 2]);
+			final int end1 = end(burstSequence[i * 2 + 1]);
+			final int start2 = start(burstSequence[(i + 1) * 2]);
 
 			if (start2 - end1 > 0)
 			{
@@ -272,17 +264,15 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 
 		// Process all blinks. Join together blinks with an off-time that would not be noticed,
 		// i.e. where the molecule was on in consecutive frames.
-		int[] offTimes = new int[blinks];
+		final int[] offTimes = new int[blinks];
 		int n = 0;
 		for (int i = 0; i < blinks; i++)
 		{
-			int end1 = end(burstSequence[i * 2 + 1]);
-			int start2 = start(burstSequence[(i + 1) * 2]);
+			final int end1 = end(burstSequence[i * 2 + 1]);
+			final int start2 = start(burstSequence[(i + 1) * 2]);
 
 			if (start2 - end1 > 0)
-			{
 				offTimes[n++] = start2 - end1;
-			}
 		}
 
 		return Arrays.copyOf(offTimes, n);
@@ -295,20 +285,18 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	public int[] getOnFrames()
 	{
-		int sequenceStartT = (int) getStartTime();
-		int sequenceEndT = (int) getEndTime();
+		final int sequenceStartT = (int) getStartTime();
+		final int sequenceEndT = (int) getEndTime();
 
 		int n = 0;
-		int[] onFrames = new int[sequenceEndT - sequenceStartT + 1];
+		final int[] onFrames = new int[sequenceEndT - sequenceStartT + 1];
 		for (int i = 0; i <= blinks; i++)
 		{
-			int on = (int) (burstSequence[i * 2]);
-			int off = (int) (burstSequence[i * 2 + 1]);
+			final int on = (int) (burstSequence[i * 2]);
+			final int off = (int) (burstSequence[i * 2 + 1]);
 
 			for (int t = on; t <= off; t++)
-			{
 				onFrames[n++] = t;
-			}
 		}
 
 		return Arrays.copyOf(onFrames, n);

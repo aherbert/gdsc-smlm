@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc"})
+@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc", "static-method"})
 public final class ResultsProtos {
   private ResultsProtos() {}
   public static void registerAllExtensions(
@@ -215,10 +215,9 @@ public final class ResultsProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -279,13 +278,11 @@ public final class ResultsProtos {
 
     public static ResultsImageType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -362,10 +359,9 @@ public final class ResultsProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -418,13 +414,11 @@ public final class ResultsProtos {
 
     public static ResultsImageMode valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -533,10 +527,9 @@ public final class ResultsProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -591,13 +584,11 @@ public final class ResultsProtos {
 
     public static ResultsFileFormat valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -674,10 +665,9 @@ public final class ResultsProtos {
 
     @Override
 	public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
+      if (this == UNRECOGNIZED)
+		throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
-      }
       return value;
     }
 
@@ -730,13 +720,11 @@ public final class ResultsProtos {
 
     public static ResultsTableFormat valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor())
+		throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
+      if (desc.getIndex() == -1)
+		return UNRECOGNIZED;
       return VALUES[desc.getIndex()];
     }
 
@@ -849,23 +837,22 @@ public final class ResultsProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               imageType_ = rawValue;
               break;
@@ -897,9 +884,9 @@ public final class ResultsProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -941,7 +928,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsImageType getImageType() {
-      gdsc.smlm.data.config.ResultsProtos.ResultsImageType result = gdsc.smlm.data.config.ResultsProtos.ResultsImageType.valueOf(imageType_);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsImageType result = gdsc.smlm.data.config.ResultsProtos.ResultsImageType.valueOf(imageType_);
       return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsImageType.UNRECOGNIZED : result;
     }
 
@@ -1018,7 +1005,7 @@ public final class ResultsProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -1029,24 +1016,18 @@ public final class ResultsProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (imageType_ != gdsc.smlm.data.config.ResultsProtos.ResultsImageType.DRAW_NONE.getNumber()) {
-        output.writeEnum(1, imageType_);
-      }
-      if (weighted_ != false) {
-        output.writeBool(2, weighted_);
-      }
-      if (equalised_ != false) {
-        output.writeBool(3, equalised_);
-      }
-      if (averagePrecision_ != 0D) {
-        output.writeDouble(4, averagePrecision_);
-      }
-      if (scale_ != 0D) {
-        output.writeDouble(5, scale_);
-      }
-      if (rollingWindowSize_ != 0) {
-        output.writeInt32(6, rollingWindowSize_);
-      }
+      if (imageType_ != gdsc.smlm.data.config.ResultsProtos.ResultsImageType.DRAW_NONE.getNumber())
+		output.writeEnum(1, imageType_);
+      if (weighted_ != false)
+		output.writeBool(2, weighted_);
+      if (equalised_ != false)
+		output.writeBool(3, equalised_);
+      if (averagePrecision_ != 0D)
+		output.writeDouble(4, averagePrecision_);
+      if (scale_ != 0D)
+		output.writeDouble(5, scale_);
+      if (rollingWindowSize_ != 0)
+		output.writeInt32(6, rollingWindowSize_);
     }
 
     @Override
@@ -1055,30 +1036,24 @@ public final class ResultsProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (imageType_ != gdsc.smlm.data.config.ResultsProtos.ResultsImageType.DRAW_NONE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (imageType_ != gdsc.smlm.data.config.ResultsProtos.ResultsImageType.DRAW_NONE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, imageType_);
-      }
-      if (weighted_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (weighted_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, weighted_);
-      }
-      if (equalised_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (equalised_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, equalised_);
-      }
-      if (averagePrecision_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (averagePrecision_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, averagePrecision_);
-      }
-      if (scale_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (scale_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(5, scale_);
-      }
-      if (rollingWindowSize_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (rollingWindowSize_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, rollingWindowSize_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -1086,13 +1061,11 @@ public final class ResultsProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings) obj;
 
       boolean result = true;
       result = result && imageType_ == other.imageType_;
@@ -1115,9 +1088,8 @@ public final class ResultsProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + IMAGE_TYPE_FIELD_NUMBER;
@@ -1228,7 +1200,7 @@ public final class ResultsProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -1301,16 +1273,15 @@ public final class ResultsProtos {
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings build() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings buildPartial() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings(this);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings(this);
         result.imageType_ = imageType_;
         result.weighted_ = weighted_;
         result.equalised_ = equalised_;
@@ -1355,9 +1326,9 @@ public final class ResultsProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings) {
-          return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings)
+			return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -1365,24 +1336,18 @@ public final class ResultsProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings other) {
         if (other == gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.getDefaultInstance()) return this;
-        if (other.imageType_ != 0) {
-          setImageTypeValue(other.getImageTypeValue());
-        }
-        if (other.getWeighted() != false) {
-          setWeighted(other.getWeighted());
-        }
-        if (other.getEqualised() != false) {
-          setEqualised(other.getEqualised());
-        }
-        if (other.getAveragePrecision() != 0D) {
-          setAveragePrecision(other.getAveragePrecision());
-        }
-        if (other.getScale() != 0D) {
-          setScale(other.getScale());
-        }
-        if (other.getRollingWindowSize() != 0) {
-          setRollingWindowSize(other.getRollingWindowSize());
-        }
+        if (other.imageType_ != 0)
+			setImageTypeValue(other.getImageTypeValue());
+        if (other.getWeighted() != false)
+			setWeighted(other.getWeighted());
+        if (other.getEqualised() != false)
+			setEqualised(other.getEqualised());
+        if (other.getAveragePrecision() != 0D)
+			setAveragePrecision(other.getAveragePrecision());
+        if (other.getScale() != 0D)
+			setScale(other.getScale());
+        if (other.getRollingWindowSize() != 0)
+			setRollingWindowSize(other.getRollingWindowSize());
         onChanged();
         return this;
       }
@@ -1400,13 +1365,12 @@ public final class ResultsProtos {
         gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -1444,7 +1408,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsImageType getImageType() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsImageType result = gdsc.smlm.data.config.ResultsProtos.ResultsImageType.valueOf(imageType_);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsImageType result = gdsc.smlm.data.config.ResultsProtos.ResultsImageType.valueOf(imageType_);
         return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsImageType.UNRECOGNIZED : result;
       }
       /**
@@ -1455,9 +1419,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.ResultsImageType image_type = 1;</code>
        */
       public Builder setImageType(gdsc.smlm.data.config.ResultsProtos.ResultsImageType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         imageType_ = value.getNumber();
         onChanged();
@@ -1876,53 +1839,52 @@ public final class ResultsProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               resultsDirectory_ = s;
               break;
             }
             case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
 
               resultsFilename_ = s;
               break;
             }
             case 24: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               fileFormat_ = rawValue;
               break;
             }
             case 32: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               distanceUnit_ = rawValue;
               break;
             }
             case 40: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               intensityUnit_ = rawValue;
               break;
             }
             case 48: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               angleUnit_ = rawValue;
               break;
@@ -1934,9 +1896,9 @@ public final class ResultsProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -1967,13 +1929,13 @@ public final class ResultsProtos {
      */
     @Override
 	public java.lang.String getResultsDirectory() {
-      java.lang.Object ref = resultsDirectory_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = resultsDirectory_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         resultsDirectory_ = s;
         return s;
       }
@@ -1988,16 +1950,16 @@ public final class ResultsProtos {
     @Override
 	public com.google.protobuf.ByteString
         getResultsDirectoryBytes() {
-      java.lang.Object ref = resultsDirectory_;
+      final java.lang.Object ref = resultsDirectory_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         resultsDirectory_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int RESULTS_FILENAME_FIELD_NUMBER = 2;
@@ -2011,13 +1973,13 @@ public final class ResultsProtos {
      */
     @Override
 	public java.lang.String getResultsFilename() {
-      java.lang.Object ref = resultsFilename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
+      final java.lang.Object ref = resultsFilename_;
+      if (ref instanceof java.lang.String)
+		return (java.lang.String) ref;
+	else {
+        final com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        final java.lang.String s = bs.toStringUtf8();
         resultsFilename_ = s;
         return s;
       }
@@ -2032,16 +1994,16 @@ public final class ResultsProtos {
     @Override
 	public com.google.protobuf.ByteString
         getResultsFilenameBytes() {
-      java.lang.Object ref = resultsFilename_;
+      final java.lang.Object ref = resultsFilename_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        final com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         resultsFilename_ = b;
         return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
       }
+	else
+		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int FILE_FORMAT_FIELD_NUMBER = 3;
@@ -2066,7 +2028,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat getFileFormat() {
-      gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.valueOf(fileFormat_);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.valueOf(fileFormat_);
       return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.UNRECOGNIZED : result;
     }
 
@@ -2092,7 +2054,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+      final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
 
@@ -2118,7 +2080,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit() {
-      gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
+      final gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
     }
 
@@ -2144,7 +2106,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.AngleUnit getAngleUnit() {
-      gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
+      final gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.AngleUnit.UNRECOGNIZED : result;
     }
 
@@ -2165,7 +2127,7 @@ public final class ResultsProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -2176,27 +2138,20 @@ public final class ResultsProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getResultsDirectoryBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, resultsDirectory_);
-      }
-      if (!getResultsFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resultsFilename_);
-      }
-      if (fileFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.FILE_NONE.getNumber()) {
-        output.writeEnum(3, fileFormat_);
-      }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(4, distanceUnit_);
-      }
-      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        output.writeEnum(5, intensityUnit_);
-      }
-      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
-        output.writeEnum(6, angleUnit_);
-      }
-      if (showPrecision_ != false) {
-        output.writeBool(7, showPrecision_);
-      }
+      if (!getResultsDirectoryBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, resultsDirectory_);
+      if (!getResultsFilenameBytes().isEmpty())
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resultsFilename_);
+      if (fileFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.FILE_NONE.getNumber())
+		output.writeEnum(3, fileFormat_);
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		output.writeEnum(4, distanceUnit_);
+      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber())
+		output.writeEnum(5, intensityUnit_);
+      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber())
+		output.writeEnum(6, angleUnit_);
+      if (showPrecision_ != false)
+		output.writeBool(7, showPrecision_);
     }
 
     @Override
@@ -2205,32 +2160,25 @@ public final class ResultsProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!getResultsDirectoryBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, resultsDirectory_);
-      }
-      if (!getResultsFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resultsFilename_);
-      }
-      if (fileFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.FILE_NONE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (!getResultsDirectoryBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, resultsDirectory_);
+      if (!getResultsFilenameBytes().isEmpty())
+		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resultsFilename_);
+      if (fileFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.FILE_NONE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, fileFormat_);
-      }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, distanceUnit_);
-      }
-      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, intensityUnit_);
-      }
-      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, angleUnit_);
-      }
-      if (showPrecision_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showPrecision_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, showPrecision_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -2238,13 +2186,11 @@ public final class ResultsProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings) obj;
 
       boolean result = true;
       result = result && getResultsDirectory()
@@ -2262,9 +2208,8 @@ public final class ResultsProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RESULTS_DIRECTORY_FIELD_NUMBER;
@@ -2374,7 +2319,7 @@ public final class ResultsProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -2449,16 +2394,15 @@ public final class ResultsProtos {
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings build() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings buildPartial() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings(this);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings(this);
         result.resultsDirectory_ = resultsDirectory_;
         result.resultsFilename_ = resultsFilename_;
         result.fileFormat_ = fileFormat_;
@@ -2504,9 +2448,9 @@ public final class ResultsProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings) {
-          return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings)
+			return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -2522,21 +2466,16 @@ public final class ResultsProtos {
           resultsFilename_ = other.resultsFilename_;
           onChanged();
         }
-        if (other.fileFormat_ != 0) {
-          setFileFormatValue(other.getFileFormatValue());
-        }
-        if (other.distanceUnit_ != 0) {
-          setDistanceUnitValue(other.getDistanceUnitValue());
-        }
-        if (other.intensityUnit_ != 0) {
-          setIntensityUnitValue(other.getIntensityUnitValue());
-        }
-        if (other.angleUnit_ != 0) {
-          setAngleUnitValue(other.getAngleUnitValue());
-        }
-        if (other.getShowPrecision() != false) {
-          setShowPrecision(other.getShowPrecision());
-        }
+        if (other.fileFormat_ != 0)
+			setFileFormatValue(other.getFileFormatValue());
+        if (other.distanceUnit_ != 0)
+			setDistanceUnitValue(other.getDistanceUnitValue());
+        if (other.intensityUnit_ != 0)
+			setIntensityUnitValue(other.getIntensityUnitValue());
+        if (other.angleUnit_ != 0)
+			setAngleUnitValue(other.getAngleUnitValue());
+        if (other.getShowPrecision() != false)
+			setShowPrecision(other.getShowPrecision());
         onChanged();
         return this;
       }
@@ -2554,13 +2493,12 @@ public final class ResultsProtos {
         gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -2575,16 +2513,16 @@ public final class ResultsProtos {
        */
       @Override
 	public java.lang.String getResultsDirectory() {
-        java.lang.Object ref = resultsDirectory_;
+        final java.lang.Object ref = resultsDirectory_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           resultsDirectory_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -2596,16 +2534,16 @@ public final class ResultsProtos {
       @Override
 	public com.google.protobuf.ByteString
           getResultsDirectoryBytes() {
-        java.lang.Object ref = resultsDirectory_;
+        final java.lang.Object ref = resultsDirectory_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           resultsDirectory_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -2616,9 +2554,8 @@ public final class ResultsProtos {
        */
       public Builder setResultsDirectory(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         resultsDirectory_ = value;
         onChanged();
@@ -2646,9 +2583,8 @@ public final class ResultsProtos {
        */
       public Builder setResultsDirectoryBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         resultsDirectory_ = value;
@@ -2666,16 +2602,16 @@ public final class ResultsProtos {
        */
       @Override
 	public java.lang.String getResultsFilename() {
-        java.lang.Object ref = resultsFilename_;
+        final java.lang.Object ref = resultsFilename_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
+          final com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
+          final java.lang.String s = bs.toStringUtf8();
           resultsFilename_ = s;
           return s;
-        } else {
-          return (java.lang.String) ref;
         }
+		else
+			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -2687,16 +2623,16 @@ public final class ResultsProtos {
       @Override
 	public com.google.protobuf.ByteString
           getResultsFilenameBytes() {
-        java.lang.Object ref = resultsFilename_;
+        final java.lang.Object ref = resultsFilename_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          final com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           resultsFilename_ = b;
           return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
         }
+		else
+			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -2707,9 +2643,8 @@ public final class ResultsProtos {
        */
       public Builder setResultsFilename(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
 
         resultsFilename_ = value;
         onChanged();
@@ -2737,9 +2672,8 @@ public final class ResultsProtos {
        */
       public Builder setResultsFilenameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
 
         resultsFilename_ = value;
@@ -2780,7 +2714,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat getFileFormat() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.valueOf(fileFormat_);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.valueOf(fileFormat_);
         return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat.UNRECOGNIZED : result;
       }
       /**
@@ -2791,9 +2725,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.ResultsFileFormat file_format = 3;</code>
        */
       public Builder setFileFormat(gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         fileFormat_ = value.getNumber();
         onChanged();
@@ -2846,7 +2779,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+        final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
       /**
@@ -2857,9 +2790,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 4;</code>
        */
       public Builder setDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         distanceUnit_ = value.getNumber();
         onChanged();
@@ -2912,7 +2844,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit() {
-        gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
+        final gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
       }
       /**
@@ -2923,9 +2855,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 5;</code>
        */
       public Builder setIntensityUnit(gdsc.smlm.data.config.UnitProtos.IntensityUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         intensityUnit_ = value.getNumber();
         onChanged();
@@ -2978,7 +2909,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.AngleUnit getAngleUnit() {
-        gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
+        final gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.AngleUnit.UNRECOGNIZED : result;
       }
       /**
@@ -2989,9 +2920,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 6;</code>
        */
       public Builder setAngleUnit(gdsc.smlm.data.config.UnitProtos.AngleUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         angleUnit_ = value.getNumber();
         onChanged();
@@ -3276,19 +3206,18 @@ public final class ResultsProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -3297,19 +3226,19 @@ public final class ResultsProtos {
               break;
             }
             case 16: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               distanceUnit_ = rawValue;
               break;
             }
             case 24: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               intensityUnit_ = rawValue;
               break;
             }
             case 32: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               angleUnit_ = rawValue;
               break;
@@ -3340,7 +3269,7 @@ public final class ResultsProtos {
               break;
             }
             case 80: {
-              int rawValue = input.readEnum();
+              final int rawValue = input.readEnum();
 
               resultsTableFormat_ = rawValue;
               break;
@@ -3352,9 +3281,9 @@ public final class ResultsProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -3410,7 +3339,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+      final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
     }
 
@@ -3436,7 +3365,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit() {
-      gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
+      final gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
     }
 
@@ -3462,7 +3391,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.UnitProtos.AngleUnit getAngleUnit() {
-      gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
+      final gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
       return result == null ? gdsc.smlm.data.config.UnitProtos.AngleUnit.UNRECOGNIZED : result;
     }
 
@@ -3558,7 +3487,7 @@ public final class ResultsProtos {
      */
     @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat getResultsTableFormat() {
-      gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.valueOf(resultsTableFormat_);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.valueOf(resultsTableFormat_);
       return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.UNRECOGNIZED : result;
     }
 
@@ -3579,7 +3508,7 @@ public final class ResultsProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -3590,39 +3519,28 @@ public final class ResultsProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (showTable_ != false) {
-        output.writeBool(1, showTable_);
-      }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(2, distanceUnit_);
-      }
-      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        output.writeEnum(3, intensityUnit_);
-      }
-      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
-        output.writeEnum(4, angleUnit_);
-      }
-      if (showPrecision_ != false) {
-        output.writeBool(5, showPrecision_);
-      }
-      if (showFittingData_ != false) {
-        output.writeBool(6, showFittingData_);
-      }
-      if (showNoiseData_ != false) {
-        output.writeBool(7, showNoiseData_);
-      }
-      if (roundingPrecision_ != 0) {
-        output.writeInt32(8, roundingPrecision_);
-      }
-      if (updateExistingTables_ != false) {
-        output.writeBool(9, updateExistingTables_);
-      }
-      if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber()) {
-        output.writeEnum(10, resultsTableFormat_);
-      }
-      if (showRowCounter_ != false) {
-        output.writeBool(11, showRowCounter_);
-      }
+      if (showTable_ != false)
+		output.writeBool(1, showTable_);
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		output.writeEnum(2, distanceUnit_);
+      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber())
+		output.writeEnum(3, intensityUnit_);
+      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber())
+		output.writeEnum(4, angleUnit_);
+      if (showPrecision_ != false)
+		output.writeBool(5, showPrecision_);
+      if (showFittingData_ != false)
+		output.writeBool(6, showFittingData_);
+      if (showNoiseData_ != false)
+		output.writeBool(7, showNoiseData_);
+      if (roundingPrecision_ != 0)
+		output.writeInt32(8, roundingPrecision_);
+      if (updateExistingTables_ != false)
+		output.writeBool(9, updateExistingTables_);
+      if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber())
+		output.writeEnum(10, resultsTableFormat_);
+      if (showRowCounter_ != false)
+		output.writeBool(11, showRowCounter_);
     }
 
     @Override
@@ -3631,50 +3549,39 @@ public final class ResultsProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (showTable_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showTable_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, showTable_);
-      }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, distanceUnit_);
-      }
-      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, intensityUnit_);
-      }
-      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, angleUnit_);
-      }
-      if (showPrecision_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showPrecision_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, showPrecision_);
-      }
-      if (showFittingData_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showFittingData_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, showFittingData_);
-      }
-      if (showNoiseData_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showNoiseData_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, showNoiseData_);
-      }
-      if (roundingPrecision_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (roundingPrecision_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, roundingPrecision_);
-      }
-      if (updateExistingTables_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (updateExistingTables_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, updateExistingTables_);
-      }
-      if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber())
+		size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(10, resultsTableFormat_);
-      }
-      if (showRowCounter_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showRowCounter_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(11, showRowCounter_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -3682,13 +3589,11 @@ public final class ResultsProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings) obj;
 
       boolean result = true;
       result = result && (getShowTable()
@@ -3714,9 +3619,8 @@ public final class ResultsProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SHOW_TABLE_FIELD_NUMBER;
@@ -3839,7 +3743,7 @@ public final class ResultsProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -3922,16 +3826,15 @@ public final class ResultsProtos {
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings build() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings buildPartial() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings(this);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings(this);
         result.showTable_ = showTable_;
         result.distanceUnit_ = distanceUnit_;
         result.intensityUnit_ = intensityUnit_;
@@ -3981,9 +3884,9 @@ public final class ResultsProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings) {
-          return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings)
+			return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -3991,39 +3894,28 @@ public final class ResultsProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings other) {
         if (other == gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance()) return this;
-        if (other.getShowTable() != false) {
-          setShowTable(other.getShowTable());
-        }
-        if (other.distanceUnit_ != 0) {
-          setDistanceUnitValue(other.getDistanceUnitValue());
-        }
-        if (other.intensityUnit_ != 0) {
-          setIntensityUnitValue(other.getIntensityUnitValue());
-        }
-        if (other.angleUnit_ != 0) {
-          setAngleUnitValue(other.getAngleUnitValue());
-        }
-        if (other.getShowPrecision() != false) {
-          setShowPrecision(other.getShowPrecision());
-        }
-        if (other.getShowFittingData() != false) {
-          setShowFittingData(other.getShowFittingData());
-        }
-        if (other.getShowNoiseData() != false) {
-          setShowNoiseData(other.getShowNoiseData());
-        }
-        if (other.getRoundingPrecision() != 0) {
-          setRoundingPrecision(other.getRoundingPrecision());
-        }
-        if (other.getUpdateExistingTables() != false) {
-          setUpdateExistingTables(other.getUpdateExistingTables());
-        }
-        if (other.resultsTableFormat_ != 0) {
-          setResultsTableFormatValue(other.getResultsTableFormatValue());
-        }
-        if (other.getShowRowCounter() != false) {
-          setShowRowCounter(other.getShowRowCounter());
-        }
+        if (other.getShowTable() != false)
+			setShowTable(other.getShowTable());
+        if (other.distanceUnit_ != 0)
+			setDistanceUnitValue(other.getDistanceUnitValue());
+        if (other.intensityUnit_ != 0)
+			setIntensityUnitValue(other.getIntensityUnitValue());
+        if (other.angleUnit_ != 0)
+			setAngleUnitValue(other.getAngleUnitValue());
+        if (other.getShowPrecision() != false)
+			setShowPrecision(other.getShowPrecision());
+        if (other.getShowFittingData() != false)
+			setShowFittingData(other.getShowFittingData());
+        if (other.getShowNoiseData() != false)
+			setShowNoiseData(other.getShowNoiseData());
+        if (other.getRoundingPrecision() != 0)
+			setRoundingPrecision(other.getRoundingPrecision());
+        if (other.getUpdateExistingTables() != false)
+			setUpdateExistingTables(other.getUpdateExistingTables());
+        if (other.resultsTableFormat_ != 0)
+			setResultsTableFormatValue(other.getResultsTableFormatValue());
+        if (other.getShowRowCounter() != false)
+			setShowRowCounter(other.getShowRowCounter());
         onChanged();
         return this;
       }
@@ -4041,13 +3933,12 @@ public final class ResultsProtos {
         gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -4124,7 +4015,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+        final gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
       }
       /**
@@ -4135,9 +4026,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 2;</code>
        */
       public Builder setDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         distanceUnit_ = value.getNumber();
         onChanged();
@@ -4190,7 +4080,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit() {
-        gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
+        final gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
       }
       /**
@@ -4201,9 +4091,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 3;</code>
        */
       public Builder setIntensityUnit(gdsc.smlm.data.config.UnitProtos.IntensityUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         intensityUnit_ = value.getNumber();
         onChanged();
@@ -4256,7 +4145,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.UnitProtos.AngleUnit getAngleUnit() {
-        gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
+        final gdsc.smlm.data.config.UnitProtos.AngleUnit result = gdsc.smlm.data.config.UnitProtos.AngleUnit.valueOf(angleUnit_);
         return result == null ? gdsc.smlm.data.config.UnitProtos.AngleUnit.UNRECOGNIZED : result;
       }
       /**
@@ -4267,9 +4156,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 4;</code>
        */
       public Builder setAngleUnit(gdsc.smlm.data.config.UnitProtos.AngleUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         angleUnit_ = value.getNumber();
         onChanged();
@@ -4517,7 +4405,7 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat getResultsTableFormat() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.valueOf(resultsTableFormat_);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.valueOf(resultsTableFormat_);
         return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.UNRECOGNIZED : result;
       }
       /**
@@ -4528,9 +4416,8 @@ public final class ResultsProtos {
        * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
        */
       public Builder setResultsTableFormat(gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+        if (value == null)
+			throw new NullPointerException();
 
         resultsTableFormat_ = value.getNumber();
         onChanged();
@@ -4683,19 +4570,18 @@ public final class ResultsProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -4705,9 +4591,9 @@ public final class ResultsProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -4744,7 +4630,7 @@ public final class ResultsProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -4755,9 +4641,8 @@ public final class ResultsProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (inMemory_ != false) {
-        output.writeBool(1, inMemory_);
-      }
+      if (inMemory_ != false)
+		output.writeBool(1, inMemory_);
     }
 
     @Override
@@ -4766,10 +4651,9 @@ public final class ResultsProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (inMemory_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (inMemory_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, inMemory_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -4777,13 +4661,11 @@ public final class ResultsProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings) obj;
 
       boolean result = true;
       result = result && (getInMemory()
@@ -4793,9 +4675,8 @@ public final class ResultsProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + IN_MEMORY_FIELD_NUMBER;
@@ -4893,7 +4774,7 @@ public final class ResultsProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -4956,16 +4837,15 @@ public final class ResultsProtos {
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings build() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings buildPartial() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings(this);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings(this);
         result.inMemory_ = inMemory_;
         onBuilt();
         return result;
@@ -5005,9 +4885,9 @@ public final class ResultsProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings) {
-          return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings)
+			return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -5015,9 +4895,8 @@ public final class ResultsProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings other) {
         if (other == gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.getDefaultInstance()) return this;
-        if (other.getInMemory() != false) {
-          setInMemory(other.getInMemory());
-        }
+        if (other.getInMemory() != false)
+			setInMemory(other.getInMemory());
         onChanged();
         return this;
       }
@@ -5035,13 +4914,12 @@ public final class ResultsProtos {
         gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -5289,19 +5167,18 @@ public final class ResultsProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -5316,9 +5193,8 @@ public final class ResultsProtos {
             }
             case 26: {
               gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.Builder subBuilder = null;
-              if (resultsImageSettings_ != null) {
-                subBuilder = resultsImageSettings_.toBuilder();
-              }
+              if (resultsImageSettings_ != null)
+				subBuilder = resultsImageSettings_.toBuilder();
               resultsImageSettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsImageSettings_);
@@ -5329,9 +5205,8 @@ public final class ResultsProtos {
             }
             case 34: {
               gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.Builder subBuilder = null;
-              if (resultsFileSettings_ != null) {
-                subBuilder = resultsFileSettings_.toBuilder();
-              }
+              if (resultsFileSettings_ != null)
+				subBuilder = resultsFileSettings_.toBuilder();
               resultsFileSettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsFileSettings_);
@@ -5342,9 +5217,8 @@ public final class ResultsProtos {
             }
             case 42: {
               gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder subBuilder = null;
-              if (resultsTableSettings_ != null) {
-                subBuilder = resultsTableSettings_.toBuilder();
-              }
+              if (resultsTableSettings_ != null)
+				subBuilder = resultsTableSettings_.toBuilder();
               resultsTableSettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsTableSettings_);
@@ -5355,9 +5229,8 @@ public final class ResultsProtos {
             }
             case 50: {
               gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.Builder subBuilder = null;
-              if (resultsInMemorySettings_ != null) {
-                subBuilder = resultsInMemorySettings_.toBuilder();
-              }
+              if (resultsInMemorySettings_ != null)
+				subBuilder = resultsInMemorySettings_.toBuilder();
               resultsInMemorySettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsInMemorySettings_);
@@ -5368,9 +5241,9 @@ public final class ResultsProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -5565,7 +5438,7 @@ public final class ResultsProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -5576,24 +5449,18 @@ public final class ResultsProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (logProgress_ != false) {
-        output.writeBool(1, logProgress_);
-      }
-      if (showDeviations_ != false) {
-        output.writeBool(2, showDeviations_);
-      }
-      if (resultsImageSettings_ != null) {
-        output.writeMessage(3, getResultsImageSettings());
-      }
-      if (resultsFileSettings_ != null) {
-        output.writeMessage(4, getResultsFileSettings());
-      }
-      if (resultsTableSettings_ != null) {
-        output.writeMessage(5, getResultsTableSettings());
-      }
-      if (resultsInMemorySettings_ != null) {
-        output.writeMessage(6, getResultsInMemorySettings());
-      }
+      if (logProgress_ != false)
+		output.writeBool(1, logProgress_);
+      if (showDeviations_ != false)
+		output.writeBool(2, showDeviations_);
+      if (resultsImageSettings_ != null)
+		output.writeMessage(3, getResultsImageSettings());
+      if (resultsFileSettings_ != null)
+		output.writeMessage(4, getResultsFileSettings());
+      if (resultsTableSettings_ != null)
+		output.writeMessage(5, getResultsTableSettings());
+      if (resultsInMemorySettings_ != null)
+		output.writeMessage(6, getResultsInMemorySettings());
     }
 
     @Override
@@ -5602,30 +5469,24 @@ public final class ResultsProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (logProgress_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (logProgress_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, logProgress_);
-      }
-      if (showDeviations_ != false) {
-        size += com.google.protobuf.CodedOutputStream
+      if (showDeviations_ != false)
+		size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, showDeviations_);
-      }
-      if (resultsImageSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsImageSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getResultsImageSettings());
-      }
-      if (resultsFileSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsFileSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getResultsFileSettings());
-      }
-      if (resultsTableSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsTableSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getResultsTableSettings());
-      }
-      if (resultsInMemorySettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsInMemorySettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getResultsInMemorySettings());
-      }
       memoizedSize = size;
       return size;
     }
@@ -5633,13 +5494,11 @@ public final class ResultsProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.ResultsProtos.ResultsSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.ResultsProtos.ResultsSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.ResultsProtos.ResultsSettings other = (gdsc.smlm.data.config.ResultsProtos.ResultsSettings) obj;
 
       boolean result = true;
       result = result && (getLogProgress()
@@ -5647,33 +5506,28 @@ public final class ResultsProtos {
       result = result && (getShowDeviations()
           == other.getShowDeviations());
       result = result && (hasResultsImageSettings() == other.hasResultsImageSettings());
-      if (hasResultsImageSettings()) {
-        result = result && getResultsImageSettings()
+      if (hasResultsImageSettings())
+		result = result && getResultsImageSettings()
             .equals(other.getResultsImageSettings());
-      }
       result = result && (hasResultsFileSettings() == other.hasResultsFileSettings());
-      if (hasResultsFileSettings()) {
-        result = result && getResultsFileSettings()
+      if (hasResultsFileSettings())
+		result = result && getResultsFileSettings()
             .equals(other.getResultsFileSettings());
-      }
       result = result && (hasResultsTableSettings() == other.hasResultsTableSettings());
-      if (hasResultsTableSettings()) {
-        result = result && getResultsTableSettings()
+      if (hasResultsTableSettings())
+		result = result && getResultsTableSettings()
             .equals(other.getResultsTableSettings());
-      }
       result = result && (hasResultsInMemorySettings() == other.hasResultsInMemorySettings());
-      if (hasResultsInMemorySettings()) {
-        result = result && getResultsInMemorySettings()
+      if (hasResultsInMemorySettings())
+		result = result && getResultsInMemorySettings()
             .equals(other.getResultsInMemorySettings());
-      }
       return result;
     }
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + LOG_PROGRESS_FIELD_NUMBER;
@@ -5790,7 +5644,7 @@ public final class ResultsProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -5839,27 +5693,27 @@ public final class ResultsProtos {
 
         showDeviations_ = false;
 
-        if (resultsImageSettingsBuilder_ == null) {
-          resultsImageSettings_ = null;
-        } else {
+        if (resultsImageSettingsBuilder_ == null)
+			resultsImageSettings_ = null;
+		else {
           resultsImageSettings_ = null;
           resultsImageSettingsBuilder_ = null;
         }
-        if (resultsFileSettingsBuilder_ == null) {
-          resultsFileSettings_ = null;
-        } else {
+        if (resultsFileSettingsBuilder_ == null)
+			resultsFileSettings_ = null;
+		else {
           resultsFileSettings_ = null;
           resultsFileSettingsBuilder_ = null;
         }
-        if (resultsTableSettingsBuilder_ == null) {
-          resultsTableSettings_ = null;
-        } else {
+        if (resultsTableSettingsBuilder_ == null)
+			resultsTableSettings_ = null;
+		else {
           resultsTableSettings_ = null;
           resultsTableSettingsBuilder_ = null;
         }
-        if (resultsInMemorySettingsBuilder_ == null) {
-          resultsInMemorySettings_ = null;
-        } else {
+        if (resultsInMemorySettingsBuilder_ == null)
+			resultsInMemorySettings_ = null;
+		else {
           resultsInMemorySettings_ = null;
           resultsInMemorySettingsBuilder_ = null;
         }
@@ -5879,38 +5733,33 @@ public final class ResultsProtos {
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsSettings build() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.ResultsProtos.ResultsSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsSettings buildPartial() {
-        gdsc.smlm.data.config.ResultsProtos.ResultsSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsSettings(this);
+        final gdsc.smlm.data.config.ResultsProtos.ResultsSettings result = new gdsc.smlm.data.config.ResultsProtos.ResultsSettings(this);
         result.logProgress_ = logProgress_;
         result.showDeviations_ = showDeviations_;
-        if (resultsImageSettingsBuilder_ == null) {
-          result.resultsImageSettings_ = resultsImageSettings_;
-        } else {
-          result.resultsImageSettings_ = resultsImageSettingsBuilder_.build();
-        }
-        if (resultsFileSettingsBuilder_ == null) {
-          result.resultsFileSettings_ = resultsFileSettings_;
-        } else {
-          result.resultsFileSettings_ = resultsFileSettingsBuilder_.build();
-        }
-        if (resultsTableSettingsBuilder_ == null) {
-          result.resultsTableSettings_ = resultsTableSettings_;
-        } else {
-          result.resultsTableSettings_ = resultsTableSettingsBuilder_.build();
-        }
-        if (resultsInMemorySettingsBuilder_ == null) {
-          result.resultsInMemorySettings_ = resultsInMemorySettings_;
-        } else {
-          result.resultsInMemorySettings_ = resultsInMemorySettingsBuilder_.build();
-        }
+        if (resultsImageSettingsBuilder_ == null)
+			result.resultsImageSettings_ = resultsImageSettings_;
+		else
+			result.resultsImageSettings_ = resultsImageSettingsBuilder_.build();
+        if (resultsFileSettingsBuilder_ == null)
+			result.resultsFileSettings_ = resultsFileSettings_;
+		else
+			result.resultsFileSettings_ = resultsFileSettingsBuilder_.build();
+        if (resultsTableSettingsBuilder_ == null)
+			result.resultsTableSettings_ = resultsTableSettings_;
+		else
+			result.resultsTableSettings_ = resultsTableSettingsBuilder_.build();
+        if (resultsInMemorySettingsBuilder_ == null)
+			result.resultsInMemorySettings_ = resultsInMemorySettings_;
+		else
+			result.resultsInMemorySettings_ = resultsInMemorySettingsBuilder_.build();
         onBuilt();
         return result;
       }
@@ -5949,9 +5798,9 @@ public final class ResultsProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsSettings) {
-          return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.ResultsProtos.ResultsSettings)
+			return mergeFrom((gdsc.smlm.data.config.ResultsProtos.ResultsSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -5959,24 +5808,18 @@ public final class ResultsProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.ResultsProtos.ResultsSettings other) {
         if (other == gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance()) return this;
-        if (other.getLogProgress() != false) {
-          setLogProgress(other.getLogProgress());
-        }
-        if (other.getShowDeviations() != false) {
-          setShowDeviations(other.getShowDeviations());
-        }
-        if (other.hasResultsImageSettings()) {
-          mergeResultsImageSettings(other.getResultsImageSettings());
-        }
-        if (other.hasResultsFileSettings()) {
-          mergeResultsFileSettings(other.getResultsFileSettings());
-        }
-        if (other.hasResultsTableSettings()) {
-          mergeResultsTableSettings(other.getResultsTableSettings());
-        }
-        if (other.hasResultsInMemorySettings()) {
-          mergeResultsInMemorySettings(other.getResultsInMemorySettings());
-        }
+        if (other.getLogProgress() != false)
+			setLogProgress(other.getLogProgress());
+        if (other.getShowDeviations() != false)
+			setShowDeviations(other.getShowDeviations());
+        if (other.hasResultsImageSettings())
+			mergeResultsImageSettings(other.getResultsImageSettings());
+        if (other.hasResultsFileSettings())
+			mergeResultsFileSettings(other.getResultsFileSettings());
+        if (other.hasResultsTableSettings())
+			mergeResultsTableSettings(other.getResultsTableSettings());
+        if (other.hasResultsInMemorySettings())
+			mergeResultsInMemorySettings(other.getResultsInMemorySettings());
         onChanged();
         return this;
       }
@@ -5994,13 +5837,12 @@ public final class ResultsProtos {
         gdsc.smlm.data.config.ResultsProtos.ResultsSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.ResultsProtos.ResultsSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -6106,11 +5948,10 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings getResultsImageSettings() {
-        if (resultsImageSettingsBuilder_ == null) {
-          return resultsImageSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.getDefaultInstance() : resultsImageSettings_;
-        } else {
-          return resultsImageSettingsBuilder_.getMessage();
-        }
+        if (resultsImageSettingsBuilder_ == null)
+			return resultsImageSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.getDefaultInstance() : resultsImageSettings_;
+		else
+			return resultsImageSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -6121,14 +5962,13 @@ public final class ResultsProtos {
        */
       public Builder setResultsImageSettings(gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings value) {
         if (resultsImageSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           resultsImageSettings_ = value;
           onChanged();
-        } else {
-          resultsImageSettingsBuilder_.setMessage(value);
         }
+		else
+			resultsImageSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -6144,9 +5984,9 @@ public final class ResultsProtos {
         if (resultsImageSettingsBuilder_ == null) {
           resultsImageSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          resultsImageSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			resultsImageSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -6159,16 +5999,15 @@ public final class ResultsProtos {
        */
       public Builder mergeResultsImageSettings(gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings value) {
         if (resultsImageSettingsBuilder_ == null) {
-          if (resultsImageSettings_ != null) {
-            resultsImageSettings_ =
+          if (resultsImageSettings_ != null)
+			resultsImageSettings_ =
               gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.newBuilder(resultsImageSettings_).mergeFrom(value).buildPartial();
-          } else {
-            resultsImageSettings_ = value;
-          }
+		else
+			resultsImageSettings_ = value;
           onChanged();
-        } else {
-          resultsImageSettingsBuilder_.mergeFrom(value);
         }
+		else
+			resultsImageSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -6211,12 +6050,11 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsImageSettingsOrBuilder getResultsImageSettingsOrBuilder() {
-        if (resultsImageSettingsBuilder_ != null) {
-          return resultsImageSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return resultsImageSettings_ == null ?
-              gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.getDefaultInstance() : resultsImageSettings_;
-        }
+        if (resultsImageSettingsBuilder_ != null)
+			return resultsImageSettingsBuilder_.getMessageOrBuilder();
+		else
+			return resultsImageSettings_ == null ?
+			      gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings.getDefaultInstance() : resultsImageSettings_;
       }
       /**
        * <pre>
@@ -6261,11 +6099,10 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings getResultsFileSettings() {
-        if (resultsFileSettingsBuilder_ == null) {
-          return resultsFileSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.getDefaultInstance() : resultsFileSettings_;
-        } else {
-          return resultsFileSettingsBuilder_.getMessage();
-        }
+        if (resultsFileSettingsBuilder_ == null)
+			return resultsFileSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.getDefaultInstance() : resultsFileSettings_;
+		else
+			return resultsFileSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -6276,14 +6113,13 @@ public final class ResultsProtos {
        */
       public Builder setResultsFileSettings(gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings value) {
         if (resultsFileSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           resultsFileSettings_ = value;
           onChanged();
-        } else {
-          resultsFileSettingsBuilder_.setMessage(value);
         }
+		else
+			resultsFileSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -6299,9 +6135,9 @@ public final class ResultsProtos {
         if (resultsFileSettingsBuilder_ == null) {
           resultsFileSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          resultsFileSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			resultsFileSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -6314,16 +6150,15 @@ public final class ResultsProtos {
        */
       public Builder mergeResultsFileSettings(gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings value) {
         if (resultsFileSettingsBuilder_ == null) {
-          if (resultsFileSettings_ != null) {
-            resultsFileSettings_ =
+          if (resultsFileSettings_ != null)
+			resultsFileSettings_ =
               gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.newBuilder(resultsFileSettings_).mergeFrom(value).buildPartial();
-          } else {
-            resultsFileSettings_ = value;
-          }
+		else
+			resultsFileSettings_ = value;
           onChanged();
-        } else {
-          resultsFileSettingsBuilder_.mergeFrom(value);
         }
+		else
+			resultsFileSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -6366,12 +6201,11 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsFileSettingsOrBuilder getResultsFileSettingsOrBuilder() {
-        if (resultsFileSettingsBuilder_ != null) {
-          return resultsFileSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return resultsFileSettings_ == null ?
-              gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.getDefaultInstance() : resultsFileSettings_;
-        }
+        if (resultsFileSettingsBuilder_ != null)
+			return resultsFileSettingsBuilder_.getMessageOrBuilder();
+		else
+			return resultsFileSettings_ == null ?
+			      gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings.getDefaultInstance() : resultsFileSettings_;
       }
       /**
        * <pre>
@@ -6416,11 +6250,10 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
-        if (resultsTableSettingsBuilder_ == null) {
-          return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
-        } else {
-          return resultsTableSettingsBuilder_.getMessage();
-        }
+        if (resultsTableSettingsBuilder_ == null)
+			return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
+		else
+			return resultsTableSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -6431,14 +6264,13 @@ public final class ResultsProtos {
        */
       public Builder setResultsTableSettings(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings value) {
         if (resultsTableSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           resultsTableSettings_ = value;
           onChanged();
-        } else {
-          resultsTableSettingsBuilder_.setMessage(value);
         }
+		else
+			resultsTableSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -6454,9 +6286,9 @@ public final class ResultsProtos {
         if (resultsTableSettingsBuilder_ == null) {
           resultsTableSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          resultsTableSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			resultsTableSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -6469,16 +6301,15 @@ public final class ResultsProtos {
        */
       public Builder mergeResultsTableSettings(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings value) {
         if (resultsTableSettingsBuilder_ == null) {
-          if (resultsTableSettings_ != null) {
-            resultsTableSettings_ =
+          if (resultsTableSettings_ != null)
+			resultsTableSettings_ =
               gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.newBuilder(resultsTableSettings_).mergeFrom(value).buildPartial();
-          } else {
-            resultsTableSettings_ = value;
-          }
+		else
+			resultsTableSettings_ = value;
           onChanged();
-        } else {
-          resultsTableSettingsBuilder_.mergeFrom(value);
         }
+		else
+			resultsTableSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -6521,12 +6352,11 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
-        if (resultsTableSettingsBuilder_ != null) {
-          return resultsTableSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return resultsTableSettings_ == null ?
-              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
-        }
+        if (resultsTableSettingsBuilder_ != null)
+			return resultsTableSettingsBuilder_.getMessageOrBuilder();
+		else
+			return resultsTableSettings_ == null ?
+			      gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
       }
       /**
        * <pre>
@@ -6571,11 +6401,10 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings getResultsInMemorySettings() {
-        if (resultsInMemorySettingsBuilder_ == null) {
-          return resultsInMemorySettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.getDefaultInstance() : resultsInMemorySettings_;
-        } else {
-          return resultsInMemorySettingsBuilder_.getMessage();
-        }
+        if (resultsInMemorySettingsBuilder_ == null)
+			return resultsInMemorySettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.getDefaultInstance() : resultsInMemorySettings_;
+		else
+			return resultsInMemorySettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -6586,14 +6415,13 @@ public final class ResultsProtos {
        */
       public Builder setResultsInMemorySettings(gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings value) {
         if (resultsInMemorySettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           resultsInMemorySettings_ = value;
           onChanged();
-        } else {
-          resultsInMemorySettingsBuilder_.setMessage(value);
         }
+		else
+			resultsInMemorySettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -6609,9 +6437,9 @@ public final class ResultsProtos {
         if (resultsInMemorySettingsBuilder_ == null) {
           resultsInMemorySettings_ = builderForValue.build();
           onChanged();
-        } else {
-          resultsInMemorySettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			resultsInMemorySettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -6624,16 +6452,15 @@ public final class ResultsProtos {
        */
       public Builder mergeResultsInMemorySettings(gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings value) {
         if (resultsInMemorySettingsBuilder_ == null) {
-          if (resultsInMemorySettings_ != null) {
-            resultsInMemorySettings_ =
+          if (resultsInMemorySettings_ != null)
+			resultsInMemorySettings_ =
               gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.newBuilder(resultsInMemorySettings_).mergeFrom(value).buildPartial();
-          } else {
-            resultsInMemorySettings_ = value;
-          }
+		else
+			resultsInMemorySettings_ = value;
           onChanged();
-        } else {
-          resultsInMemorySettingsBuilder_.mergeFrom(value);
         }
+		else
+			resultsInMemorySettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -6676,12 +6503,11 @@ public final class ResultsProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettingsOrBuilder getResultsInMemorySettingsOrBuilder() {
-        if (resultsInMemorySettingsBuilder_ != null) {
-          return resultsInMemorySettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return resultsInMemorySettings_ == null ?
-              gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.getDefaultInstance() : resultsInMemorySettings_;
-        }
+        if (resultsInMemorySettingsBuilder_ != null)
+			return resultsInMemorySettingsBuilder_.getMessageOrBuilder();
+		else
+			return resultsInMemorySettings_ == null ?
+			      gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings.getDefaultInstance() : resultsInMemorySettings_;
       }
       /**
        * <pre>
@@ -6788,7 +6614,7 @@ public final class ResultsProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    final java.lang.String[] descriptorData = {
       "\n\rresults.proto\022\025gdsc.smlm.data.config\032\n" +
       "unit.proto\"\277\001\n\024ResultsImageSettings\022;\n\ni" +
       "mage_type\030\001 \001(\0162\'.gdsc.smlm.data.config." +
@@ -6841,7 +6667,7 @@ public final class ResultsProtos {
       "\n\n\006IMAGEJ\020\001\022\017\n\013INTERACTIVE\020\002B\017B\rResultsP",
       "rotosb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
           @Override
 		public com.google.protobuf.ExtensionRegistry assignDescriptors(

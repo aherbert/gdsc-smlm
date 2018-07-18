@@ -33,7 +33,7 @@ import java.util.Arrays;
  */
 public class ScoreFunctionHelper<T extends Comparable<T>>
 {
-	
+
 	/**
 	 * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
 	 * sorted. The results should contain the best result at position 0 in the output array.

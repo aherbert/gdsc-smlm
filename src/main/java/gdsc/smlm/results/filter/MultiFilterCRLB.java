@@ -33,7 +33,7 @@ import gdsc.smlm.results.PeakResult;
  */
 public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 {
-	
+
 	/**
 	 * Instantiates a new multi filter CRLB.
 	 *
@@ -87,8 +87,8 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 	{
 		if (peak.hasParameterDeviations())
 		{
-			float vx = peak.getParameterDeviation(PeakResult.X);
-			float vy = peak.getParameterDeviation(PeakResult.Y);
+			final float vx = peak.getParameterDeviation(PeakResult.X);
+			final float vy = peak.getParameterDeviation(PeakResult.Y);
 			return (vx * vx + vy * vy);
 		}
 		return variance; // Return the current limit
@@ -131,7 +131,7 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
+		final double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 		params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
 		return new MultiFilterCRLB(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6],
 				(float) params[7], (float) params[8]);

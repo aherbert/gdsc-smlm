@@ -51,30 +51,28 @@ public class PoissonGaussianFisherInformationTest
 
 		for (int i = 0; i < 4; i++)
 		{
-			double s = (1 << i) * 0.25;
+			final double s = (1 << i) * 0.25;
 			canComputeFisherInformation(s);
 		}
 	}
 
-	private void canComputeFisherInformation(double s)
+	private static void canComputeFisherInformation(double s)
 	{
 		canComputeFisherInformation(new PoissonGaussianFisherInformation(s));
 	}
 
-	private void canComputeFisherInformation(PoissonGaussianFisherInformation f)
+	private static void canComputeFisherInformation(PoissonGaussianFisherInformation f)
 	{
 		f.setMeanThreshold(Double.MAX_VALUE);
 		// Do not evaluate at very high mean. The switch to the approximation will occur
 		// and the approximation is good.
 		for (int exp = -20; exp < 6; exp++)
-		{
 			canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
-		}
 	}
 
-	private void canComputeFisherInformation(PoissonGaussianFisherInformation f, double u)
+	private static void canComputeFisherInformation(PoissonGaussianFisherInformation f, double u)
 	{
-		double I = f.getPoissonGaussianI(u);
+		final double I = f.getPoissonGaussianI(u);
 		double lower = f.getPoissonGaussianApproximationI(u);
 		double upper = PoissonFisherInformation.getPoissonI(u);
 		//System.out.printf("s=%g u=%g I=%s  (%s - %s) alpha=%s\n", f.s, u, I, lower, upper, I / upper);
@@ -98,7 +96,7 @@ public class PoissonGaussianFisherInformationTest
 		double u = Double.longBitsToDouble(0x4000000000001L);
 
 		// Binary search for the min value
-		boolean doSearch = false;
+		final boolean doSearch = false;
 		if (doSearch)
 		{
 			// This is the full 52-bit mantissa of a double with zero for the unbiased exponent,
@@ -110,17 +108,13 @@ public class PoissonGaussianFisherInformationTest
 			{
 				// 1/Upper is not infinty
 				// Test mid-point
-				long mid = (upper + lower) / 2;
+				final long mid = (upper + lower) / 2;
 				u = Double.longBitsToDouble(mid);
 				if (1 / u == Double.POSITIVE_INFINITY)
-				{
 					lower = mid;
-				}
 				else
-				{
 					// Mid point
 					upper = mid;
-				}
 			}
 
 			u = Double.longBitsToDouble(upper);
@@ -132,13 +126,13 @@ public class PoissonGaussianFisherInformationTest
 
 		for (int i = 0; i < 4; i++)
 		{
-			double s = (1 << i) * 0.25;
-			PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(s);
-			double I = f.getPoissonGaussianI(u);
-			double I2 = f.getPoissonGaussianI(1e-100);
-			double lower = f.getPoissonGaussianApproximationI(u);
-			double upper = PoissonFisherInformation.getPoissonI(u);
-			double alpha = I / upper;
+			final double s = (1 << i) * 0.25;
+			final PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(s);
+			final double I = f.getPoissonGaussianI(u);
+			final double I2 = f.getPoissonGaussianI(1e-100);
+			final double lower = f.getPoissonGaussianApproximationI(u);
+			final double upper = PoissonFisherInformation.getPoissonI(u);
+			final double alpha = I / upper;
 			TestSettings.info("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, I2, lower, upper, alpha);
 			Assert.assertTrue(I > lower);
 			Assert.assertTrue(I < upper);

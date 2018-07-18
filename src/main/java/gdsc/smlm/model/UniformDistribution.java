@@ -41,7 +41,7 @@ public class UniformDistribution implements SpatialDistribution
 	 */
 	private class VectorGeneratorWrapper implements RandomVectorGenerator
 	{
-		private RandomGenerator rng1, rng2, rng3;
+		private final RandomGenerator rng1, rng2, rng3;
 
 		public VectorGeneratorWrapper(RandomGeneratorFactory randomGeneratorFactory)
 		{
@@ -52,7 +52,7 @@ public class UniformDistribution implements SpatialDistribution
 
 		private RandomGenerator create(RandomGeneratorFactory randomGeneratorFactory)
 		{
-			RandomGenerator rng = randomGeneratorFactory.createRandomGenerator();
+			final RandomGenerator rng = randomGeneratorFactory.createRandomGenerator();
 			if (rng == null)
 				throw new RuntimeException("RandomGeneratorFactory created null RandomGenerator");
 			return rng;
@@ -111,7 +111,7 @@ public class UniformDistribution implements SpatialDistribution
 		// The Halton sequence based on the prime of 2 does not provide great variety in the
 		// lesser significant digits when simulating a 512x512 pixel image. This is not suitable for
 		// PSF fitting since we require variation to at least 3 decimal places.
-		HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3, new int[] { 3, 5, 7 }, null);
+		final HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3, new int[] { 3, 5, 7 }, null);
 		randomVectorGenerator.skipTo(Math.abs(seed));
 		init(min, max, randomVectorGenerator);
 	}
@@ -143,7 +143,7 @@ public class UniformDistribution implements SpatialDistribution
 	 */
 	public UniformDistribution(double[] min, double[] max, RandomGeneratorFactory randomGeneratorFactory)
 	{
-		RandomVectorGenerator randomVectorGenerator = new VectorGeneratorWrapper(randomGeneratorFactory);
+		final RandomVectorGenerator randomVectorGenerator = new VectorGeneratorWrapper(randomGeneratorFactory);
 		init(min, max, randomVectorGenerator);
 	}
 
@@ -183,7 +183,7 @@ public class UniformDistribution implements SpatialDistribution
 	@Override
 	public double[] next()
 	{
-		double[] d = vectorGenerator.nextVector();
+		final double[] d = vectorGenerator.nextVector();
 		for (int i = 0; i < 3; i++)
 			d[i] = min[i] + d[i] * range[i];
 		return d;

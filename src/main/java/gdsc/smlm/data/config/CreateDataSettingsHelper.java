@@ -119,12 +119,10 @@ public class CreateDataSettingsHelper
 	private void updateTotalGain()
 	{
 		totalGain = 0;
-		double emGain = getEmGain();
-		double cameraGain = getCameraGain();
+		final double emGain = getEmGain();
+		final double cameraGain = getCameraGain();
 		if (cameraGain > 0)
-		{
 			totalGain = (emGain > 0) ? emGain * cameraGain : cameraGain;
-		}
 		else if (emGain > 0)
 			totalGain = emGain;
 		totalGain *= getQuantumEfficiency();
@@ -164,9 +162,7 @@ public class CreateDataSettingsHelper
 	public static DiffusionType getDiffusionType(int diffusionType)
 	{
 		if (diffusionType >= 0 && diffusionType < DiffusionType.values().length)
-		{
 			return DiffusionType.values()[diffusionType];
-		}
 		// Set a default
 		return DiffusionType.RANDOM_WALK;
 	}

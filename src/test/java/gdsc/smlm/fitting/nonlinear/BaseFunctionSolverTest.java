@@ -75,9 +75,9 @@ public abstract class BaseFunctionSolverTest
 	{
 		// Keep SNR reasonable. This should be an "easy" test since the bounds
 		// for a correct answer are strict.
-		double minSNR = 10;
-		double sd = 1.3;
-		double mean = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal[0], sd, sd);
+		final double minSNR = 10;
+		final double sd = 1.3;
+		final double mean = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal[0], sd, sd);
 		// snr = mean/background => background = mean/snr
 		params[Gaussian2DFunction.BACKGROUND] = mean / minSNR;
 		params[Gaussian2DFunction.X_POSITION] = size / 2;
@@ -148,7 +148,7 @@ public abstract class BaseFunctionSolverTest
 
 	private static double[] getWeights(NoiseModel noiseModel)
 	{
-		int index = noiseModel.ordinal();
+		final int index = noiseModel.ordinal();
 		if (weights[index] == null)
 			computeWeights(noiseModel, index);
 		return weights[index];
@@ -156,7 +156,7 @@ public abstract class BaseFunctionSolverTest
 
 	private static double[] getNoise(NoiseModel noiseModel)
 	{
-		int index = noiseModel.ordinal();
+		final int index = noiseModel.ordinal();
 		if (noise[index] == null)
 			computeWeights(noiseModel, index);
 		return noise[index];
@@ -164,15 +164,12 @@ public abstract class BaseFunctionSolverTest
 
 	private static void computeWeights(NoiseModel noiseModel, int index)
 	{
-		double[] w = new double[size * size];
-		double[] n = new double[size * size];
+		final double[] w = new double[size * size];
+		final double[] n = new double[size * size];
 		if (noiseModel == NoiseModel.SCMOS)
-		{
 			// Special case of per-pixel noise
 			computeSCMOSWeights(w, n);
-		}
 		else
-		{
 			// The rest are fixed for all pixels
 			switch (noiseModel)
 			{
@@ -187,7 +184,6 @@ public abstract class BaseFunctionSolverTest
 					// Nothing to do
 					break;
 			}
-		}
 		noise[index] = n;
 		weights[index] = w;
 	}
@@ -202,13 +198,13 @@ public abstract class BaseFunctionSolverTest
 	{
 		// Per observation read noise.
 		// This is generated once so create the randon generator here.
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 		for (int i = 0; i < weights.length; i++)
 		{
-			double pixelVariance = ed.sample();
-			double pixelGain = Math.max(0.1, gain + rg.nextGaussian() * gainSD);
+			final double pixelVariance = ed.sample();
+			final double pixelGain = Math.max(0.1, gain + rg.nextGaussian() * gainSD);
 			// weights = var / g^2
 			weights[i] = pixelVariance / (pixelGain * pixelGain);
 		}
@@ -230,34 +226,33 @@ public abstract class BaseFunctionSolverTest
 		canFitSingleGaussian(solver, applyBounds, NoiseModel.SCMOS);
 	}
 
-	@SuppressWarnings("null")
 	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, NoiseModel noiseModel)
 	{
 		// Allow reporting the fit deviations
-		boolean report = false;
+		final boolean report = false;
 		double[] crlb = null;
 		SimpleArrayMoment m = null;
 
-		double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(noiseModel);
 		if (solver.isWeighted())
 			solver.setWeights(getWeights(noiseModel));
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		for (double s : signal)
+		for (final double s : signal)
 		{
-			double[] expected = createParams(1, s, 0, 0, 1);
-			double[] lower = createParams(0, s * 0.5, -0.3, -0.3, 0.8);
-			double[] upper = createParams(3, s * 2, 0.3, 0.3, 1.2);
+			final double[] expected = createParams(1, s, 0, 0, 1);
+			final double[] lower = createParams(0, s * 0.5, -0.3, -0.3, 0.8);
+			final double[] upper = createParams(3, s * 2, 0.3, 0.3, 1.2);
 			if (applyBounds)
 				solver.setBounds(lower, upper);
 			if (report)
 			{
 				// Compute the CRLB for a Poisson process
-				PoissonGradientProcedure gp = PoissonGradientProcedureFactory
+				final PoissonGradientProcedure gp = PoissonGradientProcedureFactory
 						.create((Gradient1Function) ((BaseFunctionSolver) solver).getGradientFunction());
 				gp.computeFisherInformation(expected);
-				FisherInformationMatrix f = new FisherInformationMatrix(gp.getLinear(), gp.n);
+				final FisherInformationMatrix f = new FisherInformationMatrix(gp.getLinear(), gp.n);
 				crlb = f.crlbSqrt();
 				// Compute the deviations.
 				// Note this is not the same as the CRLB as the fit is repeated
@@ -266,14 +261,14 @@ public abstract class BaseFunctionSolverTest
 				// parameters and variable noise.
 				m = new SimpleArrayMoment();
 			}
-			double[] data = drawGaussian(expected, noise, noiseModel, rg);
-			for (double db : base)
-				for (double dx : shift)
-					for (double dy : shift)
-						for (double dsx : factor)
+			final double[] data = drawGaussian(expected, noise, noiseModel, rg);
+			for (final double db : base)
+				for (final double dx : shift)
+					for (final double dy : shift)
+						for (final double dsx : factor)
 						{
-							double[] p = createParams(db, s, dx, dy, dsx);
-							double[] fp = fitGaussian(solver, data, p, expected);
+							final double[] p = createParams(db, s, dx, dy, dsx);
+							final double[] fp = fitGaussian(solver, data, p, expected);
 							for (int i = 0; i < expected.length; i++)
 							{
 								if (fp[i] < lower[i])
@@ -311,26 +306,26 @@ public abstract class BaseFunctionSolverTest
 	void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
 			boolean applyBounds2, String name, String name2, NoiseModel noiseModel)
 	{
-		double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(noiseModel);
 		if (solver.isWeighted())
 			solver.setWeights(getWeights(noiseModel));
 
-		int LOOPS = 5;
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		StoredDataStatistics[] stats = new StoredDataStatistics[6];
-		String[] statName = { "Signal", "X", "Y" };
+		final int LOOPS = 5;
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final StoredDataStatistics[] stats = new StoredDataStatistics[6];
+		final String[] statName = { "Signal", "X", "Y" };
 
-		int[] betterPrecision = new int[3];
-		int[] totalPrecision = new int[3];
-		int[] betterAccuracy = new int[3];
-		int[] totalAccuracy = new int[3];
+		final int[] betterPrecision = new int[3];
+		final int[] totalPrecision = new int[3];
+		final int[] betterAccuracy = new int[3];
+		final int[] totalAccuracy = new int[3];
 
-		String msg = "%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b %s\n";
+		final String msg = "%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b %s\n";
 
 		int i1 = 0, i2 = 0;
-		for (double s : signal)
+		for (final double s : signal)
 		{
-			double[] expected = createParams(1, s, 0, 0, 1);
+			final double[] expected = createParams(1, s, 0, 0, 1);
 			double[] lower = null, upper = null;
 			if (applyBounds || applyBounds2)
 			{
@@ -344,21 +339,21 @@ public abstract class BaseFunctionSolverTest
 
 			for (int loop = LOOPS; loop-- > 0;)
 			{
-				double[] data = drawGaussian(expected, noise, noiseModel, rg);
+				final double[] data = drawGaussian(expected, noise, noiseModel, rg);
 
 				for (int i = 0; i < stats.length; i++)
 					stats[i] = new StoredDataStatistics();
 
-				for (double db : base)
-					for (double dx : shift)
-						for (double dy : shift)
-							for (double dsx : factor)
+				for (final double db : base)
+					for (final double dx : shift)
+						for (final double dy : shift)
+							for (final double dsx : factor)
 							{
-								double[] p = createParams(db, s, dx, dy, dsx);
-								double[] fp = fitGaussian(solver, data, p, expected);
+								final double[] p = createParams(db, s, dx, dy, dsx);
+								final double[] fp = fitGaussian(solver, data, p, expected);
 								i1 += solver.getEvaluations();
 
-								double[] fp2 = fitGaussian(solver2, data, p, expected);
+								final double[] fp2 = fitGaussian(solver2, data, p, expected);
 								i2 += solver2.getEvaluations();
 
 								// Get the mean and sd (the fit precision)
@@ -372,19 +367,19 @@ public abstract class BaseFunctionSolverTest
 								//stats[3].add(distance(fp2, expected2));
 							}
 
-				double alpha = 0.05; // two sided
+				final double alpha = 0.05; // two sided
 				for (int i = 0; i < stats.length; i += 2)
 				{
 					double u1 = stats[i].getMean();
 					double u2 = stats[i + 1].getMean();
-					double sd1 = stats[i].getStandardDeviation();
-					double sd2 = stats[i + 1].getStandardDeviation();
+					final double sd1 = stats[i].getStandardDeviation();
+					final double sd2 = stats[i + 1].getStandardDeviation();
 
-					TTest tt = new TTest();
-					boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
+					final TTest tt = new TTest();
+					final boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
 
-					int index = i / 2;
-					Object[] args = new Object[] { name2, name, s, noiseModel, statName[index], u2, sd2, u1, sd1,
+					final int index = i / 2;
+					final Object[] args = new Object[] { name2, name, s, noiseModel, statName[index], u2, sd2, u1, sd1,
 							stats[i].getN(), diff, "" };
 					if (diff)
 					{
@@ -427,24 +422,21 @@ public abstract class BaseFunctionSolverTest
 							totalAccuracy[index]++;
 						}
 					}
-					else
+					else // The same means. Check that it is more precise
+					if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
 					{
-						// The same means. Check that it is more precise
-						if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
+						if (sd2 < sd1)
 						{
-							if (sd2 < sd1)
-							{
-								betterPrecision[index]++;
-								args[args.length - 1] = "P*";
-								TestSettings.debug(msg, args);
-							}
-							else
-							{
-								args[args.length - 1] = "P";
-								TestSettings.debug(msg, args);
-							}
-							totalPrecision[index]++;
+							betterPrecision[index]++;
+							args[args.length - 1] = "P*";
+							TestSettings.debug(msg, args);
 						}
+						else
+						{
+							args[args.length - 1] = "P";
+							TestSettings.debug(msg, args);
+						}
+						totalPrecision[index]++;
 					}
 				}
 			}
@@ -463,13 +455,11 @@ public abstract class BaseFunctionSolverTest
 
 	private static void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
 	{
-		double p = (total == 0) ? 0 : 100.0 * better / total;
+		final double p = (total == 0) ? 0 : 100.0 * better / total;
 		TestSettings.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
 		// Do not test if we don't have many examples
 		if (total <= 10)
-		{
 			return;
-		}
 
 		// Disable this for now so builds do not fail during the test phase
 
@@ -486,8 +476,8 @@ public abstract class BaseFunctionSolverTest
 
 	static double distance(double[] o, double[] e)
 	{
-		double dx = o[Gaussian2DFunction.X_POSITION] - e[Gaussian2DFunction.X_POSITION];
-		double dy = o[Gaussian2DFunction.Y_POSITION] - e[Gaussian2DFunction.Y_POSITION];
+		final double dx = o[Gaussian2DFunction.X_POSITION] - e[Gaussian2DFunction.X_POSITION];
+		final double dy = o[Gaussian2DFunction.Y_POSITION] - e[Gaussian2DFunction.Y_POSITION];
 		// Use the signs of the coords to assign a direction vector
 		return Math.sqrt(dx * dx + dy * dy) * Math.signum(Math.signum(dy) * Math.signum(dx));
 	}
@@ -506,7 +496,7 @@ public abstract class BaseFunctionSolverTest
 
 	double[] createParams(double db, double signal, double dx, double dy, double dsx)
 	{
-		double[] p = params.clone();
+		final double[] p = params.clone();
 		p[Gaussian2DFunction.BACKGROUND] *= db;
 		p[Gaussian2DFunction.SIGNAL] = signal;
 		p[Gaussian2DFunction.X_POSITION] += dx;
@@ -526,7 +516,7 @@ public abstract class BaseFunctionSolverTest
 	{
 		//System.out.printf("%s : Expected %s\n", solver.getClass().getSimpleName(), Arrays.toString(expected));
 		params = params.clone();
-		FitStatus status = solver.fit(data, null, params, null);
+		final FitStatus status = solver.fit(data, null, params, null);
 		if (status != FitStatus.OK)
 			TestAssert.fail("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
 					Arrays.toString(params), Arrays.toString(expected));
@@ -560,20 +550,18 @@ public abstract class BaseFunctionSolverTest
 	 */
 	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel, RandomGenerator rg)
 	{
-		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
-		double[] data = f.computeValues(params);
+		final int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
+		final double[] data = f.computeValues(params);
 
 		// Poisson noise
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(rg, 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(rg, 1);
 		for (int i = 0; i < data.length; i++)
-		{
 			if (data[i] > 0)
 			{
 				pd.setMeanUnsafe(data[i]);
 				data[i] = pd.sample();
 			}
-		}
 
 		// Simulate EM-gain
 		if (noiseModel == NoiseModel.EMCCD)
@@ -582,27 +570,21 @@ public abstract class BaseFunctionSolverTest
 			// Since the call random.nextGamma(...) creates a Gamma distribution
 			// which pre-calculates factors only using the scale parameter we
 			// create a custom gamma distribution where the shape can be set as a property.
-			CustomGammaDistribution gd = new CustomGammaDistribution(rg, 1, emGain);
+			final CustomGammaDistribution gd = new CustomGammaDistribution(rg, 1, emGain);
 
 			for (int i = 0; i < data.length; i++)
-			{
 				if (data[i] > 0)
 				{
 					gd.setShapeUnsafe(data[i]);
 					// The sample will amplify the signal so we remap to the original scale
 					data[i] = gd.sample() / emGain;
 				}
-			}
 		}
 
 		// Read-noise
 		if (noise != null)
-		{
 			for (int i = 0; i < data.length; i++)
-			{
 				data[i] += rg.nextGaussian() * noise[i];
-			}
-		}
 
 		//gdsc.core.ij.Utils.display("Spot", data, size, size);
 		return data;
@@ -613,7 +595,7 @@ public abstract class BaseFunctionSolverTest
 	static
 	{
 		p1 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		double[] p2 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] p2 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		p12 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * 2];
 		p1[Gaussian2DFunction.BACKGROUND] = 5;
 		p1[Gaussian2DFunction.SIGNAL] = 1000;
@@ -628,7 +610,7 @@ public abstract class BaseFunctionSolverTest
 		System.arraycopy(p1, 0, p12, 0, p1.length);
 		System.arraycopy(p2, 1, p12, p1.length, Gaussian2DFunction.PARAMETERS_PER_PEAK);
 
-		StandardValueProcedure p = new StandardValueProcedure();
+		final StandardValueProcedure p = new StandardValueProcedure();
 		p2v = p.getValues(GaussianFunctionFactory.create2D(1, size, size, flags, null), p2);
 	}
 
@@ -651,7 +633,7 @@ public abstract class BaseFunctionSolverTest
 	void fitAndComputeDeviationsMatch(RandomGenerator rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
 			NoiseModel noiseModel, boolean useWeights)
 	{
-		double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(noiseModel);
 		if (solver1.isWeighted() && useWeights)
 		{
 			solver1.setWeights(getWeights(noiseModel));
@@ -659,11 +641,11 @@ public abstract class BaseFunctionSolverTest
 		}
 
 		// Draw target data
-		double[] data = drawGaussian(p12, noise, noiseModel, rg);
+		final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
 		// fit with 2 peaks using the known params.
 		// compare to 2 peak deviation computation.
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
+		final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
 		solver1.setGradientFunction(f2);
 		solver2.setGradientFunction(f2);
 		double[] a = p12.clone();
@@ -679,15 +661,15 @@ public abstract class BaseFunctionSolverTest
 
 		// Try again with y-fit values
 		a = p12.clone();
-		double[] o1 = new double[f2.size()];
-		double[] o2 = new double[o1.length];
+		final double[] o1 = new double[f2.size()];
+		final double[] o2 = new double[o1.length];
 		solver1.fit(data, o1, a, e);
 		//System.out.TestSettings.debug("a="+Arrays.toString(a));
 		solver2.computeValue(data, o2, a);
 
 		Assert.assertArrayEquals("Fit 2 peaks with yFit and deviations 2 peaks do not match", o, e, 0);
 
-		StandardValueProcedure p = new StandardValueProcedure();
+		final StandardValueProcedure p = new StandardValueProcedure();
 		double[] ev = p.getValues(f2, a);
 		Assert.assertArrayEquals("Fit 2 peaks yFit", ev, o1, 1e-8);
 		Assert.assertArrayEquals("computeValue 2 peaks yFit", ev, o2, 1e-8);
@@ -696,15 +678,15 @@ public abstract class BaseFunctionSolverTest
 		{
 			// fit with 1 peak + 1 precomputed using the known params.
 			// compare to 2 peak deviation computation.
-			ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
+			final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
 					null);
-			Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
+			final Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
 			solver1.setGradientFunction(pf1);
 			a = p1.clone();
 			e = new double[a.length];
 			solver1.fit(data, null, a, e);
 
-			double[] a2 = p12.clone(); // To copy the second peak
+			final double[] a2 = p12.clone(); // To copy the second peak
 			System.arraycopy(a, 0, a2, 0, a.length); // Add the same fitted first peak
 			solver2.computeDeviations(data, a2, o);
 			//System.out.TestSettings.debug("e1p1=" + Arrays.toString(e));
@@ -713,7 +695,7 @@ public abstract class BaseFunctionSolverTest
 			// Deviation should be lower with only 1 peak.
 			// Due to matrix inversion this may not be the case for all parameters so count.
 			int ok = 0, fail = 0;
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < e.length; i++)
 			{
 				if (e[i] <= o[i])
@@ -763,7 +745,7 @@ public abstract class BaseFunctionSolverTest
 	void fitAndComputeValueMatch(RandomGenerator rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
 			NoiseModel noiseModel, boolean useWeights)
 	{
-		double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(noiseModel);
 		if (solver1.isWeighted() && useWeights)
 		{
 			solver1.setWeights(getWeights(noiseModel));
@@ -771,10 +753,10 @@ public abstract class BaseFunctionSolverTest
 		}
 
 		// Draw target data
-		double[] data = drawGaussian(p12, noise, noiseModel, rg);
+		final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
 		// fit with 2 peaks using the known params.
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
+		final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
 		solver1.setGradientFunction(f2);
 		solver2.setGradientFunction(f2);
 		double[] a = p12.clone();
@@ -785,8 +767,8 @@ public abstract class BaseFunctionSolverTest
 		double v2 = solver2.getValue();
 		Assert.assertEquals("Fit 2 peaks and computeValue", v1, v2, Math.abs(v1) * 1e-10);
 
-		double[] o1 = new double[f2.size()];
-		double[] o2 = new double[o1.length];
+		final double[] o1 = new double[f2.size()];
+		final double[] o2 = new double[o1.length];
 
 		solver1.fit(data, o1, a, null);
 		solver2.computeValue(data, o2, a);
@@ -795,7 +777,7 @@ public abstract class BaseFunctionSolverTest
 		v2 = solver2.getValue();
 		Assert.assertEquals("Fit 2 peaks and computeValue with yFit", v1, v2, Math.abs(v1) * 1e-10);
 
-		StandardValueProcedure p = new StandardValueProcedure();
+		final StandardValueProcedure p = new StandardValueProcedure();
 		double[] e = p.getValues(f2, a);
 		Assert.assertArrayEquals("Fit 2 peaks yFit", e, o1, 1e-8);
 		Assert.assertArrayEquals("computeValue 2 peaks yFit", e, o2, 1e-8);
@@ -804,9 +786,9 @@ public abstract class BaseFunctionSolverTest
 		{
 			// fit with 1 peak + 1 precomputed using the known params.
 			// compare to 2 peak computation.
-			ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
+			final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
 					null);
-			Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
+			final Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
 			solver1.setGradientFunction(pf1);
 			solver2.setGradientFunction(pf1);
 

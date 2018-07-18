@@ -79,16 +79,16 @@ public class SpotFit implements PlugIn
 	{
 		private static TextWindow resultsWindow = null;
 
-		private SpotFitSettings.Builder settings;
+		private final SpotFitSettings.Builder settings;
 		private boolean active = true;
 		private boolean logging = false;
 
-		private BlockMeanFilter f = new BlockMeanFilter();
-		private FitConfiguration config;
+		private final BlockMeanFilter f = new BlockMeanFilter();
+		private final FitConfiguration config;
 		private SimplePeakResultValidationData validationData;
-		private Gaussian2DFitter gf;
+		private final Gaussian2DFitter gf;
 
-		private double[] lower, upper;
+		private final double[] lower, upper;
 
 		final static Pattern pattern = Pattern.compile("\t");
 
@@ -99,7 +99,7 @@ public class SpotFit implements PlugIn
 			gf = new Gaussian2DFitter(config);
 
 			// Support bounded fit on the coordinates
-			int n = Gaussian2DFunction.PARAMETERS_PER_PEAK + 1;
+			final int n = Gaussian2DFunction.PARAMETERS_PER_PEAK + 1;
 			lower = new double[n];
 			upper = new double[n];
 			for (int i = 0; i < n; i++)
@@ -159,9 +159,7 @@ public class SpotFit implements PlugIn
 				// Only active if the settings are valid
 				active = (settings.getFitRadius() > 1);
 				if (!active)
-				{
 					IJ.error(TITLE, "Settings are invalid");
-				}
 				SettingsManager.writeSettings(settings, 0);
 			}
 		}
@@ -171,7 +169,7 @@ public class SpotFit implements PlugIn
 		{
 			if (!active)
 				return;
-			int c = imp.getNChannels();
+			final int c = imp.getNChannels();
 			if (c < settings.getChannel())
 			{
 				// Always warn if the channel is incorrect for the image
@@ -188,7 +186,7 @@ public class SpotFit implements PlugIn
 			// Ensure rapid mouse click / new options does not break things
 			synchronized (this)
 			{
-				ImageCanvas ic = imp.getCanvas();
+				final ImageCanvas ic = imp.getCanvas();
 				int x = ic.offScreenX(e.getX());
 				int y = ic.offScreenY(e.getY());
 
@@ -196,13 +194,13 @@ public class SpotFit implements PlugIn
 					Utils.log("Clicked %d,%d", x, y);
 
 				// Get the data
-				int channel = settings.getChannel();
-				int slice = imp.getZ();
-				int frame = imp.getFrame();
+				final int channel = settings.getChannel();
+				final int slice = imp.getZ();
+				final int frame = imp.getFrame();
 
-				int stackIndex = imp.getStackIndex(channel, slice, frame);
+				final int stackIndex = imp.getStackIndex(channel, slice, frame);
 
-				ImageExtractor ie = new ImageExtractor(null, imp.getWidth(), imp.getHeight());
+				final ImageExtractor ie = new ImageExtractor(null, imp.getWidth(), imp.getHeight());
 
 				if (isRemoveEvent(e))
 				{
@@ -210,40 +208,36 @@ public class SpotFit implements PlugIn
 					return;
 				}
 
-				ImageStack stack = imp.getImageStack();
-				ImageProcessor ip = stack.getProcessor(stackIndex);
+				final ImageStack stack = imp.getImageStack();
+				final ImageProcessor ip = stack.getProcessor(stackIndex);
 
 				// Search for the maxima using the search radius
-				int index = findMaxima(ip, ie, x, y);
+				final int index = findMaxima(ip, ie, x, y);
 
 				// Fit the maxima
 				x = index % ip.getWidth();
 				y = index / ip.getWidth();
 				if (logging)
 					Utils.log("Fitting %d,%d", x, y);
-				Rectangle bounds = ie.getBoxRegionBounds(x, y, settings.getFitRadius());
+				final Rectangle bounds = ie.getBoxRegionBounds(x, y, settings.getFitRadius());
 				if (settings.getShowFitRoi())
 					imp.setRoi(bounds);
-				FitResult fitResult = fitMaxima(ip, bounds, x, y);
+				final FitResult fitResult = fitMaxima(ip, bounds, x, y);
 
 				if (logging)
 					Utils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
 				if (logging)
 				{
 					String msg = "Fit status = " + fitResult.getStatus();
-					Object data = fitResult.getStatusData();
+					final Object data = fitResult.getStatusData();
 					if (data != null)
-					{
 						msg += " : " + SimpleArrayUtils.toString(data);
-					}
 					Utils.log(msg);
 				}
 
 				if (fitResult.getStatus() != FitStatus.OK)
-				{
 					// Q. Do something?
 					return;
-				}
 
 				// Add result
 				createResultsWindow();
@@ -261,13 +255,13 @@ public class SpotFit implements PlugIn
 
 		private int findMaxima(ImageProcessor ip, ImageExtractor ie, int x, int y)
 		{
-			int n = settings.getSearchRadius();
+			final int n = settings.getSearchRadius();
 			if (n <= 0)
 				// No search
 				return y * ip.getWidth() + x;
 			// Get a region
-			Rectangle bounds = ie.getBoxRegionBounds(x, y, n);
-			float[] data = new ImageConverter().getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+			final Rectangle bounds = ie.getBoxRegionBounds(x, y, n);
+			final float[] data = new ImageConverter().getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
 			// Smooth
 			f.blockFilter(data, bounds.width, bounds.height, 1);
 			int index = 0;
@@ -286,7 +280,7 @@ public class SpotFit implements PlugIn
 			config.setInitialPeakStdDev(0);
 
 			// Get a region
-			double[] data = new ImageConverter().getDoubleData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds,
+			final double[] data = new ImageConverter().getDoubleData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds,
 					null);
 
 			setupPeakFiltering(config, bounds, ip);
@@ -294,12 +288,12 @@ public class SpotFit implements PlugIn
 			//Utils.display(TITLE + " fit data", data, bounds.width, bounds.height, 0);
 
 			// Find the index of the maxima
-			int ox = x - bounds.x;
-			int oy = y - bounds.y;
-			int index = oy * bounds.width + ox;
+			final int ox = x - bounds.x;
+			final int oy = y - bounds.y;
+			final int index = oy * bounds.width + ox;
 
 			// Limit the range for the XY position
-			int range = settings.getFitRadius() / 2;
+			final int range = settings.getFitRadius() / 2;
 			lower[Gaussian2DFunction.X_POSITION] = ox - range;
 			lower[Gaussian2DFunction.Y_POSITION] = oy - range;
 			upper[Gaussian2DFunction.X_POSITION] = ox + range;
@@ -307,10 +301,10 @@ public class SpotFit implements PlugIn
 			gf.setBounds(lower, upper);
 
 			// Leave to the fitter to estimate background, width and height
-			FitResult fitResult = gf.fit(data, bounds.width, bounds.height, new int[] { index });
+			final FitResult fitResult = gf.fit(data, bounds.width, bounds.height, new int[] { index });
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
-				double[] params = fitResult.getParameters();
+				final double[] params = fitResult.getParameters();
 				// Add the pixel offset
 				params[Gaussian2DFunction.X_POSITION] += bounds.x + 0.5;
 				params[Gaussian2DFunction.Y_POSITION] += bounds.y + 0.5;
@@ -320,7 +314,7 @@ public class SpotFit implements PlugIn
 
 		private static FitConfiguration createFitConfiguration()
 		{
-			FitConfiguration config = new FitConfiguration();
+			final FitConfiguration config = new FitConfiguration();
 			config.setFitSolver(FitSolver.LVM_LSE);
 			config.setPSF(PSFProtosHelper.getDefaultPSF(PSFType.ONE_AXIS_GAUSSIAN_2D));
 			//config.setMaxIterations(getMaxIterations());
@@ -361,14 +355,12 @@ public class SpotFit implements PlugIn
 		private static void createResultsWindow()
 		{
 			if (resultsWindow == null || !resultsWindow.isShowing())
-			{
 				resultsWindow = new TextWindow(TITLE + " Results", createHeader(), "", 700, 300);
-			}
 		}
 
 		private static String createHeader()
 		{
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("Image\t");
 			sb.append("C\t");
 			sb.append("Z\t");
@@ -388,7 +380,7 @@ public class SpotFit implements PlugIn
 		{
 			createResultsWindow();
 
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append(imp.getTitle()).append('\t');
 			sb.append(channel).append('\t');
 			sb.append(slice).append('\t');
@@ -397,13 +389,13 @@ public class SpotFit implements PlugIn
 			sb.append(bounds.y).append(' ');
 			sb.append(bounds.width).append('x');
 			sb.append(bounds.height);
-			double[] params = fitResult.getParameters();
+			final double[] params = fitResult.getParameters();
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.BACKGROUND]));
-			double signal = params[Gaussian2DFunction.SIGNAL];
+			final double signal = params[Gaussian2DFunction.SIGNAL];
 			sb.append('\t').append(Utils.rounded(signal));
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.X_POSITION]));
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.Y_POSITION]));
-			double xsd = params[Gaussian2DFunction.X_SD];
+			final double xsd = params[Gaussian2DFunction.X_SD];
 			sb.append('\t').append(Utils.rounded(xsd));
 			final double noise = validationData.getNoise();
 			final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, xsd) / noise;
@@ -414,11 +406,11 @@ public class SpotFit implements PlugIn
 
 		private void addOverlay(ImagePlus imp, int channel, int slice, int frame, FitResult fitResult)
 		{
-			double[] params = fitResult.getParameters();
+			final double[] params = fitResult.getParameters();
 			Overlay o = imp.getOverlay();
 			if (o == null)
 				o = new Overlay();
-			PointRoi roi = new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]);
+			final PointRoi roi = new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]);
 			roi.setPointType(3);
 			if (imp.isDisplayedHyperStack())
 				roi.setPosition(channel, (settings.getAttachToSlice()) ? slice : 0, frame);
@@ -431,34 +423,32 @@ public class SpotFit implements PlugIn
 		private void removeSpots(ImagePlus imp, int channel, int slice, int frame, int x, int y, ImageExtractor ie)
 		{
 			// Get a region to search for spots
-			Rectangle bounds = ie.getBoxRegionBounds(x, y, Math.max(0, settings.getSearchRadius()));
+			final Rectangle bounds = ie.getBoxRegionBounds(x, y, Math.max(0, settings.getSearchRadius()));
 			if (bounds.width == 0 || bounds.height == 0)
 				return;
 
-			boolean isDisplayedHyperStack = imp.isDisplayedHyperStack();
+			final boolean isDisplayedHyperStack = imp.isDisplayedHyperStack();
 
 			// Remove all the overlay components
 			Overlay o = imp.getOverlay();
 			if (o != null)
 			{
-				Roi[] rois = o.toArray();
-				int size = o.size();
+				final Roi[] rois = o.toArray();
+				final int size = o.size();
 				o = new Overlay();
 				for (int i = 0; i < rois.length; i++)
 				{
 					if (rois[i] instanceof PointRoi)
 					{
-						PointRoi roi = (PointRoi) rois[i];
+						final PointRoi roi = (PointRoi) rois[i];
 						boolean boundsCheck = true;
 						if (isDisplayedHyperStack)
-						{
 							// Must be on the same channel/slice/frame
 							boundsCheck = roi.getCPosition() == channel && roi.getTPosition() == frame &&
 									(roi.getZPosition() == 0 || roi.getZPosition() == slice);
-						}
 						if (boundsCheck)
 						{
-							FloatPolygon poly = roi.getFloatPolygon();
+							final FloatPolygon poly = roi.getFloatPolygon();
 							if (bounds.contains(poly.xpoints[0], poly.ypoints[0]))
 								continue;
 						}
@@ -466,44 +456,42 @@ public class SpotFit implements PlugIn
 					o.add(rois[i]);
 				}
 				if (o.size() != size)
-				{
 					if (o.size() == 0)
 						imp.setOverlay(null);
 					else
 						imp.setOverlay(o);
-				}
 			}
 
 			if (resultsWindow != null && resultsWindow.isShowing())
 			{
-				TextPanel tp = resultsWindow.getTextPanel();
-				String title = imp.getTitle();
+				final TextPanel tp = resultsWindow.getTextPanel();
+				final String title = imp.getTitle();
 				for (int i = 0; i < tp.getLineCount(); i++)
 				{
-					String line = tp.getLine(i);
+					final String line = tp.getLine(i);
 					// Check the image name
-					int startIndex = line.indexOf('\t');
+					final int startIndex = line.indexOf('\t');
 					if (startIndex == -1)
 						continue;
 					if (!title.equals(line.substring(0, startIndex)))
 						continue;
 
-					String[] fields = pattern.split(line, 0);
+					final String[] fields = pattern.split(line, 0);
 
 					try
 					{
 						if (isDisplayedHyperStack)
 						{
-							int c = Integer.parseInt(fields[1]);
+							final int c = Integer.parseInt(fields[1]);
 							// Ignore z as the user may be on the wrong slice but can still see
 							// the overlay if it is not tied to the slice position
 							//int z = Integer.parseInt(fields[2]);
-							int t = Integer.parseInt(fields[3]);
+							final int t = Integer.parseInt(fields[3]);
 							if (c != channel || t != frame)
 								continue;
 						}
-						float xp = Float.parseFloat(fields[7]);
-						float yp = Float.parseFloat(fields[8]);
+						final float xp = Float.parseFloat(fields[7]);
+						final float yp = Float.parseFloat(fields[8]);
 						if (bounds.contains(xp, yp))
 						{
 							tp.setSelection(i, i);
@@ -513,7 +501,7 @@ public class SpotFit implements PlugIn
 							i--;
 						}
 					}
-					catch (NumberFormatException ex)
+					catch (final NumberFormatException ex)
 					{
 						// Ignore
 					}
@@ -530,9 +518,7 @@ public class SpotFit implements PlugIn
 	public static void addPluginTool()
 	{
 		if (toolInstance == null)
-		{
 			toolInstance = new SpotFitPluginTool();
-		}
 
 		// Add the tool
 		Toolbar.addPlugInTool(toolInstance);
@@ -548,7 +534,7 @@ public class SpotFit implements PlugIn
 
 		// Fiji restores the toolbar from the last session.
 		// Do not show the options if this is happening.
-		ImageJ ij = IJ.getInstance();
+		final ImageJ ij = IJ.getInstance();
 		if (ij == null || !ij.isVisible())
 			return;
 

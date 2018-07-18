@@ -72,8 +72,8 @@ public class MultiDialog extends Dialog
 	private Button cancel, okay, all, none;
 	private boolean wasCanceled;
 	private List list;
-	private String macroOptions;
-	private boolean macro;
+	private final String macroOptions;
+	private final boolean macro;
 
 	/**
 	 * Interface to allow a list of any type to be shown in the MultiDialog
@@ -161,7 +161,7 @@ public class MultiDialog extends Dialog
 	 */
 	public static class MemoryResultsItems implements Items
 	{
-		private String[] names;
+		private final String[] names;
 		private int size;
 
 		/**
@@ -180,10 +180,10 @@ public class MultiDialog extends Dialog
 		 */
 		public MemoryResultsItems(MemoryResultsFilter filter)
 		{
-			Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
+			final Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
 			names = new String[allResults.size()];
 			size = 0;
-			for (MemoryPeakResults results : allResults)
+			for (final MemoryPeakResults results : allResults)
 				if (filter.accept(results))
 					names[size++] = ResultsManager.getName(results);
 		}
@@ -207,7 +207,7 @@ public class MultiDialog extends Dialog
 		}
 	}
 
-	private Items items;
+	private final Items items;
 
 	/**
 	 * Instantiates a new multi dialog.
@@ -267,9 +267,7 @@ public class MultiDialog extends Dialog
 	{
 		// Detect if running in a macro and just collect the input options
 		if (macro)
-		{
 			dispose();
-		}
 		else
 		{
 			add(buildPanel());
@@ -290,8 +288,8 @@ public class MultiDialog extends Dialog
 	 */
 	protected Panel buildPanel()
 	{
-		Panel p = new Panel();
-		BorderLayout layout = new BorderLayout();
+		final Panel p = new Panel();
+		final BorderLayout layout = new BorderLayout();
 		layout.setVgap(3);
 		p.setLayout(layout);
 		p.add(buildResultsList(), BorderLayout.NORTH, 0);
@@ -307,18 +305,16 @@ public class MultiDialog extends Dialog
 	protected Component buildResultsList()
 	{
 		final int MAX_SIZE = 30;
-		int size = items.size();
-		int rows = (size < MAX_SIZE) ? size : MAX_SIZE;
+		final int size = items.size();
+		final int rows = (size < MAX_SIZE) ? size : MAX_SIZE;
 		list = new List(rows, true);
 		for (int n = 0; n < size; n++)
 		{
-			String formattedName = items.getFormattedName(n);
+			final String formattedName = items.getFormattedName(n);
 			list.add(formattedName);
 			// Initial selection
 			if (selectAll || (selected != null && selected.contains(items.removeFormatting(formattedName))))
-			{
 				list.select(n);
-			}
 		}
 
 		list.addMouseListener(this);
@@ -335,7 +331,7 @@ public class MultiDialog extends Dialog
 	 */
 	protected Panel buildButtonPanel()
 	{
-		Panel buttons = new Panel();
+		final Panel buttons = new Panel();
 		buttons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
 		all = new Button("All");
 		all.addActionListener(this);
@@ -374,22 +370,18 @@ public class MultiDialog extends Dialog
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		Object source = e.getSource();
+		final Object source = e.getSource();
 		if (source == okay || source == cancel)
 		{
 			wasCanceled = source == cancel;
 			dispose();
 		}
 		else if (source == all)
-		{
 			for (int i = 0; i < list.getItemCount(); i++)
 				list.select(i);
-		}
 		else if (source == none)
-		{
 			for (int i = 0; i < list.getItemCount(); i++)
 				list.deselect(i);
-		}
 	}
 
 	/*
@@ -406,26 +398,22 @@ public class MultiDialog extends Dialog
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		int keyCode = e.getKeyCode();
+		final int keyCode = e.getKeyCode();
 		IJ.setKeyDown(keyCode);
 		if (keyCode == KeyEvent.VK_ENTER)
 		{
-			Object source = e.getSource();
+			final Object source = e.getSource();
 			if (source == okay || source == cancel || source == list)
 			{
 				wasCanceled = source == cancel;
 				dispose();
 			}
 			else if (source == all)
-			{
 				for (int i = 0; i < list.getItemCount(); i++)
 					list.select(i);
-			}
 			else if (source == none)
-			{
 				for (int i = 0; i < list.getItemCount(); i++)
 					list.deselect(i);
-			}
 		}
 		else if (keyCode == KeyEvent.VK_ESCAPE)
 		{
@@ -477,17 +465,12 @@ public class MultiDialog extends Dialog
 			final int[] listIndexes = list.getSelectedIndexes();
 			selected = new ArrayList<>(listIndexes.length);
 			if (listIndexes.length > 0)
-			{
-				for (int index : listIndexes)
-				{
+				for (final int index : listIndexes)
 					selected.add(items.removeFormatting(list.getItem(index)));
-				}
-			}
 		}
 
 		// Record as if we use the multiple_inputs option
 		if ((macro && Recorder.record && Recorder.recordInMacros) || Recorder.record)
-		{
 			if (!selected.isEmpty())
 			{
 				Recorder.recordOption("Input", selected.get(0));
@@ -495,12 +478,9 @@ public class MultiDialog extends Dialog
 				{
 					Recorder.recordOption("Multiple_inputs");
 					for (int n = 1; n < selected.size(); ++n)
-					{
 						Recorder.recordOption("Input" + n, selected.get(n));
-					}
 				}
 			}
-		}
 
 		return selected;
 	}
@@ -520,8 +500,8 @@ public class MultiDialog extends Dialog
 			// Is the value a macro variable?
 			if (theText.startsWith("&"))
 				theText = theText.substring(1);
-			Interpreter interp = Interpreter.getInstance();
-			String s = interp != null ? interp.getVariableAsString(theText) : null;
+			final Interpreter interp = Interpreter.getInstance();
+			final String s = interp != null ? interp.getVariableAsString(theText) : null;
 			if (s != null)
 				theText = s;
 		}
@@ -631,26 +611,22 @@ public class MultiDialog extends Dialog
 	@Override
 	public void itemStateChanged(ItemEvent paramItemEvent)
 	{
-		int index = (Integer) paramItemEvent.getItem();
-		int event = paramItemEvent.getStateChange();
+		final int index = (Integer) paramItemEvent.getItem();
+		final int event = paramItemEvent.getStateChange();
 
 		// If we have the shift key down, support multiple select/deselect
 		if (event == lastEvent && (modifiers & InputEvent.SHIFT_MASK) != 0 &&
 				(event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED))
-		{
 			if (lastIndex != index)
 			{
-				int top = Math.max(index, lastIndex);
-				int bottom = Math.min(index, lastIndex);
+				final int top = Math.max(index, lastIndex);
+				final int bottom = Math.min(index, lastIndex);
 				for (int i = bottom + 1; i < top; i++)
-				{
 					if (event == ItemEvent.SELECTED)
 						list.select(i);
 					else
 						list.deselect(i);
-				}
 			}
-		}
 
 		lastEvent = event;
 		lastIndex = index;

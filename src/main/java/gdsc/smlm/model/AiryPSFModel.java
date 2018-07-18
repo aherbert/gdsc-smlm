@@ -189,7 +189,7 @@ public class AiryPSFModel extends PSFModel
 			final double d = airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, poissonNoise);
 			return d;
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			//System.out.println(e.getMessage());
 			return 0;
@@ -212,7 +212,7 @@ public class AiryPSFModel extends PSFModel
 		{
 			return airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, poissonNoise);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			//System.out.println(e.getMessage());
 			return 0;
@@ -294,7 +294,7 @@ public class AiryPSFModel extends PSFModel
 			throw new IllegalArgumentException("Dimension 1 range not within data bounds");
 
 		// Shift centre to origin and compute gaussian
-		double[] gauss = airy2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, w0, w1);
+		final double[] gauss = airy2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, w0, w1);
 
 		return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
 	}
@@ -353,7 +353,7 @@ public class AiryPSFModel extends PSFModel
 			throw new IllegalArgumentException("Dimension 1 range not within data bounds");
 
 		// Shift centre to origin and compute gaussian
-		double[] gauss = airy2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, w0, w1);
+		final double[] gauss = airy2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, w0, w1);
 
 		return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
 	}
@@ -387,10 +387,10 @@ public class AiryPSFModel extends PSFModel
 
 		// Limit to nth dark ring
 		final double limit = RINGS[ring] * RINGS[ring];
-		double[] data = new double[x0range * x1range];
+		final double[] data = new double[x0range * x1range];
 
 		// Store if the Airy pattern has been clipped
-		boolean clipped = (x0 - RINGS[ring] * w0 < 0) || (x1 - RINGS[ring] * w1 < 0) ||
+		final boolean clipped = (x0 - RINGS[ring] * w0 < 0) || (x1 - RINGS[ring] * w1 < 0) ||
 				(x0 + RINGS[ring] * w0 > x0range) || (x1 + RINGS[ring] * w0 > x1range);
 
 		// Offset by pixel centres by 0.5
@@ -405,8 +405,8 @@ public class AiryPSFModel extends PSFModel
 		// Limit the total samples used for interpolation but always sample at least every pixel:
 		final double samplesPerPixel = FastMath.max(200 / maxD, 1);
 		final int maxR = (int) Math.ceil(maxD * samplesPerPixel);
-		double[] radius = new double[maxR + 1];
-		double[] intensity = new double[maxR + 1];
+		final double[] radius = new double[maxR + 1];
+		final double[] intensity = new double[maxR + 1];
 		for (int r = 0; r <= maxR; r++)
 		{
 			// TODO - To simulate out of focus planes the intensity function can be pre-computed using
@@ -421,8 +421,8 @@ public class AiryPSFModel extends PSFModel
 		double integral = 0;
 
 		// Pre-calculate x offset
-		double[] d0 = new double[x0range];
-		double[] d02 = new double[x0range];
+		final double[] d0 = new double[x0range];
+		final double[] d02 = new double[x0range];
 		for (int x = 0; x < x0range; x++)
 		{
 			d0[x] = (x - x0) / w0;
@@ -430,7 +430,6 @@ public class AiryPSFModel extends PSFModel
 		}
 
 		if (singlePixelApproximation)
-		{
 			// Single point approximation
 			for (int y = 0, i = 0; y < x1range; y++)
 			{
@@ -448,14 +447,13 @@ public class AiryPSFModel extends PSFModel
 					}
 				}
 			}
-		}
 		else
 		{
 			// Integration using Simpson's composite interval
 
 			// Set the number of subintervals adaptively, i.e. for small widths use more samples per pixel.
-			double nPixels = Math.PI * maxD * maxD;
-			double number = Math.sqrt(1000 / nPixels); // Approx 1000 (or so) samples across the image
+			final double nPixels = Math.PI * maxD * maxD;
+			final double number = Math.sqrt(1000 / nPixels); // Approx 1000 (or so) samples across the image
 			final int nSubintervals = FastMath.max(minSamplesPerDimension,
 					FastMath.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
 
@@ -491,17 +489,13 @@ public class AiryPSFModel extends PSFModel
 		// We must normalise the integral we calculated to the correct power of the Airy pattern,
 		// i.e. make the function we calculated a probability density that sums to 1.
 		if (clipped)
-		{
 			// Analysis has shown on unclipped data that the integral up to the nth ring is:
 			// integral ~ POWER[ring] * (Math.PI * 4 * w0 * w1)
 			// i.e. the full power of the Airy pattern is (Math.PI * 4 * w0 * w1)
 			sum *= 1.0 / (4 * Math.PI * w0 * w1);
-		}
 		else
-		{
 			// The integral we calculated corresponds to the power at the nth ring
 			sum *= POWER[ring] / integral;
-		}
 
 		for (int i = 0; i < data.length; i++)
 			data[i] *= sum;
@@ -677,7 +671,7 @@ public class AiryPSFModel extends PSFModel
 	@Override
 	public AiryPSFModel copy()
 	{
-		AiryPSFModel model = new AiryPSFModel();
+		final AiryPSFModel model = new AiryPSFModel();
 		model.zeroW0 = zeroW0;
 		model.zeroW1 = zeroW1;
 		model.zDepth = zDepth;
@@ -784,7 +778,7 @@ public class AiryPSFModel extends PSFModel
 		if (n <= 0)
 			return insertSample(data, width, height, null, null);
 		final double scale = createWidthScale(x2);
-		double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
+		final double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
 		return insertSample(data, width, height, sample[0], sample[1]);
 	}
 
@@ -794,7 +788,7 @@ public class AiryPSFModel extends PSFModel
 		if (n <= 0)
 			return insertSample(data, width, height, null, null);
 		final double scale = createWidthScale(x2);
-		double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
+		final double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
 		return insertSample(data, width, height, sample[0], sample[1]);
 	}
 
@@ -823,16 +817,14 @@ public class AiryPSFModel extends PSFModel
 		double[] y = new double[n];
 
 		final RandomGenerator random = rand.getRandomGenerator();
-		UnitSphereRandomVectorGenerator vg = new UnitSphereRandomVectorGenerator(2, random);
+		final UnitSphereRandomVectorGenerator vg = new UnitSphereRandomVectorGenerator(2, random);
 		int c = 0;
 		for (int i = 0; i < n; i++)
 		{
 			final double p = random.nextDouble();
 			if (p > POWER[SAMPLE_RINGS])
-			{
 				// TODO - We could add a simple interpolation here using a spline from AiryPattern.power()
 				continue;
-			}
 			final double r = spline.value(p);
 
 			// Convert to xy using a random vector generator
@@ -860,9 +852,9 @@ public class AiryPSFModel extends PSFModel
 		final int minimalIterationCount = 3;
 		final int maximalIterationCount = 32;
 
-		UnivariateIntegrator integrator = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy,
+		final UnivariateIntegrator integrator = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy,
 				minimalIterationCount, maximalIterationCount);
-		UnivariateFunction f = new UnivariateFunction()
+		final UnivariateFunction f = new UnivariateFunction()
 		{
 			@Override
 			public double value(double x)
@@ -875,7 +867,7 @@ public class AiryPSFModel extends PSFModel
 		};
 
 		// Integrate up to a set number of dark rings
-		int samples = 1000;
+		final int samples = 1000;
 		final double step = RINGS[SAMPLE_RINGS] / samples;
 		double to = 0, from = 0;
 		r = new double[samples + 1];
@@ -890,7 +882,7 @@ public class AiryPSFModel extends PSFModel
 		if (DoubleEquality.relativeError(sum[samples], POWER[SAMPLE_RINGS]) > 1e-3)
 			throw new RuntimeException("Failed to create the Airy distribution");
 
-		SplineInterpolator si = new SplineInterpolator();
+		final SplineInterpolator si = new SplineInterpolator();
 		spline = si.interpolate(sum, r);
 	}
 
@@ -898,7 +890,7 @@ public class AiryPSFModel extends PSFModel
 	protected boolean computeValueAndGradient(int width, int height, double x0, double x1, double x2, double[] value,
 			double[][] jacobian)
 	{
-		double[] dx = new double[] { 1e-4, 1e-4, 1e-4 };
+		final double[] dx = new double[] { 1e-4, 1e-4, 1e-4 };
 		return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);
 	}
 }

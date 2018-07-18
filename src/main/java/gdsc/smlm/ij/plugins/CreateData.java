@@ -587,10 +587,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		/** The precision of the signal (N) in photons. */
 		final double precisionN;
-		
+
 		/** The precision of the (x,y) position in nm assuming least-squares fitting. */
 		final double precisionX;
-		
+
 		/** The precision of the (x,y) position in nm assuming Maximum Likelihood fitting. */
 		final double precisionXML;
 
@@ -675,15 +675,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				@Override
 				public void executeBIR(float bg, float intensity, PeakResult result)
 				{
-					int i = result.getFrame() - 1;
+					final int i = result.getFrame() - 1;
 					if (p[i] != 0)
 						throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
 					p[i] = intensity;
 					background[i] = bg;
 				}
 			});
-			double av = Maths.sum(p) / molecules;
-			double av2 = Maths.sum(background) / molecules;
+			final double av = Maths.sum(p) / molecules;
+			final double av2 = Maths.sum(background) / molecules;
 			Utils.log(
 					"Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
 					frames, molecules, Utils.rounded(averageSignal), Utils.rounded(av), Utils.rounded(b),
@@ -721,7 +721,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/** The last benchmark parameters. */
 	static BenchmarkParameters benchmarkParameters = null;
-	
+
 	/** The last simulation parameters. */
 	static SimulationParameters simulationParameters = null;
 
@@ -793,7 +793,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				{
 					reportAndSaveFittingLimits(dist);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					// This will be from the computation of the CRLB
 					IJ.error(TITLE, e.getMessage());
@@ -812,7 +812,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Random.shuffle(nextN, new Well19937c());
 
 				// Only put spots in the central part of the image
-				double border = settings.getSize() / 4.0;
+				final double border = settings.getSize() / 4.0;
 				dist = createUniformDistribution(border);
 			}
 			else
@@ -834,7 +834,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					System.out.printf("Mean samples = %f\n", mean);
 					if (mean < 0.5)
 					{
-						GenericDialog gd = new GenericDialog(TITLE);
+						final GenericDialog gd = new GenericDialog(TITLE);
 						gd.addMessage("The mean samples per frame is low: " + Utils.rounded(mean) + "\n \nContinue?");
 						gd.enableYesNoCancel();
 						gd.hideCancelButton();
@@ -842,22 +842,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						if (!gd.wasOKed())
 							return;
 					}
-					PoissonDistribution poisson = new PoissonDistribution(createRandomGenerator(), mean,
+					final PoissonDistribution poisson = new PoissonDistribution(createRandomGenerator(), mean,
 							PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-					StoredDataStatistics samples = new StoredDataStatistics(settings.getParticles());
+					final StoredDataStatistics samples = new StoredDataStatistics(settings.getParticles());
 					while (samples.getSum() < settings.getParticles())
-					{
 						samples.add(poisson.sample());
-					}
 					nextN = new int[samples.getN()];
 					for (int i = 0; i < nextN.length; i++)
 						nextN[i] = (int) samples.getValue(i);
 				}
 				else
-				{
 					// Use the density to get the number per frame
 					n = (int) FastMath.max(1, Math.round(areaInUm * settings.getDensity()));
-				}
 			}
 
 			RandomGenerator random = null;
@@ -896,11 +892,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Simulate random photons
 					final int intensity = minPhotons + ((random != null) ? random.nextInt(range) : 0);
 
-					LocalisationModel m = new LocalisationModel(id, t, xyz, intensity, LocalisationModel.CONTINUOUS);
+					final LocalisationModel m = new LocalisationModel(id, t, xyz, intensity, LocalisationModel.CONTINUOUS);
 					localisations.add(m);
 
 					// Each localisation can be a separate localisation set
-					LocalisationModelSet set = new LocalisationModelSet(id, t);
+					final LocalisationModelSet set = new LocalisationModelSet(id, t);
 					set.add(m);
 					localisationSets.add(set);
 
@@ -952,7 +948,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// with many steps per image frame. All steps from a frame are collected
 				// into a localisation set which can be drawn on the output image.
 
-				SpatialIllumination activationIllumination = createIllumination(settings.getPulseRatio(),
+				final SpatialIllumination activationIllumination = createIllumination(settings.getPulseRatio(),
 						settings.getPulseInterval());
 
 				// Generate additional frames so that each frame has the set number of simulation steps
@@ -960,7 +956,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// Since we have an exponential decay of activations
 				// ensure half of the particles have activated by 30% of the frames.
-				double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
+				final double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
 				// Q. Does tOn/tOff change depending on the illumination strength?
 				imageModel = new ActivationEnergyImageModel(eAct, activationIllumination,
@@ -981,11 +977,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			imageModel.setRotation2D(settings.getRotate2D());
 
 			IJ.showStatus("Creating molecules ...");
-			SpatialDistribution distribution = createDistribution();
-			List<CompoundMoleculeModel> compounds = createCompoundMolecules();
+			final SpatialDistribution distribution = createDistribution();
+			final List<CompoundMoleculeModel> compounds = createCompoundMolecules();
 			if (compounds == null)
 				return;
-			List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, settings.getParticles(),
+			final List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, settings.getParticles(),
 					distribution, settings.getRotateInitialOrientation());
 
 			// Activate fluorophores
@@ -1004,10 +1000,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (compounds.size() > 1)
 			{
 				idToCompound = new TIntIntHashMap(fluorophores.size());
-				for (FluorophoreSequenceModel l : fluorophores)
-				{
+				for (final FluorophoreSequenceModel l : fluorophores)
 					idToCompound.put(l.getId(), l.getLabel());
-				}
 			}
 
 			IJ.showStatus("Creating localisations ...");
@@ -1024,7 +1018,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				imageModel.setConfinementDistribution(createConfinementDistribution());
 			}
-			catch (ConfigurationException e)
+			catch (final ConfigurationException e)
 			{
 				// We asked the user if it was OK to continue and they said no
 				return;
@@ -1040,7 +1034,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (settings.getStepsPerSecond() != 1)
 			{
 				final double scale = 1.0 / settings.getStepsPerSecond();
-				for (FluorophoreSequenceModel f : fluorophores)
+				for (final FluorophoreSequenceModel f : fluorophores)
 					f.adjustTime(scale);
 			}
 
@@ -1062,11 +1056,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		fluorophores = removeFilteredFluorophores(fluorophores, localisations);
 
-		double signalPerFrame = showSummary(fluorophores, localisations);
+		final double signalPerFrame = showSummary(fluorophores, localisations);
 
 		if (!benchmarkMode)
 		{
-			boolean fullSimulation = (!(simpleMode || spotMode));
+			final boolean fullSimulation = (!(simpleMode || spotMode));
 			saveSimulationParameters(localisations.size(), fullSimulation, signalPerFrame);
 		}
 
@@ -1102,15 +1096,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		Utils.log(TITLE + " Benchmark");
 
-		double a = settings.getPixelPitch();
-		double[] xyz = dist.next().clone();
-		int size = settings.getSize();
-		double offset = size * 0.5;
+		final double a = settings.getPixelPitch();
+		final double[] xyz = dist.next().clone();
+		final int size = settings.getSize();
+		final double offset = size * 0.5;
 		for (int i = 0; i < 2; i++)
 			xyz[i] += offset;
 
 		// Get the width for the z-depth by using the PSF Model
-		PSFModel psf = createPSFModel(xyz);
+		final PSFModel psf = createPSFModel(xyz);
 		psfModelCache = psf;
 
 		double sd0, sd1;
@@ -1132,11 +1126,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			sd1 = ((ImagePSFModel) psf).getHWHM1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR;
 		}
 		else
-		{
 			throw new IllegalStateException("Unknown PSF: " + psf.getClass().getSimpleName());
-		}
 
-		double sd = Gaussian2DPeakResultHelper.getStandardDeviation(sd0, sd1) * a;
+		final double sd = Gaussian2DPeakResultHelper.getStandardDeviation(sd0, sd1) * a;
 
 		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * a), Utils.rounded(xyz[0], 6));
 		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * a), Utils.rounded(xyz[1], 6));
@@ -1150,12 +1142,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		boolean emCCD;
 		double totalGain;
 		final double qe = getQuantumEfficiency();
-		double noise = getNoiseEstimateInPhotoelectrons(qe);
+		final double noise = getNoiseEstimateInPhotoelectrons(qe);
 		double readNoise;
 
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
-			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			final CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 			emCCD = helper.isEMCCD;
 			totalGain = helper.getTotalGainSafe();
 			// Store read noise in ADUs
@@ -1170,9 +1162,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			readNoise = 0;
 		}
 		else
-		{
 			throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
-		}
 
 		// The precision calculation is dependent on the model. The classic Mortensen formula
 		// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided
@@ -1182,14 +1172,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Apply QE directly to simulated photons to allow computation of bounds
 		// with the captured photons...
-		double min = settings.getPhotonsPerSecond() * qe;
-		double max = settings.getPhotonsPerSecondMaximum() * qe;
-		double lowerP = Gaussian2DPeakResultHelper.getPrecision(a, sd, max, noise, emCCD);
-		double upperP = Gaussian2DPeakResultHelper.getPrecision(a, sd, min, noise, emCCD);
-		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, max, noise, emCCD);
-		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, min, noise, emCCD);
-		double lowerN = getPrecisionN(a, sd, min, Maths.pow2(noise), emCCD);
-		double upperN = getPrecisionN(a, sd, max, Maths.pow2(noise), emCCD);
+		final double min = settings.getPhotonsPerSecond() * qe;
+		final double max = settings.getPhotonsPerSecondMaximum() * qe;
+		final double lowerP = Gaussian2DPeakResultHelper.getPrecision(a, sd, max, noise, emCCD);
+		final double upperP = Gaussian2DPeakResultHelper.getPrecision(a, sd, min, noise, emCCD);
+		final double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, max, noise, emCCD);
+		final double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, min, noise, emCCD);
+		final double lowerN = getPrecisionN(a, sd, min, Maths.pow2(noise), emCCD);
+		final double upperN = getPrecisionN(a, sd, max, Maths.pow2(noise), emCCD);
 
 		if (settings.getCameraType() == CameraType.SCMOS)
 			Utils.log("sCMOS camera background estimate uses an average read noise");
@@ -1202,19 +1192,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		Utils.log("Signal precision: %s - %s photo-electrons", Utils.rounded(lowerN), Utils.rounded(upperN));
 
 		// Wrap to a function
-		PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
+		final PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
 
 		// Set parameters
-		double[] params = new double[5];
+		final double[] params = new double[5];
 		// No background when computing the SNR
 		//params[0] = settings.getBackground() * qe;
 		params[1] = min;
 		System.arraycopy(xyz, 0, params, 2, 3);
 
 		// Compute SNR using mean signal at 50%. Assume the region covers the entire PSF.
-		double[] v = new StandardValueProcedure().getValues(f, params);
-		double u = FunctionHelper.getMeanValue(v, 0.5);
-		double u0 = Maths.max(v);
+		final double[] v = new StandardValueProcedure().getValues(f, params);
+		final double u = FunctionHelper.getMeanValue(v, 0.5);
+		final double u0 = Maths.max(v);
 
 		// Store the benchmark settings when not using variable photons
 		if (min == max)
@@ -1225,15 +1215,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			createLikelihoodFunction();
 
 			// Compute Fisher information
-			UnivariateLikelihoodFisherInformationCalculator c = new UnivariateLikelihoodFisherInformationCalculator(f,
+			final UnivariateLikelihoodFisherInformationCalculator c = new UnivariateLikelihoodFisherInformationCalculator(f,
 					fiFunction);
 
 			// Get limits: Include background in the params
 			params[0] = settings.getBackground() * qe;
-			FisherInformationMatrix m = c.compute(params);
+			final FisherInformationMatrix m = c.compute(params);
 
 			// Report and store the limits
-			double[] crlb = m.crlbSqrt();
+			final double[] crlb = m.crlbSqrt();
 			//System.out.println(m);
 			if (crlb != null)
 			{
@@ -1252,7 +1242,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		else
 		{
 			// SNR will just scale
-			double scale = max / min;
+			final double scale = max / min;
 			Utils.log("50%% PSF SNR : %s - %s : Peak SNR : %s - %s", Utils.rounded(u / noise),
 					Utils.rounded(scale * u / noise), Utils.rounded(u0 / noise), Utils.rounded(scale * u0 / noise));
 			Utils.log(
@@ -1293,13 +1283,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// approximation of the background noise for the precision computation.
 
 			// We get the total background in electrons
-			double backgroundVariance = settings.getBackground() * qe;
+			final double backgroundVariance = settings.getBackground() * qe;
 
 			// Create the camera noise model
 			createPerPixelCameraModelData(cameraModel);
 
 			// Get the average read noise in electrons
-			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length);
+			final double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length);
 
 			// Combine as above
 			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
@@ -1320,12 +1310,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
 		double totalGain;
-		double noise = getNoiseEstimateInPhotoelectrons(getQuantumEfficiency());
+		final double noise = getNoiseEstimateInPhotoelectrons(getQuantumEfficiency());
 		double readNoise;
 
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
-			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			final CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 			totalGain = helper.getTotalGainSafe();
 			// Store read noise in ADUs
 			readNoise = helper.getReadNoiseInCounts();
@@ -1337,11 +1327,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			readNoise = 0;
 		}
 		else
-		{
 			throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
-		}
 
-		double sd = getPsfSD() * settings.getPixelPitch();
+		final double sd = getPsfSD() * settings.getPixelPitch();
 
 		final double qe = getQuantumEfficiency();
 
@@ -1407,31 +1395,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private int checkTotalSteps(int totalSteps, List<? extends FluorophoreSequenceModel> fluorophores)
 	{
 		int max = totalSteps;
-		for (FluorophoreSequenceModel f : fluorophores)
-		{
+		for (final FluorophoreSequenceModel f : fluorophores)
 			if (max < f.getEndTime())
 				max = (int) (f.getEndTime() + 1);
-		}
 		if (max > totalSteps)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			final GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			final double simulationStepsPerFrame = (settings.getStepsPerSecond() * settings.getExposureTime()) / 1000.0;
-			int newFrames = 1 + (int) (max / simulationStepsPerFrame);
+			final int newFrames = 1 + (int) (max / simulationStepsPerFrame);
 
 			if (totalSteps != 0)
 			{
-				int totalFrames = (int) Math.ceil(settings.getSeconds() * 1000 / settings.getExposureTime());
+				final int totalFrames = (int) Math.ceil(settings.getSeconds() * 1000 / settings.getExposureTime());
 				gd.addMessage(String.format(
 						"Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
 						newFrames - totalFrames, Utils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
 			}
 			else
-			{
 				gd.addMessage(String.format("Require %d frames to draw all fluorophores.\nDo you want to proceed?",
 						newFrames));
-			}
 			gd.showDialog();
 			if (gd.wasOKed())
 				totalSteps = max;
@@ -1443,19 +1427,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
 		{
-			ImagePlus imp = WindowManager.getImage(settings.getDistributionMask());
+			final ImagePlus imp = WindowManager.getImage(settings.getDistributionMask());
 			if (imp != null)
-			{
 				return createMaskDistribution(imp, settings.getDistributionMaskSliceDepth(), true);
-			}
 		}
 		else if (settings.getDistribution().equals(DISTRIBUTION[GRID]))
-		{
 			return new GridDistribution(settings.getSize(), settings.getDepth() / settings.getPixelPitch(),
 					settings.getCellSize(), settings.getProbabilityBinary(),
 					settings.getMinBinaryDistance() / settings.getPixelPitch(),
 					settings.getMaxBinaryDistance() / settings.getPixelPitch());
-		}
 
 		return createUniformDistributionWithPSFWidthBorder();
 	}
@@ -1471,18 +1451,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Use an image for the distribution
 		if (imp.getStackSize() > 1)
 		{
-			ImageStack stack = imp.getImageStack();
-			List<int[]> masks = new ArrayList<>(stack.getSize());
-			int[] maxMask = new int[w * h];
+			final ImageStack stack = imp.getImageStack();
+			final List<int[]> masks = new ArrayList<>(stack.getSize());
+			final int[] maxMask = new int[w * h];
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				int[] mask = extractMask(stack.getProcessor(slice));
+				final int[] mask = extractMask(stack.getProcessor(slice));
 				if (updateArea)
-				{
 					for (int i = 0; i < mask.length; i++)
 						if (mask[i] != 0)
 							maxMask[i] = 1;
-				}
 				masks.add(mask);
 			}
 			if (updateArea)
@@ -1495,7 +1473,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return new MaskDistribution3D(masks, w, h, sliceDepth / settings.getPixelPitch(), scaleX, scaleY,
 					createRandomGenerator());
 		}
-		int[] mask = extractMask(imp.getProcessor());
+		final int[] mask = extractMask(imp.getProcessor());
 		if (updateArea)
 			updateArea(mask, w, h);
 		return new MaskDistribution(mask, w, h, settings.getDepth() / settings.getPixelPitch(), scaleX, scaleY,
@@ -1507,15 +1485,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Note: The apparent area will be bigger due to the PSF width blurring the edges.
 		// Assume the entire max intensity mask is in focus and the PSF is Gaussian in the focal plane.
 		// Blur the mask
-		float[] pixels = new float[mask.length];
+		final float[] pixels = new float[mask.length];
 		for (int i = 0; i < pixels.length; i++)
 			pixels[i] = mask[i];
 
-		GaussianFilter blur = new GaussianFilter();
+		final GaussianFilter blur = new GaussianFilter();
 		final double scaleX = (double) settings.getSize() / w;
 		final double scaleY = (double) settings.getSize() / h;
-		double extra = 1; // Allow extra?
-		double sd = getPsfSD() * extra;
+		final double extra = 1; // Allow extra?
+		final double sd = getPsfSD() * extra;
 		blur.convolve(pixels, w, h, sd / scaleX, sd / scaleY);
 
 		// Count pixels in blurred mask. Ignore those that are very faint (at the edge of the region)
@@ -1549,8 +1527,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		//		}
 
 		// Threshold to a mask
-		FloatProcessor fp = new FloatProcessor(w, h, pixels);
-		ShortProcessor sp = (ShortProcessor) fp.convertToShort(true);
+		final FloatProcessor fp = new FloatProcessor(w, h, pixels);
+		final ShortProcessor sp = (ShortProcessor) fp.convertToShort(true);
 		final int t = AutoThreshold.getThreshold(AutoThreshold.Method.OTSU, sp.getHistogram());
 		//Utils.display("Blurred", fp);
 		for (int i = 0; i < mask.length; i++)
@@ -1576,11 +1554,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		//ip = ip.duplicate();
 		//ip.setInterpolationMethod(ImageProcessor.BILINEAR);
 		//ip = ip.resize(settings.size, settings.size);
-		int[] mask = new int[ip.getPixelCount()];
+		final int[] mask = new int[ip.getPixelCount()];
 		for (int i = 0; i < mask.length; i++)
-		{
 			mask[i] = ip.get(i);
-		}
 		return mask;
 	}
 
@@ -1596,7 +1572,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SpatialDistribution dist;
 		dist = new SpatialDistribution()
 		{
-			private double[] xyz = new double[] { settings.getXPosition() / settings.getPixelPitch(),
+			private final double[] xyz = new double[] { settings.getXPosition() / settings.getPixelPitch(),
 					settings.getYPosition() / settings.getPixelPitch(),
 					settings.getZPosition() / settings.getPixelPitch() };
 
@@ -1635,15 +1611,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private double getHWHM()
 	{
 		if (hwhm == 0)
-		{
 			if (psfModelType == PSF_MODEL_IMAGE)
-			{
 				hwhm = getImageHWHM();
-			}
 			else if (psfModelType == PSF_MODEL_ASTIGMATISM)
-			{
 				hwhm = getAstigmatismHWHM();
-			}
 			else
 			{
 				final double sd = (settings.getEnterWidth()) ? settings.getPsfSd()
@@ -1651,14 +1622,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				hwhm = Gaussian2DFunction.SD_TO_HWHM_FACTOR * sd / settings.getPixelPitch();
 			}
-		}
 		return hwhm;
 	}
 
 	private PSF createPSF(double psfSD) throws IllegalArgumentException
 	{
 		if (psf == null)
-		{
 			if (psfModelType == PSF_MODEL_ASTIGMATISM)
 			{
 				// Note: the astigmatismModel may not yet be created so create if necessary.
@@ -1685,7 +1654,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL,
 							DistanceUnit.PIXEL);
 				}
-				catch (ConversionException e)
+				catch (final ConversionException e)
 				{
 					// Wrap so this can be caught as the same type
 					throw new IllegalArgumentException(e);
@@ -1703,7 +1672,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				psfBuilder.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
 				psf = psfBuilder.build();
 			}
-		}
 		return psf;
 	}
 
@@ -1724,13 +1692,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private double getImageHWHM()
 	{
-		ImagePlus imp = WindowManager.getImage(settings.getPsfImageName());
+		final ImagePlus imp = WindowManager.getImage(settings.getPsfImageName());
 		if (imp == null)
 		{
 			IJ.error(TITLE, "Unable to create the PSF model from image: " + settings.getPsfImageName());
 			return -1;
 		}
-		ImagePSF psfSettings = ImagePSFHelper.fromString(imp.getProperty("Info").toString());
+		final ImagePSF psfSettings = ImagePSFHelper.fromString(imp.getProperty("Info").toString());
 		if (psfSettings == null)
 		{
 			IJ.error(TITLE, "Unknown PSF settings for image: " + imp.getTitle());
@@ -1764,14 +1732,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Get the width at z=0 in pixels
 			model = AstigmatismModelManager.convert(model, model.getZDistanceUnit(), DistanceUnit.PIXEL);
-			AstigmatismZModel zModel = AstigmatismModelManager.create(model);
-			double sx = zModel.getSx(0);
-			double sy = zModel.getSy(0);
+			final AstigmatismZModel zModel = AstigmatismModelManager.create(model);
+			final double sx = zModel.getSx(0);
+			final double sy = zModel.getSy(0);
 			return Gaussian2DPeakResultHelper.getStandardDeviation(sx, sy) * Gaussian2DFunction.SD_TO_HWHM_FACTOR
 			// Scale appropriately
 					* model.getNmPerPixel() / settings.getPixelPitch();
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			IJ.error(TITLE, "Unknown PSF FWHM setting for model: " + settings.getAstigmatismModel());
 			return -1;
@@ -1787,12 +1755,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private UniformDistribution createUniformDistribution(double border)
 	{
-		double depth = (settings.getFixedDepth()) ? settings.getDepth() / settings.getPixelPitch()
+		final double depth = (settings.getFixedDepth()) ? settings.getDepth() / settings.getPixelPitch()
 				: settings.getDepth() / (2 * settings.getPixelPitch());
 
 		// Ensure the focal plane is in the middle of the zDepth
-		double[] max = new double[] { settings.getSize() / 2 - border, settings.getSize() / 2 - border, depth };
-		double[] min = new double[3];
+		final double[] max = new double[] { settings.getSize() / 2 - border, settings.getSize() / 2 - border, depth };
+		final double[] min = new double[3];
 		for (int i = 0; i < 3; i++)
 			min[i] = -max[i];
 		if (settings.getFixedDepth())
@@ -1802,19 +1770,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final RandomGenerator rand1 = createRandomGenerator();
 
 		if (settings.getDistribution().equals(DISTRIBUTION[UNIFORM_HALTON]))
-		{
 			return new UniformDistribution(min, max, rand1.nextInt());
-		}
 
 		if (settings.getDistribution().equals(DISTRIBUTION[UNIFORM_SOBOL]))
 		{
-			SobolSequenceGenerator rvg = new SobolSequenceGenerator(3);
+			final SobolSequenceGenerator rvg = new SobolSequenceGenerator(3);
 			rvg.skipTo(rand1.nextInt());
 			return new UniformDistribution(min, max, rvg);
 		}
 
 		// Create a distribution using random generators for each dimension
-		UniformDistribution distribution = new UniformDistribution(min, max, this);
+		final UniformDistribution distribution = new UniformDistribution(min, max, this);
 		return distribution;
 	}
 
@@ -1837,11 +1803,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				checkConfiguration(
 						"Simulation uses a mask confinement with a different depth to the mask distribution");
 
-			ImagePlus imp = WindowManager.getImage(settings.getConfinementMask());
+			final ImagePlus imp = WindowManager.getImage(settings.getConfinementMask());
 			if (imp != null)
-			{
 				return createMaskDistribution(imp, settings.getConfinementMaskSliceDepth(), false);
-			}
 		}
 		else if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 		{
@@ -1870,7 +1834,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static void checkConfiguration(String message) throws ConfigurationException
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage(TextUtils.wrap("Warning: " + message, 80));
 		gd.setOKLabel("Continue");
 		gd.showDialog();
@@ -1901,13 +1865,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private List<LocalisationModelSet> filterToImageBounds(List<LocalisationModelSet> localisationSets)
 	{
-		List<LocalisationModelSet> newLocalisations = new ArrayList<>(localisationSets.size());
-		SpatialDistribution bounds = createUniformDistribution(0);
-		for (LocalisationModelSet s : localisationSets)
-		{
+		final List<LocalisationModelSet> newLocalisations = new ArrayList<>(localisationSets.size());
+		final SpatialDistribution bounds = createUniformDistribution(0);
+		for (final LocalisationModelSet s : localisationSets)
 			if (bounds.isWithinXY(s.toLocalisation().getCoordinates()))
 				newLocalisations.add(s);
-		}
 		return newLocalisations;
 	}
 
@@ -1919,14 +1881,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution()))
 		{
 			// Get the distribution file
-			String filename = Utils.getFilename("Photon_distribution", settings.getPhotonDistributionFile());
+			final String filename = Utils.getFilename("Photon_distribution", settings.getPhotonDistributionFile());
 			if (filename != null)
 			{
 				settings.setPhotonDistributionFile(filename);
 				try (BufferedReader in = new BufferedReader(
 						new UnicodeReader(new FileInputStream(new File(settings.getPhotonDistributionFile())), null)))
 				{
-					StoredDataStatistics stats = new StoredDataStatistics();
+					final StoredDataStatistics stats = new StoredDataStatistics();
 					try
 					{
 						String str = null;
@@ -1945,8 +1907,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (stats.getSum() > 0)
 					{
 						// Update the statistics to the desired mean.
-						double scale = settings.getPhotonsPerSecond() / stats.getMean();
-						double[] values = stats.getValues();
+						final double scale = settings.getPhotonsPerSecond() / stats.getMean();
+						final double[] values = stats.getValues();
 						for (int i = 0; i < values.length; i++)
 							values[i] *= scale;
 
@@ -1955,20 +1917,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 						// Create the distribution using the recommended number of bins
 						final int binCount = stats.getN() / 10;
-						EmpiricalDistribution dist = new EmpiricalDistribution(binCount, createRandomGenerator());
+						final EmpiricalDistribution dist = new EmpiricalDistribution(binCount, createRandomGenerator());
 						dist.load(values);
 						return dist;
 					}
 				}
-				catch (IOException e)
+				catch (final IOException e)
 				{
 					// Ignore
 				}
-				catch (NullArgumentException e)
+				catch (final NullArgumentException e)
 				{
 					// Ignore
 				}
-				catch (NumberFormatException e)
+				catch (final NumberFormatException e)
 				{
 					// Ignore
 				}
@@ -1980,7 +1942,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (settings.getPhotonsPerSecond() < settings.getPhotonsPerSecondMaximum())
 			{
-				UniformRealDistribution dist = new UniformRealDistribution(createRandomGenerator(),
+				final UniformRealDistribution dist = new UniformRealDistribution(createRandomGenerator(),
 						settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum());
 				return dist;
 			}
@@ -1988,15 +1950,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution()))
 		{
 			final double scaleParameter = settings.getPhotonsPerSecond() / settings.getPhotonShape();
-			GammaDistribution dist = new GammaDistribution(createRandomGenerator(), settings.getPhotonShape(),
+			final GammaDistribution dist = new GammaDistribution(createRandomGenerator(), settings.getPhotonShape(),
 					scaleParameter, ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 			return dist;
 		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.getPhotonDistribution()))
-		{
 			// No distribution required
 			return null;
-		}
 
 		settings.setPhotonDistribution(PHOTON_DISTRIBUTION[PHOTON_FIXED]);
 		return null;
@@ -2007,30 +1967,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Allow fractional integration steps
 		final double simulationStepsPerFrame = (settings.getStepsPerSecond() * settings.getExposureTime()) / 1000.0;
 
-		List<LocalisationModelSet> newLocalisations = new ArrayList<>(
+		final List<LocalisationModelSet> newLocalisations = new ArrayList<>(
 				(int) (localisations.size() / simulationStepsPerFrame));
 
 		//System.out.printf("combineSimulationSteps @ %f\n", simulationStepsPerFrame);
 
 		//final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 		sortLocalisationsByIdThenTime(localisations);
-		int[] idList = getIds(localisations);
+		final int[] idList = getIds(localisations);
 		movingMolecules = new TIntHashSet(idList.length);
 		int index = 0;
-		for (int id : idList)
+		for (final int id : idList)
 		{
-			int fromIndex = findIndexById(localisations, index, id);
+			final int fromIndex = findIndexById(localisations, index, id);
 			if (fromIndex > -1)
 			{
-				int toIndex = findLastIndexById(localisations, fromIndex, id);
-				List<LocalisationModel> subset = localisations.subList(fromIndex, toIndex + 1);
+				final int toIndex = findLastIndexById(localisations, fromIndex, id);
+				final List<LocalisationModel> subset = localisations.subList(fromIndex, toIndex + 1);
 				index = toIndex;
 
 				// Store the IDs of any moving molecules
 				if (isMoving(subset))
-				{
 					movingMolecules.add(id);
-				}
 
 				// The frames may be longer or shorter than the simulation steps. Allocate the step
 				// proportionately to each frame it overlaps:
@@ -2050,22 +2008,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Get the first frame offset and allocate space to store all potential frames
 				final int intFirstFrame = (int) firstFrame;
 				final int intLastFrame = (int) Math.ceil(lastFrame);
-				LocalisationModelSet[] sets = new LocalisationModelSet[intLastFrame - intFirstFrame + 1];
+				final LocalisationModelSet[] sets = new LocalisationModelSet[intLastFrame - intFirstFrame + 1];
 
 				// Process each step
-				for (LocalisationModel l : subset)
+				for (final LocalisationModel l : subset)
 				{
 					// Get the fractional start and end frames
-					double startFrame = getStartFrame(l, simulationStepsPerFrame);
-					double endFrame = getEndFrame(l, simulationStepsPerFrame);
+					final double startFrame = getStartFrame(l, simulationStepsPerFrame);
+					final double endFrame = getEndFrame(l, simulationStepsPerFrame);
 
 					// Round down to get the actual frames that are overlapped
-					int start = (int) startFrame;
+					final int start = (int) startFrame;
 					int end = (int) endFrame;
 
 					// Check if the span covers a fraction of the end frame, otherwise decrement to ignore that frame
 					if (end > start && endFrame == end)
-					{
 						// E.g. convert
 						// Steps:      |-- 0 --|
 						// Frames: |- 0 -|- 1 -|- 2 -|
@@ -2073,12 +2030,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						// Steps:      |-- 0 --|
 						// Frames: |- 0 -|- 1 -|
 						end--;
-					}
 
 					if (start == end)
 					{
 						// If the step falls within one frame then add it to the set
-						int tIndex = start - intFirstFrame;
+						final int tIndex = start - intFirstFrame;
 						if (sets[tIndex] == null)
 							sets[tIndex] = new LocalisationModelSet(id, start);
 						sets[tIndex].add(l);
@@ -2123,7 +2079,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							//t += fraction;
 
 							// Add to the set
-							int tIndex = frame - intFirstFrame;
+							final int tIndex = frame - intFirstFrame;
 							if (sets[tIndex] == null)
 								sets[tIndex] = new LocalisationModelSet(id, frame);
 							sets[tIndex].add(getFraction(l, fraction / total, state));
@@ -2174,7 +2130,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double[] xyz = subset.get(0).getCoordinates();
 		for (int i = 1; i < subset.size(); i++)
 		{
-			double[] xyz2 = subset.get(i).getCoordinates();
+			final double[] xyz2 = subset.get(i).getCoordinates();
 			for (int j = 0; j < 3; j++)
 				if (xyz[j] != xyz2[j])
 					return true;
@@ -2233,18 +2189,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (localisations.isEmpty())
 			return new int[0];
-		TIntArrayList ids = new TIntArrayList(settings.getParticles());
+		final TIntArrayList ids = new TIntArrayList(settings.getParticles());
 		// Assume the localisations are sorted by id
 		int id = localisations.get(0).getId();
 		ids.add(id);
-		for (LocalisationModel l : localisations)
-		{
+		for (final LocalisationModel l : localisations)
 			if (id != l.getId())
 			{
 				id = l.getId();
 				ids.add(id);
 			}
-		}
 		return ids.toArray();
 	}
 
@@ -2286,7 +2240,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
-		CalibrationWriter c = new CalibrationWriter();
+		final CalibrationWriter c = new CalibrationWriter();
 		c.setDistanceUnit(DistanceUnit.PIXEL);
 		c.setIntensityUnit(IntensityUnit.PHOTON);
 		c.setNmPerPixel(settings.getPixelPitch());
@@ -2294,12 +2248,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		c.setCameraType(settings.getCameraType());
 		if (settings.getCameraType() == CameraType.SCMOS)
-		{
 			c.setCameraModelName(settings.getCameraModelName());
-		}
 		else
 		{
-			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			final CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 			c.setCountPerPhoton(helper.getTotalGainSafe());
 			c.setBias(settings.getBias());
 			c.setReadNoise(helper.getReadNoiseInCounts());
@@ -2313,7 +2265,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		maxT = localisationSets.get(localisationSets.size() - 1).getTime();
 
 		// Display image
-		ImageStack stack = new ImageStack(settings.getSize(), settings.getSize(), maxT);
+		final ImageStack stack = new ImageStack(settings.getSize(), settings.getSize(), maxT);
 
 		final double psfSD = getPsfSD();
 		if (psfSD <= 0)
@@ -2326,12 +2278,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		createPerPixelCameraModelData(cameraModel);
 		createBackgroundPixels();
 
-		int threadCount = Prefs.getThreads();
+		final int threadCount = Prefs.getThreads();
 
 		IJ.showStatus("Drawing image ...");
 
 		// Multi-thread for speed
-		PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
+		final PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
 		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 		List<Future<?>> futures = new LinkedList<>();
 
@@ -2344,7 +2296,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Process all frames
 		int i = 0;
 		int lastT = -1;
-		for (LocalisationModelSet l : localisationSets)
+		for (final LocalisationModelSet l : localisationSets)
 		{
 			if (Utils.isInterrupted())
 				break;
@@ -2372,12 +2324,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (Utils.isInterrupted())
 				break;
-			Object pixels = stack.getPixels(t);
+			final Object pixels = stack.getPixels(t);
 			if (pixels == null)
-			{
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT, t, null,
 						syncResults, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
-			}
 			else if (limits == null)
 				limits = Maths.limits((float[]) pixels);
 		}
@@ -2387,9 +2337,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		threadPool.shutdown();
 		IJ.showProgress(1);
 		if (Utils.isInterrupted() || limits == null)
-		{
 			return null;
-		}
 		results.end();
 
 		// Clear memory
@@ -2427,12 +2375,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (!settings.getRawImage())
 		{
 			// Get the global limits and ensure all values can be represented
-			Object[] imageArray = stack.getImageArray();
+			final Object[] imageArray = stack.getImageArray();
 			limits = Maths.limits((float[]) imageArray[0]);
 			for (int j = 1; j < imageArray.length; j++)
 				limits = Maths.limits(limits, (float[]) imageArray[j]);
 			//float limits0 = limits[0];
-			float limits0 = 0; // Leave bias in place
+			final float limits0 = 0; // Leave bias in place
 			// Check if the image will fit in a 16-bit range
 			if ((limits[1] - limits0) < 65535)
 			{
@@ -2442,12 +2390,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final float min = (float) (limits0 - 0.5);
 				for (int j = 0; j < imageArray.length; j++)
 				{
-					float[] image = (float[]) imageArray[j];
-					short[] pixels = new short[image.length];
+					final float[] image = (float[]) imageArray[j];
+					final short[] pixels = new short[image.length];
 					for (int k = 0; k < pixels.length; k++)
-					{
 						pixels[k] = (short) (image[k] - min);
-					}
 					newStack.setPixels(pixels, j + 1);
 					// Free memory
 					imageArray[j] = null;
@@ -2463,11 +2409,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Keep as 32-bit but round to whole numbers
 				for (int j = 0; j < imageArray.length; j++)
 				{
-					float[] pixels = (float[]) imageArray[j];
+					final float[] pixels = (float[]) imageArray[j];
 					for (int k = 0; k < pixels.length; k++)
-					{
 						pixels[k] = Math.round(pixels[k]);
-					}
 				}
 				for (int k = 2; k-- > 0;)
 					limits[k] = Math.round(limits[k]);
@@ -2475,9 +2419,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Show image
-		ImagePlus imp = Utils.display(CREATE_DATA_IMAGE_TITLE, newStack);
+		final ImagePlus imp = Utils.display(CREATE_DATA_IMAGE_TITLE, newStack);
 
-		ij.measure.Calibration cal = new ij.measure.Calibration();
+		final ij.measure.Calibration cal = new ij.measure.Calibration();
 		String unit = "nm";
 		double unitPerPixel = settings.getPixelPitch();
 		if (unitPerPixel > 100)
@@ -2487,7 +2431,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		cal.setUnit(unit);
 		cal.pixelHeight = cal.pixelWidth = unitPerPixel;
-		Rectangle bounds = cameraModel.getBounds();
+		final Rectangle bounds = cameraModel.getBounds();
 		if (bounds != null)
 		{
 			cal.xOrigin = -bounds.x;
@@ -2502,7 +2446,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		saveImage(imp);
 
-		IJImageSource imageSource = new IJImageSource(imp);
+		final IJImageSource imageSource = new IJImageSource(imp);
 		// Shift simulation image source to correct location
 		results.setSource(imageSource);
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
@@ -2517,7 +2461,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (benchmarkMode && benchmarkParameters != null)
 			benchmarkParameters.setPhotons(results);
 
-		List<LocalisationModel> localisations = toLocalisations(localisationSets);
+		final List<LocalisationModel> localisations = toLocalisations(localisationSets);
 
 		savePulses(localisations, results);
 
@@ -2543,7 +2487,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private ImagePSFModel createImagePSF(List<LocalisationModelSet> localisationSets)
 	{
-		ImagePlus imp = WindowManager.getImage(settings.getPsfImageName());
+		final ImagePlus imp = WindowManager.getImage(settings.getPsfImageName());
 		if (imp == null)
 		{
 			IJ.error(TITLE, "Unable to create the PSF model from image: " + settings.getPsfImageName());
@@ -2551,7 +2495,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		try
 		{
-			ImagePSF psfSettings = ImagePSFHelper.fromString(imp.getProperty("Info").toString());
+			final ImagePSF psfSettings = ImagePSFHelper.fromString(imp.getProperty("Info").toString());
 			if (psfSettings == null)
 				throw new RuntimeException("Unknown PSF settings for image: " + imp.getTitle());
 
@@ -2568,9 +2512,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// To save memory construct the Image PSF using only the slices that are within
 			// the depth of field of the simulation
 			double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
-			for (LocalisationModelSet l : localisationSets)
-			{
-				for (LocalisationModel m : l.getLocalisations())
+			for (final LocalisationModelSet l : localisationSets)
+				for (final LocalisationModel m : l.getLocalisations())
 				{
 					final double z = m.getZ();
 					if (minZ > z)
@@ -2578,11 +2521,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (maxZ < z)
 						maxZ = z;
 				}
-			}
 
-			int nSlices = imp.getStackSize();
+			final int nSlices = imp.getStackSize();
 			// z-centre should be an index and not the ImageJ slice number so subtract 1
-			int zCentre = psfSettings.getCentreImage() - 1;
+			final int zCentre = psfSettings.getCentreImage() - 1;
 
 			// Calculate the start/end slices to cover the depth of field
 			// This logic must match the ImagePSFModel.
@@ -2607,32 +2549,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			final double noiseFraction = 1e-3;
-			float[][] image = extractImageStack(imp, lower, upper);
+			final float[][] image = extractImageStack(imp, lower, upper);
 			final ImagePSFModel model = new ImagePSFModel(image, zCentre - lower,
 					psfSettings.getPixelSize() / settings.getPixelPitch(), unitsPerSlice, psfSettings.getFwhm(),
 					noiseFraction);
 
 			// Add the calibrated centres. The map will not be null
-			Map<Integer, Offset> map = psfSettings.getOffsetsMap();
+			final Map<Integer, Offset> map = psfSettings.getOffsetsMap();
 			if (!map.isEmpty())
 			{
 				final int sliceOffset = lower + 1;
-				for (Entry<Integer, Offset> entry : map.entrySet())
-				{
+				for (final Entry<Integer, Offset> entry : map.entrySet())
 					model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
 							entry.getValue().getCy());
-				}
 			}
 			else
 			{
 				// Use the CoM if present
-				double cx = psfSettings.getXCentre();
-				double cy = psfSettings.getYCentre();
+				final double cx = psfSettings.getXCentre();
+				final double cy = psfSettings.getYCentre();
 				if (cx != 0 || cy != 0)
-				{
 					for (int slice = 0; slice < image.length; slice++)
 						model.setCentre(slice, cx, cy);
-				}
 			}
 
 			// Initialise the HWHM table so that it can be cloned
@@ -2640,7 +2578,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			return model;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.error(TITLE, "Unable to create the image PSF model:\n" + e.getMessage());
 			return null;
@@ -2660,13 +2598,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	public static float[][] extractImageStack(ImagePlus imp, int start, int end)
 	{
-		int size = end - start + 1;
-		ImageStack stack = imp.getImageStack();
-		float[][] image = new float[size][];
+		final int size = end - start + 1;
+		final ImageStack stack = imp.getImageStack();
+		final float[][] image = new float[size][];
 		for (int i = 0; i < image.length; i++)
-		{
 			image[i] = (float[]) stack.getProcessor(i + start + 1).toFloat(0, null).getPixels();
-		}
 		return image;
 	}
 
@@ -2677,9 +2613,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return psfModelCache;
 
 		if (psfModelType == PSF_MODEL_IMAGE)
-		{
 			return createImagePSF(localisationSets);
-		}
 
 		if (psfModelType == PSF_MODEL_ASTIGMATISM)
 		{
@@ -2691,12 +2625,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				if (DoubleEquality.relativeError(astigmatismModel.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
 				{
-					String message = String.format(
+					final String message = String.format(
 							"Astigmatism model '%s' calibration (%s nm) does not match pixel pitch (%s nm)",
 							settings.getAstigmatismModel(), Utils.rounded(astigmatismModel.getNmPerPixel()),
 							Utils.rounded(settings.getPixelPitch()));
 					// Optionally convert
-					GenericDialog gd = new GenericDialog(TITLE);
+					final GenericDialog gd = new GenericDialog(TITLE);
 					gd.addMessage(TextUtils.wrap(message + ". Created data is not suitable for fitting.", 80));
 					gd.addMessage(TextUtils.wrap("Click OK to continue anyway (i.e. draw the spot using the " +
 							"correct nm width on the different sized pixels).", 80));
@@ -2715,28 +2649,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						DistanceUnit.PIXEL);
 				return new GaussianPSFModel(AstigmatismModelManager.create(astigmatismModel));
 			}
-			catch (ConversionException e)
+			catch (final ConversionException e)
 			{
 				// Wrap so this can be caught as the same type
 				throw new IllegalArgumentException(e);
 			}
 		}
 
-		double d = settings.getDepthOfFocus() / settings.getPixelPitch();
+		final double d = settings.getDepthOfFocus() / settings.getPixelPitch();
 
 		if (psfModelType == PSF_MODEL_GAUSSIAN)
 		{
-			double sd = getPsfSD();
-			double gamma = 0;
-			HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
-			GaussianPSFModel m = new GaussianPSFModel(createRandomGenerator(), zModel);
+			final double sd = getPsfSD();
+			final double gamma = 0;
+			final HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
+			final GaussianPSFModel m = new GaussianPSFModel(createRandomGenerator(), zModel);
 			//m.setRange(10);
 			return m;
 		}
 
 		// Default to Airy pattern
-		double width = getPsfSD() / PSFCalculator.AIRY_TO_GAUSSIAN;
-		AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, d);
+		final double width = getPsfSD() / PSFCalculator.AIRY_TO_GAUSSIAN;
+		final AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, d);
 		m.setRing(2);
 		return m;
 	}
@@ -2744,9 +2678,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private PSFModel createPSFModel(double[] xyz)
 	{
 		// Create a set with a single model
-		List<LocalisationModelSet> localisationSets = new TurboList<>(1);
-		LocalisationModelSet set = new LocalisationModelSet(0, 0);
-		LocalisationModel m = new LocalisationModel(0, 0, xyz, 1, 0);
+		final List<LocalisationModelSet> localisationSets = new TurboList<>(1);
+		final LocalisationModelSet set = new LocalisationModelSet(0, 0);
+		final LocalisationModel m = new LocalisationModel(0, 0, xyz, 1, 0);
 		set.add(m);
 		localisationSets.add(set);
 		return createPSFModel(localisationSets);
@@ -2754,7 +2688,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private PSFModel createPSFModel(PSFModel psfModel) throws IllegalArgumentException
 	{
-		PSFModel copy = psfModel.copy();
+		final PSFModel copy = psfModel.copy();
 		copy.setRandomGenerator(createRandomGenerator());
 		return copy;
 
@@ -2801,17 +2735,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (cameraModel.isPerPixelModel())
 		{
-			Rectangle bounds = cameraModel.getBounds();
+			final Rectangle bounds = cameraModel.getBounds();
 			readNoise = cameraModel.getVariance(bounds);
-			float[] gain = cameraModel.getGain(bounds);
+			final float[] gain = cameraModel.getGain(bounds);
 			for (int i = 0; i < readNoise.length; i++)
 				readNoise[i] = (float) (Math.sqrt(readNoise[i]) / gain[i]);
 		}
 		else
 		{
 			// Use a dummy coordinate to find out the fixed variance and gain
-			float variance = cameraModel.getVariance(0, 0);
-			float gain = cameraModel.getGain(0, 0);
+			final float variance = cameraModel.getVariance(0, 0);
+			final float gain = cameraModel.getGain(0, 0);
 
 			// Avoid sqrt on all the same value
 			this.readNoise = new float[settings.getSize() * settings.getSize()];
@@ -2842,13 +2776,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private CameraModel createCCDCameraModel()
 	{
-		float bias = settings.getBias();
+		final float bias = settings.getBias();
 		float gain = 1f;
 
 		if (settings.getCameraGain() != 0)
 			gain = (float) settings.getCameraGain();
 
-		float readNoise = (float) new CreateDataSettingsHelper(settings).getReadNoiseInCounts();
+		final float readNoise = (float) new CreateDataSettingsHelper(settings).getReadNoiseInCounts();
 
 		return new CCDCameraModel(bias, gain, (float) Maths.pow2(readNoise));
 	}
@@ -2921,29 +2855,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Gamma(a+b,scale) = Gamma(a,scale) + Gamma(b,scale)
 			// See: https://en.wikipedia.org/wiki/Gamma_distribution#Summation
 
-			float[] background = createBackground(random);
+			final float[] background = createBackground(random);
 			if (settings.getBackground() > 0)
 				amplify(background);
 
-			float[] image = new float[background.length];
+			final float[] image = new float[background.length];
 
 			// Create read noise now so that we can calculate the true background noise.
 			// Note: The read noise is in electrons.
 			if (readNoise != null)
 			{
-				RandomGenerator r = random.getRandomGenerator();
+				final RandomGenerator r = random.getRandomGenerator();
 				for (int i = 0; i < background.length; i++)
 					background[i] += (float) (readNoise[i] * r.nextGaussian());
 			}
 
 			// Extract the localisations and draw if we have a PSF model
-			int fromIndex = findIndexByTime(localisations, startIndex, t);
+			final int fromIndex = findIndexByTime(localisations, startIndex, t);
 			if (fromIndex > -1 && psfModel != null)
 			{
-				int toIndex = findLastIndexByTime(localisations, fromIndex, t);
-				List<LocalisationModelSet> subset = localisations.subList(fromIndex, toIndex + 1);
-				float[] data = new float[settings.getSize() * settings.getSize()];
-				for (LocalisationModelSet localisationSet : subset)
+				final int toIndex = findLastIndexByTime(localisations, fromIndex, t);
+				final List<LocalisationModelSet> subset = localisations.subList(fromIndex, toIndex + 1);
+				final float[] data = new float[settings.getSize() * settings.getSize()];
+				for (final LocalisationModelSet localisationSet : subset)
 				{
 					if (Utils.isInterrupted())
 						return;
@@ -2953,12 +2887,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					// Draw each localisation in the set. Store the PSF so we can remove it later
 					double totalPhotonsRendered = 0;
-					Spot[] spots = new Spot[localisationSet.size()];
+					final Spot[] spots = new Spot[localisationSet.size()];
 					int spotCount = 0;
-					for (LocalisationModel localisation : localisationSet.getLocalisations())
+					for (final LocalisationModel localisation : localisationSet.getLocalisations())
 					{
 						// Adjust to centre of image
-						double[] xyz = localisation.getCoordinates();
+						final double[] xyz = localisation.getCoordinates();
 						xyz[0] += xoffset;
 						xyz[1] += xoffset;
 
@@ -2968,7 +2902,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						double intensity = localisation.getIntensity();
 						int[] samplePositions = null;
 						if (intensity > 0)
-						{
 							// TODO record all the positions we draw and the number of photons.
 							// This can be used later to compute the Fisher information for each spot.
 							if (poissonNoise)
@@ -2980,12 +2913,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 								samplePositions = psfModel.getSamplePositions();
 							}
 							else
-							{
 								photonsRendered = psfModel.create3D(data, settings.getSize(), settings.getSize(),
 										intensity, localisation.getX(), localisation.getY(), localisation.getZ(),
 										false);
-							}
-						}
 						//addDraw(photons);
 						if (photonsRendered > 0)
 						{
@@ -3007,55 +2937,51 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					{
 						photonsRemoved.incrementAndGet();
 						for (int i = 0; i < spotCount; i++)
-						{
 							erase(data, spots[i]);
-						}
 						localisationSet.setData(new double[5]);
 						continue;
 					}
 
 					addPhotons(totalPhotonsRendered);
 
-					LocalisationModel localisation = localisationSet.toLocalisation();
+					final LocalisationModel localisation = localisationSet.toLocalisation();
 
 					// Add to memory.
 					// Use the actual intensity (not the total photons rendered)
-					float intensity = (float) localisation.getIntensity();
-					float x = (float) localisation.getX();
-					float y = (float) localisation.getY();
-					float z = (float) localisation.getZ();
+					final float intensity = (float) localisation.getIntensity();
+					final float x = (float) localisation.getX();
+					final float y = (float) localisation.getY();
+					final float z = (float) localisation.getZ();
 					// 0.5 is the centre of the pixel so just round down.
-					int origX = (int) x;
-					int origY = (int) y;
+					final int origX = (int) x;
+					final int origY = (int) y;
 					// Background and noise should be calculated using the
 					// region covered by the PSF.
-					double[] localStats = getStatistics(backgroundPixels, background, origX, origY);
-					double backgroundInPhotons = localStats[0];
+					final double[] localStats = getStatistics(backgroundPixels, background, origX, origY);
+					final double backgroundInPhotons = localStats[0];
 
 					// Note: The width estimate does not account for diffusion
 					float sx, sy;
 					if (psfModel instanceof GaussianPSFModel)
 					{
-						GaussianPSFModel m = (GaussianPSFModel) psfModel;
+						final GaussianPSFModel m = (GaussianPSFModel) psfModel;
 						sx = (float) m.getS0();
 						sy = (float) m.getS1();
 					}
 					else if (psfModel instanceof AiryPSFModel)
 					{
-						AiryPSFModel m = (AiryPSFModel) psfModel;
+						final AiryPSFModel m = (AiryPSFModel) psfModel;
 						sx = (float) (m.getW0() * AiryPattern.FACTOR);
 						sy = (float) (m.getW1() * AiryPattern.FACTOR);
 					}
 					else if (psfModel instanceof ImagePSFModel)
 					{
-						ImagePSFModel m = (ImagePSFModel) psfModel;
+						final ImagePSFModel m = (ImagePSFModel) psfModel;
 						sx = (float) (m.getHWHM0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
 						sy = (float) (m.getHWHM1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
 					}
 					else
-					{
 						throw new IllegalStateException("Unknown PSF model");
-					}
 
 					// *-*-*-*-*
 					// We want to compute the background noise at the localisation position in photons.
@@ -3068,7 +2994,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// *-*-*-*-*
 
 					// The variance of the background image is currently in electrons^2
-					double totalNoise = Math.sqrt(localStats[3]);
+					final double totalNoise = Math.sqrt(localStats[3]);
 
 					// Convert noise from electrons back to photons for convenience when computing SNR using the signal in photons.
 					double totalNoiseInPhotons = totalNoise / qe;
@@ -3096,24 +3022,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							new double[] { backgroundInPhotons, totalNoiseInPhotons, sx, sy, totalPhotonsRendered });
 
 					if (checkSNR)
-					{
 						if (badLocalisation(localisationSet, totalPhotonsRendered, totalNoiseInPhotons))
 						{
 							for (int i = 0; i < spotCount; i++)
-							{
 								erase(data, spots[i]);
-							}
 							localisationSet.setData(new double[5]);
 							continue;
 						}
-					}
 
 					newLocalisations.add(localisationSet);
 					// The parameters should have the background and intensity in
 					// photons before noise (as a perfect result).
-					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams((float) backgroundInPhotons,
+					final float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams((float) backgroundInPhotons,
 							intensity, x, y, z, sx, sy);
-					float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
+					final float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
 					// Use extended result to store the ID
 					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoiseInPhotons,
 							u, params, null, localisationSet.getId()));
@@ -3150,13 +3072,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Quantum efficiency: Model using binomial distribution
 			if (qe < 1)
-			{
 				for (int i = 0; i < image.length; i++)
-				{
 					if (image[i] != 0)
 						image[i] = random.nextBinomial((int) image[i], qe);
-				}
-			}
 
 			// Apply EM gain
 			if (emGain != 0)
@@ -3179,7 +3097,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// fitted.
 
 				if (tubbsModel)
-				{
 					// Tubbs's model
 					// Equation 14: is a gamma distribution for electrons created in the register
 					for (int i = 0; i < image.length; i++)
@@ -3190,7 +3107,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						final double electrons = Math.round(random.nextGamma(image[i], scale) - 1);
 						image[i] += electrons;
 					}
-				}
 				else
 				{
 					// Standard gamma distribution
@@ -3199,17 +3115,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Since the call random.nextGamma(...) creates a Gamma distribution
 					// which pre-calculates factors only using the scale parameter we
 					// create a custom gamma distribution where the shape can be set as a property.
-					double shape = 1;
-					CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), shape,
+					final double shape = 1;
+					final CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), shape,
 							emGain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 					for (int i = 0; i < image.length; i++)
 					{
 						if (image[i] <= 0)
-						{
 							// What about modelling spontaneous electron events?
 							continue;
-						}
 						dist.setShapeUnsafe(image[i]);
 						image[i] = Math.round(dist.sample());
 					}
@@ -3220,14 +3134,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		private void erase(float[] data, Spot spot)
 		{
 			if (spot.samplePositions != null)
-			{
 				psfModel.eraseSample(data, settings.getSize(), settings.getSize(), spot.samplePositions);
-			}
 			else
-			{
 				psfModel.erase(data, settings.getSize(), settings.getSize(), spot.psf, spot.x0min, spot.x0max,
 						spot.x1min, spot.x1max);
-			}
 		}
 
 		/**
@@ -3271,8 +3181,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				x1range = x1max - x1min + 1;
 			}
 
-			Statistics sum = new Statistics();
-			Statistics sum2 = new Statistics();
+			final Statistics sum = new Statistics();
+			final Statistics sum2 = new Statistics();
 			for (int y = 0; y < x1range; y++)
 			{
 				// Locate the insert location
@@ -3317,8 +3227,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (localisationSet.hasNeighbour())
 		{
-			double nextIntensity = getIntensity(localisationSet.getNext());
-			double previousIntensity = getIntensity(localisationSet.getPrevious());
+			final double nextIntensity = getIntensity(localisationSet.getNext());
+			final double previousIntensity = getIntensity(localisationSet.getPrevious());
 
 			// Check if either neighbour is above the t1 threshold
 			if (Math.max(nextIntensity, previousIntensity) / noise > settings.getMinSnrT1())
@@ -3360,7 +3270,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Add Poisson noise.
 			if (uniformBackground)
 			{
-				double mean = backgroundPixels[0];
+				final double mean = backgroundPixels[0];
 
 				// Simulate N photons hitting the image. The total photons (N) is
 				// the mean for each pixel multiplied by the number of pixels.
@@ -3369,11 +3279,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				long samples = random.nextPoisson(mean * backgroundPixels.length);
 
 				final int upper = pixels2.length - 1;
-				UniformIntegerDistribution d = new UniformIntegerDistribution(random.getRandomGenerator(), 0, upper);
+				final UniformIntegerDistribution d = new UniformIntegerDistribution(random.getRandomGenerator(), 0, upper);
 				while (samples-- > 0)
-				{
 					pixels2[d.sample()] += 1;
-				}
 
 				//// Alternative is to sample each pixel from a Poisson distribution. This is slow
 				//PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), backgroundPixels[0],
@@ -3385,22 +3293,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			else
 			{
-				CustomPoissonDistribution dist = new CustomPoissonDistribution(random.getRandomGenerator(), 1,
+				final CustomPoissonDistribution dist = new CustomPoissonDistribution(random.getRandomGenerator(), 1,
 						PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 				for (int i = 0; i < pixels2.length; i++)
-				{
 					if (backgroundPixels[i] > 0)
 					{
 						dist.setMeanUnsafe(backgroundPixels[i]);
 						pixels2[i] = dist.sample();
 					}
-				}
 			}
 		}
 		else
-		{
 			pixels2 = backgroundPixels.clone();
-		}
 
 		return pixels2;
 	}
@@ -3412,31 +3316,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			backgroundPixels = new float[settings.getSize() * settings.getSize()];
 
-			ImagePlus imp = WindowManager.getImage(settings.getBackgroundImage());
+			final ImagePlus imp = WindowManager.getImage(settings.getBackgroundImage());
 			if (imp != null)
 			{
 				// Use an image for the background
 				ImageProcessor ip = imp.getProcessor().duplicate().toFloat(0, null);
 				ip.setInterpolationMethod(ImageProcessor.BILINEAR);
 				ip = ip.resize(settings.getSize(), settings.getSize());
-				float[] data = (float[]) ip.getPixels();
+				final float[] data = (float[]) ip.getPixels();
 				final double max = Maths.maxDefault(0, data);
 				if (max != 0)
 				{
 					final double scale = settings.getBackground() / max;
 					for (int i = 0; i < backgroundPixels.length; i++)
-					{
 						// Ignore pixels below zero
 						backgroundPixels[i] = (float) (FastMath.max(0, data[i]) * scale);
-					}
 					return;
 				}
 			}
 
 			// Use the illumination (this is the fall-back method if the background image has no
 			// maximum)
-			SpatialIllumination illumination = createIllumination(settings.getBackground(), 0);
-			double[] xyz = new double[3];
+			final SpatialIllumination illumination = createIllumination(settings.getBackground(), 0);
+			final double[] xyz = new double[3];
 			for (int y = 0, i = 0; y < settings.getSize(); y++)
 			{
 				xyz[1] = y - settings.getSize() / 2;
@@ -3537,8 +3439,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static List<LocalisationModel> toLocalisations(List<LocalisationModelSet> localisationSets)
 	{
-		ArrayList<LocalisationModel> localisations = new ArrayList<>(localisationSets.size());
-		for (LocalisationModelSet s : localisationSets)
+		final ArrayList<LocalisationModel> localisations = new ArrayList<>(localisationSets.size());
+		for (final LocalisationModelSet s : localisationSets)
 			localisations.add(s.toLocalisation());
 		return localisations;
 	}
@@ -3558,15 +3460,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (fluorophores == null)
 			return null;
 		// movingMolecules will be created with an initial capacity to hold all the unique IDs
-		TIntHashSet idSet = new TIntHashSet((movingMolecules != null) ? movingMolecules.capacity() : 0);
-		for (LocalisationModel l : localisations)
+		final TIntHashSet idSet = new TIntHashSet((movingMolecules != null) ? movingMolecules.capacity() : 0);
+		for (final LocalisationModel l : localisations)
 			idSet.add(l.getId());
-		List<FluorophoreSequenceModel> newFluorophores = new ArrayList<>(idSet.size());
-		for (FluorophoreSequenceModel f : fluorophores)
-		{
+		final List<FluorophoreSequenceModel> newFluorophores = new ArrayList<>(idSet.size());
+		for (final FluorophoreSequenceModel f : fluorophores)
 			if (idSet.contains(f.getId()))
 				newFluorophores.add(f);
-		}
 		return newFluorophores;
 	}
 
@@ -3577,15 +3477,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		createSummaryTable();
 
-		Statistics[] stats = new Statistics[NAMES.length];
+		final Statistics[] stats = new Statistics[NAMES.length];
 		for (int i = 0; i < stats.length; i++)
-		{
 			stats[i] = (settings.getShowHistograms() || alwaysRemoveOutliers[i]) ? new StoredDataStatistics()
 					: new Statistics();
-		}
 
 		// Find the largest timepoint
-		ImagePlus outputImp = WindowManager.getImage(benchmarkImageId);
+		final ImagePlus outputImp = WindowManager.getImage(benchmarkImageId);
 		int nFrames;
 		if (outputImp == null)
 		{
@@ -3593,16 +3491,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			nFrames = localisations.get(localisations.size() - 1).getTime();
 		}
 		else
-		{
 			nFrames = outputImp.getStackSize();
-		}
-		int[] countHistogram = new int[nFrames + 1];
+		final int[] countHistogram = new int[nFrames + 1];
 
 		// Use the localisations that were drawn to create the sampled on/off times
 		rebuildNeighbours(localisations);
 
 		// Assume that there is at least one localisation
-		LocalisationModel first = localisations.get(0);
+		final LocalisationModel first = localisations.get(0);
 		int currentId = first.getId(); // The current localisation
 		int lastT = first.getTime(); // The last time this localisation was on
 		int blinks = 0; // Number of blinks
@@ -3612,9 +3508,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Used to convert the sampled times in frames into seconds
 		final double framesPerSecond = 1000.0 / settings.getExposureTime();
 		//final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
-		for (LocalisationModel l : localisations)
+		for (final LocalisationModel l : localisations)
 		{
-			double[] data = l.getData();
+			final double[] data = l.getData();
 			if (data == null)
 				throw new IllegalStateException("No localisation data. This should not happen!");
 			final double noise = data[1];
@@ -3640,7 +3536,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					stats[SNR_CONTINUOUS].add(snr);
 			}
 
-			int id = l.getId();
+			final int id = l.getId();
 			// Check if this a new fluorophore
 			if (currentId != id)
 			{
@@ -3667,10 +3563,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					stats[SAMPLED_T_OFF].add(((l.getTime() - 1) - lastT) / framesPerSecond);
 				}
 				else
-				{
 					// Continuous on-time
 					currentT++;
-				}
 			}
 
 			lastT = l.getTime();
@@ -3690,18 +3584,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			stats[SAMPLES].add(countHistogram[t]);
 
 		if (fluorophores != null)
-		{
-			for (FluorophoreSequenceModel f : fluorophores)
+			for (final FluorophoreSequenceModel f : fluorophores)
 			{
 				stats[BLINKS].add(f.getNumberOfBlinks());
 				// On-time
-				for (double t : f.getOnTimes())
+				for (final double t : f.getOnTimes())
 					stats[T_ON].add(t);
 				// Off-time
-				for (double t : f.getOffTimes())
+				for (final double t : f.getOffTimes())
 					stats[T_OFF].add(t);
 			}
-		}
 		else
 		{
 			// show no blinks
@@ -3718,11 +3610,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			try
 			{
 				// Get widths
-				WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+				final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
 				wp.getW();
 				stats[WIDTH].add(wp.wx);
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				Utils.log("Unable to compute width: " + e.getMessage());
 			}
@@ -3730,20 +3622,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			try
 			{
 				// Get z depth
-				StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+				final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
 				sp.getXYZ();
 
 				// Get precision
-				PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+				final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
 				pp.getPrecision();
 				stats[PRECISION].add(pp.precision);
 				for (int i = 0; i < pp.size(); i++)
-				{
 					if (Math.abs(sp.z[i]) < depth)
 						stats[PRECISION_IN_FOCUS].add(pp.precision[i]);
-				}
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				Utils.log("Unable to compute LSE precision: " + e.getMessage());
 			}
@@ -3770,10 +3660,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public void execute(PeakResult r)
 					{
 						if (counter.advance(r.getFrame()))
-						{
 							counter.increment(runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats,
 									radius, bounds, allDensity, counter.getCount()));
-						}
 						coordsX.add(r.getXPosition());
 						coordsY.add(r.getYPosition());
 					}
@@ -3794,7 +3682,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					@Override
 					public void execute(PeakResult r)
 					{
-						int density = allDensity[counter.getAndIncrement()];
+						final int density = allDensity[counter.getAndIncrement()];
 						r.setOrigValue(density);
 						if (density == 0)
 							singles.add(r);
@@ -3805,20 +3693,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(datasetNumber).append('\t');
 		if (settings.getCameraType() == CameraType.SCMOS)
 		{
 			sb.append("sCMOS (").append(settings.getCameraModelName()).append(") ");
-			Rectangle bounds = cameraModel.getBounds();
+			final Rectangle bounds = cameraModel.getBounds();
 			sb.append(" ").append(bounds.x).append(",").append(bounds.y);
-			int size = settings.getSize();
+			final int size = settings.getSize();
 			sb.append(" ").append(size).append("x").append(size);
 		}
 		else if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
 			sb.append(CalibrationProtosHelper.getName(settings.getCameraType()));
-			int size = settings.getSize();
+			final int size = settings.getSize();
 			sb.append(" ").append(size).append("x").append(size);
 			if (settings.getCameraType() == CameraType.EMCCD)
 				sb.append(" EM=").append(settings.getEmGain());
@@ -3827,26 +3715,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			sb.append(" B=").append(settings.getBias());
 		}
 		else
-		{
 			throw new IllegalStateException();
-		}
 		sb.append(" QE=").append(settings.getQuantumEfficiency()).append('\t');
 		sb.append(settings.getPsfModel());
 		if (psfModelType == PSF_MODEL_IMAGE)
-		{
 			sb.append(" Image").append(settings.getPsfImageName());
-		}
 		else if (psfModelType == PSF_MODEL_ASTIGMATISM)
-		{
 			sb.append(" model=").append(settings.getAstigmatismModel());
-		}
 		else
 		{
 			sb.append(" DoF=").append(Utils.rounded(settings.getDepthOfFocus()));
 			if (settings.getEnterWidth())
-			{
 				sb.append(" SD=").append(Utils.rounded(settings.getPsfSd()));
-			}
 			else
 			{
 				sb.append(" λ=").append(Utils.rounded(settings.getWavelength()));
@@ -3868,10 +3748,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		sb.append(Utils.rounded(sa, 4)).append('\t');
 		// Width not valid for the Image PSF.
 		// Q. Is this true? We can approximate the FHWM for a spot-like image PSF.
-		int nStats = (psfModelType == PSF_MODEL_IMAGE) ? stats.length - 1 : stats.length;
+		final int nStats = (psfModelType == PSF_MODEL_IMAGE) ? stats.length - 1 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
-			double centre = (alwaysRemoveOutliers[i])
+			final double centre = (alwaysRemoveOutliers[i])
 					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
 					: stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append('\t');
@@ -3887,13 +3767,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getShowHistograms())
 		{
 			IJ.showStatus("Calculating histograms ...");
-			boolean[] chosenHistograms = getChoosenHistograms();
+			final boolean[] chosenHistograms = getChoosenHistograms();
 
-			WindowOrganiser wo = new WindowOrganiser();
+			final WindowOrganiser wo = new WindowOrganiser();
 
 			boolean requireRetile = false;
 			for (int i = 0; i < NAMES.length; i++)
-			{
 				if (chosenHistograms[i])
 				{
 					wo.add(Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
@@ -3902,7 +3781,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							settings.getHistogramBins() * ((integerDisplay[i]) ? 100 : 1)));
 					requireRetile = requireRetile || Utils.isNewWindow();
 				}
-			}
 
 			wo.tile();
 		}
@@ -3959,7 +3837,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private MemoryPeakResults copyMemoryPeakResults(String nameSuffix)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 		newResults.copySettings(this.results);
 		newResults.setName(newResults.getSource().getName() + " (" + TITLE + " " + nameSuffix + ")");
 		newResults.setSortAfterEnd(true);
@@ -3973,7 +3851,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getChooseHistograms())
 			return displayHistograms;
 
-		boolean[] all = new boolean[displayHistograms.length];
+		final boolean[] all = new boolean[displayHistograms.length];
 		for (int i = 0; i < all.length; i++)
 			all[i] = true;
 		return all;
@@ -4029,18 +3907,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		int id = 0, t = 0;
 		LocalisationModel previous = null;
-		for (LocalisationModel l : localisations)
+		for (final LocalisationModel l : localisations)
 		{
 			if (l.getId() != id)
-			{
 				// New spot so no previous neighbour
 				previous = null;
-			}
 			else if (l.getTime() > t + 1)
-			{
 				// Discontinuous time so no previous neighbour
 				previous = null;
-			}
 
 			l.setPrevious(previous);
 			l.setNext(null);
@@ -4061,26 +3935,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				IJ.log(header);
 			}
 		}
-		else
+		else if (summaryTable == null || !summaryTable.isVisible())
 		{
-			if (summaryTable == null || !summaryTable.isVisible())
-			{
-				summaryTable = new TextWindow("Data Summary", createHeader(), "", 800, 300);
-				summaryTable.setVisible(true);
-			}
+			summaryTable = new TextWindow("Data Summary", createHeader(), "", 800, 300);
+			summaryTable.setVisible(true);
 		}
 	}
 
 	private static String createHeader()
 	{
-		StringBuilder sb = new StringBuilder(
+		final StringBuilder sb = new StringBuilder(
 				"Dataset\tCamera\tPSF\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
 		for (int i = 0; i < NAMES.length; i++)
-		{
 			sb.append('\t').append(NAMES[i]);
 			//if (alwaysRemoveOutliers[i])
 			//	sb.append("*");
-		}
 		return sb.toString();
 	}
 
@@ -4094,14 +3963,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (!settings.getSaveImage())
 			return;
-		String[] path = Utils.decodePath(settings.getImageFilename());
-		OpenDialog chooser = new OpenDialog("Image_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(settings.getImageFilename());
+		final OpenDialog chooser = new OpenDialog("Image_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.setImageFilename(chooser.getDirectory() + chooser.getFileName());
 			settings.setImageFilename(Utils.replaceExtension(settings.getImageFilename(), "tiff"));
 
-			FileSaver fs = new FileSaver(imp);
+			final FileSaver fs = new FileSaver(imp);
 			boolean ok;
 			if (imp.getStackSize() > 1)
 				ok = fs.saveAsTiffStack(settings.getImageFilename());
@@ -4119,14 +3988,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (!settings.getSaveImageResults())
 			return;
-		String[] path = Utils.decodePath(settings.getImageResultsFilename());
-		OpenDialog chooser = new OpenDialog("Image_Results_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(settings.getImageResultsFilename());
+		final OpenDialog chooser = new OpenDialog("Image_Results_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.setImageResultsFilename(chooser.getDirectory() + chooser.getFileName());
 			settings.setImageResultsFilename(Utils.replaceExtension(settings.getImageResultsFilename(), "xls"));
 
-			TextFilePeakResults r = new TextFilePeakResults(settings.getImageResultsFilename(), false);
+			final TextFilePeakResults r = new TextFilePeakResults(settings.getImageResultsFilename(), false);
 			r.copySettings(results);
 			r.begin();
 			r.addAll(results.toArray());
@@ -4147,7 +4016,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		sortLocalisationsByIdThenTime(localisations);
 
-		MemoryPeakResults traceResults = copyMemoryPeakResults("Pulses");
+		final MemoryPeakResults traceResults = copyMemoryPeakResults("Pulses");
 		LocalisationModel start = null;
 		int currentId = -1;
 		int n = 0;
@@ -4156,7 +4025,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final int isy = Gaussian2DPeakResultHelper.INDEX_SY;
 		double noise = 0;
 		int lastT = -1;
-		for (LocalisationModel localisation : localisations)
+		for (final LocalisationModel localisation : localisations)
 		{
 			if (currentId != localisation.getId() || lastT + 1 != localisation.getTime())
 			{
@@ -4168,7 +4037,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					params[isx] /= n;
 					params[isy] /= n;
 
-					ExtendedPeakResult p = new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
+					final ExtendedPeakResult p = new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
 							(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), 0, params, null, lastT,
 							currentId);
 					// if (p.getPrecision(107, 1) > 2000)
@@ -4220,10 +4089,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getDiffusionRate() <= 0 || settings.getFixedFraction() >= 1)
 			return;
 
-		MemoryPeakResults fixedResults = copyMemoryPeakResults("Fixed");
-		MemoryPeakResults movingResults = copyMemoryPeakResults("Moving");
+		final MemoryPeakResults fixedResults = copyMemoryPeakResults("Fixed");
+		final MemoryPeakResults movingResults = copyMemoryPeakResults("Moving");
 
-		PeakResult[] peakResults = results.toArray();
+		final PeakResult[] peakResults = results.toArray();
 		// Sort using the ID
 		Arrays.sort(peakResults, new Comparator<PeakResult>()
 		{
@@ -4235,13 +4104,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		});
 
 		MemoryPeakResults currentResults = movingResults;
-		FrameCounter counter = new FrameCounter(-1);
-		for (PeakResult p : peakResults)
+		final FrameCounter counter = new FrameCounter(-1);
+		for (final PeakResult p : peakResults)
 		{
 			if (counter.advance(p.getId()))
-			{
 				currentResults = (movingMolecules.contains(p.getId())) ? movingResults : fixedResults;
-			}
 			currentResults.add(p);
 		}
 
@@ -4255,11 +4122,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (idToCompound == null)
 			return;
 
-		MemoryPeakResults[] set = new MemoryPeakResults[compoundNames.size()];
+		final MemoryPeakResults[] set = new MemoryPeakResults[compoundNames.size()];
 		for (int i = 0; i < set.length; i++)
 			set[i] = copyMemoryPeakResults("Compound " + (i + 1) + ", " + compoundNames.get(i));
 
-		PeakResult[] peakResults = results.toArray();
+		final PeakResult[] peakResults = results.toArray();
 		// Sort using the ID
 		Arrays.sort(peakResults, new Comparator<PeakResult>()
 		{
@@ -4271,13 +4138,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		});
 
 		MemoryPeakResults currentResults = null;
-		FrameCounter counter = new FrameCounter(-1);
-		for (PeakResult p : peakResults)
+		final FrameCounter counter = new FrameCounter(-1);
+		for (final PeakResult p : peakResults)
 		{
 			if (counter.advance(p.getId()))
-			{
 				currentResults = set[idToCompound.get(p.getId())];
-			}
 			currentResults.add(p);
 		}
 
@@ -4294,13 +4159,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	@SuppressWarnings("unused")
 	private static void convertRelativeToAbsolute(List<CompoundMoleculeModel> molecules)
 	{
-		for (CompoundMoleculeModel c : molecules)
+		for (final CompoundMoleculeModel c : molecules)
 		{
 			final double[] xyz = c.getCoordinates();
 			for (int n = c.getSize(); n-- > 0;)
 			{
-				MoleculeModel m = c.getMolecule(n);
-				double[] xyz2 = m.getCoordinates();
+				final MoleculeModel m = c.getMolecule(n);
+				final double[] xyz2 = m.getCoordinates();
 				for (int i = 0; i < 3; i++)
 					xyz2[i] += xyz[i];
 			}
@@ -4318,8 +4183,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (!settings.getSaveFluorophores() || fluorophores == null)
 			return;
 
-		String[] path = Utils.decodePath(settings.getFluorophoresFilename());
-		OpenDialog chooser = new OpenDialog("Fluorophores_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(settings.getFluorophoresFilename());
+		final OpenDialog chooser = new OpenDialog("Fluorophores_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.setFluorophoresFilename(chooser.getDirectory() + chooser.getFileName());
@@ -4332,20 +4197,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				output.newLine();
 				for (int id = 1; id <= fluorophores.size(); id++)
 				{
-					FluorophoreSequenceModel f = fluorophores.get(id - 1);
-					StringBuilder sb = new StringBuilder();
+					final FluorophoreSequenceModel f = fluorophores.get(id - 1);
+					final StringBuilder sb = new StringBuilder();
 					sb.append(f.getId()).append('\t');
 					sb.append(f.getNumberOfBlinks()).append('\t');
-					for (double[] burst : f.getBurstSequence())
-					{
+					for (final double[] burst : f.getBurstSequence())
 						sb.append(Utils.rounded(burst[0], 3)).append('\t').append(Utils.rounded(burst[1], 3))
 								.append('\t');
-					}
 					output.write(sb.toString());
 					output.newLine();
 				}
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				// Q. Add better handling of errors?
 				e.printStackTrace();
@@ -4384,10 +4247,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		//				return (o1.getZ() == o2.getZ()) ? 0 : (o1.getZ() == 0) ? -1 : 1;
 		//			}});
 
-		LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
+		final LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(settings.getLocalisationsFilename());
-		OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(settings.getLocalisationsFilename());
+		final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.setLocalisationsFilename(
@@ -4399,9 +4262,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				output.write(createResultsFileHeader());
 				output.write("#T\tId\tX\tY\tZ\tIntensity");
 				output.newLine();
-				for (LocalisationModel l : localisations)
+				for (final LocalisationModel l : localisations)
 				{
-					StringBuilder sb = new StringBuilder();
+					final StringBuilder sb = new StringBuilder();
 					sb.append(l.getTime()).append('\t');
 					sb.append(l.getId()).append('\t');
 					sb.append(l.getX()).append('\t');
@@ -4412,7 +4275,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					output.newLine();
 				}
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				// Q. Add better handling of errors?
 				e.printStackTrace();
@@ -4425,9 +4288,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (resultsFileHeader == null)
 		{
-			String[] backgroundImages = createBackgroundImageList();
+			final String[] backgroundImages = createBackgroundImageList();
 
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("# ").append(TITLE).append(" Parameters:\n");
 			addHeaderLine(sb, "Pixel_pitch (nm)", settings.getPixelPitch());
 			addHeaderLine(sb, "Size", settings.getSize());
@@ -4455,22 +4318,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			addCameraOptions(sb);
 			addHeaderLine(sb, "PSF_model", settings.getPsfModel());
 			if (psfModelType == PSF_MODEL_IMAGE)
-			{
 				addHeaderLine(sb, "PSF_image", settings.getPsfImageName());
-			}
 			else if (psfModelType == PSF_MODEL_ASTIGMATISM)
-			{
 				addHeaderLine(sb, "Astigmatism_model", settings.getAstigmatismModel());
 				// Q. Should the actual model be appended?
 				//addHeaderLine(sb, "Astigmatism_model parameters", SettingsManager.toJSON(getTheModel()));
-			}
 			else
 			{
 				addHeaderLine(sb, "Depth-of-focus (nm)", settings.getDepthOfFocus());
 				if (settings.getEnterWidth())
-				{
 					addHeaderLine(sb, "PSF_SD", settings.getPsfSd());
-				}
 				else
 				{
 					addHeaderLine(sb, "Wavelength (nm)", settings.getWavelength());
@@ -4481,9 +4338,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				addHeaderLine(sb, "Distribution", settings.getDistribution());
 				if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
-				{
 					addHeaderLine(sb, "Distribution_mask", settings.getDistributionMask());
-				}
 				else if (settings.getDistribution().equals(DISTRIBUTION[GRID]))
 				{
 					addHeaderLine(sb, "Cell_size", settings.getCellSize());
@@ -4527,13 +4382,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				}
 				addHeaderLine(sb, "Confinement", settings.getConfinement());
 				if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE]))
-				{
 					addHeaderLine(sb, "Confinement_radius", settings.getConfinementRadius());
-				}
 				else if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_MASK]))
-				{
 					addHeaderLine(sb, "Confinement_mask", settings.getConfinementMask());
-				}
 				addHeaderLine(sb, "Photon", settings.getPhotonsPerSecond());
 				addHeaderLine(sb, "Photon_distribution", settings.getPhotonDistribution());
 				if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution()))
@@ -4717,7 +4568,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			validateCameraOptions();
 			validatePSFOptions();
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -4725,7 +4576,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (!benchmarkMode && settings.getDistribution().equals(DISTRIBUTION[MASK]))
 		{
-			String[] maskImages = createDistributionImageList();
+			final String[] maskImages = createDistributionImageList();
 			if (maskImages != null)
 			{
 				gd = new ExtendedGenericDialog(TITLE);
@@ -4767,9 +4618,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					private boolean collectOptions(boolean silent)
 					{
-						CameraType cameraType = settings.getCameraType();
-						boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						final CameraType cameraType = settings.getCameraType();
+						final boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (isCCD)
 						{
 							if (cameraType == CameraType.EMCCD)
@@ -4782,7 +4633,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						}
 						else if (cameraType == CameraType.SCMOS)
 						{
-							String[] models = CameraModelManager.listCameraModels(true);
+							final String[] models = CameraModelManager.listCameraModels(true);
 							egd.addChoice("Camera_model_name", models, settings.getCameraModelName());
 							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2, 6,
 									"electron/photon");
@@ -4817,15 +4668,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private void validateCameraOptions()
 	{
-		CameraType cameraType = settings.getCameraType();
-		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
+		final CameraType cameraType = settings.getCameraType();
+		final boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 		if (isCCD)
 		{
 			if (cameraType == CameraType.EMCCD)
 				Parameters.isPositive("EM gain", settings.getEmGain());
 			Parameters.isPositive("Camera gain", settings.getCameraGain());
 			Parameters.isPositive("Read noise", settings.getReadNoise());
-			double noiseRange = settings.getReadNoise() * settings.getCameraGain() * 4;
+			final double noiseRange = settings.getReadNoise() * settings.getCameraGain() * 4;
 			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ",
 					settings.getBias(), noiseRange);
 
@@ -4836,24 +4687,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Load the model
 			cameraModel = CameraModelManager.load(settings.getCameraModelName());
 			if (cameraModel == null)
-			{
 				throw new IllegalArgumentException("Unknown camera model for name: " + settings.getCameraModelName());
-			}
 
 			// Check the width is above the selected size
 			Rectangle modelBounds = cameraModel.getBounds();
-			int size = settings.getSize();
+			final int size = settings.getSize();
 			if (modelBounds.width < size || modelBounds.height < size)
-			{
 				throw new IllegalArgumentException(String.format(
 						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] are smaller than simulation size [%d]",
 						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size));
-			}
 
 			// Ask for a crop
 			if (modelBounds.width > size || modelBounds.height > size)
 			{
-				GenericDialog gd = new GenericDialog(TITLE);
+				final GenericDialog gd = new GenericDialog(TITLE);
 				//@formatter:off
 				gd.addMessage(String.format(
 						"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the simulation size [=%d].\n \nCrop the model?",
@@ -4861,8 +4708,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						));
 				//@formatter:on
 				gd.addCheckbox("Random_crop", settings.getRandomCrop());
-				int upperx = modelBounds.x + modelBounds.width - size;
-				int uppery = modelBounds.y + modelBounds.height - size;
+				final int upperx = modelBounds.x + modelBounds.width - size;
+				final int uppery = modelBounds.y + modelBounds.height - size;
 				gd.addSlider("Origin_x", modelBounds.x, upperx,
 						Maths.clip(modelBounds.x, upperx, settings.getOriginX()));
 				gd.addSlider("Origin_y", modelBounds.y, uppery,
@@ -4878,7 +4725,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				int ox, oy;
 				if (settings.getRandomCrop())
 				{
-					RandomDataGenerator rg = new RandomDataGenerator(createRandomGenerator());
+					final RandomDataGenerator rg = new RandomDataGenerator(createRandomGenerator());
 					ox = rg.nextInt(modelBounds.x, upperx);
 					oy = rg.nextInt(modelBounds.y, uppery);
 				}
@@ -4887,7 +4734,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					ox = settings.getOriginX();
 					oy = settings.getOriginY();
 				}
-				Rectangle bounds = new Rectangle(ox, oy, size, size);
+				final Rectangle bounds = new Rectangle(ox, oy, size, size);
 				cameraModel = cameraModel.crop(bounds, false);
 				modelBounds = cameraModel.getBounds();
 				if (modelBounds.width != size || modelBounds.height != size)
@@ -4895,16 +4742,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 		}
 		else
-		{
 			throw new IllegalArgumentException(
 					"Unsupported camera type: " + CalibrationProtosHelper.getName(cameraType));
-		}
 	}
 
 	private void addCameraOptions(StringBuilder sb)
 	{
-		CameraType cameraType = settings.getCameraType();
-		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
+		final CameraType cameraType = settings.getCameraType();
+		final boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 		if (isCCD)
 		{
 			if (cameraType == CameraType.EMCCD)
@@ -4923,7 +4768,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private double getQuantumEfficiency()
 	{
-		double qe = settings.getQuantumEfficiency();
+		final double qe = settings.getQuantumEfficiency();
 		return (qe > 0 && qe < 1) ? qe : 1;
 	}
 
@@ -4932,21 +4777,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void createLikelihoodFunction()
 	{
-		CameraType cameraType = settings.getCameraType();
-		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
+		final CameraType cameraType = settings.getCameraType();
+		final boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 		fiFunction = new BasePoissonFisherInformation[settings.getSize() * settings.getSize()];
 		if (isCCD)
 		{
 			BasePoissonFisherInformation f;
-			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
-			double readNoise = helper.getReadNoiseInCounts();
+			final CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			final double readNoise = helper.getReadNoiseInCounts();
 
 			if (cameraType == CameraType.EMCCD)
 			{
 				// We only want the amplification (without QE applied)
-				double amp = helper.getAmplification();
+				final double amp = helper.getAmplification();
 				// This should be interpolated from a stored curve
-				InterpolatedPoissonFisherInformation i = CameraModelFisherInformationAnalysis
+				final InterpolatedPoissonFisherInformation i = CameraModelFisherInformationAnalysis
 						.loadFunction(CameraModelFisherInformationAnalysis.CameraType.EM_CCD, amp, readNoise);
 				if (i == null)
 					throw new IllegalStateException("No stored Fisher information for EM-CCD camera with gain " + amp +
@@ -4954,29 +4799,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				f = i;
 			}
 			else
-			{
 				// This is fast enough to compute dynamically.
 				// Read noise is in electrons so use directly.
 				f = new PoissonGaussianFisherInformation(settings.getReadNoise());
-			}
 			Arrays.fill(fiFunction, f);
 		}
 		else if (cameraType == CameraType.SCMOS)
 		{
 			// Build per-pixel likelihood function.
 			// Get the normalised variance per pixel.
-			float[] v = cameraModel.getNormalisedVariance(cameraModel.getBounds());
+			final float[] v = cameraModel.getNormalisedVariance(cameraModel.getBounds());
 			// Build the function
 			for (int i = 0; i < fiFunction.length; i++)
-			{
 				fiFunction[i] = new PoissonGaussianFisherInformation(Math.sqrt(v[i]));
-			}
 		}
 		else
-		{
 			throw new IllegalArgumentException(
 					"Unsupported camera type: " + CalibrationProtosHelper.getName(cameraType));
-		}
 	}
 
 	/**
@@ -4990,8 +4829,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void addPSFOptions(final ExtendedGenericDialog gd)
 	{
 		gd.addMessage("--- PSF Model ---");
-		List<String> imageNames = PSFCombiner.createImageList();
-		TurboList<String> availableModels = new TurboList<>();
+		final List<String> imageNames = PSFCombiner.createImageList();
+		final TurboList<String> availableModels = new TurboList<>();
 		availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
 		availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);
 		final String[] images;
@@ -5001,9 +4840,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			images = imageNames.toArray(new String[imageNames.size()]);
 		}
 		else
-		{
 			images = null;
-		}
 		final String[] astigmatismModels = AstigmatismModelManager.listAstigmatismModels(false, true);
 		if (astigmatismModels.length != 0)
 			availableModels.add(PSF_MODELS[PSF_MODEL_ASTIGMATISM]);
@@ -5025,17 +4862,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			private boolean collectOptions(boolean silent)
 			{
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 				egd.addMessage("Configure the " + settings.getPsfModel() + " PSF model");
 
 				int type = 0;
 
 				// Get the image
 				if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_IMAGE]))
-				{
 					egd.addChoice("PSF_image", images, settings.getPsfImageName());
-				}
-				// Get the astigmatism model
 				else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
 				{
 					type = 1;
@@ -5061,13 +4895,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				if (egd.wasCanceled())
 					return false;
 				if (type == 0)
-				{
 					settings.setPsfImageName(egd.getNextChoice());
-				}
 				else if (type == 1)
-				{
 					settings.setAstigmatismModel(AstigmatismModelManager.removeFormatting(egd.getNextChoice()));
-				}
 				else
 				{
 					settings.setDepthOfFocus(egd.getNextNumber());
@@ -5087,23 +4917,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
 		{
 			psfModelType = PSF_MODEL_ASTIGMATISM;
-			AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
+			final AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
 			if (model == null)
 				throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
 		}
 		else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_IMAGE]))
-		{
 			psfModelType = PSF_MODEL_IMAGE;
-		}
 		else
 		{
 			psfModelType = (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_GAUSSIAN])) ? PSF_MODEL_GAUSSIAN
 					: PSF_MODEL_AIRY;
 			Parameters.isAboveZero("Depth-of-focus", settings.getDepthOfFocus());
 			if (settings.getEnterWidth())
-			{
 				Parameters.isAboveZero("PSF SD", settings.getPsfSd());
-			}
 			else
 			{
 				Parameters.isAboveZero("Wavelength", settings.getWavelength());
@@ -5149,7 +4975,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getStepsPerSecond() < 1)
 			settings.setStepsPerSecond(1);
 
-		String[] backgroundImages = createBackgroundImageList();
+		final String[] backgroundImages = createBackgroundImageList();
 		gd.addNumericField("Pixel_pitch (nm)", settings.getPixelPitch(), 2);
 		gd.addNumericField("Size (px)", settings.getSize(), 0);
 		gd.addNumericField("Depth (nm)", settings.getDepth(), 0);
@@ -5181,14 +5007,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Particles", settings.getParticles(), 0);
 		gd.addCheckbox("Compound_molecules", settings.getCompoundMolecules());
 		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.getDiffusionRate(), 2);
-		String[] diffusionTypes = SettingsManager.getNames((Object[]) DiffusionType.values());
+		final String[] diffusionTypes = SettingsManager.getNames((Object[]) DiffusionType.values());
 		gd.addChoice("Diffusion_type", diffusionTypes,
 				diffusionTypes[CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType()).ordinal()]);
 		gd.addSlider("Fixed_fraction (%)", 0, 100, settings.getFixedFraction() * 100);
 		gd.addChoice("Confinement", CONFINEMENT, settings.getConfinement());
 		gd.addNumericField("Photons (sec^-1)", settings.getPhotonsPerSecond(), 0);
 		// We cannot use the correlation moe with fixed life time tracks
-		String[] dist = (trackMode) ? Arrays.copyOf(PHOTON_DISTRIBUTION, PHOTON_DISTRIBUTION.length - 1)
+		final String[] dist = (trackMode) ? Arrays.copyOf(PHOTON_DISTRIBUTION, PHOTON_DISTRIBUTION.length - 1)
 				: PHOTON_DISTRIBUTION;
 		gd.addChoice("Photon_distribution", dist, settings.getPhotonDistribution());
 		gd.addNumericField("On_time (ms)", settings.getTOn(), 2);
@@ -5295,7 +5121,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Ensure tN threshold is more lenient
 		if (settings.getMinSnrT1() < settings.getMinSnrTN())
 		{
-			double tmp = settings.getMinSnrT1();
+			final double tmp = settings.getMinSnrT1();
 			settings.setMinSnrT1(settings.getMinSnrTN());
 			settings.setMinSnrTN(tmp);
 		}
@@ -5340,7 +5166,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			validateCameraOptions();
 			validatePSFOptions();
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -5398,7 +5224,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Parameters.isEqualOrBelow("Min binary distance", settings.getMinBinaryDistance(),
 						settings.getMaxBinaryDistance());
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
@@ -5408,7 +5234,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SettingsManager.writeSettings(settings.build());
 
 		if (settings.getDiffusionRate() > 0 && settings.getFixedFraction() < 1)
-		{
 			if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 			{
 				gd = new ExtendedGenericDialog(TITLE);
@@ -5438,7 +5263,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						settings.setConfinementMaskSliceDepth(Math.abs(gd.getNextNumber()));
 				}
 			}
-		}
 
 		SettingsManager.writeSettings(settings.build());
 
@@ -5458,8 +5282,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (Utils.isShowGenericDialog())
 			{
 				@SuppressWarnings("rawtypes")
+				final
 				Vector v = gd.getCheckboxes();
-				Checkbox cb = (Checkbox) v.get(v.size() - 1);
+				final Checkbox cb = (Checkbox) v.get(v.size() - 1);
 				cb.addItemListener(this);
 			}
 
@@ -5485,27 +5310,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Configure the photon distribution: " + settings.getPhotonDistribution());
 		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution()))
-		{
 			// Nothing more to be done
 			return true;
-		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.getPhotonDistribution()))
-		{
 			gd.addNumericField("Max_Photons (sec^-1)", settings.getPhotonsPerSecondMaximum(), 0);
-		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution()))
-		{
 			gd.addNumericField("Photon_shape", settings.getPhotonShape(), 2);
-		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.getPhotonDistribution()))
-		{
 			gd.addNumericField("Correlation (to total tOn)", settings.getCorrelation(), 2);
-		}
 		else
-		{
 			// Nothing more to be done
 			return true;
-		}
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -5531,7 +5346,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Parameters.isEqualOrAbove("Correlation", settings.getCorrelation(), -1);
 			}
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -5549,21 +5364,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private static String[] createBackgroundImageList()
 	{
-		int[] idList = WindowManager.getIDList();
+		final int[] idList = WindowManager.getIDList();
 		if (idList != null)
 		{
-			String[] list = new String[idList.length + 1];
+			final String[] list = new String[idList.length + 1];
 			list[0] = "[None]";
 			int count = 1;
-			for (int id : idList)
+			for (final int id : idList)
 			{
-				ImagePlus imp = WindowManager.getImage(id);
+				final ImagePlus imp = WindowManager.getImage(id);
 				// Image must be square and greyscale
 				if (imp != null && imp.getWidth() == imp.getHeight() &&
 						(imp.getBitDepth() == 8 || imp.getBitDepth() == 16 || imp.getBitDepth() == 32))
-				{
 					list[count++] = imp.getTitle();
-				}
 			}
 			if (count == 1)
 				return null;
@@ -5580,15 +5393,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private String[] createDistributionImageList()
 	{
 		maskListContainsStacks = false;
-		int[] idList = WindowManager.getIDList();
+		final int[] idList = WindowManager.getIDList();
 		if (idList != null)
 		{
-			String[] list = new String[idList.length + 1];
+			final String[] list = new String[idList.length + 1];
 			list[0] = "[None]";
 			int count = 1;
-			for (int id : idList)
+			for (final int id : idList)
 			{
-				ImagePlus imp = WindowManager.getImage(id);
+				final ImagePlus imp = WindowManager.getImage(id);
 				if (imp != null && imp.getWidth() == imp.getHeight())
 				{
 					list[count++] = imp.getTitle();
@@ -5607,7 +5420,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	public void itemStateChanged(ItemEvent e)
 	{
 		// When the checkbox is clicked, output example compounds to the ImageJ log
-		Checkbox cb = (Checkbox) e.getSource();
+		final Checkbox cb = (Checkbox) e.getSource();
 		if (cb.getState())
 		{
 			cb.setState(false);
@@ -5627,7 +5440,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		comment("Coordinates describe the relative positions of atoms in the molecule; the molcule will have a randomly assigned XYZ position for its centre-of-mass. Rotation will be about the centre-of-mass.");
 		IJ.log("");
 
-		Molecule.Builder mb = Molecule.newBuilder();
+		final Molecule.Builder mb = Molecule.newBuilder();
 		addAtom(mb, 10, 1, 1, 1);
 		mb.setDiffusionRate(0.5);
 		mb.setDiffusionType(DiffusionType.RANDOM_WALK.toString());
@@ -5648,7 +5461,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		addAtom(mb, 1, 1000, 1732, 0);
 		addAtom(mb, 1, 0, 1732, 0);
 		addAtom(mb, 1, -500, 866, 0);
-		Molecule m3 = mb.build();
+		final Molecule m3 = mb.build();
 
 		comment("Single molecules");
 		IJ.log("");
@@ -5669,7 +5482,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static void addAtom(Molecule.Builder mb, double mass, double x, double y, double z)
 	{
-		Atom.Builder ab = mb.addAtomBuilder();
+		final Atom.Builder ab = mb.addAtomBuilder();
 		ab.setMass(mass);
 		ab.setX(x);
 		ab.setY(y);
@@ -5678,8 +5491,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static void demo(Molecule... molecules)
 	{
-		Mixture.Builder builder = Mixture.newBuilder();
-		for (Molecule m : molecules)
+		final Mixture.Builder builder = Mixture.newBuilder();
+		for (final Molecule m : molecules)
 			builder.addMolecule(m);
 
 		// The toString() method is more verbose than JSON but easier to read
@@ -5700,27 +5513,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		List<CompoundMoleculeModel> compounds;
 		if (settings.getCompoundMolecules())
-		{
 			// Try and load the compounds from the text specification
 			try
 			{
 				// Convert from the serialised objects to the compound model
-				String text = settings.getCompoundText();
-				Mixture.Builder builder = Mixture.newBuilder();
+				final String text = settings.getCompoundText();
+				final Mixture.Builder builder = Mixture.newBuilder();
 				TextFormat.merge(text, builder);
 
 				compounds = new ArrayList<>(builder.getMoleculeCount());
 				int id = 1;
 				compoundNames = new ArrayList<>(builder.getMoleculeCount());
-				for (Molecule m : builder.getMoleculeList())
+				for (final Molecule m : builder.getMoleculeList())
 				{
-					MoleculeModel[] molecules = new MoleculeModel[m.getAtomCount()];
+					final MoleculeModel[] molecules = new MoleculeModel[m.getAtomCount()];
 					for (int i = 0; i < molecules.length; i++)
 					{
-						AtomOrBuilder a = m.getAtomOrBuilder(i);
+						final AtomOrBuilder a = m.getAtomOrBuilder(i);
 						molecules[i] = new MoleculeModel(a.getMass(), a.getX(), a.getY(), a.getZ());
 					}
-					CompoundMoleculeModel cm = new CompoundMoleculeModel(id++, 0, 0, 0, Arrays.asList(molecules));
+					final CompoundMoleculeModel cm = new CompoundMoleculeModel(id++, 0, 0, 0, Arrays.asList(molecules));
 					cm.setFraction(m.getFraction());
 					cm.setDiffusionRate(m.getDiffusionRate() * diffusionFactor);
 					cm.setDiffusionType(DiffusionType.fromString(m.getDiffusionType()));
@@ -5731,22 +5543,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// Convert coordinates from nm to pixels
 				final double scaleFactor = 1.0 / settings.getPixelPitch();
-				for (CompoundMoleculeModel c : compounds)
-				{
+				for (final CompoundMoleculeModel c : compounds)
 					c.scale(scaleFactor);
-				}
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				IJ.error(TITLE, "Unable to create compound molecules");
 				return null;
 			}
-		}
 		else
 		{
 			// Create a simple compound with one molecule at the origin
 			compounds = new ArrayList<>(1);
-			CompoundMoleculeModel m = new CompoundMoleculeModel(1, 0, 0, 0,
+			final CompoundMoleculeModel m = new CompoundMoleculeModel(1, 0, 0, 0,
 					Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 			m.setDiffusionRate(settings.getDiffusionRate() * diffusionFactor);
 			m.setDiffusionType(CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType()));
@@ -5789,7 +5598,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		abstract boolean identicalAddition();
 	}
 
-	private SeedMode seedMode = SeedMode.DEFAULT;
+	private final SeedMode seedMode = SeedMode.DEFAULT;
 
 	private long getSeedOffset()
 	{
@@ -5799,14 +5608,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private int getSeedAddition()
 	{
 		if (seedMode.identicalAddition())
-		{
 			if (resetSeed)
 			{
 				// Reset only once per plugin execution
 				resetSeed = false;
 				seedAddition = 0;
 			}
-		}
 		// Increment the seed to ensure that new generators are created at the same system time point
 		return seedAddition++;
 	}
@@ -5866,7 +5673,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	public static ImmutableMemoryPeakResults getResults()
 	{
-		MemoryPeakResults r = MemoryPeakResults.getResults(benchmarkResultsName);
+		final MemoryPeakResults r = MemoryPeakResults.getResults(benchmarkResultsName);
 		if (r == null)
 			return null;
 		return new ImmutableMemoryPeakResults(r);
@@ -5881,13 +5688,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// last simulation parameters to set settings.
 
 		if (!showLoadDialog())
-		{
 			//resetMemory();
 			return;
-		}
 
 		// Load the image
-		ImagePlus imp = WindowManager.getImage(benchmarkImage);
+		final ImagePlus imp = WindowManager.getImage(benchmarkImage);
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No benchmark image: " + benchmarkImage);
@@ -5896,7 +5701,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Load the results
-		MemoryPeakResults results = getSimulationResults();
+		final MemoryPeakResults results = getSimulationResults();
 		if (results == null)
 		{
 			IJ.error(TITLE, "No benchmark results: " + benchmarkResultsName);
@@ -5905,7 +5710,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		results.setName(imp.getTitle() + " (Results)");
 		results.setBounds(new Rectangle(0, 0, imp.getWidth(), imp.getHeight()));
-		IJImageSource imageSource = new IJImageSource(imp);
+		final IJImageSource imageSource = new IJImageSource(imp);
 		results.setSource(imageSource);
 
 		// Load the settings as these are used in the dialog
@@ -5920,9 +5725,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.showStatus("Loaded " + TextUtils.pleural(results.size(), "result"));
 		}
 		else
-		{
 			resetMemory();
-		}
 	}
 
 	/**
@@ -5961,7 +5764,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		IJ.showStatus("Estimating noise ...");
 
 		// Compute noise per frame
-		ImageStack stack = imp.getImageStack();
+		final ImageStack stack = imp.getImageStack();
 		final int width = stack.getWidth();
 		final int height = stack.getHeight();
 		final IJImageSource source = new IJImageSource(imp);
@@ -5970,7 +5773,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		source.open();
 		for (int slice = 1; slice < noise.length; slice++)
 		{
-			float[] data = source.next();
+			final float[] data = source.next();
 			// Use the trimmed method as there may be a lot of spots in the frame
 			noise[slice] = FitWorker.estimateNoise(data, width, height,
 					NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
@@ -6001,8 +5804,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Load directly from a results file. This is mainly to be used to load simulations
 			// saved to memory then saved to file.
-			PeakResultsReader r = new PeakResultsReader(benchmarkFile);
-			MemoryPeakResults results = r.getResults();
+			final PeakResultsReader r = new PeakResultsReader(benchmarkFile);
+			final MemoryPeakResults results = r.getResults();
 			if (results != null)
 			{
 				ResultsManager.checkCalibration(results);
@@ -6017,7 +5820,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		loadSettings.setLocalisationsFilename(benchmarkFile);
 		// TODO - This could be configurable to ignore fields that are not required,
 		// e.g. the dataset name
-		LocalisationList localisations = LoadLocalisations.loadLocalisations(loadSettings);
+		final LocalisationList localisations = LoadLocalisations.loadLocalisations(loadSettings);
 		//loadSettings.setLocalisationsFilename(tmp);
 		SettingsManager.writeSettings(loadSettings.build());
 		if (localisations == null || localisations.isEmpty())
@@ -6028,7 +5831,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private SimulationParameters showSimulationParametersDialog(ImagePlus imp, MemoryPeakResults results)
 	{
-		int molecules = results.size();
+		final int molecules = results.size();
 
 		// Get the missing parameters from the user
 		boolean fullSimulation = false;
@@ -6044,22 +5847,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Get these from the data
-		RawResultProcedure sp = new RawResultProcedure(results);
+		final RawResultProcedure sp = new RawResultProcedure(results);
 		sp.getBIXYZ();
-		float[] signal = sp.intensity;
+		final float[] signal = sp.intensity;
 		float[] limits = Maths.limits(signal);
 		double minSignal = limits[0];
 		double maxSignal = limits[1];
 		double signalPerFrame = Maths.sum(signal) / molecules;
 
-		float[] depths = sp.z;
+		final float[] depths = sp.z;
 		limits = Maths.limits(depths);
 		float depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
-		boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
+		final boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
 
 		final CalibrationWriter cal = results.getCalibrationWriter();
-		String iUnits = " " + UnitHelper.getName(cal.getIntensityUnit());
-		String zUnits = " " + UnitHelper.getName(cal.getDistanceUnit());
+		final String iUnits = " " + UnitHelper.getName(cal.getIntensityUnit());
+		final String zUnits = " " + UnitHelper.getName(cal.getDistanceUnit());
 
 		// Get this from the user
 		double b = -1;
@@ -6091,7 +5894,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Show a dialog to confirm settings
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Results contain ").append(TextUtils.pleural(molecules, "molecule")).append('\n');
 		sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(iUnits).append('\n');
 		sb.append("Max signal = ").append(Utils.rounded(maxSignal)).append(iUnits).append('\n');
@@ -6114,7 +5917,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public boolean collectOptions(Integer field)
 					{
 						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
-						boolean result = collectOptions(false);
+						final boolean result = collectOptions(false);
 						return result;
 					}
 
@@ -6126,9 +5929,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					private boolean collectOptions(boolean silent)
 					{
-						CameraType cameraType = settings.getCameraType();
-						boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						final CameraType cameraType = settings.getCameraType();
+						final boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (isCCD)
 						{
 							egd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "count/photon");
@@ -6138,7 +5941,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						}
 						else if (cameraType == CameraType.SCMOS)
 						{
-							String[] models = CameraModelManager.listCameraModels(true);
+							final String[] models = CameraModelManager.listCameraModels(true);
 							egd.addChoice("Camera_model_name", models, cal.getCameraModelName());
 							egd.addNumericField("Quantum_efficiency", cal.getQuantumEfficiency(), 2, 6,
 									"electron/photon");
@@ -6169,9 +5972,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				});
 
 		if (!fixedDepth)
-		{
 			gd.addNumericField("Depth", depth, 3, 8, "pixel");
-		}
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -6235,7 +6036,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						new Rectangle(ox, oy, imp.getWidth(), imp.getHeight()), null, false);
 				modelBounds = cameraModel.getBounds();
 
-				IJImageSource imageSource = (IJImageSource) results.getSource();
+				final IJImageSource imageSource = (IJImageSource) results.getSource();
 				imageSource.setOrigin(modelBounds.x, modelBounds.y);
 
 				cal.clearGlobalCameraSettings();
@@ -6246,7 +6047,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return null;
 			}
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return null;
@@ -6255,17 +6056,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store calibration
 		results.setCalibration(cal.getCalibration());
 
-		double a = cal.getNmPerPixel();
-		double bias = cal.getBias();
-		double gain = cal.getCountPerPhoton();
-		double readNoise = cal.getReadNoise();
-		double qe = cal.getQuantumEfficiency();
+		final double a = cal.getNmPerPixel();
+		final double bias = cal.getBias();
+		final double gain = cal.getCountPerPhoton();
+		final double readNoise = cal.getReadNoise();
+		final double qe = cal.getQuantumEfficiency();
 
 		// Note: The calibration will throw an exception if the converter cannot be created.
 		// This is OK as the data will be invalid.
 
 		// Convert values to photons
-		TypeConverter<IntensityUnit> ic = cal.getIntensityConverter(IntensityUnit.PHOTON);
+		final TypeConverter<IntensityUnit> ic = cal.getIntensityConverter(IntensityUnit.PHOTON);
 		minSignal = ic.convert(minSignal);
 		maxSignal = ic.convert(maxSignal);
 		signalPerFrame = ic.convert(signalPerFrame);
@@ -6274,20 +6075,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		depth = cal.getDistanceConverter(DistanceUnit.NM).convert(depth * 2);
 
 		// Compute total background variance in photons
-		double backgroundVariance = b;
+		final double backgroundVariance = b;
 		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor
 		// so this is "double-counting" the EM-CCD.
 		//if (emCCD)
 		//	backgroundVariance *= 2;
 
 		// Read noise is in ADUs. Convert to Photons to get contribution to background variance
-		double readNoiseInPhotons = readNoise / gain;
+		final double readNoiseInPhotons = readNoise / gain;
 
 		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this
 		// is equal to the total variance at the pixel.
-		double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
+		final double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
 
-		SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
+		final SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
 				signalPerFrame, depth, fixedDepth, bias, gain, qe, readNoise, cal.getCameraType(),
 				cal.getCameraModelName(), modelBounds, b, b2, createPSF(s / a));
 		p.loaded = true;
@@ -6301,14 +6102,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private static boolean showLoadDialog()
 	{
-		String[] images = Utils.getImageList(Utils.GREY_SCALE);
+		final String[] images = Utils.getImageList(Utils.GREY_SCALE);
 		if (images.length == 0)
 		{
 			IJ.error(TITLE, "No greyscale benchmark images");
 			return false;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Image", images, benchmarkImage);
 		gd.addFilenameField("Results_file", benchmarkFile);
 		gd.addMessage(
@@ -6357,7 +6158,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				{
 					cameraModel = cameraModel.crop(parameters.cameraBounds, true);
 				}
-				catch (IllegalArgumentException e)
+				catch (final IllegalArgumentException e)
 				{
 					throw new ConfigurationException(e);
 				}
@@ -6387,7 +6188,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (parameters.cameraType == CameraType.SCMOS)
 		{
 			sb.append("sCMOS (").append(parameters.cameraModelName).append(") ");
-			Rectangle bounds = parameters.cameraBounds;
+			final Rectangle bounds = parameters.cameraBounds;
 			sb.append(" ").append(bounds.x).append(",").append(bounds.y);
 			sb.append(" ").append(bounds.width).append("x").append(bounds.height);
 		}
@@ -6399,9 +6200,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			sb.append(" B=").append(parameters.bias);
 		}
 		else
-		{
 			throw new IllegalStateException();
-		}
 		return sb;
 	}
 }

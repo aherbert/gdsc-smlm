@@ -111,9 +111,7 @@ public class OffsetGradient2Function extends OffsetGradient1Function implements 
 		{
 			// Avoid multiple wrapping
 			if (func instanceof OffsetGradient2Function)
-			{
 				return new OffsetGradient2Function((OffsetGradient2Function) func, b);
-			}
 			return new OffsetGradient2Function(func, b);
 		}
 		return func;

@@ -153,10 +153,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		public double[] map(double[] point)
 		{
 			point = point.clone();
-			for (int i : map)
-			{
+			for (final int i : map)
 				point[i] = Math.sqrt(FastMath.abs(point[i])) * FastMath.signum(point[i]);
-			}
 			return point;
 		}
 
@@ -172,14 +170,12 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		public double[] unmap(double[] point)
 		{
 			point = point.clone();
-			for (int i : map)
-			{
+			for (final int i : map)
 				//point[i] = point[i] * point[i] * FastMath.signum(point[i]);
 				if (point[i] > 0)
 					point[i] = point[i] * point[i];
 				else
 					point[i] = -(point[i] * point[i]);
-			}
 			return point;
 		}
 
@@ -205,7 +201,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		@Override
 		public double[] value(double[] point)
 		{
-			double[] gradient = new double[point.length];
+			final double[] gradient = new double[point.length];
 			fun.likelihood(point, gradient);
 			return gradient;
 		}
@@ -353,14 +349,14 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		final int n = y.length;
-		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+		final LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
 
 		@SuppressWarnings("rawtypes")
 		BaseOptimizer baseOptimiser = null;
 
 		try
 		{
-			double[] startPoint = getInitialSolution(a);
+			final double[] startPoint = getInitialSolution(a);
 
 			PointValuePair optimum = null;
 			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED ||
@@ -386,7 +382,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				final double lineRel = relativeThreshold;
 				final double lineAbs = absoluteThreshold;
 
-				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold, lineRel,
+				final CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold, lineRel,
 						lineAbs, null, basisConvergence);
 				baseOptimiser = o;
 
@@ -397,36 +393,34 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				if (searchMethod == SearchMethod.POWELL_ADAPTER)
 				{
 					// Try using the mapping adapter for a bounded Powell search
-					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
+					final MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
 							new MultivariateLikelihood(maximumLikelihoodFunction), lower, upper);
 					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
 							new ObjectiveFunction(adapter), GoalType.MINIMIZE,
 							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
-					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
+					final double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
 					optimum = new PointValuePair(solution, optimum.getValue());
 				}
 				else
 				{
 					if (powellFunction == null)
-					{
 						powellFunction = new MultivariateLikelihood(maximumLikelihoodFunction);
-					}
 
 					// Update the maximum likelihood function in the Powell function wrapper
 					powellFunction.fun = maximumLikelihoodFunction;
 
-					OptimizationData positionChecker = null;
+					final OptimizationData positionChecker = null;
 					// new org.apache.commons.math3.optim.PositionChecker(relativeThreshold, absoluteThreshold);
 					SimpleBounds simpleBounds = null;
 					if (powellFunction.isMapped())
 					{
-						MappedMultivariateLikelihood adapter = (MappedMultivariateLikelihood) powellFunction;
+						final MappedMultivariateLikelihood adapter = (MappedMultivariateLikelihood) powellFunction;
 						if (searchMethod == SearchMethod.POWELL_BOUNDED)
 							simpleBounds = new SimpleBounds(adapter.map(lower), adapter.map(upper));
 						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
 								new ObjectiveFunction(powellFunction), GoalType.MINIMIZE,
 								new InitialGuess(adapter.map(startPoint)), positionChecker, simpleBounds);
-						double[] solution = adapter.unmap(optimum.getPointRef());
+						final double[] solution = adapter.unmap(optimum.getPointRef());
 						optimum = new PointValuePair(solution, optimum.getValue());
 					}
 					else
@@ -443,9 +437,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 			{
 				// Differentiable approximation using Powell's BOBYQA algorithm.
 				// This is slower than the Powell optimiser and requires a high number of evaluations.
-				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
+				final int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
-				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
+				final BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
 				baseOptimiser = o;
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()),
 						new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)), GoalType.MINIMIZE,
@@ -459,14 +453,14 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// CMAESOptimiser based on Matlab code:
 				// https://www.lri.fr/~hansen/cmaes.m
 				// Take the defaults from the Matlab documentation
-				double stopFitness = 0; //Double.NEGATIVE_INFINITY;
-				boolean isActiveCMA = true;
-				int diagonalOnly = 0;
-				int checkFeasableCount = 1;
-				RandomGenerator random = new Well19937c();
-				boolean generateStatistics = false;
+				final double stopFitness = 0; //Double.NEGATIVE_INFINITY;
+				final boolean isActiveCMA = true;
+				final int diagonalOnly = 0;
+				final int checkFeasableCount = 1;
+				final RandomGenerator random = new Well19937c();
+				final boolean generateStatistics = false;
 				// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
-				double[] sigma = new double[lower.length];
+				final double[] sigma = new double[lower.length];
 				for (int i = 0; i < sigma.length; i++)
 					sigma[i] = (upper[i] - lower[i]) / 3;
 				int popSize = (int) (4 + Math.floor(3 * Math.log(sigma.length)));
@@ -476,7 +470,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// function evaluations
 				final int n30 = FastMath.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
 				evaluations = 0;
-				OptimizationData[] data = new OptimizationData[] { new InitialGuess(startPoint),
+				final OptimizationData[] data = new OptimizationData[] { new InitialGuess(startPoint),
 						new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
 						new CMAESOptimizer.Sigma(sigma),
 						new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)), GoalType.MINIMIZE,
@@ -493,19 +487,17 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 						popSize *= 2;
 						data[1] = new CMAESOptimizer.PopulationSize(popSize);
 					}
-					CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA, diagonalOnly,
+					final CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA, diagonalOnly,
 							checkFeasableCount, random, generateStatistics,
 							new SimpleValueChecker(relativeThreshold, absoluteThreshold));
 					baseOptimiser = o;
-					PointValuePair result = o.optimize(data);
+					final PointValuePair result = o.optimize(data);
 					iterations += o.getIterations();
 					evaluations += o.getEvaluations();
 					//System.out.printf("CMAES [%d] i=%d [%d], e=%d [%d]\n", repeat, o.getIterations(), iterations,
 					//		o.getEvaluations(), totalEvaluations);
 					if (optimum == null || result.getValue() < optimum.getValue())
-					{
 						optimum = result;
-					}
 				}
 				// Prevent incrementing the iterations again
 				baseOptimiser = null;
@@ -519,11 +511,11 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// Do not use the convergence checker on the value of the function. Use the convergence on the
 				// point coordinate and gradient
 				//BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
-				BFGSOptimizer o = new BFGSOptimizer();
+				final BFGSOptimizer o = new BFGSOptimizer();
 				baseOptimiser = o;
 
 				// Configure maximum step length for each dimension using the bounds
-				double[] stepLength = new double[lower.length];
+				final double[] stepLength = new double[lower.length];
 				for (int i = 0; i < stepLength.length; i++)
 				{
 					stepLength[i] = (upper[i] - lower[i]) * 0.3333333;
@@ -532,7 +524,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				}
 
 				// The GoalType is always minimise so no need to pass this in
-				OptimizationData positionChecker = null;
+				final OptimizationData positionChecker = null;
 				//new org.apache.commons.math3.optim.PositionChecker(relativeThreshold, absoluteThreshold);
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()),
 						new ObjectiveFunctionGradient(new MultivariateVectorLikelihood(maximumLikelihoodFunction)),
@@ -549,7 +541,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// Note that running it on an easy problem (200 photons with fixed fitting (no background)) the algorithm
 				// does sometimes produces results better than the Powell algorithm but it is slower.
 
-				BoundedNonLinearConjugateGradientOptimizer o = new BoundedNonLinearConjugateGradientOptimizer(
+				final BoundedNonLinearConjugateGradientOptimizer o = new BoundedNonLinearConjugateGradientOptimizer(
 						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? Formula.FLETCHER_REEVES
 								: Formula.POLAK_RIBIERE,
 						new SimpleValueChecker(relativeThreshold, absoluteThreshold));
@@ -614,7 +606,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				final double gradient[] = new double[startPoint.length];
 				maximumLikelihoodFunction.likelihood(startPoint, gradient);
 				double l = 0;
-				for (double d : gradient)
+				for (final double d : gradient)
 					l += d * d;
 				final double bracketingStep = FastMath.min(0.001, ((l > 1) ? 1.0 / l : 1));
 				//System.out.printf("Bracketing step = %f (length=%f)\n", bracketingStep, l);
@@ -634,7 +626,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 
 			if (optimum == null)
 				return FitStatus.FAILED_TO_CONVERGE;
-			
+
 			final double[] solution = optimum.getPointRef();
 
 			setSolution(a, solution);
@@ -650,7 +642,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// However the variance for the position estimates of a 2D PSF can be
 				// scaled by a factor of 2 as in Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3.
 				// Since the type of function is unknown this cannot be done here.
-				FisherInformationMatrix m = new FisherInformationMatrix(
+				final FisherInformationMatrix m = new FisherInformationMatrix(
 						maximumLikelihoodFunction.fisherInformation(solution));
 				setDeviations(aDev, m);
 			}
@@ -658,31 +650,31 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 			// Reverse negative log likelihood for maximum likelihood score
 			value = -optimum.getValue();
 		}
-		catch (TooManyIterationsException e)
+		catch (final TooManyIterationsException e)
 		{
 			//System.out.printf("Too many iterations = %d\n", e.getMax());
 			//e.printStackTrace();
 			return FitStatus.TOO_MANY_ITERATIONS;
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			//System.out.printf("Too many evaluations = %d\n", e.getMax());
 			//e.printStackTrace();
 			return FitStatus.TOO_MANY_EVALUATIONS;
 		}
-		catch (ConvergenceException e)
+		catch (final ConvergenceException e)
 		{
 			// Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
 			//System.out.printf("Singular non linear model = %s\n", e.getMessage());
 			return FitStatus.SINGULAR_NON_LINEAR_MODEL;
 		}
-		catch (BFGSOptimizer.LineSearchRoundoffException e)
+		catch (final BFGSOptimizer.LineSearchRoundoffException e)
 		{
 			//System.out.println("BFGS error: " + e.getMessage());
 			//e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			//System.out.printf("Unknown error = %s\n", e.getMessage());
 			e.printStackTrace();
@@ -740,13 +732,11 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 			// Just truncate the counts for now. These are from noise in the count estimates that we do not model.
 			final double[] y2 = new double[n];
 			for (int i = 0; i < n; i++)
-			{
 				if (y[i] < 0)
 					y2[i] = 0;
 				else
 					y2[i] = y[i];
-			}
-			PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n, myAlpha);
+			final PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n, myAlpha);
 			// This will allow Powell searches. The effect on the gradient search algorithms may be weird so leave alone.
 			if (!searchMethod.usesGradient)
 				function.setAllowNegativeExpectedValues(true);
@@ -947,7 +937,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	public void setBounds(double[] lowerB, double[] upperB)
 	{
 		// Extract the bounds for the parameters we are fitting
-		int[] indices = f.gradientIndices();
+		final int[] indices = f.gradientIndices();
 
 		lower = new double[indices.length];
 		upper = new double[indices.length];
@@ -967,7 +957,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	public void setConstraints(double[] lowerB, double[] upperB)
 	{
 		// Extract the bounds for the parameters we are fitting
-		int[] indices = f.gradientIndices();
+		final int[] indices = f.gradientIndices();
 
 		lowerConstraint = new double[indices.length];
 		upperConstraint = new double[indices.length];
@@ -982,7 +972,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	public boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
 		final int n = y.length;
-		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+		final LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
 
 		final double l = maximumLikelihoodFunction.likelihood(a);
 		if (l == Double.POSITIVE_INFINITY)
@@ -998,8 +988,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
 	{
 		final int n = y.length;
-		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
-		double[] solution = getInitialSolution(a);
+		final LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+		final double[] solution = getInitialSolution(a);
 		// Compute assuming a Poisson process.
 		// Note:
 		// If using a Poisson-Gamma-Gaussian model then these will be incorrect.
@@ -1024,10 +1014,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 					e[i] = y[i] * alpha;
 			}
 			else
-			{
 				e = y;
-			}
-			LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(new FixedNonLinearFunction(e), n,
+			final LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(new FixedNonLinearFunction(e), n,
 					lastY, a);
 
 			final double l = maximumLikelihoodFunction.likelihood(a);

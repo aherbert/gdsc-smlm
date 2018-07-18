@@ -343,7 +343,7 @@ public class NullCameraModel extends BaseCameraModel
 		{
 			return (NullCameraModel) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

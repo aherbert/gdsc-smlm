@@ -110,7 +110,7 @@ public class Population<T extends Comparable<T>>
 			SelectionStrategy<T> selectionStrategy, ConvergenceChecker<T> checker)
 	{
 		// Reset the fitness
-		for (Chromosome<T> c : individuals)
+		for (final Chromosome<T> c : individuals)
 			c.setFitness(null);
 
 		// Find the best individual
@@ -146,7 +146,7 @@ public class Population<T extends Comparable<T>>
 		if (individuals.size() >= populationSize)
 			return;
 
-		ArrayList<Chromosome<T>> newIndividuals = new ArrayList<>(populationSize - individuals.size());
+		final ArrayList<Chromosome<T>> newIndividuals = new ArrayList<>(populationSize - individuals.size());
 
 		// Check for a minimum population size & mutate the individuals to achieve it.
 		// This allows a seed population of 1 to evolve.
@@ -161,7 +161,7 @@ public class Population<T extends Comparable<T>>
 			int fails = 0;
 			while (newIndividuals.size() < target && fails < failureLimit)
 			{
-				Chromosome<T> c = mutator.mutate(individuals.get(next++ % individuals.size()));
+				final Chromosome<T> c = mutator.mutate(individuals.get(next++ % individuals.size()));
 				if (c != null && !isDuplicate(newIndividuals, c))
 				{
 					newIndividuals.add(c);
@@ -170,9 +170,7 @@ public class Population<T extends Comparable<T>>
 						tracker.progress(newIndividuals.size() + individuals.size(), populationSize);
 				}
 				else
-				{
 					fails++;
-				}
 			}
 
 			// Combine the lists
@@ -196,14 +194,13 @@ public class Population<T extends Comparable<T>>
 			previousSize = newIndividuals.size();
 
 			// Select two individuals for recombination
-			ChromosomePair<T> pair = selectionStrategy.next();
-			Chromosome<T>[] children = recombiner.cross(pair.c1, pair.c2);
+			final ChromosomePair<T> pair = selectionStrategy.next();
+			final Chromosome<T>[] children = recombiner.cross(pair.c1, pair.c2);
 			if (children != null && children.length != 0)
-			{
 				// New children have been generated so mutate them
 				for (int i = 0; i < children.length && newIndividuals.size() < target; i++)
 				{
-					Chromosome<T> c = mutator.mutate(children[i]);
+					final Chromosome<T> c = mutator.mutate(children[i]);
 					if (c == null)
 						continue;
 
@@ -213,7 +210,6 @@ public class Population<T extends Comparable<T>>
 
 					newIndividuals.add(c);
 				}
-			}
 
 			if (previousSize == newIndividuals.size())
 				fails++;
@@ -245,10 +241,10 @@ public class Population<T extends Comparable<T>>
 	private boolean isDuplicate(ArrayList<? extends Chromosome<T>> newIndividuals, Chromosome<T> c)
 	{
 		final double[] s = c.sequence();
-		for (Chromosome<T> i : this.individuals)
+		for (final Chromosome<T> i : this.individuals)
 			if (match(i, s))
 				return true;
-		for (Chromosome<T> i : newIndividuals)
+		for (final Chromosome<T> i : newIndividuals)
 			if (match(i, s))
 				return true;
 		return false;
@@ -287,15 +283,13 @@ public class Population<T extends Comparable<T>>
 		T max = null;
 
 		// Subset only those with no fitness score (the others must be unchanged)
-		ArrayList<Chromosome<T>> subset = new ArrayList<>(individuals.size());
+		final ArrayList<Chromosome<T>> subset = new ArrayList<>(individuals.size());
 		long count = 0;
-		for (Chromosome<T> c : individuals)
+		for (final Chromosome<T> c : individuals)
 		{
 			final T f = c.getFitness();
 			if (f == null)
-			{
 				subset.add(c);
-			}
 			else
 			{
 				if (tracker != null)
@@ -309,7 +303,7 @@ public class Population<T extends Comparable<T>>
 		}
 
 		fitnessFunction.initialise(subset);
-		for (Chromosome<T> c : subset)
+		for (final Chromosome<T> c : subset)
 		{
 			final T f = fitnessFunction.fitness(c);
 			c.setFitness(f);

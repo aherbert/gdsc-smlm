@@ -43,46 +43,46 @@ public class PoissonGaussianConvolutionFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithPDF()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					cumulativeProbabilityIsOne(g, p, s, false);
 	}
 
 	@Test
 	public void cumulativeProbabilityIsOneWithPMF()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					cumulativeProbabilityIsOne(g, p, s, true);
 	}
 
 	@Test
 	public void probabilityMatchesLogProbabilityWithPDF()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					probabilityMatchesLogProbability(g, p, s, false);
 	}
 
 	@Test
 	public void probabilityMatchesLogProbabilityWithPMF()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					probabilityMatchesLogProbability(g, p, s, true);
 	}
 
-	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, boolean computePMF)
+	private static void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, boolean computePMF)
 	{
-		double p2 = cumulativeProbability(gain, mu, s, computePMF);
+		final double p2 = cumulativeProbability(gain, mu, s, computePMF);
 		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 	}
 
-	private double cumulativeProbability(final double gain, final double mu, final double s, boolean computePMF)
+	private static double cumulativeProbability(final double gain, final double mu, final double s, boolean computePMF)
 	{
 		// Note: The input s parameter is pre-gain.
 		final PoissonGaussianConvolutionFunction f = PoissonGaussianConvolutionFunction
@@ -105,7 +105,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
-			int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
+			final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
 			min = range[0];
 			max = range[1];
 			for (int x = min; x <= max; x++)
@@ -147,7 +147,7 @@ public class PoissonGaussianConvolutionFunctionTest
 			// Do a formal integration if the PDF
 			//if (p < 0.98 || p > 1.02)
 			//	System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
-			UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
+			final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
 					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
@@ -165,10 +165,10 @@ public class PoissonGaussianConvolutionFunctionTest
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, final double s, boolean computePMF)
+	private static void probabilityMatchesLogProbability(final double gain, double mu, final double s, boolean computePMF)
 	{
 		// Note: The input s parameter is pre-gain.
-		PoissonGaussianConvolutionFunction f = PoissonGaussianConvolutionFunction
+		final PoissonGaussianConvolutionFunction f = PoissonGaussianConvolutionFunction
 				.createWithStandardDeviation(1.0 / gain, s * gain);
 		f.setComputePMF(computePMF);
 
@@ -176,12 +176,12 @@ public class PoissonGaussianConvolutionFunctionTest
 		// Gaussian should have >99% within +/- s
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
-		int min = range[0];
-		int max = range[1];
+		final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
+		final int min = range[0];
+		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
+		final String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
@@ -198,29 +198,29 @@ public class PoissonGaussianConvolutionFunctionTest
 		TestSettings.assumeSpeedTest();
 
 		// Realistic CCD parameters for speed test
-		double s = 7.16;
-		double g = 3.1;
+		final double s = 7.16;
+		final double g = 3.1;
 
-		PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
+		final PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
 				s);
 		f1.setComputePMF(true);
 
-		PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
+		final PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
 				s);
 		f2.setComputePMF(false);
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		// Generate realistic data from the probability mass function
-		double[][] samples = new double[photons.length][];
+		final double[][] samples = new double[photons.length][];
 		for (int j = 0; j < photons.length; j++)
 		{
-			int start = (int) (4 * -s);
+			final int start = (int) (4 * -s);
 			int u = start;
-			StoredDataStatistics stats = new StoredDataStatistics();
+			final StoredDataStatistics stats = new StoredDataStatistics();
 			while (stats.getSum() < 0.995)
 			{
-				double p = f1.likelihood(u, photons[j]);
+				final double p = f1.likelihood(u, photons[j]);
 				stats.add(p);
 				if (u > 10 && p / stats.getSum() < 1e-6)
 					break;
@@ -228,12 +228,12 @@ public class PoissonGaussianConvolutionFunctionTest
 			}
 
 			// Generate cumulative probability
-			double[] data = stats.getValues();
+			final double[] data = stats.getValues();
 			for (int i = 1; i < data.length; i++)
 				data[i] += data[i - 1];
 
 			// Sample
-			double[] sample = new double[1000];
+			final double[] sample = new double[1000];
 			for (int i = 0; i < sample.length; i++)
 			{
 				final double p = rg.nextDouble();
@@ -260,13 +260,13 @@ public class PoissonGaussianConvolutionFunctionTest
 		TestSettings.logSpeedTestResult(t2 < t1, "cdf  %d -> pdf  %d = %f x\n", t1, t2, (double) t1 / t2);
 	}
 
-	private long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)
+	private static long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)
 	{
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		for (int j = 0; j < photons.length; j++)
 		{
 			final double p = photons[j];
-			for (double x : samples[j])
+			for (final double x : samples[j])
 				f.likelihood(x, p);
 		}
 		return System.nanoTime() - start;

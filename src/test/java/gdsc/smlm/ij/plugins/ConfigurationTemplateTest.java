@@ -54,11 +54,11 @@ public class ConfigurationTemplateTest
 	{
 		// This is not really a test.
 		// It creates some templates so that they can be put in the resources folder.
-		File tmpFile = File.createTempFile("template", ".json.txt");
+		final File tmpFile = File.createTempFile("template", ".json.txt");
 		tmpFile.deleteOnExit();
 
-		FitEngineConfiguration config = new FitEngineConfiguration();
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitEngineConfiguration config = new FitEngineConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setMaxIterations(150);
 		fitConfig.setMinWidthFactor(0.2);
 		fitConfig.setMinWidthFactor(5);
@@ -75,7 +75,7 @@ public class ConfigurationTemplateTest
 		config.setDataFilter(DataFilterMethod.GAUSSIAN, 0.425, false, 0);
 
 		//System.out.println(tmpFile.getPath());
-		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
+		final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
 		builder.setFitEngineSettings(config.getFitEngineSettings());
 		Assert.assertTrue(SettingsManager.toJSON(builder.build(), tmpFile, SettingsManager.FLAG_JSON_WHITESPACE));
 	}
@@ -85,10 +85,10 @@ public class ConfigurationTemplateTest
 	{
 		ConfigurationTemplate.clearTemplates();
 
-		String[] before = ConfigurationTemplate.getTemplateNames(false);
-		TemplateResource[] templates = ConfigurationTemplate.listTemplateResources();
+		final String[] before = ConfigurationTemplate.getTemplateNames(false);
+		final TemplateResource[] templates = ConfigurationTemplate.listTemplateResources();
 		ConfigurationTemplate.loadTemplateResources(templates);
-		String[] after = ConfigurationTemplate.getTemplateNames(false);
+		final String[] after = ConfigurationTemplate.getTemplateNames(false);
 
 		checkLoaded("canLoadResourceTemplates", templates, before, after);
 	}
@@ -96,13 +96,13 @@ public class ConfigurationTemplateTest
 	private static void checkLoaded(String test, TemplateResource[] templates, String[] before, String[] after)
 	{
 		// Subtract the before from the after
-		HashSet<String> set = new HashSet<>(Arrays.asList(after));
+		final HashSet<String> set = new HashSet<>(Arrays.asList(after));
 		set.removeAll(Arrays.asList(before));
 
 		Assert.assertEquals("Loaded incorrect number", templates.length, set.size());
 
 		// Check all have been loaded
-		for (TemplateResource template : templates)
+		for (final TemplateResource template : templates)
 		{
 			if (set.contains(template.name))
 			{
@@ -118,10 +118,10 @@ public class ConfigurationTemplateTest
 	{
 		ConfigurationTemplate.clearTemplates();
 
-		String[] names = new String[10];
+		final String[] names = new String[10];
 		for (int i = 0; i < names.length; i++)
 		{
-			String name = "Test" + i;
+			final String name = "Test" + i;
 			names[i] = name;
 			ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), null);
 		}
@@ -137,26 +137,26 @@ public class ConfigurationTemplateTest
 		Assert.assertEquals(0, ConfigurationTemplate.getTemplateNamesWithImage().length);
 
 		// Create a dummy image
-		int size = 20;
-		float[] pixels = new float[size * size];
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final int size = 20;
+		final float[] pixels = new float[size * size];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int i = pixels.length; i-- > 0;)
 			pixels[i] = r.nextFloat();
-		ImagePlus imp = new ImagePlus("test", new FloatProcessor(size, size, pixels));
-		File tmpFile = File.createTempFile("tmp", ".tif");
+		final ImagePlus imp = new ImagePlus("test", new FloatProcessor(size, size, pixels));
+		final File tmpFile = File.createTempFile("tmp", ".tif");
 		tmpFile.deleteOnExit();
 		IJ.save(imp, tmpFile.getPath());
 
-		String name = "canLoadTemplateImageFromFile";
-		File file = new File(Utils.replaceExtension(tmpFile.getPath(), ".xml"));
+		final String name = "canLoadTemplateImageFromFile";
+		final File file = new File(Utils.replaceExtension(tmpFile.getPath(), ".xml"));
 		ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), file);
 
 		Assert.assertEquals(1, ConfigurationTemplate.getTemplateNamesWithImage().length);
 
-		ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(name);
+		final ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(name);
 
 		Assert.assertNotNull(imp2);
-		float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
+		final float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
 
 		Assert.assertArrayEquals(pixels, data, 0);
 	}
@@ -169,28 +169,22 @@ public class ConfigurationTemplateTest
 		ConfigurationTemplate.clearTemplates();
 		ConfigurationTemplate.loadTemplateResources(ConfigurationTemplate.listTemplateResources());
 
-		String[] names = ConfigurationTemplate.getTemplateNamesWithImage();
+		final String[] names = ConfigurationTemplate.getTemplateNamesWithImage();
 		if (names.length == 0)
 			return;
 
-		ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(names[0]);
+		final ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(names[0]);
 
 		Assert.assertNotNull(imp2);
-		float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
+		final float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
 
 		// Check data is not zero
 		for (int i = 0; i < data.length; i++)
-		{
 			if (data[i] != 0)
-			{
 				// Check another pixel is different
 				for (int j = i + 1; j < data.length; j++)
-				{
 					if (data[i] != data[j])
 						return;
-				}
-			}
-		}
 
 		Assert.fail("Data is invalid");
 	}

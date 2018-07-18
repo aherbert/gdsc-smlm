@@ -66,7 +66,7 @@ public class FHTFilter extends BaseFilter
 		 */
 		public static Operation forOrdinal(int ordinal)
 		{
-			Operation[] values = Operation.values();
+			final Operation[] values = Operation.values();
 			if (ordinal < 0 || ordinal >= values.length)
 				return Operation.CORRELATION;
 			return values[ordinal];
@@ -107,13 +107,11 @@ public class FHTFilter extends BaseFilter
 		this.kw = kw;
 		this.kh = kh;
 		kN = Maths.nextPow2(Math.max(kw, kh));
-		double scale = getScale(kernel);
+		final double scale = getScale(kernel);
 		// Scale
 		if (scale != 1)
-		{
 			for (int i = 0; i < kernel.length; i++)
 				kernel[i] *= scale;
-		}
 	}
 
 	private static void checkKernel(float[] kernel, int kw, int kh)
@@ -175,13 +173,9 @@ public class FHTFilter extends BaseFilter
 	public void filter(float[] data, final int maxx, final int maxy, int border)
 	{
 		if (border < 0)
-		{
 			border = 0;
-		}
 		else
-		{
 			border = Maths.min(border, maxx / 2, maxy / 2);
-		}
 		filterInternal(data, maxx, maxy, border);
 	}
 
@@ -203,10 +197,10 @@ public class FHTFilter extends BaseFilter
 	{
 		initialiseKernel(maxx, maxy);
 
-		FHT2 dataFht = createFHT(data, maxx, maxy, border);
-		int maxN = kernelFht.getWidth();
+		final FHT2 dataFht = createFHT(data, maxx, maxy, border);
+		final int maxN = kernelFht.getWidth();
 
-		FHT2 result = compute(dataFht);
+		final FHT2 result = compute(dataFht);
 
 		// Do the transform using JTransforms as it is faster
 		dht.inverse(result.getData(), true);
@@ -216,17 +210,13 @@ public class FHTFilter extends BaseFilter
 		result.swapQuadrants();
 		if (maxx < maxN || maxy < maxN)
 		{
-			int x = getInsert(maxN, maxx);
-			int y = getInsert(maxN, maxy);
+			final int x = getInsert(maxN, maxx);
+			final int y = getInsert(maxN, maxy);
 			for (int to = 0, from = y * maxN + x; to < data.length; to += maxx, from += maxN)
-			{
 				System.arraycopy(tmp, from, data, to, maxx);
-			}
 		}
 		else
-		{
 			System.arraycopy(tmp, 0, data, 0, tmp.length);
-		}
 	}
 
 	private FHT2 compute(FHT2 dataFht)
@@ -254,31 +244,29 @@ public class FHTFilter extends BaseFilter
 	 */
 	public void initialiseKernel(int maxx, int maxy)
 	{
-		int maxN = Maths.nextPow2(Maths.max(maxx, maxy, kN));
+		final int maxN = Maths.nextPow2(Maths.max(maxx, maxy, kN));
 		if (tmp == null || tmp.length != maxN * maxN)
 			tmp = new float[maxN * maxN];
 		if (kernelFht != null && maxN == kernelFht.getWidth())
 			// Already initialised
 			return;
-		int size = maxN * maxN;
+		final int size = maxN * maxN;
 		// No window function for the kernel so just create a new FHT
 		float[] data;
 		if (kw < maxN || kh < maxN)
 		{
 			// Too small so insert in the middle
 			data = new float[size];
-			int x = getInsert(maxN, kw);
-			int y = getInsert(maxN, kh);
+			final int x = getInsert(maxN, kw);
+			final int y = getInsert(maxN, kh);
 			insert(kernel, kw, data, maxN, x, y);
 		}
 		else
-		{
 			// Clone to avoid destroying data
 			data = kernel.clone();
-		}
 
 		// Do the transform using JTransforms as it is faster. Do not allow multi-threading.
-		long begin = CommonUtils.getThreadsBeginN_2D();
+		final long begin = CommonUtils.getThreadsBeginN_2D();
 		CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
 		dht = new FloatDHT_2D(maxN, maxN);
 		CommonUtils.setThreadsBeginN_2D(begin);
@@ -303,16 +291,14 @@ public class FHTFilter extends BaseFilter
 		// So we must insert the centre at that point. To do this we check for odd/even
 		// and offset if necessary. This allows the FHTFilter to match the correlation
 		// result from a filter in the spatial domain performed using the KernelFilter class.
-		int diff = maxN - width;
+		final int diff = maxN - width;
 		return ((diff & 1) == 1) ? (diff + 1) / 2 : diff / 2;
 	}
 
 	private static void insert(float[] source, int maxx, float[] dest, int maxN, int x, int y)
 	{
 		for (int from = 0, to = y * maxN + x; from < source.length; from += maxx, to += maxN)
-		{
 			System.arraycopy(source, from, dest, to, maxx);
-		}
 	}
 
 	/**
@@ -333,20 +319,20 @@ public class FHTFilter extends BaseFilter
 		if (border != 0)
 			applyBorderInternal(data, maxx, maxy, border);
 
-		int maxN = kernelFht.getWidth();
+		final int maxN = kernelFht.getWidth();
 		if (maxx < maxN || maxy < maxN)
 		{
 			// Too small so insert in the middle of a new processor
-			float[] data2 = new float[maxN * maxN];
-			int x = getInsert(maxN, maxx);
-			int y = getInsert(maxN, maxy);
+			final float[] data2 = new float[maxN * maxN];
+			final int x = getInsert(maxN, maxx);
+			final int y = getInsert(maxN, maxy);
 			insert(data, maxx, data2, maxN, x, y);
 			data = data2;
 		}
 
 		// Do the transform using JTransforms as it is faster
 		dht.forward(data);
-		FHT2 result = new FHT2(data, maxN, true);
+		final FHT2 result = new FHT2(data, maxN, true);
 
 		//FHT2 result = new FHT2(data, maxN, false);
 		// Copy the initialised tables
@@ -407,7 +393,7 @@ public class FHTFilter extends BaseFilter
 
 		for (int b = 0, ri = -1, rj = kernel.length; b < border; b++)
 		{
-			double weight = w[b];
+			final double weight = w[b];
 			// index = y * kw + x
 			// Rows (ri|rj): y = b or kh-b-1; x = 0
 			// Columns (ri|rj): y = 0; x = b or kw-b-1
@@ -429,7 +415,7 @@ public class FHTFilter extends BaseFilter
 	@Override
 	public FHTFilter clone()
 	{
-		FHTFilter fht = (FHTFilter) super.clone();
+		final FHTFilter fht = (FHTFilter) super.clone();
 		fht.tmp = null; // This cannot be shared across instances
 		return fht;
 	}

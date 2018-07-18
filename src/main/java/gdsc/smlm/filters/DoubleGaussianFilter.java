@@ -69,10 +69,10 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 		// Cache the normaliser
 		if (normaliser == null || sx != sigmaX || sy != sigmaY)
 		{
-			float[] normalisation = weights.clone();
+			final float[] normalisation = weights.clone();
 			sx = sigmaX;
 			sy = sigmaY;
-			DoubleGaussianFilter gf = new DoubleGaussianFilter(accuracy);
+			final DoubleGaussianFilter gf = new DoubleGaussianFilter(accuracy);
 			gf.convolve(normalisation, weightWidth, weightHeight, sigmaX, sigmaY);
 			normaliser = new PerPixelNormaliser(normalisation);
 		}
@@ -114,7 +114,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	public void convolveInternal(float[] data, final int maxx, final int maxy, final double sigma)
 	{
 		final int border = getBorder(sigma);
-		Rectangle roi = new Rectangle(border, border, maxx - 2 * border, maxy - 2 * border);
+		final Rectangle roi = new Rectangle(border, border, maxx - 2 * border, maxy - 2 * border);
 		if (roi.width < 1 || roi.height < 1)
 			return;
 		// Q. Should the extra lines parameter be used here?
@@ -149,7 +149,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	 */
 	public void convolve(float[] data, final int maxx, final int maxy, final double sigma)
 	{
-		Rectangle roi = new Rectangle(maxx, maxy);
+		final Rectangle roi = new Rectangle(maxx, maxy);
 		convolve(data, roi, maxx, maxy, sigma, sigma, 0);
 	}
 
@@ -171,7 +171,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	 */
 	public void convolve(float[] data, final int maxx, final int maxy, final double sigmaX, final double sigmaY)
 	{
-		Rectangle roi = new Rectangle(maxx, maxy);
+		final Rectangle roi = new Rectangle(maxx, maxy);
 		convolve(data, roi, maxx, maxy, sigmaX, sigmaY, 0);
 	}
 
@@ -181,7 +181,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 		// Compute using double precision
 		if (wdata == null || wdata.length != data.length)
 			wdata = new double[data.length];
-		int size = data.length;
+		final int size = data.length;
 		for (int i = 0; i < size; i++)
 			wdata[i] = data[i];
 
@@ -211,16 +211,12 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 			blur1Direction(wdata, roi, maxx, maxy, sigmaY, false, 0);
 
 			if (extraLines != 0)
-			{
 				// Copy back to the input array so that the extra blurred lines
 				// are not present.
 				NonNormaliser.INSTANCE.normalise(wdata, data, maxx, maxy, extraLines);
-			}
 			else
-			{
 				for (int i = 0; i < data.length; i++)
 					data[i] = (float) wdata[i];
-			}
 		}
 	}
 
@@ -296,7 +292,6 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 
 		int pixel0 = lineFrom * lineInc;
 		for (int line = lineFrom; line < lineTo; line += 1, pixel0 += lineInc)
-		{
 			if (doDownscaling)
 			{
 				downscaleLine(pixels, cache1, downscaleKernel, reduceBy, pixel0, unscaled0, length, pointInc,
@@ -311,7 +306,6 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 					cache1[i] = pixels[p];
 				convolveLine(cache1, pixels, gaussKernel, readFrom, readTo, writeFrom, writeTo, pixel0, pointInc);
 			}
-		}
 	}
 
 	private void createScalingKernels(int unitLength)
@@ -361,7 +355,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 			double sum0 = 0, sum1 = 0, sum2 = 0;
 			for (int x = 0; x < reduceBy; x++, p += pointInc)
 			{
-				double v = pixels[p < pixel0 ? pixel0 : (p > pLast ? pLast : p)];
+				final double v = pixels[p < pixel0 ? pixel0 : (p > pLast ? pLast : p)];
 				sum0 += v * kernel[x + 2 * reduceBy];
 				sum1 += v * kernel[x + reduceBy];
 				sum2 += v * kernel[x];
@@ -593,7 +587,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 			while (r > kRadius / 2)
 			{
 				r--;
-				double a = Math.sqrt(kernel[0][r]) / (kRadius - r);
+				final double a = Math.sqrt(kernel[0][r]) / (kRadius - r);
 				if (a < sqrtSlope)
 					sqrtSlope = a;
 				else
@@ -616,7 +610,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 		double rsum = 0.5 + 0.5 * kernel[0][0] / sum;
 		for (int i = 0; i < kRadius; i++)
 		{
-			double v = (kernel[0][i] / sum);
+			final double v = (kernel[0][i] / sum);
 			kernel[0][i] = v;
 			rsum -= v;
 			kernel[1][i] = rsum;
@@ -632,7 +626,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	@Override
 	public DoubleGaussianFilter clone()
 	{
-		DoubleGaussianFilter o = (DoubleGaussianFilter) super.clone();
+		final DoubleGaussianFilter o = (DoubleGaussianFilter) super.clone();
 		return o;
 	}
 

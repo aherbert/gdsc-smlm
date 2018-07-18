@@ -42,7 +42,7 @@ public class PrecisionTest
 	int Single = 1;
 	int Double = 2;
 
-	private int MAX_ITER = 200000;
+	private final int MAX_ITER = 200000;
 
 	int maxx = 10;
 	// Use realistic values for a camera with a bias of 500
@@ -428,7 +428,7 @@ public class PrecisionTest
 						1e-3);
 			}
 		}
-		catch (AssertionError e)
+		catch (final AssertionError e)
 		{
 			TestSettings.infoln(e.getMessage());
 			//e.printStackTrace();
@@ -491,7 +491,7 @@ public class PrecisionTest
 				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
 			}
 		}
-		catch (AssertionError e)
+		catch (final AssertionError e)
 		{
 			TestSettings.infoln(e.getMessage());
 			//e.printStackTrace();
@@ -527,29 +527,29 @@ public class PrecisionTest
 	{
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
-		float[] p1 = params1.clone();
-		double[] p2 = params2.clone();
+		final float[] p1 = params1.clone();
+		final double[] p2 = params2.clone();
 		p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
 		p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 		f1.initialise(p1);
 		f2.initialise(p2);
 		final int n = p1.length;
-		float[] g1 = new float[n];
-		double[] g2 = new double[n];
+		final float[] g1 = new float[n];
+		final double[] g2 = new double[n];
 
 		double t1 = 0, t2 = 0;
-		double[] tg1 = new double[n];
-		double[] tg2 = new double[n];
+		final double[] tg1 = new double[n];
+		final double[] tg2 = new double[n];
 
 		for (int i = 0; i < maxx; i++)
 		{
-			float v1 = f1.eval(i);
+			final float v1 = f1.eval(i);
 			t1 += v1;
-			double v2 = f2.eval(i);
+			final double v2 = f2.eval(i);
 			t2 += v2;
 			Assert.assertEquals("Different values", v2, v1, precision);
-			float vv1 = f1.eval(i, g1);
-			double vv2 = f2.eval(i, g2);
+			final float vv1 = f1.eval(i, g1);
+			final double vv2 = f2.eval(i, g2);
 			Assert.assertEquals("Different f1 values", v1, vv1, precision);
 			Assert.assertEquals("Different f2 values", v2, vv2, precision);
 			for (int j = 0; j < n; j++)
@@ -570,8 +570,8 @@ public class PrecisionTest
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
-		float[] p1 = params1.clone();
-		double[] p2 = params2.clone();
+		final float[] p1 = params1.clone();
+		final double[] p2 = params2.clone();
 		p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
 		p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 
@@ -599,7 +599,7 @@ public class PrecisionTest
 		Class<?> c1, c2;
 		if (doubleFaster)
 		{
-			long time = time1;
+			final long time = time1;
 			time1 = time2;
 			time2 = time;
 			c1 = f2.getClass();
@@ -620,19 +620,15 @@ public class PrecisionTest
 	{
 		f.initialise(p);
 		final int n = params1.length;
-		float[] g = new float[n];
-		double[] tg = new double[n];
+		final float[] g = new float[n];
+		final double[] tg = new double[n];
 
 		// Warm up
 		for (int j = 0; j < 10; j++)
-		{
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i, g);
-			}
-		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		double sum = 0;
 		for (int j = 0; j < MAX_ITER; j++)
 		{
@@ -650,25 +646,17 @@ public class PrecisionTest
 	private long runSingleWithGradientsNoSum(int maxx, SinglePrecision f, float[] p)
 	{
 		f.initialise(p);
-		float[] g = new float[params1.length];
+		final float[] g = new float[params1.length];
 
 		// Warm up
 		for (int j = 0; j < 10; j++)
-		{
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i, g);
-			}
-		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		for (int j = 0; j < MAX_ITER; j++)
-		{
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i, g);
-			}
-		}
 		return System.nanoTime() - time;
 	}
 
@@ -677,19 +665,15 @@ public class PrecisionTest
 	{
 		f.initialise(p);
 		final int n = params1.length;
-		double[] g = new double[n];
-		double[] tg = new double[n];
+		final double[] g = new double[n];
+		final double[] tg = new double[n];
 
 		// Warm up
 		for (int j = 0; j < 10; j++)
-		{
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i, g);
-			}
-		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		double sum = 0;
 		for (int j = 0; j < MAX_ITER; j++)
 		{
@@ -707,25 +691,17 @@ public class PrecisionTest
 	private long runDoubleWithGradientsNoSum(int maxx, DoublePrecision f, double[] p)
 	{
 		f.initialise(p);
-		double[] g = new double[params1.length];
+		final double[] g = new double[params1.length];
 
 		// Warm up
 		for (int j = 0; j < 10; j++)
-		{
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i, g);
-			}
-		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		for (int j = 0; j < MAX_ITER; j++)
-		{
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i, g);
-			}
-		}
 		return System.nanoTime() - time;
 	}
 
@@ -735,8 +711,8 @@ public class PrecisionTest
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
-		float[] p1 = params1.clone();
-		double[] p2 = params2.clone();
+		final float[] p1 = params1.clone();
+		final double[] p2 = params2.clone();
 		p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
 		p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 
@@ -763,7 +739,7 @@ public class PrecisionTest
 		Class<?> c1, c2;
 		if (doubleFaster)
 		{
-			long time = time1;
+			final long time = time1;
 			time1 = time2;
 			time2 = time;
 			c1 = f2.getClass();
@@ -787,21 +763,17 @@ public class PrecisionTest
 		{
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i);
-			}
 		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		double sum = 0;
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			sum = 0;
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				sum += f.eval(i);
-			}
 		}
 		return System.nanoTime() - time;
 	}
@@ -813,19 +785,15 @@ public class PrecisionTest
 		{
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i);
-			}
 		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i);
-			}
 		}
 		return System.nanoTime() - time;
 	}
@@ -838,21 +806,17 @@ public class PrecisionTest
 		{
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i);
-			}
 		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		double sum = 0;
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			sum = 0;
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				sum += f.eval(i);
-			}
 		}
 		return System.nanoTime() - time;
 	}
@@ -864,26 +828,22 @@ public class PrecisionTest
 		{
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i);
-			}
 		}
 
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			f.initialise(p);
 			for (int i = 0; i < maxx; i++)
-			{
 				f.eval(i);
-			}
 		}
 		return System.nanoTime() - time;
 	}
 
 	private static float[] toFloat(double[] p)
 	{
-		float[] f = new float[p.length];
+		final float[] f = new float[p.length];
 		for (int i = 0; i < f.length; i++)
 			f[i] = (float) p[i];
 		return f;
@@ -891,7 +851,7 @@ public class PrecisionTest
 
 	private static double[] toDouble(float[] p)
 	{
-		double[] f = new double[p.length];
+		final double[] f = new double[p.length];
 		for (int i = 0; i < f.length; i++)
 			f[i] = p[i];
 		return f;

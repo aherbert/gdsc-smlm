@@ -40,22 +40,22 @@ public abstract class ResultFilter
 {
 	/** The filter. */
 	protected List<float[]> filter;
-	
+
 	/** The distance squared. */
 	protected float d2;
-	
+
 	/** The number of maxima. */
 	protected int nMaxima;
 
 	/** The filtered count. */
 	protected int filteredCount = 0;
-	
+
 	/** The filtered fit results. */
 	protected FitResult[] filteredFitResults;
-	
+
 	/** The filtered indices. */
 	protected int[] filteredIndices;
-	
+
 	/** The peak results. */
 	protected List<PeakResult> peakResults;
 
@@ -73,11 +73,9 @@ public abstract class ResultFilter
 	{
 		if (filter == null)
 			throw new IllegalArgumentException("null filter list");
-		for (float[] f : filter)
-		{
+		for (final float[] f : filter)
 			if (f == null)
 				throw new IllegalArgumentException("null array used for filter element");
-		}
 		this.filter = filter;
 		d2 = d * d;
 		this.nMaxima = nMaxima;

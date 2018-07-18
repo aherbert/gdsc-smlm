@@ -69,7 +69,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 	@Override
 	public FitStatus computeFit(double[] y, final double[] yFit, double[] a, double[] aDev)
 	{
-		int n = y.length;
+		final int n = y.length;
 		try
 		{
 			// Different convergence thresholds seem to have no effect on the resulting fit, only the number of
@@ -89,16 +89,14 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 			final double[] yd = new double[n];
 			//final double[] w = new double[n];
 			for (int i = 0; i < n; i++)
-			{
 				yd[i] = y[i];
 				//w[i] = 1;
-			}
 
-			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
+			final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
 
 			//@formatter:off
-			LeastSquaresBuilder builder = new LeastSquaresBuilder()
+			final LeastSquaresBuilder builder = new LeastSquaresBuilder()
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(getMaxEvaluations())
 					.start(initialSolution)
@@ -108,7 +106,6 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 			//@formatter:on
 
 			if (f instanceof ExtendedNonLinearFunction && ((ExtendedNonLinearFunction) f).canComputeValuesAndJacobian())
-			{
 				// Compute together, or each individually
 				builder.model(new ValueAndJacobianFunction()
 				{
@@ -135,17 +132,14 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 						return new Array2DRowRealMatrix(fun.computeJacobian(params), false);
 					}
 				});
-			}
 			else
-			{
 				// Compute separately
 				builder.model(new MultivariateVectorFunctionWrapper((NonLinearFunction) f, a, n),
 						new MultivariateMatrixFunctionWrapper((NonLinearFunction) f, a, n));
-			}
 
-			LeastSquaresProblem problem = builder.build();
+			final LeastSquaresProblem problem = builder.build();
 
-			Optimum optimum = optimizer.optimize(problem);
+			final Optimum optimum = optimizer.optimize(problem);
 
 			final double[] parameters = optimum.getPoint().toArray();
 			setSolution(a, parameters);
@@ -159,15 +153,15 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 				// Compute transpose(J)J.
 				final RealMatrix jTj = j.transpose().multiply(j);
 
-				double[][] data = (jTj instanceof Array2DRowRealMatrix) ? ((Array2DRowRealMatrix) jTj).getDataRef()
+				final double[][] data = (jTj instanceof Array2DRowRealMatrix) ? ((Array2DRowRealMatrix) jTj).getDataRef()
 						: jTj.getData();
-				FisherInformationMatrix m = new FisherInformationMatrix(data);
+				final FisherInformationMatrix m = new FisherInformationMatrix(data);
 				setDeviations(aDev, m);
 			}
 			// Compute function value
 			if (yFit != null)
 			{
-				Gaussian2DFunction f = (Gaussian2DFunction) this.f;
+				final Gaussian2DFunction f = (Gaussian2DFunction) this.f;
 				f.initialise0(a);
 				f.forEach(new ValueProcedure()
 				{
@@ -186,20 +180,20 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 			// just computes the dot product anyway.
 			value = optimum.getResiduals().dotProduct(optimum.getResiduals());
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			return FitStatus.TOO_MANY_EVALUATIONS;
 		}
-		catch (TooManyIterationsException e)
+		catch (final TooManyIterationsException e)
 		{
 			return FitStatus.TOO_MANY_ITERATIONS;
 		}
-		catch (ConvergenceException e)
+		catch (final ConvergenceException e)
 		{
 			// Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
 			return FitStatus.SINGULAR_NON_LINEAR_MODEL;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// TODO - Find out the other exceptions from the fitter and add return values to match.
 			return FitStatus.UNKNOWN;
@@ -211,7 +205,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 	@Override
 	public boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
-		GradientCalculator calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+		final GradientCalculator calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
 
 		// Since we know the function is a Gaussian2DFunction from the constructor
 		value = calculator.findLinearised(y.length, y, yFit, a, (NonLinearFunction) f);
@@ -222,9 +216,9 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 	@Override
 	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
 	{
-		GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+		final GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
 		// Since we know the function is a Gaussian2DFunction from the constructor
-		double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
+		final double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
 		if (c.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		return new FisherInformationMatrix(I);

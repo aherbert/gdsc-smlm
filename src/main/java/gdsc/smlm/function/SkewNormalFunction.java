@@ -37,13 +37,13 @@ public class SkewNormalFunction
 {
 	/** The amplitude. */
 	protected double amplitude;
-	
+
 	/** The location. */
 	protected double location;
-	
+
 	/** The scale. */
 	protected double scale;
-	
+
 	/** The alpha. */
 	protected double alpha;
 

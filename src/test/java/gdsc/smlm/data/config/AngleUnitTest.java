@@ -37,29 +37,27 @@ public class AngleUnitTest
 	{
 		final double degToRad = Math.PI / 180.0;
 		for (int a = -360; a <= 360; a++)
-		{
 			//@formatter:off
     		check(
     			new ExpectedUnit<>(AngleUnit.DEGREE, a),
     			new ExpectedUnit<>(AngleUnit.RADIAN, a * degToRad)
     			);
     		//@formatter:on
-		}
 	}
 
 	private static void check(ExpectedUnit<AngleUnit>... expectedUnits)
 	{
-		int n = expectedUnits.length;
+		final int n = expectedUnits.length;
 		TypeConverter<AngleUnit> c;
 		for (int i = 0; i < n; i++)
 		{
-			AngleUnit u1 = expectedUnits[i].u;
-			double v1 = expectedUnits[i].value;
+			final AngleUnit u1 = expectedUnits[i].u;
+			final double v1 = expectedUnits[i].value;
 			for (int j = 0; j < n; j++)
 			{
-				AngleUnit u2 = expectedUnits[j].u;
+				final AngleUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2);
-				double o = c.convert(v1);
+				final double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}
 		}

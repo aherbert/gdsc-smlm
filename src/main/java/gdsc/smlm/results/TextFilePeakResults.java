@@ -147,7 +147,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			out = new OutputStreamWriter(fos, "UTF-8");
 		}
-		catch (UnsupportedEncodingException e)
+		catch (final UnsupportedEncodingException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -160,7 +160,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			out.write(data);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			closeOutput();
 		}
@@ -177,7 +177,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			// Make sure we close the writer since it may be buffered
 			out.close();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore exception
 		}
@@ -199,26 +199,22 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		canComputePrecision = false;
 
 		if (isShowPrecision() && hasCalibration())
-		{
 			// Determine if we can compute the precision using the current settings
 			if (computePrecision)
-			{
 				try
 				{
 					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
 							Gaussian2DPeakResultHelper.LSE_PRECISION);
 					canComputePrecision = true;
 				}
-				catch (ConfigurationException e)
+				catch (final ConfigurationException e)
 				{
 					// Ignore
 				}
-				catch (ConversionException e)
+				catch (final ConversionException e)
 				{
 					// Ignore
 				}
-			}
-		}
 
 		// We must correctly convert all the PSF parameter types
 		helper = new PeakResultConversionHelper(getCalibration(), getPSF());
@@ -239,9 +235,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	@Override
 	protected String[] getFieldNames()
 	{
-		String[] unitNames = helper.getUnitNames();
+		final String[] unitNames = helper.getUnitNames();
 
-		ArrayList<String> names = new ArrayList<>(20);
+		final ArrayList<String> names = new ArrayList<>(20);
 		if (isShowId())
 			names.add("Id");
 		names.add(peakIdColumnName);
@@ -260,7 +256,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			meanIntensityField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
 		names.add(meanIntensityField);
 
-		String[] fields = helper.getNames();
+		final String[] fields = helper.getNames();
 
 		for (int i = 0; i < fields.length; i++)
 		{
@@ -289,7 +285,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		if (fos == null)
 			return;
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity);
 
 		// Add the parameters
@@ -318,17 +314,13 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			checkSize(converters.length, params);
 			for (int i = 0; i < converters.length; i++)
-			{
 				add(sb, converters[i].convert(params[i]));
-			}
 		}
 		if (isShowPrecision())
-		{
 			if (canComputePrecision)
 				addPrecision(sb, calculator.getLSEPrecision(params, noise), true);
 			else
 				sb.append("\t0");
-		}
 		sb.append('\n');
 		writeResult(1, sb.toString());
 	}
@@ -375,7 +367,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		if (fos == null)
 			return;
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		add(sb, result);
 		writeResult(1, sb.toString());
 	}
@@ -414,19 +406,15 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			checkSize(converters.length, params);
 			for (int i = 0; i < converters.length; i++)
-			{
 				add(sb, converters[i].convert(params[i]));
-			}
 		}
 		if (isShowPrecision())
-		{
 			if (result.hasPrecision())
 				addPrecision(sb, result.getPrecision(), false);
 			else if (canComputePrecision)
 				addPrecision(sb, calculator.getLSEPrecision(params, result.getNoise()), true);
 			else
 				sb.append("\t0");
-		}
 		sb.append('\n');
 	}
 
@@ -438,8 +426,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 		int count = 0;
 
-		StringBuilder sb = new StringBuilder();
-		for (PeakResult result : results)
+		final StringBuilder sb = new StringBuilder();
+		for (final PeakResult result : results)
 		{
 			add(sb, result);
 
@@ -470,7 +458,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			return;
 		if (cluster.size() > 0)
 		{
-			float[] centroid = cluster.getCentroid();
+			final float[] centroid = cluster.getCentroid();
 			writeResult(0,
 					String.format("#Cluster %f %f (+/-%f) n=%d\n", converters[PeakResult.X].convert(centroid[0]),
 							converters[PeakResult.X].convert(centroid[1]),
@@ -488,9 +476,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	protected void addAll(Cluster cluster)
 	{
 		if (!isShowId() || cluster.getId() == 0)
-		{
 			addAll(cluster.getPoints().toArray());
-		}
 		else
 		{
 			// Store the ID from the trace
@@ -504,11 +490,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 					if (result.getId() == id)
 						results2.add(result);
 					else
-					{
 						results2.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
 								result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
 								result.getParameters(), result.getParameterDeviations(), result.getEndFrame(), id));
-					}
 				}
 			});
 			addAll(results2.toArray());
@@ -529,7 +513,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			return;
 		if (trace.size() > 0)
 		{
-			float[] centroid = trace.getCentroid();
+			final float[] centroid = trace.getCentroid();
 			writeResult(0, String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n",
 					converters[PeakResult.X].convert(centroid[0]), converters[PeakResult.X].convert(centroid[1]),
 					converters[PeakResult.X].convert(trace.getStandardDeviation()), trace.size(), trace.getNBlinks(),
@@ -572,7 +556,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			out.write(result);
 		}
-		catch (IOException ioe)
+		catch (final IOException ioe)
 		{
 			closeOutput();
 		}
@@ -588,8 +572,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		try (BufferedReader input = new BufferedReader(new FileReader(filename)))
 		{
-			TurboList<Result> results = new TurboList<>(size);
-			StringBuilder header = new StringBuilder();
+			final TurboList<Result> results = new TurboList<>(size);
+			final StringBuilder header = new StringBuilder();
 
 			String line;
 			// Skip the header
@@ -605,10 +589,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			}
 
 			while ((line = input.readLine()) != null)
-			{
 				results.add(new Result(line));
-			}
-			
+
 			input.close();
 
 			Collections.sort(results);
@@ -646,11 +628,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 					// The peak is the second column
 					slice = scanner.nextInt();
 			}
-			catch (InputMismatchException e)
+			catch (final InputMismatchException e)
 			{
 				// Ignore
 			}
-			catch (NoSuchElementException e)
+			catch (final NoSuchElementException e)
 			{
 				// Ignore
 			}

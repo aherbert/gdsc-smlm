@@ -155,7 +155,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	{
 		// Compute using the scaled Hessian as per the above method.
 		// Use a dedicated procedure that omits computing beta.
-		WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y, getWeights(y.length),
+		final WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y, getWeights(y.length),
 				(Gradient1Function) f);
 		p.computeFisherInformation(a);
 		if (p.isNaNGradients())

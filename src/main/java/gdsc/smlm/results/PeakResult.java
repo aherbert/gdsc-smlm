@@ -840,13 +840,13 @@ public class PeakResult implements Cloneable
 	{
 		try
 		{
-			PeakResult result = (PeakResult) super.clone();
+			final PeakResult result = (PeakResult) super.clone();
 			result.params = params.clone();
 			if (paramStdDevs != null)
 				result.paramStdDevs = paramStdDevs.clone();
 			return result;
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

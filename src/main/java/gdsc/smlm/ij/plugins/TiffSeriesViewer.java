@@ -110,17 +110,15 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 				if (inputMode == 0)
 				{
 					String dir = null;
-					String title = "Select image series ...";
+					final String title = "Select image series ...";
 					if (silent)
 					{
-						String macroOptions = Macro.getOptions();
+						final String macroOptions = Macro.getOptions();
 						if (macroOptions != null)
 							dir = Macro.getValue(macroOptions, title, null);
 					}
 					else
-					{
 						dir = Utils.getDirectory(title, inputDirectory);
-					}
 					if (TextUtils.isNullOrEmpty(dir))
 						return false;
 					inputDirectory = dir;
@@ -128,17 +126,15 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 				else
 				{
 					String file = null;
-					String title = "Select image ...";
+					final String title = "Select image ...";
 					if (silent)
 					{
-						String macroOptions = Macro.getOptions();
+						final String macroOptions = Macro.getOptions();
 						if (macroOptions != null)
 							file = Macro.getValue(macroOptions, title, null);
 					}
 					else
-					{
 						file = Utils.getFilename(title, inputFile);
-					}
 					if (TextUtils.isNullOrEmpty(file))
 						return false;
 					inputFile = file;
@@ -182,11 +178,9 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			private boolean collectOptions(boolean silent)
 			{
 				if (outputMode == 0)
-				{
 					// Nothing to do
 					return false;
-				}
-				ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
 				egd.addNumericField("Slices_per_image", nImages, 0);
 				egd.addDirectoryField("Output_directory", outputDirectory);
 				egd.setSilent(silent);
@@ -235,7 +229,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		SeriesImageSource source;
 		if (inputMode == 0)
 		{
-			SeriesOpener series = new SeriesOpener(inputDirectory);
+			final SeriesOpener series = new SeriesOpener(inputDirectory);
 			if (series.getNumberOfImages() == 0)
 			{
 				IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
@@ -245,7 +239,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		}
 		else
 		{
-			File file = new File(inputFile);
+			final File file = new File(inputFile);
 			source = new SeriesImageSource(file.getName(), new String[] { inputFile });
 		}
 
@@ -267,29 +261,27 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		Utils.showStatus("");
 
 		// Create a virtual stack
-		TiffSeriesVirtualStack stack = new TiffSeriesVirtualStack(source);
+		final TiffSeriesVirtualStack stack = new TiffSeriesVirtualStack(source);
 		if (outputMode == 0)
-		{
 			stack.show();
-		}
 		else
 		{
-			int nImages = Math.max(1, TiffSeriesViewer.nImages);
-			ImagePlus imp = stack.createImp();
+			final int nImages = Math.max(1, TiffSeriesViewer.nImages);
+			final ImagePlus imp = stack.createImp();
 			// The calibration only has the offset so ignore for speed.
 			//Calibration cal = imp.getCalibration();
-			int size = stack.getSize();
+			final int size = stack.getSize();
 
 			// Create the format string
-			int digits = String.format("%d", size).length();
-			String format = new File(outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif").getPath();
+			final int digits = String.format("%d", size).length();
+			final String format = new File(outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif").getPath();
 
 			IJ.showStatus("Saving image ...");
 			Utils.setShowStatus(false);
 			Utils.setShowProgress(false);
-			ProgressBar progressBar = Utils.getProgressBar();
+			final ProgressBar progressBar = Utils.getProgressBar();
 			progressBar.show(0);
-			int step = Utils.getProgressInterval(size);
+			final int step = Utils.getProgressInterval(size);
 			int next = step;
 			try
 			{
@@ -302,19 +294,17 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 						progressBar.show(i, size);
 						next += step;
 					}
-					String path = String.format(format, i);
+					final String path = String.format(format, i);
 					//System.out.println(path);
-					ImageStack out = new ImageStack(source.getWidth(), source.getHeight());
+					final ImageStack out = new ImageStack(source.getWidth(), source.getHeight());
 					for (int j = 0, k = i; j < nImages && k <= size; j++, k++)
-					{
 						out.addSlice(null, stack.getPixels(k));
-					}
-					ImagePlus outImp = new ImagePlus(path, out);
+					final ImagePlus outImp = new ImagePlus(path, out);
 					//outImp.setCalibration(cal);
 					saveAsTiff(outImp, path);
 				}
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				IJ.log(ExceptionUtils.getStackTrace(e));
 				IJ.error(TITLE, "Failed to save image: " + e.getMessage());
@@ -335,7 +325,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	{
 		//IJ.saveAsTiff(imp, path);
 
-		FileInfo fi = imp.getFileInfo();
+		final FileInfo fi = imp.getFileInfo();
 		fi.nImages = imp.getStackSize();
 		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path))))
 		{
@@ -380,7 +370,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			if (!source.isValid(1))
 				throw new IllegalArgumentException("Source has no frames");
 			this.source = source;
-			Object pixels = source.getRaw(1);
+			final Object pixels = source.getRaw(1);
 			if (pixels == null)
 				throw new IllegalArgumentException("Source has no first frame");
 			setBitDepth(Utils.getBitDepth(pixels));
@@ -393,7 +383,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		 */
 		public ImagePlus createImp()
 		{
-			ImagePlus imp = new ImagePlus(source.getName(), this);
+			final ImagePlus imp = new ImagePlus(source.getName(), this);
 			addInfo(imp);
 			return imp;
 		}
@@ -405,7 +395,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		 */
 		public ImagePlus show()
 		{
-			ImagePlus imp = Utils.display(source.getName(), this);
+			final ImagePlus imp = Utils.display(source.getName(), this);
 			addInfo(imp);
 			return imp;
 		}
@@ -418,10 +408,10 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			imp.getFileInfo();
 
 			// Get metadata from the source
-			ExtendedFileInfo[] fileInfo = source.getFileInfo(0);
+			final ExtendedFileInfo[] fileInfo = source.getFileInfo(0);
 			if (fileInfo != null && fileInfo[0] != null)
 			{
-				ExtendedFileInfo efi = fileInfo[0];
+				final ExtendedFileInfo efi = fileInfo[0];
 				if (efi.extendedMetaData != null)
 					imp.setProperty("Info", efi.extendedMetaData);
 				else if (efi.info != null)
@@ -429,7 +419,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			}
 			if (source.getXOrigin() != 0 || source.getYOrigin() != 0)
 			{
-				Calibration cal = imp.getLocalCalibration();
+				final Calibration cal = imp.getLocalCalibration();
 				cal.xOrigin = -source.getXOrigin();
 				cal.yOrigin = -source.getYOrigin();
 			}
@@ -460,13 +450,11 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		@Override
 		public ImageProcessor getProcessor(int n)
 		{
-			Object pixels = source.getRaw(n);
+			final Object pixels = source.getRaw(n);
 			ImageProcessor ip = null;
 			int depthThisImage = 0;
 			if (pixels != null)
-			{
 				ip = Utils.createProcessor(getWidth(), getHeight(), pixels);
-			}
 			else
 			{
 				ip = new ByteProcessor(getWidth(), getHeight());
@@ -474,7 +462,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 				int size = getHeight() / 20;
 				if (size < 9)
 					size = 9;
-				Font font = new Font("Helvetica", Font.PLAIN, size);
+				final Font font = new Font("Helvetica", Font.PLAIN, size);
 				ip.setFont(font);
 				ip.setAntialiasedText(true);
 				ip.setColor(0);
@@ -482,7 +470,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 				depthThisImage = 8;
 			}
 			if (depthThisImage != getBitDepth())
-			{
 				switch (getBitDepth())
 				{
 					case 8:
@@ -498,7 +485,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 						ip = ip.convertToFloat();
 						break;
 				}
-			}
 			// This will not happen as the source checks the dimensions
 			//if (ip.getWidth() != getWidth() || ip.getHeight() != getHeight())
 			//{

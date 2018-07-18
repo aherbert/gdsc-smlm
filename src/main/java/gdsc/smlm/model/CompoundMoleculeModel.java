@@ -181,22 +181,20 @@ public class CompoundMoleculeModel extends MoleculeModel
 	public void checkMass()
 	{
 		int invalidMass = 0;
-		for (MoleculeModel m : molecules)
+		for (final MoleculeModel m : molecules)
 		{
 			if (m == null)
 				throw new IllegalArgumentException("Input list contains null molecules");
 			if (m.mass <= 0 || Double.isNaN(m.mass))
-			{
 				invalidMass++;
 				//throw new IllegalArgumentException("Input list contains molecules with invalid mass: " + m.mass);
-			}
 		}
 
 		this.mass = 0;
 		if (invalidMass > 0)
 		{
 			final double resetMass = (invalidMass == molecules.size()) ? 1 : 0;
-			for (MoleculeModel m : molecules)
+			for (final MoleculeModel m : molecules)
 			{
 				if (m.mass <= 0 || Double.isNaN(m.mass))
 					m.mass = resetMass;
@@ -204,12 +202,8 @@ public class CompoundMoleculeModel extends MoleculeModel
 			}
 		}
 		else
-		{
-			for (MoleculeModel m : molecules)
-			{
+			for (final MoleculeModel m : molecules)
 				this.mass += m.mass;
-			}
-		}
 	}
 
 	/**
@@ -223,26 +217,17 @@ public class CompoundMoleculeModel extends MoleculeModel
 		if (this.mass == 0)
 			checkMass();
 
-		double[] com = new double[3];
-		for (MoleculeModel m : molecules)
-		{
-			for (int i = 0; i < 3; i++)
+		final double[] com = new double[3];
+		for (final MoleculeModel m : molecules)
+		 for (int i = 0; i < 3; i++)
 				com[i] += m.xyz[i] * m.mass;
-		}
-		// Checked during initialisation
-		//if (w <= 0 || Double.isNaN(w))
-		//	throw new IllegalArgumentException("Input list contains molecules with invalid mass");
 
 		for (int i = 0; i < 3; i++)
-		{
 			com[i] /= this.mass;
-		}
 
-		for (MoleculeModel m : molecules)
-		{
+		for (final MoleculeModel m : molecules)
 			for (int i = 0; i < 3; i++)
 				m.xyz[i] -= com[i];
-		}
 	}
 
 	/**
@@ -260,11 +245,9 @@ public class CompoundMoleculeModel extends MoleculeModel
 		if (this.mass == 0)
 			checkMass();
 
-		double[] axis = new double[3];
+		final double[] axis = new double[3];
 		for (int i = 0; i < 3; i++)
-		{
 			axis[i] = random.nextGaussian();
-		}
 
 		final double angle = (-maxAngle + random.nextDouble() * 2.0 * maxAngle);
 		if (angle == 0)
@@ -314,11 +297,9 @@ public class CompoundMoleculeModel extends MoleculeModel
 		if (this.mass == 0)
 			checkMass();
 
-		double[] axis = new double[3];
+		final double[] axis = new double[3];
 		for (int i = 0; i < 3; i++)
-		{
 			axis[i] = random.nextGaussian();
-		}
 
 		rotateMolecules(axis, angle);
 	}
@@ -351,24 +332,20 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 */
 	private void rotateMolecules(double[] axis, double angle)
 	{
-		double[] r = getRotationMatrix(axis, angle);
+		final double[] r = getRotationMatrix(axis, angle);
 		if (r == I)
 			return;
 
 		// Use the actual centre of mass of the molecules to avoid drift over time
 		// (i.e. do not assume the centre is 0,0,0)
-		double[] com = new double[3];
-		for (MoleculeModel m : molecules)
-		{
+		final double[] com = new double[3];
+		for (final MoleculeModel m : molecules)
 			for (int i = 0; i < 3; i++)
 				com[i] += m.xyz[i] * m.mass;
-		}
 		for (int i = 0; i < 3; i++)
-		{
 			com[i] /= this.mass;
-		}
 
-		for (MoleculeModel m : molecules)
+		for (final MoleculeModel m : molecules)
 		{
 			final double xtmp = m.xyz[0] - com[0];
 			final double ytmp = m.xyz[1] - com[1];
@@ -394,17 +371,12 @@ public class CompoundMoleculeModel extends MoleculeModel
 		/* Set to unit length */
 		double length = 0;
 		for (int i = 0; i < 3; i++)
-		{
 			length += axis[i] * axis[i];
-		}
 		if (length == 0 || Double.isNaN(length))
 			return I;
 		length = Math.sqrt(length);
 		for (int i = 0; i < 3; i++)
-		{
-			axis[i] /= length;
-		}
-		//System.out.printf("Angle = %.1f, Axis = %.3f, %.3f, %.3f\n", angle, axis[0], axis[1], axis[2]);
+		 axis[i] /= length;
 
 		/* Store the components and their squares */
 		final double u = axis[0];
@@ -466,8 +438,8 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 */
 	public double[] getCoordinates(int n) throws IndexOutOfBoundsException
 	{
-		double[] xyz = Arrays.copyOf(this.xyz, 3);
-		MoleculeModel m = molecules.get(n);
+		final double[] xyz = Arrays.copyOf(this.xyz, 3);
+		final MoleculeModel m = molecules.get(n);
 		for (int i = 0; i < 3; i++)
 			xyz[i] += m.xyz[i];
 		return xyz;
@@ -485,7 +457,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 */
 	public double[] getRelativeCoordinates(int n) throws IndexOutOfBoundsException
 	{
-		MoleculeModel m = molecules.get(n);
+		final MoleculeModel m = molecules.get(n);
 		return Arrays.copyOf(m.xyz, 3);
 	}
 
@@ -549,11 +521,9 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 */
 	public void scale(double factor)
 	{
-		for (MoleculeModel m : molecules)
-		{
+		for (final MoleculeModel m : molecules)
 			for (int i = 0; i < 3; i++)
 				m.xyz[i] *= factor;
-		}
 	}
 
 	/**

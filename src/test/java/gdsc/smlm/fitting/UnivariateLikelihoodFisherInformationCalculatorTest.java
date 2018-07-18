@@ -54,41 +54,35 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePoissonFisherInformation()
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
-		{
 			canComputePoissonFisherInformation(r, Model.POISSON);
-		}
 	}
 
 	@Test
 	public void canComputeHalfPoissonFisherInformation()
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
-		{
 			canComputePoissonFisherInformation(r, Model.HALF_POISSON);
-		}
 	}
 
 	@Test
 	public void canComputePoissonGaussianApproximationFisherInformation()
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
-		{
 			canComputePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
-		}
 	}
 
-	private void canComputePoissonFisherInformation(RandomGenerator r, Model model)
+	private static void canComputePoissonFisherInformation(RandomGenerator r, Model model)
 	{
-		RandomDataGenerator rdg = new RandomDataGenerator(r);
+		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 
 		// Create function
-		Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
+		final Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
 				null);
-		double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		params[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
 		params[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 		params[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
@@ -102,7 +96,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		{
 			// Get a variance
 			case POISSON_GAUSSIAN:
-				double var = 0.9 + 0.2 * r.nextDouble();
+				final double var = 0.9 + 0.2 * r.nextDouble();
 				fi = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var));
 				f1 = (Gradient1Function) OffsetFunctionFactory.wrapFunction(func,
 						SimpleArrayUtils.newDoubleArray(func.size(), var));
@@ -120,21 +114,19 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		// This introduces a dependency on a different package, and relies on that
 		// computing the correct answer. However that code predates this and so the
 		// test ensures that the FisherInformationCalculator functions correctly.
-		PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
+		final PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
 		p1.computeFisherInformation(params);
-		double[] e = p1.getLinear();
+		final double[] e = p1.getLinear();
 
-		FisherInformationCalculator calc = new UnivariateLikelihoodFisherInformationCalculator(func, fi);
-		FisherInformationMatrix I = calc.compute(params);
-		double[] o = I.getMatrix().data;
+		final FisherInformationCalculator calc = new UnivariateLikelihoodFisherInformationCalculator(func, fi);
+		final FisherInformationMatrix I = calc.compute(params);
+		final double[] o = I.getMatrix().data;
 
-		boolean emCCD = model == Model.HALF_POISSON;
+		final boolean emCCD = model == Model.HALF_POISSON;
 
 		if (emCCD)
-		{
 			// Assumes half the poisson fisher information
 			SimpleArrayUtils.multiply(e, 0.5);
-		}
 
 		Assert.assertArrayEquals(e, o, 1e-6);
 
@@ -142,17 +134,17 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		{
 			// Get the Mortensen approximation for fitting Poisson data with a Gaussian.
 			// Set a to 100 for the square pixel adjustment.
-			double a = 100;
-			double s = params[Gaussian2DFunction.X_SD] * a;
-			double N = params[Gaussian2DFunction.SIGNAL];
-			double b2 = params[Gaussian2DFunction.BACKGROUND];
+			final double a = 100;
+			final double s = params[Gaussian2DFunction.X_SD] * a;
+			final double N = params[Gaussian2DFunction.SIGNAL];
+			final double b2 = params[Gaussian2DFunction.BACKGROUND];
 			double var = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, emCCD);
 
 			// Convert expected variance to pixels
 			var /= (a * a);
 
 			// Get the limits by inverting the Fisher information
-			double[] crlb = I.crlb();
+			final double[] crlb = I.crlb();
 
 			TestAssert.assertEqualsRelative(var, crlb[2], 5e-2);
 			TestAssert.assertEqualsRelative(var, crlb[3], 5e-2);
@@ -162,21 +154,19 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePerPixelPoissonGaussianApproximationFisherInformation()
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
-		{
 			canComputePerPixelPoissonGaussianApproximationFisherInformation(r);
-		}
 	}
 
-	private void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomGenerator r)
+	private static void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomGenerator r)
 	{
-		RandomDataGenerator rdg = new RandomDataGenerator(r);
+		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 
 		// Create function
-		Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
+		final Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
 				null);
-		double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		params[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
 		params[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 		params[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
@@ -187,7 +177,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		FisherInformation[] fi;
 
 		// Get a per-pixel variance
-		double[] var = new double[func.size()];
+		final double[] var = new double[func.size()];
 
 		fi = new FisherInformation[var.length];
 		for (int i = var.length; i-- > 0;)
@@ -201,13 +191,13 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		// This introduces a dependency on a different package, and relies on that
 		// computing the correct answer. However that code predates this and so the
 		// test ensures that the FisherInformationCalculator functions correctly.
-		PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
+		final PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
 		p1.computeFisherInformation(params);
-		double[] e = p1.getLinear();
+		final double[] e = p1.getLinear();
 
-		FisherInformationCalculator calc = new UnivariateLikelihoodFisherInformationCalculator(func, fi);
-		FisherInformationMatrix I = calc.compute(params);
-		double[] o = I.getMatrix().data;
+		final FisherInformationCalculator calc = new UnivariateLikelihoodFisherInformationCalculator(func, fi);
+		final FisherInformationMatrix I = calc.compute(params);
+		final double[] o = I.getMatrix().data;
 
 		TestAssert.assertArrayEqualsRelative(e, o, 1e-6);
 	}

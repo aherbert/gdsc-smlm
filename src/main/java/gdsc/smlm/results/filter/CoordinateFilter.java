@@ -63,7 +63,7 @@ public class CoordinateFilter extends DirectFilter
 	{
 		if (maxX < minX)
 		{
-			float f = maxX;
+			final float f = maxX;
 			maxX = minX;
 			minX = f;
 		}
@@ -71,7 +71,7 @@ public class CoordinateFilter extends DirectFilter
 		this.maxX = maxX;
 		if (maxY < minY)
 		{
-			float f = maxY;
+			final float f = maxY;
 			maxY = minY;
 			minY = f;
 		}

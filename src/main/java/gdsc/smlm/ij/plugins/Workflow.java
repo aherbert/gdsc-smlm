@@ -42,7 +42,7 @@ import gdsc.smlm.utils.Pair;
  */
 public class Workflow<S, R>
 {
-	
+
 	/** Default delay (in milliseconds) to use for dialog previews. */
 	public static final long DELAY = 500;
 
@@ -103,7 +103,7 @@ public class Workflow<S, R>
 
 		synchronized Work getWork()
 		{
-			Work work = this.work;
+			final Work work = this.work;
 			this.work = null;
 			return work;
 		}
@@ -196,7 +196,7 @@ public class Workflow<S, R>
 					{
 						// Create a new result
 						debug(" Creating new result");
-						Pair<S, R> results = worker.doWork(work.work);
+						final Pair<S, R> results = worker.doWork(work.work);
 						result = new Work(results);
 					}
 					else
@@ -216,7 +216,7 @@ public class Workflow<S, R>
 							((WorkStack) outbox[i]).addWork(result);
 					}
 				}
-				catch (InterruptedException e)
+				catch (final InterruptedException e)
 				{
 					debug(" Interrupted, stopping");
 					break;
@@ -249,7 +249,7 @@ public class Workflow<S, R>
 
 			// We can compare these here using object references.
 			// Any new results passed in will trigger equals to fail.
-			boolean result = worker.equalResults(work.getResults(), lastWork.getResults());
+			final boolean result = worker.equalResults(work.getResults(), lastWork.getResults());
 			if (!result)
 				worker.newResults();
 			return result;
@@ -263,9 +263,9 @@ public class Workflow<S, R>
 		}
 	}
 
-	private WorkStack inputStack = new WorkStack();
+	private final WorkStack inputStack = new WorkStack();
 	private ArrayList<Thread> threads;
-	private ArrayList<RunnableWorker> workers = new ArrayList<>();
+	private final ArrayList<RunnableWorker> workers = new ArrayList<>();
 	private long delay = 0;
 
 	/** The debug flag. Set to true to allow print statements during operation. */
@@ -312,13 +312,11 @@ public class Workflow<S, R>
 	private int addToChain(WorkflowWorker<S, R> worker)
 	{
 		if (workers.isEmpty())
-		{
 			return addToChain(worker, null);
-		}
 		else
 		{
 			// Chain together
-			RunnableWorker previous = workers.get(workers.size() - 1);
+			final RunnableWorker previous = workers.get(workers.size() - 1);
 			return addToChain(worker, previous);
 		}
 
@@ -336,16 +334,14 @@ public class Workflow<S, R>
 	@SuppressWarnings("unchecked")
 	private int addToChain(WorkflowWorker<S, R> inputWorker, RunnableWorker previous)
 	{
-		RunnableWorker worker = new RunnableWorker(inputWorker);
+		final RunnableWorker worker = new RunnableWorker(inputWorker);
 		if (previous == null)
-		{
 			// Take the primary input
 			worker.inbox = inputStack;
-		}
 		else
 		{
 			// Chain together
-			int size = (previous.outbox == null) ? 0 : previous.outbox.length;
+			final int size = (previous.outbox == null) ? 0 : previous.outbox.length;
 			if (size == 0)
 				previous.outbox = new Object[1];
 			else
@@ -394,10 +390,10 @@ public class Workflow<S, R>
 	@SuppressWarnings("static-method")
 	private ArrayList<Thread> startWorkers(ArrayList<RunnableWorker> workers)
 	{
-		ArrayList<Thread> threads = new ArrayList<>();
-		for (RunnableWorker w : workers)
+		final ArrayList<Thread> threads = new ArrayList<>();
+		for (final RunnableWorker w : workers)
 		{
-			Thread t = new Thread(w);
+			final Thread t = new Thread(w);
 			w.running = true;
 			t.setDaemon(true);
 			t.start();
@@ -412,22 +408,20 @@ public class Workflow<S, R>
 		// Finish work
 		for (int i = 0; i < threads.size(); i++)
 		{
-			Thread t = threads.get(i);
-			RunnableWorker w = workers.get(i);
+			final Thread t = threads.get(i);
+			final RunnableWorker w = workers.get(i);
 
 			if (now)
-			{
 				// Stop immediately any running worker
 				try
 				{
 					t.interrupt();
 				}
-				catch (SecurityException e)
+				catch (final SecurityException e)
 				{
 					// We should have permission to interrupt this thread.
 					e.printStackTrace();
 				}
-			}
 			else
 			{
 				// Stop after the current work in the inbox
@@ -445,7 +439,7 @@ public class Workflow<S, R>
 				{
 					t.join(0);
 				}
-				catch (InterruptedException e)
+				catch (final InterruptedException e)
 				{
 					// Ignore
 				}

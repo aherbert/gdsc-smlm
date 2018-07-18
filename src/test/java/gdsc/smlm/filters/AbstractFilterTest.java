@@ -78,7 +78,7 @@ public class AbstractFilterTest
 	 */
 	static float[] createData(RandomGenerator rg, int width, int height)
 	{
-		float[] data = new float[width * height];
+		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = rg.nextFloat();
 		return data;
@@ -97,7 +97,7 @@ public class AbstractFilterTest
 	 */
 	static int[] createIntData(RandomGenerator rg, int width, int height)
 	{
-		int[] data = new int[width * height];
+		final int[] data = new int[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = i;
 		Random.shuffle(data, rg);
@@ -121,16 +121,12 @@ public class AbstractFilterTest
 			if (rg == null)
 				rg = TestSettings.getRandomGenerator();
 			while (dataSet.size() < size)
-			{
 				dataSet.add(createData(rg, primes[0], primes[0]));
-			}
 		}
 
-		ArrayList<float[]> dataSet2 = new ArrayList<>(size);
+		final ArrayList<float[]> dataSet2 = new ArrayList<>(size);
 		for (int i = 0; i < size; i++)
-		{
 			dataSet2.add(dataSet.get(i).clone());
-		}
 		return dataSet2;
 	}
 
@@ -148,16 +144,14 @@ public class AbstractFilterTest
 			if (rg == null)
 				rg = TestSettings.getRandomGenerator();
 			while (dataSet.size() < size)
-			{
 				dataSet.add(createData(rg, primes[0], primes[0]));
-			}
 		}
 
-		ArrayList<int[]> dataSet2 = new ArrayList<>(size);
+		final ArrayList<int[]> dataSet2 = new ArrayList<>(size);
 		for (int i = 0; i < size; i++)
 		{
-			float[] f = dataSet.get(i);
-			int[] d = new int[f.length];
+			final float[] f = dataSet.get(i);
+			final int[] d = new int[f.length];
 			for (int j = 0; j < d.length; j++)
 				d[j] = (int) (4096 * f[j]);
 			dataSet2.add(d);
@@ -177,7 +171,7 @@ public class AbstractFilterTest
 
 	static float[] floatClone(int[] data1)
 	{
-		float[] data2 = new float[data1.length];
+		final float[] data2 = new float[data1.length];
 		for (int i = data2.length; i-- > 0;)
 			data2[i] = data1[i];
 		return data2;
@@ -192,19 +186,17 @@ public class AbstractFilterTest
 			String format, Object... args)
 	{
 		// Ignore the border
-		int border = (int) Math.ceil(boxSize);
+		final int border = (int) Math.ceil(boxSize);
 		for (int y = border; y < maxy - border - 1; y++)
 		{
 			int index = y * maxx + border;
 			for (int x = border; x < maxx - border - 1; x++, index++)
-			{
 				if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index]))
 				{
-					String message = String.format(format, args);
+					final String message = String.format(format, args);
 					TestAssert.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
 							FloatEquality.relativeError(data1[index], data2[index]));
 				}
-			}
 		}
 	}
 
@@ -212,19 +204,17 @@ public class AbstractFilterTest
 			Object... args)
 	{
 		// Ignore the border
-		int border = (int) Math.ceil(boxSize);
+		final int border = (int) Math.ceil(boxSize);
 		for (int y = border; y < maxy - border - 1; y++)
 		{
 			int index = y * maxx + border;
 			for (int x = border; x < maxx - border - 1; x++, index++)
-			{
 				if (data1[index] != data2[index])
 				{
-					String message = String.format(format, args);
+					final String message = String.format(format, args);
 					TestAssert.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
 							FloatEquality.relativeError(data1[index], data2[index]));
 				}
-			}
 		}
 	}
 }

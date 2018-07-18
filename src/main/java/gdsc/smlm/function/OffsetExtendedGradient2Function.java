@@ -31,7 +31,7 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
 {
 	/** The extended gradient2 function. */
 	protected final ExtendedGradient2Function ef2;
-	
+
 	/** The procedure. */
 	protected ExtendedGradient2Procedure procedure;
 
@@ -111,9 +111,7 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
 		{
 			// Avoid multiple wrapping
 			if (func instanceof OffsetExtendedGradient2Function)
-			{
 				return new OffsetExtendedGradient2Function((OffsetExtendedGradient2Function) func, b);
-			}
 			return new OffsetExtendedGradient2Function(func, b);
 		}
 		return func;

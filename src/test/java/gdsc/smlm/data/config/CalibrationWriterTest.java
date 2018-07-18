@@ -39,25 +39,25 @@ public class CalibrationWriterTest
 	@Test
 	public void canWrite()
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int i = 0; i < 100; i++)
 			canWrite(r);
 	}
 
-	private void canWrite(RandomGenerator r)
+	private static void canWrite(RandomGenerator r)
 	{
-		double qe = r.nextDouble();
-		double bias = 1 + r.nextDouble();
-		double exposureTime = 1 + r.nextDouble();
-		double gain = 1 + r.nextDouble();
-		double nmPerPixel = 1 + r.nextDouble();
-		double readNoise = 1 + r.nextDouble();
-		AngleUnit angleUnit = AngleUnit.values()[r.nextInt(AngleUnit.values().length - 1)];
-		CameraType cameraType = CameraType.values()[r.nextInt(CameraType.values().length - 1)];
-		DistanceUnit distanceUnit = DistanceUnit.values()[r.nextInt(DistanceUnit.values().length - 1)];
-		IntensityUnit intensityUnit = IntensityUnit.values()[r.nextInt(IntensityUnit.values().length - 1)];
+		final double qe = r.nextDouble();
+		final double bias = 1 + r.nextDouble();
+		final double exposureTime = 1 + r.nextDouble();
+		final double gain = 1 + r.nextDouble();
+		final double nmPerPixel = 1 + r.nextDouble();
+		final double readNoise = 1 + r.nextDouble();
+		final AngleUnit angleUnit = AngleUnit.values()[r.nextInt(AngleUnit.values().length - 1)];
+		final CameraType cameraType = CameraType.values()[r.nextInt(CameraType.values().length - 1)];
+		final DistanceUnit distanceUnit = DistanceUnit.values()[r.nextInt(DistanceUnit.values().length - 1)];
+		final IntensityUnit intensityUnit = IntensityUnit.values()[r.nextInt(IntensityUnit.values().length - 1)];
 
-		CalibrationWriter writer = new CalibrationWriter();
+		final CalibrationWriter writer = new CalibrationWriter();
 
 		Assert.assertEquals(writer.getQuantumEfficiency(), 0, 0);
 		Assert.assertEquals(writer.getBias(), 0, 0);
@@ -104,7 +104,7 @@ public class CalibrationWriterTest
 		Assert.assertEquals(writer.getDistanceUnit(), distanceUnit);
 		Assert.assertEquals(writer.getIntensityUnit(), intensityUnit);
 
-		CalibrationReader reader = new CalibrationReader(writer.getCalibration());
+		final CalibrationReader reader = new CalibrationReader(writer.getCalibration());
 
 		Assert.assertEquals(reader.getQuantumEfficiency(), qe, 0);
 		Assert.assertEquals(reader.getBias(), bias, 0);

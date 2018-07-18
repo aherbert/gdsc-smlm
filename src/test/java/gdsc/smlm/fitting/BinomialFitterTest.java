@@ -51,39 +51,29 @@ public class BinomialFitterTest
 	public void canFitBinomialWithKnownNUsingLeastSquaresEstimator()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = false;
-		boolean maximumLikelihood = false;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = false;
+		final boolean maximumLikelihood = false;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
-			}
-		}
 	}
 
 	@Test
 	public void canFitBinomialWithKnownNUsingMaximumLikelihood()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = false;
-		boolean maximumLikelihood = true;
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = false;
+		final boolean maximumLikelihood = true;
 		if (TestSettings.allow(optionalTestComplexity))
-		{
-			for (int n : N)
-			{
-				for (double p : P)
-				{
+			for (final int n : N)
+				for (final double p : P)
 					fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
-				}
-			}
-		}
 		else
 		{
 			// This is the default test
-			int n = 2;
-			double p = 0.5;
+			final int n = 2;
+			final double p = 0.5;
 			fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
 		}
 	}
@@ -92,136 +82,104 @@ public class BinomialFitterTest
 	public void canFitBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = false;
-		boolean maximumLikelihood = false;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = false;
+		final boolean maximumLikelihood = false;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
-			}
-		}
 	}
 
 	@Test
 	public void canFitBinomialWithUnknownNUsingMaximumLikelihood()
 	{
 		TestSettings.assume(optionalTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = false;
-		boolean maximumLikelihood = true;
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = false;
+		final boolean maximumLikelihood = true;
 
 		// TODO - Sort out how to fit unknown N using MLE.
 		// The problem is that the model returns a p of zero when n>N and this results in a negative infinity likelihood
 
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
-			}
-		}
 	}
 
 	@Test
 	public void canFitZeroTruncatedBinomialWithKnownNUsingLeastSquaresEstimator()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = true;
-		boolean maximumLikelihood = false;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = true;
+		final boolean maximumLikelihood = false;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
-			}
-		}
 	}
 
 	@Test
 	public void canFitZeroTruncatedBinomialWithKnownNUsingMaximumLikelihood()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = true;
-		boolean maximumLikelihood = true;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = true;
+		final boolean maximumLikelihood = true;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
-			}
-		}
 	}
 
 	@Test
 	public void canFitZeroTruncatedBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = true;
-		boolean maximumLikelihood = false;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = true;
+		final boolean maximumLikelihood = false;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
-			}
-		}
 	}
 
 	@Test
 	public void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = true;
-		boolean maximumLikelihood = false;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = true;
+		final boolean maximumLikelihood = false;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
-			}
-		}
 	}
 
 	@Test
 	public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = false;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = false;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomialUsing_LSE_Or_MLE(rg, n, p, zeroTruncated, n, n);
-			}
-		}
 	}
 
 	@Test
 	public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
 		TestSettings.assume(nonEssentialTestComplexity);
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		boolean zeroTruncated = true;
-		for (int n : N)
-		{
-			for (double p : P)
-			{
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final boolean zeroTruncated = true;
+		for (final int n : N)
+			for (final double p : P)
 				fitBinomialUsing_LSE_Or_MLE(rg, n, p, zeroTruncated, n, n);
-			}
-		}
 	}
 
 	private void fitBinomial(RandomGenerator rg, int n, double p, boolean zeroTruncated, boolean maximumLikelihood,
 			int minN, int maxN)
 	{
-		BinomialFitter bf = new BinomialFitter(null);
+		final BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 		bf.setMaximumLikelihood(maximumLikelihood);
 
@@ -229,17 +187,17 @@ public class BinomialFitterTest
 		int fail = 0;
 		for (int i = 0; i < TRIALS; i++)
 		{
-			int[] data = createData(rg, n, p, false);
-			double[] fit = bf.fitBinomial(data, minN, maxN, zeroTruncated);
-			int fittedN = (int) fit[0];
-			double fittedP = fit[1];
+			final int[] data = createData(rg, n, p, false);
+			final double[] fit = bf.fitBinomial(data, minN, maxN, zeroTruncated);
+			final int fittedN = (int) fit[0];
+			final double fittedP = fit[1];
 			log("  Fitted (n=%d, p=%f)\n", fittedN, fittedP);
 			try
 			{
 				Assert.assertEquals("Failed to fit n", n, fittedN);
 				Assert.assertEquals("Failed to fit p", p, fittedP, 0.05);
 			}
-			catch (AssertionError e)
+			catch (final AssertionError e)
 			{
 				fail++;
 				log("    " + e.getMessage() + "\n");
@@ -251,7 +209,7 @@ public class BinomialFitterTest
 	private void fitBinomialUsing_LSE_Or_MLE(RandomGenerator rg, int n, double p, boolean zeroTruncated, int minN,
 			int maxN)
 	{
-		BinomialFitter bf = new BinomialFitter(null);
+		final BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 
 		log("Fitting (n=%d, p=%f)\n", n, p);
@@ -259,16 +217,16 @@ public class BinomialFitterTest
 		int c1 = 0;
 		for (int i = 0; i < TRIALS; i++)
 		{
-			int[] data = createData(rg, n, p, false);
+			final int[] data = createData(rg, n, p, false);
 			bf.setMaximumLikelihood(false);
-			double[] fitLSE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
+			final double[] fitLSE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
 			bf.setMaximumLikelihood(true);
-			double[] fitMLE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
+			final double[] fitMLE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
 
-			int n1 = (int) fitLSE[0];
-			double p1 = fitLSE[1];
-			int n2 = (int) fitMLE[0];
-			double p2 = fitMLE[1];
+			final int n1 = (int) fitLSE[0];
+			final double p1 = fitLSE[1];
+			final int n2 = (int) fitMLE[0];
+			final double p2 = fitMLE[1];
 
 			log("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)\n", n1, p1, n2, p2);
 
@@ -277,7 +235,7 @@ public class BinomialFitterTest
 				Assert.assertEquals("Failed to match n", n1, n2);
 				Assert.assertEquals("Failed to match p", p1, p2, 0.05);
 			}
-			catch (AssertionError e)
+			catch (final AssertionError e)
 			{
 				fail++;
 				log("    " + e.getMessage() + "\n");
@@ -288,15 +246,15 @@ public class BinomialFitterTest
 		log("  Closest LSE %d, MLE %d\n", c1, TRIALS - c1);
 		if (fail > FAILURES)
 		{
-			String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
+			final String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
 			Assert.fail(msg);
 		}
 	}
 
 	private static int[] createData(RandomGenerator rg, int n, double p, boolean zeroTruncated)
 	{
-		RandomDataGenerator rdg = new RandomDataGenerator(rg);
-		int[] data = new int[2000];
+		final RandomDataGenerator rdg = new RandomDataGenerator(rg);
+		final int[] data = new int[2000];
 		if (zeroTruncated)
 		{
 			if (p <= 0)
@@ -305,19 +263,14 @@ public class BinomialFitterTest
 			{
 				int count;
 				do
-				{
 					count = rdg.nextBinomial(n, p);
-				} while (count == 0);
+				while (count == 0);
 				data[i] = count;
 			}
 		}
 		else
-		{
 			for (int i = 0; i < data.length; i++)
-			{
 				data[i] = rdg.nextBinomial(n, p);
-			}
-		}
 		return data;
 	}
 

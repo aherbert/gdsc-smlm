@@ -180,7 +180,7 @@ public class DoubleImage2D extends Image2D
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = h * w;
+		final int size = h * w;
 		if (region == null || region.length != size)
 			region = new double[size];
 		int base = y * nc + x;
@@ -215,22 +215,20 @@ public class DoubleImage2D extends Image2D
 	public static DoubleImage2D crop(ImageProcessor image, int x, int y, int w, int h, double[] region)
 			throws IllegalArgumentException
 	{
-		int nc = image.getWidth();
-		int nr = image.getHeight();
+		final int nc = image.getWidth();
+		final int nr = image.getHeight();
 
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = checkSize(w, h, true);
+		final int size = checkSize(w, h, true);
 		if (region == null || region.length != size)
 			region = new double[size];
 		int base = y * nc + x;
 		for (int r = 0, i = 0; r < h; r++)
 		{
 			for (int c = 0; c < w; c++)
-			{
 				region[i++] = image.getf(base + c);
-			}
 			base += nc;
 		}
 		return new DoubleImage2D(w, h, region, false);
@@ -240,13 +238,9 @@ public class DoubleImage2D extends Image2D
 	public void insert(int x, int y, Image2D image) throws IllegalArgumentException
 	{
 		if (image instanceof DoubleImage2D)
-		{
 			insert(x, y, (DoubleImage2D) image);
-		}
 		else
-		{
 			super.insert(x, y, image);
-		}
 	}
 
 	/**
@@ -264,13 +258,13 @@ public class DoubleImage2D extends Image2D
 	public void insert(int x, int y, DoubleImage2D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
 		if (w < 1 || h < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		double[] region = image.data;
+		final double[] region = image.data;
 		int base = y * nc + x;
 		for (int r = 0, i = 0; r < h; r++)
 		{

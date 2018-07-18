@@ -53,10 +53,10 @@ public class Transparency_Demo implements PlugIn
 
 	private static void createUniverse(String title, boolean disableBackfaceNormalFlip, boolean backfaceCull)
 	{
-		Image3DUniverse univ = new Image3DUniverse();
+		final Image3DUniverse univ = new Image3DUniverse();
 		univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 		univ.show();
-		ImageWindow3D w = univ.getWindow();
+		final ImageWindow3D w = univ.getWindow();
 		GUI.center(w);
 		w.setTitle(title);
 
@@ -69,14 +69,14 @@ public class Transparency_Demo implements PlugIn
 	private static void addPoint(Image3DUniverse univ, boolean disableBackfaceNormalFlip, boolean backfaceCull, float x,
 			float y, float z, Color3f c)
 	{
-		List<Point3f> points = MeshMaker.createIcosahedron(0, 1f);
-		for (Point3f p : points)
+		final List<Point3f> points = MeshMaker.createIcosahedron(0, 1f);
+		for (final Point3f p : points)
 		{
 			p.x += x;
 			p.y += y;
 			p.z += z;
 		}
-		CustomMesh mesh = new CustomTriangleMesh(points, c, 0.5f);
+		final CustomMesh mesh = new CustomTriangleMesh(points, c, 0.5f);
 		mesh.getAppearance().getPolygonAttributes().setBackFaceNormalFlip(!disableBackfaceNormalFlip);
 		if (backfaceCull)
 			mesh.getAppearance().getPolygonAttributes().setCullFace(PolygonAttributes.CULL_BACK);

@@ -101,10 +101,8 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 			d1[i] += duk_dt[i] * xk_uk_minus1;
 
 			for (int j = 0, k = i * n; j <= i; j++, index++, k++)
-			{
 				// This requires the partial second derivative with respect to i and j
 				J[index] += d2uk_dtds[k] * xk_uk_minus1 - duk_dt[i] * duk_dt[j] * xk_uk2;
-			}
 		}
 	}
 
@@ -112,15 +110,11 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 	public boolean isNaNGradients()
 	{
 		for (int i = n; i-- > 0;)
-		{
 			if (Double.isNaN(d1[i]))
 				return true;
-		}
 		for (int i = J.length; i-- > 0;)
-		{
 			if (Double.isNaN(J[i]))
 				return true;
-		}
 		return false;
 	}
 
@@ -131,7 +125,7 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 	 */
 	public double[] getJacobianLinear()
 	{
-		double[] jacobian = new double[n * n];
+		final double[] jacobian = new double[n * n];
 		GradientProcedureHelper.getMatrix(J, jacobian, n);
 		return jacobian;
 	}

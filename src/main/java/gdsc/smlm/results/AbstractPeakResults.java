@@ -131,15 +131,13 @@ public abstract class AbstractPeakResults implements PeakResults
 	public String getBoundsString()
 	{
 		if (bounds != null)
-		{
 			return String.format("x%d y%d w%d h%d", bounds.x, bounds.y, bounds.width, bounds.height);
-		}
 		return "";
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)
 	 */
 	@Override
@@ -182,8 +180,8 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Gets the calibration writer with the current calibration (must not be null). The writer can be used to update the
-	 * calibration but changes are not saved until 
-	 * {@link gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)} 
+	 * calibration but changes are not saved until
+	 * {@link gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)}
 	 * is called with the new calibration.
 	 *
 	 * @return the calibration writer
@@ -197,8 +195,8 @@ public abstract class AbstractPeakResults implements PeakResults
 
 	/**
 	 * Gets the calibration writer with the current calibration, or a default calibration. The writer can be used to
-	 * update the calibration but changes are not saved until 
-	 * {@link gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)} 
+	 * update the calibration but changes are not saved until
+	 * {@link gdsc.smlm.results.PeakResults#setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration)}
 	 * is called with the new calibration.
 	 *
 	 * @return the calibration writer
@@ -330,8 +328,8 @@ public abstract class AbstractPeakResults implements PeakResults
 		{
 			if (!calibrationReader.isCCDCamera())
 				return false;
-			DistanceUnit du = calibrationReader.getDistanceUnit();
-			IntensityUnit iu = calibrationReader.getIntensityUnit();
+			final DistanceUnit du = calibrationReader.getDistanceUnit();
+			final IntensityUnit iu = calibrationReader.getIntensityUnit();
 			if (du == DistanceUnit.NM && iu == IntensityUnit.PHOTON)
 				return true;
 			return isCalibrated();
@@ -349,8 +347,8 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		if (calibration != null)
 		{
-			DistanceUnit du = calibrationReader.getDistanceUnit();
-			IntensityUnit iu = calibrationReader.getIntensityUnit();
+			final DistanceUnit du = calibrationReader.getDistanceUnit();
+			final IntensityUnit iu = calibrationReader.getIntensityUnit();
 			//@formatter:off
 			return (du != null && calibrationReader.getNmPerPixel() > 0) &&
 				   (iu != null && calibrationReader.getCountPerPhoton() > 0);

@@ -67,7 +67,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 					Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 			useBackground = true;
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
 					Gaussian2DPeakResultHelper.LSE_PRECISION);
@@ -80,10 +80,8 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	public boolean accept(PeakResult peak)
 	{
 		if (useBackground)
-		{
 			// Use the estimated background for the peak
 			return calculator.getLSEPrecision(peak.getParameters()) <= variance;
-		}
 		// Use the background noise to estimate precision
 		return calculator.getLSEPrecision(peak.getParameters(), peak.getNoise()) <= variance;
 	}

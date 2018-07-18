@@ -63,7 +63,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	private static int filter2 = 0;
 	private static double smooth2 = 3;
 
-	private int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
+	private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
 
 	/*
 	 * (non-Javadoc)
@@ -89,7 +89,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			return DONE;
 		}
 
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() != Roi.RECTANGLE)
 		{
 			IJ.error("Rectangular ROI required");
@@ -112,7 +112,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		// throws away the snap shot. The pixel data for the previous slice is then fixed
 		// with the preview. So we can only support a single slice.
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Smooth image:");
@@ -159,16 +159,16 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	@Override
 	public void run(ImageProcessor ip)
 	{
-		Rectangle bounds = ip.getRoi();
+		final Rectangle bounds = ip.getRoi();
 
 		// Crop to the ROI
 		FloatProcessor fp = ip.crop().toFloat(0, null);
 
 		float[] data = (float[]) fp.getPixels();
 
-		MaximaSpotFilter filter = createSpotFilter();
-		int width = fp.getWidth();
-		int height = fp.getHeight();
+		final MaximaSpotFilter filter = createSpotFilter();
+		final int width = fp.getWidth();
+		final int height = fp.getHeight();
 		data = filter.preprocessData(data, width, height);
 
 		//System.out.println(filter.getDescription());
@@ -183,10 +183,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	{
 		final int search = 1;
 		final int border = 0;
-		DataProcessor processor0 = FitEngineConfiguration.createDataProcessor(border, filters[filter1], smooth1);
+		final DataProcessor processor0 = FitEngineConfiguration.createDataProcessor(border, filters[filter1], smooth1);
 		if (differenceFilter)
 		{
-			DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border, filters[filter2], smooth2);
+			final DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border, filters[filter2], smooth2);
 			return new DifferenceSpotFilter(search, border, processor0, processor1);
 		}
 		return new SingleSpotFilter(search, border, processor0);

@@ -90,23 +90,19 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 	static
 	{
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
 		defaultLimits = new int[101];
 		for (int i = 1; i < defaultLimits.length; i++)
-		{
 			defaultLimits[i] = computeLimit(pd, i, DEFAULT_CUMULATIVE_PROBABILITY);
 			//System.out.printf("[%d] = %d  scale=%d\n", i, defaultLimits[i], getScale(Math.sqrt(i)));
-		}
 
 		// Use exponent of the mean down to -20
 		defaultTinyLimits = new int[21];
 		for (int i = 1; i < defaultTinyLimits.length; i++)
-		{
 			defaultTinyLimits[i] = computeTinyLimit(pd, -i, DEFAULT_CUMULATIVE_PROBABILITY);
 			//System.out.printf("[%d] = %d : p(0) = %g : cumul = %s : next = %g\n", i, defaultTinyLimits[i],
 			//		pd.probability(0), pd.cumulativeProbability(defaultTinyLimits[i]),
 			//		pd.probability(defaultTinyLimits[i] + 1));
-		}
 	}
 
 	/**
@@ -122,7 +118,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 */
 	public static int computeLimit(double mean)
 	{
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(null, mean);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(null, mean);
 		int x = (int) mean;
 		while (pd.logProbability(x + 1) > -709)
 			x++;
@@ -160,8 +156,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	private static int computeTinyLimit(CustomPoissonDistribution pd, int exp, double cumulativeProbability)
 	{
 		// Fill all bits of the mantissa
-		long bits = 0xffffffffffffffL;
-		double mean = Double.longBitsToDouble(bits | (long) (exp + 1023) << 52);
+		final long bits = 0xffffffffffffffL;
+		final double mean = Double.longBitsToDouble(bits | (long) (exp + 1023) << 52);
 		pd.setMeanUnsafe(mean);
 		return pd.inverseCumulativeProbability(cumulativeProbability);
 	}
@@ -248,10 +244,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		this.s = s;
 		noGaussian = (s * MAX_RANGE < 1);
 		if (noGaussian)
-		{
 			// This is OK. Just return the information for a Poisson.
 			this.defaultScale = 0;
-		}
 		else
 		{
 			// This is set to work for reasonable values of the Gaussian kernel and sampling
@@ -261,10 +255,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 			// Don't support excess scaling caused by small kernels
 			if (defaultScale * s * MAX_RANGE > 1000000000)
-			{
 				throw new IllegalArgumentException(
 						"Maximum Gaussian kernel size too large: " + defaultScale * s * MAX_RANGE);
-			}
 
 			gaussianKernel = new GaussianKernel(s);
 		}
@@ -279,7 +271,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 */
 	protected static int getPow2Scale(double s)
 	{
-		double scale = Math.ceil(s);
+		final double scale = Math.ceil(s);
 		if (scale > MAX_SCALE)
 			return MAX_SCALE;
 		return Maths.nextPow2((int) scale);
@@ -346,17 +338,13 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 			return Double.POSITIVE_INFINITY;
 
 		if (noGaussian)
-		{
 			// No Gaussian convolution
 			// Get the Fisher information for a Poisson.
 			return 1.0 / t;
-		}
 
 		if (t > meanThreshold)
-		{
 			// Use an approximation when the Poisson mean is large
 			return 1.0 / (t + s * s); //getPoissonGaussianApproximationI(t);
-		}
 
 		// This computes the convolution of a Poisson PMF and a Gaussian PDF.
 		// The value of this is p(z).
@@ -423,7 +411,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		// the values (for example those returned by computeLimit(...).
 		int maxx;
 		// The exponent provides a rough idea of the size of the mean
-		int exp = NumberUtils.getSignedExponent(t);
+		final int exp = NumberUtils.getSignedExponent(t);
 		if (t < 1)
 		{
 			int e = -exp;
@@ -435,7 +423,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		}
 		else
 		{
-			int x = (int) Math.ceil(t);
+			final int x = (int) Math.ceil(t);
 			if (x < limits.length)
 			{
 				if (limits[x] == 0)
@@ -446,7 +434,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 			{
 				// For large mean the distribution will be far from zero.
 				// In this case use a 2-tailed limit.
-				double lower = (1 - cumulativeProbability) / 2;
+				final double lower = (1 - cumulativeProbability) / 2;
 				minx = computeLimit(pd, x, lower);
 				maxx = computeLimit(pd, x, 1 - lower);
 			}
@@ -463,23 +451,21 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 		for (int x = minx; x <= maxx; x++)
 		{
-			double pp = pd.probability(x);
+			final double pp = pd.probability(x);
 			if (pp == 0)
 				break;
 			list.add(pp);
 		}
 
 		if (list.size() < 2)
-		{
 			// Extreme case where there is no Poisson for convolution.
 			// Assume a Gaussian distribution. Return the Fisher information
 			// for the Gaussian with mean 0. This will happen when the cumulative
 			// probability has been altered from the default.
 			return getGaussianI();
-		}
 
 		// Unscaled Poisson
-		double[] p = list.toArray();
+		final double[] p = list.toArray();
 
 		// Convolve with the Gaussian kernel.
 		// As the mean reduces the Poisson distribution is more skewed
@@ -508,12 +494,12 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		for (int iteration = 1; iteration <= maxIterations && scale < MAX_SCALE; iteration++)
 		{
 			scale *= 2;
-			double oldSum = sum;
+			final double oldSum = sum;
 			try
 			{
 				sum = compute(scale, range, p);
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				// Occurs when the convolution has grown too big
 				return sum;
@@ -523,9 +509,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 			//		delta / (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5);
 			final double rLimit = getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5;
 			if (delta <= rLimit)
-			{
 				break;
-			}
 		}
 
 		return sum;
@@ -554,20 +538,16 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		@Override
 		public boolean execute(double pz)
 		{
-			int index = i % scale;
+			final int index = i % scale;
 			i++;
 			final double az = pz_1[index];
 			pz_1[index] = pz;
 			if (pz > 0)
-			{
-				//sum(az * az / pz);
-
 				// Compute with respect to the ultimate limit.
 				// Both az and pz should be < 1
 				// if az < 1 : az^2 -> 0
 				//   if pz < 1 then dividing first will reduce the chance of computing zero.
 				sum((az / pz) * az);
-			}
 			return true;
 		}
 
@@ -657,9 +637,9 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 */
 	private double compute(int scale, int range, double[] p) throws IllegalArgumentException
 	{
-		double[] g = gaussianKernel.getGaussianKernel(scale, range, true);
+		final double[] g = gaussianKernel.getGaussianKernel(scale, range, true);
 
-		IntegrationProcedure ip = (use38) ? new Simpson38IntegrationProcedure(scale)
+		final IntegrationProcedure ip = (use38) ? new Simpson38IntegrationProcedure(scale)
 				: new SimpsonIntegrationProcedure(scale);
 
 		Convolution.convolve(g, p, scale, ip);

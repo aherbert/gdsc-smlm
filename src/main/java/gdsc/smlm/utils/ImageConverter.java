@@ -52,7 +52,7 @@ public class ImageConverter
 		if (!(rFactor >= 0 && gFactor >= 0 && bFactor >= 0))
 			throw new IllegalArgumentException("Weights must sum to a positive value");
 
-		double sum = rFactor + gFactor + bFactor;
+		final double sum = rFactor + gFactor + bFactor;
 		if (!(sum > 0 && sum != Double.POSITIVE_INFINITY))
 			throw new IllegalArgumentException("Weights must sum to a positive finite value");
 
@@ -68,7 +68,7 @@ public class ImageConverter
 	 */
 	public double[] getWeightingFactors()
 	{
-		double[] weights = new double[3];
+		final double[] weights = new double[3];
 		weights[0] = rWeight;
 		weights[1] = gWeight;
 		weights[2] = bWeight;
@@ -85,9 +85,9 @@ public class ImageConverter
 	 */
 	public float rgbToGreyscale(int c)
 	{
-		int r = (c & 0xff0000) >> 16;
-		int g = (c & 0xff00) >> 8;
-		int b = c & 0xff;
+		final int r = (c & 0xff0000) >> 16;
+		final int g = (c & 0xff00) >> 8;
+		final int b = c & 0xff;
 		return (float) (r * rWeight + g * gWeight + b * bWeight);
 	}
 
@@ -122,79 +122,71 @@ public class ImageConverter
 
 		if (oPixels instanceof float[])
 		{
-			float[] pixels = (float[]) oPixels;
+			final float[] pixels = (float[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++];
-				}
 				return pixels2;
 			}
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
 			return pixels2;
 		}
 		else if (oPixels instanceof short[])
 		{
-			short[] pixels = (short[]) oPixels;
+			final short[] pixels = (short[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xffff;
-				}
 				return pixels2;
 			}
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i] & 0xffff;
 			return pixels2;
 		}
 		else if (oPixels instanceof byte[])
 		{
-			byte[] pixels = (byte[]) oPixels;
+			final byte[] pixels = (byte[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xff;
-				}
 				return pixels2;
 			}
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i] & 0xff;
 			return pixels2;
 		}
 		else if (oPixels instanceof double[])
 		{
-			double[] pixels = (double[]) oPixels;
+			final double[] pixels = (double[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = (float) pixels[offset2++];
-				}
 				return pixels2;
 			}
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = (float) pixels[i];
 			return pixels2;
@@ -202,20 +194,18 @@ public class ImageConverter
 		else if (oPixels instanceof int[])
 		{
 			// The default processing assumes RGB
-			int[] pixels = (int[]) oPixels;
+			final int[] pixels = (int[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = rgbToGreyscale(pixels[offset2++]);
-				}
 				return pixels2;
 			}
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = rgbToGreyscale(pixels[i]);
 			return pixels2;
@@ -266,100 +256,90 @@ public class ImageConverter
 
 		if (oPixels instanceof float[])
 		{
-			float[] pixels = (float[]) oPixels;
+			final float[] pixels = (float[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++];
-				}
 				return pixels2;
 			}
-			double[] pixels2 = allocate(buffer, pixels.length);
+			final double[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i];
 			return pixels2;
 		}
 		else if (oPixels instanceof short[])
 		{
-			short[] pixels = (short[]) oPixels;
+			final short[] pixels = (short[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xffff;
-				}
 				return pixels2;
 			}
-			double[] pixels2 = allocate(buffer, pixels.length);
+			final double[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i] & 0xffff;
 			return pixels2;
 		}
 		else if (oPixels instanceof byte[])
 		{
-			byte[] pixels = (byte[]) oPixels;
+			final byte[] pixels = (byte[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xff;
-				}
 				return pixels2;
 			}
-			double[] pixels2 = allocate(buffer, pixels.length);
+			final double[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i] & 0xff;
 			return pixels2;
 		}
 		if (oPixels instanceof double[])
 		{
-			double[] pixels = (double[]) oPixels;
+			final double[] pixels = (double[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++];
-				}
 				return pixels2;
 			}
-			double[] pixels2 = allocate(buffer, pixels.length);
+			final double[] pixels2 = allocate(buffer, pixels.length);
 			System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
 			return pixels2;
 		}
 		else if (oPixels instanceof int[])
 		{
 			// The default processing assumes RGB
-			int[] pixels = (int[]) oPixels;
+			final int[] pixels = (int[]) oPixels;
 			if (incorrectSize(pixels.length, width, height))
 				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
-				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				final double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
 				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
-				{
 					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = rgbToGreyscale(pixels[offset2++]);
-				}
 				return pixels2;
 			}
-			double[] pixels2 = allocate(buffer, pixels.length);
+			final double[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = rgbToGreyscale(pixels[i]);
 			return pixels2;
@@ -394,33 +374,33 @@ public class ImageConverter
 
 		if (oPixels instanceof float[])
 		{
-			float[] pixels = (float[]) oPixels;
+			final float[] pixels = (float[]) oPixels;
 			if (buffer == null)
 				return pixels;
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
 			return pixels2;
 		}
 		else if (oPixels instanceof short[])
 		{
-			short[] pixels = (short[]) oPixels;
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final short[] pixels = (short[]) oPixels;
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i] & 0xffff;
 			return pixels2;
 		}
 		else if (oPixels instanceof byte[])
 		{
-			byte[] pixels = (byte[]) oPixels;
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final byte[] pixels = (byte[]) oPixels;
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = pixels[i] & 0xff;
 			return pixels2;
 		}
 		else if (oPixels instanceof double[])
 		{
-			double[] pixels = (double[]) oPixels;
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final double[] pixels = (double[]) oPixels;
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = (float) pixels[i];
 			return pixels2;
@@ -428,8 +408,8 @@ public class ImageConverter
 		else if (oPixels instanceof int[])
 		{
 			// The default processing
-			int[] pixels = (int[]) oPixels;
-			float[] pixels2 = allocate(buffer, pixels.length);
+			final int[] pixels = (int[]) oPixels;
+			final float[] pixels2 = allocate(buffer, pixels.length);
 			for (int i = 0; i < pixels.length; i++)
 				pixels2[i] = rgbToGreyscale(pixels[i]);
 			return pixels2;

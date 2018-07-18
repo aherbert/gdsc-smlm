@@ -319,9 +319,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final int x0 = x % maxx;
 
 		for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK)
-		{
 			y += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
-		}
 
 		return y;
 	}

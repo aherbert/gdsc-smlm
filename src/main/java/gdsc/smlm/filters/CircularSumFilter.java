@@ -60,7 +60,7 @@ public class CircularSumFilter extends CircularFilter
 	@Override
 	public CircularSumFilter clone()
 	{
-		CircularSumFilter o = (CircularSumFilter) super.clone();
+		final CircularSumFilter o = (CircularSumFilter) super.clone();
 		return o;
 	}
 }

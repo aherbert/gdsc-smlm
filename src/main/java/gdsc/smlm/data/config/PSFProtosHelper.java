@@ -48,8 +48,8 @@ public class PSFProtosHelper
 
 	static
 	{
-		PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
-		PSF.Builder builder = PSF.newBuilder();
+		final PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
+		final PSF.Builder builder = PSF.newBuilder();
 
 		builder.setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
 		paramBuilder.setName("S");
@@ -153,10 +153,10 @@ public class PSFProtosHelper
 				model.getSDistanceUnitValue() == sDistanceUnit.getNumber())
 			return model;
 
-		AstigmatismModel.Builder builder = model.toBuilder();
-		TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(model.getZDistanceUnit(), zDistanceUnit,
+		final AstigmatismModel.Builder builder = model.toBuilder();
+		final TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(model.getZDistanceUnit(), zDistanceUnit,
 				model.getNmPerPixel());
-		TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(model.getSDistanceUnit(), sDistanceUnit,
+		final TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(model.getSDistanceUnit(), sDistanceUnit,
 				model.getNmPerPixel());
 		builder.setZDistanceUnitValue(zDistanceUnit.getNumber());
 		builder.setSDistanceUnitValue(sDistanceUnit.getNumber());
@@ -196,8 +196,8 @@ public class PSFProtosHelper
 	{
 		model = convert(model, zDistanceUnit, sDistanceUnit);
 
-		PSF.Builder psf = PSF.newBuilder();
-		PSFParameter.Builder param = PSFParameter.newBuilder();
+		final PSF.Builder psf = PSF.newBuilder();
+		final PSFParameter.Builder param = PSFParameter.newBuilder();
 		psf.setPsfTypeValue(PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE);
 
 		// Add the widths first so the PSF parameters can be converted/used as a 2-axis Gaussian
@@ -246,16 +246,16 @@ public class PSFProtosHelper
 	{
 		if (psf.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
 			throw new ConfigurationException("Not a " + getName(PSFType.ASTIGMATIC_GAUSSIAN_2D));
-		List<PSFParameter> list = psf.getParametersList();
+		final List<PSFParameter> list = psf.getParametersList();
 		if (list.size() != 8)
 			throw new ConfigurationException("Invalid number of parameters");
-		String[] names = { "s0x", "s0y", "gamma", "d", "Ax", "Bx", "Ay", "By" };
+		final String[] names = { "s0x", "s0y", "gamma", "d", "Ax", "Bx", "Ay", "By" };
 		for (int i = 0; i < names.length; i++)
 			if (!list.get(i).getName().equals(names[i]))
 				throw new ConfigurationException(
 						"Invalid parameter name: " + list.get(i).getName() + " != " + names[i]);
 
-		AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
+		final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
 		model.setSDistanceUnit(sDistanceUnit);
 		model.setZDistanceUnit(zDistanceUnit);
 		model.setNmPerPixel(nmPerPixel);

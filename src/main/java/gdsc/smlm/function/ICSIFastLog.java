@@ -43,9 +43,9 @@ public class ICSIFastLog extends FastLog
 	public enum DataType
 	{
 		/** float. */
-		FLOAT, 
+		FLOAT,
 		/** double. */
-		DOUBLE, 
+		DOUBLE,
 		/** float and double. */
 		BOTH
 	}
@@ -153,7 +153,7 @@ public class ICSIFastLog extends FastLog
 		qd = 52 - n;
 		int x = 0x3F800000; // Set the exponent to 0 so the float value=1.0
 		//assert Float.intBitsToFloat(x) == 1.0f : "value is not 1.0f";
-		int inc = 1 << q; // Amount to increase the mantissa
+		final int inc = 1 << q; // Amount to increase the mantissa
 
 		// Allow computation of float/double datatypes
 		final int size = 1 << n;
@@ -180,9 +180,9 @@ public class ICSIFastLog extends FastLog
 			//if (i<50 || i>size-50)
 			//	System.out.println(Integer.toBinaryString(x));
 
-			float value = Float.intBitsToFloat(x);
+			final float value = Float.intBitsToFloat(x);
 			// Subtract the bias here so we don't need to do it in fastLog()
-			double log2 = exactLog2(value);
+			final double log2 = exactLog2(value);
 
 			// Note: Pre-subtract the exponent bias
 			if (data != null)
@@ -247,21 +247,15 @@ public class ICSIFastLog extends FastLog
 
 		// Check for negatives
 		if ((bits >> 31) != 0)
-		{
 			// Only -0 is allowed
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		if (e == 0)
-		{
 			return (m == 0)
 					// Special case for +0
 					? Float.NEGATIVE_INFINITY : (data[m >>> q]);
-		}
 		else
-		{
 			return (e + data[m >>> q]);
-		}
 	}
 
 	/**
@@ -304,18 +298,12 @@ public class ICSIFastLog extends FastLog
 		}
 
 		if ((bits >> 31) != 0)
-		{
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		if (e == 0)
-		{
 			return (m == 0) ? Float.NEGATIVE_INFINITY : (data[m >>> q]) * LN2F;
-		}
 		else
-		{
 			return (e + data[m >>> q]) * LN2F;
-		}
 	}
 
 	/**
@@ -374,21 +362,15 @@ public class ICSIFastLog extends FastLog
 
 		// Check for negatives
 		if ((bits >> 63) != 0L)
-		{
 			// Only -0 is allowed
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		if (e == 0)
-		{
 			return (m == 0L)
 					// Special case for +0
 					? Float.NEGATIVE_INFINITY : (ddata[(int) (m >>> qd)]);
-		}
 		else
-		{
 			return (e + ddata[(int) (m >>> qd)]);
-		}
 	}
 
 	/**
@@ -430,18 +412,12 @@ public class ICSIFastLog extends FastLog
 		}
 
 		if ((bits >> 63) != 0L)
-		{
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		if (e == 0)
-		{
 			return (m == 0L) ? Float.NEGATIVE_INFINITY : (ddata[(int) (m >>> qd)]) * LN2F;
-		}
 		else
-		{
 			return (e + ddata[(int) (m >>> qd)]) * LN2F;
-		}
 	}
 
 	/**

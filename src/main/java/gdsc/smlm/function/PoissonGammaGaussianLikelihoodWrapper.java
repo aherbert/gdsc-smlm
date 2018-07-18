@@ -88,9 +88,7 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 		// Compute the negative log-likelihood
 		double ll = 0;
 		for (int i = 0; i < n; i++)
-		{
 			ll -= p.logLikelihood(data[i], f.eval(i));
-		}
 		return ll;
 	}
 

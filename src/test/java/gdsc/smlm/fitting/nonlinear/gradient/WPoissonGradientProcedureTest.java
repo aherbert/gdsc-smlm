@@ -59,18 +59,16 @@ public class WPoissonGradientProcedureTest
 	{
 		int n = blockWidth * blockWidth;
 		var = new double[n];
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		while (n-- > 0)
-		{
 			// Range 0.9 to 1.1
 			var[n] = 0.9 + 0.2 * r.nextDouble();
-		}
 	}
 
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
-		double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
+		final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
 		Assert.assertEquals(WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
 				WPoissonGradientProcedure6.class);
 		Assert.assertEquals(WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(5)).getClass(),
@@ -91,22 +89,22 @@ public class WPoissonGradientProcedureTest
 
 	private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(int nparams)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		String name = String.format("[%d]", nparams);
+		final String name = String.format("[%d]", nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double[] y = createFakeData();
-			WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y, var, func);
+			final double[] y = createFakeData();
+			final WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y, var, func);
 			p.computeFisherInformation(paramsList.get(i));
-			WLSQLVMGradientProcedure p2 = new WLSQLVMGradientProcedure(y, var, func);
+			final WLSQLVMGradientProcedure p2 = new WLSQLVMGradientProcedure(y, var, func);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
@@ -136,7 +134,7 @@ public class WPoissonGradientProcedureTest
 			long t1 = time();
 			for (int i = 0; i < 10; i++)
 			{
-				long t2 = t1;
+				final long t2 = t1;
 				t1 = time();
 				if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) // 2% difference
 					break;
@@ -175,24 +173,24 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
-		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
+		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-		double[] v = (precomputed) ? var : null;
+		final double[] v = (precomputed) ? var : null;
 
-		String name = String.format("[%d]", nparams);
+		final String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double[] y = createFakeData();
-			WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
+			final double[] y = createFakeData();
+			final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
 			p1.computeFisherInformation(paramsList.get(i));
 
-			WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, v, func);
+			final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, v, func);
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Exactly the same ...
@@ -234,11 +232,11 @@ public class WPoissonGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double[] y = yList.get(i);
-			WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
+			final double[] y = yList.get(i);
+			final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
 			p1.computeFisherInformation(paramsList.get(i));
 
-			WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, v, func);
+			final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, v, func);
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Check they are the same
@@ -249,35 +247,35 @@ public class WPoissonGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(yList.get(i), v, func);
+					final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(yList.get(i), v, func);
 					for (int j = loops; j-- > 0;)
 						p1.computeFisherInformation(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(yList.get(i), v, func);
+					final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(yList.get(i), v, func);
 					for (int j = loops; j-- > 0;)
 						p2.computeFisherInformation(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
@@ -308,11 +306,11 @@ public class WPoissonGradientProcedureTest
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double[] y = yList.get(i);
-			WLSQLVMGradientProcedure p1 = WLSQLVMGradientProcedureFactory.create(y, var, func);
+			final double[] y = yList.get(i);
+			final WLSQLVMGradientProcedure p1 = WLSQLVMGradientProcedureFactory.create(y, var, func);
 			p1.gradient(paramsList.get(i));
 
-			WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, var, func);
+			final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, var, func);
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Check they are the same
@@ -323,35 +321,35 @@ public class WPoissonGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					WLSQLVMGradientProcedure p1 = WLSQLVMGradientProcedureFactory.create(yList.get(i), var, func);
+					final WLSQLVMGradientProcedure p1 = WLSQLVMGradientProcedureFactory.create(yList.get(i), var, func);
 					for (int j = loops; j-- > 0;)
 						p1.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(yList.get(i), var, func);
+					final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(yList.get(i), var, func);
 					for (int j = loops; j-- > 0;)
 						p2.computeFisherInformation(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1,
 				"WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
@@ -360,13 +358,13 @@ public class WPoissonGradientProcedureTest
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
-			double[] y = createFakeData(params);
+			final double[] params = new double[nparams];
+			final double[] y = createFakeData(params);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -375,33 +373,27 @@ public class WPoissonGradientProcedureTest
 
 	private double[] createFakeData(double[] params)
 	{
-		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
+		final int n = blockWidth * blockWidth;
+		final RandomGenerator r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] = r.nextDouble();
-		}
 
 		return y;
 	}
 
 	private double[] createFakeData()
 	{
-		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
+		final int n = blockWidth * blockWidth;
+		final RandomGenerator r = rdg.getRandomGenerator();
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] = r.nextDouble();
-		}
 
 		return y;
 	}
@@ -410,7 +402,7 @@ public class WPoissonGradientProcedureTest
 	{
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
+			final double[] params = new double[nparams];
 			createFakeParams(params);
 			paramsList.add(params);
 		}
@@ -418,26 +410,22 @@ public class WPoissonGradientProcedureTest
 
 	private void createFakeParams(double[] params)
 	{
-		RandomGenerator r = rdg.getRandomGenerator();
+		final RandomGenerator r = rdg.getRandomGenerator();
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
+		final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
-		{
 			params2List.add(copydouble(paramsList.get(i)));
-		}
 		return params2List;
 	}
 
 	private static double[] copydouble(double[] d)
 	{
-		double[] d2 = new double[d.length];
+		final double[] d2 = new double[d.length];
 		for (int i = 0; i < d.length; i++)
 			d2[i] = d[i];
 		return d2;

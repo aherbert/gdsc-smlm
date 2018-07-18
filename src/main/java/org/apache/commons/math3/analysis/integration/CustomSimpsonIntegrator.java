@@ -79,9 +79,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 	{
 		super(relativeAccuracy, absoluteAccuracy, minimalIterationCount, maximalIterationCount);
 		if (maximalIterationCount > SIMPSON_MAX_ITERATIONS_COUNT)
-		{
 			throw new NumberIsTooLargeException(maximalIterationCount, SIMPSON_MAX_ITERATIONS_COUNT, false);
-		}
 	}
 
 	/**
@@ -107,9 +105,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 	{
 		super(minimalIterationCount, maximalIterationCount);
 		if (maximalIterationCount > SIMPSON_MAX_ITERATIONS_COUNT)
-		{
 			throw new NumberIsTooLargeException(maximalIterationCount, SIMPSON_MAX_ITERATIONS_COUNT, false);
-		}
 	}
 
 	/**
@@ -131,7 +127,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 
 		// Simpson's rule requires at least two trapezoid stages.
 		// So we set the first sum using two trapezoid stages.
-		TrapezoidIntegrator qtrap = new TrapezoidIntegrator();
+		final TrapezoidIntegrator qtrap = new TrapezoidIntegrator();
 
 		//		if (getMinimalIterationCount() == 1)
 		//		{
@@ -166,9 +162,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 				final double delta = FastMath.abs(s - olds);
 				final double rLimit = getRelativeAccuracy() * (FastMath.abs(olds) + FastMath.abs(s)) * 0.5;
 				if ((delta <= rLimit) || (delta <= getAbsoluteAccuracy()))
-				{
 					return s;
-				}
 			}
 			olds = s;
 			oldt = t;

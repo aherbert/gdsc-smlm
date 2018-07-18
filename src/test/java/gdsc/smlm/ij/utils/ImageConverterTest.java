@@ -44,14 +44,14 @@ public class ImageConverterTest
 	final static int w = 200, h = 300;
 	static
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		ByteProcessor bp = new ByteProcessor(w, h);
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final ByteProcessor bp = new ByteProcessor(w, h);
 		bdata = (byte[]) bp.getPixels();
 		sdata = new short[bdata.length];
 		fdata = new float[bdata.length];
 		for (int i = 0; i < bp.getPixelCount(); i++)
 		{
-			int value = r.nextInt(256);
+			final int value = r.nextInt(256);
 			bp.set(i, value);
 			fdata[i] = sdata[i] = (short) value;
 		}
@@ -60,13 +60,13 @@ public class ImageConverterTest
 	@Test
 	public void canGetData()
 	{
-		Rectangle bounds = null;
-		float[] fe = fdata;
+		final Rectangle bounds = null;
+		final float[] fe = fdata;
 		Assert.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null), 0);
 		// Check the double format
-		double[] de = SimpleArrayUtils.toDouble(fe);
+		final double[] de = SimpleArrayUtils.toDouble(fe);
 		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
@@ -75,13 +75,13 @@ public class ImageConverterTest
 	@Test
 	public void canGetDataWithFullBounds()
 	{
-		Rectangle bounds = new Rectangle(0, 0, w, h);
-		float[] fe = fdata;
+		final Rectangle bounds = new Rectangle(0, 0, w, h);
+		final float[] fe = fdata;
 		Assert.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null), 0);
 		// Check the double format
-		double[] de = SimpleArrayUtils.toDouble(fe);
+		final double[] de = SimpleArrayUtils.toDouble(fe);
 		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
@@ -90,20 +90,20 @@ public class ImageConverterTest
 	@Test
 	public void canGetCropData()
 	{
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		ImageExtractor ie = new ImageExtractor(fdata, w, h);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final ImageExtractor ie = new ImageExtractor(fdata, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
+			final Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
 					5 + rand.nextInt(5));
-			FloatProcessor ip = new FloatProcessor(w, h, fdata.clone());
+			final FloatProcessor ip = new FloatProcessor(w, h, fdata.clone());
 			ip.setRoi(bounds);
-			float[] fe = (float[]) (ip.crop().getPixels());
+			final float[] fe = (float[]) (ip.crop().getPixels());
 			Assert.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null), 0);
 			// Check the double format
-			double[] de = SimpleArrayUtils.toDouble(fe);
+			final double[] de = SimpleArrayUtils.toDouble(fe);
 			Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);

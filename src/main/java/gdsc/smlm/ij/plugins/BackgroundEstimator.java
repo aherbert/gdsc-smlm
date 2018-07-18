@@ -78,7 +78,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	private static int histogramSize;
 	static
 	{
-		DataEstimator de = new DataEstimator(new float[0], 0, 0);
+		final DataEstimator de = new DataEstimator(new float[0], 0, 0);
 		fraction = de.getFraction();
 		histogramSize = de.getHistogramSize();
 	}
@@ -121,7 +121,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 			gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(), noiseMethod.ordinal());
 
 			// For background based on pixel below a threshold
-			String[] thresholdMethods = AutoThreshold.getMethods(true);
+			final String[] thresholdMethods = AutoThreshold.getMethods(true);
 			gd.addChoice("Threshold_method", thresholdMethods, thresholdMethods[thresholdMethod.ordinal() - 1]);
 			gd.addSlider("Fraction", 0, 0.999, fraction);
 			gd.addNumericField("Histogram_size", histogramSize, 0);
@@ -164,18 +164,18 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	{
 		IJ.showStatus("Estimating background ...");
 
-		int start = imp.getCurrentSlice();
-		int end = FastMath.min(imp.getStackSize(), start + 100);
-		int size = end - start + 1;
-		double[] xValues = new double[size];
-		double[] noise1 = new double[size];
-		double[] noise2 = new double[size];
-		double[] background = new double[size];
-		double[] threshold = new double[size];
-		double[] percentile = new double[size];
+		final int start = imp.getCurrentSlice();
+		final int end = FastMath.min(imp.getStackSize(), start + 100);
+		final int size = end - start + 1;
+		final double[] xValues = new double[size];
+		final double[] noise1 = new double[size];
+		final double[] noise2 = new double[size];
+		final double[] background = new double[size];
+		final double[] threshold = new double[size];
+		final double[] percentile = new double[size];
 
-		ImageStack stack = imp.getImageStack();
-		Rectangle bounds = imp.getProcessor().getRoi();
+		final ImageStack stack = imp.getImageStack();
+		final Rectangle bounds = imp.getProcessor().getRoi();
 		float[] buffer = null;
 		for (int slice = start, i = 0; slice <= end; slice++, i++)
 		{
@@ -195,7 +195,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 				threshold[i] = de.getThreshold();
 				percentile[i] = de.getPercentile(BackgroundEstimator.percentile);
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -205,7 +205,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
 		IJ.showStatus("Plotting background ...");
 
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 		plot(wo, xValues, noise1, noise2, null, "Noise", "Background Noise", "Global Noise", null);
 		plot(wo, xValues, background, threshold, percentile, "Background", "Background", "Threshold", "Percentile");
 		wo.tile();
@@ -217,14 +217,14 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 			String title, String title1, String title2, String title3)
 	{
 		// Get limits
-		double[] a = Maths.limits(xValues);
+		final double[] a = Maths.limits(xValues);
 		double[] b = Maths.limits(data1);
 		b = Maths.limits(b, data2);
 		if (data3 != null)
 			b = Maths.limits(b, data3);
 
 		title = imp.getTitle() + " " + title;
-		Plot2 plot = new Plot2(title, "Slice", title);
+		final Plot2 plot = new Plot2(title, "Slice", title);
 		double range = b[1] - b[0];
 		if (range == 0)
 			range = 1;
@@ -255,7 +255,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, label);
 
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			wo.add(pw);
 	}
@@ -269,11 +269,11 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	public void run(ImageProcessor ip)
 	{
 		// Perform all methods and add to the results
-		double[] result = new double[8];
+		final double[] result = new double[8];
 		int i = 0;
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
-		Rectangle bounds = ip.getRoi();
-		float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+		final Rectangle bounds = ip.getRoi();
+		final float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
 		final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
 		de.setFraction(fraction);
 		de.setHistogramSize(histogramSize);
@@ -311,9 +311,9 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 			}
 		});
 
-		BufferedTextWindow tw = new BufferedTextWindow(
+		final BufferedTextWindow tw = new BufferedTextWindow(
 				new TextWindow(imp.getTitle() + " Background", createHeader(), "", 800, 400));
-		for (double[] result : results)
+		for (final double[] result : results)
 			tw.append(createResult(result));
 		tw.flush();
 	}
@@ -349,12 +349,10 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
 	private String createResult(double[] result)
 	{
-		StringBuilder sb = new StringBuilder(prefix);
+		final StringBuilder sb = new StringBuilder(prefix);
 		sb.append((int) result[0]);
 		for (int i = 1; i < result.length; i++)
-		{
 			sb.append('\t').append(Utils.rounded(result[i]));
-		}
 		return sb.toString();
 	}
 }

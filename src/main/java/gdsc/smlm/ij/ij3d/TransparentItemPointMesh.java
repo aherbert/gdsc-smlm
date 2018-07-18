@@ -80,7 +80,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 			color = DEFAULT_COLOR;
 		Arrays.fill(colors, new Color4f(color.x, color.y, color.z, 1));
 
-		GeometryArray ta = new PointArray(size, GeometryArray.COORDINATES | GeometryArray.COLOR_4);
+		final GeometryArray ta = new PointArray(size, GeometryArray.COORDINATES | GeometryArray.COLOR_4);
 
 		ta.setValidVertexCount(size);
 
@@ -119,17 +119,17 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		// From here on we assume the current geometry will not be null
 		// as this only happens when the original size is zero. Size has
 		// been checked at this point to be the smaller of new and old.
-		GeometryArray ga = (GeometryArray) getGeometry();
+		final GeometryArray ga = (GeometryArray) getGeometry();
 
 		// Reorder all things in the geometry: coordinates and colour
-		Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
-		float[] oldColors = new float[oldSize * 4];
+		final Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
+		final float[] oldColors = new float[oldSize * 4];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size];
 		final float[] colors = new float[size * 4];
 		for (int i = 0; i < size; i++)
 		{
-			int j = indices[i];
+			final int j = indices[i];
 			coords[i] = oldCoords[j];
 			System.arraycopy(oldColors, j * 4, colors, i * 4, 4);
 		}
@@ -140,7 +140,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 			@Override
 			public void updateData(Geometry geometry)
 			{
-				GeometryArray ga = (GeometryArray) geometry;
+				final GeometryArray ga = (GeometryArray) geometry;
 				// We re-use the geometry and just truncate the vertex count
 				ga.setCoordinates(0, coords);
 				ga.setColors(0, colors);
@@ -162,7 +162,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		if (color == null)
 			color = DEFAULT_COLOR;
 		this.color = color;
-		int size = size();
+		final int size = size();
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
@@ -189,7 +189,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
@@ -198,7 +198,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		final float[] colors = new float[4 * size];
 		ga.getColors(0, colors);
 		int i = 0;
-		for (Color3f c : color)
+		for (final Color3f c : color)
 		{
 			colors[i++] = c.x;
 			colors[i++] = c.y;
@@ -218,7 +218,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
@@ -245,10 +245,8 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		final float[] colors = new float[4 * size];
 		ga.getColors(0, colors);
 		for (int i = 0; i < size; i++)
-		{
 			// Set only alpha
 			colors[i * 4 + 3] = alpha[i];
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}
@@ -268,10 +266,8 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		final float[] colors = new float[4 * size];
 		ga.getColors(0, colors);
 		for (int i = 0; i < size; i++)
-		{
 			// Set only alpha
 			colors[i * 4 + 3] = alpha;
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}
@@ -293,9 +289,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		final float[] colors = new float[4 * size];
 		ga.getColors(0, colors);
 		for (int i = 0; i < size; i++)
-		{
 			// Get only alpha
 			alpha[i] = colors[i * 4 + 3];
-		}
 	}
 }

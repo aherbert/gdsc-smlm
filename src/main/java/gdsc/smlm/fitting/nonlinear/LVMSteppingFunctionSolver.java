@@ -170,7 +170,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 
 		// Set up the current best Hessian matrix and gradient parameter
 		lambda = initialLambda;
-		int n = gradientProcedure.n;
+		final int n = gradientProcedure.n;
 		alpha = null;
 		beta = null;
 		walpha = new double[n * n];
@@ -238,10 +238,8 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 		System.arraycopy(alpha, 0, walpha, 0, alpha.length);
 		final double scale = (1.0 + lambda);
 		for (int i = 0, j = 0; i < n; i++, j += (n + 1))
-		{
 			// Scale the diagonal of the Hessian to favour direct descent
 			walpha[j] *= scale;
-		}
 		if (!solver.solve(walpha, step))
 			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_MODEL);
 	}

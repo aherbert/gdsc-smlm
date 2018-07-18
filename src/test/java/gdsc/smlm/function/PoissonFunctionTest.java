@@ -49,14 +49,14 @@ public class PoissonFunctionTest
 			}
 	}
 
-	private int[] cumulativeProbabilityIsOne(final double gain, final double mu)
+	private static int[] cumulativeProbabilityIsOne(final double gain, final double mu)
 	{
 		final double o = mu;
 
-		PoissonFunction f = new PoissonFunction(1.0 / gain);
+		final PoissonFunction f = new PoissonFunction(1.0 / gain);
 		double p = 0;
 
-		TDoubleArrayList values = new TDoubleArrayList();
+		final TDoubleArrayList values = new TDoubleArrayList();
 
 		double maxp = 0;
 		int maxc = 0;
@@ -65,7 +65,7 @@ public class PoissonFunctionTest
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 
-		int[] range = getRange(gain, mu);
+		final int[] range = getRange(gain, mu);
 		int min = range[0];
 		int max = range[1];
 		for (int x = min; x <= max; x++)
@@ -123,12 +123,10 @@ public class PoissonFunctionTest
 		}
 
 		// Find the range for 99.5% of the sum
-		double[] h = values.toArray();
+		final double[] h = values.toArray();
 		// Find cumulative
 		for (int i = 1; i < h.length; i++)
-		{
 			h[i] += h[i - 1];
-		}
 		int minx = 0, maxx = h.length - 1;
 		while (h[minx + 1] < 0.0025)
 			minx++;
@@ -147,9 +145,9 @@ public class PoissonFunctionTest
 		// Evaluate an initial range.
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		double range = Math.max(1, Math.sqrt(mu));
-		int min = Math.max(0, (int) Math.floor(gain * (mu - 3 * range)));
-		int max = (int) Math.ceil(gain * (mu + 3 * range));
+		final double range = Math.max(1, Math.sqrt(mu));
+		final int min = Math.max(0, (int) Math.floor(gain * (mu - 3 * range)));
+		final int max = (int) Math.ceil(gain * (mu + 3 * range));
 		return new int[] { min, max };
 	}
 
@@ -158,25 +156,23 @@ public class PoissonFunctionTest
 	{
 		for (int j = 0; j < gain.length; j++)
 			for (int i = 0; i < photons.length; i++)
-			{
 				probabilityMatchesLogProbabilty(gain[j], photons[i]);
-			}
 	}
 
-	private void probabilityMatchesLogProbabilty(final double gain, final double mu)
+	private static void probabilityMatchesLogProbabilty(final double gain, final double mu)
 	{
 		final double o = mu;
 
-		PoissonFunction f = new PoissonFunction(1.0 / gain);
-		double p = 0;
+		final PoissonFunction f = new PoissonFunction(1.0 / gain);
+		final double p = 0;
 
-		int[] range = getRange(gain, mu);
-		int min = range[0];
-		int max = range[1];
+		final int[] range = getRange(gain, mu);
+		final int min = range[0];
+		final int max = range[1];
 		for (int x = min; x <= max; x++)
 		{
-			double v1 = Math.log(f.likelihood(x, o));
-			double v2 = f.logLikelihood(x, o);
+			final double v1 = Math.log(f.likelihood(x, o));
+			final double v2 = f.logLikelihood(x, o);
 
 			TestAssert.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
 		}
@@ -186,27 +182,25 @@ public class PoissonFunctionTest
 	public void probabilityMatchesPoissonWithNoGain()
 	{
 		for (int i = 0; i < photons.length; i++)
-		{
 			probabilityMatchesPoissonWithNoGain(photons[i]);
-		}
 	}
 
-	private void probabilityMatchesPoissonWithNoGain(final double mu)
+	private static void probabilityMatchesPoissonWithNoGain(final double mu)
 	{
 		final double o = mu;
 
-		PoissonFunction f = new PoissonFunction(1.0);
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(null, mu);
+		final PoissonFunction f = new PoissonFunction(1.0);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(null, mu);
 
-		double p = 0;
+		final double p = 0;
 
-		int[] range = getRange(1, mu);
-		int min = range[0];
-		int max = range[1];
+		final int[] range = getRange(1, mu);
+		final int min = range[0];
+		final int max = range[1];
 		for (int x = min; x <= max; x++)
 		{
-			double v1 = f.likelihood(x, o);
-			double v2 = pd.probability(x);
+			final double v1 = f.likelihood(x, o);
+			final double v2 = pd.probability(x);
 
 			TestAssert.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
 		}

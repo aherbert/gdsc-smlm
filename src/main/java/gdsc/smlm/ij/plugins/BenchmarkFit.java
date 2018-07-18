@@ -134,9 +134,9 @@ public class BenchmarkFit implements PlugIn
 	private FitConfiguration fitConfig;
 	private ImagePlus imp;
 	private CreateData.BenchmarkParameters benchmarkParameters;
-	private double[] answer = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+	private final double[] answer = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 	private Rectangle region = null;
-	private AtomicInteger comValid = new AtomicInteger();
+	private final AtomicInteger comValid = new AtomicInteger();
 
 	// Used to store all the results for cross-method comparison
 	private double[][] results;
@@ -261,7 +261,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				while (true)
 				{
-					Integer job = jobs.take();
+					final Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
 						break;
 					if (!finished)
@@ -269,7 +269,7 @@ public class BenchmarkFit implements PlugIn
 						run(job.intValue());
 				}
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				System.out.println(e.toString());
 				throw new RuntimeException(e);
@@ -297,15 +297,11 @@ public class BenchmarkFit implements PlugIn
 			// Use a camera model to pre-process the data.
 			// The camera model is cropped to the correct region size.
 			if (fitConfig.isFitCameraCounts())
-			{
 				cameraModel.removeBias(data);
-			}
 			else
-			{
 				cameraModel.removeBiasAndGain(data);
-			}
 
-			double[] data = SimpleArrayUtils.toDouble(this.data);
+			final double[] data = SimpleArrayUtils.toDouble(this.data);
 
 			// Get the background and signal estimate for fitting in the correct units
 			final double b = (backgroundFitting && estimateBackground) ? getBackground(data, size, size)
@@ -318,7 +314,7 @@ public class BenchmarkFit implements PlugIn
 							((fitConfig.isFitCameraCounts()) ? benchmarkParameters.gain : 1);
 
 			// Find centre-of-mass estimate
-			double[] com = new double[2];
+			final double[] com = new double[2];
 			getCentreOfMass(data, size, size, com);
 
 			// Update the origin from the answer
@@ -329,30 +325,28 @@ public class BenchmarkFit implements PlugIn
 				origin[1] = com[1];
 			}
 			if (originZ == 1)
-			{
 				// Use zero as the origin
 				origin[2] = 0;
-			}
 
-			double dx = com[0] - answer[Gaussian2DFunction.X_POSITION];
-			double dy = com[1] - answer[Gaussian2DFunction.Y_POSITION];
+			final double dx = com[0] - answer[Gaussian2DFunction.X_POSITION];
+			final double dy = com[1] - answer[Gaussian2DFunction.Y_POSITION];
 			if (Math.abs(dx) < offsetRangeX && Math.abs(dy) < offsetRangeY)
 				comValid.getAndIncrement();
 
-			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+			final double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
 			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialXSD();
 			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialYSD();
 
 			double[][] bounds = null;
-			double[][] result = new double[offsets.length][];
-			long[] time = new long[offsets.length];
+			final double[][] result = new double[offsets.length][];
+			final long[] time = new long[offsets.length];
 			int c = 0;
 			int resultPosition = frame;
-			for (double[] offset : offsets)
+			for (final double[] offset : offsets)
 			{
-				long start = System.nanoTime();
+				final long start = System.nanoTime();
 
 				// Do fitting
 				final double[] params = initialParams.clone();
@@ -360,7 +354,7 @@ public class BenchmarkFit implements PlugIn
 				params[Gaussian2DFunction.Y_POSITION] = origin[1] + offset[1];
 				params[Gaussian2DFunction.Z_POSITION] = origin[2] + offset[2];
 				fitConfig.initialise(1, size, size, params);
-				FunctionSolver solver = fitConfig.getFunctionSolver();
+				final FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
 					bounds = setBounds(solver, initialParams, bounds);
 				else if (solver.isConstrained())
@@ -466,7 +460,7 @@ public class BenchmarkFit implements PlugIn
 
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * benchmarkParameters.getBackground());
-				double signal = benchmarkParameters.getSignal();
+				final double signal = benchmarkParameters.getSignal();
 				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
 				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
@@ -475,8 +469,8 @@ public class BenchmarkFit implements PlugIn
 				ub[Gaussian2DFunction.ANGLE] = Math.PI;
 				lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 				ub[Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
-				double wf = 1.5;
-				double s = benchmarkParameters.s / benchmarkParameters.a;
+				final double wf = 1.5;
+				final double s = benchmarkParameters.s / benchmarkParameters.a;
 				lb[Gaussian2DFunction.X_SD] = s / wf;
 				ub[Gaussian2DFunction.X_SD] = s * wf;
 				lb[Gaussian2DFunction.Y_SD] = s / wf;
@@ -510,35 +504,23 @@ public class BenchmarkFit implements PlugIn
 		private boolean isValid(FitStatus status, double[] params, int size)
 		{
 			if (status != FitStatus.OK)
-			{
 				return false;
-			}
 
 			// Reject fits that are outside the bounds of the data
 			if (params[Gaussian2DFunction.SIGNAL] < 0 || params[Gaussian2DFunction.X_POSITION] < 0 ||
 					params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > size ||
 					params[Gaussian2DFunction.Y_POSITION] > size)
-			{
 				return false;
-			}
 
 			// Q. Should we do width bounds checking?
 			if (fitConfig.isXSDFitting())
-			{
 				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
 						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
-				{
 					return false;
-				}
-			}
 			if (fitConfig.isYSDFitting())
-			{
 				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
 						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
-				{
 					return false;
-				}
-			}
 
 			return true;
 		}
@@ -567,9 +549,7 @@ public class BenchmarkFit implements PlugIn
 	{
 		// Store the results from each run
 		for (int i = 0; i < c; i++)
-		{
 			addResult(stats, answer, photons, sa, result[i], time[i]);
-		}
 	}
 
 	/**
@@ -592,9 +572,7 @@ public class BenchmarkFit implements PlugIn
 			long time)
 	{
 		for (int j = 0; j < result.length; j++)
-		{
 			stats[j].add(result[j] - answer[j]);
-		}
 		stats[TIME].add(time);
 		stats[ACTUAL_SIGNAL].add(result[Gaussian2DFunction.SIGNAL] - photons);
 		stats[ADJUSTED_X_SD].add(result[Gaussian2DFunction.X_SD] - sa);
@@ -654,7 +632,7 @@ public class BenchmarkFit implements PlugIn
 				String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
 						Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
 
-		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
+		final FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
 		fitConfig.setNmPerPixel(benchmarkParameters.a);
 
@@ -695,7 +673,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				if (originXY != 2)
 					return false;
-				ExtendedGenericDialog egd = new ExtendedGenericDialog("Origin XY");
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog("Origin XY");
 				egd.addNumericField("Offset_X", offsetX, 2, 6, "nm");
 				egd.addNumericField("Offset_Y", offsetY, 2, 6, "nm");
 				egd.setSilent(silent);
@@ -726,7 +704,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				if (originZ != 2)
 					return false;
-				ExtendedGenericDialog egd = new ExtendedGenericDialog("Origin Z");
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog("Origin Z");
 				egd.addNumericField("Offset_Z", offsetZ, 2, 6, "nm");
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
@@ -757,7 +735,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				if (offsetPoints == 0)
 					return false;
-				ExtendedGenericDialog egd = new ExtendedGenericDialog("Offset range");
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog("Offset range");
 				egd.addSlider("Offset_range_x", 0, 2.5, offsetRangeX);
 				egd.addSlider("Offset_range_y", 0, 2.5, offsetRangeY);
 				egd.addSlider("Offset_range_z", 0, 2.5, offsetRangeZ);
@@ -790,7 +768,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				if (!backgroundFitting)
 					return false;
-				ExtendedGenericDialog egd = new ExtendedGenericDialog("Background fitting");
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog("Background fitting");
 				egd.addCheckbox("Estimate_background", estimateBackground);
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
@@ -821,7 +799,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				if (!signalFitting)
 					return false;
-				ExtendedGenericDialog egd = new ExtendedGenericDialog("Signal fitting");
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog("Signal fitting");
 				egd.addCheckbox("Estimate_signal", estimateSignal);
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
@@ -872,7 +850,7 @@ public class BenchmarkFit implements PlugIn
 			return false;
 
 		// Initialise the correct calibration
-		CalibrationWriter calibration = new CalibrationWriter(fitConfig.getCalibration());
+		final CalibrationWriter calibration = new CalibrationWriter(fitConfig.getCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
 		calibration.setCountPerPhoton(benchmarkParameters.gain);
 		calibration.setQuantumEfficiency(benchmarkParameters.qe);
@@ -889,11 +867,11 @@ public class BenchmarkFit implements PlugIn
 
 		if (showHistograms)
 		{
-			ExtendedGenericDialog gd2 = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd2 = new ExtendedGenericDialog(TITLE);
 			gd2.addMessage("Select the histograms to display");
 			gd2.addNumericField("Histogram_bins", histogramBins, 0);
 
-			double[] convert = getConversionFactors();
+			final double[] convert = getConversionFactors();
 
 			for (int i = 0; i < displayHistograms.length; i++)
 				if (convert[i] != 0)
@@ -925,10 +903,8 @@ public class BenchmarkFit implements PlugIn
 	private synchronized void showProgress()
 	{
 		if (progress % stepProgress == 0)
-		{
 			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
-		}
 		progress++;
 	}
 
@@ -948,7 +924,6 @@ public class BenchmarkFit implements PlugIn
 		int y = (int) benchmarkParameters.y;
 		region = new Rectangle(x - regionSize, y - regionSize, 2 * regionSize + 1, 2 * regionSize + 1);
 		if (!new Rectangle(0, 0, imp.getWidth(), imp.getHeight()).contains(region))
-		{
 			// Check if it is incorrect by only 1 pixel
 			if (region.width <= imp.getWidth() + 1 && region.height <= imp.getHeight() + 1)
 			{
@@ -961,7 +936,6 @@ public class BenchmarkFit implements PlugIn
 				IJ.error(TITLE, "Fit region does not fit within the image");
 				return;
 			}
-		}
 
 		// Adjust the centre & account for 0.5 pixel offset during fitting
 		x -= region.x;
@@ -983,14 +957,14 @@ public class BenchmarkFit implements PlugIn
 		final ImageStack stack = imp.getImageStack();
 
 		// Create a pool of workers
-		int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-		List<Worker> workers = new LinkedList<>();
-		List<Thread> threads = new LinkedList<>();
+		final int nThreads = Prefs.getThreads();
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		final List<Worker> workers = new LinkedList<>();
+		final List<Thread> threads = new LinkedList<>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, region, fitConfig, cameraModel);
-			Thread t = new Thread(worker);
+			final Worker worker = new Worker(jobs, stack, region, fitConfig, cameraModel);
+			final Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
 			t.start();
@@ -1007,31 +981,23 @@ public class BenchmarkFit implements PlugIn
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
 		for (int i = 0; i < totalFrames; i++)
-		{
 			// Only fit if there were simulated photons
 			if (benchmarkParameters.p[i] > 0)
-			{
 				put(jobs, i);
-			}
-		}
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
-		{
 			put(jobs, -1);
-		}
 
 		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
-		{
 			try
 			{
 				threads.get(i).join();
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
-		}
 		threads.clear();
 
 		if (hasOffsetXY())
@@ -1045,16 +1011,14 @@ public class BenchmarkFit implements PlugIn
 		Statistics[] stats = null;
 		for (int i = 0; i < workers.size(); i++)
 		{
-			Statistics[] next = workers.get(i).stats;
+			final Statistics[] next = workers.get(i).stats;
 			if (stats == null)
 			{
 				stats = next;
 				continue;
 			}
 			for (int j = 0; j < next.length; j++)
-			{
 				stats[j].add(next[j]);
-			}
 		}
 		workers.clear();
 
@@ -1068,24 +1032,22 @@ public class BenchmarkFit implements PlugIn
 
 			int[] idList = new int[NAMES.length];
 			int count = 0;
-			double[] convert = getConversionFactors();
+			final double[] convert = getConversionFactors();
 
 			boolean requireRetile = false;
 			for (int i = 0; i < NAMES.length; i++)
-			{
 				if (displayHistograms[i] && convert[i] != 0)
 				{
 					// We will have to convert the values...
-					double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
+					final double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
 					for (int j = 0; j < tmp.length; j++)
 						tmp[j] *= convert[i];
-					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
+					final StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
 					idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
 							String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
 									Utils.rounded(tmpStats.getStandardDeviation())));
 					requireRetile = requireRetile || Utils.isNewWindow();
 				}
-			}
 
 			if (count > 0 && requireRetile)
 			{
@@ -1096,7 +1058,7 @@ public class BenchmarkFit implements PlugIn
 
 		if (saveRawData)
 		{
-			String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
+			final String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
 			if (dir != null)
 				saveData(stats, dir);
 		}
@@ -1108,29 +1070,27 @@ public class BenchmarkFit implements PlugIn
 	{
 		rawDataDirectory = dir;
 		for (int i = 0; i < NAMES.length; i++)
-		{
 			saveStatistics((StoredDataStatistics) stats[i], NAMES[i]);
-		}
 	}
 
 	private static void saveStatistics(StoredDataStatistics stats, String title)
 	{
-		String filename = rawDataDirectory + title.replace(" ", "_") + ".txt";
+		final String filename = rawDataDirectory + title.replace(" ", "_") + ".txt";
 
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")))
 		{
 			//out.write(title);
 			//out.newLine();
-			double[] data = stats.getValues();
+			final double[] data = stats.getValues();
 			Arrays.sort(data);
-			for (double d : data)
+			for (final double d : data)
 			{
 				//out.write(Utils.rounded(d, 4)); // rounded
 				out.write(Double.toString(d));
 				out.newLine();
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -1142,7 +1102,7 @@ public class BenchmarkFit implements PlugIn
 		{
 			jobs.put(i);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			throw new RuntimeException("Unexpected interruption", e);
 		}
@@ -1162,10 +1122,10 @@ public class BenchmarkFit implements PlugIn
 		if (startPoints != null)
 			return startPoints;
 
-		TurboList<double[]> list = new TurboList<>();
+		final TurboList<double[]> list = new TurboList<>();
 
 		// Set up origin with an offset
-		double[] origin = new double[3];
+		final double[] origin = new double[3];
 		switch (originXY)
 		{
 			case 2:
@@ -1199,18 +1159,16 @@ public class BenchmarkFit implements PlugIn
 
 		if (offsetPoints > 0 && ((offsetRangeX > 0 || offsetRangeY > 0) || is3D && offsetRangeZ > 0))
 		{
-			double[] min = new double[] { -Math.max(0, offsetRangeX), -Math.max(0, offsetRangeY),
+			final double[] min = new double[] { -Math.max(0, offsetRangeX), -Math.max(0, offsetRangeY),
 					-Math.max(0, offsetRangeZ) };
-			double[] range = new double[] { 2 * min[0], 2 * min[1], 2 * min[2] };
-			HaltonSequenceGenerator halton = new HaltonSequenceGenerator((is3D) ? 3 : 2);
+			final double[] range = new double[] { 2 * min[0], 2 * min[1], 2 * min[2] };
+			final HaltonSequenceGenerator halton = new HaltonSequenceGenerator((is3D) ? 3 : 2);
 			for (int i = 0; i < offsetPoints; i++)
 			{
-				double[] offset = origin.clone();
-				double[] v = halton.nextVector();
+				final double[] offset = origin.clone();
+				final double[] v = halton.nextVector();
 				for (int j = 0; j < v.length; j++)
-				{
 					offset[j] += v[j] * range[j] + min[j];
-				}
 				list.add(offset);
 			}
 		}
@@ -1236,7 +1194,7 @@ public class BenchmarkFit implements PlugIn
 	public static double getSignal(double[] data, double b)
 	{
 		double s = 0;
-		for (double d : data)
+		for (final double d : data)
 			s += d;
 		// Subtract the background per pixel and ensure at least 1 photon in the signal
 		return Math.max(1, s - b * data.length);
@@ -1272,16 +1230,14 @@ public class BenchmarkFit implements PlugIn
 		}
 
 		for (int i = 2; i-- > 0;)
-		{
 			com[i] /= sum;
-		}
 	}
 
 	private void summariseResults(Statistics[] stats, CameraModel cameraModel)
 	{
 		createTable();
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		// Create the benchmark settings and the fitting settings
 		sb.append(benchmarkParameters.getMolecules()).append('\t');
@@ -1294,12 +1250,12 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append('\t');
 
-		CameraType cameraType = benchmarkParameters.cameraType;
+		final CameraType cameraType = benchmarkParameters.cameraType;
 		if (cameraType == CameraType.SCMOS)
 		{
 			sb.append("sCMOS (").append(benchmarkParameters.cameraModelName).append(") ");
-			Rectangle bounds = benchmarkParameters.cameraBounds;
-			Rectangle cropBounds = cameraModel.getBounds();
+			final Rectangle bounds = benchmarkParameters.cameraBounds;
+			final Rectangle cropBounds = cameraModel.getBounds();
 			sb.append(" ").append(bounds.x + cropBounds.x).append(",").append(bounds.y + cropBounds.y);
 			sb.append(" ").append(region.width).append("x").append(region.width);
 		}
@@ -1323,11 +1279,9 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(fitConfig.getInitialPeakStdDev() * benchmarkParameters.a)).append('\t');
 		sb.append(PSFProtosHelper.getName(fitConfig.getPSF().getPsfType()));
 		if (fitConfig.isFixedPSF())
-		{
 			// Only fixed fitting can ignore the signal
 			if (!signalFitting)
 				sb.append("NS");
-		}
 		if (!backgroundFitting)
 			sb.append("NB");
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
@@ -1336,7 +1290,7 @@ public class BenchmarkFit implements PlugIn
 			sb.append(":Camera\t");
 
 			// Add details of the noise model for the MLE
-			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
+			final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
 			sb.append("EM=").append(r.isEMCCD());
 			sb.append(":G=").append(r.getCountPerPhoton());
 			sb.append(":N=").append(r.getReadNoise());
@@ -1345,17 +1299,15 @@ public class BenchmarkFit implements PlugIn
 			sb.append('\t');
 
 		// Convert to units of the image (ADUs and pixels)
-		double[] convert = getConversionFactors();
+		final double[] convert = getConversionFactors();
 
 		// Store the results for fitting on this benchmark dataset
-		BenchmarkResult benchmarkResult = new BenchmarkResult(benchmarkParameters, answer, sb.toString(), convert,
+		final BenchmarkResult benchmarkResult = new BenchmarkResult(benchmarkParameters, answer, sb.toString(), convert,
 				this.results, this.resultsTime);
 		if (!benchmarkResults.isEmpty())
-		{
 			// Clear the results if the benchmark has changed
 			if (benchmarkResults.getFirst().benchmarkParameters.id != benchmarkParameters.id)
 				benchmarkResults.clear();
-		}
 		benchmarkResults.add(benchmarkResult);
 
 		// Now output the actual results ...
@@ -1364,13 +1316,11 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(recall));
 
 		for (int i = 0; i < stats.length; i++)
-		{
 			if (convert[i] != 0)
 				sb.append('\t').append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
 						.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
 			else
 				sb.append("\t0\t0");
-		}
 		summaryTable.append(sb.toString());
 	}
 
@@ -1427,13 +1377,11 @@ public class BenchmarkFit implements PlugIn
 
 	private static String createHeader(boolean extraRecall)
 	{
-		StringBuilder sb = new StringBuilder(createParameterHeader() + "\tRecall");
+		final StringBuilder sb = new StringBuilder(createParameterHeader() + "\tRecall");
 		if (extraRecall)
 			sb.append("\tOrigRecall");
 		for (int i = 0; i < NAMES.length; i++)
-		{
 			sb.append('\t').append(NAMES[i]).append("\t+/-");
-		}
 		return sb.toString();
 	}
 
@@ -1450,15 +1398,15 @@ public class BenchmarkFit implements PlugIn
 		// The fitting could have used centre-of-mass or not making the number of points different.
 		// Find the shortest array (this will be the one where the centre-of-mass was not used)
 		int length = Integer.MAX_VALUE;
-		for (BenchmarkResult benchmarkResult : benchmarkResults)
+		for (final BenchmarkResult benchmarkResult : benchmarkResults)
 			if (length > benchmarkResult.results.length)
 				length = benchmarkResult.results.length;
 
 		// Build a list of all the frames which have results
-		int[] valid = new int[length];
+		final int[] valid = new int[length];
 		int j = 0;
-		int[] count = new int[benchmarkResults.size()];
-		for (BenchmarkResult benchmarkResult : benchmarkResults)
+		final int[] count = new int[benchmarkResults.size()];
+		for (final BenchmarkResult benchmarkResult : benchmarkResults)
 		{
 			int c = 0;
 			for (int i = 0; i < valid.length; i++)
@@ -1487,11 +1435,11 @@ public class BenchmarkFit implements PlugIn
 
 		// Create the results using only frames where all the fitting methods were successful
 		j = 0;
-		for (BenchmarkResult benchmarkResult : benchmarkResults)
+		for (final BenchmarkResult benchmarkResult : benchmarkResults)
 		{
 			final double[] answer = benchmarkResult.answer;
 
-			Statistics[] stats = new Statistics[NAMES.length];
+			final Statistics[] stats = new Statistics[NAMES.length];
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = new Statistics();
 
@@ -1504,7 +1452,7 @@ public class BenchmarkFit implements PlugIn
 						benchmarkResult.resultsTime[i]);
 			}
 
-			StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
+			final StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
 
 			// Now output the actual results ...
 			sb.append('\t');
@@ -1519,13 +1467,11 @@ public class BenchmarkFit implements PlugIn
 			final double[] convert = benchmarkResult.convert;
 
 			for (int i = 0; i < stats.length; i++)
-			{
 				if (convert[i] != 0)
 					sb.append('\t').append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
 							.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
 				else
 					sb.append("\t0\t0");
-			}
 			analysisTable.append(sb.toString());
 		}
 	}

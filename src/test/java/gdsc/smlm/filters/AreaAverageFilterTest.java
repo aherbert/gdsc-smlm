@@ -34,37 +34,37 @@ import gdsc.test.TestSettings;
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AreaAverageFilterTest extends AbstractFilterTest
 {
-	private int ITER = 100;
-	private int InternalITER = 300;
+	private final int ITER = 100;
+	private final int InternalITER = 300;
 
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
 
-		AreaAverageFilter filter = new AreaAverageFilter();
+		final AreaAverageFilter filter = new AreaAverageFilter();
 
-		ArrayList<float[]> dataSet = getSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = getSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
-		for (float boxSize : fBoxSizes)
+		for (final float boxSize : fBoxSizes)
 		{
 			filter.areaAverageUsingAveragesInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			filter.areaAverageUsingSumsInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : fBoxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final float boxSize : fBoxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(data.clone());
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.areaAverageUsingSumsInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -72,22 +72,22 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : fBoxSizes)
+		for (final float boxSize : fBoxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(data.clone());
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.areaAverageUsingAveragesInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -114,30 +114,30 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		AreaAverageFilter filter = new AreaAverageFilter();
-		AverageFilter filter2 = new AverageFilter();
+		final AreaAverageFilter filter = new AreaAverageFilter();
+		final AverageFilter filter2 = new AverageFilter();
 
-		ArrayList<float[]> dataSet = getSpeedData(ITER);
+		final ArrayList<float[]> dataSet = getSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
-		for (float boxSize : fBoxSizes)
+		for (final float boxSize : fBoxSizes)
 		{
 			filter.areaAverageUsingAverages(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			filter2.stripedBlockAverage(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : fBoxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final float boxSize : fBoxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(data.clone());
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.stripedBlockAverage(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -145,22 +145,22 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : fBoxSizes)
+		for (final float boxSize : fBoxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(data.clone());
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.areaAverageUsingAverages(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -187,30 +187,30 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		AreaAverageFilter filter = new AreaAverageFilter();
-		AverageFilter filter2 = new AverageFilter();
+		final AreaAverageFilter filter = new AreaAverageFilter();
+		final AverageFilter filter2 = new AverageFilter();
 
-		ArrayList<float[]> dataSet = getSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = getSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
-		for (float boxSize : fBoxSizes)
+		for (final float boxSize : fBoxSizes)
 		{
 			filter.areaAverageUsingAveragesInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			filter2.stripedBlockAverageInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : fBoxSizes)
-			for (int width : primes)
-				for (int height : primes)
+		for (final float boxSize : fBoxSizes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(data.clone());
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter2.stripedBlockAverageInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -218,22 +218,22 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : fBoxSizes)
+		for (final float boxSize : fBoxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-					for (float[] data : dataSet)
+					final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
+					for (final float[] data : dataSet)
 						dataSet2.add(data.clone());
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet2)
+					for (final float[] data : dataSet2)
 						filter.areaAverageUsingAveragesInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -258,13 +258,13 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageCorrectlyInterpolatesBetweenBlocks()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		int max = 50;
-		float[] data = createData(rg, max, max);
-		AreaAverageFilter filter = new AreaAverageFilter();
-		int n = 30;
-		float[][] results = new float[n + 1][];
-		double[] w = new double[n + 1];
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final int max = 50;
+		final float[] data = createData(rg, max, max);
+		final AreaAverageFilter filter = new AreaAverageFilter();
+		final int n = 30;
+		final float[][] results = new float[n + 1][];
+		final double[] w = new double[n + 1];
 		int count = 0;
 		for (int i = 0; i <= n; i++)
 		{
@@ -280,18 +280,15 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	public void checkInterpolation(int max, int n, float[][] results, int count)
 	{
 		// Pick some points and see if they are monototically interpolated between integer blocks
-		int[] p = new int[] { 10, 20, 30, 40 };
-		for (int x : p)
-		{
-			for (int y : p)
+		final int[] p = new int[] { 10, 20, 30, 40 };
+		for (final int x : p)
+			for (final int y : p)
 			{
-				int index = y * max + x;
-				double[] yy = new double[count];
+				final int index = y * max + x;
+				final double[] yy = new double[count];
 				int c = 0;
-				for (float[] data1 : results)
-				{
+				for (final float[] data1 : results)
 					yy[c++] = data1[index];
-				}
 
 				//// Debugging
 				//String title = "AreaAverage";
@@ -300,9 +297,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 
 				for (int i = 0; i < n; i += 10)
 				{
-					boolean up = yy[i + 10] > yy[i];
+					final boolean up = yy[i + 10] > yy[i];
 					for (int j = i + 1; j < i + 10; j++)
-					{
 						if (up)
 						{
 							Assert.assertTrue(yy[j] >= yy[j - 1]);
@@ -313,23 +309,21 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 							Assert.assertTrue(yy[j] <= yy[j - 1]);
 							Assert.assertTrue(yy[j] >= yy[j + 1]);
 						}
-					}
 				}
 
 			}
-		}
 	}
 
 	@Test
 	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		int max = 50;
-		float[] data = createData(rg, max, max);
-		AreaAverageFilter filter = new AreaAverageFilter();
-		int n = 30;
-		float[][] results = new float[n + 1][];
-		double[] w = new double[n + 1];
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final int max = 50;
+		final float[] data = createData(rg, max, max);
+		final AreaAverageFilter filter = new AreaAverageFilter();
+		final int n = 30;
+		final float[][] results = new float[n + 1][];
+		final double[] w = new double[n + 1];
 		int count = 0;
 		for (int i = 0; i <= n; i++)
 		{
@@ -345,14 +339,14 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		int max = 50;
-		float[] data = createData(rg, max, max);
-		AreaAverageFilter filter = new AreaAverageFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final int max = 50;
+		final float[] data = createData(rg, max, max);
+		final AreaAverageFilter filter = new AreaAverageFilter();
 		filter.setSimpleInterpolation(false);
-		int n = 30;
-		float[][] results = new float[n + 1][];
-		double[] w = new double[n + 1];
+		final int n = 30;
+		final float[][] results = new float[n + 1][];
+		final double[] w = new double[n + 1];
 		int count = 0;
 		for (int i = 0; i <= n; i++)
 		{
@@ -368,14 +362,14 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		int max = 50;
-		float[] data = createData(rg, max, max);
-		AreaAverageFilter filter = new AreaAverageFilter();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final int max = 50;
+		final float[] data = createData(rg, max, max);
+		final AreaAverageFilter filter = new AreaAverageFilter();
 		filter.setSimpleInterpolation(false);
-		int n = 30;
-		float[][] results = new float[n + 1][];
-		double[] w = new double[n + 1];
+		final int n = 30;
+		final float[][] results = new float[n + 1][];
+		final double[] w = new double[n + 1];
 		int count = 0;
 		for (int i = 0; i <= n; i++)
 		{

@@ -37,15 +37,14 @@ import gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class ErfGaussian2DFunctionVsPSFModelTest
 {
-	private int width = 10;
-	private int height = 9;
+	private final int width = 10;
+	private final int height = 9;
 
 	@Test
 	public void computesSameAsPSFModel()
 	{
-		RandomDataGenerator r = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator r = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		for (int i = 0; i < 10; i++)
-		{
 			//@formatter:off
 			computesSameAsPSFModel(
 					r.nextUniform(50, 100),
@@ -54,23 +53,22 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 					r.nextUniform(0.5, 2),
 					r.nextUniform(0.5, 2));
 			//@formatter:on
-		}
 	}
 
 	private void computesSameAsPSFModel(double sum, double x0, double x1, double s0, double s1)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, width, height,
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, width, height,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.SIGNAL] = sum;
 		a[Gaussian2DFunction.X_POSITION] = x0;
 		a[Gaussian2DFunction.Y_POSITION] = x1;
 		a[Gaussian2DFunction.X_SD] = s0;
 		a[Gaussian2DFunction.Y_SD] = s1;
-		double[] o = new StandardValueProcedure().getValues(f, a);
+		final double[] o = new StandardValueProcedure().getValues(f, a);
 
-		GaussianPSFModel m = new GaussianPSFModel(s0, s1);
-		double[] e = new double[o.length];
+		final GaussianPSFModel m = new GaussianPSFModel(s0, s1);
+		final double[] e = new double[o.length];
 		// Note that the Gaussian2DFunction has 0,0 at the centre of a pixel.
 		// The model has 0.5,0.5 at the centre so add an offset.
 		m.create2D(e, width, height, sum, x0 + 0.5, x1 + 0.5, false);
@@ -81,7 +79,7 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 		for (int i = 0; i < e.length; i++)
 			if (e[i] > 1e-2) // Only check where there is a reasonable amount of signal
 			{
-				double error = DoubleEquality.relativeError(e[i], o[i]);
+				final double error = DoubleEquality.relativeError(e[i], o[i]);
 				// We expect a small error since the ErfGaussian2DFunction uses a
 				// fast approximation of the Erf(..) (the error function). The PSFModel
 				// uses the Apache commons implementation.

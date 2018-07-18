@@ -70,9 +70,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 				throw new IllegalArgumentException("No initial width1 estimate");
 		}
 		else
-		{
 			sy = sx;
-		}
 
 		isZFitting = fitConfiguration.isZFitting();
 		if (isZFitting)
@@ -93,9 +91,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 					throw new IllegalArgumentException("No initial angle estimate");
 			}
 			else
-			{
 				angle = 0;
-			}
 		}
 	}
 
@@ -133,30 +129,20 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 				angle = params[j + Gaussian2DFunction.ANGLE];
 
 				if (sx == 0)
-				{
 					sx = this.sx;
-				}
 
 				if (isWidth1Fitting)
 				{
 					if (sy == 0)
-					{
 						sy = this.sy;
-					}
 				}
 				else
-				{
 					sy = sx;
-				}
 
 				// Guess the initial angle if input angle is out-of-bounds
 				if (isAngleFitting)
-				{
 					if (angle == 0)
-					{
 						angle = this.angle;
-					}
-				}
 			}
 
 			// Set-up for estimating peak width at half maximum

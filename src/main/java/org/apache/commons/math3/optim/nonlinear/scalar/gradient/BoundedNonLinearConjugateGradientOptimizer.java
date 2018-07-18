@@ -255,12 +255,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 		checkGradients(r, unbounded);
 
 		if (goal == GoalType.MINIMIZE)
-		{
 			for (int i = 0; i < n; i++)
-			{
 				r[i] = -r[i];
-			}
-		}
 
 		// Initial search direction.
 		double[] steepestDescent = preconditioner.precondition(point, r);
@@ -268,9 +264,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 		double delta = 0;
 		for (int i = 0; i < n; ++i)
-		{
 			delta += r[i] * searchDirection[i];
-		}
 
 		// Used for non-gradient based line search
 		LineSearch line = null;
@@ -290,13 +284,11 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 			incrementIterationCount();
 
 			final double objective = computeObjectiveValue(point);
-			PointValuePair previous = current;
+			final PointValuePair previous = current;
 			current = new PointValuePair(point, objective);
 			if (previous != null && checker.converged(getIterations(), previous, current))
-			{
 				// We have found an optimum.
 				return current;
-			}
 
 			double step;
 			if (useGradientLineSearch)
@@ -327,7 +319,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 						maxEval -= solver.getEvaluations(); // Subtract used up evaluations.
 					}
 				}
-				catch (MathIllegalStateException e)
+				catch (final MathIllegalStateException e)
 				{
 					//System.out.printf("Failed to bracket %s @ %s\n", Arrays.toString(point), Arrays.toString(searchDirection));
 
@@ -348,30 +340,22 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 			// Validate new point.
 			//System.out.printf("Step = %f x %s\n", step, Arrays.toString(searchDirection));
 			for (int i = 0; i < point.length; ++i)
-			{
 				point[i] += step * searchDirection[i];
-			}
 			unbounded = point.clone();
 			applyBounds(point);
 			r = computeObjectiveGradient(point);
 			checkGradients(r, unbounded);
 
 			if (goal == GoalType.MINIMIZE)
-			{
 				for (int i = 0; i < n; ++i)
-				{
 					r[i] = -r[i];
-				}
-			}
 
 			// Compute beta.
 			final double deltaOld = delta;
 			final double[] newSteepestDescent = preconditioner.precondition(point, r);
 			delta = 0;
 			for (int i = 0; i < n; ++i)
-			{
 				delta += r[i] * newSteepestDescent[i];
-			}
 
 			if (delta == 0)
 				return new PointValuePair(point, computeObjectiveValue(point));
@@ -385,9 +369,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 				case POLAK_RIBIERE:
 					double deltaMid = 0;
 					for (int i = 0; i < r.length; ++i)
-					{
 						deltaMid += r[i] * steepestDescent[i];
-					}
 					beta = (delta - deltaMid) / deltaOld;
 					break;
 				default:
@@ -398,18 +380,12 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 			// Compute conjugate search direction.
 			if (getIterations() % n == 0 || beta < 0)
-			{
 				// Break conjugation: reset search direction.
 				searchDirection = steepestDescent.clone();
-			}
 			else
-			{
 				// Compute new conjugate search direction.
 				for (int i = 0; i < n; ++i)
-				{
 					searchDirection[i] = steepestDescent[i] + beta * searchDirection[i];
-				}
-			}
 
 			// The gradient has already been adjusted for the search direction
 			checkGradients(searchDirection, unbounded, -sign);
@@ -435,8 +411,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 		// The existing values (as set by the previous call) are reused if
 		// not provided in the argument list.
-		for (OptimizationData data : optData)
-		{
+		for (final OptimizationData data : optData)
 			if (data instanceof BracketingStep)
 			{
 				initialStep = ((BracketingStep) data).getBracketingStep();
@@ -444,7 +419,6 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 				// changed to "continue".
 				break;
 			}
-		}
 
 		checkParameters();
 	}
@@ -468,16 +442,12 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 		double yB = yA;
 		for (double step = h; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB))
 		{
-			double b = a + step;
+			final double b = a + step;
 			yB = f.value(b);
 			if (yA * yB <= 0)
-			{
 				return b;
-			}
 			if (Double.isNaN(yB))
-			{
 				throw new MathIllegalStateException(LocalizedFormats.UNABLE_TO_BRACKET_OPTIMUM_IN_LINE_SEARCH);
-			}
 		}
 		throw new MathIllegalStateException(LocalizedFormats.UNABLE_TO_BRACKET_OPTIMUM_IN_LINE_SEARCH);
 	}
@@ -512,9 +482,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 			double b = a + step;
 			yB = f.value(b);
 			if (yA * yB <= 0)
-			{
 				return b;
-			}
 
 			if (Double.isNaN(yB))
 			{
@@ -534,13 +502,9 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 					b = a + step;
 					yB = f.value(b);
 					if (yA * yB <= 0)
-					{
 						return b;
-					}
 					if (!Double.isNaN(yB))
-					{
 						lastB = b;
-					}
 				}
 				if (lastB != Double.NaN)
 					// Return the point we reached as the minimum
@@ -622,9 +586,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 				{
 					final double[] x = new double[n];
 					for (int i = 0; i < n; i++)
-					{
 						x[i] = p[i] + alpha * d[i];
-					}
 					applyBounds(x);
 					final double obj = BoundedNonLinearConjugateGradientOptimizer.this.computeObjectiveValue(x);
 					return obj;
@@ -677,11 +639,9 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 			// current point in the search direction
 			final double[] shiftedPoint = currentPoint.clone();
 			for (int i = 0; i < shiftedPoint.length; ++i)
-			{
 				shiftedPoint[i] += x * searchDirection[i];
-			}
 
-			double[] unbounded = shiftedPoint.clone();
+			final double[] unbounded = shiftedPoint.clone();
 
 			// Ensure the point is within bounds
 			applyBounds(shiftedPoint);
@@ -696,9 +656,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 			// dot product with the search direction
 			double dotProduct = 0;
 			for (int i = 0; i < gradient.length; ++i)
-			{
 				dotProduct += gradient[i] * searchDirection[i];
-			}
 
 			return dotProduct;
 		}
@@ -718,11 +676,9 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 		isUpper = checkArray(upper, Double.POSITIVE_INFINITY);
 		// Check that the upper bound is above the lower bound
 		if (isUpper && isLower)
-		{
 			for (int i = 0; i < lower.length; i++)
 				if (lower[i] > upper[i])
 					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
-		}
 	}
 
 	/**
@@ -738,7 +694,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	{
 		if (array == null)
 			return false;
-		for (double v : array)
+		for (final double v : array)
 			if (v != value)
 				return true;
 		return false;
@@ -753,17 +709,13 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	private void applyBounds(double[] point)
 	{
 		if (isUpper)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] > upper[i])
 					point[i] = upper[i];
-		}
 		if (isLower)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] < lower[i])
 					point[i] = lower[i];
-		}
 	}
 
 	/**
@@ -796,17 +748,13 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	private boolean checkGradients(double[] r, double[] point, final double sign)
 	{
 		if (isUpper)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] >= upper[i] && Math.signum(r[i]) == sign)
 					r[i] = 0;
-		}
 		if (isLower)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] <= lower[i] && Math.signum(r[i]) == -sign)
 					r[i] = 0;
-		}
 		boolean isNaN = false;
 		for (int i = 0; i < point.length; i++)
 			if (Double.isNaN(r[i]))

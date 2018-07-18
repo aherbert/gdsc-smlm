@@ -49,25 +49,25 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquation()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		final EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
-		double[] b = new double[] { 3, 3, 4 };
+		final double[] b = new double[] { 3, 3, 4 };
 
 		// Expected solution
-		double[] x = new double[] { 4.75, 6.5, 5.25 };
-		double[][] a_inv = new double[][] {
+		final double[] x = new double[] { 4.75, 6.5, 5.25 };
+		final double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0.5, 0.25 },
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
-		boolean result = solver.solve(a, b);
+		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
@@ -84,25 +84,25 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquationWithZeroInB()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		final EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
-		double[] b = new double[] { 3, 0, 4 };
+		final double[] b = new double[] { 3, 0, 4 };
 
 		// Expected solution
-		double[] x = new double[] { 3.25, 3.5, 3.75 };
-		double[][] a_inv = new double[][] {
+		final double[] x = new double[] { 3.25, 3.5, 3.75 };
+		final double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0.5, 0.25 },
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
-		boolean result = solver.solve(a, b);
+		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
@@ -119,26 +119,26 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquationWithZeroInA()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		final EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, 0, -1, 0 },
 			new double[] { 0, 0, 0, 0 },
 			new double[] { -1, 0, 2, -1 },
 			new double[] { 0, 0, -1, 2 } };
-		double[] b = new double[] { 3, 0, 3, 4 };
+		final double[] b = new double[] { 3, 0, 3, 4 };
 
 		// Expected solution
-		double[] x = new double[] { 4.75, 0, 6.5, 5.25 };
-		double[][] a_inv = new double[][] {
+		final double[] x = new double[] { 4.75, 0, 6.5, 5.25 };
+		final double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0, 0.5, 0.25 },
 			new double[] { 0, 0, 0, 0 },
 			new double[] { 0.5, 0, 1, 0.5 },
 			new double[] { 0.25, 0, 0.5, 0.75 } };
 
-		boolean result = solver.solve(a, b);
+		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
@@ -155,24 +155,24 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquationWithZerosInA()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver();
-		DoubleEquality eq = new DoubleEquality(5e-3, 1e-16);
+		final EJMLLinearSolver solver = new EJMLLinearSolver();
+		final DoubleEquality eq = new DoubleEquality(5e-3, 1e-16);
 		solver.setEqual(eq);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, 0, -1, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { -1, 0, 2, 0, 0, -1 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0, 0, -1, 0, 0, 2 } };
-		double[] b = new double[] { 3, 0, 3, 0, 0, 4 };
+		final double[] b = new double[] { 3, 0, 3, 0, 0, 4 };
 
 		// Expected solution
-		double[] x = new double[] { 4.75, 0, 6.5, 0, 0, 5.25 };
-		double[][] a_inv = new double[][] {
+		final double[] x = new double[] { 4.75, 0, 6.5, 0, 0, 5.25 };
+		final double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.5, 0, 1, 0, 0, 0.5 },
@@ -180,7 +180,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
-		boolean result = solver.solve(a, b);
+		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
@@ -197,23 +197,23 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvert()
 	{
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
 
 		// Expected solution
-		double[][] a_inv = new double[][] {
+		final double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0.5, 0.25 },
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
-		boolean result = solver.invert(a);
+		final boolean result = solver.invert(a);
 
 		Assert.assertTrue("Failed to invert", result);
 
@@ -227,12 +227,12 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertWithZeros()
 	{
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, 0, -1, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { -1, 0, 2, 0, 0, -1 },
@@ -241,7 +241,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0, 0, -1, 0, 0, 2 } };
 
 		// Expected solution
-		double[][] a_inv = new double[][] {
+		final double[][] a_inv = new double[][] {
 			new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.5, 0, 1, 0, 0, 0.5 },
@@ -249,7 +249,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
-		boolean result = solver.invert(a);
+		final boolean result = solver.invert(a);
 
 		Assert.assertTrue("Failed to invert", result);
 
@@ -263,20 +263,20 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertDiagonal()
 	{
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, -1, 0 },
 			new double[] { -1, 2, -1 },
 			new double[] { 0, -1, 2 } };
 
 		// Expected solution
-		double[] e = new double[] { 0.75, 1, 0.75 };
+		final double[] e = new double[] { 0.75, 1, 0.75 };
 
-		double[] o = solver.invertDiagonal(a);
+		final double[] o = solver.invertDiagonal(a);
 
 		Assert.assertNotNull("Failed to invert", o);
 
@@ -287,12 +287,12 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertDiagonalWithZeros()
 	{
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] {
+		final double[][] a = new double[][] {
 			new double[] { 2, 0, -1, 0, 0, 0 },
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { -1, 0, 2, 0, 0, -1 },
@@ -301,9 +301,9 @@ public class EJMLLinearSolverTest
 			new double[] { 0, 0, -1, 0, 0, 2 } };
 
 		// Expected solution
-		double[] e = new double[] { 0.75, 0, 1, 0, 0, 0.75 };
+		final double[] e = new double[] { 0.75, 0, 1, 0, 0, 0.75 };
 
-		double[] o = solver.invertDiagonal(a);
+		final double[] o = solver.invertDiagonal(a);
 
 		Assert.assertNotNull("Failed to invert", o);
 
@@ -329,25 +329,19 @@ public class EJMLLinearSolverTest
 			// Check the solver gets a good answer
 			solver.setEqual(new DoubleEquality(5e-3, 1e-6));
 			int fail = 0;
-			Object data = getData(0);
+			final Object data = getData(0);
 			a = (DenseMatrix64F[]) ((Object[]) data)[0];
 			b = (DenseMatrix64F[]) ((Object[]) data)[1];
 			for (int i = 0; i < a.length; i++)
-			{
 				if (!solve(a[i], b[i]))
-				{
 					fail++;
-				}
-			}
 			if (fail > 0)
 			{
 				log(getName() + " failed to invert %d/%d\n", fail, a.length);
 				badSolver = true;
 			}
 			else
-			{
 				badSolver = false;
-			}
 			solver.setEqual(null);
 		}
 
@@ -362,8 +356,8 @@ public class EJMLLinearSolverTest
 		{
 			// Clone
 			int n = b.length;
-			DenseMatrix64F[] a = new DenseMatrix64F[n];
-			DenseMatrix64F[] b = new DenseMatrix64F[n];
+			final DenseMatrix64F[] a = new DenseMatrix64F[n];
+			final DenseMatrix64F[] b = new DenseMatrix64F[n];
 			while (n-- > 0)
 			{
 				a[n] = this.a[n].copy();
@@ -375,12 +369,10 @@ public class EJMLLinearSolverTest
 		@Override
 		public Object run(Object data)
 		{
-			DenseMatrix64F[] a = (DenseMatrix64F[]) ((Object[]) data)[0];
-			DenseMatrix64F[] b = (DenseMatrix64F[]) ((Object[]) data)[1];
+			final DenseMatrix64F[] a = (DenseMatrix64F[]) ((Object[]) data)[0];
+			final DenseMatrix64F[] b = (DenseMatrix64F[]) ((Object[]) data)[1];
 			for (int i = 0; i < a.length; i++)
-			{
 				solve(a[i], b[i]);
-			}
 			return null;
 		}
 
@@ -493,27 +485,27 @@ public class EJMLLinearSolverTest
 		TestSettings.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
-		int n = f0.size();
+		final int n = f0.size();
 		final double[] y = new double[n];
 		final TurboList<DenseMatrix64F> aList = new TurboList<>();
 		final TurboList<DenseMatrix64F> bList = new TurboList<>();
-		double[] testbackground = new double[] { 0.2, 0.7 };
-		double[] testsignal1 = new double[] { 30, 100, 300 };
-		double[] testcx1 = new double[] { 4.9, 5.3 };
-		double[] testcy1 = new double[] { 4.8, 5.2 };
-		double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
-		int np = f0.getNumberOfGradients();
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
+		final double[] testbackground = new double[] { 0.2, 0.7 };
+		final double[] testsignal1 = new double[] { 30, 100, 300 };
+		final double[] testcx1 = new double[] { 4.9, 5.3 };
+		final double[] testcy1 = new double[] { 4.8, 5.2 };
+		final double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
+		final int np = f0.getNumberOfGradients();
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
 		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		//double lambda = 10;
-		for (double background : testbackground)
+		for (final double background : testbackground)
 			// Peak 1
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double w1 : testw1)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double w1 : testw1)
 						{
-							double[] p = new double[] { background, signal1, 0, cx1, cy1, w1, w1 };
+							final double[] p = new double[] { background, signal1, 0, cx1, cy1, w1, w1 };
 							f0.initialise(p);
 							f0.forEach(new ValueProcedure()
 							{
@@ -526,8 +518,8 @@ public class EJMLLinearSolverTest
 									y[i++] = rdg.nextPoisson(value);
 								}
 							});
-							double[][] alpha = new double[np][np];
-							double[] beta = new double[np];
+							final double[][] alpha = new double[np][np];
+							final double[] beta = new double[np];
 							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
 							//TestSettings.debug("SS = %f\n", ss);
@@ -538,21 +530,21 @@ public class EJMLLinearSolverTest
 							bList.add(EJMLLinearSolver.toB(beta));
 						}
 
-		DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
-		DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
-		int runs = 100000 / a.length;
-		TimingService ts = new TimingService(runs);
-		TurboList<SolverTimingTask> tasks = new TurboList<>();
+		final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
+		final DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
+		final int runs = 100000 / a.length;
+		final TimingService ts = new TimingService(runs);
+		final TurboList<SolverTimingTask> tasks = new TurboList<>();
 		// Added in descending speed order
 		tasks.add(new PseudoInverseSolverTimingTask(a, b));
 		tasks.add(new LinearSolverTimingTask(a, b));
 		tasks.add(new CholeskySolverTimingTask(a, b));
 		tasks.add(new CholeskyLDLTSolverTimingTask(a, b));
 		tasks.add(new DirectInversionSolverTimingTask(a, b));
-		for (SolverTimingTask task : tasks)
+		for (final SolverTimingTask task : tasks)
 			if (!task.badSolver)
 				ts.execute(task);
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat();
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
@@ -567,7 +559,7 @@ public class EJMLLinearSolverTest
 		{
 			// The Direct solver may not be faster at size=5
 			int i = (np == 5) ? 2 : 1;
-			int size_1 = size - 1;
+			final int size_1 = size - 1;
 			for (; i < size_1; i++)
 				TestSettings.logSpeedTestResult(ts.get(-(size_1)), ts.get(-i));
 		}
@@ -590,21 +582,18 @@ public class EJMLLinearSolverTest
 			// Check the inversion gets a good answer
 			solver.setInversionTolerance(1e-2);
 			int fail = 0;
-			boolean[] failed = new boolean[a.length];
+			final boolean[] failed = new boolean[a.length];
 			for (int i = 0; i < a.length; i++)
 			{
-				double[] b = invert(a[i].copy());
+				final double[] b = invert(a[i].copy());
 				if (b == null)
 				{
 					failed[i] = true;
 					fail++;
 				}
 				else if (answer[i] == null)
-				{
 					answer[i] = b;
-				}
 				else
-				{
 					// Check against the existing answer
 					for (int j = 0; j < b.length; j++)
 						if (!DoubleEquality.almostEqualRelativeOrAbsolute(b[j], answer[i][j], 1e-3, 1e-4))
@@ -613,16 +602,13 @@ public class EJMLLinearSolverTest
 							fail++;
 							break;
 						}
-				}
 			}
 			if (fail > 0)
 				log(getName() + " failed to invert %d/%d\n", fail, a.length);
 			solver.setInversionTolerance(0);
 			if (fail == a.length)
-			{
 				// This solver cannot do the inversion
 				badSolver = true;
-			}
 			else
 			{
 				badSolver = false;
@@ -644,24 +630,20 @@ public class EJMLLinearSolverTest
 		{
 			// Clone
 			int n = a.length;
-			DenseMatrix64F[] a = new DenseMatrix64F[n];
+			final DenseMatrix64F[] a = new DenseMatrix64F[n];
 			while (n-- > 0)
-			{
 				if (!ignore[n])
 					a[n] = this.a[n].copy();
-			}
 			return a;
 		}
 
 		@Override
 		public Object run(Object data)
 		{
-			DenseMatrix64F[] a = (DenseMatrix64F[]) data;
+			final DenseMatrix64F[] a = (DenseMatrix64F[]) data;
 			for (int i = 0; i < a.length; i++)
-			{
 				if (!ignore[i])
 					invert(a[i]);
-			}
 			return null;
 		}
 
@@ -669,8 +651,8 @@ public class EJMLLinearSolverTest
 
 		double[] extract(DenseMatrix64F a)
 		{
-			int n = a.numCols;
-			double[] b = new double[n];
+			final int n = a.numCols;
+			final double[] b = new double[n];
 			for (int i = 0, j = 0; i < n; i++, j += n + 1)
 				b[i] = a.data[j];
 			return b;
@@ -807,26 +789,26 @@ public class EJMLLinearSolverTest
 		TestSettings.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
-		int n = f0.size();
+		final int n = f0.size();
 		final double[] y = new double[n];
 		final TurboList<DenseMatrix64F> aList = new TurboList<>();
-		double[] testbackground = new double[] { 0.2, 0.7 };
-		double[] testsignal1 = new double[] { 30, 100, 300 };
-		double[] testcx1 = new double[] { 4.9, 5.3 };
-		double[] testcy1 = new double[] { 4.8, 5.2 };
-		double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
-		int np = f0.getNumberOfGradients();
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
+		final double[] testbackground = new double[] { 0.2, 0.7 };
+		final double[] testsignal1 = new double[] { 30, 100, 300 };
+		final double[] testcx1 = new double[] { 4.9, 5.3 };
+		final double[] testcy1 = new double[] { 4.8, 5.2 };
+		final double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
+		final int np = f0.getNumberOfGradients();
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
 		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		//double lambda = 10;
-		for (double background : testbackground)
+		for (final double background : testbackground)
 			// Peak 1
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double w1 : testw1)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double w1 : testw1)
 						{
-							double[] p = new double[] { background, signal1, 0, cx1, cy1, w1, w1 };
+							final double[] p = new double[] { background, signal1, 0, cx1, cy1, w1, w1 };
 							f0.initialise(p);
 							f0.forEach(new ValueProcedure()
 							{
@@ -839,8 +821,8 @@ public class EJMLLinearSolverTest
 									y[i++] = rdg.nextPoisson(value);
 								}
 							});
-							double[][] alpha = new double[np][np];
-							double[] beta = new double[np];
+							final double[][] alpha = new double[np][np];
+							final double[] beta = new double[np];
 							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
 							//TestSettings.debug("SS = %f\n", ss);
@@ -850,12 +832,12 @@ public class EJMLLinearSolverTest
 							aList.add(EJMLLinearSolver.toA(alpha));
 						}
 
-		DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
-		boolean[] ignore = new boolean[a.length];
-		double[][] answer = new double[a.length][];
-		int runs = 100000 / a.length;
-		TimingService ts = new TimingService(runs);
-		TurboList<InversionTimingTask> tasks = new TurboList<>();
+		final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
+		final boolean[] ignore = new boolean[a.length];
+		final double[][] answer = new double[a.length][];
+		final int runs = 100000 / a.length;
+		final TimingService ts = new TimingService(runs);
+		final TurboList<InversionTimingTask> tasks = new TurboList<>();
 		// Added in descending speed order
 		tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
 		tasks.add(new LinearInversionTimingTask(a, ignore, answer));
@@ -863,10 +845,10 @@ public class EJMLLinearSolverTest
 		tasks.add(new CholeskyInversionTimingTask(a, ignore, answer));
 		tasks.add(new DirectInversionInversionTimingTask(a, ignore, answer));
 		tasks.add(new DiagonalDirectInversionInversionTimingTask(a, ignore, answer));
-		for (InversionTimingTask task : tasks)
+		for (final InversionTimingTask task : tasks)
 			if (!task.badSolver)
 				ts.execute(task);
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat();
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
@@ -878,26 +860,20 @@ public class EJMLLinearSolverTest
 				TestSettings.logSpeedTestResult(ts.get(-1), ts.get(-i));
 
 			if (np < 5)
-			{
 				// n < 5 Direct is fastest
 				for (int i = 3; i <= size; i++)
 					TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));
-			}
 			else
-			{
 				// Cholesky should be fastest. It is marginal over CholeskyLDLT.
 				// and may not be faster than Direct at n=5 so that comparison is ignored.
 				for (int i = 4; i <= size; i++)
 					TestSettings.logSpeedTestResult(ts.get(-3), ts.get(-i));
-			}
 		}
 		else
-		{
 			// No Direct inversion possible.
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
 				TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));
-		}
 	}
 
 	void log(String format, Object... args)

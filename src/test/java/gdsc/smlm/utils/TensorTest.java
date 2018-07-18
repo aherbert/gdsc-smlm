@@ -37,24 +37,24 @@ public class TensorTest
 	public void canComputeTensor3D()
 	{
 		//@formatter:off
-		float[][] data = new float[][] {
+		final float[][] data = new float[][] {
 			{ 2, 1, 0, 1, 2, 1, 0, 1, 2 },
 			//{ 1, 0, 0, 0, 1, 0, 0, 0, 1 },
 			//{ 1, 0, 0, 0, 1, 0, 0, 0, 1 },
 		};
 		//@formatter:on
-		Tensor3D t = new Tensor3D(data, 3, 3);
+		final Tensor3D t = new Tensor3D(data, 3, 3);
 		Assert.assertTrue(t.hasDecomposition());
-		double[] com = t.getCentreOfMass();
+		final double[] com = t.getCentreOfMass();
 		Assert.assertArrayEquals(new double[] { 1, 1, 0 }, com, 0);
-		double[] v = t.getEigenValues();
-		double[][] vv = t.getEigenVectors();
+		final double[] v = t.getEigenValues();
+		final double[][] vv = t.getEigenVectors();
 		print(com, v, vv);
 		for (int i = 1; i < v.length; i++)
 			Assert.assertTrue(v[i - 1] >= v[i]);
 	}
 
-	private void print(double[] com, double[] v, double[][] vv)
+	private static void print(double[] com, double[] v, double[][] vv)
 	{
 		if (TestSettings.allow(LogLevel.INFO))
 		{
@@ -71,18 +71,18 @@ public class TensorTest
 		//@formatter:off
 		// Line through [0][0], [1][1], [2][2]
 		// longest axis of object is -45 degrees
-		float[] data = new float[] {
+		final float[] data = new float[] {
 				//1, 0, 0, 0, 1, 0, 0, 0, 1
 				2, 1, 0, 1, 2, 1, 0, 1, 2
 				//2, 0, 0, 0, 0, 0, 0, 0, 2
 				};
 		//@formatter:on
-		Tensor2D t = new Tensor2D(data, 3, 3);
+		final Tensor2D t = new Tensor2D(data, 3, 3);
 		Assert.assertTrue(t.hasDecomposition());
-		double[] com = t.getCentreOfMass();
+		final double[] com = t.getCentreOfMass();
 		Assert.assertArrayEquals(new double[] { 1, 1 }, com, 0);
-		double[] v = t.getEigenValues();
-		double[][] vv = t.getEigenVectors();
+		final double[] v = t.getEigenValues();
+		final double[][] vv = t.getEigenVectors();
 		print(com, v, vv);
 		for (int i = 1; i < v.length; i++)
 			Assert.assertTrue(v[i - 1] >= v[i]);
@@ -91,23 +91,23 @@ public class TensorTest
 	@Test
 	public void canComputeSameTensor()
 	{
-		RandomGenerator random = TestSettings.getRandomGenerator();
-		int w = 3, h = 4;
-		float[] data = new float[w * h];
+		final RandomGenerator random = TestSettings.getRandomGenerator();
+		final int w = 3, h = 4;
+		final float[] data = new float[w * h];
 		for (int i = 0; i < 10; i++)
 		{
 			for (int j = data.length; j-- > 0;)
 				data[j] = random.nextFloat();
 
-			Tensor2D t2 = new Tensor2D(data, w, h);
-			Tensor3D t3 = new Tensor3D(new float[][] { data }, w, h);
+			final Tensor2D t2 = new Tensor2D(data, w, h);
+			final Tensor3D t3 = new Tensor3D(new float[][] { data }, w, h);
 
-			double[] com2 = t2.getCentreOfMass();
-			double[] v2 = t2.getEigenValues();
-			double[][] vv2 = t2.getEigenVectors();
-			double[] com3 = t3.getCentreOfMass();
-			double[] v3 = t3.getEigenValues();
-			double[][] vv3 = t3.getEigenVectors();
+			final double[] com2 = t2.getCentreOfMass();
+			final double[] v2 = t2.getEigenValues();
+			final double[][] vv2 = t2.getEigenVectors();
+			final double[] com3 = t3.getCentreOfMass();
+			final double[] v3 = t3.getEigenValues();
+			final double[][] vv3 = t3.getEigenVectors();
 			for (int k = 0; k < 2; k++)
 			{
 				Assert.assertEquals(com2[k], com3[k], 0);

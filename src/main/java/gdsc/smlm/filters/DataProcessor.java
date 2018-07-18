@@ -105,7 +105,7 @@ public abstract class DataProcessor implements Cloneable
 		{
 			return (DataProcessor) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}
@@ -129,7 +129,7 @@ public abstract class DataProcessor implements Cloneable
 	 */
 	public List<String> getParameters()
 	{
-		ArrayList<String> list = new ArrayList<>();
+		final ArrayList<String> list = new ArrayList<>();
 		list.add("border = " + border);
 		if (hasWeights())
 			list.add("weighted");

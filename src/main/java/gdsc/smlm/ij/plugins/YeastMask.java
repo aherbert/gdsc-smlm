@@ -67,7 +67,7 @@ public class YeastMask implements PlugIn
 
 	private static boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Create a mask of a yeast cell as a tube plus end-caps");
@@ -123,11 +123,11 @@ public class YeastMask implements PlugIn
 		final int h = (int) Math.ceil(length * 1000 / nmPerPixel);
 		if (h > 0)
 		{
-			ImageStack newStack = new ImageStack(width, stack.getHeight() + h, stack.getSize());
+			final ImageStack newStack = new ImageStack(width, stack.getHeight() + h, stack.getSize());
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				byte[] pixels = (byte[]) stack.getPixels(slice);
-				byte[] newPixels = new byte[width * newStack.getHeight()];
+				final byte[] pixels = (byte[]) stack.getPixels(slice);
+				final byte[] newPixels = new byte[width * newStack.getHeight()];
 				newStack.setPixels(newPixels, slice);
 				System.arraycopy(pixels, 0, newPixels, 0, pixels.length);
 				// Get the final strip to be extended
@@ -143,11 +143,11 @@ public class YeastMask implements PlugIn
 		}
 
 		// Copy the hemi-sphere onto the end
-		ImageStack newStack = new ImageStack(width, stack.getHeight() + hw, stack.getSize());
+		final ImageStack newStack = new ImageStack(width, stack.getHeight() + hw, stack.getSize());
 		for (int slice = 1; slice <= stack.getSize(); slice++)
 		{
-			byte[] pixels = (byte[]) stack.getPixels(slice);
-			byte[] newPixels = new byte[width * newStack.getHeight()];
+			final byte[] pixels = (byte[]) stack.getPixels(slice);
+			final byte[] newPixels = new byte[width * newStack.getHeight()];
 			newStack.setPixels(newPixels, slice);
 			System.arraycopy(pixels, 0, newPixels, 0, pixels.length);
 			// Copy the hemi-sphere
@@ -164,42 +164,40 @@ public class YeastMask implements PlugIn
 
 		if (excludeNucleus)
 		{
-			ImageStack stack2 = createNucleusSphere(width, depth);
-			int xloc = (stack.getWidth() - stack2.getWidth()) / 2;
-			int yloc = (stack.getHeight() - stack2.getHeight()) / 2;
-			int offset = (stack.getSize() - stack2.getSize()) / 2;
+			final ImageStack stack2 = createNucleusSphere(width, depth);
+			final int xloc = (stack.getWidth() - stack2.getWidth()) / 2;
+			final int yloc = (stack.getHeight() - stack2.getHeight()) / 2;
+			final int offset = (stack.getSize() - stack2.getSize()) / 2;
 			for (int slice = 1; slice <= stack2.getSize(); slice++)
 			{
-				ImageProcessor ip = stack.getProcessor(slice + offset);
-				ImageProcessor ip2 = stack2.getProcessor(slice);
+				final ImageProcessor ip = stack.getProcessor(slice + offset);
+				final ImageProcessor ip2 = stack2.getProcessor(slice);
 				ip.copyBits(ip2, xloc, yloc, Blitter.SUBTRACT);
 			}
 		}
 
 		if (squareOutput && stack.getWidth() != stack.getHeight())
 		{
-			ImageStack stack2 = new ImageStack(stack.getHeight(), stack.getHeight());
-			int end = stack.getHeight() - stack.getWidth();
+			final ImageStack stack2 = new ImageStack(stack.getHeight(), stack.getHeight());
+			final int end = stack.getHeight() - stack.getWidth();
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				ImageProcessor ip = stack.getProcessor(slice);
-				ImageProcessor ip2 = new ByteProcessor(stack2.getWidth(), stack2.getHeight());
+				final ImageProcessor ip = stack.getProcessor(slice);
+				final ImageProcessor ip2 = new ByteProcessor(stack2.getWidth(), stack2.getHeight());
 				stack2.addSlice(ip2);
 				for (int xloc = 0; xloc <= end; xloc += stack.getWidth())
-				{
 					ip2.insert(ip, xloc, 0);
-				}
 			}
 			stack = stack2;
 		}
 
 		if (border > 0)
 		{
-			ImageStack stack2 = new ImageStack(stack.getWidth() + 2 * border, stack.getHeight() + 2 * border);
+			final ImageStack stack2 = new ImageStack(stack.getWidth() + 2 * border, stack.getHeight() + 2 * border);
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				ImageProcessor ip = stack.getProcessor(slice);
-				ImageProcessor ip2 = new ByteProcessor(stack2.getWidth(), stack2.getHeight());
+				final ImageProcessor ip = stack.getProcessor(slice);
+				final ImageProcessor ip2 = new ByteProcessor(stack2.getWidth(), stack2.getHeight());
 				stack2.addSlice(ip2);
 				ip2.insert(ip, border, border);
 			}
@@ -210,16 +208,14 @@ public class YeastMask implements PlugIn
 		if (is2D)
 		{
 			// TODO - Remove this laziness since we should really just do a 2D image
-			int centre = stack.getSize() / 2;
+			final int centre = stack.getSize() / 2;
 			imp = Utils.display(TITLE, stack.getProcessor(centre));
 		}
 		else
-		{
 			imp = Utils.display(TITLE, stack);
-		}
 
 		// Calibrate
-		Calibration cal = new Calibration();
+		final Calibration cal = new Calibration();
 		cal.setUnit("um");
 		cal.pixelWidth = cal.pixelHeight = nmPerPixel / 1000;
 		cal.pixelDepth = nmPerSlice / 1000;
@@ -243,14 +239,14 @@ public class YeastMask implements PlugIn
 		final double centreZ = depth * 0.5;
 
 		// Precompute squares for the width
-		double[] s = new double[width];
+		final double[] s = new double[width];
 		for (int iy = 0; iy < width; iy++)
 		{
 			final double y = (centreX - (iy + 0.5)) * nmPerPixel;
 			s[iy] = y * y;
 		}
 
-		ImageStack stack = new ImageStack(width, width, depth);
+		final ImageStack stack = new ImageStack(width, width, depth);
 		final byte on = (byte) 255;
 		final double r = radius * 1000 * nucleus;
 		final double r2 = r * r;
@@ -258,7 +254,7 @@ public class YeastMask implements PlugIn
 		{
 			final double z = (centreZ - (iz + 0.5)) * nmPerSlice;
 			final double z2 = z * z;
-			byte[] mask = new byte[width * width];
+			final byte[] mask = new byte[width * width];
 			for (int iy = 0, i = 0; iy < width; iy++)
 			{
 				final double y2z2 = s[iy] + z2;
@@ -292,7 +288,7 @@ public class YeastMask implements PlugIn
 		final double centreZ = depth * 0.5;
 
 		// Precompute squares for the width
-		double[] s = new double[width];
+		final double[] s = new double[width];
 		for (int iy = 0; iy < width; iy++)
 		{
 			final double y = (centreX - (iy + 0.5)) * nmPerPixel;
@@ -300,7 +296,7 @@ public class YeastMask implements PlugIn
 		}
 
 		final int halfHeight = 1 + width / 2;
-		ImageStack stack = new ImageStack(width, halfHeight, depth);
+		final ImageStack stack = new ImageStack(width, halfHeight, depth);
 		final byte on = (byte) 255;
 		final double r = radius * 1000;
 		final double r2 = r * r;
@@ -308,7 +304,7 @@ public class YeastMask implements PlugIn
 		{
 			final double z = (centreZ - (iz + 0.5)) * nmPerSlice;
 			final double z2 = z * z;
-			byte[] mask = new byte[width * halfHeight];
+			final byte[] mask = new byte[width * halfHeight];
 			for (int iy = 0, i = 0; iy < halfHeight; iy++)
 			{
 				final double y2z2 = s[iy] + z2;

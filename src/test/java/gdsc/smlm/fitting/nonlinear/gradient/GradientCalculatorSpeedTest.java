@@ -232,26 +232,26 @@ public class GradientCalculatorSpeedTest
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
-		int iter = 50;
+		final int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		double[][] alpha = new double[nparams][nparams];
-		double[] beta = new double[nparams];
-		double[][] alpha2 = new double[nparams][nparams];
-		double[] beta2 = new double[nparams];
+		final double[][] alpha = new double[nparams][nparams];
+		final double[] beta = new double[nparams];
+		final double[][] alpha2 = new double[nparams][nparams];
+		final double[] beta2 = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createData(1, iter, paramsList, yList);
+		final int[] x = createData(1, iter, paramsList, yList);
 
-		GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
-		GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
+		final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
+		final GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
-			double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+			final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+			final double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
 			Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
 			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
@@ -261,8 +261,8 @@ public class GradientCalculatorSpeedTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
-			double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+			final double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
+			final double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
 			Assert.assertTrue("N-Result: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
 			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
@@ -276,8 +276,8 @@ public class GradientCalculatorSpeedTest
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{
-				double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
-				double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+				final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+				final double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
 				Assert.assertTrue("Result+Noise: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
 				Assert.assertTrue("Observations+Noise: Not same beta @ " + i,
 						eq.almostEqualRelativeOrAbsolute(beta, beta2));
@@ -288,8 +288,8 @@ public class GradientCalculatorSpeedTest
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{
-				double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
-				double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+				final double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
+				final double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
 				Assert.assertTrue("N-Result+Noise: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
 				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i,
 						eq.almostEqualRelativeOrAbsolute(beta, beta2));
@@ -307,18 +307,18 @@ public class GradientCalculatorSpeedTest
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
-		int iter = 10000;
+		final int iter = 10000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-		double[][] alpha = new double[nparams][nparams];
-		double[] beta = new double[nparams];
+		final double[][] alpha = new double[nparams][nparams];
+		final double[] beta = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createData(1, iter, paramsList, yList);
+		final int[] x = createData(1, iter, paramsList, yList);
 
-		GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
-		GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
+		final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
+		final GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -346,21 +346,21 @@ public class GradientCalculatorSpeedTest
 	{
 		TestSettings.assumeSpeedTest();
 
-		int iter = 10000;
+		final int iter = 10000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createData(1, iter, paramsList, yList);
+		final int[] x = createData(1, iter, paramsList, yList);
 
-		GradientCalculator calc = new GradientCalculator6();
-		GradientCalculator calc2 = new GradientCalculator6();
-		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth);
-		int n = x.length;
-		int ng = func.getNumberOfGradients();
-		double[][] alpha = new double[ng][ng];
-		double[] beta = new double[ng];
+		final GradientCalculator calc = new GradientCalculator6();
+		final GradientCalculator calc2 = new GradientCalculator6();
+		final SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth);
+		final int n = x.length;
+		final int ng = func.getNumberOfGradients();
+		final double[][] alpha = new double[ng][ng];
+		final double[] beta = new double[ng];
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -397,45 +397,45 @@ public class GradientCalculatorSpeedTest
 
 	private void gradientCalculatorComputesGradient(GradientCalculator calc)
 	{
-		int nparams = calc.nparams;
-		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
+		final int nparams = calc.nparams;
+		final Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
 		// Check the function is the correct size
-		int[] indices = func.gradientIndices();
+		final int[] indices = func.gradientIndices();
 		Assert.assertEquals(nparams, indices.length);
 
-		int iter = 50;
+		final int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		double[] beta = new double[nparams];
-		double[] beta2 = new double[nparams];
+		final double[] beta = new double[nparams];
+		final double[] beta2 = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createData(1, iter, paramsList, yList, true);
+		final int[] x = createData(1, iter, paramsList, yList, true);
 
-		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
+		final double delta = 1e-3;
+		final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			double[] y = yList.get(i);
-			double[] a = paramsList.get(i);
-			double[] a2 = a.clone();
+			final double[] y = yList.get(i);
+			final double[] a = paramsList.get(i);
+			final double[] a2 = a.clone();
 			//double s =
 			calc.evaluate(x, y, a, beta, func);
 
 			for (int k = 0; k < nparams; k++)
 			{
-				int j = indices[k];
-				double d = Precision.representableDelta(a[j], (a[j] == 0) ? 1e-3 : a[j] * delta);
+				final int j = indices[k];
+				final double d = Precision.representableDelta(a[j], (a[j] == 0) ? 1e-3 : a[j] * delta);
 				a2[j] = a[j] + d;
-				double s1 = calc.evaluate(x, y, a2, beta2, func);
+				final double s1 = calc.evaluate(x, y, a2, beta2, func);
 				a2[j] = a[j] - d;
-				double s2 = calc.evaluate(x, y, a2, beta2, func);
+				final double s2 = calc.evaluate(x, y, a2, beta2, func);
 				a2[j] = a[j];
 
-				double gradient = (s1 - s2) / (2 * d);
+				final double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, j, s, func.getName(j), a[j], d, beta[k],
 				//		gradient);
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[k], gradient));
@@ -447,7 +447,7 @@ public class GradientCalculatorSpeedTest
 	public void mleGradientCalculatorComputesLikelihood()
 	{
 		//@formatter:off
-		NonLinearFunction func = new NonLinearFunction(){
+		final NonLinearFunction func = new NonLinearFunction(){
 			double u;
 			@Override
 			public void initialise(double[] a) { u = a[0]; }
@@ -470,13 +470,13 @@ public class GradientCalculatorSpeedTest
 		};
 		//@formatter:on
 
-		int[] xx = SimpleArrayUtils.newArray(100, 0, 1);
-		double[] xxx = SimpleArrayUtils.newArray(100, 0, 1.0);
-		for (double u : new double[] { 0.79, 2.5, 5.32 })
+		final int[] xx = SimpleArrayUtils.newArray(100, 0, 1);
+		final double[] xxx = SimpleArrayUtils.newArray(100, 0, 1.0);
+		for (final double u : new double[] { 0.79, 2.5, 5.32 })
 		{
 			double ll = 0;
-			PoissonDistribution pd = new PoissonDistribution(u);
-			for (int x : xx)
+			final PoissonDistribution pd = new PoissonDistribution(u);
+			for (final int x : xx)
 			{
 				double o = MLEGradientCalculator.likelihood(u, x);
 				double e = pd.probability(x);
@@ -489,8 +489,8 @@ public class GradientCalculatorSpeedTest
 				ll += e;
 			}
 
-			MLEGradientCalculator gc = new MLEGradientCalculator(1);
-			double o = gc.logLikelihood(xxx, new double[] { u }, func);
+			final MLEGradientCalculator gc = new MLEGradientCalculator(1);
+			final double o = gc.logLikelihood(xxx, new double[] { u }, func);
 
 			Assert.assertEquals("sum log likelihood", ll, o, Math.abs(ll) * 1e-10);
 		}
@@ -500,45 +500,43 @@ public class GradientCalculatorSpeedTest
 	public void gradientCalculatorComputesSameOutputWithBias()
 	{
 
-		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
-		int nparams = func.getNumberOfGradients();
-		GradientCalculator calc = new GradientCalculator(nparams);
-		int n = func.size();
+		final Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
+		final int nparams = func.getNumberOfGradients();
+		final GradientCalculator calc = new GradientCalculator(nparams);
+		final int n = func.size();
 
-		int iter = 50;
+		final int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		ArrayList<double[][]> alphaList = new ArrayList<>(iter);
-		ArrayList<double[]> betaList = new ArrayList<>(iter);
-		ArrayList<double[]> xList = new ArrayList<>(iter);
+		final ArrayList<double[][]> alphaList = new ArrayList<>(iter);
+		final ArrayList<double[]> betaList = new ArrayList<>(iter);
+		final ArrayList<double[]> xList = new ArrayList<>(iter);
 
 		// Manipulate the background
-		double defaultBackground = Background;
-		boolean report = TestSettings.allow(LogLevel.INFO);
+		final double defaultBackground = Background;
+		final boolean report = TestSettings.allow(LogLevel.INFO);
 		try
 		{
 			Background = 1e-2;
 			createData(1, iter, paramsList, yList, true);
 
-			EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
+			final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{
-				double[] y = yList.get(i);
-				double[] a = paramsList.get(i);
-				double[][] alpha = new double[nparams][nparams];
-				double[] beta = new double[nparams];
+				final double[] y = yList.get(i);
+				final double[] a = paramsList.get(i);
+				final double[][] alpha = new double[nparams][nparams];
+				final double[] beta = new double[nparams];
 				calc.findLinearised(n, y, a, alpha, beta, func);
 				alphaList.add(alpha);
 				betaList.add(beta.clone());
 				for (int j = 0; j < nparams; j++)
-				{
 					if (Math.abs(beta[j]) < 1e-6)
 						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
-				}
 				// Solve
 				if (!solver.solve(alpha, beta))
 					throw new AssertionError();
@@ -546,10 +544,10 @@ public class GradientCalculatorSpeedTest
 				//System.out.println(Arrays.toString(beta));
 			}
 
-			double[][] alpha = new double[nparams][nparams];
-			double[] beta = new double[nparams];
-			Statistics[] rel = new Statistics[nparams];
-			Statistics[] abs = new Statistics[nparams];
+			final double[][] alpha = new double[nparams][nparams];
+			final double[] beta = new double[nparams];
+			final Statistics[] rel = new Statistics[nparams];
+			final Statistics[] abs = new Statistics[nparams];
 			for (int i = 0; i < nparams; i++)
 			{
 				rel[i] = new Statistics();
@@ -558,54 +556,46 @@ public class GradientCalculatorSpeedTest
 
 			//for (int b = 1; b < 1000; b *= 2)
 			//for (double b : new double[] { -500, -100, -10, -1, -0.1, 0.1, 1, 10, 100, 500 })
-			for (double b : new double[] { -10, -1, -0.1, 0.1, 1, 10 })
+			for (final double b : new double[] { -10, -1, -0.1, 0.1, 1, 10 })
 			{
 				if (report)
-				{
 					for (int i = 0; i < nparams; i++)
 					{
 						rel[i].reset();
 						abs[i].reset();
 					}
-				}
 
 				for (int i = 0; i < paramsList.size(); i++)
 				{
-					double[] y = add(yList.get(i), b);
-					double[] a = paramsList.get(i).clone();
+					final double[] y = add(yList.get(i), b);
+					final double[] a = paramsList.get(i).clone();
 					a[0] += b;
 					calc.findLinearised(n, y, a, alpha, beta, func);
-					double[][] alpha2 = alphaList.get(i);
-					double[] beta2 = betaList.get(i);
-					double[] x2 = xList.get(i);
+					final double[][] alpha2 = alphaList.get(i);
+					final double[] beta2 = betaList.get(i);
+					final double[] x2 = xList.get(i);
 
 					Assert.assertArrayEquals("Beta", beta2, beta, 1e-10);
 					for (int j = 0; j < nparams; j++)
-					{
 						Assert.assertArrayEquals("Alpha", alpha2[j], alpha[j], 1e-10);
-					}
 
 					// Solve
 					solver.solve(alpha, beta);
 					Assert.assertArrayEquals("X", x2, beta, 1e-10);
 
 					if (report)
-					{
 						for (int j = 0; j < nparams; j++)
 						{
 							rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
 							abs[j].add(Math.abs(x2[j] - beta[j]));
 						}
-					}
 				}
 
 				if (report)
-				{
 					for (int i = 0; i < nparams; i++)
 						System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
 								func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
 								abs[i].getMean(), abs[i].getStandardDeviation());
-				}
 			}
 		}
 		finally
@@ -614,7 +604,7 @@ public class GradientCalculatorSpeedTest
 		}
 	}
 
-	private double[] add(double[] d, double b)
+	private static double[] add(double[] d, double b)
 	{
 		d = d.clone();
 		for (int i = 0; i < d.length; i++)
@@ -625,9 +615,9 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void mleCalculatorComputesLogLikelihoodRatio()
 	{
-		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
-		int n = blockWidth * blockWidth;
-		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
+		final int n = blockWidth * blockWidth;
+		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		for (int run = 5; run-- > 0;)
 		{
@@ -641,8 +631,8 @@ public class GradientCalculatorSpeedTest
 
 			// Simulate Poisson process
 			func.initialise(a);
-			double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
-			double[] u = new double[x.length];
+			final double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
+			final double[] u = new double[x.length];
 			for (int i = 0; i < n; i++)
 			{
 				u[i] = func.eval(i);
@@ -650,14 +640,14 @@ public class GradientCalculatorSpeedTest
 					x[i] = rdg.nextPoisson(u[i]);
 			}
 
-			int ng = func.getNumberOfGradients();
-			double[][] alpha = new double[ng][ng];
-			double[] beta = new double[ng];
+			final int ng = func.getNumberOfGradients();
+			final double[][] alpha = new double[ng][ng];
+			final double[] beta = new double[ng];
 
-			GradientCalculator calc = GradientCalculatorFactory.newCalculator(ng, true);
+			final GradientCalculator calc = GradientCalculatorFactory.newCalculator(ng, true);
 
-			double llr = PoissonCalculator.logLikelihoodRatio(u, x);
-			double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
+			final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
+			final double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
 			//System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
 			Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-10);
 		}
@@ -678,10 +668,10 @@ public class GradientCalculatorSpeedTest
 	 */
 	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
 	{
-		int n = blockWidth * blockWidth;
+		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
+		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
 		params[0] = random(Background);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
@@ -693,14 +683,12 @@ public class GradientCalculatorSpeedTest
 			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
 		}
 
-		double[] dy_da = new double[params.length];
-		double[] y = new double[n];
+		final double[] dy_da = new double[params.length];
+		final double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
-		{
 			// Add random Poisson noise
 			y[i] = rdg.nextPoisson(func.eval(i, dy_da));
-		}
 
 		if (randomiseParams)
 		{
@@ -732,13 +720,13 @@ public class GradientCalculatorSpeedTest
 	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
 			boolean randomiseParams)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
+			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
+			final double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -747,20 +735,10 @@ public class GradientCalculatorSpeedTest
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
+		final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
-		{
-			params2List.add(copydouble(paramsList.get(i)));
-		}
+			params2List.add(paramsList.get(i).clone());
 		return params2List;
-	}
-
-	private double[] copydouble(double[] d)
-	{
-		double[] d2 = new double[d.length];
-		for (int i = 0; i < d.length; i++)
-			d2[i] = d[i];
-		return d2;
 	}
 
 	void log(String format, Object... args)

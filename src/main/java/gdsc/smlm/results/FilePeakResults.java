@@ -76,7 +76,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 			openOutput();
 			write(createResultsHeader());
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// TODO - Add better handling of errors
 			e.printStackTrace();
@@ -123,7 +123,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 */
 	protected String createResultsHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		addComment(sb, getHeaderTitle());
 		sb.append(String.format("#FileVersion %s\n", getVersion()));
@@ -146,15 +146,13 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 			printer = addMessage(sb, printer, "PSF", getPSF());
 
 		// Add any extra comments
-		String[] comments = getHeaderComments();
+		final String[] comments = getHeaderComments();
 		if (comments != null)
-		{
-			for (String comment : comments)
+			for (final String comment : comments)
 				addComment(sb, comment);
-		}
 
 		// Output the field names
-		String[] fields = getFieldNames();
+		final String[] fields = getFieldNames();
 		if (fields != null)
 		{
 			sb.append('#');
@@ -182,7 +180,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 				;
 			sb.append(String.format("#%s %s\n", name, printer.print(msg)));
 		}
-		catch (InvalidProtocolBufferException e)
+		catch (final InvalidProtocolBufferException e)
 		{
 			// This shouldn't happen so throw it
 			throw new NotImplementedException("Unable to serialise the " + name + " settings", e);
@@ -254,7 +252,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		{
 			fos.close();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore exception
 		}
@@ -296,7 +294,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 
 			sort();
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// ignore
 		}

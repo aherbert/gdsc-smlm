@@ -33,7 +33,7 @@ import ij.process.ImageProcessor;
  */
 public class ObjectAnalyzer
 {
-	private ImageProcessor ip;
+	private final ImageProcessor ip;
 	private boolean eightConnected;
 	private int[] objectMask;
 	private int maxObject;
@@ -124,41 +124,35 @@ public class ObjectAnalyzer
 		objectMask = new int[maskImage.length];
 		maxObject = 0;
 
-		int[][] ppList = new int[1][];
+		final int[][] ppList = new int[1][];
 		ppList[0] = new int[100];
 		initialise(ip);
 
 		int[] sizes = new int[100];
 
 		for (int i = 0; i < maskImage.length; i++)
-		{
 			// Look for non-zero values that are not already in an object
 			if (maskImage[i] != 0 && objectMask[i] == 0)
 			{
 				maxObject++;
-				int size = expandObjectXY(maskImage, objectMask, i, maxObject, ppList);
+				final int size = expandObjectXY(maskImage, objectMask, i, maxObject, ppList);
 				if (sizes.length == maxObject)
 					sizes = Arrays.copyOf(sizes, (int) (maxObject * 1.5));
 				sizes[maxObject] = size;
 			}
-		}
 
 		// Remove objects that are too small
 		if (minObjectSize > 0)
 		{
-			int[] map = new int[maxObject + 1];
+			final int[] map = new int[maxObject + 1];
 			maxObject = 0;
 			for (int i = 1; i < map.length; i++)
-			{
 				if (sizes[i] >= minObjectSize)
 					map[i] = ++maxObject;
-			}
 
 			for (int i = 0; i < objectMask.length; i++)
-			{
 				if (objectMask[i] != 0)
 					objectMask[i] = map[objectMask[i]];
-			}
 		}
 	}
 
@@ -185,20 +179,17 @@ public class ObjectAnalyzer
 			final int x1 = index1 % maxx;
 			final int y1 = index1 / maxx;
 
-			boolean isInnerXY = (y1 != 0 && y1 != ylimit) && (x1 != 0 && x1 != xlimit);
+			final boolean isInnerXY = (y1 != 0 && y1 != ylimit) && (x1 != 0 && x1 != xlimit);
 
 			for (int d = neighbours; d-- > 0;)
-			{
 				if (isInnerXY || isWithinXY(x1, y1, d))
 				{
-					int index2 = index1 + offset[d];
+					final int index2 = index1 + offset[d];
 					if (objectMask[index2] != 0)
-					{
 						// This has been done already, ignore this point
 						continue;
-					}
 
-					int v2 = image[index2];
+					final int v2 = image[index2];
 
 					if (v2 == v0)
 					{
@@ -209,7 +200,6 @@ public class ObjectAnalyzer
 							pList = Arrays.copyOf(pList, (int) (listLen * 1.5));
 					}
 				}
-			}
 
 			listI++;
 
@@ -240,9 +230,7 @@ public class ObjectAnalyzer
 		// Create the offset table (for single array 3D neighbour comparisons)
 		offset = new int[DIR_X_OFFSET.length];
 		for (int d = offset.length; d-- > 0;)
-		{
 			offset[d] = maxx * DIR_Y_OFFSET[d] + DIR_X_OFFSET[d];
-		}
 	}
 
 	/**
@@ -308,9 +296,9 @@ public class ObjectAnalyzer
 	 */
 	public double[][] getObjectCentres()
 	{
-		int[] count = new int[maxObject + 1];
-		double[] sumx = new double[count.length];
-		double[] sumy = new double[count.length];
+		final int[] count = new int[maxObject + 1];
+		final double[] sumx = new double[count.length];
+		final double[] sumy = new double[count.length];
 		final int maxy = getHeight();
 		final int maxx = getWidth();
 		for (int y = 0, i = 0; y < maxy; y++)
@@ -324,7 +312,7 @@ public class ObjectAnalyzer
 					count[value]++;
 				}
 			}
-		double[][] data = new double[count.length][3];
+		final double[][] data = new double[count.length][3];
 		for (int i = 1; i < count.length; i++)
 		{
 			data[i][0] = sumx[i] / count[i];

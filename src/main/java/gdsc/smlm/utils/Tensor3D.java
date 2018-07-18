@@ -66,7 +66,7 @@ public class Tensor3D
 				double sumX = 0;
 				for (int x = 0; x < w; x++)
 				{
-					float f = d[j++];
+					final float f = d[j++];
 					sumX += f;
 					cx += f * x;
 				}
@@ -137,7 +137,7 @@ public class Tensor3D
 		tensor.data[7] = tensor.data[5];
 
 		// Eigen decompose
-		EigenDecomposition<DenseMatrix64F> decomp = DecompositionFactory.eig(3, true, true);
+		final EigenDecomposition<DenseMatrix64F> decomp = DecompositionFactory.eig(3, true, true);
 
 		if (!decomp.decompose(tensor))
 		{
@@ -181,7 +181,7 @@ public class Tensor3D
 			{
 				w[k] = w[i];
 				w[i] = p;
-				double[] vv = v[k];
+				final double[] vv = v[k];
 				v[k] = v[i];
 				v[i] = vv;
 			}

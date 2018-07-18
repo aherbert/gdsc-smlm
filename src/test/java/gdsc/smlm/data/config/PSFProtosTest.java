@@ -44,8 +44,8 @@ public class PSFProtosTest
 	@Test
 	public void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException
 	{
-		PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();
-		PSFParameter.Builder psfParamBuilder = PSFProtos.PSFParameter.newBuilder();
+		final PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();
+		final PSFParameter.Builder psfParamBuilder = PSFProtos.PSFParameter.newBuilder();
 		psfBuilder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		psfParamBuilder.setName("X\"SD");
 		psfParamBuilder.setUnit(PSFParameterUnit.DISTANCE);
@@ -61,9 +61,9 @@ public class PSFProtosTest
 		psfBuilder.addParameters(psfParamBuilder);
 
 		// Standard string
-		String e = psfBuilder.toString();
-		PSFProtos.PSF psf = psfBuilder.build();
-		String o = psf.toString();
+		final String e = psfBuilder.toString();
+		final PSFProtos.PSF psf = psfBuilder.build();
+		final String o = psf.toString();
 		TestSettings.debugln(o);
 		Assert.assertEquals(e, o);
 
@@ -72,7 +72,7 @@ public class PSFProtosTest
 		Assert.assertTrue("Merge string", psf.equals(psfBuilder.build()));
 
 		// Short string
-		String o2 = TextFormat.shortDebugString(psf);
+		final String o2 = TextFormat.shortDebugString(psf);
 		TestSettings.debugln(o2);
 
 		psfBuilder.clear();
@@ -80,7 +80,7 @@ public class PSFProtosTest
 		Assert.assertTrue("Merge short string", psf.equals(psfBuilder.build()));
 
 		// JSON
-		Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
+		final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 		String json = printer.print(psf);
 		TestSettings.debugln(json);
 		json = JSONUtils.simplify(json);

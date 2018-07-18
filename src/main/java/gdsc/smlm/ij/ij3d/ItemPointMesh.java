@@ -71,7 +71,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	@Override
 	protected Appearance createAppearance()
 	{
-		Appearance appearance = super.createAppearance();
+		final Appearance appearance = super.createAppearance();
 		final PointAttributes pointAttributes = appearance.getPointAttributes();
 		// This allows points to support transparency
 		pointAttributes.setPointAntialiasingEnable(true);
@@ -91,7 +91,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 		final Color3f[] colors = new Color3f[size];
 		Arrays.fill(colors, (color == null) ? DEFAULT_COLOR : color);
 
-		GeometryArray ta = new PointArray(size, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
+		final GeometryArray ta = new PointArray(size, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 
 		ta.setValidVertexCount(size);
 
@@ -138,21 +138,21 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 			this.setGeometry(null);
 			return;
 		}
-		
+
 		// From here on we assume the current geometry will not be null
 		// as this only happens when the original size is zero. Size has
 		// been checked at this point to be the smaller of new and old.
-		GeometryArray ga = (GeometryArray) getGeometry();
+		final GeometryArray ga = (GeometryArray) getGeometry();
 
 		// Reorder all things in the geometry: coordinates and colour
-		Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
-		float[] oldColors = new float[oldSize * 3];
+		final Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
+		final float[] oldColors = new float[oldSize * 3];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size];
 		final float[] colors = new float[size * 3];
 		for (int i = 0; i < size; i++)
 		{
-			int j = indices[i];
+			final int j = indices[i];
 			coords[i] = oldCoords[j];
 			System.arraycopy(oldColors, j * 3, colors, i * 3, 3);
 		}
@@ -163,7 +163,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 			@Override
 			public void updateData(Geometry geometry)
 			{
-				GeometryArray ga = (GeometryArray) geometry;
+				final GeometryArray ga = (GeometryArray) geometry;
 				// We re-use the geometry and just truncate the vertex count
 				ga.setCoordinates(0, coords);
 				ga.setColors(0, colors);
@@ -189,7 +189,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 
 		// Check all indices are present.
 		// Do a sort and then check it is a natural order
-		int[] check = indices.clone();
+		final int[] check = indices.clone();
 		Arrays.sort(check);
 		for (int i = 0; i < check.length; i++)
 			if (check[i] != i)

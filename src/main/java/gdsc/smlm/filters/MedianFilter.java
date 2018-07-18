@@ -88,9 +88,9 @@ public class MedianFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(floatDataBuffer, data.length);
+		final float[] newData = floatBuffer(floatDataBuffer, data.length);
 
-		int[] offset = new int[blockSize * blockSize - 1];
+		final int[] offset = new int[blockSize * blockSize - 1];
 		for (int y = -n, d = 0; y <= n; y++)
 			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
@@ -111,10 +111,8 @@ public class MedianFilter extends BaseFilter
 
 				// Sweep neighbourhood -
 				// No check for boundaries as this should be an internal sweep.
-				for (int offset_d : offset)
-				{
+				for (final int offset_d : offset)
 					add(data[index + offset_d]);
-				}
 
 				newData[index] = getMedian();
 			}
@@ -125,9 +123,7 @@ public class MedianFilter extends BaseFilter
 		{
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -147,7 +143,7 @@ public class MedianFilter extends BaseFilter
 	 */
 	public void blockMedian3x3Internal(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(floatDataBuffer, data.length);
+		final float[] newData = floatBuffer(floatDataBuffer, data.length);
 		init(9, data[maxx + 1]);
 		// Boundary control
 		final int xlimit = maxx - 1;
@@ -181,9 +177,7 @@ public class MedianFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < xlimit; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -222,13 +216,9 @@ public class MedianFilter extends BaseFilter
 	private void add(float v)
 	{
 		if (v > guess)
-		{
 			aboveBuf[nAbove++] = v;
-		}
 		else if (v < guess)
-		{
 			belowBuf[nBelow++] = v;
-		}
 	}
 
 	/**
@@ -291,7 +281,7 @@ public class MedianFilter extends BaseFilter
 					i++;
 				while (med < buf[j])
 					j--;
-				float dum = buf[j];
+				final float dum = buf[j];
 				buf[j] = buf[i];
 				buf[i] = dum;
 				i++;
@@ -309,9 +299,7 @@ public class MedianFilter extends BaseFilter
 	private static float[] floatBuffer(float[] buffer, int size)
 	{
 		if (buffer == null || buffer.length < size)
-		{
 			buffer = new float[size];
-		}
 		return buffer;
 	}
 
@@ -354,7 +342,7 @@ public class MedianFilter extends BaseFilter
 	public void blockMedianNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
 		final int length = maxx * maxy;
-		float[] newData = floatBuffer(floatDataBuffer, length);
+		final float[] newData = floatBuffer(floatDataBuffer, length);
 
 		// Boundary control
 		final int xwidth = FastMath.min(n, maxx - 1);
@@ -362,9 +350,9 @@ public class MedianFilter extends BaseFilter
 		final int xlimit = maxx - xwidth;
 		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		for (int y = -ywidth, d = 0; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
 				if (x != 0 || y != 0)
@@ -379,25 +367,19 @@ public class MedianFilter extends BaseFilter
 
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
 				reset();
 				add(data[index]);
 
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
-				{
-					for (int offset_d : offset)
-					{
+					for (final int offset_d : offset)
 						add(data[index + offset_d]);
-					}
-				}
 				else
-				{
 					for (int d = offset.length; d-- > 0;)
 					{
 						// Get the pixel with boundary checking
@@ -413,11 +395,9 @@ public class MedianFilter extends BaseFilter
 							yy = maxy - 1;
 						add(data[xx + yy * maxx]);
 					}
-				}
 
 				newData[index] = getMedian();
 			}
-		}
 
 		// Copy back
 		System.arraycopy(newData, 0, data, 0, length);
@@ -438,15 +418,15 @@ public class MedianFilter extends BaseFilter
 	public void blockMedian3x3(float[] data, final int maxx, final int maxy)
 	{
 		final int length = maxx * maxy;
-		float[] newData = floatBuffer(floatDataBuffer, length);
+		final float[] newData = floatBuffer(floatDataBuffer, length);
 		init(9, data[maxx + 1]);
 
 		// Boundary control
 		final int xlimit = maxx - 1;
 		final int ylimit = maxy - 1;
 
-		int[] xoffset = new int[] { -1, 0, 1, -1, 1, -1, 0, 1 };
-		int[] yoffset = new int[] { -1, -1, -1, 0, 0, 1, 1, 1 };
+		final int[] xoffset = new int[] { -1, 0, 1, -1, 1, -1, 0, 1 };
+		final int[] yoffset = new int[] { -1, -1, -1, 0, 0, 1, 1, 1 };
 
 		for (int y = 0; y < maxy; y++)
 		{
@@ -472,12 +452,11 @@ public class MedianFilter extends BaseFilter
 					add(data[index2 + 1]);
 				}
 				else
-				{
 					for (int d = xoffset.length; d-- > 0;)
 					{
 						// Get the pixel with boundary checking
 						int yy = y + yoffset[d];
-						int xx = x + xoffset[d];
+						final int xx = x + xoffset[d];
 						if (yy < 0)
 							yy = 0;
 						else if (yy == maxy)
@@ -489,7 +468,6 @@ public class MedianFilter extends BaseFilter
 						else
 							add(data[xx + yy * maxx]);
 					}
-				}
 				newData[index1] = getMedian();
 				index0++;
 				index1++;
@@ -548,7 +526,7 @@ public class MedianFilter extends BaseFilter
 			return;
 
 		final int length = maxx * maxy;
-		float[] newData = floatBuffer(floatDataBuffer, length);
+		final float[] newData = floatBuffer(floatDataBuffer, length);
 
 		// Hold the pointers to the image data for nY rows
 		final int[] p = new int[blockSize];
@@ -568,15 +546,11 @@ public class MedianFilter extends BaseFilter
 			// Fill the initial region
 
 			for (int x = -n; x < n; x++)
-			{
 				for (int d = 0; d < p.length; d++)
-				{
 					values[i++] = data[p[d]++];
-				}
-			}
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			final MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
 
 			// For each position up to the limit, add the next column and increment
 			int index = y * maxx + n;
@@ -593,9 +567,7 @@ public class MedianFilter extends BaseFilter
 		{
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -616,7 +588,7 @@ public class MedianFilter extends BaseFilter
 	public void rollingMedian3x3Internal(float[] data, final int maxx, final int maxy)
 	{
 		final int length = maxx * maxy;
-		float[] newData = floatBuffer(floatDataBuffer, length);
+		final float[] newData = floatBuffer(floatDataBuffer, length);
 
 		// Boundary control
 		final int xlimit = maxx - 1;
@@ -642,7 +614,7 @@ public class MedianFilter extends BaseFilter
 			values[i++] = data[p2++];
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			final MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
 
 			// For each position up to the limit, add the next column and increment
 			int index = p1 - 1;
@@ -660,9 +632,7 @@ public class MedianFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < xlimit; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -705,7 +675,7 @@ public class MedianFilter extends BaseFilter
 	public void rollingMedianNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
 		final int length = maxx * maxy;
-		float[] newData = floatBuffer(floatDataBuffer, length);
+		final float[] newData = floatBuffer(floatDataBuffer, length);
 
 		// Boundary control
 		final int xwidth = FastMath.min(n, maxx - 1);
@@ -741,21 +711,15 @@ public class MedianFilter extends BaseFilter
 
 			// The columns below x==0 use x=0
 			for (int x = -xwidth; x < 0; x++)
-			{
-				for (int pos : p)
+				for (final int pos : p)
 					values[i++] = data[pos];
-			}
 			// The remaining columns increment. Do not include x==xwidth
 			for (int x = 0; x < xwidth; x++)
-			{
 				for (int d = 0; d < p.length; d++)
-				{
 					values[i++] = data[p[d]++];
-				}
-			}
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			final MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
 
 			// For each position up to the limit, add the next column and increment
 			for (int x = 0; x < xlimit; x++)
@@ -793,7 +757,7 @@ public class MedianFilter extends BaseFilter
 	public void rollingMedian3x3(float[] data, final int maxx, final int maxy)
 	{
 		final int length = maxx * maxy;
-		float[] newData = floatBuffer(floatDataBuffer, length);
+		final float[] newData = floatBuffer(floatDataBuffer, length);
 
 		// Boundary control
 		final int xlimit = maxx - 2;
@@ -827,7 +791,7 @@ public class MedianFilter extends BaseFilter
 			values[i++] = data[p2++];
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			final MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
 
 			// For each position up to the limit, add the next column and increment
 			for (int x = 0; x < xlimit; x++)
@@ -860,7 +824,7 @@ public class MedianFilter extends BaseFilter
 	@Override
 	public MedianFilter clone()
 	{
-		MedianFilter o = (MedianFilter) super.clone();
+		final MedianFilter o = (MedianFilter) super.clone();
 		o.floatDataBuffer = null;
 		o.aboveBuf = o.belowBuf = null;
 		return o;

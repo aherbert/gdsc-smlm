@@ -30,30 +30,30 @@ import gdsc.smlm.filters.Spot;
  */
 class Candidate extends Spot
 {
-	
+
 	/** The index. */
 	final public int index;
-	
+
 	/** Flag to indicate if the candidate has been fit. */
 	public boolean fit = false;
 
 	// Results of fitting
-	
+
 	/** The params. */
 	public float[] params;
-	
+
 	/** The param deviations. */
 	public float[] paramDevs;
-	
+
 	/** The error. */
 	public double error;
-	
+
 	/** The noise. */
 	public float noise;
-	
+
 	/** The mean intensity. */
 	public float meanIntensity;
-	
+
 	/** The precision. */
 	public double precision;
 
@@ -152,7 +152,7 @@ class Candidate extends Spot
 	public Candidate createFitted(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
 			float meanIntensity, boolean valid)
 	{
-		Candidate c = new Candidate(x, y, intensity, getScore(), index);
+		final Candidate c = new Candidate(x, y, intensity, getScore(), index);
 		c.params = params;
 		c.paramDevs = paramDevs;
 		c.error = error;

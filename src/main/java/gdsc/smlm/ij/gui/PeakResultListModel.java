@@ -40,7 +40,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 
 	/** The store to delegate all model changes. */
 	final PeakResultStoreList delegate;
-	
+
 	private boolean checkForDuplicates = false;
 
 	/**
@@ -111,22 +111,20 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 	{
 		if (peakResults.length == 0)
 			return;
-		int index0 = delegate.size();
+		final int index0 = delegate.size();
 		if (checkForDuplicates)
 		{
 			int size = 0;
 			for (int i = 0; i < peakResults.length; i++)
-			{
 				if (!delegate.contains(peakResults[i]))
 					peakResults[size++] = peakResults[i];
-			}
 			if (size == 0)
 				return;
 			if (size != peakResults.length)
 				peakResults = Arrays.copyOf(peakResults, size);
 		}
 		delegate.addArray(peakResults);
-		int index1 = delegate.size() - 1;
+		final int index1 = delegate.size() - 1;
 		fireIntervalAdded(source, index0, index1);
 	}
 
@@ -172,9 +170,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 		if (peakResults.length == 0)
 			return;
 		for (int i = 0; i < peakResults.length; i++)
-		{
 			remove(peakResults[i]);
-		}
 	}
 
 	/**
@@ -182,7 +178,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 	 */
 	public void clear()
 	{
-		int index1 = delegate.size() - 1;
+		final int index1 = delegate.size() - 1;
 		if (index1 >= 0)
 		{
 			delegate.clear();

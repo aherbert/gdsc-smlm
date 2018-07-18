@@ -84,9 +84,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		// Calculate the sum in the n and n+1 regions
 		final float[] sum1;
 		if (n == 0)
-		{
 			sum1 = data;
-		}
 		else
 		{
 			sum1 = data.clone();
@@ -101,9 +99,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float edgeWeight;
 
 		if (simpleInterpolation)
-		{
 			edgeWeight = (float) (w - n);
-		}
 		else
 		{
 			// Use the area to produce the weighting
@@ -118,9 +114,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		{
 			int index = y * maxx + n1;
 			for (int x = n1; x < maxx - n1; x++, index++)
-			{
 				data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
-			}
 		}
 	}
 
@@ -156,9 +150,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		// Calculate the sum in the n and n+1 regions
 		final float[] sum1;
 		if (n == 0)
-		{
 			sum1 = data;
-		}
 		else
 		{
 			sum1 = data.clone();
@@ -173,9 +165,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float edgeWeight;
 
 		if (simpleInterpolation)
-		{
 			edgeWeight = (float) (w - n);
-		}
 		else
 		{
 			// Use the area to produce the weighting
@@ -187,9 +177,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float norm = (float) (1.0 / area);
 
 		for (int index = 0; index < sum1.length; index++)
-		{
 			data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
-		}
 	}
 
 	/**
@@ -228,9 +216,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		// Calculate the sum in the n and n+1 regions
 		final float[] av1;
 		if (n == 0)
-		{
 			av1 = data;
-		}
 		else
 		{
 			av1 = data.clone();
@@ -243,9 +229,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float outerWeight;
 
 		if (simpleInterpolation)
-		{
 			outerWeight = (float) (w - n);
-		}
 		else
 		{
 			// Use the area to produce the weighting
@@ -261,9 +245,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		{
 			int index = y * maxx + n1;
 			for (int x = n1; x < maxx - n1; x++, index++)
-			{
 				data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
-			}
 		}
 	}
 
@@ -299,9 +281,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		// Calculate the sum in the n and n+1 regions
 		final float[] av1;
 		if (n == 0)
-		{
 			av1 = data;
-		}
 		else
 		{
 			av1 = data.clone();
@@ -314,9 +294,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float outerWeight;
 
 		if (simpleInterpolation)
-		{
 			outerWeight = (float) (w - n);
-		}
 		else
 		{
 			// Use the area to produce the weighting
@@ -329,9 +307,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float innerWeight = 1 - outerWeight;
 
 		for (int index = 0; index < av1.length; index++)
-		{
 			data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
-		}
 	}
 
 	/*
@@ -342,7 +318,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	@Override
 	public AreaAverageFilter clone()
 	{
-		AreaAverageFilter o = (AreaAverageFilter) super.clone();
+		final AreaAverageFilter o = (AreaAverageFilter) super.clone();
 		o.sumFilter1 = sumFilter1.clone();
 		o.sumFilter2 = sumFilter2.clone();
 		o.blockMeanFilter1 = blockMeanFilter1.clone();

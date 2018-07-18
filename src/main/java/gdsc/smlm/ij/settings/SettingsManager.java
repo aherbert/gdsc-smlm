@@ -155,7 +155,7 @@ public class SettingsManager
 			if (!settingsDirectory.exists())
 				settingsDirectory.mkdirs();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.log("Unable create settings directory: " + e.getMessage());
 		}
@@ -193,16 +193,14 @@ public class SettingsManager
 
 	private static void initDistanceUnit()
 	{
-		EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
+		final EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
 		d.remove(DistanceUnit.UNRECOGNIZED);
 		//d.remove(DistanceUnit.DISTANCE_UNIT_NA);
 		_DistanceUnitValues = d.toArray(new DistanceUnit[d.size()]);
 		_DistanceUnitNames = new String[_DistanceUnitValues.length];
 		for (int i = 0; i < _DistanceUnitValues.length; i++)
-		{
 			_DistanceUnitNames[i] = getName(UnitHelper.getName(_DistanceUnitValues[i]),
 					UnitHelper.getShortName(_DistanceUnitValues[i]));
-		}
 	}
 
 	private static IntensityUnit[] _IntensityUnitValues;
@@ -235,16 +233,14 @@ public class SettingsManager
 
 	private static void initIntensityUnit()
 	{
-		EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
+		final EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
 		d.remove(IntensityUnit.UNRECOGNIZED);
 		//d.remove(IntensityUnit.INTENSITY_UNIT_NA);
 		_IntensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
 		_IntensityUnitNames = new String[_IntensityUnitValues.length];
 		for (int i = 0; i < _IntensityUnitValues.length; i++)
-		{
 			_IntensityUnitNames[i] = getName(UnitHelper.getName(_IntensityUnitValues[i]),
 					UnitHelper.getShortName(_IntensityUnitValues[i]));
-		}
 	}
 
 	private static AngleUnit[] _AngleUnitValues;
@@ -277,16 +273,14 @@ public class SettingsManager
 
 	private static void initAngleUnit()
 	{
-		EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
+		final EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
 		d.remove(AngleUnit.UNRECOGNIZED);
 		//d.remove(AngleUnit.ANGLE_UNIT_NA);
 		_AngleUnitValues = d.toArray(new AngleUnit[d.size()]);
 		_AngleUnitNames = new String[_AngleUnitValues.length];
 		for (int i = 0; i < _AngleUnitValues.length; i++)
-		{
 			_AngleUnitNames[i] = getName(UnitHelper.getName(_AngleUnitValues[i]),
 					UnitHelper.getShortName(_AngleUnitValues[i]));
-		}
 	}
 
 	private static TimeUnit[] _TimeUnitValues;
@@ -319,16 +313,14 @@ public class SettingsManager
 
 	private static void initTimeUnit()
 	{
-		EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
+		final EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
 		d.remove(TimeUnit.UNRECOGNIZED);
 		//d.remove(TimeUnit.TIME_UNIT_NA);
 		_TimeUnitValues = d.toArray(new TimeUnit[d.size()]);
 		_TimeUnitNames = new String[_TimeUnitValues.length];
 		for (int i = 0; i < _TimeUnitValues.length; i++)
-		{
 			_TimeUnitNames[i] = getName(UnitHelper.getName(_TimeUnitValues[i]),
 					UnitHelper.getShortName(_TimeUnitValues[i]));
-		}
 	}
 
 	private static ResultsImageType[] _ResultsImageTypeValues;
@@ -361,14 +353,12 @@ public class SettingsManager
 
 	private static void initResultsImageType()
 	{
-		EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
+		final EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
 		d.remove(ResultsImageType.UNRECOGNIZED);
 		_ResultsImageTypeValues = d.toArray(new ResultsImageType[d.size()]);
 		_ResultsImageTypeNames = new String[_ResultsImageTypeValues.length];
 		for (int i = 0; i < _ResultsImageTypeValues.length; i++)
-		{
 			_ResultsImageTypeNames[i] = ResultsProtosHelper.getName(_ResultsImageTypeValues[i]);
-		}
 	}
 
 	private static ResultsFileFormat[] _ResultsFileFormatValues;
@@ -401,14 +391,12 @@ public class SettingsManager
 
 	private static void initResultsFileFormat()
 	{
-		EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
+		final EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
 		d.remove(ResultsFileFormat.UNRECOGNIZED);
 		_ResultsFileFormatValues = d.toArray(new ResultsFileFormat[d.size()]);
 		_ResultsFileFormatNames = new String[_ResultsFileFormatValues.length];
 		for (int i = 0; i < _ResultsFileFormatValues.length; i++)
-		{
 			_ResultsFileFormatNames[i] = ResultsProtosHelper.getName(_ResultsFileFormatValues[i]);
-		}
 	}
 
 	private static ResultsTableFormat[] _ResultsTableFormatValues;
@@ -441,14 +429,12 @@ public class SettingsManager
 
 	private static void initResultsTableFormat()
 	{
-		EnumSet<ResultsTableFormat> d = EnumSet.allOf(ResultsTableFormat.class);
+		final EnumSet<ResultsTableFormat> d = EnumSet.allOf(ResultsTableFormat.class);
 		d.remove(ResultsTableFormat.UNRECOGNIZED);
 		_ResultsTableFormatValues = d.toArray(new ResultsTableFormat[d.size()]);
 		_ResultsTableFormatNames = new String[_ResultsTableFormatValues.length];
 		for (int i = 0; i < _ResultsTableFormatValues.length; i++)
-		{
 			_ResultsTableFormatNames[i] = ResultsProtosHelper.getName(_ResultsTableFormatValues[i]);
-		}
 	}
 
 	private static DataFilterType[] _DataFilterTypeValues;
@@ -481,14 +467,12 @@ public class SettingsManager
 
 	private static void initDataFilterType()
 	{
-		EnumSet<DataFilterType> d = EnumSet.allOf(DataFilterType.class);
+		final EnumSet<DataFilterType> d = EnumSet.allOf(DataFilterType.class);
 		d.remove(DataFilterType.UNRECOGNIZED);
 		_DataFilterTypeValues = d.toArray(new DataFilterType[d.size()]);
 		_DataFilterTypeNames = new String[_DataFilterTypeValues.length];
 		for (int i = 0; i < _DataFilterTypeValues.length; i++)
-		{
 			_DataFilterTypeNames[i] = FitProtosHelper.getName(_DataFilterTypeValues[i]);
-		}
 	}
 
 	private static DataFilterMethod[] _DataFilterMethodValues;
@@ -521,14 +505,12 @@ public class SettingsManager
 
 	private static void initDataFilterMethod()
 	{
-		EnumSet<DataFilterMethod> d = EnumSet.allOf(DataFilterMethod.class);
+		final EnumSet<DataFilterMethod> d = EnumSet.allOf(DataFilterMethod.class);
 		d.remove(DataFilterMethod.UNRECOGNIZED);
 		_DataFilterMethodValues = d.toArray(new DataFilterMethod[d.size()]);
 		_DataFilterMethodNames = new String[_DataFilterMethodValues.length];
 		for (int i = 0; i < _DataFilterMethodValues.length; i++)
-		{
 			_DataFilterMethodNames[i] = FitProtosHelper.getName(_DataFilterMethodValues[i]);
-		}
 	}
 
 	private static FitSolver[] _FitSolverValues;
@@ -561,14 +543,12 @@ public class SettingsManager
 
 	private static void initFitSolver()
 	{
-		EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
+		final EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
 		d.remove(FitSolver.UNRECOGNIZED);
 		_FitSolverValues = d.toArray(new FitSolver[d.size()]);
 		_FitSolverNames = new String[_FitSolverValues.length];
 		for (int i = 0; i < _FitSolverValues.length; i++)
-		{
 			_FitSolverNames[i] = FitProtosHelper.getName(_FitSolverValues[i]);
-		}
 	}
 
 	private static NoiseEstimatorMethod[] _NoiseEstimatorMethodValues;
@@ -601,14 +581,12 @@ public class SettingsManager
 
 	private static void initNoiseEstimatorMethod()
 	{
-		EnumSet<NoiseEstimatorMethod> d = EnumSet.allOf(NoiseEstimatorMethod.class);
+		final EnumSet<NoiseEstimatorMethod> d = EnumSet.allOf(NoiseEstimatorMethod.class);
 		d.remove(NoiseEstimatorMethod.UNRECOGNIZED);
 		_NoiseEstimatorMethodValues = d.toArray(new NoiseEstimatorMethod[d.size()]);
 		_NoiseEstimatorMethodNames = new String[_NoiseEstimatorMethodValues.length];
 		for (int i = 0; i < _NoiseEstimatorMethodValues.length; i++)
-		{
 			_NoiseEstimatorMethodNames[i] = FitProtosHelper.getName(_NoiseEstimatorMethodValues[i]);
-		}
 	}
 
 	private static CameraType[] _CameraTypeValues;
@@ -641,14 +619,12 @@ public class SettingsManager
 
 	private static void initCameraType()
 	{
-		EnumSet<CameraType> d = EnumSet.allOf(CameraType.class);
+		final EnumSet<CameraType> d = EnumSet.allOf(CameraType.class);
 		d.remove(CameraType.UNRECOGNIZED);
 		_CameraTypeValues = d.toArray(new CameraType[d.size()]);
 		_CameraTypeNames = new String[_CameraTypeValues.length];
 		for (int i = 0; i < _CameraTypeValues.length; i++)
-		{
 			_CameraTypeNames[i] = CalibrationProtosHelper.getName(_CameraTypeValues[i]);
-		}
 	}
 
 	private static PrecisionMethod[] _PrecisionMethodValues;
@@ -681,14 +657,12 @@ public class SettingsManager
 
 	private static void initPrecisionMethod()
 	{
-		EnumSet<PrecisionMethod> d = EnumSet.allOf(PrecisionMethod.class);
+		final EnumSet<PrecisionMethod> d = EnumSet.allOf(PrecisionMethod.class);
 		d.remove(PrecisionMethod.UNRECOGNIZED);
 		_PrecisionMethodValues = d.toArray(new PrecisionMethod[d.size()]);
 		_PrecisionMethodNames = new String[_PrecisionMethodValues.length];
 		for (int i = 0; i < _PrecisionMethodValues.length; i++)
-		{
 			_PrecisionMethodNames[i] = FitProtosHelper.getName(_PrecisionMethodValues[i]);
-		}
 	}
 
 	/**
@@ -704,35 +678,22 @@ public class SettingsManager
 	 */
 	public static String[] getNames(Object... objects)
 	{
-		String[] names = new String[objects.length];
+		final String[] names = new String[objects.length];
 		for (int i = 0; i < names.length; i++)
 		{
 			String name;
 			if (objects[i] instanceof NamedObject)
 			{
-				NamedObject o = (NamedObject) objects[i];
+				final NamedObject o = (NamedObject) objects[i];
 				name = getName(o.getName(), o.getShortName());
 			}
 			else
-			{
 				name = objects[i].toString();
-			}
 
 			if (name.length() > 0)
-			{
 				// Capitalise first letter
 				if (Character.isLowerCase(name.charAt(0)))
 					name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-
-				//// Check if all upper-case
-				//boolean isUpper = true;
-				//for (int j = 0; j < name.length(); j++)
-				//	if (Character.isLetter(name.charAt(j)) && !Character.isUpperCase(name.charAt(j)))
-				//		isUpper = false;
-				//
-				//if (isUpper) // Use sentence case
-				//	name = name.charAt(0) + name.substring(1).toLowerCase();
-			}
 			names[i] = name;
 		}
 		return names;
@@ -760,7 +721,7 @@ public class SettingsManager
 	 */
 	public static String getSettingsFilename()
 	{
-		String filename = Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
+		final String filename = Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
 		return filename;
 	}
 
@@ -848,16 +809,14 @@ public class SettingsManager
 	 */
 	public static boolean clearSettings(Class<?> clazz)
 	{
-		File file = createSettingsFile(clazz);
+		final File file = createSettingsFile(clazz);
 		try
 		{
 			if (file.exists())
-			{
 				return file.delete();
-			}
 			return true; // Already clear
 		}
-		catch (SecurityException e)
+		catch (final SecurityException e)
 		{
 			IJ.log("Unable to clear the settings: " + e.getMessage());
 		}
@@ -873,7 +832,7 @@ public class SettingsManager
 	public static class ConfigurationReader<T extends Message>
 	{
 		/** the default instance of the message type */
-		private T t;
+		private final T t;
 
 		/**
 		 * Instantiates a new configuration reader.
@@ -1079,9 +1038,9 @@ public class SettingsManager
 	 */
 	public static FitEngineConfiguration readFitEngineConfiguration(int flags)
 	{
-		FitEngineSettings fitEngineSettings = readFitEngineSettings(flags);
-		Calibration calibration = readCalibration(flags);
-		PSF psf = readPSF(flags);
+		final FitEngineSettings fitEngineSettings = readFitEngineSettings(flags);
+		final Calibration calibration = readCalibration(flags);
+		final PSF psf = readPSF(flags);
 		return new FitEngineConfiguration(fitEngineSettings, calibration, psf);
 	}
 
@@ -1290,7 +1249,7 @@ public class SettingsManager
 	 */
 	public static boolean writeSettings(FitEngineConfiguration fitEngineConfiguration, int flags)
 	{
-		FitConfiguration fitConfig = fitEngineConfiguration.getFitConfiguration();
+		final FitConfiguration fitConfig = fitEngineConfiguration.getFitConfiguration();
 		// This is fail fast
 		boolean result = writeSettings(fitEngineConfiguration.getFitEngineSettings(), flags);
 		result &= writeSettings(fitConfig.getCalibration(), flags);
@@ -1335,7 +1294,7 @@ public class SettingsManager
 		{
 			return writeMessage(message, fs, flags);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			//e.printStackTrace();
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
@@ -1364,7 +1323,7 @@ public class SettingsManager
 			message.writeDelimitedTo(output);
 			return true;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
@@ -1409,7 +1368,7 @@ public class SettingsManager
 		{
 			return readMessage(parser, fs, flags);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			//e.printStackTrace();
 			// Only print this if the file-not-found flag is present
@@ -1440,7 +1399,7 @@ public class SettingsManager
 		{
 			return parser.parseDelimitedFrom(input);
 		}
-		catch (InvalidProtocolBufferException e)
+		catch (final InvalidProtocolBufferException e)
 		{
 			//e.printStackTrace();
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
@@ -1474,7 +1433,7 @@ public class SettingsManager
 	 */
 	public static String toJSON(MessageOrBuilder message, int flags)
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		if (toJSON(message, sb, flags))
 			return sb.toString();
 		return null;
@@ -1517,7 +1476,7 @@ public class SettingsManager
 		{
 			return toJSON(message, fs, flags);
 		}
-		catch (FileNotFoundException e)
+		catch (final FileNotFoundException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
@@ -1550,7 +1509,7 @@ public class SettingsManager
 			p.appendTo(message, output);
 			return true;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
@@ -1607,7 +1566,7 @@ public class SettingsManager
 		{
 			return fromJSON(reader, builder, flags);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
@@ -1635,7 +1594,7 @@ public class SettingsManager
 			parser.merge(reader, builder);
 			return true;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());

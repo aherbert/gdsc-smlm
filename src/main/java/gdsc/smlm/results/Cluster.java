@@ -120,15 +120,12 @@ public class Cluster implements Comparable<Cluster>
 	public float[] getCentroid(CentroidMethod method)
 	{
 		if (centroid == null && results.size() != 0)
-		{
 			switch (method)
 			{
 				case SIGNAL_WEIGHTED:
 					final float[] weights = new float[results.size()];
 					for (int i = 0; i < results.size(); i++)
-					{
 						weights[i] = Math.abs(results.get(i).getIntensity());
-					}
 					// Normalise weights?
 					return getCentroid(results, weights);
 
@@ -136,7 +133,6 @@ public class Cluster implements Comparable<Cluster>
 				default:
 					return getCentroid();
 			}
-		}
 		return centroid;
 	}
 
@@ -146,7 +142,7 @@ public class Cluster implements Comparable<Cluster>
 		double sum = 0;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			final float w = weights[i++];
 			sum += w;
 			centroid[0] += result.getXPosition() * w;
@@ -169,7 +165,7 @@ public class Cluster implements Comparable<Cluster>
 			centroid = new float[2];
 			for (int i = 0; i < results.size(); i++)
 			{
-				PeakResult result = results.get(i);
+				final PeakResult result = results.get(i);
 				centroid[0] += result.getXPosition();
 				centroid[1] += result.getYPosition();
 			}
@@ -200,7 +196,7 @@ public class Cluster implements Comparable<Cluster>
 		double ssx = 0;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			final double dx = result.getXPosition() - centroid[0];
 			final double dy = result.getYPosition() - centroid[1];
 			final double d2 = dx * dx + dy * dy;
@@ -235,18 +231,16 @@ public class Cluster implements Comparable<Cluster>
 
 		if (n == 1)
 		{
-			PeakResult result = results.get(0);
+			final PeakResult result = results.get(0);
 			if (centroid == null)
-			{
 				centroid = new float[] { result.getXPosition(), result.getYPosition() };
-			}
 			return checkPrecision(result.getPrecision());
 		}
 
-		float[] photons = new float[results.size()];
+		final float[] photons = new float[results.size()];
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			photons[i++] = Math.abs(result.getIntensity());
 		}
 
@@ -254,7 +248,7 @@ public class Cluster implements Comparable<Cluster>
 		double xm = 0, ym = 0;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			final float Ni = photons[i++];
 			sumNi += Ni;
 			xm += result.getXPosition() * Ni;
@@ -264,30 +258,28 @@ public class Cluster implements Comparable<Cluster>
 		ym /= sumNi;
 
 		if (centroid == null)
-		{
 			centroid = new float[] { (float) xm, (float) ym };
-		}
 
 		double sumXi2Ni = 0, sumYi2Ni = 0, sumS2 = 0;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			final float Ni = photons[i++];
 
-			double dx = converter.convert(result.getXPosition() - xm);
-			double dy = converter.convert(result.getYPosition() - ym);
+			final double dx = converter.convert(result.getXPosition() - xm);
+			final double dy = converter.convert(result.getYPosition() - ym);
 
 			sumXi2Ni += dx * dx * Ni;
 			sumYi2Ni += dy * dy * Ni;
 			sumS2 += Maths.pow2(checkPrecision(result.getPrecision())) * Ni;
 		}
 
-		double sumNin = sumNi * n;
-		double sumS2_sumNin = sumS2 / sumNin;
-		double sxm = Math.sqrt(sumXi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
-		double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
+		final double sumNin = sumNi * n;
+		final double sumS2_sumNin = sumS2 / sumNin;
+		final double sxm = Math.sqrt(sumXi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
+		final double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
 
-		double sPeak = FastMath.max(sxm, sym);
+		final double sPeak = FastMath.max(sxm, sym);
 
 		return sPeak;
 	}
@@ -344,7 +336,7 @@ public class Cluster implements Comparable<Cluster>
 		double sum = 0;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			sum += result.getIntensity();
 		}
 		return sum;
@@ -404,7 +396,7 @@ public class Cluster implements Comparable<Cluster>
 		int singles = 0;
 		while (singles < results.size())
 		{
-			PeakResult result = results.get(singles);
+			final PeakResult result = results.get(singles);
 			if (result.getFrame() != result.getEndFrame())
 				break;
 			singles++;
@@ -413,24 +405,18 @@ public class Cluster implements Comparable<Cluster>
 		if (singles == size())
 			return;
 
-		PeakResultStoreList newResults = new ArrayPeakResultStore(size());
+		final PeakResultStoreList newResults = new ArrayPeakResultStore(size());
 		for (int i = 0; i < singles; i++)
-		{
 			newResults.add(results.get(i));
-		}
 
 		for (int i = singles; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			if (result.getFrame() != result.getEndFrame())
-			{
 				for (int peak = result.getFrame(); peak <= result.getEndFrame(); peak++)
-				{
 					newResults.add(new ExtendedPeakResult(peak, result.getOrigX(), result.getOrigY(),
 							result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
 							result.getParameters(), result.getParameterDeviations(), peak, result.getId()));
-				}
-			}
 			else
 				newResults.add(result);
 		}
@@ -445,12 +431,10 @@ public class Cluster implements Comparable<Cluster>
 	public void removeEnds()
 	{
 		if (size() <= 2)
-		{
 			results.clear();
-		}
 		else
 		{
-			PeakResultStoreList newResults = new ArrayPeakResultStore(size() - 2);
+			final PeakResultStoreList newResults = new ArrayPeakResultStore(size() - 2);
 			for (int i = 1, size = size() - 1; i < size; i++)
 				newResults.add(results.get(i));
 			results = newResults;
@@ -469,11 +453,9 @@ public class Cluster implements Comparable<Cluster>
 		PeakResult last = null;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			if (last != null)
-			{
 				msd += last.distance2(result);
-			}
 			last = result;
 		}
 		return msd / (size() - 1);
@@ -490,11 +472,9 @@ public class Cluster implements Comparable<Cluster>
 		PeakResult last = null;
 		for (int i = 0; i < results.size(); i++)
 		{
-			PeakResult result = results.get(i);
+			final PeakResult result = results.get(i);
 			if (last != null)
-			{
 				msd += last.distance(result);
-			}
 			last = result;
 		}
 		return msd / (size() - 1);

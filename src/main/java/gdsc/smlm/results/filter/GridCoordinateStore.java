@@ -91,7 +91,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * The z resolution. If this is negative then this is ignored and the store behaves as if processing 2D coordinates.
 	 */
 	private double zResolution;
-	private int minx, miny, width, height;
+	private final int minx, miny, width, height;
 	private int xBlocks, yBlocks;
 	/**
 	 * Flag to indicate that the store is active (i.e. storing coordinates). It is not active if the XY resolution is
@@ -197,9 +197,7 @@ public class GridCoordinateStore implements CoordinateStore
 			{
 				final CoordinateList[] list = grid[x];
 				for (int y = 0; y < yBlocks; y++)
-				{
 					list[y] = new CoordinateList();
-				}
 			}
 		}
 	}
@@ -324,9 +322,7 @@ public class GridCoordinateStore implements CoordinateStore
 	public void addToQueue(double x, double y, double z)
 	{
 		if (isActive)
-		{
 			queue.add(x, y, z);
-		}
 	}
 
 	/*
@@ -353,9 +349,7 @@ public class GridCoordinateStore implements CoordinateStore
 	public void add(final double x, final double y, final double z)
 	{
 		if (isActive)
-		{
 			addf(x, y, z);
-		}
 	}
 
 	private void addf(final double x, final double y, final double z)
@@ -422,16 +416,12 @@ public class GridCoordinateStore implements CoordinateStore
 
 		// Reset after an entire cycle of timestamps
 		if (timestamp == 0)
-		{
 			for (int x = 0; x < xBlocks; x++)
 			{
 				final CoordinateList[] list = grid[x];
 				for (int y = 0; y < yBlocks; y++)
-				{
 					list[y].clear();
-				}
 			}
-		}
 	}
 
 	/*
@@ -455,7 +445,6 @@ public class GridCoordinateStore implements CoordinateStore
 		final int ymax = Math.min(yBlocks, yBlock + 2);
 
 		for (int xx = xmin; xx < xmax; xx++)
-		{
 			for (int yy = ymin; yy < ymax; yy++)
 			{
 				final CoordinateList l = getList(xx, yy);
@@ -464,7 +453,6 @@ public class GridCoordinateStore implements CoordinateStore
 					continue;
 				final double[] list = l.list;
 				for (int i = 0; i < size; i += 3)
-				{
 					if (distance2(x, y, list[i], list[i + 1]) <= xy2)
 					{
 						if (is2D)
@@ -473,9 +461,7 @@ public class GridCoordinateStore implements CoordinateStore
 						if (distance(z, list[i + 2]) <= zResolution)
 							return true;
 					}
-				}
 			}
-		}
 
 		return false;
 	}
@@ -528,7 +514,7 @@ public class GridCoordinateStore implements CoordinateStore
 		final int xBlock = getBlockX(x);
 		final int yBlock = getBlockY(y);
 
-		double[] match = new double[3];
+		final double[] match = new double[3];
 		double min = Double.POSITIVE_INFINITY;
 
 		final int xmin = Math.max(0, xBlock - 1);
@@ -537,7 +523,6 @@ public class GridCoordinateStore implements CoordinateStore
 		final int ymax = Math.min(yBlocks, yBlock + 2);
 
 		for (int xx = xmin; xx < xmax; xx++)
-		{
 			for (int yy = ymin; yy < ymax; yy++)
 			{
 				final CoordinateList l = getList(xx, yy);
@@ -570,7 +555,6 @@ public class GridCoordinateStore implements CoordinateStore
 					}
 				}
 			}
-		}
 
 		return (min < Double.POSITIVE_INFINITY) ? match : null;
 	}

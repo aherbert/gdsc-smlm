@@ -69,33 +69,31 @@ public class NeighbourAnalysis implements PlugIn
 		if (!showDialog())
 			return;
 
-		TraceManager manager = new TraceManager(results);
+		final TraceManager manager = new TraceManager(results);
 
 		// Run the tracing
 		manager.setTracker(new IJTrackProgress());
-		Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
+		final Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
 
 		saveTraces(traces);
 	}
 
 	private void saveTraces(Trace[] traces)
 	{
-		String[] path = Utils.decodePath(filename);
-		OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(filename);
+		final OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			filename = chooser.getDirectory() + chooser.getFileName();
 
 			// Remove extension and replace with .xls
-			int index = filename.lastIndexOf('.');
+			final int index = filename.lastIndexOf('.');
 			if (index > 0)
-			{
 				filename = filename.substring(0, index);
-			}
 			filename += ".xls";
 
-			boolean showDeviations = results.hasDeviations();
-			TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
+			final boolean showDeviations = results.hasDeviations();
+			final TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
 			traceResults.copySettings(results);
 			traceResults.begin();
 			if (!traceResults.isActive())
@@ -104,7 +102,7 @@ public class NeighbourAnalysis implements PlugIn
 				return;
 			}
 			traceResults.addComment(createSettingsComment());
-			for (Trace trace : traces)
+			for (final Trace trace : traces)
 				traceResults.addCluster(trace); // addTrace(...) does a sort on the results
 			traceResults.end();
 		}
@@ -118,7 +116,7 @@ public class NeighbourAnalysis implements PlugIn
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);

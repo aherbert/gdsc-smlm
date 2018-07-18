@@ -68,7 +68,7 @@ public class CubicSplineData
 	{
 		if (maxx < 1 || maxy < 1 || splines.length < 1)
 			throw new IllegalArgumentException("No splines");
-		int size = maxx * maxy;
+		final int size = maxx * maxy;
 		for (int z = 0; z < splines.length; z++)
 			if (splines[z].length != size)
 				throw new IllegalArgumentException("Incorrect XY splines size");
@@ -108,9 +108,9 @@ public class CubicSplineData
 	{
 		maxx = function.getMaxXSplinePosition() + 1;
 		maxy = function.getMaxYSplinePosition() + 1;
-		int maxz = function.getMaxZSplinePosition() + 1;
+		final int maxz = function.getMaxZSplinePosition() + 1;
 
-		int size = maxx * maxy;
+		final int size = maxx * maxy;
 		splines = new CustomTricubicFunction[maxz][size];
 
 		for (int z = 0; z < splines.length; z++)
@@ -211,27 +211,25 @@ public class CubicSplineData
 	public void write(OutputStream outputStream, TrackProgress progress) throws IOException
 	{
 		// Write dimensions
-		int maxz = splines.length;
-		Ticker ticker = Ticker.create(progress, (long) maxx * maxy * maxz, false);
+		final int maxz = splines.length;
+		final Ticker ticker = Ticker.create(progress, (long) maxx * maxy * maxz, false);
 		ticker.start();
-		BufferedOutputStream buffer = new BufferedOutputStream(outputStream);
-		DataOutput out = new DataOutputStream(buffer);
+		final BufferedOutputStream buffer = new BufferedOutputStream(outputStream);
+		final DataOutput out = new DataOutputStream(buffer);
 		out.writeInt(maxx);
 		out.writeInt(maxy);
 		out.writeInt(maxz);
 		// Write precision
-		boolean singlePrecision = isSinglePrecision();
+		final boolean singlePrecision = isSinglePrecision();
 		out.writeBoolean(singlePrecision);
-		SplineWriter writer = (singlePrecision) ? new FloatSplineWriter() : new DoubleSplineWriter();
-		int size = maxx * maxy;
+		final SplineWriter writer = (singlePrecision) ? new FloatSplineWriter() : new DoubleSplineWriter();
+		final int size = maxx * maxy;
 		for (int z = 0; z < maxz; z++)
-		{
 			for (int i = 0; i < size; i++)
 			{
 				ticker.tick();
 				writer.write(out, splines[z][i]);
 			}
-		}
 		ticker.stop();
 		buffer.flush();
 	}
@@ -268,26 +266,24 @@ public class CubicSplineData
 	public static CubicSplineData read(InputStream inputStream, TrackProgress progress) throws IOException
 	{
 		// Read dimensions
-		BufferedInputStream buffer = new BufferedInputStream(inputStream);
-		DataInput in = new DataInputStream(buffer);
-		int maxx = in.readInt();
-		int maxy = in.readInt();
-		int maxz = in.readInt();
-		Ticker ticker = Ticker.create(progress, (long) maxx * maxy * maxz, false);
+		final BufferedInputStream buffer = new BufferedInputStream(inputStream);
+		final DataInput in = new DataInputStream(buffer);
+		final int maxx = in.readInt();
+		final int maxy = in.readInt();
+		final int maxz = in.readInt();
+		final Ticker ticker = Ticker.create(progress, (long) maxx * maxy * maxz, false);
 		ticker.start();
 		// Read precision
-		boolean singlePrecision = in.readBoolean();
-		SplineReader reader = (singlePrecision) ? new FloatSplineReader() : new DoubleSplineReader();
-		int size = maxx * maxy;
-		CustomTricubicFunction[][] splines = new CustomTricubicFunction[maxz][maxx * maxy];
+		final boolean singlePrecision = in.readBoolean();
+		final SplineReader reader = (singlePrecision) ? new FloatSplineReader() : new DoubleSplineReader();
+		final int size = maxx * maxy;
+		final CustomTricubicFunction[][] splines = new CustomTricubicFunction[maxz][maxx * maxy];
 		for (int z = 0; z < maxz; z++)
-		{
 			for (int i = 0; i < size; i++)
 			{
 				ticker.tick();
 				splines[z][i] = reader.read(in);
 			}
-		}
 		ticker.stop();
 		// Skip validation
 		return new CubicSplineData(maxx, maxy, splines, false);
@@ -379,7 +375,7 @@ public class CubicSplineData
 		if (!procedure.setDimensions(maxx + 1, maxy + 1, maxz + 1))
 			return;
 
-		Ticker ticker = Ticker.create(progress, (long) (maxx + 1) * (maxy + 1) * (maxz + 1), false);
+		final Ticker ticker = Ticker.create(progress, (long) (maxx + 1) * (maxy + 1) * (maxz + 1), false);
 		ticker.start();
 
 		// Pre-compute interpolation tables
@@ -393,14 +389,12 @@ public class CubicSplineData
 		final double[][] tables = new double[nx1 * ny1 * nz1][];
 		for (int z = 0, i = 0; z < nz1; z++)
 		{
-			CubicSplinePosition szz = sz[z];
+			final CubicSplinePosition szz = sz[z];
 			for (int y = 0; y < ny1; y++)
 			{
-				CubicSplinePosition syy = sy[y];
+				final CubicSplinePosition syy = sy[y];
 				for (int x = 0; x < nx1; x++, i++)
-				{
 					tables[i] = CustomTricubicFunction.computePowerTable(sx[x], syy, szz);
-				}
 			}
 		}
 
@@ -458,10 +452,10 @@ public class CubicSplineData
 		// Write interpolated values
 		for (int z = 0; z <= maxz; z++)
 		{
-			CustomTricubicFunction[] xySplines = splines[zp[z]];
+			final CustomTricubicFunction[] xySplines = splines[zp[z]];
 			for (int y = 0; y <= maxy; y++)
 			{
-				int index = yp[y] * getMaxX();
+				final int index = yp[y] * getMaxX();
 				final int j = nx1 * (yt[y] + ny1 * zt[z]);
 				for (int x = 0; x <= maxx; x++)
 				{
@@ -479,7 +473,7 @@ public class CubicSplineData
 		// Use an extra one to have the final x=1 interpolation point.
 		final int n1 = n + 1;
 		final double step = 1.0 / n;
-		CubicSplinePosition[] s = new CubicSplinePosition[n1];
+		final CubicSplinePosition[] s = new CubicSplinePosition[n1];
 		for (int x = 0; x < n; x++)
 			s[x] = new CubicSplinePosition(x * step);
 		// Final interpolation point must be exactly 1

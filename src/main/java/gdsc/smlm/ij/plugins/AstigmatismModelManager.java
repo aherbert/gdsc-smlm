@@ -149,15 +149,15 @@ public class AstigmatismModelManager implements PlugIn
 	 */
 	public static String[] listAstigmatismModels(boolean includeNone)
 	{
-		AstigmatismModelSettings.Builder settings = getSettings();
-		List<String> list = createList(includeNone);
+		final AstigmatismModelSettings.Builder settings = getSettings();
+		final List<String> list = createList(includeNone);
 		list.addAll(settings.getAstigmatismModelResourcesMap().keySet());
 		return list.toArray(new String[list.size()]);
 	}
 
 	private static List<String> createList(boolean includeNone)
 	{
-		List<String> list = new TurboList<>();
+		final List<String> list = new TurboList<>();
 		if (includeNone)
 			list.add("[None]");
 		return list;
@@ -190,14 +190,14 @@ public class AstigmatismModelManager implements PlugIn
 	 */
 	public static String[] listAstigmatismModels(boolean includeNone, double nmPerPixel, double error)
 	{
-		AstigmatismModelSettings.Builder settings = getSettings();
-		List<String> list = createList(includeNone);
+		final AstigmatismModelSettings.Builder settings = getSettings();
+		final List<String> list = createList(includeNone);
 		error = Math.abs(error);
-		double low = nmPerPixel - error;
-		double high = nmPerPixel + error;
-		for (Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
+		final double low = nmPerPixel - error;
+		final double high = nmPerPixel + error;
+		for (final Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
 		{
-			AstigmatismModel resource = entry.getValue();
+			final AstigmatismModel resource = entry.getValue();
 			if (resource.getNmPerPixel() >= low && resource.getNmPerPixel() <= high)
 				list.add(entry.getKey());
 		}
@@ -215,11 +215,11 @@ public class AstigmatismModelManager implements PlugIn
 	 */
 	public static String[] listAstigmatismModels(boolean includeNone, boolean withNmPerPixel)
 	{
-		AstigmatismModelSettings.Builder settings = getSettings();
-		List<String> list = createList(includeNone);
-		for (Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
+		final AstigmatismModelSettings.Builder settings = getSettings();
+		final List<String> list = createList(includeNone);
+		for (final Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
 		{
-			AstigmatismModel resource = entry.getValue();
+			final AstigmatismModel resource = entry.getValue();
 			if (withNmPerPixel)
 				list.add(String.format("%s [%s nm]", entry.getKey(), Utils.rounded(resource.getNmPerPixel())));
 			else
@@ -237,7 +237,7 @@ public class AstigmatismModelManager implements PlugIn
 	 */
 	public static String removeFormatting(String name)
 	{
-		int index = name.lastIndexOf('[');
+		final int index = name.lastIndexOf('[');
 		if (index > 0)
 			name = name.substring(0, index - 1);
 		return name;
@@ -296,15 +296,13 @@ public class AstigmatismModelManager implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		String[] options = OPTIONS;
-		AstigmatismModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
+		final AstigmatismModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
 		if (settings.getAstigmatismModelResourcesCount() == 0)
-		{
 			options = OPTIONS2;
-		}
 
 		pluginSettings = SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Option", options, pluginSettings.getOption());
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -372,8 +370,8 @@ public class AstigmatismModelManager implements PlugIn
 	private boolean getImage()
 	{
 		// Select an image
-		GenericDialog gd = new GenericDialog(TITLE);
-		String[] list = getImageList();
+		final GenericDialog gd = new GenericDialog(TITLE);
+		final String[] list = getImageList();
 		if (list.length == 0)
 		{
 			IJ.error("No suitable images");
@@ -383,7 +381,7 @@ public class AstigmatismModelManager implements PlugIn
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		String image = gd.getNextChoice();
+		final String image = gd.getNextChoice();
 		pluginSettings.setImage(image);
 		imp = WindowManager.getImage(image);
 		if (imp == null)
@@ -391,7 +389,7 @@ public class AstigmatismModelManager implements PlugIn
 			IJ.error(TITLE, "Failed to find image: " + image);
 			return false;
 		}
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (roi == null || roi.getType() != Roi.POINT)
 		{
 			IJ.error("Point ROI required");
@@ -402,18 +400,18 @@ public class AstigmatismModelManager implements PlugIn
 
 	private static String[] getImageList()
 	{
-		TurboList<String> newImageList = new TurboList<>();
+		final TurboList<String> newImageList = new TurboList<>();
 
-		for (int id : Utils.getIDList())
+		for (final int id : Utils.getIDList())
 		{
-			ImagePlus imp = WindowManager.getImage(id);
+			final ImagePlus imp = WindowManager.getImage(id);
 			if (imp == null)
 				continue;
 			if (imp.getNDimensions() != 3)
 				continue;
 			if (imp.getBitDepth() == 24)
 				continue;
-			Roi roi = imp.getRoi();
+			final Roi roi = imp.getRoi();
 			if (roi == null || roi.getType() != Roi.POINT)
 				continue;
 			newImageList.add(imp.getTitle());
@@ -424,7 +422,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private boolean showFitDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		guessScale();
@@ -447,7 +445,7 @@ public class AstigmatismModelManager implements PlugIn
 		{
 			Parameters.isPositive("nm/slice", pluginSettings.getNmPerSlice());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -458,9 +456,9 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void guessScale()
 	{
-		CalibrationWriter cw = CalibrationWriter.create(pluginSettings.getCalibration());
+		final CalibrationWriter cw = CalibrationWriter.create(pluginSettings.getCalibration());
 		// It does not matter if we already have settings, try and update them anyway
-		Calibration c = imp.getCalibration();
+		final Calibration c = imp.getCalibration();
 		double r = guessScale(c.getXUnit(), c.pixelWidth);
 		if (r != 0)
 		{
@@ -525,7 +523,7 @@ public class AstigmatismModelManager implements PlugIn
 		fitConfig = config.getFitConfiguration();
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
@@ -535,7 +533,7 @@ public class AstigmatismModelManager implements PlugIn
 
 		PeakFit.addPSFOptions(gd, fitConfig);
 
-		FitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(config);
+		final FitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(config);
 		PeakFit.addFittingOptions(gd, provider);
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 		gd.addCheckbox("Log_fit_progress", pluginSettings.getLogFitProgress());
@@ -549,7 +547,7 @@ public class AstigmatismModelManager implements PlugIn
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		// Fitting may need to be extra wide
-		double w = fitConfig.getMaxWidthFactor();
+		final double w = fitConfig.getMaxWidthFactor();
 		gd.addSlider("Width_factor", 1.01, Math.max(10, w), w);
 		PeakFit.addPrecisionOptions(gd, new PeakFit.SimpleFitConfigurationProvider(fitConfig));
 
@@ -586,9 +584,7 @@ public class AstigmatismModelManager implements PlugIn
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
 			if (fitConfig.getPSF().getParametersCount() > 1)
-			{
 				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
-			}
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 
 			if (!fitConfig.isSmartFilter())
@@ -601,7 +597,7 @@ public class AstigmatismModelManager implements PlugIn
 				Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 			}
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -610,7 +606,7 @@ public class AstigmatismModelManager implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
-		int flags = PeakFit.FLAG_NO_SAVE;
+		final int flags = PeakFit.FLAG_NO_SAVE;
 		if (!PeakFit.configureSmartFilter(config, flags))
 			return false;
 		PeakFit.configureFitSolver(config, null, null, flags);
@@ -621,11 +617,11 @@ public class AstigmatismModelManager implements PlugIn
 	private boolean findFitRegion()
 	{
 		// Get the centre
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() == Roi.POINT)
 		{
-			FloatPolygon p = roi.getFloatPolygon();
-			int n = p.npoints;
+			final FloatPolygon p = roi.getFloatPolygon();
+			final int n = p.npoints;
 			if (n != 1)
 			{
 				IJ.error(TITLE, "Require a single point ROI");
@@ -641,7 +637,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private boolean fitRegion()
 	{
-		int radius = config.getFittingWidth();
+		final int radius = config.getFittingWidth();
 
 		//IJ.log(config.getFitEngineSettings().toString());
 
@@ -654,35 +650,35 @@ public class AstigmatismModelManager implements PlugIn
 		results.setPSF(fitConfig.getPSF());
 		results.setSortAfterEnd(true);
 		results.begin();
-		int threadCount = Prefs.getThreads();
-		FitEngine engine = new FitEngine(config, SynchronizedPeakResults.create(results, threadCount), threadCount,
+		final int threadCount = Prefs.getThreads();
+		final FitEngine engine = new FitEngine(config, SynchronizedPeakResults.create(results, threadCount), threadCount,
 				FitQueue.BLOCKING);
 
-		IJImageSource source = new IJImageSource(imp);
+		final IJImageSource source = new IJImageSource(imp);
 		source.open();
 
-		Rectangle r1 = new Rectangle(cx - radius, cy - radius, 2 * radius + 1, 2 * radius + 1);
-		Rectangle regionBounds = r1.intersection(new Rectangle(source.getWidth(), source.getHeight()));
+		final Rectangle r1 = new Rectangle(cx - radius, cy - radius, 2 * radius + 1, 2 * radius + 1);
+		final Rectangle regionBounds = r1.intersection(new Rectangle(source.getWidth(), source.getHeight()));
 		// Fit only a spot in the centre
-		int x = cx - regionBounds.x;
-		int y = cy - regionBounds.y;
-		int[] maxIndices = new int[] { y * regionBounds.width + x };
+		final int x = cx - regionBounds.x;
+		final int y = cy - regionBounds.y;
+		final int[] maxIndices = new int[] { y * regionBounds.width + x };
 
-		Ticker ticker = Ticker.createStarted(new IJTrackProgress(), source.getFrames(), threadCount > 1);
+		final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), source.getFrames(), threadCount > 1);
 		IJ.showStatus("Fitting ...");
 
 		boolean shutdown = false;
 		while (!shutdown)
 		{
 			// Extract the region from each frame
-			float[] region = source.next(regionBounds);
+			final float[] region = source.next(regionBounds);
 			if (region == null)
 				break;
 
-			FitParameters params = new FitParameters();
+			final FitParameters params = new FitParameters();
 			params.maxIndices = maxIndices.clone();
-			int slice = (int) ticker.getCurrent();
-			ParameterisedFitJob job = new ParameterisedFitJob(slice, params, slice, region, regionBounds);
+			final int slice = (int) ticker.getCurrent();
+			final ParameterisedFitJob job = new ParameterisedFitJob(slice, params, slice, region, regionBounds);
 			engine.run(job);
 
 			ticker.tick();
@@ -725,7 +721,7 @@ public class AstigmatismModelManager implements PlugIn
 			@Override
 			public void execute(PeakResult peak)
 			{
-				int i = counter.getAndIncrement();
+				final int i = counter.getAndIncrement();
 				z[i] = peak.getFrame() * umPerSlice;
 				x[i] = (peak.getXPosition() - cx);
 				y[i] = (peak.getYPosition() - cy);
@@ -733,12 +729,12 @@ public class AstigmatismModelManager implements PlugIn
 			}
 		});
 
-		WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+		final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
 		wp.getWxWy();
 		sx = SimpleArrayUtils.toDouble(wp.wx);
 		sy = SimpleArrayUtils.toDouble(wp.wy);
 
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 
 		plot(wo, z, "Intensity (photon)", I, "Intensity", null, null);
 		xyPlot = plot(wo, z, "Position (px)", x, "X", y, "Y");
@@ -752,13 +748,13 @@ public class AstigmatismModelManager implements PlugIn
 	private static PlotWindow plot(WindowOrganiser wo, double[] z, String yTitle, double[] y1, String y1Title, double[] y2,
 			String y2Title)
 	{
-		String title = TITLE + " " + yTitle;
-		Plot plot = new Plot(title, "Z (μm)", yTitle);
+		final String title = TITLE + " " + yTitle;
+		final Plot plot = new Plot(title, "Z (μm)", yTitle);
 		double[] limits = Maths.limits(y1);
 		if (y2 != null)
 			limits = Maths.limits(limits, y2);
-		double rangex = (z[z.length - 1] - z[0]) * 0.05;
-		double rangey = (limits[1] - limits[0]) * 0.05;
+		final double rangex = (z[z.length - 1] - z[0]) * 0.05;
+		final double rangey = (limits[1] - limits[0]) * 0.05;
 		plot.setLimits(z[0] - rangex, z[z.length - 1] + rangex, limits[0] - rangey, limits[1] + rangey);
 		plot.setColor(Color.RED);
 		plot.addPoints(z, y1, Plot.CIRCLE);
@@ -788,7 +784,7 @@ public class AstigmatismModelManager implements PlugIn
 		minz = 0;
 		maxz = z.length - 1;
 
-		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addMessage("Select z-range for curve fit.\nChoose a region with a smooth width curve and low XY drift.");
 		gd.addSlider("Min_z", minz, maxz, minz);
 		gd.addSlider("Max_z", minz, maxz, maxz);
@@ -834,8 +830,8 @@ public class AstigmatismModelManager implements PlugIn
 		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
-			int oldMinz = minz;
-			int oldMaxz = maxz;
+			final int oldMinz = minz;
+			final int oldMaxz = maxz;
 			minz = (int) gd.getNextNumber();
 			maxz = (int) gd.getNextNumber();
 			pluginSettings.setSmoothing(gd.getNextNumber());
@@ -851,12 +847,12 @@ public class AstigmatismModelManager implements PlugIn
 
 		private void addRoi(PlotWindow pw)
 		{
-			Plot plot = pw.getPlot();
-			int x1 = (int) plot.scaleXtoPxl(z[minz]);
-			int x2 = (int) plot.scaleXtoPxl(z[maxz]);
-			double[] limits = plot.getLimits();
-			int y1 = (int) plot.scaleYtoPxl(limits[3]);
-			int y2 = (int) plot.scaleYtoPxl(limits[2]);
+			final Plot plot = pw.getPlot();
+			final int x1 = (int) plot.scaleXtoPxl(z[minz]);
+			final int x2 = (int) plot.scaleXtoPxl(z[maxz]);
+			final double[] limits = plot.getLimits();
+			final int y1 = (int) plot.scaleYtoPxl(limits[3]);
+			final int y2 = (int) plot.scaleYtoPxl(limits[2]);
 			pw.getImagePlus().setRoi(new Roi(x1, y1, x2 - x1, y2 - y1));
 		}
 	}
@@ -874,11 +870,11 @@ public class AstigmatismModelManager implements PlugIn
 		double[] smoothSy = fitSy;
 		if (pluginSettings.getSmoothing() > 0)
 		{
-			LoessInterpolator loess = new LoessInterpolator(pluginSettings.getSmoothing(), 0);
+			final LoessInterpolator loess = new LoessInterpolator(pluginSettings.getSmoothing(), 0);
 			smoothSx = loess.smooth(fitZ, fitSx);
 			smoothSy = loess.smooth(fitZ, fitSy);
 
-			Plot plot = sPlot.getPlot();
+			final Plot plot = sPlot.getPlot();
 			plot.setColor(Color.RED);
 			plot.addPoints(fitZ, smoothSx, Plot.LINE);
 			plot.setColor(Color.BLUE);
@@ -887,18 +883,18 @@ public class AstigmatismModelManager implements PlugIn
 			plot.updateImage();
 		}
 
-		int focalPlaneXindex = SimpleArrayUtils.findMinIndex(smoothSx);
-		int focalPlaneYindex = SimpleArrayUtils.findMinIndex(smoothSy);
-		double s0x = smoothSx[focalPlaneXindex];
-		double s0y = smoothSy[focalPlaneYindex];
-		double focalPlaneX = fitZ[focalPlaneXindex];
-		double focalPlaneY = fitZ[focalPlaneYindex];
+		final int focalPlaneXindex = SimpleArrayUtils.findMinIndex(smoothSx);
+		final int focalPlaneYindex = SimpleArrayUtils.findMinIndex(smoothSy);
+		final double s0x = smoothSx[focalPlaneXindex];
+		final double s0y = smoothSy[focalPlaneYindex];
+		final double focalPlaneX = fitZ[focalPlaneXindex];
+		final double focalPlaneY = fitZ[focalPlaneYindex];
 		double gamma = Math.abs(focalPlaneY - focalPlaneX) / 2;
-		double z0 = (focalPlaneX + focalPlaneY) / 2;
-		double d = (estimateD(focalPlaneXindex, fitZ, smoothSx) + estimateD(focalPlaneYindex, fitZ, smoothSy)) / 2;
+		final double z0 = (focalPlaneX + focalPlaneY) / 2;
+		final double d = (estimateD(focalPlaneXindex, fitZ, smoothSx) + estimateD(focalPlaneYindex, fitZ, smoothSy)) / 2;
 
 		// Start with Ax, Bx, Ay, By as zero.
-		double Ax = 0, Bx = 0, Ay = 0, By = 0;
+		final double Ax = 0, Bx = 0, Ay = 0, By = 0;
 
 		// Equations assume that x direction is focused above (positive).
 		// If this is not the case we can invert the gamma parameter.
@@ -917,7 +913,7 @@ public class AstigmatismModelManager implements PlugIn
 		System.arraycopy(fitSx, 0, y, 0, fitSx.length);
 		System.arraycopy(fitSy, 0, y, fitSx.length, fitSy.length);
 
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
+		final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 				costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
 
 		parameters = new double[9];
@@ -939,7 +935,7 @@ public class AstigmatismModelManager implements PlugIn
 		}
 
 		//@formatter:off
-		LeastSquaresBuilder builder = new LeastSquaresBuilder()
+		final LeastSquaresBuilder builder = new LeastSquaresBuilder()
 				.maxEvaluations(Integer.MAX_VALUE)
 				.maxIterations(3000)
 				.start(parameters)
@@ -949,14 +945,14 @@ public class AstigmatismModelManager implements PlugIn
 		if (pluginSettings.getWeightedFit())
 			builder.weight(new DiagonalMatrix(getWeights(smoothSx, smoothSy)));
 
-		AstigmatismVectorFunction vf = new AstigmatismVectorFunction();
+		final AstigmatismVectorFunction vf = new AstigmatismVectorFunction();
 		builder.model(vf, new AstigmatismMatrixFunction());
 
-		LeastSquaresProblem problem = builder.build();
+		final LeastSquaresProblem problem = builder.build();
 
 		try
 		{
-			Optimum optimum = optimizer.optimize(problem);
+			final Optimum optimum = optimizer.optimize(problem);
 
 			parameters = optimum.getPoint().toArray();
 
@@ -965,7 +961,7 @@ public class AstigmatismModelManager implements PlugIn
 
 			saveResult(optimum);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.error(TITLE, "Failed to fit curve: " + e.getMessage());
 			return false;
@@ -990,7 +986,7 @@ public class AstigmatismModelManager implements PlugIn
 		// w = w0 * sqrt(1 + z^2/d^2)
 		// if z==d then w = w0 * sqrt(2)
 
-		double w = sx[min] * 1.414213562; // sqrt(2) the min width
+		final double w = sx[min] * 1.414213562; // sqrt(2) the min width
 		int lower = min;
 		while (lower > 0 && sx[lower] < w)
 			lower--;
@@ -1005,7 +1001,7 @@ public class AstigmatismModelManager implements PlugIn
 		int n = 0;
 		for (int i = 0; i < y.length; i++)
 			n += y[i].length;
-		double[] w = new double[n];
+		final double[] w = new double[n];
 		for (int i = 0, k = 0; i < y.length; i++)
 			for (int j = 0; j < y[i].length; j++)
 				w[k++] = 1.0 / y[i][j];
@@ -1051,9 +1047,9 @@ public class AstigmatismModelManager implements PlugIn
 		@Override
 		public double[] value(double[] p) throws IllegalArgumentException
 		{
-			double one_d2 = 1.0 / Maths.pow2(p[P_D]);
+			final double one_d2 = 1.0 / Maths.pow2(p[P_D]);
 
-			double[] value = new double[fitZ.length * 2];
+			final double[] value = new double[fitZ.length * 2];
 			double z, z2, z3, z4;
 
 			for (int i = 0, j = fitZ.length; i < fitZ.length; i++, j++)
@@ -1081,12 +1077,12 @@ public class AstigmatismModelManager implements PlugIn
 		@Override
 		public double[][] value(double[] p) throws IllegalArgumentException
 		{
-			double[] pu = p.clone();
-			double[] pl = p.clone();
+			final double[] pu = p.clone();
+			final double[] pl = p.clone();
 
 			// Numerical gradients
-			double delta = 1e-6;
-			double twoDelta = 2 * delta;
+			final double delta = 1e-6;
+			final double twoDelta = 2 * delta;
 
 			for (int i = 0; i < p.length; i++)
 			{
@@ -1094,11 +1090,11 @@ public class AstigmatismModelManager implements PlugIn
 				pl[i] -= delta;
 			}
 
-			double one_d2 = 1.0 / Maths.pow2(p[P_D]);
+			final double one_d2 = 1.0 / Maths.pow2(p[P_D]);
 			pu[P_D] = 1.0 / Maths.pow2(pu[P_D]);
 			pl[P_D] = 1.0 / Maths.pow2(pl[P_D]);
 
-			double[][] value = new double[fitZ.length * 2][p.length];
+			final double[][] value = new double[fitZ.length * 2][p.length];
 			double z, z2, z3, z4, v1, v2;
 
 			// X : z -> z-gamma
@@ -1189,8 +1185,8 @@ public class AstigmatismModelManager implements PlugIn
 
 	private static void record(String name, double[] parameters)
 	{
-		StringBuilder sb = new StringBuilder(name);
-		Rounder rounder = RounderFactory.create(4);
+		final StringBuilder sb = new StringBuilder(name);
+		final Rounder rounder = RounderFactory.create(4);
 		sb.append(": ").append("gamma=").append(rounder.round(parameters[P_GAMMA]));
 		sb.append("; ").append("d=").append(rounder.round(parameters[P_D]));
 		sb.append("; ").append("s0x=").append(rounder.round(parameters[P_S0X]));
@@ -1207,22 +1203,22 @@ public class AstigmatismModelManager implements PlugIn
 	{
 		//System.out.println(Arrays.toString(parameters));
 
-		double gamma = parameters[P_GAMMA];
-		double d = parameters[P_D];
-		double s0x = parameters[P_S0X];
-		double Ax = parameters[P_AX];
-		double Bx = parameters[P_BX];
-		double s0y = parameters[P_S0Y];
-		double Ay = parameters[P_AY];
-		double By = parameters[P_BY];
-		double z0 = parameters[P_Z0];
+		final double gamma = parameters[P_GAMMA];
+		final double d = parameters[P_D];
+		final double s0x = parameters[P_S0X];
+		final double Ax = parameters[P_AX];
+		final double Bx = parameters[P_BX];
+		final double s0y = parameters[P_S0Y];
+		final double Ay = parameters[P_AY];
+		final double By = parameters[P_BY];
+		final double z0 = parameters[P_Z0];
 
 		// Draw across the entire data range
-		double one_d2 = 1.0 / Maths.pow2(d);
+		final double one_d2 = 1.0 / Maths.pow2(d);
 
 		// Update plot
-		double[] sx1 = new double[z.length];
-		double[] sy1 = new double[z.length];
+		final double[] sx1 = new double[z.length];
+		final double[] sy1 = new double[z.length];
 		for (int i = 0; i < z.length; i++)
 		{
 			sx1[i] = getS(s0x, z[i] - z0 - gamma, one_d2, Ax, Bx);
@@ -1231,7 +1227,7 @@ public class AstigmatismModelManager implements PlugIn
 
 		// Just redraw the plot
 		sPlot = plot(null, z, "Width (px)", sx, "Sx", sy, "Sy");
-		Plot plot = sPlot.getPlot();
+		final Plot plot = sPlot.getPlot();
 		plot.setColor(Color.RED);
 		plot.addPoints(z, sx1, Plot.LINE);
 		plot.setColor(Color.BLUE);
@@ -1250,8 +1246,8 @@ public class AstigmatismModelManager implements PlugIn
 	private void saveResult(Optimum optimum)
 	{
 		createResultWindow();
-		StringBuilder sb = new StringBuilder();
-		Rounder rounder = RounderFactory.create(4);
+		final StringBuilder sb = new StringBuilder();
+		final Rounder rounder = RounderFactory.create(4);
 		sb.append(fitZ.length * 2);
 		sb.append('\t').append(pluginSettings.getWeightedFit());
 		sb.append('\t').append(Utils.rounded(optimum.getRMS(), 6));
@@ -1278,7 +1274,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private boolean saveModel()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Save the model");
 		gd.addCheckbox("Save_model", pluginSettings.getSaveModel());
 		gd.addStringField("Model_name", pluginSettings.getModelName());
@@ -1290,7 +1286,7 @@ public class AstigmatismModelManager implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 		pluginSettings.setSaveModel(gd.getNextBoolean());
-		String name = gd.getNextString();
+		final String name = gd.getNextString();
 		pluginSettings.setSaveFitWidth(gd.getNextBoolean());
 
 		if (pluginSettings.getSaveFitWidth())
@@ -1304,7 +1300,7 @@ public class AstigmatismModelManager implements PlugIn
 
 		if (pluginSettings.getSaveModel())
 		{
-			AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
+			final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
 			model.setGamma(parameters[P_GAMMA]);
 			model.setD(parameters[P_D]);
 			model.setS0X(parameters[P_S0X]);
@@ -1327,12 +1323,12 @@ public class AstigmatismModelManager implements PlugIn
 		pluginSettings.setModelName(name);
 
 		// Check existing names
-		AstigmatismModelSettings.Builder settings = getSettings();
-		Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
+		final AstigmatismModelSettings.Builder settings = getSettings();
+		final Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
 		if (map.containsKey(name))
 		{
 			name = suggest(map, name);
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Model name " + pluginSettings.getModelName() + " already exists.\n \nSuggest renaming to:");
 			gd.addStringField("Model_name", name);
 			gd.enableYesNoCancel("Rename", "Overwrite");
@@ -1359,7 +1355,7 @@ public class AstigmatismModelManager implements PlugIn
 		name += '_';
 		for (int i = 2; i > 0; i++)
 		{
-			String name2 = name + i;
+			final String name2 = name + i;
 			if (!map.containsKey(name2))
 				return name2;
 		}
@@ -1368,18 +1364,18 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void importModel()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addStringField("Model_name", pluginSettings.getModelName());
 		gd.addFilenameField("Filename", pluginSettings.getFilename());
 		//gd.setCancelLabel(" No ");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextString();
+		final String name = gd.getNextString();
 		pluginSettings.setModelName(name);
 		pluginSettings.setFilename(gd.getNextString());
 
-		AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
+		final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
 		if (!SettingsManager.fromJSON(new File(pluginSettings.getFilename()), model, 0))
 			return;
 
@@ -1388,19 +1384,19 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void exportModel()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		String[] MODELS = listAstigmatismModels(false);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final String[] MODELS = listAstigmatismModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.addFilenameField("Filename", pluginSettings.getFilename());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 		pluginSettings.setFilename(gd.getNextString());
 
 		// Try and get the named resource
-		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
 		if (model == null)
 		{
 			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
@@ -1418,8 +1414,8 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void viewModel()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		String[] MODELS = listAstigmatismModels(false);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final String[] MODELS = listAstigmatismModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.addChoice("z_distance_unit", SettingsManager.getDistanceUnitNames(), pluginSettings.getZDistanceUnitValue());
 		gd.addChoice("s_distance_unit", SettingsManager.getDistanceUnitNames(), pluginSettings.getSDistanceUnitValue());
@@ -1429,7 +1425,7 @@ public class AstigmatismModelManager implements PlugIn
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 		pluginSettings.setZDistanceUnitValue(gd.getNextChoiceIndex());
 		pluginSettings.setSDistanceUnitValue(gd.getNextChoiceIndex());
@@ -1449,7 +1445,7 @@ public class AstigmatismModelManager implements PlugIn
 		{
 			model = convert(model, pluginSettings.getZDistanceUnit(), pluginSettings.getSDistanceUnit());
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			Utils.log("Bad conversion (%s), defaulting to native model units", e.getMessage());
 		}
@@ -1457,40 +1453,40 @@ public class AstigmatismModelManager implements PlugIn
 		Utils.log("Astigmatism model: %s\n%s", name, model);
 
 		// Plot the curve. Do this so we encompass twice the depth-of-field.
-		double gamma = model.getGamma();
-		double d = model.getD();
-		double s0x = model.getS0X();
-		double Ax = model.getAx();
-		double Bx = model.getBx();
-		double s0y = model.getS0Y();
-		double Ay = model.getAy();
-		double By = model.getBy();
+		final double gamma = model.getGamma();
+		final double d = model.getD();
+		final double s0x = model.getS0X();
+		final double Ax = model.getAx();
+		final double Bx = model.getBx();
+		final double s0y = model.getS0Y();
+		final double Ay = model.getAy();
+		final double By = model.getBy();
 
-		double range = Math.abs(gamma) + 1.5 * d;
-		int n = 200;
-		double step = range / n;
-		double[] z = new double[2 * n + 1];
-		double[] sx = new double[z.length];
-		double[] sy = new double[z.length];
+		final double range = Math.abs(gamma) + 1.5 * d;
+		final int n = 200;
+		final double step = range / n;
+		final double[] z = new double[2 * n + 1];
+		final double[] sx = new double[z.length];
+		final double[] sy = new double[z.length];
 		// Use the same class that is used during fitting
-		HoltzerAstigmatismZModel m = HoltzerAstigmatismZModel.create(s0x, s0y, gamma, d, Ax, Bx, Ay, By);
+		final HoltzerAstigmatismZModel m = HoltzerAstigmatismZModel.create(s0x, s0y, gamma, d, Ax, Bx, Ay, By);
 		for (int i = 0; i < z.length; i++)
 		{
-			double zz = -range + i * step;
+			final double zz = -range + i * step;
 			z[i] = zz;
 			sx[i] = m.getSx(zz);
 			sy[i] = m.getSy(zz);
 		}
 
-		String title = TITLE + " Width Curve";
-		Plot plot = new Plot(title, "Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")",
+		final String title = TITLE + " Width Curve";
+		final Plot plot = new Plot(title, "Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")",
 				"Width (" + UnitHelper.getShortName(model.getSDistanceUnit()) + ")");
 		double[] limits = Maths.limits(sx);
 		limits = Maths.limits(limits, sy);
-		double rangex = (z[z.length - 1] - z[0]) * 0.05;
-		double rangey = (limits[1] - limits[0]) * 0.05;
-		double miny = limits[0] - rangey;
-		double maxy = limits[1] + rangey;
+		final double rangex = (z[z.length - 1] - z[0]) * 0.05;
+		final double rangey = (limits[1] - limits[0]) * 0.05;
+		final double miny = limits[0] - rangey;
+		final double maxy = limits[1] + rangey;
 		plot.setLimits(z[0] - rangex, z[z.length - 1] + rangex, miny, maxy);
 		plot.setColor(Color.RED);
 		plot.addPoints(z, sx, Plot.LINE);
@@ -1500,7 +1496,7 @@ public class AstigmatismModelManager implements PlugIn
 
 		if (pluginSettings.getShowDepthOfFocus())
 		{
-			double z0x = gamma, z0y = -gamma;
+			final double z0x = gamma, z0y = -gamma;
 			plot.setColor(Color.RED.darker());
 			plot.drawDottedLine(z0x - d, miny, z0x - d, maxy, 4);
 			plot.drawDottedLine(z0x + d, miny, z0x + d, maxy, 4);
@@ -1511,11 +1507,9 @@ public class AstigmatismModelManager implements PlugIn
 		String legend = "Sx\nSy";
 		if (pluginSettings.getShowCombinedWidth())
 		{
-			double[] s = new double[z.length];
+			final double[] s = new double[z.length];
 			for (int i = 0; i < z.length; i++)
-			{
 				s[i] = Gaussian2DPeakResultHelper.getStandardDeviation(sx[i], sy[i]);
-			}
 			plot.setColor(Color.GREEN);
 			plot.addPoints(z, s, Plot.LINE);
 			legend += "\tS";
@@ -1530,7 +1524,7 @@ public class AstigmatismModelManager implements PlugIn
 			return;
 
 		// Get pixel range using 3x[max SD]
-		int width = 1 + 2 * ((int) Math.ceil(limits[1] * 3));
+		final int width = 1 + 2 * ((int) Math.ceil(limits[1] * 3));
 		new ModelRenderer(name, model, m, range, width, plot).run();
 	}
 
@@ -1603,32 +1597,30 @@ public class AstigmatismModelManager implements PlugIn
 		private void draw()
 		{
 			_z = z;
-			int calibratedImage = getCalibratedImage();
-			float[] data = new float[width * width];
+			final int calibratedImage = getCalibratedImage();
+			final float[] data = new float[width * width];
 			psf.create3D(data, width, width, 1, cx, cx, _z, false);
-			ImagePlus imp = Utils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
+			final ImagePlus imp = Utils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
 			if (_calibratedImage != calibratedImage)
 			{
 				if (calibratedImage == 1)
 				{
-					Calibration cal = new Calibration();
+					final Calibration cal = new Calibration();
 					cal.setXUnit("um");
 					cal.pixelWidth = cal.pixelHeight = model.getNmPerPixel() / 1000;
 					imp.setCalibration(cal);
 				}
 				else
-				{
 					imp.setCalibration(null);
-				}
 				_calibratedImage = calibratedImage;
 			}
 			imp.resetDisplayRange();
 
 			// Show the z position using an overlay
-			double x = plot.scaleXtoPxl(_z);
-			double[] limits = plot.getLimits();
-			int y1 = (int) plot.scaleYtoPxl(limits[3]);
-			int y2 = (int) plot.scaleYtoPxl(limits[2]);
+			final double x = plot.scaleXtoPxl(_z);
+			final double[] limits = plot.getLimits();
+			final int y1 = (int) plot.scaleYtoPxl(limits[3]);
+			final int y2 = (int) plot.scaleYtoPxl(limits[2]);
 			plot.getImagePlus().setRoi(new Line(x, y1, x, y2));
 		}
 
@@ -1637,7 +1629,6 @@ public class AstigmatismModelManager implements PlugIn
 		private void update()
 		{
 			if (lock.acquire())
-			{
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
@@ -1652,10 +1643,7 @@ public class AstigmatismModelManager implements PlugIn
 									_z != z ||
 									_calibratedImage != getCalibratedImage()
 									)
-							//@formatter:on
-							{
 								draw();
-							}
 						}
 						finally
 						{
@@ -1664,7 +1652,6 @@ public class AstigmatismModelManager implements PlugIn
 						}
 					}
 				}).start();
-			}
 		}
 
 		private int getCalibratedImage()
@@ -1694,16 +1681,16 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void deleteModel()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
-		String[] MODELS = listAstigmatismModels(false);
+		final GenericDialog gd = new GenericDialog(TITLE);
+		final String[] MODELS = listAstigmatismModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 
-		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
 		if (model == null)
 		{
 			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
@@ -1718,8 +1705,8 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void invertModel()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
-		String[] MODELS = listAstigmatismModels(false);
+		final GenericDialog gd = new GenericDialog(TITLE);
+		final String[] MODELS = listAstigmatismModels(false);
 		gd.addMessage("Invert the z-orientation of a model.\n \n" + TextUtils.wrap(
 				//@formatter:off
 				 "Note that a positive gamma puts the focal plane for the X-dimension " +
@@ -1733,17 +1720,17 @@ public class AstigmatismModelManager implements PlugIn
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 
-		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
 		if (model == null)
 		{
 			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
 			return;
 		}
 
-		AstigmatismModel.Builder builder = model.toBuilder();
+		final AstigmatismModel.Builder builder = model.toBuilder();
 		// Invert the gamma
 		builder.setGamma(-model.getGamma());
 		// Invert the constants of z^3 as these have an asymmetric effect on the curve

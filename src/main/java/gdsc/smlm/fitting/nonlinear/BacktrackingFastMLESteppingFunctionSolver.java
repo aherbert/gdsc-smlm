@@ -43,7 +43,7 @@ import gdsc.smlm.function.Gradient2Function;
  */
 public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFunctionSolver
 {
-	private LineStepSearch lineSearch = new LineStepSearch();
+	private final LineStepSearch lineSearch = new LineStepSearch();
 	/** Maximum step length used in line search. */
 	private double[] maximumStepLength = null;
 	private double maximumStepSize = 0;
@@ -117,8 +117,8 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		maximumStepLength = null;
 		if (maximumStepSize > 0)
 		{
-			double[] lower = bounds.getLower();
-			double[] upper = bounds.getUpper();
+			final double[] lower = bounds.getLower();
+			final double[] upper = bounds.getUpper();
 			if (lower != null && upper != null)
 			{
 				maximumStepLength = new double[lower.length];
@@ -173,12 +173,10 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	protected void computeStep(double[] step)
 	{
 		if (tc.getIterations() > 0)
-		{
 			// After backtracking we must compute the derivatives.
 			// Note we leave it to here (and not after the line search) so it
 			// can be skipped if convergence is achieved.
 			computeGradients(aOld);
-		}
 		super.computeStep(step);
 	}
 
@@ -219,7 +217,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			double alam2 = 0.0, f2 = 0.0;
 
 			// New point
-			double[] x = new double[xOld.length];
+			final double[] x = new double[xOld.length];
 
 			final int n = xOld.length;
 
@@ -228,16 +226,12 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			{
 				double scale = 1;
 				for (int i = 0; i < n; i++)
-				{
 					if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
 						scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
-				}
 				if (scale < 1)
-				{
 					// Scale the entire search direction
 					for (int i = 0; i < n; i++)
 						searchDirection[i] *= scale;
-				}
 			}
 
 			double slope = 0.0;
@@ -245,18 +239,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			for (int i = 0; i < gradient.length; i++)
 				slope += gradient[i] * searchDirection[gradientIndices[i]];
 			if (slope <= 0.0)
-			{
-				//System.out.printf("Slope is negative: %g f=%g\n", slope, fOld);
-				//for (int i = 0; i < gradient.length; i++)
-				//{
-				//	System.out.printf("[%d:%g %s] (%g/-(%g)=%g) x %g = %g\n", i, xOld[gradientIndices[i]],
-				//			BacktrackingFastMLESteppingFunctionSolver.this.getName(gradientIndices[i]),
-				//			gradientProcedure.d1[i], gradientProcedure.d2[i],
-				//			gradientProcedure.d1[i] / -gradientProcedure.d2[i], searchDirection[gradientIndices[i]],
-				//			gradient[i] * searchDirection[gradientIndices[i]]);
-				//}
-
-				// The search direction for the NR step is the (first derivative / -second derivative).
+			 // The search direction for the NR step is the (first derivative / -second derivative).
 				// If there are sign errors in the second derivative (it should be the same sign as the
 				// first derivative) then the step will be in the 'wrong' direction.
 				// Handle this with different options:
@@ -271,35 +254,29 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 						slope = 0.0;
 						for (int i = 0; i < gradient.length; i++)
 						{
-							double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
+							final double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
 							if (slopeComponent < 0)
-							{
 								searchDirection[gradientIndices[i]] = 0;
-							}
 							else
-							{
 								slope += slopeComponent;
-							}
 						}
 						if (slope == 0)
-						{
 							return setInsignificantStep(xOld, fOld);
 							//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
-						}
 						break;
 
 					case PARTIAL_IGNORE:
 						// Progressively ignore any search direction that is in the opposite direction to
 						// the first derivative gradient. Do this in order of the magnitude of the error
-						double[] slopeComponents = new double[gradient.length];
+						final double[] slopeComponents = new double[gradient.length];
 						for (int i = 0; i < slopeComponents.length; i++)
 							slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
-						int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
+						final int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
 						Sort.sortAscending(indices, slopeComponents);
 						int j = 0;
 						while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
 						{
-							int i = indices[j];
+							final int i = indices[j];
 							// Ignore this component
 							searchDirection[gradientIndices[i]] = 0;
 							j++;
@@ -309,18 +286,14 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 								slope += slopeComponents[indices[k]];
 						}
 						if (slope == 0)
-						{
 							// All components have been removed so handle no slope
 							return setInsignificantStep(xOld, fOld);
 							//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
-						}
 						break;
 
 					default:
 						throw new IllegalStateException("Unknown line search method: " + lineSearchMethod);
 				}
-			}
-			//System.out.printf("New slope: %g f=%g  %s\n", slope, fOld, Arrays.toString(xOld));
 
 			// Compute lambda min
 			double test = 0.0;
@@ -330,7 +303,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				if (temp > test)
 					test = temp;
 			}
-			double alamin = TOLX / test;
+			final double alamin = TOLX / test;
 
 			// Always try the full step first
 			double alam = 1.0;
@@ -339,11 +312,9 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			for (;;)
 			{
 				if (alam < alamin)
-				{
 					// Convergence (insignificant step).
 					//System.out.printf("alam %g < alamin %g\n", alam, alamin);
 					return setInsignificantStep(xOld, fOld);
-				}
 
 				for (int i = 0; i < n; i++)
 					x[i] = xOld[i] + alam * searchDirection[i];
@@ -353,11 +324,9 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				f = gradientProcedure.computePseudoLogLikelihood();
 				//System.out.printf("f=%f @ %f : %s\n", f, alam, java.util.Arrays.toString(x));
 				if (f >= fOld + ALF * alam * slope)
-				{
 					// Sufficient function decrease
 					//System.out.printf("f=%f > %f\n", f, fOld + ALF * alam * slope);
 					return x;
-				}
 				else
 				{
 					// Check for bad function evaluation

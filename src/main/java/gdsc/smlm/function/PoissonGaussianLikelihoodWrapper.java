@@ -37,7 +37,7 @@ package gdsc.smlm.function;
  */
 public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 {
-	private PoissonGaussianFunction2 p;
+	private final PoissonGaussianFunction2 p;
 	final private boolean usePicard = false;
 
 	/**
@@ -77,9 +77,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 		// Compute the negative log-likelihood to be minimised
 		double ll = 0;
 		for (int i = 0; i < n; i++)
-		{
 			ll -= p.logLikelihood(data[i], f.eval(i));
-		}
 		return ll;
 	}
 

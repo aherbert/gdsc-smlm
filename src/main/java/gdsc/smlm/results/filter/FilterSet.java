@@ -36,7 +36,7 @@ public class FilterSet
 {
 	@XStreamAsAttribute
 	private String name;
-	private List<Filter> filters;
+	private final List<Filter> filters;
 
 	@XStreamOmitField
 	private Filter weakest;
@@ -88,10 +88,8 @@ public class FilterSet
 	public String getName()
 	{
 		if (name == null || name.length() == 0)
-		{
 			if (filters != null && !filters.isEmpty())
 				name = filters.get(0).getName();
-		}
 		return name;
 	}
 
@@ -136,7 +134,7 @@ public class FilterSet
 		{
 			return (FilterSet) XStreamWrapper.fromXML(xml);
 		}
-		catch (ClassCastException ex)
+		catch (final ClassCastException ex)
 		{
 			//ex.printStackTrace();
 		}
@@ -177,10 +175,8 @@ public class FilterSet
 		final double[] parameters = f1.getParameters();
 
 		// Find the weakest
-		for (Filter f : filters)
-		{
+		for (final Filter f : filters)
 			f.weakestParameters(parameters);
-		}
 
 		return f1.create(parameters);
 	}
@@ -205,13 +201,11 @@ public class FilterSet
 
 		// Check for the same type
 		final String type = filters.get(0).getType();
-		for (Filter f : filters)
-		{
+		for (final Filter f : filters)
 			// Use the != since the Strings should be immutable
 			//if (f.getType() != type)
 			if (!f.getType().equals(type))
 				return -1;
-		}
 		return 1;
 	}
 }

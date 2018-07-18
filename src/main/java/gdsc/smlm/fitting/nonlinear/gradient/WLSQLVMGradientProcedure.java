@@ -62,16 +62,12 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 		// Total noise = variance + max(di, 0) + 1
 
 		if (var != null && var.length == n)
-		{
 			// Include the variance in the weight. Assume variance is positive.
 			for (int i = 0; i < n; i++)
 				w[i] = (y[i] > 0) ? 1.0 / (var[i] + y[i] + 1.0) : 1.0 / (var[i] + 1.0);
-		}
 		else
-		{
 			for (int i = 0; i < n; i++)
 				w[i] = (y[i] > 0) ? 1.0 / (y[i] + 1.0) : 1.0;
-		}
 	}
 
 	/*
@@ -96,9 +92,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 			final double wgt = dy_da[j] * w;
 
 			for (int k = 0; k <= j; k++)
-			{
 				alpha[i++] += wgt * dy_da[k];
-			}
 			beta[j] += wgt * dy;
 		}
 	}

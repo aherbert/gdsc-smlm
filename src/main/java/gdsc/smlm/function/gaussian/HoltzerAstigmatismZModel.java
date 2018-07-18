@@ -288,7 +288,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 		{
 			return (HoltzerAstigmatismZModel) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

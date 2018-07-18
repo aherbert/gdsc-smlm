@@ -94,24 +94,24 @@ public class LSQVarianceGradientProcedureTest
 
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
-		int n = blockWidth * blockWidth;
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final int n = blockWidth * blockWidth;
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
-		String name = String.format("[%d]", nparams);
+		final String name = String.format("[%d]", nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
+			final LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
 			p.variance(paramsList.get(i));
-			double[] e = calc.variance(n, paramsList.get(i), func);
+			final double[] e = calc.variance(n, paramsList.get(i), func);
 			Assert.assertArrayEquals(name + " Observations: Not same @ " + i, e, p.variance, 0);
 		}
 	}
@@ -136,7 +136,7 @@ public class LSQVarianceGradientProcedureTest
 			long t1 = time();
 			for (int i = 0; i < 10; i++)
 			{
-				long t2 = t1;
+				final long t2 = t1;
 				t1 = time();
 				if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) // 2% difference
 					break;
@@ -170,14 +170,14 @@ public class LSQVarianceGradientProcedureTest
 		final int n = blockWidth * blockWidth;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.variance(n, paramsList.get(i), func);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
+			final LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
 			p.variance(paramsList.get(i));
 		}
 
@@ -185,35 +185,35 @@ public class LSQVarianceGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+					final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 					for (int j = loops; j-- > 0;)
 						calc.variance(n, paramsList.get(k++ % iter), func);
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
+					final LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
 					for (int j = loops; j-- > 0;)
 						p.variance(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1,
 				"GradientCalculator = %d : LSQVarianceGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
@@ -238,10 +238,10 @@ public class LSQVarianceGradientProcedureTest
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -250,13 +250,13 @@ public class LSQVarianceGradientProcedureTest
 			func = OffsetGradient1Function.wrapGradient1Function(func,
 					SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
 
-		String name = String.format("[%d]", nparams);
+		final String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
+			final LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
 			p1.variance(paramsList.get(i));
 
-			LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory.create(func);
+			final LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory.create(func);
 			p2.variance(paramsList.get(i));
 
 			// Exactly the same ...
@@ -292,18 +292,18 @@ public class LSQVarianceGradientProcedureTest
 		createFakeParams(nparams, iter, paramsList);
 
 		// Remove the timing of the function call by creating a dummy function
-		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
 				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
 				: f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
+			final LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
 			p1.variance(paramsList.get(i));
 			p1.variance(paramsList.get(i));
 
-			LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory.create(func);
+			final LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory.create(func);
 			p2.variance(paramsList.get(i));
 			p2.variance(paramsList.get(i));
 
@@ -315,35 +315,35 @@ public class LSQVarianceGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
+					final LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
 					for (int j = loops; j-- > 0;)
 						p1.variance(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory.create(func);
+					final LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory.create(func);
 					for (int j = loops; j-- > 0;)
 						p2.variance(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
@@ -352,17 +352,17 @@ public class LSQVarianceGradientProcedureTest
 	@Test
 	public void crlbIsHigherWithPrecomputed()
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
+		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
-		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		int n = func.getNumberOfGradients();
+		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final int n = func.getNumberOfGradients();
 
 		// Get a background
-		double[] b = new double[func.size()];
+		final double[] b = new double[func.size()];
 		for (int i = 0; i < b.length; i++)
 			b[i] = rdg.nextUniform(1, 2);
 
@@ -375,15 +375,15 @@ public class LSQVarianceGradientProcedureTest
 			a[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
 			a[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
 
-			LSQVarianceGradientProcedure p1 = LSQVarianceGradientProcedureFactory.create(func);
+			final LSQVarianceGradientProcedure p1 = LSQVarianceGradientProcedureFactory.create(func);
 			p1.variance(a);
 
-			LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory
+			final LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory
 					.create(OffsetGradient1Function.wrapGradient1Function(func, b));
 			p2.variance(a);
 
-			double[] crlb1 = p1.variance;
-			double[] crlb2 = p2.variance;
+			final double[] crlb1 = p1.variance;
+			final double[] crlb2 = p2.variance;
 			Assert.assertNotNull(crlb1);
 			Assert.assertNotNull(crlb2);
 			//System.out.printf("%s : %s\n", Arrays.toString(crlb1), Arrays.toString(crlb2));
@@ -397,39 +397,39 @@ public class LSQVarianceGradientProcedureTest
 	{
 		//Assume.assumeTrue(false);
 
-		double[] N_ = new double[] { 20, 50, 100, 500 };
-		double[] b2_ = new double[] { 0, 1, 2, 4 };
-		double[] s_ = new double[] { 1, 1.2, 1.5 };
-		double[] x_ = new double[] { 4.8, 5, 5.5 };
-		double a = 100;
-		int size = 10;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ERF_CIRCLE,
+		final double[] N_ = new double[] { 20, 50, 100, 500 };
+		final double[] b2_ = new double[] { 0, 1, 2, 4 };
+		final double[] s_ = new double[] { 1, 1.2, 1.5 };
+		final double[] x_ = new double[] { 4.8, 5, 5.5 };
+		final double a = 100;
+		final int size = 10;
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ERF_CIRCLE,
 				null);
-		LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(f);
-		int ix = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
-		int iy = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
-		double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		for (double N : N_)
+		final LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(f);
+		final int ix = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
+		final int iy = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
+		final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		for (final double N : N_)
 		{
 			params[Gaussian2DFunction.SIGNAL] = N;
-			for (double b2 : b2_)
+			for (final double b2 : b2_)
 			{
 				params[Gaussian2DFunction.BACKGROUND] = b2;
-				for (double s : s_)
+				for (final double s : s_)
 				{
-					double ss = s * a;
+					final double ss = s * a;
 					params[Gaussian2DFunction.X_SD] = s;
-					for (double x : x_)
+					for (final double x : x_)
 					{
 						params[Gaussian2DFunction.X_POSITION] = x;
-						for (double y : x_)
+						for (final double y : x_)
 						{
 							params[Gaussian2DFunction.Y_POSITION] = y;
 							if (p.variance(params) != LSQVarianceGradientProcedure.STATUS_OK)
 								Assert.fail("No variance");
-							double o1 = Math.sqrt(p.variance[ix]) * a;
-							double o2 = Math.sqrt(p.variance[iy]) * a;
-							double e = Gaussian2DPeakResultHelper.getPrecisionX(a, ss, N, b2, false);
+							final double o1 = Math.sqrt(p.variance[ix]) * a;
+							final double o2 = Math.sqrt(p.variance[iy]) * a;
+							final double e = Gaussian2DPeakResultHelper.getPrecisionX(a, ss, N, b2, false);
 							//System.out.printf("e = %f  :  o  =   %f   %f\n", e, o1, o2);
 							Assert.assertEquals(e, o1, e * 5e-2);
 							Assert.assertEquals(e, o2, e * 5e-2);
@@ -442,13 +442,13 @@ public class LSQVarianceGradientProcedureTest
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
-			double[] y = createFakeData(params);
+			final double[] params = new double[nparams];
+			final double[] y = createFakeData(params);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -457,19 +457,15 @@ public class LSQVarianceGradientProcedureTest
 
 	private double[] createFakeData(double[] params)
 	{
-		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
+		final int n = blockWidth * blockWidth;
+		final RandomGenerator r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] = r.nextDouble();
-		}
 
 		return y;
 	}
@@ -478,7 +474,7 @@ public class LSQVarianceGradientProcedureTest
 	{
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
+			final double[] params = new double[nparams];
 			createFakeParams(params);
 			paramsList.add(params);
 		}
@@ -486,28 +482,16 @@ public class LSQVarianceGradientProcedureTest
 
 	private void createFakeParams(double[] params)
 	{
-		RandomGenerator r = rdg.getRandomGenerator();
+		final RandomGenerator r = rdg.getRandomGenerator();
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
+		final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
-		{
-			params2List.add(copydouble(paramsList.get(i)));
-		}
+			params2List.add(paramsList.get(i).clone());
 		return params2List;
-	}
-
-	private double[] copydouble(double[] d)
-	{
-		double[] d2 = new double[d.length];
-		for (int i = 0; i < d.length; i++)
-			d2[i] = d[i];
-		return d2;
 	}
 }

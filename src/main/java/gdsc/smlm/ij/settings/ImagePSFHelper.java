@@ -54,7 +54,7 @@ public class ImagePSFHelper
 	 */
 	public static ImagePSF fromString(String string)
 	{
-		ImagePSF.Builder builder = ImagePSF.newBuilder();
+		final ImagePSF.Builder builder = ImagePSF.newBuilder();
 		if (SettingsManager.fromJSON(string, builder))
 			return builder.build();
 		return null;
@@ -100,7 +100,7 @@ public class ImagePSFHelper
 	public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm,
 			HashMap<String, String> notes)
 	{
-		ImagePSF.Builder builder = ImagePSF.newBuilder();
+		final ImagePSF.Builder builder = ImagePSF.newBuilder();
 		builder.setCentreImage(centreImage);
 		builder.setPixelSize(pixelSize);
 		builder.setPixelDepth(pixelDepth);

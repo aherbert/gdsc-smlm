@@ -59,23 +59,23 @@ public class Shape3DHelper
 	public enum Rendering implements NamedObject
 	{
 		/** Point. */
-		POINT { 
+		POINT {
 			@Override public String getName() { return "Point"; }
 			@Override public boolean is2D() { return true; }},
 		/** Square. */
-		SQUARE { 
+		SQUARE {
             @Override public String getName() { return "Square"; }
 			@Override public boolean is2D() { return true; }},
 		/** Hexagon. */
-		HEXAGON{ 
+		HEXAGON{
             @Override public String getName() { return "Hexagon"; }
 			@Override public boolean is2D() { return true; }},
 		/** Low resolution circle. */
-		LOW_RES_CIRCLE { 
+		LOW_RES_CIRCLE {
 		    @Override public String getName() { return "Low resolution circle"; }
 			@Override public boolean is2D() { return true; }},
 		/** High resolution circle. */
-		HIGH_RES_CIRCLE { 
+		HIGH_RES_CIRCLE {
             @Override public String getName() { return "High resolution circle"; }
 			@Override public boolean is2D() { return true; }},
         /** Cube. */
@@ -83,15 +83,15 @@ public class Shape3DHelper
         /** Icosahedron. */
         ICOSAHEDRON	{ @Override public String getName() { return "Icosahedron"; }},
         /** Low resolution sphere. */
-        LOW_RES_SPHERE { 
+        LOW_RES_SPHERE {
         	@Override public String getName() { return "Low Resolution Sphere"; }
         	@Override public boolean isHighResolution() { return true; }},
         /** High resolution sphere. */
-        HIGH_RES_SPHERE	{ 
+        HIGH_RES_SPHERE	{
 	        @Override public String getName() { return "High Resolution Sphere"; }
         	@Override public boolean isHighResolution() { return true; }},
         /** Super high resolution sphere. */
-        SUPER_HIGH_RES_SPHERE { 
+        SUPER_HIGH_RES_SPHERE {
             @Override public String getName() { return "Super-High Resolution Sphere"; }
     		@Override public boolean isHighResolution() { return true; }},
         ;
@@ -128,7 +128,7 @@ public class Shape3DHelper
 		 */
 		public static Rendering forNumber(int number)
 		{
-			Rendering[] values = Rendering.values();
+			final Rendering[] values = Rendering.values();
 			if (number < 0 || number >= values.length)
 				throw new IllegalArgumentException();
 			return values[number];
@@ -149,11 +149,11 @@ public class Shape3DHelper
 	 */
 	public static Shape3D createShape(Rendering rendering, int colorDepth)
 	{
-		TurboList<Point3f> points = new TurboList<>(1);
+		final TurboList<Point3f> points = new TurboList<>(1);
 		points.addf(new Point3f());
 
 		GeometryArray ga;
-		Appearance appearance = new Appearance();
+		final Appearance appearance = new Appearance();
 
 		int vertexFormat = GeometryArray.COORDINATES;
 		if (colorDepth == 3)
@@ -166,7 +166,7 @@ public class Shape3DHelper
 		{
 			ga = new PointArray(1, vertexFormat);
 
-			PointAttributes pa = new PointAttributes();
+			final PointAttributes pa = new PointAttributes();
 			pa.setPointAntialiasingEnable(true);
 			appearance.setPointAttributes(pa);
 		}
@@ -185,7 +185,7 @@ public class Shape3DHelper
 			//					break;
 			//			}
 
-			PolygonAttributes pa = new PolygonAttributes();
+			final PolygonAttributes pa = new PolygonAttributes();
 			pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
 			if (rendering.is2D())
 			{
@@ -210,7 +210,7 @@ public class Shape3DHelper
 			ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
 			appearance.setColoringAttributes(ca);
 
-			Material m = new Material();
+			final Material m = new Material();
 			m.setShininess(128f);
 			m.setAmbientColor(0.1f, 0.1f, 0.1f);
 			if (rendering.isHighResolution())
@@ -236,8 +236,8 @@ public class Shape3DHelper
 	 */
 	public static Vector3f[] getNormals(Point3f[] vertices, double creaseAngle)
 	{
-		int nVertices = vertices.length;
-		Vector3f[] normals = new Vector3f[nVertices];
+		final int nVertices = vertices.length;
+		final Vector3f[] normals = new Vector3f[nVertices];
 
 		final GeometryArray ta = new TriangleArray(nVertices, GeometryArray.COORDINATES);
 		ta.setCoordinates(0, vertices);
@@ -246,12 +246,10 @@ public class Shape3DHelper
 		if (creaseAngle >= 0 && creaseAngle <= 180)
 			ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
 		ng.generateNormals(gi);
-		Vector3f[] n = gi.getNormals();
-		int[] indices = gi.getNormalIndices();
+		final Vector3f[] n = gi.getNormals();
+		final int[] indices = gi.getNormalIndices();
 		for (int i = 0; i < nVertices; i++)
-		{
 			normals[i] = n[indices[i]];
-		}
 
 		return normals;
 	}
@@ -267,7 +265,7 @@ public class Shape3DHelper
 	 */
 	public static Pair<Vector3f[], int[]> getIndexedNormals(Point3f[] vertices, double creaseAngle)
 	{
-		int nVertices = vertices.length;
+		final int nVertices = vertices.length;
 		final GeometryArray ta = new TriangleArray(nVertices, GeometryArray.COORDINATES);
 		ta.setCoordinates(0, vertices);
 		final GeometryInfo gi = new GeometryInfo(ta);
@@ -511,14 +509,10 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise)
 	{
-		List<Point3f> ps = new TurboList<>();
+		final List<Point3f> ps = new TurboList<>();
 		for (int i = 0; i < faces.length; i++)
-		{
 			for (int k = 0; k < 3; k++)
-			{
 				ps.add(new Point3f(vertices[faces[i][k]]));
-			}
-		}
 		// Project all vertices to the surface of a sphere of radius 1
 		if (normalise)
 			normalise(ps);
@@ -596,11 +590,9 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise)
 	{
-		List<Point3f> ps = new TurboList<>();
+		final List<Point3f> ps = new TurboList<>();
 		for (int i = 0; i < vertices.length; i++)
-		{
 			ps.add(new Point3f(vertices[i]));
-		}
 		// Make continuous
 		ps.add(new Point3f(vertices[0]));
 		if (normalise)
@@ -717,7 +709,7 @@ public class Shape3DHelper
 		by *= bScale;
 		bz *= bScale;
 
-		TurboList<Point3f> list = new TurboList<>();
+		final TurboList<Point3f> list = new TurboList<>();
 		if (includeCenter)
 			list.add(new Point3f((float) x, (float) y, (float) z));
 		for (int i = edgePoints + 1; i-- > 0;)
@@ -729,9 +721,9 @@ public class Shape3DHelper
 			final double angle = Math.PI / 2 + (i * 2 * Math.PI) / edgePoints;
 			final double c = Math.cos(angle);
 			final double s = Math.sin(angle);
-			float px = (float) (x + radius * c * ax + radius * s * bx);
-			float py = (float) (y + radius * c * ay + radius * s * by);
-			float pz = (float) (z + radius * c * az + radius * s * bz);
+			final float px = (float) (x + radius * c * ax + radius * s * bx);
+			final float py = (float) (y + radius * c * ay + radius * s * by);
+			final float pz = (float) (z + radius * c * az + radius * s * bz);
 			list.add(new Point3f(px, py, pz));
 		}
 		return list;
@@ -748,9 +740,9 @@ public class Shape3DHelper
 	 */
 	public static GeometryArray createGeometryArray(Rendering rendering, int colorDepth)
 	{
-		GeometryInfo gi = createGeometryInfo(rendering, colorDepth);
-		boolean useCoordIndexOnly = gi.getUseCoordIndexOnly();
-		GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray()
+		final GeometryInfo gi = createGeometryInfo(rendering, colorDepth);
+		final boolean useCoordIndexOnly = gi.getUseCoordIndexOnly();
+		final GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray()
 				: gi.getIndexedGeometryArray(false, false, false, useCoordIndexOnly, false);
 
 		//int v = ga.getValidVertexCount();
@@ -778,7 +770,7 @@ public class Shape3DHelper
 		List<Point3f> coords;
 		int primitive = GeometryInfo.TRIANGLE_ARRAY;
 		int[] stripsCounts = null;
-		Vector3f normal = new Vector3f();
+		final Vector3f normal = new Vector3f();
 		boolean normalise = false;
 		switch (rendering)
 		{
@@ -808,14 +800,12 @@ public class Shape3DHelper
 			case CUBE:
 				primitive = GeometryInfo.QUAD_ARRAY;
 				coords = new TurboList<>();
-				Point3f[] vertices = new Point3f[8];
+				final Point3f[] vertices = new Point3f[8];
 				for (int i = 0; i < 8; i++)
 					vertices[i] = new Point3f(cubeVertices[i][0], cubeVertices[i][1], cubeVertices[i][2]);
-				for (int[] face : cubeFaces4)
-				{
+				for (final int[] face : cubeFaces4)
 					for (int i = 0; i < 4; i++)
 						coords.add(vertices[face[i]]);
-				}
 				normalise = true;
 				break;
 
@@ -854,7 +844,7 @@ public class Shape3DHelper
 
 			// Normals generated with the normal generator add extra normals for indexed arrays
 			// so we do it manually
-			Vector3f[] normals = new Vector3f[coords.size()];
+			final Vector3f[] normals = new Vector3f[coords.size()];
 			Arrays.fill(normals, normal);
 			gi.setNormals(normals);
 		}
@@ -863,14 +853,14 @@ public class Shape3DHelper
 			// Generate indexes manually.
 			// The GeometryInfo somehow does not do this correctly for all rendering modes.
 			// E.g. the icosahedron gets extra indexes to normals that are 0,0,0.
-			Pair<Point3f[], int[]> p = createIndexedObject(coords);
+			final Pair<Point3f[], int[]> p = createIndexedObject(coords);
 
-			Point3f[] iCoords = p.a;
+			final Point3f[] iCoords = p.a;
 			gi.setCoordinates(iCoords);
 			gi.setCoordinateIndices(p.b);
 
 			// Normals are just the vector from 0,0,0 to the vertex
-			Vector3f[] normals = new Vector3f[iCoords.length];
+			final Vector3f[] normals = new Vector3f[iCoords.length];
 			for (int i = 0; i < normals.length; i++)
 			{
 				normal.set(iCoords[i]);
@@ -882,13 +872,11 @@ public class Shape3DHelper
 			//gi.setNormalIndices(p.b);
 
 			if (colorDepth == 3 || colorDepth == 4)
-			{
 				if (colorDepth == 3)
 					gi.setColors3(new float[iCoords.length * 3]);
 				else if (colorDepth == 4)
 					gi.setColors4(new float[iCoords.length * 4]);
 				//gi.setColorIndices(p.b);
-			}
 
 			//			final NormalGenerator ng = new NormalGenerator();
 			//			double creaseAngle = (rendering.isHighResolution()) ? Math.PI : 0;
@@ -912,13 +900,13 @@ public class Shape3DHelper
 	{
 		// Compact the vertices to a set of vertices and faces
 		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
-		TurboList<Point3f> vertices = new TurboList<>(list.size());
-		TIntArrayList faces = new TIntArrayList(list.size());
+		final TurboList<Point3f> vertices = new TurboList<>(list.size());
+		final TIntArrayList faces = new TIntArrayList(list.size());
 		int index = 0;
 		// Process triangles
 		for (int i = 0; i < list.size(); i++)
 		{
-			Point3f p = list.get(i);
+			final Point3f p = list.get(i);
 			int value = m.putIfAbsent(p, index);
 			if (value == -1)
 			{
@@ -941,7 +929,7 @@ public class Shape3DHelper
 	 */
 	public static int getNumberOfTriangles(GeometryArray ga)
 	{
-		GeometryInfo gi = new GeometryInfo(ga);
+		final GeometryInfo gi = new GeometryInfo(ga);
 		gi.convertToIndexedTriangles();
 		return gi.getCoordinateIndices().length / 3;
 	}
@@ -957,10 +945,10 @@ public class Shape3DHelper
 	{
 		if (rendering == Rendering.POINT)
 			return 0;
-		int index = rendering.ordinal();
+		final int index = rendering.ordinal();
 		if (numberOfTriangles[index] == 0)
 		{
-			GeometryInfo gi = createGeometryInfo(rendering, 0);
+			final GeometryInfo gi = createGeometryInfo(rendering, 0);
 			// Remove so the conversion is faster
 			gi.setColors((Color3f[]) null);
 			gi.setColorIndices(null);

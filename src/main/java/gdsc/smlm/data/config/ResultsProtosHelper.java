@@ -37,7 +37,7 @@ public class ResultsProtosHelper
 	public static final ResultsSettings defaultResultsSettings;
 	static
 	{
-		ResultsSettings.Builder builder = ResultsSettings.newBuilder();
+		final ResultsSettings.Builder builder = ResultsSettings.newBuilder();
 		builder.getResultsImageSettingsBuilder().setWeighted(true);
 		builder.getResultsImageSettingsBuilder().setEqualised(true);
 		builder.getResultsImageSettingsBuilder().setAveragePrecision(30);

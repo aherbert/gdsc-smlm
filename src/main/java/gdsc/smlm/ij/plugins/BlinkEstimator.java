@@ -116,7 +116,7 @@ public class BlinkEstimator implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -128,18 +128,14 @@ public class BlinkEstimator implements PlugIn
 
 		showPlots = true;
 		if (rangeFittedPoints > 0)
-		{
 			computeFitCurves(results, true);
-		}
 		else
-		{
 			computeBlinkingRate(results, true);
-		}
 	}
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(
@@ -180,7 +176,7 @@ public class BlinkEstimator implements PlugIn
 			Parameters.isAbove("n-Fitted points", nFittedPoints, 3);
 			Parameters.isPositive("Range of fitted points", rangeFittedPoints);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -199,19 +195,17 @@ public class BlinkEstimator implements PlugIn
 		td = shift(td);
 
 		// Fit curve
-		double[] nPoints = new double[rangeFittedPoints + 1];
-		double[][] parameters = new double[3][nPoints.length];
-		double[] r2 = new double[rangeFittedPoints + 1];
-		double[] adjustedR2 = new double[rangeFittedPoints + 1];
+		final double[] nPoints = new double[rangeFittedPoints + 1];
+		final double[][] parameters = new double[3][nPoints.length];
+		final double[] r2 = new double[rangeFittedPoints + 1];
+		final double[] adjustedR2 = new double[rangeFittedPoints + 1];
 		for (int n = 0; n <= rangeFittedPoints; n++)
 		{
 			nPoints[n] = n + nFittedPoints;
-			double[] p = fit(td, Ntd, (int) nPoints[n], false);
+			final double[] p = fit(td, Ntd, (int) nPoints[n], false);
 			if (p == null)
-			{
 				// Leave as empty in the output plots
 				continue;
-			}
 			for (int i = 0; i < p.length; i++)
 				parameters[i][n] = p[i];
 			r2[n] = this.r2;
@@ -236,15 +230,15 @@ public class BlinkEstimator implements PlugIn
 	{
 		if (fitIntercept)
 			return d;
-		double[] d2 = new double[d.length - 1];
+		final double[] d2 = new double[d.length - 1];
 		System.arraycopy(d, 1, d2, 0, d2.length);
 		return d2;
 	}
 
 	private static void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y)
 	{
-		String title = TITLE + " " + yAxisTitle;
-		Plot2 plot = new Plot2(title, xAxisTitle, yAxisTitle, x, y);
+		final String title = TITLE + " " + yAxisTitle;
+		final Plot2 plot = new Plot2(title, xAxisTitle, yAxisTitle, x, y);
 		Utils.display(title, plot);
 	}
 
@@ -280,16 +274,16 @@ public class BlinkEstimator implements PlugIn
 		// Display
 		if (showPlots)
 		{
-			String title = TITLE + " Molecule Counts";
-			Plot2 plot = new Plot2(title, "td (ms)", "Count", td, Ntd);
+			final String title = TITLE + " Molecule Counts";
+			final Plot2 plot = new Plot2(title, "td (ms)", "Count", td, Ntd);
 			Utils.display(title, plot);
 
 			plot.setColor(Color.red);
 			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot.CIRCLE);
 
 			// Add the rest that is not fitted
-			double[] xOther = new double[td.length - blinkingModel.size()];
-			double[] yOther = new double[xOther.length];
+			final double[] xOther = new double[td.length - blinkingModel.size()];
+			final double[] yOther = new double[xOther.length];
 			for (int i = 0, t = blinkingModel.size(); i < xOther.length; i++, t++)
 			{
 				xOther[i] = td[t];
@@ -315,7 +309,7 @@ public class BlinkEstimator implements PlugIn
 		}
 
 		// Blinking rate is 1 + nBlinks
-		double blinkingRate = 1 + parameters[1];
+		final double blinkingRate = 1 + parameters[1];
 		if (verbose)
 			Utils.log("  Blinking rate = %s", Utils.rounded(blinkingRate, 4));
 		return blinkingRate;
@@ -359,7 +353,7 @@ public class BlinkEstimator implements PlugIn
 		double distanceThreshold;
 		if (relativeDistance)
 		{
-			double averagePrecision = calculateAveragePrecision(results, verbose);
+			final double averagePrecision = calculateAveragePrecision(results, verbose);
 			distanceThreshold = averagePrecision * searchDistance / results.getNmPerPixel();
 			if (verbose)
 				Utils.log("Average precision = %f, Distance threshold = %f px", averagePrecision, distanceThreshold);
@@ -370,9 +364,9 @@ public class BlinkEstimator implements PlugIn
 			Utils.log("Distance threshold = %f px", distanceThreshold);
 		}
 
-		double[] Ntd = new double[maxDarkTime + 1];
+		final double[] Ntd = new double[maxDarkTime + 1];
 
-		TraceManager tm = new TraceManager(results);
+		final TraceManager tm = new TraceManager(results);
 		IJ.showStatus("Computing counts ...");
 		for (int td = 0; td <= maxDarkTime; td++)
 		{
@@ -403,21 +397,15 @@ public class BlinkEstimator implements PlugIn
 	 */
 	public double[] calculateTd(double[] Ntd)
 	{
-		double[] td = new double[Ntd.length];
+		final double[] td = new double[Ntd.length];
 		for (int t = 0; t < td.length; t++)
-		{
 			if (timeAtLowerBound)
-			{
 				// Using the lower bounds of the dark time allows the blink estimator to predict the sampled blinks
 				// statistic produced by the Create Data plugin.
 				td[t] = t * msPerFrame;
-			}
 			else
-			{
 				// Adjust for the number of frames that the molecule is allowed to be in a dark state
 				td[t] = (t + 1) * msPerFrame;
-			}
-		}
 		return td;
 	}
 
@@ -427,13 +415,13 @@ public class BlinkEstimator implements PlugIn
 
 		try
 		{
-			PCPALMMolecules fitter = new PCPALMMolecules();
-			ArrayList<Molecule> molecules = fitter.extractLocalisations(results);
-			String title = (verbose) ? TITLE + " Localisation Precision" : null;
+			final PCPALMMolecules fitter = new PCPALMMolecules();
+			final ArrayList<Molecule> molecules = fitter.extractLocalisations(results);
+			final String title = (verbose) ? TITLE + " Localisation Precision" : null;
 
 			fittedAverage = fitter.calculateAveragePrecision(molecules, title, histogramBins, true, true);
 		}
-		catch (DataException e)
+		catch (final DataException e)
 		{
 			// This is thrown when the data cannot be converted for precision computation
 		}
@@ -441,7 +429,7 @@ public class BlinkEstimator implements PlugIn
 		// Sense check the precision
 		if (fittedAverage < 5 || fittedAverage > 60)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			final GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Estimated precision is not within expected bounds.\nPlease enter an estimate:");
 			gd.addSlider("Precision", 5, 60, fittedAverage);
 			gd.showDialog();
@@ -480,19 +468,19 @@ public class BlinkEstimator implements PlugIn
 
 		// Different convergence thresholds seem to have no effect on the resulting fit, only the number of
 		// iterations for convergence
-		double initialStepBoundFactor = 100;
-		double costRelativeTolerance = 1e-6;
-		double parRelativeTolerance = 1e-6;
-		double orthoTolerance = 1e-6;
-		double threshold = Precision.SAFE_MIN;
-		LevenbergMarquardtOptimizer optimiser = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
+		final double initialStepBoundFactor = 100;
+		final double costRelativeTolerance = 1e-6;
+		final double parRelativeTolerance = 1e-6;
+		final double orthoTolerance = 1e-6;
+		final double threshold = Precision.SAFE_MIN;
+		final LevenbergMarquardtOptimizer optimiser = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 				costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
 		try
 		{
-			double[] obs = blinkingModel.getY();
+			final double[] obs = blinkingModel.getY();
 
 			//@formatter:off
-			LeastSquaresProblem problem = new LeastSquaresBuilder()
+			final LeastSquaresProblem problem = new LeastSquaresBuilder()
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(1000)
 					.start(new double[] { ntd[0], 0.1, td[1] })
@@ -510,21 +498,19 @@ public class BlinkEstimator implements PlugIn
 
 			blinkingModel.setLogging(false);
 
-			Optimum optimum = optimiser.optimize(problem);
+			final Optimum optimum = optimiser.optimize(problem);
 
-			double[] parameters = optimum.getPoint().toArray();
+			final double[] parameters = optimum.getPoint().toArray();
 
 			//double[] exp = blinkingModel.value(parameters);
 			double mean = 0;
-			for (double d : obs)
+			for (final double d : obs)
 				mean += d;
 			mean /= obs.length;
 			double ssResiduals = 0, ssTotal = 0;
 			for (int i = 0; i < obs.length; i++)
-			{
 				//ssResiduals += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 				ssTotal += (obs[i] - mean) * (obs[i] - mean);
-			}
 			// This is true if the weights are 1
 			ssResiduals = optimum.getResiduals().dotProduct(optimum.getResiduals());
 
@@ -542,13 +528,13 @@ public class BlinkEstimator implements PlugIn
 
 			return parameters;
 		}
-		catch (TooManyIterationsException e)
+		catch (final TooManyIterationsException e)
 		{
 			if (log)
 				Utils.log("  Failed to fit %d points: Too many iterations: (%s)", blinkingModel.size(), e.getMessage());
 			return null;
 		}
-		catch (ConvergenceException e)
+		catch (final ConvergenceException e)
 		{
 			if (log)
 				Utils.log("  Failed to fit %d points", blinkingModel.size());
@@ -686,11 +672,11 @@ public class BlinkEstimator implements PlugIn
 			final double N = variables[0];
 			final double nBlink = variables[1];
 			final double tOff = variables[2];
-			double[][] jacobian = new double[x.size()][variables.length];
+			final double[][] jacobian = new double[x.size()][variables.length];
 
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double td = this.x.get(i);
+				final double td = this.x.get(i);
 
 				final double a = (1 - td) / tOff;
 				final double b = FastMath.exp(a);
@@ -728,19 +714,19 @@ public class BlinkEstimator implements PlugIn
 			final double N = variables[0];
 			final double nBlink = variables[1];
 			final double tOff = variables[2];
-			double[][] jacobian = new double[x.size()][variables.length];
+			final double[][] jacobian = new double[x.size()][variables.length];
 
 			final double delta = 0.001;
-			double[][] d = new double[variables.length][variables.length];
+			final double[][] d = new double[variables.length][variables.length];
 			for (int i = 0; i < variables.length; i++)
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
-				double value = evaluate(r, N, nBlink, tOff);
+				final double r = this.x.get(i);
+				final double value = evaluate(r, N, nBlink, tOff);
 				for (int j = 0; j < variables.length; j++)
 				{
-					double value2 = evaluate(r, N + d[0][j], nBlink + d[1][j], tOff + d[2][j]);
+					final double value2 = evaluate(r, N + d[0][j], nBlink + d[1][j], tOff + d[2][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
 			}
@@ -788,11 +774,9 @@ public class BlinkEstimator implements PlugIn
 		public double[] value(double[] variables)
 		{
 			increment();
-			double[] values = new double[x.size()];
+			final double[] values = new double[x.size()];
 			for (int i = 0; i < values.length; i++)
-			{
 				values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2]);
-			}
 			return values;
 		}
 

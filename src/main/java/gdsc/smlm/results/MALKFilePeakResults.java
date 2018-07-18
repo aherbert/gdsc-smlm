@@ -96,7 +96,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		{
 			out = new OutputStreamWriter(fos, "UTF-8");
 		}
-		catch (UnsupportedEncodingException e)
+		catch (final UnsupportedEncodingException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -109,7 +109,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		{
 			out.write(data);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			closeOutput();
 		}
@@ -126,7 +126,7 @@ public class MALKFilePeakResults extends FilePeakResults
 			// Make sure we close the writer since it may be buffered
 			out.close();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore exception
 		}
@@ -143,7 +143,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		if (hasCalibration())
 		{
 			// Copy it so it can be modified
-			CalibrationWriter cw = new CalibrationWriter(getCalibration());
+			final CalibrationWriter cw = new CalibrationWriter(getCalibration());
 
 			// Create converters
 			try
@@ -151,7 +151,7 @@ public class MALKFilePeakResults extends FilePeakResults
 				toNMConverter = cw.getDistanceConverter(DistanceUnit.NM);
 				cw.setDistanceUnit(DistanceUnit.NM);
 			}
-			catch (ConversionException e)
+			catch (final ConversionException e)
 			{
 				// Gracefully fail so ignore this
 			}
@@ -160,7 +160,7 @@ public class MALKFilePeakResults extends FilePeakResults
 				toPhotonConverter = cw.getIntensityConverter(IntensityUnit.PHOTON);
 				cw.setIntensityUnit(IntensityUnit.PHOTON);
 			}
-			catch (ConversionException e)
+			catch (final ConversionException e)
 			{
 				// Gracefully fail so ignore this
 			}
@@ -189,24 +189,18 @@ public class MALKFilePeakResults extends FilePeakResults
 	@Override
 	protected String[] getHeaderComments()
 	{
-		String[] comments = new String[3];
+		final String[] comments = new String[3];
 		int count = 0;
 		if (hasCalibration())
 		{
-			CalibrationReader cr = getCalibrationReader();
+			final CalibrationReader cr = getCalibrationReader();
 			if (cr.hasNmPerPixel())
-			{
 				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(cr.getNmPerPixel()));
-			}
 			if (cr.hasCountPerPhoton())
-			{
 				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(cr.getCountPerPhoton()));
-			}
 			if (cr.hasExposureTime())
-			{
 				comments[count++] = String.format("Exposure time %s (seconds)",
 						Utils.rounded(cr.getExposureTime() * 1e-3));
-			}
 		}
 		return Arrays.copyOf(comments, count);
 	}
@@ -219,16 +213,14 @@ public class MALKFilePeakResults extends FilePeakResults
 	@Override
 	protected String[] getFieldNames()
 	{
-		String[] names = new String[] { "X", "Y", "Frame", "Signal" };
+		final String[] names = new String[] { "X", "Y", "Frame", "Signal" };
 		if (toNMConverter != null)
 		{
 			names[0] += " (nm)";
 			names[1] += " (nm)";
 		}
 		if (toPhotonConverter != null)
-		{
 			names[3] += " (photon)";
-		}
 		return names;
 	}
 
@@ -244,7 +236,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		if (fos == null)
 			return;
 
-		StringBuilder sb = new StringBuilder(100);
+		final StringBuilder sb = new StringBuilder(100);
 
 		addStandardData(sb, params[PeakResult.X], params[PeakResult.Y], peak, params[PeakResult.INTENSITY]);
 
@@ -274,7 +266,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		if (fos == null)
 			return;
 
-		StringBuilder sb = new StringBuilder(100);
+		final StringBuilder sb = new StringBuilder(100);
 
 		addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getIntensity());
 
@@ -294,8 +286,8 @@ public class MALKFilePeakResults extends FilePeakResults
 
 		int count = 0;
 
-		StringBuilder sb = new StringBuilder(2000);
-		for (PeakResult result : results)
+		final StringBuilder sb = new StringBuilder(2000);
+		for (final PeakResult result : results)
 		{
 			// Add the standard data
 			addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getIntensity());
@@ -334,13 +326,12 @@ public class MALKFilePeakResults extends FilePeakResults
 	{
 		try (BufferedReader input = new BufferedReader(new FileReader(filename)))
 		{
-			TurboList<Result> results = new TurboList<>(size);
-			StringBuilder header = new StringBuilder();
+			final TurboList<Result> results = new TurboList<>(size);
+			final StringBuilder header = new StringBuilder();
 
 			String line;
 			// Skip the header
 			while ((line = input.readLine()) != null)
-			{
 				if (line.charAt(0) != '#')
 				{
 					// This is the first record
@@ -349,13 +340,10 @@ public class MALKFilePeakResults extends FilePeakResults
 				}
 				else
 					header.append(line).append("\n");
-			}
 
 			while ((line = input.readLine()) != null)
-			{
 				results.add(new Result(line));
-			}
-			
+
 			input.close();
 
 			Collections.sort(results);
@@ -393,11 +381,11 @@ public class MALKFilePeakResults extends FilePeakResults
 				slice = scanner.nextInt();
 				scanner.close();
 			}
-			catch (InputMismatchException e)
+			catch (final InputMismatchException e)
 			{
 				// Ignore
 			}
-			catch (NoSuchElementException e)
+			catch (final NoSuchElementException e)
 			{
 				// Ignore
 			}

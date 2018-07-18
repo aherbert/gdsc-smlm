@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "javadoc"})
+@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method"})
 public final class TemplateProtos {
   private TemplateProtos() {}
   public static void registerAllExtensions(
@@ -187,19 +187,18 @@ public final class TemplateProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+              final java.lang.String s = input.readStringRequireUtf8();
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
                 notes_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000001;
@@ -209,9 +208,8 @@ public final class TemplateProtos {
             }
             case 18: {
               gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder subBuilder = null;
-              if (calibration_ != null) {
-                subBuilder = calibration_.toBuilder();
-              }
+              if (calibration_ != null)
+				subBuilder = calibration_.toBuilder();
               calibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationProtos.Calibration.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(calibration_);
@@ -222,9 +220,8 @@ public final class TemplateProtos {
             }
             case 26: {
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder subBuilder = null;
-              if (fitEngineSettings_ != null) {
-                subBuilder = fitEngineSettings_.toBuilder();
-              }
+              if (fitEngineSettings_ != null)
+				subBuilder = fitEngineSettings_.toBuilder();
               fitEngineSettings_ = input.readMessage(gdsc.smlm.data.config.FitProtos.FitEngineSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitEngineSettings_);
@@ -235,9 +232,8 @@ public final class TemplateProtos {
             }
             case 34: {
               gdsc.smlm.data.config.ResultsProtos.ResultsSettings.Builder subBuilder = null;
-              if (resultsSettings_ != null) {
-                subBuilder = resultsSettings_.toBuilder();
-              }
+              if (resultsSettings_ != null)
+				subBuilder = resultsSettings_.toBuilder();
               resultsSettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsSettings_);
@@ -248,9 +244,8 @@ public final class TemplateProtos {
             }
             case 42: {
               gdsc.smlm.data.config.PSFProtos.PSF.Builder subBuilder = null;
-              if (psf_ != null) {
-                subBuilder = psf_.toBuilder();
-              }
+              if (psf_ != null)
+				subBuilder = psf_.toBuilder();
               psf_ = input.readMessage(gdsc.smlm.data.config.PSFProtos.PSF.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(psf_);
@@ -261,15 +256,14 @@ public final class TemplateProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          notes_ = notes_.getUnmodifiableView();
-        }
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001))
+			notes_ = notes_.getUnmodifiableView();
         makeExtensionsImmutable();
       }
     }
@@ -483,7 +477,7 @@ public final class TemplateProtos {
     private byte memoizedIsInitialized = -1;
     @Override
 	public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -494,21 +488,16 @@ public final class TemplateProtos {
     @Override
 	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < notes_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, notes_.getRaw(i));
-      }
-      if (calibration_ != null) {
-        output.writeMessage(2, getCalibration());
-      }
-      if (fitEngineSettings_ != null) {
-        output.writeMessage(3, getFitEngineSettings());
-      }
-      if (resultsSettings_ != null) {
-        output.writeMessage(4, getResultsSettings());
-      }
-      if (psf_ != null) {
-        output.writeMessage(5, getPsf());
-      }
+      for (int i = 0; i < notes_.size(); i++)
+		com.google.protobuf.GeneratedMessageV3.writeString(output, 1, notes_.getRaw(i));
+      if (calibration_ != null)
+		output.writeMessage(2, getCalibration());
+      if (fitEngineSettings_ != null)
+		output.writeMessage(3, getFitEngineSettings());
+      if (resultsSettings_ != null)
+		output.writeMessage(4, getResultsSettings());
+      if (psf_ != null)
+		output.writeMessage(5, getPsf());
     }
 
     @Override
@@ -519,28 +508,23 @@ public final class TemplateProtos {
       size = 0;
       {
         int dataSize = 0;
-        for (int i = 0; i < notes_.size(); i++) {
-          dataSize += computeStringSizeNoTag(notes_.getRaw(i));
-        }
+        for (int i = 0; i < notes_.size(); i++)
+			dataSize += computeStringSizeNoTag(notes_.getRaw(i));
         size += dataSize;
         size += 1 * getNotesList().size();
       }
-      if (calibration_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (calibration_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getCalibration());
-      }
-      if (fitEngineSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (fitEngineSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getFitEngineSettings());
-      }
-      if (resultsSettings_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (resultsSettings_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getResultsSettings());
-      }
-      if (psf_ != null) {
-        size += com.google.protobuf.CodedOutputStream
+      if (psf_ != null)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getPsf());
-      }
       memoizedSize = size;
       return size;
     }
@@ -548,45 +532,38 @@ public final class TemplateProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TemplateProtos.TemplateSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TemplateProtos.TemplateSettings other = (gdsc.smlm.data.config.TemplateProtos.TemplateSettings) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof gdsc.smlm.data.config.TemplateProtos.TemplateSettings))
+		return super.equals(obj);
+      final gdsc.smlm.data.config.TemplateProtos.TemplateSettings other = (gdsc.smlm.data.config.TemplateProtos.TemplateSettings) obj;
 
       boolean result = true;
       result = result && getNotesList()
           .equals(other.getNotesList());
       result = result && (hasCalibration() == other.hasCalibration());
-      if (hasCalibration()) {
-        result = result && getCalibration()
+      if (hasCalibration())
+		result = result && getCalibration()
             .equals(other.getCalibration());
-      }
       result = result && (hasFitEngineSettings() == other.hasFitEngineSettings());
-      if (hasFitEngineSettings()) {
-        result = result && getFitEngineSettings()
+      if (hasFitEngineSettings())
+		result = result && getFitEngineSettings()
             .equals(other.getFitEngineSettings());
-      }
       result = result && (hasResultsSettings() == other.hasResultsSettings());
-      if (hasResultsSettings()) {
-        result = result && getResultsSettings()
+      if (hasResultsSettings())
+		result = result && getResultsSettings()
             .equals(other.getResultsSettings());
-      }
       result = result && (hasPsf() == other.hasPsf());
-      if (hasPsf()) {
-        result = result && getPsf()
+      if (hasPsf())
+		result = result && getPsf()
             .equals(other.getPsf());
-      }
       return result;
     }
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (getNotesCount() > 0) {
@@ -701,7 +678,7 @@ public final class TemplateProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -748,27 +725,27 @@ public final class TemplateProtos {
         super.clear();
         notes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        if (calibrationBuilder_ == null) {
-          calibration_ = null;
-        } else {
+        if (calibrationBuilder_ == null)
+			calibration_ = null;
+		else {
           calibration_ = null;
           calibrationBuilder_ = null;
         }
-        if (fitEngineSettingsBuilder_ == null) {
-          fitEngineSettings_ = null;
-        } else {
+        if (fitEngineSettingsBuilder_ == null)
+			fitEngineSettings_ = null;
+		else {
           fitEngineSettings_ = null;
           fitEngineSettingsBuilder_ = null;
         }
-        if (resultsSettingsBuilder_ == null) {
-          resultsSettings_ = null;
-        } else {
+        if (resultsSettingsBuilder_ == null)
+			resultsSettings_ = null;
+		else {
           resultsSettings_ = null;
           resultsSettingsBuilder_ = null;
         }
-        if (psfBuilder_ == null) {
-          psf_ = null;
-        } else {
+        if (psfBuilder_ == null)
+			psf_ = null;
+		else {
           psf_ = null;
           psfBuilder_ = null;
         }
@@ -788,43 +765,38 @@ public final class TemplateProtos {
 
       @Override
 	public gdsc.smlm.data.config.TemplateProtos.TemplateSettings build() {
-        gdsc.smlm.data.config.TemplateProtos.TemplateSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+        final gdsc.smlm.data.config.TemplateProtos.TemplateSettings result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
       @Override
 	public gdsc.smlm.data.config.TemplateProtos.TemplateSettings buildPartial() {
-        gdsc.smlm.data.config.TemplateProtos.TemplateSettings result = new gdsc.smlm.data.config.TemplateProtos.TemplateSettings(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        final gdsc.smlm.data.config.TemplateProtos.TemplateSettings result = new gdsc.smlm.data.config.TemplateProtos.TemplateSettings(this);
+        final int from_bitField0_ = bitField0_;
+        final int to_bitField0_ = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           notes_ = notes_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.notes_ = notes_;
-        if (calibrationBuilder_ == null) {
-          result.calibration_ = calibration_;
-        } else {
-          result.calibration_ = calibrationBuilder_.build();
-        }
-        if (fitEngineSettingsBuilder_ == null) {
-          result.fitEngineSettings_ = fitEngineSettings_;
-        } else {
-          result.fitEngineSettings_ = fitEngineSettingsBuilder_.build();
-        }
-        if (resultsSettingsBuilder_ == null) {
-          result.resultsSettings_ = resultsSettings_;
-        } else {
-          result.resultsSettings_ = resultsSettingsBuilder_.build();
-        }
-        if (psfBuilder_ == null) {
-          result.psf_ = psf_;
-        } else {
-          result.psf_ = psfBuilder_.build();
-        }
+        if (calibrationBuilder_ == null)
+			result.calibration_ = calibration_;
+		else
+			result.calibration_ = calibrationBuilder_.build();
+        if (fitEngineSettingsBuilder_ == null)
+			result.fitEngineSettings_ = fitEngineSettings_;
+		else
+			result.fitEngineSettings_ = fitEngineSettingsBuilder_.build();
+        if (resultsSettingsBuilder_ == null)
+			result.resultsSettings_ = resultsSettings_;
+		else
+			result.resultsSettings_ = resultsSettingsBuilder_.build();
+        if (psfBuilder_ == null)
+			result.psf_ = psf_;
+		else
+			result.psf_ = psfBuilder_.build();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -864,9 +836,9 @@ public final class TemplateProtos {
       }
       @Override
 	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TemplateProtos.TemplateSettings) {
-          return mergeFrom((gdsc.smlm.data.config.TemplateProtos.TemplateSettings)other);
-        } else {
+        if (other instanceof gdsc.smlm.data.config.TemplateProtos.TemplateSettings)
+			return mergeFrom((gdsc.smlm.data.config.TemplateProtos.TemplateSettings)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -884,18 +856,14 @@ public final class TemplateProtos {
           }
           onChanged();
         }
-        if (other.hasCalibration()) {
-          mergeCalibration(other.getCalibration());
-        }
-        if (other.hasFitEngineSettings()) {
-          mergeFitEngineSettings(other.getFitEngineSettings());
-        }
-        if (other.hasResultsSettings()) {
-          mergeResultsSettings(other.getResultsSettings());
-        }
-        if (other.hasPsf()) {
-          mergePsf(other.getPsf());
-        }
+        if (other.hasCalibration())
+			mergeCalibration(other.getCalibration());
+        if (other.hasFitEngineSettings())
+			mergeFitEngineSettings(other.getFitEngineSettings());
+        if (other.hasResultsSettings())
+			mergeResultsSettings(other.getResultsSettings());
+        if (other.hasPsf())
+			mergePsf(other.getPsf());
         onChanged();
         return this;
       }
@@ -913,13 +881,12 @@ public final class TemplateProtos {
         gdsc.smlm.data.config.TemplateProtos.TemplateSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.TemplateProtos.TemplateSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -987,9 +954,8 @@ public final class TemplateProtos {
        */
       public Builder setNotes(
           int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   ensureNotesIsMutable();
         notes_.set(index, value);
         onChanged();
@@ -1004,9 +970,8 @@ public final class TemplateProtos {
        */
       public Builder addNotes(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   ensureNotesIsMutable();
         notes_.add(value);
         onChanged();
@@ -1049,9 +1014,8 @@ public final class TemplateProtos {
        */
       public Builder addNotesBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
+        if (value == null)
+			throw new NullPointerException();
   checkByteStringIsUtf8(value);
         ensureNotesIsMutable();
         notes_.add(value);
@@ -1082,11 +1046,10 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
-        if (calibrationBuilder_ == null) {
-          return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        } else {
-          return calibrationBuilder_.getMessage();
-        }
+        if (calibrationBuilder_ == null)
+			return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
+		else
+			return calibrationBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -1097,14 +1060,13 @@ public final class TemplateProtos {
        */
       public Builder setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(value);
         }
+		else
+			calibrationBuilder_.setMessage(value);
 
         return this;
       }
@@ -1120,9 +1082,9 @@ public final class TemplateProtos {
         if (calibrationBuilder_ == null) {
           calibration_ = builderForValue.build();
           onChanged();
-        } else {
-          calibrationBuilder_.setMessage(builderForValue.build());
         }
+		else
+			calibrationBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -1135,16 +1097,15 @@ public final class TemplateProtos {
        */
       public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
-          if (calibration_ != null) {
-            calibration_ =
+          if (calibration_ != null)
+			calibration_ =
               gdsc.smlm.data.config.CalibrationProtos.Calibration.newBuilder(calibration_).mergeFrom(value).buildPartial();
-          } else {
-            calibration_ = value;
-          }
+		else
+			calibration_ = value;
           onChanged();
-        } else {
-          calibrationBuilder_.mergeFrom(value);
         }
+		else
+			calibrationBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -1187,12 +1148,11 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
-        if (calibrationBuilder_ != null) {
-          return calibrationBuilder_.getMessageOrBuilder();
-        } else {
-          return calibration_ == null ?
-              gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
-        }
+        if (calibrationBuilder_ != null)
+			return calibrationBuilder_.getMessageOrBuilder();
+		else
+			return calibration_ == null ?
+			      gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
       }
       /**
        * <pre>
@@ -1237,11 +1197,10 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
-        if (fitEngineSettingsBuilder_ == null) {
-          return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
-        } else {
-          return fitEngineSettingsBuilder_.getMessage();
-        }
+        if (fitEngineSettingsBuilder_ == null)
+			return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
+		else
+			return fitEngineSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -1252,14 +1211,13 @@ public final class TemplateProtos {
        */
       public Builder setFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           fitEngineSettings_ = value;
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.setMessage(value);
         }
+		else
+			fitEngineSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -1275,9 +1233,9 @@ public final class TemplateProtos {
         if (fitEngineSettingsBuilder_ == null) {
           fitEngineSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			fitEngineSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -1290,16 +1248,15 @@ public final class TemplateProtos {
        */
       public Builder mergeFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
-          if (fitEngineSettings_ != null) {
-            fitEngineSettings_ =
+          if (fitEngineSettings_ != null)
+			fitEngineSettings_ =
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.newBuilder(fitEngineSettings_).mergeFrom(value).buildPartial();
-          } else {
-            fitEngineSettings_ = value;
-          }
+		else
+			fitEngineSettings_ = value;
           onChanged();
-        } else {
-          fitEngineSettingsBuilder_.mergeFrom(value);
         }
+		else
+			fitEngineSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -1342,12 +1299,11 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
-        if (fitEngineSettingsBuilder_ != null) {
-          return fitEngineSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return fitEngineSettings_ == null ?
-              gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
-        }
+        if (fitEngineSettingsBuilder_ != null)
+			return fitEngineSettingsBuilder_.getMessageOrBuilder();
+		else
+			return fitEngineSettings_ == null ?
+			      gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
       }
       /**
        * <pre>
@@ -1392,11 +1348,10 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsSettings getResultsSettings() {
-        if (resultsSettingsBuilder_ == null) {
-          return resultsSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance() : resultsSettings_;
-        } else {
-          return resultsSettingsBuilder_.getMessage();
-        }
+        if (resultsSettingsBuilder_ == null)
+			return resultsSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance() : resultsSettings_;
+		else
+			return resultsSettingsBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -1407,14 +1362,13 @@ public final class TemplateProtos {
        */
       public Builder setResultsSettings(gdsc.smlm.data.config.ResultsProtos.ResultsSettings value) {
         if (resultsSettingsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           resultsSettings_ = value;
           onChanged();
-        } else {
-          resultsSettingsBuilder_.setMessage(value);
         }
+		else
+			resultsSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -1430,9 +1384,9 @@ public final class TemplateProtos {
         if (resultsSettingsBuilder_ == null) {
           resultsSettings_ = builderForValue.build();
           onChanged();
-        } else {
-          resultsSettingsBuilder_.setMessage(builderForValue.build());
         }
+		else
+			resultsSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -1445,16 +1399,15 @@ public final class TemplateProtos {
        */
       public Builder mergeResultsSettings(gdsc.smlm.data.config.ResultsProtos.ResultsSettings value) {
         if (resultsSettingsBuilder_ == null) {
-          if (resultsSettings_ != null) {
-            resultsSettings_ =
+          if (resultsSettings_ != null)
+			resultsSettings_ =
               gdsc.smlm.data.config.ResultsProtos.ResultsSettings.newBuilder(resultsSettings_).mergeFrom(value).buildPartial();
-          } else {
-            resultsSettings_ = value;
-          }
+		else
+			resultsSettings_ = value;
           onChanged();
-        } else {
-          resultsSettingsBuilder_.mergeFrom(value);
         }
+		else
+			resultsSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -1497,12 +1450,11 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder getResultsSettingsOrBuilder() {
-        if (resultsSettingsBuilder_ != null) {
-          return resultsSettingsBuilder_.getMessageOrBuilder();
-        } else {
-          return resultsSettings_ == null ?
-              gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance() : resultsSettings_;
-        }
+        if (resultsSettingsBuilder_ != null)
+			return resultsSettingsBuilder_.getMessageOrBuilder();
+		else
+			return resultsSettings_ == null ?
+			      gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance() : resultsSettings_;
       }
       /**
        * <pre>
@@ -1547,11 +1499,10 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
-        if (psfBuilder_ == null) {
-          return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
-        } else {
-          return psfBuilder_.getMessage();
-        }
+        if (psfBuilder_ == null)
+			return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
+		else
+			return psfBuilder_.getMessage();
       }
       /**
        * <pre>
@@ -1562,14 +1513,13 @@ public final class TemplateProtos {
        */
       public Builder setPsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           psf_ = value;
           onChanged();
-        } else {
-          psfBuilder_.setMessage(value);
         }
+		else
+			psfBuilder_.setMessage(value);
 
         return this;
       }
@@ -1585,9 +1535,9 @@ public final class TemplateProtos {
         if (psfBuilder_ == null) {
           psf_ = builderForValue.build();
           onChanged();
-        } else {
-          psfBuilder_.setMessage(builderForValue.build());
         }
+		else
+			psfBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -1600,16 +1550,15 @@ public final class TemplateProtos {
        */
       public Builder mergePsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
-          if (psf_ != null) {
-            psf_ =
+          if (psf_ != null)
+			psf_ =
               gdsc.smlm.data.config.PSFProtos.PSF.newBuilder(psf_).mergeFrom(value).buildPartial();
-          } else {
-            psf_ = value;
-          }
+		else
+			psf_ = value;
           onChanged();
-        } else {
-          psfBuilder_.mergeFrom(value);
         }
+		else
+			psfBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -1652,12 +1601,11 @@ public final class TemplateProtos {
        */
       @Override
 	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
-        if (psfBuilder_ != null) {
-          return psfBuilder_.getMessageOrBuilder();
-        } else {
-          return psf_ == null ?
-              gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
-        }
+        if (psfBuilder_ != null)
+			return psfBuilder_.getMessageOrBuilder();
+		else
+			return psf_ == null ?
+			      gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
       }
       /**
        * <pre>
@@ -1744,7 +1692,7 @@ public final class TemplateProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    final java.lang.String[] descriptorData = {
       "\n\016template.proto\022\025gdsc.smlm.data.config\032" +
       "\021calibration.proto\032\tfit.proto\032\rresults.p" +
       "roto\032\tpsf.proto\"\214\002\n\020TemplateSettings\022\r\n\005" +
@@ -1756,7 +1704,7 @@ public final class TemplateProtos {
       "tings\022\'\n\003psf\030\005 \001(\0132\032.gdsc.smlm.data.conf" +
       "ig.PSFB\020B\016TemplateProtosb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
           @Override
 		public com.google.protobuf.ExtensionRegistry assignDescriptors(

@@ -86,7 +86,7 @@ public class IntBlockSumFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		int[] wdata = initialise(data, maxx, maxy, n, true);
+		final int[] wdata = initialise(data, maxx, maxy, n, true);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -179,7 +179,7 @@ public class IntBlockSumFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		int[] wdata = initialise(data, maxx, maxy, 1, true);
+		final int[] wdata = initialise(data, maxx, maxy, 1, true);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -241,7 +241,7 @@ public class IntBlockSumFilter extends BaseFilter
 	 */
 	private int[] initialise(int[] data, final int maxx, final int maxy, final int n, boolean internal)
 	{
-		int size = data.length;
+		final int size = data.length;
 		createIntBuffer(size);
 		return data;
 	}
@@ -256,9 +256,7 @@ public class IntBlockSumFilter extends BaseFilter
 	private int[] createIntBuffer(int size)
 	{
 		if (buffer == null || buffer.length < size)
-		{
 			buffer = new int[size];
-		}
 		return buffer;
 	}
 
@@ -300,7 +298,7 @@ public class IntBlockSumFilter extends BaseFilter
 	 */
 	void rollingBlockFilterNxN(int[] data, final int maxx, final int maxy, final int n)
 	{
-		int[] wdata = initialise(data, maxx, maxy, n, false);
+		final int[] wdata = initialise(data, maxx, maxy, n, false);
 
 		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -322,9 +320,7 @@ public class IntBlockSumFilter extends BaseFilter
 			int sum = n * row[0] + row[n];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -353,9 +349,7 @@ public class IntBlockSumFilter extends BaseFilter
 			int sum = n * row[0] + row[n];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -384,7 +378,7 @@ public class IntBlockSumFilter extends BaseFilter
 	 */
 	void rollingBlockFilter3x3(int[] data, final int maxx, final int maxy)
 	{
-		int[] wdata = initialise(data, maxx, maxy, 1, false);
+		final int[] wdata = initialise(data, maxx, maxy, 1, false);
 
 		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -449,9 +443,7 @@ public class IntBlockSumFilter extends BaseFilter
 	private int[] intRowBuffer(int size)
 	{
 		if (intRowBuffer == null || intRowBuffer.length < size)
-		{
 			intRowBuffer = new int[size];
-		}
 		return intRowBuffer;
 	}
 
@@ -496,7 +488,7 @@ public class IntBlockSumFilter extends BaseFilter
 	@Override
 	public IntBlockSumFilter clone()
 	{
-		IntBlockSumFilter o = (IntBlockSumFilter) super.clone();
+		final IntBlockSumFilter o = (IntBlockSumFilter) super.clone();
 		o.buffer = null;
 		o.intRowBuffer = null;
 		return o;

@@ -257,9 +257,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	public void setMean(double p)
 	{
 		if (p <= 0)
-		{
 			throw new NotStrictlyPositiveException(LocalizedFormats.MEAN, p);
-		}
 		setMeanUnsafe(p);
 	}
 
@@ -292,18 +290,12 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	{
 		double ret;
 		if (x < 0 || x == Integer.MAX_VALUE)
-		{
 			ret = Double.NEGATIVE_INFINITY;
-		}
 		else if (x == 0)
-		{
 			ret = -mean;
-		}
 		else
-		{
 			ret = -SaddlePointExpansion.getStirlingError(x) - SaddlePointExpansion.getDeviancePart(x, mean) -
 					0.5 * FastMath.log(MathUtils.TWO_PI) - 0.5 * FastMath.log(x);
-		}
 		return ret;
 	}
 
@@ -312,13 +304,9 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	public double cumulativeProbability(int x)
 	{
 		if (x < 0)
-		{
 			return 0;
-		}
 		if (x == Integer.MAX_VALUE)
-		{
 			return 1;
-		}
 		return Gamma.regularizedGammaQ((double) x + 1, mean, epsilon, maxIterations);
 	}
 
@@ -446,7 +434,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 		final double pivot = 40.0d;
 		if (meanPoisson < pivot)
 		{
-			double p = FastMath.exp(-meanPoisson);
+			final double p = FastMath.exp(-meanPoisson);
 			long n = 0;
 			double r = 1.0d;
 			double rnd = 1.0d;
@@ -456,17 +444,13 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 				rnd = random.nextDouble();
 				r *= rnd;
 				if (r >= p)
-				{
 					n++;
-				}
 				else
-				{
 					return n;
-				}
 			}
 			return n;
 		}
-		
+
 		computeFactors();
 
 		y2 = lambdaFractional < Double.MIN_VALUE ? 0 : nextPoisson(lambdaFractional);
@@ -486,9 +470,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 				final double n = random.nextGaussian();
 				x = n * FastMath.sqrt(lambda + halfDelta) - 0.5d;
 				if (x > delta || x < -lambda)
-				{
 					continue;
-				}
 				y = x < 0 ? FastMath.floor(x) : FastMath.ceil(x);
 				final double e = exponential.sample();
 				v = -e - (n * n / 2) + c1;
@@ -500,7 +482,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 					y = lambda;
 					break;
 				}
-				
+
 				x = delta + (twolpd / delta) * exponential.sample();
 				y = FastMath.ceil(x);
 				v = -exponential.sample() - delta * (x + 1) / twolpd;
@@ -520,9 +502,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 				break;
 			}
 			if (v > qr)
-			{
 				continue;
-			}
 			if (v < y * logLambda - CombinatoricsUtils.factorialLog((int) (y + lambda)) + logLambdaFactorial)
 			{
 				y = lambda + y;
@@ -543,9 +523,9 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 			delta = FastMath.sqrt(lambda * FastMath.log(32 * lambda / FastMath.PI + 1));
 			halfDelta = delta / 2;
 			twolpd = 2 * lambda + delta;
-			double a1 = FastMath.sqrt(FastMath.PI * twolpd) * FastMath.exp(1 / (8 * lambda));
-			double a2 = (twolpd / delta) * FastMath.exp(-delta * (1 + delta) / twolpd);
-			double aSum = a1 + a2 + 1;
+			final double a1 = FastMath.sqrt(FastMath.PI * twolpd) * FastMath.exp(1 / (8 * lambda));
+			final double a2 = (twolpd / delta) * FastMath.exp(-delta * (1 + delta) / twolpd);
+			final double aSum = a1 + a2 + 1;
 			p1 = a1 / aSum;
 			p2 = a2 / aSum;
 			c1 = 1 / (8 * lambda);

@@ -60,7 +60,7 @@ public class MinMaxResultProcedure implements PeakResultProcedure
 	@Override
 	public void execute(PeakResult peakResult)
 	{
-		float v = value.getValue(peakResult);
+		final float v = value.getValue(peakResult);
 		if (min > v)
 			min = v;
 		else if (max < v)

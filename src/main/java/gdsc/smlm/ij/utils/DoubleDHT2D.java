@@ -105,7 +105,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	@Override
 	public DoubleDHT2D copy()
 	{
-		DoubleDHT2D copy = new DoubleDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
+		final DoubleDHT2D copy = new DoubleDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
 		copy.h2e = h2e;
 		copy.h2o = h2o;
 		copy.jj = jj;
@@ -166,20 +166,18 @@ public class DoubleDHT2D extends DoubleImage2D
 		if (h2e == null)
 		{
 			// Do this on new arrays for thread safety (i.e. concurrent initialisation)
-			double[] h2 = getData();
-			double[] h2e = new double[h2.length];
-			double[] h2o = new double[h2e.length];
-			int[] jj = new int[h2e.length];
+			final double[] h2 = getData();
+			final double[] h2e = new double[h2.length];
+			final double[] h2o = new double[h2e.length];
+			final int[] jj = new int[h2e.length];
 			for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-			{
 				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 				{
-					int j = nr_m_r * nc + nc_m_c;
+					final int j = nr_m_r * nc + nc_m_c;
 					h2e[i] = (h2[i] + h2[j]) / 2.0;
 					h2o[i] = (h2[i] - h2[j]) / 2.0;
 					jj[i] = j;
 				}
-			}
 			this.h2o = h2o;
 			this.jj = jj;
 			// Assign at the end for thread safety (i.e. concurrent initialisation)
@@ -200,8 +198,8 @@ public class DoubleDHT2D extends DoubleImage2D
 		if (mag == null)
 		{
 			// Do this on new arrays for thread safety (i.e. concurrent initialisation)
-			double[] mag = new double[h2e.length];
-			double[] h2 = getData();
+			final double[] mag = new double[h2e.length];
+			final double[] h2 = getData();
 			for (int i = 0; i < h2.length; i++)
 				// Note that pre-computed h2e and h2o are divided by 2 so we also
 				// divide the magnitude by 2 to allow reuse of the pre-computed values
@@ -290,12 +288,11 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	private DoubleDHT2D multiply(double[] h2, double[] tmp)
 	{
-		double[] h1 = this.data;
+		final double[] h1 = this.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 
 		for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-		{
 			for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 			{
 				// This is actually doing for 2D data stored as x[rows][columns]
@@ -303,12 +300,11 @@ public class DoubleDHT2D extends DoubleImage2D
 				//h2e = (h2[r][c] + h2[Nr-r][Nr-c]) / 2;
 				//h2o = (h2[r][c] - h2[Nr-r][Nr-c]) / 2;
 				//tmp[r][c] =(h1[r][c] * h2e + h1[Nr-r][Nc-c] * h2o);
-				int j = nr_m_r * nc + nc_m_c;
-				double h2e = (h2[i] + h2[j]) / 2.0;
-				double h2o = (h2[i] - h2[j]) / 2.0;
+				final int j = nr_m_r * nc + nc_m_c;
+				final double h2e = (h2[i] + h2[j]) / 2.0;
+				final double h2o = (h2[i] - h2[j]) / 2.0;
 				tmp[i] = (h1[i] * h2e + h1[j] * h2o);
 			}
-		}
 
 		return new DoubleDHT2D(nc, nr, tmp, true, this.dht);
 	}
@@ -331,7 +327,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	private DoubleDHT2D multiply(double[] h2e, double[] h2o, int[] jj, double[] tmp)
 	{
-		double[] h1 = getData();
+		final double[] h1 = getData();
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 		for (int i = 0; i < h1.length; i++)
@@ -393,21 +389,19 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	private DoubleDHT2D conjugateMultiply(double[] h2, double[] tmp) throws IllegalArgumentException
 	{
-		double[] h1 = this.data;
+		final double[] h1 = this.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 
 		for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-		{
 			for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 			{
-				int j = nr_m_r * nc + nc_m_c;
-				double h2e = (h2[i] + h2[j]) / 2.0;
-				double h2o = (h2[i] - h2[j]) / 2.0;
+				final int j = nr_m_r * nc + nc_m_c;
+				final double h2e = (h2[i] + h2[j]) / 2.0;
+				final double h2o = (h2[i] - h2[j]) / 2.0;
 				// As per multiply but reverse the addition sign for the conjugate
 				tmp[i] = (h1[i] * h2e - h1[j] * h2o);
 			}
-		}
 
 		return new DoubleDHT2D(nc, nr, tmp, true, this.dht);
 	}
@@ -430,7 +424,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	private DoubleDHT2D conjugateMultiply(double[] h2e, double[] h2o, int[] jj, double[] tmp)
 	{
-		double[] h1 = getData();
+		final double[] h1 = getData();
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 		for (int i = 0; i < h1.length; i++)
@@ -491,26 +485,24 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	private DoubleDHT2D divide(double[] h2, double[] tmp) throws IllegalArgumentException
 	{
-		double[] h1 = this.data;
+		final double[] h1 = this.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 
 		for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-		{
 			for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 			{
 				// This is a copy of the divide operation in ij.process.FHT
-				int j = nr_m_r * nc + nc_m_c;
-				double h2i = h2[i];
-				double h2j = h2[j];
+				final int j = nr_m_r * nc + nc_m_c;
+				final double h2i = h2[i];
+				final double h2j = h2[j];
 				double mag = h2i * h2i + h2j * h2j;
 				if (mag < 1e-20)
 					mag = 1e-20;
-				double h2e = (h2i + h2j);
-				double h2o = (h2i - h2j);
+				final double h2e = (h2i + h2j);
+				final double h2o = (h2i - h2j);
 				tmp[i] = ((h1[i] * h2e - h1[j] * h2o) / mag);
 			}
-		}
 
 		return new DoubleDHT2D(nc, nr, tmp, true, this.dht);
 	}
@@ -534,7 +526,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	 */
 	private DoubleDHT2D divide(double[] h2e, double[] h2o, int[] jj, double[] mag, double[] tmp)
 	{
-		double[] h1 = getData();
+		final double[] h1 = getData();
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 		for (int i = 0; i < h1.length; i++)
@@ -578,22 +570,20 @@ public class DoubleDHT2D extends DoubleImage2D
 		if (!isFrequencyDomain)
 			throw new IllegalArgumentException("Require frequency domain DHT");
 
-		double[] h1 = this.data;
+		final double[] h1 = this.data;
 		if (real == null || real.length != h1.length)
 			real = new double[h1.length];
 		if (imaginary == null || imaginary.length != h1.length)
 			imaginary = new double[h1.length];
 
 		for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-		{
 			for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 			{
 				// This is a copy of the getComplexTransform operation in ij.process.FHT
-				int j = nr_m_r * nc + nc_m_c;
+				final int j = nr_m_r * nc + nc_m_c;
 				real[i] = (h1[i] + h1[j]) * 0.5;
 				imaginary[i] = (-h1[i] + h1[j]) * 0.5;
 			}
-		}
 
 		return new DoubleImage2D[] { new DoubleImage2D(nc, nr, real, false),
 				new DoubleImage2D(nc, nr, imaginary, false) };
@@ -618,19 +608,18 @@ public class DoubleDHT2D extends DoubleImage2D
 		if (real.nr != imaginary.nr || real.nc != imaginary.nc)
 			throw new IllegalArgumentException("Dimension mismatch");
 
-		double[] re = real.getData();
-		double[] im = imaginary.getData();
+		final double[] re = real.getData();
+		final double[] im = imaginary.getData();
 		if (tmp == null || tmp.length != re.length)
 			tmp = new double[re.length];
 
-		int nc = real.nc;
-		int nr = real.nr;
+		final int nc = real.nc;
+		final int nr = real.nr;
 
 		for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-		{
 			for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 			{
-				int j = nr_m_r * nc + nc_m_c;
+				final int j = nr_m_r * nc + nc_m_c;
 				// Reverse the toDFT() method
 				// re = (a+b)/2
 				// im = (-a+b)/2
@@ -639,7 +628,6 @@ public class DoubleDHT2D extends DoubleImage2D
 				tmp[j] = re[i] + im[i];
 				tmp[i] = 2 * re[i] - tmp[j];
 			}
-		}
 
 		return new DoubleDHT2D(nc, nr, tmp, true, new DoubleDHT_2D(nr, nc));
 	}
@@ -659,19 +647,17 @@ public class DoubleDHT2D extends DoubleImage2D
 		if (!isFrequencyDomain)
 			throw new IllegalArgumentException("Require frequency domain DHT");
 
-		double[] h1 = this.data;
+		final double[] h1 = this.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new double[h1.length];
 
 		for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r)
-		{
 			for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 			{
 				// This is a copy of the amplitude operation in ij.process.FHT
-				int j = nr_m_r * nc + nc_m_c;
+				final int j = nr_m_r * nc + nc_m_c;
 				tmp[i] = Math.sqrt(h1[i] * h1[i] + h1[j] * h1[j]);
 			}
-		}
 
 		return new DoubleImage2D(nc, nr, tmp, false);
 	}
@@ -710,16 +696,16 @@ public class DoubleDHT2D extends DoubleImage2D
 		// This is a specialised version to allow using a double buffer and
 		// optimised for even sized images
 
-		int ny = image.getHeight();
-		int nx = image.getWidth();
+		final int ny = image.getHeight();
+		final int nx = image.getWidth();
 		if ((ny & 1) == 1 || (nx & 1) == 1)
 			throw new IllegalArgumentException("Require even dimensions");
 
-		int ny_2 = ny / 2;
-		int nx_2 = nx / 2;
+		final int ny_2 = ny / 2;
+		final int nx_2 = nx / 2;
 
-		double[] tmp = new double[nx];
-		double[] a = image.getData();
+		final double[] tmp = new double[nx];
+		final double[] a = image.getData();
 
 		//@formatter:off
 		// We swap: 0 <=> nx_2, 0 <=> ny_2
@@ -761,8 +747,8 @@ public class DoubleDHT2D extends DoubleImage2D
 	{
 		for (int ayy = ay + h, byy = by + h - 1; ayy-- > ay; byy--)
 		{
-			int ai = ayy * width + ax;
-			int bi = byy * width + bx;
+			final int ai = ayy * width + ax;
+			final int bi = byy * width + bx;
 			System.arraycopy(a, ai, tmp, 0, w);
 			System.arraycopy(b, bi, a, ai, w);
 			System.arraycopy(tmp, 0, b, bi, w);

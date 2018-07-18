@@ -54,7 +54,7 @@ public class ShowResultsHeader implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Show the results header in the ImageJ log");
 		gd.addFilenameField("Filename", inputFilename, 30);
 		gd.addCheckbox("Raw", raw);
@@ -68,8 +68,8 @@ public class ShowResultsHeader implements PlugIn
 
 		Prefs.set(Constants.inputFilename, inputFilename);
 
-		PeakResultsReader reader = new PeakResultsReader(inputFilename);
-		String header = reader.getHeader();
+		final PeakResultsReader reader = new PeakResultsReader(inputFilename);
+		final String header = reader.getHeader();
 		if (header == null)
 		{
 			IJ.error(TITLE, "No header found in file: " + inputFilename);
@@ -102,7 +102,7 @@ public class ShowResultsHeader implements PlugIn
 			IJ.error(TITLE, "No header information found in file: " + inputFilename);
 	}
 
-	private boolean show(String title, Object data)
+	private static boolean show(String title, Object data)
 	{
 		if (data == null)
 			return false;
@@ -113,7 +113,7 @@ public class ShowResultsHeader implements PlugIn
 		return true;
 	}
 
-	private boolean show(String title, Message data)
+	private static boolean show(String title, Message data)
 	{
 		if (data == null)
 			return false;

@@ -83,10 +83,10 @@ public class SummariseResults implements PlugIn, MouseListener
 		}
 
 		createSummaryTable();
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
-		int nextFlush = 9;
-		for (MemoryPeakResults result : MemoryPeakResults.getAllResults())
+		final int nextFlush = 9;
+		for (final MemoryPeakResults result : MemoryPeakResults.getAllResults())
 		{
 			addSummary(sb, result);
 			if (++i == nextFlush)
@@ -113,10 +113,10 @@ public class SummariseResults implements PlugIn, MouseListener
 	{
 		if (summary == null || !summary.isShowing())
 		{
-			StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
+			final StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
 			// Calibration
 			sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");
-			for (String statName : new String[] { "Precision (nm)", "SNR" })
+			for (final String statName : new String[] { "Precision (nm)", "SNR" })
 			{
 				sb.append("\tAv ").append(statName);
 				sb.append("\tMedian ").append(statName);
@@ -139,16 +139,14 @@ public class SummariseResults implements PlugIn, MouseListener
 	{
 		final DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
 		for (int i = 0; i < stats.length; i++)
-		{
 			stats[i] = new DescriptiveStatistics();
-		}
 
 		if (result.hasNullResults())
 		{
 			IJ.log("Null results in dataset: " + result.getName());
 			if (removeNullResults == UNKNOWN)
 			{
-				GenericDialog gd = new GenericDialog(TITLE);
+				final GenericDialog gd = new GenericDialog(TITLE);
 				gd.addMessage("There are invalid results in memory.\n \nClean these results?");
 				gd.enableYesNoCancel();
 				gd.hideCancelButton();
@@ -160,7 +158,7 @@ public class SummariseResults implements PlugIn, MouseListener
 			result.removeNullResults();
 		}
 
-		CalibrationReader calibration = result.getCalibrationReader();
+		final CalibrationReader calibration = result.getCalibrationReader();
 
 		PrecisionMethod precisionMethod = PrecisionMethod.PRECISION_METHOD_NA;
 		boolean stored = false;
@@ -170,14 +168,14 @@ public class SummariseResults implements PlugIn, MouseListener
 			// Precision
 			try
 			{
-				PrecisionResultProcedure p = new PrecisionResultProcedure(result);
+				final PrecisionResultProcedure p = new PrecisionResultProcedure(result);
 				// Use stored precision if possible
 				stored = result.hasPrecision();
 				precisionMethod = p.getPrecision(stored);
-				for (double v : p.precision)
+				for (final double v : p.precision)
 					stats[0].addValue(v);
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				// Ignore
 			}
@@ -185,12 +183,12 @@ public class SummariseResults implements PlugIn, MouseListener
 			// SNR
 			try
 			{
-				SNRResultProcedure p = new SNRResultProcedure(result);
+				final SNRResultProcedure p = new SNRResultProcedure(result);
 				p.getSNR();
-				for (double v : p.snr)
+				for (final double v : p.snr)
 					stats[1].addValue(v);
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				// Ignore
 			}
@@ -199,9 +197,7 @@ public class SummariseResults implements PlugIn, MouseListener
 		sb.append(result.getName());
 		int maxT = 0;
 		if (result.size() == 0)
-		{
 			sb.append("\t0\t0");
-		}
 		else
 		{
 			sb.append('\t').append(result.size());
@@ -209,25 +205,19 @@ public class SummariseResults implements PlugIn, MouseListener
 			sb.append('\t').append(maxT);
 		}
 		if (calibration != null && calibration.hasExposureTime())
-		{
 			sb.append('\t').append(Utils.timeToString(maxT * calibration.getExposureTime()));
-		}
 		else
-		{
 			sb.append("\t-");
-		}
 		if (size > 0)
 		{
-			boolean includeDeviations = result.hasDeviations();
-			long memorySize = MemoryPeakResults.estimateMemorySize(size, includeDeviations);
-			String memory = MemoryPeakResults.memorySizeString(memorySize);
+			final boolean includeDeviations = result.hasDeviations();
+			final long memorySize = MemoryPeakResults.estimateMemorySize(size, includeDeviations);
+			final String memory = MemoryPeakResults.memorySizeString(memorySize);
 			sb.append('\t').append(memory);
 		}
 		else
-		{
 			sb.append("\t-");
-		}
-		Rectangle bounds = result.getBounds(true);
+		final Rectangle bounds = result.getBounds(true);
 		sb.append(
 				String.format("\t%d,%d,%d,%d", bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height));
 		if (calibration != null)
@@ -246,18 +236,14 @@ public class SummariseResults implements PlugIn, MouseListener
 				}
 			}
 			else
-			{
 				sb.append("\t-");
-			}
 
 			sb.append('\t').append(calibration.hasDistanceUnit() ? UnitHelper.getShortName(calibration.getDistanceUnit()) : '-');
 			sb.append('\t').append(calibration.hasIntensityUnit() ? UnitHelper.getShortName(calibration.getIntensityUnit()) : '-');
 			//@formatter:on
 		}
 		else
-		{
 			sb.append("\t\t\t\t\t");
-		}
 
 		if (result.is3D())
 			sb.append("\tY");
@@ -268,11 +254,8 @@ public class SummariseResults implements PlugIn, MouseListener
 		if (stored)
 			sb.append(" (Stored)");
 		for (int i = 0; i < stats.length; i++)
-		{
 			if (Double.isNaN(stats[i].getMean()))
-			{
 				sb.append("\t-\t-\t-\t-");
-			}
 			else
 			{
 				sb.append('\t').append(IJ.d2s(stats[i].getMean(), 3));
@@ -280,7 +263,6 @@ public class SummariseResults implements PlugIn, MouseListener
 				sb.append('\t').append(IJ.d2s(stats[i].getMin(), 3));
 				sb.append('\t').append(IJ.d2s(stats[i].getMax(), 3));
 			}
-		}
 		sb.append("\n");
 	}
 
@@ -296,15 +278,15 @@ public class SummariseResults implements PlugIn, MouseListener
 
 	private void showStatistics()
 	{
-		TextPanel textPanel = summary.getTextPanel();
-		int selectedIndex = textPanel.getSelectionStart();
+		final TextPanel textPanel = summary.getTextPanel();
+		final int selectedIndex = textPanel.getSelectionStart();
 		if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
 			return;
-		String line = textPanel.getLine(selectedIndex);
-		int endIndex = line.indexOf('\t');
+		final String line = textPanel.getLine(selectedIndex);
+		final int endIndex = line.indexOf('\t');
 		if (endIndex == -1)
 			return;
-		String name = line.substring(0, endIndex);
+		final String name = line.substring(0, endIndex);
 		final MemoryPeakResults result = MemoryPeakResults.getResults(name);
 		if (result == null)
 			return;
@@ -322,8 +304,8 @@ public class SummariseResults implements PlugIn, MouseListener
 
 	private void showStatistics(MemoryPeakResults result)
 	{
-		SummariseResultsSettings.Builder settings = SettingsManager.readSummariseResultsSettings(0).toBuilder();
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final SummariseResultsSettings.Builder settings = SettingsManager.readSummariseResultsSettings(0).toBuilder();
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Show histograms of the results properties (if available)");
 		gd.addCheckbox("Plot_background", settings.getPlotBackground());
 		gd.addCheckbox("Plot_signal", settings.getPlotSignal());
@@ -352,7 +334,7 @@ public class SummariseResults implements PlugIn, MouseListener
 		settings.setRemoveOutliers(removeOutliers);
 		SettingsManager.writeSettings(settings);
 
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 
 		if (settings.getPlotBackground())
 			plot(wo, "Background", result, PeakResult.BACKGROUND);
@@ -367,16 +349,14 @@ public class SummariseResults implements PlugIn, MouseListener
 		if ((settings.getPlotNoise() || settings.getPlotSnr()) && result.hasNoise())
 		{
 			if (settings.getPlotSnr())
-			{
 				try
 				{
 					plot(wo, "SNR", new SNRResultProcedure(result).getSNR());
 				}
-				catch (DataException e)
+				catch (final DataException e)
 				{
 					// Ignore
 				}
-			}
 			if (settings.getPlotNoise())
 			{
 				final Counter counter = new Counter();
@@ -386,7 +366,7 @@ public class SummariseResults implements PlugIn, MouseListener
 					@Override
 					public void execute(PeakResult peakResult)
 					{
-						int i = counter.getAndIncrement();
+						final int i = counter.getAndIncrement();
 						noise[i] = peakResult.getNoise();
 					}
 				});
@@ -394,24 +374,22 @@ public class SummariseResults implements PlugIn, MouseListener
 			}
 		}
 		if (settings.getPlotPrecision())
-		{
 			// Precision
 			try
 			{
-				PrecisionResultProcedure p = new PrecisionResultProcedure(result);
+				final PrecisionResultProcedure p = new PrecisionResultProcedure(result);
 				// Use stored precision if possible
-				boolean stored = result.hasPrecision();
-				PrecisionMethod precisionMethod = p.getPrecision(stored);
+				final boolean stored = result.hasPrecision();
+				final PrecisionMethod precisionMethod = p.getPrecision(stored);
 				String name = FitProtosHelper.getName(precisionMethod);
 				if (stored)
 					name += " (Stored)";
 				plot(wo, "Precision: " + name, new StoredDataStatistics(p.precision));
 			}
-			catch (DataException e)
+			catch (final DataException e)
 			{
 				// Ignore
 			}
-		}
 
 		wo.tile();
 	}
@@ -437,7 +415,7 @@ public class SummariseResults implements PlugIn, MouseListener
 
 	private void plot(WindowOrganiser wo, String title, StoredDataStatistics data)
 	{
-		int id = Utils.showHistogram(TITLE, data, title, 0, removeOutliers, histgramBins);
+		final int id = Utils.showHistogram(TITLE, data, title, 0, removeOutliers, histgramBins);
 		if (Utils.isNewWindow())
 			wo.add(id);
 	}

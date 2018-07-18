@@ -49,7 +49,7 @@ public class PoissonCalculator
 	protected static final double ONE_OVER_1680 = 1.0 / 1680;
 
 	private boolean uninitialsed = true;
-	
+
 	/** The maximum log likelihood. */
 	protected double mll;
 	/** The sum of the log X factorial term to convert the pseudo log-likelihood to the log-likelihood. */
@@ -102,7 +102,6 @@ public class PoissonCalculator
 		// the same magnitude as the first omitted term.
 
 		for (int i = 0, n = x.length; i < n; i++)
-		{
 			// Note: When x==0:
 			// log(n!) = 0
 			// mll = 0
@@ -110,11 +109,9 @@ public class PoissonCalculator
 			{
 				final double logx = Math.log(x[i]);
 				if (x[i] <= 1)
-				{
 					// When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
 					// Compute the actual maximum log likelihood
 					mll += x[i] * logx - x[i];
-				}
 				else if (x[i] <= APPROXIMATION_X)
 				{
 					// At low values of log(n!) we use the gamma function as the relative error of the
@@ -138,10 +135,7 @@ public class PoissonCalculator
 				}
 			}
 			else if (x[i] != 0)
-			{
 				throw new IllegalArgumentException("Input values x must be positive");
-			}
-		}
 	}
 
 	/**
@@ -228,12 +222,10 @@ public class PoissonCalculator
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-		{
 			if (x[i] == 0.0)
 				ll -= u[i];
 			else
 				ll += x[i] * Math.log(u[i]) - u[i];
-		}
 		return ll;
 	}
 
@@ -338,12 +330,10 @@ public class PoissonCalculator
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-		{
 			if (x[i] == 0.0)
 				ll -= u[i];
 			else
 				ll += x[i] * Math.log(u[i]) - u[i] - logFactorial(x[i]);
-		}
 		return ll;
 	}
 
@@ -357,10 +347,8 @@ public class PoissonCalculator
 	public static double logFactorial(double x)
 	{
 		if (x > 1)
-		{
 			//return Gamma.logGamma(1 + x);
 			return logGamma(1 + x);
-		}
 		return 0.0;
 	}
 
@@ -401,23 +389,19 @@ public class PoissonCalculator
 		//		}
 		//		else
 		if (x <= 2.5)
-		{
 			return Gamma.logGamma1p((x - 0.5) - 0.5);
-		}
 		else if (x <= 8.0)
 		{
 			final int n = (int) FastMath.floor(x - 1.5);
 			double prod = 1.0;
 			for (int i = 1; i <= n; i++)
-			{
 				prod *= x - i;
-			}
 			return Gamma.logGamma1p(x - (n + 1)) + Math.log(prod);
 		}
 		else
 		{
-			double sum = Gamma.lanczos(x);
-			double tmp = x + Gamma.LANCZOS_G + .5;
+			final double sum = Gamma.lanczos(x);
+			final double tmp = x + Gamma.LANCZOS_G + .5;
 			return ((x + .5) * Math.log(tmp)) - tmp + HALF_LOG_2_PI + Math.log(sum / x);
 		}
 	}
@@ -473,13 +457,10 @@ public class PoissonCalculator
 
 		// Use the Stirling approximation when appropriate
 		if (x <= 1)
-		{
 			// When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
 			// Compute the actual log likelihood
 			return x * Math.log(u) - u;
-		}
 		else if (x <= APPROXIMATION_X)
-		{
 			// At low values of log(n!) we use the gamma function as the relative error of the
 			// approximation is high.
 			// Note that the logGamma function uses only 1 Math.log() call when the input is
@@ -487,16 +468,13 @@ public class PoissonCalculator
 			//return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
 			// Note Math.log1p is faster than FastMath.log1p.
 			return x * Math.log(u) - u + Math.log1p(Gamma.invGamma1pm1(x));
-		}
 		else
-		{
 			// Approximate log(n!) using Stirling's approximation using the first 3 terms.
 			// This will have a maximum relative error of approximately 6.7e-5
 			// ll = x * log(u) - u - x * log(x) + x - O(ln(x))
 			// O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
 			return x * Math.log(u) - u - HALF_LOG_2_PI - (x + 0.5) * Math.log(x) + x - ONE_OVER_12 / x +
 					ONE_OVER_360 / pow3(x);
-		}
 	}
 
 	/**
@@ -515,12 +493,10 @@ public class PoissonCalculator
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-		{
 			if (x[i] == 0.0)
 				ll -= u[i];
 			else
 				ll += fastLogLikelihoodX(u[i], x[i]);
-		}
 		return ll;
 	}
 
@@ -579,13 +555,10 @@ public class PoissonCalculator
 
 		// Use the Stirling approximation when appropriate
 		if (x <= 1)
-		{
 			// When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
 			// Compute the actual log likelihood
 			return x * fastLog.log(u) - u;
-		}
 		else if (x <= APPROXIMATION_X)
-		{
 			// At low values of log(n!) we use the gamma function as the relative error of the
 			// approximation is high.
 			// Note that the logGamma function uses only 1 Math.log() call when the input is
@@ -593,16 +566,13 @@ public class PoissonCalculator
 			//return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
 			// Note Math.log1p is faster than FastMath.log1p.
 			return x * fastLog.log(u) - u + Math.log1p(Gamma.invGamma1pm1(x));
-		}
 		else
-		{
 			// Approximate log(n!) using Stirling's approximation using the first 3 terms.
 			// This will have a maximum relative error of approximately 6.7e-5
 			// ll = x * log(u) - u - x * log(x) + x - O(ln(x))
 			// O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
 			return x * fastLog.log(u) - u - HALF_LOG_2_PI - (x + 0.5) * fastLog.log(x) + x - ONE_OVER_12 / x +
 					ONE_OVER_360 / pow3(x);
-		}
 	}
 
 	/**
@@ -623,12 +593,10 @@ public class PoissonCalculator
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-		{
 			if (x[i] == 0.0)
 				ll -= u[i];
 			else
 				ll += fastLogLikelihoodX(u[i], x[i], fastLog);
-		}
 		return ll;
 	}
 
@@ -926,21 +894,13 @@ public class PoissonCalculator
 
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-		{
-			//ll += logLikelihood(u[i], x[i]) - maximumLogLikelihood(x[i]);
-
 			if (x[i] > 0.0)
-			{
 				//ll += (x[i] * Math.log(u[i]) - u[i]) - (x[i] * Math.log(x[i]) - x[i]);
 				//ll += x[i] * Math.log(u[i]) - u[i] - x[i] * Math.log(x[i]) + x[i];
 				//ll += x[i] * (Math.log(u[i]) - Math.log(x[i])) - u[i] + x[i];
 				ll += x[i] * Math.log(u[i] / x[i]) - u[i] + x[i];
-			}
 			else
-			{
 				ll -= u[i];
-			}
-		}
 		return -2.0 * ll;
 	}
 
@@ -960,16 +920,10 @@ public class PoissonCalculator
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-		{
 			if (x[i] > 0.0)
-			{
 				ll += x[i] * fastLog.log(u[i] / x[i]) - u[i] + x[i];
-			}
 			else
-			{
 				ll -= u[i];
-			}
-		}
 		return -2.0 * ll;
 	}
 
@@ -986,13 +940,9 @@ public class PoissonCalculator
 	public static double logLikelihoodRatio(double u, double x)
 	{
 		if (x > 0.0)
-		{
 			return -2.0 * x * Math.log(u / x) - u + x;
-		}
 		else
-		{
 			return -2.0 * u;
-		}
 	}
 
 	/**
@@ -1010,12 +960,8 @@ public class PoissonCalculator
 	public static double logLikelihoodRatio(double u, double x, FastLog fastLog)
 	{
 		if (x > 0.0)
-		{
 			return -2.0 * x * fastLog.log(u / x) - u + x;
-		}
 		else
-		{
 			return -2.0 * u;
-		}
 	}
 }

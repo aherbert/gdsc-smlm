@@ -84,7 +84,7 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
 					Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 			useBackground = true;
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
 					Gaussian2DPeakResultHelper.LSE_PRECISION);
@@ -102,13 +102,9 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
 	protected double getVariance(PeakResult peak)
 	{
 		if (useBackground)
-		{
 			return calculator.getLSEVariance(peak.getParameters());
-		}
 		else
-		{
 			return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
-		}
 	}
 
 	/*
@@ -137,7 +133,7 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
+		final double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 		params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
 		return new MultiFilter2(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6],
 				(float) params[7], (float) params[8]);

@@ -46,39 +46,39 @@ public abstract class Image3DTest
 
 	private void canCrop(int x, int y, int z, int w, int h, int d)
 	{
-		Image3D image = createData(x + w + 1, y + h + 1, z + d + 1);
-		ImageStack stack = image.getImageStack();
+		final Image3D image = createData(x + w + 1, y + h + 1, z + d + 1);
+		final ImageStack stack = image.getImageStack();
 
-		Image3D croppedData = image.crop(x, y, z, w, h, d);
+		final Image3D croppedData = image.crop(x, y, z, w, h, d);
 		Assert.assertEquals(croppedData.getWidth(), w);
 		Assert.assertEquals(croppedData.getHeight(), h);
 		Assert.assertEquals(croppedData.getSize(), d);
 
-		Image3D croppedData2 = FloatImage3D.crop(stack, x, y, z, w, h, d, null);
+		final Image3D croppedData2 = FloatImage3D.crop(stack, x, y, z, w, h, d, null);
 		assertEquals(croppedData, croppedData2);
 
-		ImageStack croppedStack = image.cropToStack(x, y, z, w, h, d);
+		final ImageStack croppedStack = image.cropToStack(x, y, z, w, h, d);
 		Assert.assertEquals(croppedStack.getWidth(), w);
 		Assert.assertEquals(croppedStack.getHeight(), h);
 		Assert.assertEquals(croppedStack.getSize(), d);
 
 		assertEquals(croppedData, new FloatImage3D(croppedStack));
 
-		ImageStack croppedStack2 = Image3D.cropToStack(stack, x, y, z, w, h, d);
+		final ImageStack croppedStack2 = Image3D.cropToStack(stack, x, y, z, w, h, d);
 		assertEquals(croppedData, new FloatImage3D(croppedStack2));
 
 		// Test it is the correct region
-		ImageStack originalStack = image.getImageStack();
+		final ImageStack originalStack = image.getImageStack();
 		for (int zz = 0; zz < d; zz++)
 		{
 			// Crop from the original data
 			ImageProcessor fp = originalStack.getProcessor(1 + zz + z);
 			fp.setRoi(x, y, w, h);
 			fp = fp.crop();
-			float[] e = (float[]) fp.getPixels();
+			final float[] e = (float[]) fp.getPixels();
 
 			// Compare to the cropped stack
-			float[] o = (float[]) croppedStack.getPixels(1 + zz);
+			final float[] o = (float[]) croppedStack.getPixels(1 + zz);
 			Assert.assertArrayEquals(e, o, 0);
 
 			// Compare to the cropped data
@@ -98,13 +98,13 @@ public abstract class Image3DTest
 	private void canInsert(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that copy and crop work!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
-			Image3D image2 = image.copy();
-			Image3D image3 = image.copy();
+			final Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image2 = image.copy();
+			final Image3D image3 = image.copy();
 
-			Image3D blank = createEmptyData(w, h, d);
+			final Image3D blank = createEmptyData(w, h, d);
 
 			image.insert(x, y, z, blank);
 
@@ -112,7 +112,7 @@ public abstract class Image3DTest
 
 			assertEquals(croppedData, blank);
 
-			ImageStack blankStack = blank.getImageStack();
+			final ImageStack blankStack = blank.getImageStack();
 			image2.insert(x, y, z, blankStack);
 
 			croppedData = image2.crop(x, y, z, w, h, d);
@@ -131,7 +131,7 @@ public abstract class Image3DTest
 	@Test
 	public void canFindMin()
 	{
-		Image3D image = createData(2, 2, 2);
+		final Image3D image = createData(2, 2, 2);
 		Assert.assertEquals(0, image.findMinIndex(0, 0, 0, 2, 2, 2));
 		Assert.assertEquals(1, image.findMinIndex(1, 0, 0, 2, 2, 2));
 		Assert.assertEquals(2, image.findMinIndex(0, 1, 0, 2, 2, 2));
@@ -150,16 +150,16 @@ public abstract class Image3DTest
 	private void canFindMin(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that crop works!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d);
-			int i = findMinIndex(croppedData);
-			int[] xyz = croppedData.getXYZ(i);
+			final Image3D croppedData = image.crop(x, y, z, w, h, d);
+			final int i = findMinIndex(croppedData);
+			final int[] xyz = croppedData.getXYZ(i);
 
-			int j = image.findMinIndex(x, y, z, w, h, d);
-			int[] xyz2 = image.getXYZ(j);
+			final int j = image.findMinIndex(x, y, z, w, h, d);
+			final int[] xyz2 = image.getXYZ(j);
 
 			Assert.assertEquals(xyz[0] + x, xyz2[0]);
 			Assert.assertEquals(xyz[1] + y, xyz2[1]);
@@ -170,7 +170,7 @@ public abstract class Image3DTest
 	@Test
 	public void canFindMax()
 	{
-		Image3D image = createData(2, 2, 2);
+		final Image3D image = createData(2, 2, 2);
 		Assert.assertEquals(7, image.findMaxIndex(0, 0, 0, 2, 2, 2));
 		Assert.assertEquals(6, image.findMaxIndex(0, 0, 0, 1, 2, 2));
 		Assert.assertEquals(5, image.findMaxIndex(0, 0, 0, 2, 1, 2));
@@ -189,16 +189,16 @@ public abstract class Image3DTest
 	private void canFindMax(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that crop works!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d);
-			int i = findMaxIndex(croppedData);
-			int[] xyz = croppedData.getXYZ(i);
+			final Image3D croppedData = image.crop(x, y, z, w, h, d);
+			final int i = findMaxIndex(croppedData);
+			final int[] xyz = croppedData.getXYZ(i);
 
-			int j = image.findMaxIndex(x, y, z, w, h, d);
-			int[] xyz2 = image.getXYZ(j);
+			final int j = image.findMaxIndex(x, y, z, w, h, d);
+			final int[] xyz2 = image.getXYZ(j);
 
 			Assert.assertEquals(xyz[0] + x, xyz2[0]);
 			Assert.assertEquals(xyz[1] + y, xyz2[1]);
@@ -210,7 +210,7 @@ public abstract class Image3DTest
 	public void canComputeSum()
 	{
 		// Bounds checks
-		Image3D image = createData(2, 2, 2);
+		final Image3D image = createData(2, 2, 2);
 		Assert.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2), 0);
 		Assert.assertEquals(0, image.computeSum(0, 0, 0, 0, 0, 0), 0);
 		Assert.assertEquals(1, image.computeSum(0, 0, 0, 1, 1, 1), 0);
@@ -231,13 +231,13 @@ public abstract class Image3DTest
 	private void canComputeSum(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that crop works!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d);
-			double e = sum(croppedData);
-			double o = image.computeSum(x, y, z, w, h, d);
+			final Image3D croppedData = image.crop(x, y, z, w, h, d);
+			final double e = sum(croppedData);
+			final double o = image.computeSum(x, y, z, w, h, d);
 
 			Assert.assertEquals(o, e, 0);
 		}
@@ -246,15 +246,15 @@ public abstract class Image3DTest
 	@Test
 	public void canComputeRollingSumTable()
 	{
-		int w = 2, h = 3, d = 4;
-		Image3D image = createData(w, h, d);
-		double[] table = image.computeRollingSumTable(null);
+		final int w = 2, h = 3, d = 4;
+		final Image3D image = createData(w, h, d);
+		final double[] table = image.computeRollingSumTable(null);
 		for (int dd = 1, i = 0; dd <= d; dd++)
 			for (int hh = 1; hh <= h; hh++)
 				for (int ww = 1; ww <= w; ww++)
 				{
-					double e = image.computeSum(0, 0, 0, ww, hh, dd);
-					double o = table[i++];
+					final double e = image.computeSum(0, 0, 0, ww, hh, dd);
+					final double o = table[i++];
 					Assert.assertEquals(e, o, 1e-3);
 				}
 	}
@@ -263,8 +263,8 @@ public abstract class Image3DTest
 	public void canComputeSumUsingTable()
 	{
 		// Bounds checks
-		Image3D image = createData(2, 2, 2);
-		double[] table = image.computeRollingSumTable(null);
+		final Image3D image = createData(2, 2, 2);
+		final double[] table = image.computeRollingSumTable(null);
 		//testComputeSum(36, image,table, 0, 0, 0, 2, 2, 2);
 		testComputeSum(36, image, table, 0, 0, 0, 5, 7, 9);
 		testComputeSum(0, image, table, 0, 0, 0, 0, 0, 0);
@@ -286,22 +286,22 @@ public abstract class Image3DTest
 	private void canComputeSumUsingTable(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that crop works!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
-			double[] table = image.computeRollingSumTable(null);
+			final Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			final double[] table = image.computeRollingSumTable(null);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d);
-			double e = sum(croppedData);
+			final Image3D croppedData = image.crop(x, y, z, w, h, d);
+			final double e = sum(croppedData);
 
 			testComputeSum(e, image, table, x, y, z, w, h, d);
 		}
 	}
 
-	private void testComputeSum(double e, Image3D image, double[] table, int x, int y, int z, int w, int h, int d)
+	private static void testComputeSum(double e, Image3D image, double[] table, int x, int y, int z, int w, int h, int d)
 	{
-		double o = image.computeSum(table, x, y, z, w, h, d);
-		double o2 = image.computeSumFast(table, x, y, z, w, h, d);
+		final double o = image.computeSum(table, x, y, z, w, h, d);
+		final double o2 = image.computeSumFast(table, x, y, z, w, h, d);
 
 		// This may be different due to floating point error
 		// but we are adding integers so it should be OK
@@ -320,19 +320,19 @@ public abstract class Image3DTest
 	private void canFill(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that copy, crop and insert work!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
 			image.fill(1);
 			image.fill(x, y, z, w, h, d, 2);
 
-			Image3D image2 = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image2 = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
 			image2.fill(1);
-			Image3D blank = createEmptyData(w, h, d);
+			final Image3D blank = createEmptyData(w, h, d);
 			blank.fill(2);
 			image2.insert(x, y, z, blank);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d);
+			final Image3D croppedData = image.crop(x, y, z, w, h, d);
 
 			assertEquals(croppedData, blank);
 
@@ -351,19 +351,19 @@ public abstract class Image3DTest
 	private void canFillOutside(int x, int y, int z, int w, int h, int d)
 	{
 		// This test assumes that copy, crop and insert work!
-		for (int pad : new int[] { 0, 1 })
+		for (final int pad : new int[] { 0, 1 })
 		{
-			Image3D image = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
 			image.fill(1);
 			image.fillOutside(x, y, z, w, h, d, 2);
 
-			Image3D image2 = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			final Image3D image2 = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
 			image2.fill(2);
-			Image3D blank = createEmptyData(w, h, d);
+			final Image3D blank = createEmptyData(w, h, d);
 			blank.fill(1);
 			image2.insert(x, y, z, blank);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d);
+			final Image3D croppedData = image.crop(x, y, z, w, h, d);
 
 			assertEquals(croppedData, blank);
 

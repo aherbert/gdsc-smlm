@@ -28,11 +28,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.XmlUtils;
+import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
-import gdsc.test.TimingTask;
 
 @SuppressWarnings({ "javadoc" })
 public class FilterTest
@@ -40,14 +40,14 @@ public class FilterTest
 	@Test
 	public void canCompareMultiFilter()
 	{
-		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
-		MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
-			MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			MultiFilter f2 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			int e = f1.weakest((Filter) f2);
-			int o = f1.weakest(f2);
+			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final MultiFilter f2 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final int e = f1.weakest((Filter) f2);
+			final int o = f1.weakest(f2);
 			Assert.assertEquals(e, o);
 		}
 	}
@@ -55,14 +55,14 @@ public class FilterTest
 	@Test
 	public void canCompareMultiFilter2()
 	{
-		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
-		MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
-			MultiFilter2 f1 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			MultiFilter2 f2 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			int e = f1.weakest((Filter) f2);
-			int o = f1.weakest(f2);
+			final MultiFilter2 f1 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final MultiFilter2 f2 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final int e = f1.weakest((Filter) f2);
+			final int o = f1.weakest(f2);
 			Assert.assertEquals(e, o);
 		}
 	}
@@ -72,20 +72,18 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		final double[][][] data = new double[1000][][];
 		for (int i = data.length; i-- > 0;)
-		{
 			data[i] = new double[][] { random(f1.getNumberOfParameters(), randomGenerator),
 					random(f1.getNumberOfParameters(), randomGenerator) };
-		}
 
-		TimingService ts = new TimingService();
+		final TimingService ts = new TimingService();
 
-		ts.execute(new TimingTask()
+		ts.execute(new BaseTimingTask("MultiFilter")
 		{
 			@Override
 			public Object getData(int i)
@@ -96,31 +94,20 @@ public class FilterTest
 			@Override
 			public Object run(Object data)
 			{
-				MultiFilter f1 = ((MultiFilter[]) data)[0];
-				MultiFilter f2 = ((MultiFilter[]) data)[1];
+				final MultiFilter f1 = ((MultiFilter[]) data)[0];
+				final MultiFilter f2 = ((MultiFilter[]) data)[1];
 				f1.weakest((Filter) f2);
 				return null;
 			}
 
 			@Override
-			public void check(int i, Object result)
-			{
-			}
-
-			@Override
 			public int getSize()
 			{
 				return data.length;
 			}
-
-			@Override
-			public String getName()
-			{
-				return "MultiFilter";
-			}
 		});
 
-		ts.execute(new TimingTask()
+		ts.execute(new BaseTimingTask("MultiFilter direct")
 		{
 			@Override
 			public Object getData(int i)
@@ -131,15 +118,10 @@ public class FilterTest
 			@Override
 			public Object run(Object data)
 			{
-				MultiFilter f1 = ((MultiFilter[]) data)[0];
-				MultiFilter f2 = ((MultiFilter[]) data)[1];
+				final MultiFilter f1 = ((MultiFilter[]) data)[0];
+				final MultiFilter f2 = ((MultiFilter[]) data)[1];
 				f1.weakest(f2);
 				return null;
-			}
-
-			@Override
-			public void check(int i, Object result)
-			{
 			}
 
 			@Override
@@ -147,15 +129,9 @@ public class FilterTest
 			{
 				return data.length;
 			}
-
-			@Override
-			public String getName()
-			{
-				return "MultiFilter direct";
-			}
 		});
 
-		ts.execute(new TimingTask()
+		ts.execute(new BaseTimingTask("MultiFilter2")
 		{
 			@Override
 			public Object getData(int i)
@@ -167,15 +143,10 @@ public class FilterTest
 			@Override
 			public Object run(Object data)
 			{
-				MultiFilter2 f1 = ((MultiFilter2[]) data)[0];
-				MultiFilter2 f2 = ((MultiFilter2[]) data)[1];
+				final MultiFilter2 f1 = ((MultiFilter2[]) data)[0];
+				final MultiFilter2 f2 = ((MultiFilter2[]) data)[1];
 				f1.weakest((Filter) f2);
 				return null;
-			}
-
-			@Override
-			public void check(int i, Object result)
-			{
 			}
 
 			@Override
@@ -183,15 +154,9 @@ public class FilterTest
 			{
 				return data.length;
 			}
-
-			@Override
-			public String getName()
-			{
-				return "MultiFilter2";
-			}
 		});
 
-		ts.execute(new TimingTask()
+		ts.execute(new BaseTimingTask("MultiFilter2 direct")
 		{
 			@Override
 			public Object getData(int i)
@@ -203,48 +168,37 @@ public class FilterTest
 			@Override
 			public Object run(Object data)
 			{
-				MultiFilter2 f1 = ((MultiFilter2[]) data)[0];
-				MultiFilter2 f2 = ((MultiFilter2[]) data)[1];
+				final MultiFilter2 f1 = ((MultiFilter2[]) data)[0];
+				final MultiFilter2 f2 = ((MultiFilter2[]) data)[1];
 				f1.weakest(f2);
 				return null;
-			}
-
-			@Override
-			public void check(int i, Object result)
-			{
 			}
 
 			@Override
 			public int getSize()
 			{
 				return data.length;
-			}
-
-			@Override
-			public String getName()
-			{
-				return "MultiFilter2 direct";
 			}
 		});
 
 		ts.check();
 
-		int size = ts.repeat();
+		final int size = ts.repeat();
 		ts.repeat(size);
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
 		for (int i = 0; i < size; i += 2)
 		{
-			TimingResult slow = ts.get(-(i + 2));
-			TimingResult fast = ts.get(-(i + 1));
+			final TimingResult slow = ts.get(-(i + 2));
+			final TimingResult fast = ts.get(-(i + 1));
 			Assert.assertTrue(slow.getMin() > fast.getMin());
 		}
 	}
 
-	private double[] random(int n, RandomGenerator r)
+	private static double[] random(int n, RandomGenerator r)
 	{
-		double[] p = new double[n];
+		final double[] p = new double[n];
 		while (n-- > 0)
 			p[n] = r.nextInt(3);
 		return p;
@@ -254,20 +208,20 @@ public class FilterTest
 	public void canSerialiseMultiFilter()
 	{
 		// Check the XStream serialisation supports inheritance
-		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
 		testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
 		testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
 	}
 
-	private void testSerialisation(MultiFilter f, RandomGenerator randomGenerator)
+	private static void testSerialisation(MultiFilter f, RandomGenerator randomGenerator)
 	{
 		for (int i = 10; i-- > 0;)
 		{
-			MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			String xml = f1.toXML();
+			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final String xml = f1.toXML();
 			TestSettings.debugln(XmlUtils.prettyPrintXml(xml));
-			MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
+			final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
 			Assert.assertTrue(f1.getClass().equals(f2.getClass()));
 			Assert.assertEquals(f1, f2);
 		}

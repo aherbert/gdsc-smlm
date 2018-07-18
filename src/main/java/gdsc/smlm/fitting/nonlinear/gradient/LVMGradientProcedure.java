@@ -94,9 +94,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 				this.y[i] = y[i] - b[i];
 		}
 		else
-		{
 			this.y = y;
-		}
 		this.func = func;
 		this.n = func.getNumberOfGradients();
 		beta = new double[n];
@@ -170,7 +168,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	 */
 	public double[][] getAlphaMatrix()
 	{
-		double[][] a = new double[n][n];
+		final double[][] a = new double[n][n];
 		getAlphaMatrix(a);
 		return a;
 	}
@@ -190,7 +188,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	 */
 	public double[] getAlphaLinear()
 	{
-		double[] a = new double[n * n];
+		final double[] a = new double[n * n];
 		getAlphaLinear(a);
 		return a;
 	}
@@ -246,9 +244,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	protected double[][] toMatrix(double[] data, double[][] out)
 	{
 		for (int i = 0, pos = 0; i < n; i++, pos += n)
-		{
 			System.arraycopy(data, pos, out[i], 0, n);
-		}
 		return out;
 	}
 

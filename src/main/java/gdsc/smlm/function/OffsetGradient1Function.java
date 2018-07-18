@@ -31,7 +31,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 {
 	/** The gradient1 function. */
 	protected final Gradient1Function f1;
-	
+
 	/** The procedure. */
 	protected Gradient1Procedure procedure;
 
@@ -44,10 +44,10 @@ public class OffsetGradient1Function extends OffsetValueFunction
 
 		/** The values. */
 		public final double[] values;
-		
+
 		/** The dyda gradients. */
 		public final double[][] dyda;
-		
+
 		/** The number of gradients. */
 		public final int length;
 
@@ -96,10 +96,10 @@ public class OffsetGradient1Function extends OffsetValueFunction
 
 	/** Used to store all the values and gradients for the NonLinearFunction interface */
 	protected FunctionStore store = null;
-	
+
 	/** All the values for the NonLinearFunction interface. */
 	protected double[] all_values;
-	
+
 	/** All the gradients for the NonLinearFunction interface. */
 	protected double[][] all_dyda;
 
@@ -200,9 +200,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		{
 			// Avoid multiple wrapping
 			if (func instanceof OffsetGradient1Function)
-			{
 				return new OffsetGradient1Function((OffsetGradient1Function) func, b);
-			}
 			return new OffsetGradient1Function(func, b);
 		}
 		return func;

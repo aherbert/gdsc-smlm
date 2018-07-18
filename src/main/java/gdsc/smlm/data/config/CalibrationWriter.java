@@ -340,7 +340,7 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void clearGlobalCameraSettings()
 	{
-		CameraCalibration.Builder b = getBuilder().getCameraCalibrationBuilder();
+		final CameraCalibration.Builder b = getBuilder().getCameraCalibrationBuilder();
 		b.setBias(0);
 		b.setReadNoise(0);
 		setCountPerPhoton(0); // gain

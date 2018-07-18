@@ -44,7 +44,7 @@ public class PerPixelCameraModelTest
 	final static int w = 113, h = 29, size;
 	static
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		size = w * h;
 		bias = new float[size];
 		gain = new float[size];
@@ -64,8 +64,8 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canGetDataWithFullBounds()
 	{
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
-		Rectangle bounds = new Rectangle(0, 0, w, h);
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
+		final Rectangle bounds = new Rectangle(0, 0, w, h);
 		Assert.assertArrayEquals(bias, model.getBias(bounds), 0);
 		Assert.assertArrayEquals(gain, model.getGain(bounds), 0);
 		Assert.assertArrayEquals(variance, model.getVariance(bounds), 0);
@@ -83,14 +83,14 @@ public class PerPixelCameraModelTest
 		canGetCropData(false);
 	}
 
-	private void canGetCropData(boolean initialise)
+	private static void canGetCropData(boolean initialise)
 	{
-		PerPixelCameraModel model = createModel(initialise);
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		final PerPixelCameraModel model = createModel(initialise);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = getBounds(rand, ie);
+			final Rectangle bounds = getBounds(rand, ie);
 			check(bias, bounds, model.getBias(bounds));
 			check(gain, bounds, model.getGain(bounds));
 			check(variance, bounds, model.getVariance(bounds));
@@ -98,26 +98,26 @@ public class PerPixelCameraModelTest
 		}
 	}
 
-	private Rectangle getBounds(RandomGenerator rand, ImageExtractor ie)
+	private static Rectangle getBounds(RandomGenerator rand, ImageExtractor ie)
 	{
-		Rectangle bounds = ie.getBoxRegionBounds(5 + rand.nextInt(w - 10), 5 + rand.nextInt(h - 10),
+		final Rectangle bounds = ie.getBoxRegionBounds(5 + rand.nextInt(w - 10), 5 + rand.nextInt(h - 10),
 				2 + rand.nextInt(3));
 		return bounds;
 	}
 
-	private PerPixelCameraModel createModel(boolean initialise)
+	private static PerPixelCameraModel createModel(boolean initialise)
 	{
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
 		if (initialise)
 			model.initialise();
 		return model;
 	}
 
-	private void check(float[] data, Rectangle bounds, float[] o)
+	private static void check(float[] data, Rectangle bounds, float[] o)
 	{
-		FloatProcessor ip = new FloatProcessor(w, h, data.clone());
+		final FloatProcessor ip = new FloatProcessor(w, h, data.clone());
 		ip.setRoi(bounds);
-		float[] e = (float[]) (ip.crop().getPixels());
+		final float[] e = (float[]) (ip.crop().getPixels());
 		Assert.assertArrayEquals(e, o, 0);
 	}
 
@@ -128,15 +128,15 @@ public class PerPixelCameraModelTest
 		canCropAndGetData(false);
 	}
 
-	private void canCropAndGetData(boolean initialise)
+	private static void canCropAndGetData(boolean initialise)
 	{
-		PerPixelCameraModel model = createModel(initialise);
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		final PerPixelCameraModel model = createModel(initialise);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = getBounds(rand, ie);
-			CameraModel model2 = model.crop(bounds, false);
+			final Rectangle bounds = getBounds(rand, ie);
+			final CameraModel model2 = model.crop(bounds, false);
 			Assert.assertEquals(model2.getBounds(), bounds);
 			check(bias, bounds, model2.getBias(bounds));
 			check(gain, bounds, model2.getGain(bounds));
@@ -148,20 +148,20 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canConvertDataWithFullBounds()
 	{
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
 		checkConversion(new Rectangle(0, 0, w, h), model);
 	}
 
-	private void checkConversion(Rectangle bounds, CameraModel model)
+	private static void checkConversion(Rectangle bounds, CameraModel model)
 	{
-		FloatProcessor ip = new FloatProcessor(w, h, image.clone());
+		final FloatProcessor ip = new FloatProcessor(w, h, image.clone());
 		ip.setRoi(bounds);
-		float[] e = (float[]) (ip.crop().getPixels());
+		final float[] e = (float[]) (ip.crop().getPixels());
 		float[] o = e.clone();
-		float[] o2 = e.clone();
+		final float[] o2 = e.clone();
 
 		ip.setPixels(bias);
-		float[] bias = (float[]) (ip.crop().getPixels());
+		final float[] bias = (float[]) (ip.crop().getPixels());
 
 		for (int i = 0; i < e.length; i++)
 			e[i] -= bias[i];
@@ -169,7 +169,7 @@ public class PerPixelCameraModelTest
 		Assert.assertArrayEquals(e, o, 0);
 
 		ip.setPixels(gain);
-		float[] gain = (float[]) (ip.crop().getPixels());
+		final float[] gain = (float[]) (ip.crop().getPixels());
 
 		for (int i = 0; i < e.length; i++)
 			e[i] /= gain[i];
@@ -184,12 +184,12 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canConvertDataWithCropBounds()
 	{
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int j = 0; j < 10; j++)
 		{
-			Rectangle bounds = getBounds(rand, ie);
+			final Rectangle bounds = getBounds(rand, ie);
 			checkConversion(bounds, model);
 		}
 	}
@@ -197,12 +197,12 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canCropAndConvertDataWithCropBounds()
 	{
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int j = 0; j < 10; j++)
 		{
-			Rectangle bounds = getBounds(rand, ie);
+			final Rectangle bounds = getBounds(rand, ie);
 			checkConversion(bounds, model.crop(bounds, false));
 		}
 	}
@@ -210,13 +210,13 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canGetWeightsWithPositiveVariance()
 	{
-		float[] var = variance.clone();
+		final float[] var = variance.clone();
 		for (int i = 0; i < var.length; i++)
 			if (var[i] == 0)
 				var[i] = 1;
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
-		float[] w = model.getWeights(model.getBounds());
-		float[] e = var;
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
+		final float[] w = model.getWeights(model.getBounds());
+		final float[] e = var;
 		for (int i = 0; i < e.length; i++)
 			e[i] = (float) (1.0 / e[i]);
 		Assert.assertArrayEquals(e, w, 0);
@@ -225,10 +225,10 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canGetWeightsWithAllZeroVariance()
 	{
-		float[] var = new float[variance.length];
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
-		float[] w = model.getWeights(model.getBounds());
-		float[] e = var;
+		final float[] var = new float[variance.length];
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
+		final float[] w = model.getWeights(model.getBounds());
+		final float[] e = var;
 		Arrays.fill(e, 1f);
 		Assert.assertArrayEquals(e, w, 0);
 	}
@@ -236,12 +236,12 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canGetWeightsWithZeroVariance()
 	{
-		float[] var = variance.clone();
+		final float[] var = variance.clone();
 		var[0] = 0;
-		float min = SimpleArrayUtils.minAboveZero(var);
-		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
-		float[] w = model.getWeights(model.getBounds());
-		float[] e = var;
+		final float min = SimpleArrayUtils.minAboveZero(var);
+		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
+		final float[] w = model.getWeights(model.getBounds());
+		final float[] e = var;
 		for (int i = 0; i < e.length; i++)
 			e[i] = (e[i] == 0) ? (float) (1.0 / min) : (float) (1.0 / e[i]);
 		Assert.assertArrayEquals(e, w, 0);
@@ -261,17 +261,17 @@ public class PerPixelCameraModelTest
 		canGetMeanVariance(false, true);
 	}
 
-	private void canGetMeanVariance(boolean initialise, boolean normalised)
+	private static void canGetMeanVariance(boolean initialise, boolean normalised)
 	{
-		PerPixelCameraModel model = createModel(initialise);
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		final PerPixelCameraModel model = createModel(initialise);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = getBounds(rand, ie);
-			float[] v = (normalised) ? model.getNormalisedVariance(bounds) : model.getVariance(bounds);
-			double e = Maths.sum(v) / v.length;
-			double o = (normalised) ? model.getMeanNormalisedVariance(bounds) : model.getMeanVariance(bounds);
+			final Rectangle bounds = getBounds(rand, ie);
+			final float[] v = (normalised) ? model.getNormalisedVariance(bounds) : model.getVariance(bounds);
+			final double e = Maths.sum(v) / v.length;
+			final double o = (normalised) ? model.getMeanNormalisedVariance(bounds) : model.getMeanVariance(bounds);
 			Assert.assertEquals(e, o, 0);
 		}
 	}
@@ -279,15 +279,15 @@ public class PerPixelCameraModelTest
 	@Test
 	public void canGetCoordinateData()
 	{
-		int ox = 2;
-		int oy = 3;
-		int w = 8;
-		int h = 10;
-		int size = w * h;
-		float[] bias = Arrays.copyOf(PerPixelCameraModelTest.bias, size);
-		float[] gain = Arrays.copyOf(PerPixelCameraModelTest.gain, size);
-		float[] variance = Arrays.copyOf(PerPixelCameraModelTest.variance, size);
-		PerPixelCameraModel model = new PerPixelCameraModel(ox, oy, w, h, bias, gain, variance);
+		final int ox = 2;
+		final int oy = 3;
+		final int w = 8;
+		final int h = 10;
+		final int size = w * h;
+		final float[] bias = Arrays.copyOf(PerPixelCameraModelTest.bias, size);
+		final float[] gain = Arrays.copyOf(PerPixelCameraModelTest.gain, size);
+		final float[] variance = Arrays.copyOf(PerPixelCameraModelTest.variance, size);
+		final PerPixelCameraModel model = new PerPixelCameraModel(ox, oy, w, h, bias, gain, variance);
 		for (int y = 0, y1 = oy, i = 0; y < h; y++, y1++)
 			for (int x = 0, x1 = ox; x < w; x++, x1++, i++)
 			{

@@ -36,7 +36,7 @@ public class CodeReporter
 	 */
 	public static void debug(Throwable t)
 	{
-		StackTraceElement e = t.getStackTrace()[0];
+		final StackTraceElement e = t.getStackTrace()[0];
 		System.err.printf("%s:%s:%d\n", e.getClassName(), e.getMethodName(), e.getLineNumber());
 	}
 }

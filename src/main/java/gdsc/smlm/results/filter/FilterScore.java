@@ -30,16 +30,16 @@ public class FilterScore implements Comparable<FilterScore>
 {
 	/** The filter. */
 	final public Filter filter;
-	
+
 	/** The score. */
 	final public double score;
-	
+
 	/** The criteria. */
 	final public double criteria;
-	
+
 	/** Flag to indicate if the criteria passed. */
 	final public boolean criteriaPassed;
-	
+
 	/** Flag to indicate if the filters are all same type. */
 	final public boolean allSameType;
 
@@ -94,13 +94,9 @@ public class FilterScore implements Comparable<FilterScore>
 				return 1;
 			// If the same type then compare the parameters
 			if (allSameType)
-			{
 				return compareParameters(that);
-			}
 			else if (this.filter.getType().equals(that.filter.getType()))
-			{
 				return compareParameters(that);
-			}
 			return 0;
 		}
 		else
@@ -120,13 +116,9 @@ public class FilterScore implements Comparable<FilterScore>
 				return 1;
 			// If the same type then compare the parameters
 			if (allSameType)
-			{
 				return compareParameters(that);
-			}
 			else if (this.filter.getType().equals(that.filter.getType()))
-			{
 				return compareParameters(that);
-			}
 			return 0;
 		}
 	}

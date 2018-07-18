@@ -100,20 +100,20 @@ public class CameraModelManager implements PlugIn
 
 		// Try to save to file
 		//filename = Utils.replaceExtension(filename, ".tif");
-		String name = getName(filename);
+		final String name = getName(filename);
 
-		ImageStack stack = new ImageStack(cameraModel.getWidth(), cameraModel.getHeight());
+		final ImageStack stack = new ImageStack(cameraModel.getWidth(), cameraModel.getHeight());
 		stack.addSlice("Bias", cameraModel.getBias());
 		stack.addSlice("Gain", cameraModel.getGain());
 		stack.addSlice("Variance", cameraModel.getVariance());
-		ImagePlus imp = new ImagePlus(name, stack);
+		final ImagePlus imp = new ImagePlus(name, stack);
 		imp.setIgnoreGlobalCalibration(true);
-		Calibration cal = imp.getCalibration();
+		final Calibration cal = imp.getCalibration();
 		cal.xOrigin = cameraModel.getXOrigin();
 		cal.yOrigin = cameraModel.getYOrigin();
 		imp.setProperty("Info", INFO_TAG);
 		// Do this to allow the filename to be something other than .tif
-		boolean ok = new FileSaver(imp).saveAsTiffStack(filename);
+		final boolean ok = new FileSaver(imp).saveAsTiffStack(filename);
 
 		if (ok)
 			saveResource(cameraModel, filename, name);
@@ -123,21 +123,21 @@ public class CameraModelManager implements PlugIn
 
 	private static String getName(String filename)
 	{
-		File file = new File(filename);
-		String name = Utils.removeExtension(file.getName());
+		final File file = new File(filename);
+		final String name = Utils.removeExtension(file.getName());
 		return name;
 	}
 
 	private static void saveResource(PerPixelCameraModel cameraModel, String filename, String name)
 	{
-		CameraModelResource.Builder resource = CameraModelResource.newBuilder();
+		final CameraModelResource.Builder resource = CameraModelResource.newBuilder();
 		resource.setX(cameraModel.getXOrigin());
 		resource.setY(cameraModel.getYOrigin());
 		resource.setWidth(cameraModel.getWidth());
 		resource.setHeight(cameraModel.getHeight());
 		resource.setFilename(filename);
 
-		CameraModelSettings.Builder settings = getSettings();
+		final CameraModelSettings.Builder settings = getSettings();
 		settings.putCameraModelResources(name, resource.build());
 		SettingsManager.writeSettings(settings.build());
 
@@ -158,9 +158,9 @@ public class CameraModelManager implements PlugIn
 		PerPixelCameraModel model = map.get(name);
 		if (model == null)
 		{
-			CameraModelSettings.Builder settings = getSettings();
+			final CameraModelSettings.Builder settings = getSettings();
 			// Try and get the named resource
-			CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
+			final CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 			if (resource == null)
 				return null;
 			model = loadFromFile(name, resource.getFilename());
@@ -174,7 +174,7 @@ public class CameraModelManager implements PlugIn
 	private static PerPixelCameraModel loadFromFile(String name, String filename)
 	{
 		// Try and load the resource
-		ImagePlus imp = IJ.openImage(filename);
+		final ImagePlus imp = IJ.openImage(filename);
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
 		if (imp == null)
@@ -183,7 +183,7 @@ public class CameraModelManager implements PlugIn
 			return null;
 		}
 		// Check stack size
-		ImageStack stack = imp.getImageStack();
+		final ImageStack stack = imp.getImageStack();
 		if (stack.getSize() != 3)
 		{
 			Utils.log("Camera model %s requires 3 image stack from file: %s", name, filename);
@@ -191,16 +191,16 @@ public class CameraModelManager implements PlugIn
 		}
 		// Get the origin
 		imp.setIgnoreGlobalCalibration(true);
-		Calibration cal = imp.getCalibration();
-		Rectangle bounds = new Rectangle((int) cal.xOrigin, (int) cal.yOrigin, stack.getWidth(), stack.getHeight());
+		final Calibration cal = imp.getCalibration();
+		final Rectangle bounds = new Rectangle((int) cal.xOrigin, (int) cal.yOrigin, stack.getWidth(), stack.getHeight());
 		try
 		{
-			float[] bias = (float[]) stack.getPixels(1);
-			float[] gain = (float[]) stack.getPixels(2);
-			float[] variance = (float[]) stack.getPixels(3);
+			final float[] bias = (float[]) stack.getPixels(1);
+			final float[] gain = (float[]) stack.getPixels(2);
+			final float[] variance = (float[]) stack.getPixels(3);
 			return PerPixelCameraModel.create(bounds, bias, gain, variance);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			Utils.log("Failed to load camera model %s from file: %s. %s", name, filename, e.getMessage());
 		}
@@ -216,15 +216,15 @@ public class CameraModelManager implements PlugIn
 	 */
 	public static String[] listCameraModels(boolean includeNone)
 	{
-		CameraModelSettings.Builder settings = getSettings();
-		List<String> list = createList(includeNone);
+		final CameraModelSettings.Builder settings = getSettings();
+		final List<String> list = createList(includeNone);
 		list.addAll(settings.getCameraModelResourcesMap().keySet());
 		return list.toArray(new String[list.size()]);
 	}
 
 	private static List<String> createList(boolean includeNone)
 	{
-		List<String> list = new TurboList<>();
+		final List<String> list = new TurboList<>();
 		if (includeNone)
 			list.add("[None]");
 		return list;
@@ -243,11 +243,11 @@ public class CameraModelManager implements PlugIn
 	 */
 	public static String[] listCameraModels(boolean includeNone, int width, int height)
 	{
-		CameraModelSettings.Builder settings = getSettings();
-		List<String> list = createList(includeNone);
-		for (Map.Entry<String, CameraModelResource> entry : settings.getCameraModelResourcesMap().entrySet())
+		final CameraModelSettings.Builder settings = getSettings();
+		final List<String> list = createList(includeNone);
+		for (final Map.Entry<String, CameraModelResource> entry : settings.getCameraModelResourcesMap().entrySet())
 		{
-			CameraModelResource resource = entry.getValue();
+			final CameraModelResource resource = entry.getValue();
 			if (resource.getWidth() == width && resource.getHeight() == height)
 				list.add(entry.getKey());
 		}
@@ -276,15 +276,13 @@ public class CameraModelManager implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		String[] options = OPTIONS;
-		CameraModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
+		final CameraModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
 		if (settings.getCameraModelResourcesCount() == 0)
-		{
 			options = Arrays.copyOf(OPTIONS, 2);
-		}
 
 		pluginSettings = SettingsManager.readCameraModelManagerSettings(0).toBuilder();
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Option", options, pluginSettings.getOption());
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -320,14 +318,14 @@ public class CameraModelManager implements PlugIn
 	{
 		// Select an image
 		GenericDialog gd = new GenericDialog(TITLE);
-		String[] list = Utils.getImageList(Utils.GREY_SCALE);
+		final String[] list = Utils.getImageList(Utils.GREY_SCALE);
 		gd.addChoice("Image", list, pluginSettings.getImage());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String image = gd.getNextChoice();
+		final String image = gd.getNextChoice();
 		pluginSettings.setImage(image);
-		ImagePlus imp = WindowManager.getImage(image);
+		final ImagePlus imp = WindowManager.getImage(image);
 		if (imp == null)
 		{
 			IJ.error(TITLE, "Failed to find image: " + image);
@@ -336,12 +334,12 @@ public class CameraModelManager implements PlugIn
 
 		// Select the model
 		gd = new GenericDialog(TITLE);
-		String[] MODELS = listCameraModels(false);
+		final String[] MODELS = listCameraModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 
 		CameraModel cameraModel = load(name);
@@ -360,19 +358,19 @@ public class CameraModelManager implements PlugIn
 			{
 				bounds = IJImageSource.getBounds(imp);
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				bounds = new Rectangle(pluginSettings.getOriginX(), pluginSettings.getOriginY(), imp.getWidth(),
 						imp.getHeight());
 			}
 			cameraModel = PeakFit.cropCameraModel(cameraModel, bounds, null, false);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return;
 		}
-		Rectangle bounds = cameraModel.getBounds();
+		final Rectangle bounds = cameraModel.getBounds();
 		pluginSettings.setOriginX(bounds.x);
 		pluginSettings.setOriginY(bounds.y);
 
@@ -381,31 +379,31 @@ public class CameraModelManager implements PlugIn
 		cameraModel.setOrigin(0, 0);
 
 		// Filter all the frames
-		ImageSource source = new IJImageSource(imp);
-		ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
+		final ImageSource source = new IJImageSource(imp);
+		final ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
 		for (float[] data = source.next(); data != null; data = source.next())
 		{
 			cameraModel.removeBiasAndGain(data);
 			stack.addSlice(null, data);
 		}
 
-		ImagePlus imp2 = new ImagePlus(imp.getTitle() + " Filtered", stack);
+		final ImagePlus imp2 = new ImagePlus(imp.getTitle() + " Filtered", stack);
 		imp2.copyScale(imp);
 		imp2.show();
 	}
 
 	private void deleteCameraModel()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
-		String[] MODELS = listCameraModels(false);
+		final GenericDialog gd = new GenericDialog(TITLE);
+		final String[] MODELS = listCameraModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 
-		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
+		final CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 		if (resource == null)
 		{
 			IJ.error(TITLE, "Failed to find camera data for model: " + name);
@@ -420,7 +418,7 @@ public class CameraModelManager implements PlugIn
 
 	private static void loadFromDirectory()
 	{
-		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 		egd.addMessage("Load camera models from a directory.");
 		egd.addFilenameField("Directory", directory);
 		egd.showDialog();
@@ -429,7 +427,7 @@ public class CameraModelManager implements PlugIn
 
 		directory = egd.getNextString();
 
-		File[] fileList = (new File(directory)).listFiles(new FileFilter()
+		final File[] fileList = (new File(directory)).listFiles(new FileFilter()
 		{
 			@Override
 			public boolean accept(File pathname)
@@ -438,15 +436,13 @@ public class CameraModelManager implements PlugIn
 			}
 		});
 
-		for (File file : fileList)
-		{
+		for (final File file : fileList)
 			loadFromFileAndSaveResource(file.getPath());
-		}
 	}
 
 	private static void loadFromFile()
 	{
-		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 		egd.addMessage("Load a camera model from file.");
 		egd.addFilenameField("Filename", filename);
 		egd.showDialog();
@@ -460,8 +456,8 @@ public class CameraModelManager implements PlugIn
 
 	private static void loadFromFileAndSaveResource(String filename)
 	{
-		String name = getName(filename);
-		PerPixelCameraModel model = loadFromFile(name, filename);
+		final String name = getName(filename);
+		final PerPixelCameraModel model = loadFromFile(name, filename);
 
 		if (model != null)
 			saveResource(model, filename, name);
@@ -469,17 +465,17 @@ public class CameraModelManager implements PlugIn
 
 	private void viewCameraModel()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
-		String[] MODELS = listCameraModels(false);
+		final GenericDialog gd = new GenericDialog(TITLE);
+		final String[] MODELS = listCameraModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = gd.getNextChoice();
+		final String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 
 		// Try and get the named resource
-		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
+		final CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 		if (resource == null)
 		{
 			IJ.error(TITLE, "Failed to find camera data for model: " + name);
@@ -495,7 +491,7 @@ public class CameraModelManager implements PlugIn
 			IJ.error(TITLE, "Failed to load camera data for model: " + name);
 			return;
 		}
-		ImageStack stack = imp.getImageStack();
+		final ImageStack stack = imp.getImageStack();
 		if (stack.getSize() != 3)
 		{
 			IJ.error(TITLE, "Failed to load camera data for model: " + name +
@@ -507,17 +503,17 @@ public class CameraModelManager implements PlugIn
 			logStats(stack.getSliceLabel(n), stack.getProcessor(n));
 
 		// Show normalised variance: var/g^2
-		float[] var_g2 = new float[stack.getWidth() * stack.getHeight()];
+		final float[] var_g2 = new float[stack.getWidth() * stack.getHeight()];
 		try
 		{
-			float[] gain = (float[]) stack.getPixels(2);
-			float[] variance = (float[]) stack.getPixels(3);
+			final float[] gain = (float[]) stack.getPixels(2);
+			final float[] variance = (float[]) stack.getPixels(3);
 
-			ExtendedStatistics stats1 = new ExtendedStatistics();
-			ExtendedStatistics stats2 = new ExtendedStatistics();
+			final ExtendedStatistics stats1 = new ExtendedStatistics();
+			final ExtendedStatistics stats2 = new ExtendedStatistics();
 			for (int i = 0; i < gain.length; i++)
 			{
-				double v1 = variance[i] / Maths.pow2(gain[i]);
+				final double v1 = variance[i] / Maths.pow2(gain[i]);
 				var_g2[i] = (float) v1;
 				stats1.add(Math.sqrt(v1));
 				stats2.add(v1);
@@ -525,7 +521,7 @@ public class CameraModelManager implements PlugIn
 			logStats("var/g^2", stats2);
 			logStats("sqrt(var/g^2)", stats1);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			Utils.log("Failed to load camera model %s from file: %s. %s", name, resource.getFilename(), e.getMessage());
 		}
@@ -535,7 +531,7 @@ public class CameraModelManager implements PlugIn
 		imp = new ImagePlus(name, stack);
 		imp.setDimensions(4, 1, 1);
 		imp.setOpenAsHyperStack(true);
-		CompositeImage cimp = new CompositeImage(imp, CompositeImage.GRAYSCALE);
+		final CompositeImage cimp = new CompositeImage(imp, CompositeImage.GRAYSCALE);
 		cimp.resetDisplayRanges();
 		for (int n = 1; n <= 4; n++)
 		{
@@ -553,18 +549,12 @@ public class CameraModelManager implements PlugIn
 
 	private static void logStats(String name, ImageProcessor ip)
 	{
-		ExtendedStatistics stats = new ExtendedStatistics();
+		final ExtendedStatistics stats = new ExtendedStatistics();
 		if (ip instanceof FloatProcessor)
-		{
 			stats.add((float[]) ip.getPixels());
-		}
 		else
-		{
 			for (int i = ip.getPixelCount(); i-- > 0;)
-			{
 				stats.add(ip.getf(i));
-			}
-		}
 		logStats(name, stats);
 	}
 

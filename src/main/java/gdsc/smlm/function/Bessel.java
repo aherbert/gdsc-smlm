@@ -111,11 +111,9 @@ public class Bessel
 	public static double J2(double x)
 	{
 		if (x == 0.0)
-		{
 			return 0.0;
-		}
-		double value0 = J0(x);
-		double value1 = J1(x);
+		final double value0 = J0(x);
+		final double value1 = J1(x);
 		return 2.0 * value1 / x + value0;
 	}
 

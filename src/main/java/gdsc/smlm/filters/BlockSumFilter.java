@@ -36,20 +36,16 @@ public class BlockSumFilter extends BlockFilter
 	@Override
 	protected Normaliser computeWeightedNormaliser(float n)
 	{
-		float[] divisor = weights.clone();
+		final float[] divisor = weights.clone();
 
 		// Use a mean filter to get the mean of the weights in the region
-		BlockMeanFilter sum = new BlockMeanFilter();
+		final BlockMeanFilter sum = new BlockMeanFilter();
 		if ((int) n == n)
-		{
 			sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
 			//sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
-		}
 		else
-		{
 			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
 			//sum.blockFilter(divisor, weightWidth, weightHeight, n);
-		}
 		return new PerPixelNormaliser(divisor);
 	}
 
@@ -72,7 +68,7 @@ public class BlockSumFilter extends BlockFilter
 	@Override
 	public BlockSumFilter clone()
 	{
-		BlockSumFilter o = (BlockSumFilter) super.clone();
+		final BlockSumFilter o = (BlockSumFilter) super.clone();
 		return o;
 	}
 }

@@ -67,7 +67,7 @@ public class SplitResults implements PlugIn
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;
 		}
-		String[] items = Utils.getImageList(Utils.GREY_8_16);
+		final String[] items = Utils.getImageList(Utils.GREY_8_16);
 		if (items.length == 0)
 		{
 			IJ.error(TITLE, "There are no suitable mask images");
@@ -75,7 +75,7 @@ public class SplitResults implements PlugIn
 		}
 
 		// Show a dialog allowing the results set to be filtered
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to split");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.addChoice("Object_mask", items, objectMask);
@@ -90,14 +90,14 @@ public class SplitResults implements PlugIn
 		showObjectMask = gd.getNextBoolean();
 		nonMaskDataset = gd.getNextBoolean();
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
 			return;
 		}
 
-		ImagePlus imp = WindowManager.getImage(objectMask);
+		final ImagePlus imp = WindowManager.getImage(objectMask);
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No object mask could be found");
@@ -112,7 +112,7 @@ public class SplitResults implements PlugIn
 		IJ.showStatus("Splitting " + TextUtils.pleural(results.size(), "result"));
 
 		// Create an object mask
-		ObjectAnalyzer objectAnalyzer = new ObjectAnalyzer(ip, false);
+		final ObjectAnalyzer objectAnalyzer = new ObjectAnalyzer(ip, false);
 
 		final int maxx = ip.getWidth();
 		final int maxy = ip.getHeight();
@@ -125,7 +125,7 @@ public class SplitResults implements PlugIn
 		final MemoryPeakResults[] resultsSet = new MemoryPeakResults[maxObject + 1];
 		for (int object = 0; object <= maxObject; object++)
 		{
-			MemoryPeakResults newResults = new MemoryPeakResults();
+			final MemoryPeakResults newResults = new MemoryPeakResults();
 			newResults.copySettings(results);
 			newResults.setName(results.getName() + " " + object);
 			resultsSet[object] = newResults;
@@ -135,11 +135,11 @@ public class SplitResults implements PlugIn
 
 		if (showObjectMask)
 		{
-			ImageProcessor objectIp = (maxObject <= 255) ? new ByteProcessor(maxx, maxy)
+			final ImageProcessor objectIp = (maxObject <= 255) ? new ByteProcessor(maxx, maxy)
 					: new ShortProcessor(maxx, maxy);
 			for (int i = 0; i < mask.length; i++)
 				objectIp.set(i, mask[i]);
-			ImagePlus imp = Utils.display(objectMask + " Objects", objectIp);
+			final ImagePlus imp = Utils.display(objectMask + " Objects", objectIp);
 			imp.setDisplayRange(0, maxObject);
 			imp.updateAndDraw();
 		}
@@ -158,12 +158,10 @@ public class SplitResults implements PlugIn
 
 				// Map to the mask objects
 				final int object;
-				int x = (int) (xx / scaleX);
-				int y = (int) (yy / scaleY);
+				final int x = (int) (xx / scaleX);
+				final int y = (int) (yy / scaleY);
 				if (x < 0 || x >= maxx || y < 0 || y >= maxy)
-				{
 					object = 0;
-				}
 				else
 				{
 					final int index = y * maxx + x;
@@ -182,13 +180,11 @@ public class SplitResults implements PlugIn
 		// Add the new results sets to memory
 		i.reset();
 		for (int object = (nonMaskDataset) ? 0 : 1; object <= maxObject; object++)
-		{
 			if (resultsSet[object].isNotEmpty())
 			{
 				MemoryPeakResults.addResults(resultsSet[object]);
 				i.increment();
 			}
-		}
 
 		IJ.showStatus("Split " + TextUtils.pleural(results.size(), "result") + " into " +
 				TextUtils.pleural(i.getCount(), "set"));

@@ -148,10 +148,8 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 		// convert to photons
 		o *= alpha;
 		if (e <= 0)
-		{
 			// If no Poisson mean then just use the Gaussian
 			return FastMath.exp(-0.5 * o * o / sigmasquared) * probabilityNormalisationNoPoisson;
-		}
 		else
 		{
 			//e *= alpha;
@@ -174,10 +172,8 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 		// convert to photons
 		o *= alpha;
 		if (e <= 0)
-		{
 			// If no Poisson mean then just use the Gaussian
 			return (-0.5 * o * o / sigmasquared) + logNormalisationNoPoisson;
-		}
 		else
 		{
 			//e *= alpha;

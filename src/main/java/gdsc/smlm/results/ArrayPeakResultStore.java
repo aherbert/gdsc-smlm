@@ -190,13 +190,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (results instanceof ArrayPeakResultStore)
 		{
-			ArrayPeakResultStore store = (ArrayPeakResultStore) results;
+			final ArrayPeakResultStore store = (ArrayPeakResultStore) results;
 			return addArray(store.results, store.size);
 		}
 		else
-		{
 			return addArray(results.toArray());
-		}
 	}
 
 	/*
@@ -208,7 +206,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	public PeakResult remove(int index)
 	{
 		rangeCheck(index);
-		PeakResult oldValue = results[index];
+		final PeakResult oldValue = results[index];
 		fastRemove(index);
 		return oldValue;
 	}
@@ -248,7 +246,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 */
 	private void fastRemove(int index)
 	{
-		int numMoved = size - index - 1;
+		final int numMoved = size - index - 1;
 		if (numMoved > 0)
 			System.arraycopy(results, index + 1, results, index, numMoved);
 		results[--size] = null; // Let gc do its work
@@ -263,13 +261,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	public void remove(int fromIndex, int toIndex)
 	{
 		if (fromIndex > toIndex)
-		{
 			throw new IllegalArgumentException("fromIndex must be <= toIndex");
-		}
 		rangeCheckWithLowerBounds(fromIndex);
 		rangeCheck(toIndex); // This is above fromIndex so ignore lower bounds check
 		toIndex++; // Make exclusive
-		int numMoved = size - toIndex;
+		final int numMoved = size - toIndex;
 		if (numMoved > 0)
 			System.arraycopy(results, toIndex, results, fromIndex, numMoved);
 		// Let gc do its work
@@ -285,7 +281,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	@Override
 	public boolean remove(PeakResult result)
 	{
-		int index = indexOf(result);
+		final int index = indexOf(result);
 		if (index != -1)
 		{
 			fastRemove(index);
@@ -327,20 +323,16 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	public boolean removeStore(PeakResultStore results)
 	{
 		if (results instanceof ArrayPeakResultStore)
-		{
 			return removeArray(((ArrayPeakResultStore) results).results);
-		}
 		else
-		{
 			return removeArray(results.toArray());
-		}
 	}
 
 	private boolean batchRemove(PeakResult[] results2, boolean complement)
 	{
 		// Adapted from java.utisl.ArrayList
 
-		ArrayPeakResultStore c = new ArrayPeakResultStore(results2);
+		final ArrayPeakResultStore c = new ArrayPeakResultStore(results2);
 		int r = 0, w = 0;
 		boolean modified = false;
 		try
@@ -390,7 +382,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (results == null || results.length == 0)
 		{
-			boolean result = size != 0;
+			final boolean result = size != 0;
 			clear();
 			return result;
 		}
@@ -406,13 +398,9 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	public boolean retainStore(PeakResultStore results)
 	{
 		if (results instanceof ArrayPeakResultStore)
-		{
 			return retainArray(((ArrayPeakResultStore) results).results);
-		}
 		else
-		{
 			return retainArray(results.toArray());
-		}
 	}
 
 	/**
@@ -460,7 +448,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	@Override
 	public PeakResult[] toArray()
 	{
-		PeakResult[] array = new PeakResult[size];
+		final PeakResult[] array = new PeakResult[size];
 		System.arraycopy(results, 0, array, 0, size);
 		return array;
 	}
@@ -486,7 +474,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (deepCopy)
 		{
-			ArrayPeakResultStore copy = new ArrayPeakResultStore(size());
+			final ArrayPeakResultStore copy = new ArrayPeakResultStore(size());
 			for (int i = 0, size = size(); i < size; i++)
 				copy.add(results[i].clone());
 			return copy;
@@ -516,13 +504,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 		final int size = this.size;
 		final BitSet removeSet = new BitSet(size);
 		for (int i = 0; i < size; i++)
-		{
 			if (filter.test(results[i]))
 			{
 				removeSet.set(i);
 				removeCount++;
 			}
-		}
 
 		// shift surviving elements left over the spaces left by removed elements
 		final boolean anyToRemove = removeCount > 0;
@@ -582,8 +568,8 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 		// Fisher-Yates shuffle
 		for (int i = size; i-- > 1;)
 		{
-			int j = randomGenerator.nextInt(i + 1);
-			PeakResult tmp = results[i];
+			final int j = randomGenerator.nextInt(i + 1);
+			final PeakResult tmp = results[i];
 			results[i] = results[j];
 			results[j] = tmp;
 		}
@@ -604,11 +590,9 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 					return i;
 		}
 		else
-		{
 			for (int i = 0; i < size; i++)
 				if (result.equals(results[i]))
 					return i;
-		}
 		return -1;
 	}
 
@@ -627,11 +611,9 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 					return i;
 		}
 		else
-		{
 			for (int i = size; i-- > 0;)
 				if (result.equals(results[i]))
 					return i;
-		}
 		return -1;
 	}
 

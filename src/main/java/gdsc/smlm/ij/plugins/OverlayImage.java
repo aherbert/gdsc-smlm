@@ -60,8 +60,8 @@ public class OverlayImage implements PlugIn
 	 */
 	void addImage()
 	{
-		ImagePlus imp = IJ.getImage();
-		int[] wList = WindowManager.getIDList();
+		final ImagePlus imp = IJ.getImage();
+		final int[] wList = WindowManager.getIDList();
 		if (wList == null || wList.length < 2)
 		{
 			IJ.error("Add Image...", "The command requires at least two open images.");
@@ -71,7 +71,7 @@ public class OverlayImage implements PlugIn
 		int count = 0;
 		for (int i = 0; i < wList.length; i++)
 		{
-			ImagePlus imp2 = WindowManager.getImage(wList[i]);
+			final ImagePlus imp2 = WindowManager.getImage(wList[i]);
 			if (imp2 != null && imp2 != imp && imp.getWidth() >= imp2.getWidth() && imp.getHeight() >= imp2.getHeight())
 				titles[count++] = imp2.getTitle();
 		}
@@ -83,15 +83,15 @@ public class OverlayImage implements PlugIn
 		titles = Arrays.copyOf(titles, count);
 
 		int x = 0, y = 0;
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (roi != null && roi.isArea())
 		{
-			Rectangle r = roi.getBounds();
+			final Rectangle r = roi.getBounds();
 			x = r.x;
 			y = r.y;
 		}
 
-		GenericDialog gd = new GenericDialog("Add Image...");
+		final GenericDialog gd = new GenericDialog("Add Image...");
 		gd.addChoice("Image to add:", titles, title);
 		gd.addNumericField("X location:", x, 0);
 		gd.addNumericField("Y location:", y, 0);
@@ -110,7 +110,7 @@ public class OverlayImage implements PlugIn
 		transparent = gd.getNextBoolean();
 		replace = gd.getNextBoolean();
 
-		ImagePlus overlay = WindowManager.getImage(title);
+		final ImagePlus overlay = WindowManager.getImage(title);
 		if (overlay == imp)
 		{
 			IJ.error("Add Image...", "Image to be added cannot be the same as\n\"" + imp.getTitle() + "\".");
@@ -122,7 +122,7 @@ public class OverlayImage implements PlugIn
 			return;
 		}
 
-		ImageRoi roi2 = new ImageRoi(x, y, overlay.getProcessor());
+		final ImageRoi roi2 = new ImageRoi(x, y, overlay.getProcessor());
 		roi2.setZeroTransparent(transparent);
 		roi2.setName(overlay.getShortTitle());
 		if (opacity != 100)

@@ -30,7 +30,7 @@ public class ParameterSettings
 {
 	/** The name. */
 	public String name = "";
-	
+
 	/** The value. */
 	public String value = "";
 

@@ -124,7 +124,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 */
 	public int findGradientIndex(int parameterIndex)
 	{
-		int[] gradientIndices = gradientIndices();
+		final int[] gradientIndices = gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
 			if (gradientIndices[i] == parameterIndex)
 				return i;
@@ -204,47 +204,41 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			// Map z to a position in the spline
 			// We want 0 to be in the centre.
 			// Note: Scale up the input parameter to the spline scale.
-			double z = cz + scale * tZ;
+			final double z = cz + scale * tZ;
 
 			if (z < 0 || z > maxSz)
-			{
 				return false;
-			}
 
 			// Shift the scaled XY spline bounds by the target centre
-			double x1 = lx + tX;
-			double x2 = ux + tX;
-			double y1 = ly + tY;
-			double y2 = uy + tY;
+			final double x1 = lx + tX;
+			final double x2 = ux + tX;
+			final double y1 = ly + tY;
+			final double y2 = uy + tY;
 
 			// Check if it is within the region
 			if (!(x2 > 0 && y2 > 0 && x1 < maxx && y1 < maxy))
-			{
 				return false;
-			}
 
 			// Convert the lower bounds to integer grid in the target region,
 			// i.e. we sample the region at x=0,1,2,...
 			// We want the first integer that the function overlaps,
 			// i.e. can interpolate a value for so it must be above the lower bounds
-			int ix1 = (int) Math.ceil(x1);
-			int iy1 = (int) Math.ceil(y1);
+			final int ix1 = (int) Math.ceil(x1);
+			final int iy1 = (int) Math.ceil(y1);
 
 			// How far into the unscaled function is the first point.
 			// i.e. x=1 may be 0.6 above the scaled lower bound (0.4) but that would require
 			// the first sample to be taken at spline[1] @ 0.2 if the scale is 2.
-			double x = scale * (ix1 - x1);
-			double y = scale * (iy1 - y1);
+			final double x = scale * (ix1 - x1);
+			final double y = scale * (iy1 - y1);
 
 			// This is the first index for the spline sample
-			int ix = (int) x;
-			int iy = (int) y;
+			final int ix = (int) x;
+			final int iy = (int) y;
 			int iz = (int) z;
 			if (iz == maxSz)
-			{
 				// Special edge case. Interpolation uses the node below with a (z-iz) value of 1
 				iz--;
-			}
 
 			// Get the spline index position for 0,0 offset by the scale (for pre-increment loops)
 			ix0 = ix - scale * ix1 - scale;
@@ -274,9 +268,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 				this.offset = 1 + id * 4;
 				this.neg_tI_by_s3 = -tI_by_s2 * scale;
 				if (order == 2)
-				{
 					this.tI_by_s4 = tI_by_s2 * scale2;
-				}
 			}
 
 			return true;

@@ -112,7 +112,6 @@ public class GradientCalculator
 			}
 		}
 		else
-		{
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da);
@@ -134,7 +133,6 @@ public class GradientCalculator
 
 				ssx += dy * dy;
 			}
-		}
 
 		// Generate symmetric matrix
 		for (int i = 0; i < nparams - 1; i++)
@@ -183,7 +181,7 @@ public class GradientCalculator
 
 		func.initialise(a);
 
-		int[] indices = new int[nparams];
+		final int[] indices = new int[nparams];
 		int nnparams = 0;
 		for (int j = 0; j < nparams; j++)
 		{
@@ -219,7 +217,6 @@ public class GradientCalculator
 			}
 		}
 		else
-		{
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da);
@@ -241,7 +238,6 @@ public class GradientCalculator
 
 				ssx += dy * dy;
 			}
-		}
 
 		// Generate symmetric matrix
 		for (int i = 0; i < nparams - 1; i++)
@@ -286,37 +282,30 @@ public class GradientCalculator
 				}
 			}
 			else
-			{
 				for (int i = 0; i < x.length; i++)
 				{
 					final double dy = y[i] - func.eval(x[i]);
 					ssx += dy * dy;
 				}
+		}
+		else if (func.canComputeWeights())
+		{
+			final double[] w = new double[1];
+			for (int i = 0; i < x.length; i++)
+			{
+				yFit[i] = func.evalw(x[i], w);
+				final double dy = y[i] - yFit[i];
+				final double weight = getWeight(w[0]);
+				ssx += dy * dy * weight;
 			}
 		}
 		else
-		{
-			if (func.canComputeWeights())
+			for (int i = 0; i < x.length; i++)
 			{
-				final double[] w = new double[1];
-				for (int i = 0; i < x.length; i++)
-				{
-					yFit[i] = func.evalw(x[i], w);
-					final double dy = y[i] - yFit[i];
-					final double weight = getWeight(w[0]);
-					ssx += dy * dy * weight;
-				}
+				yFit[i] = func.eval(x[i]);
+				final double dy = y[i] - yFit[i];
+				ssx += dy * dy;
 			}
-			else
-			{
-				for (int i = 0; i < x.length; i++)
-				{
-					yFit[i] = func.eval(x[i]);
-					final double dy = y[i] - yFit[i];
-					ssx += dy * dy;
-				}
-			}
-		}
 
 		return ssx;
 	}
@@ -389,7 +378,6 @@ public class GradientCalculator
 			}
 		}
 		else
-		{
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da);
@@ -411,7 +399,6 @@ public class GradientCalculator
 
 				ssx += dy * dy;
 			}
-		}
 
 		// Generate symmetric matrix
 		for (int i = 0; i < nparams - 1; i++)
@@ -467,7 +454,7 @@ public class GradientCalculator
 
 		func.initialise(a);
 
-		int[] indices = new int[nparams];
+		final int[] indices = new int[nparams];
 		int nnparams = 0;
 		for (int j = 0; j < nparams; j++)
 		{
@@ -503,7 +490,6 @@ public class GradientCalculator
 			}
 		}
 		else
-		{
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da);
@@ -525,7 +511,6 @@ public class GradientCalculator
 
 				ssx += dy * dy;
 			}
-		}
 
 		// Generate symmetric matrix
 		for (int i = 0; i < nparams - 1; i++)
@@ -570,37 +555,30 @@ public class GradientCalculator
 				}
 			}
 			else
-			{
 				for (int i = 0; i < n; i++)
 				{
 					final double dy = y[i] - func.eval(i);
 					ssx += dy * dy;
 				}
+		}
+		else if (func.canComputeWeights())
+		{
+			final double[] w = new double[1];
+			for (int i = 0; i < n; i++)
+			{
+				yFit[i] = func.evalw(i, w);
+				final double dy = y[i] - yFit[i];
+				final double weight = getWeight(w[0]);
+				ssx += dy * dy * weight;
 			}
 		}
 		else
-		{
-			if (func.canComputeWeights())
+			for (int i = 0; i < n; i++)
 			{
-				final double[] w = new double[1];
-				for (int i = 0; i < n; i++)
-				{
-					yFit[i] = func.evalw(i, w);
-					final double dy = y[i] - yFit[i];
-					final double weight = getWeight(w[0]);
-					ssx += dy * dy * weight;
-				}
+				yFit[i] = func.eval(i);
+				final double dy = y[i] - yFit[i];
+				ssx += dy * dy;
 			}
-			else
-			{
-				for (int i = 0; i < n; i++)
-				{
-					yFit[i] = func.eval(i);
-					final double dy = y[i] - yFit[i];
-					ssx += dy * dy;
-				}
-			}
-		}
 
 		return ssx;
 	}
@@ -676,11 +654,9 @@ public class GradientCalculator
 	private static boolean checkIsNaN(final double[][] alpha, final int nparams)
 	{
 		for (int i = 0; i < nparams; i++)
-		{
 			for (int j = 0; j <= i; j++)
 				if (Double.isNaN(alpha[i][j]))
 					return true;
-		}
 		return false;
 	}
 
@@ -709,10 +685,8 @@ public class GradientCalculator
 	private static boolean checkIsNaN(final double[] beta, final int nparams)
 	{
 		for (int i = 0; i < nparams; i++)
-		{
 			if (Double.isNaN(beta[i]))
 				return true;
-		}
 		return false;
 	}
 
@@ -804,7 +778,6 @@ public class GradientCalculator
 		{
 			final double yi = func.eval(i, dy_da);
 			if (yi > 0)
-			{
 				for (int j = 0; j < nparams; j++)
 				{
 					final double dy_db = dy_da[j] / yi;
@@ -812,7 +785,6 @@ public class GradientCalculator
 					for (int k = 0; k <= j; k++)
 						alpha[j][k] += dy_db * dy_da[k];
 				}
-			}
 		}
 
 		// Generate symmetric matrix
@@ -861,9 +833,7 @@ public class GradientCalculator
 			// - the gradient vector of the function's partial first derivatives with respect to the parameters
 
 			for (int j = 0; j < nparams; j++)
-			{
 				df_da[j] += dy_da[j] * dy;
-			}
 
 			ssx += dy * dy;
 		}
@@ -887,9 +857,7 @@ public class GradientCalculator
 	protected void zero(final double[] beta)
 	{
 		for (int i = 0; i < nparams; i++)
-		{
 			beta[i] = 0;
-		}
 	}
 
 	/**
@@ -944,14 +912,12 @@ public class GradientCalculator
 		{
 			final double Ei = func.eval(i, Eix);
 			for (int a = 0; a < nparams; a++)
-			{
 				for (int b = 0; b <= a; b++)
 				{
-					double v = Eix[a] * Eix[b];
+					final double v = Eix[a] * Eix[b];
 					I[a][b] += v;
 					Ei_Eia_Eib[a][b] += Ei * v;
 				}
-			}
 		}
 
 		// Generate symmetric matrix
@@ -1019,14 +985,12 @@ public class GradientCalculator
 		{
 			final double Ei = func.eval(i, Eix);
 			for (int a = 0; a < nparams; a++)
-			{
 				for (int b = 0; b <= a; b++)
 				{
-					double v = Eix[a] * Eix[b];
+					final double v = Eix[a] * Eix[b];
 					I[a][b] += v;
 					Ei_Eia_Eib[a][b] += Ei * v;
 				}
-			}
 		}
 
 		// Generate symmetric matrix

@@ -33,7 +33,7 @@ public abstract class BaseWeightedFilter extends BaseFilter
 
 	/** The width of the weights. */
 	protected int weightWidth;
-	
+
 	/** The height of the weights. */
 	protected int weightHeight;
 

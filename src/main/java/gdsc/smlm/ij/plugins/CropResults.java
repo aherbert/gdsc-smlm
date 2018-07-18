@@ -105,13 +105,13 @@ public class CropResults implements PlugIn
 
 		// Build a list of all images with a region ROI
 		titles = new TurboList<>(WindowManager.getWindowCount());
-		for (int imageID : Utils.getIDList())
+		for (final int imageID : Utils.getIDList())
 		{
-			ImagePlus imp = WindowManager.getImage(imageID);
+			final ImagePlus imp = WindowManager.getImage(imageID);
 			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
 				titles.add(imp.getTitle());
 		}
-		boolean roiMode = "roi".equals(arg);
+		final boolean roiMode = "roi".equals(arg);
 		if (roiMode && titles.isEmpty())
 		{
 			IJ.error(TITLE, "No images with an ROI");
@@ -121,7 +121,7 @@ public class CropResults implements PlugIn
 		settings = SettingsManager.readCropResultsSettings(0).toBuilder();
 
 		// Show a dialog allowing the results set to be filtered
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to crop");
 		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
 		gd.showDialog();
@@ -141,13 +141,9 @@ public class CropResults implements PlugIn
 			minMax = new MinMaxResultProcedure(results, new PeakResultValueParameter(PeakResult.Z));
 
 		if (roiMode)
-		{
 			runRoiCrop();
-		}
 		else
-		{
 			runCrop();
-		}
 
 		SettingsManager.writeSettings(settings);
 	}
@@ -161,10 +157,10 @@ public class CropResults implements PlugIn
 
 	private boolean showCropDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		Rectangle bounds = results.getBounds(true);
+		final Rectangle bounds = results.getBounds(true);
 		results.is3D();
 
 		gd.addMessage(String.format("x=%d,y=%d,w=%d,h=%d", bounds.x, bounds.y, bounds.width, bounds.height));
@@ -177,7 +173,7 @@ public class CropResults implements PlugIn
 		if (!titles.isEmpty())
 		{
 			gd.addCheckbox("Use_ROI", settings.getUseRoi());
-			String[] items = titles.toArray(new String[titles.size()]);
+			final String[] items = titles.toArray(new String[titles.size()]);
 			gd.addChoice("Image", items, settings.getRoiImage());
 		}
 		addStandardFields(gd);
@@ -216,14 +212,14 @@ public class CropResults implements PlugIn
 			double min = minMax.getMinimum();
 			double max = minMax.getMaximum();
 
-			double maxz = FastMath.min(settings.getMaxZ(), max);
-			double minz = FastMath.max(settings.getMinZ(), min);
+			final double maxz = FastMath.min(settings.getMaxZ(), max);
+			final double minz = FastMath.max(settings.getMinZ(), min);
 
 			// Display in nm
 			c = new IdentityTypeConverter<>(null);
 			String unit = "";
 
-			DistanceUnit nativeUnit = results.getDistanceUnit();
+			final DistanceUnit nativeUnit = results.getDistanceUnit();
 			if (nativeUnit != null)
 			{
 				unit = UnitHelper.getShortName(nativeUnit);
@@ -232,7 +228,7 @@ public class CropResults implements PlugIn
 					c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
 					unit = UnitHelper.getShortName(DistanceUnit.NM);
 				}
-				catch (ConversionException e)
+				catch (final ConversionException e)
 				{
 					// No native units
 				}
@@ -240,7 +236,7 @@ public class CropResults implements PlugIn
 			min = c.convert(min);
 			max = c.convert(max);
 
-			String msg = String.format("%.2f <= z <= %.2f (%s)", min, max, unit);
+			final String msg = String.format("%.2f <= z <= %.2f (%s)", min, max, unit);
 
 			min = Math.floor(min);
 			max = Math.ceil(max);
@@ -268,22 +264,22 @@ public class CropResults implements PlugIn
 
 			private boolean collectOptions(boolean silent)
 			{
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 				if (settings.getNameOption() == NAME_OPTION_NAME)
 				{
-					String name = (TextUtils.isNullOrEmpty(settings.getOutputName())) ? (results.getName() + " Cropped")
+					final String name = (TextUtils.isNullOrEmpty(settings.getOutputName())) ? (results.getName() + " Cropped")
 							: settings.getOutputName();
 					egd.addStringField("Output_name", name, Maths.clip(60, 120, name.length()));
 				}
 				else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
 				{
-					String name = (TextUtils.isNullOrEmpty(settings.getNameSuffix())) ? " Cropped"
+					final String name = (TextUtils.isNullOrEmpty(settings.getNameSuffix())) ? " Cropped"
 							: settings.getNameSuffix();
 					egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
 				}
 				else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
 				{
-					String name = settings.getNameSuffix();
+					final String name = settings.getNameSuffix();
 					egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
 					int c = settings.getNameCounter();
 					if (c < 1)
@@ -291,21 +287,15 @@ public class CropResults implements PlugIn
 					egd.addNumericField("Name_counter", c, 0);
 				}
 				else
-				{
 					throw new IllegalStateException("Unknown name option: " + settings.getNameOption());
-				}
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
 				if (settings.getNameOption() == NAME_OPTION_NAME)
-				{
 					settings.setOutputName(egd.getNextString());
-				}
 				else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
-				{
 					settings.setNameSuffix(egd.getNextString());
-				}
 				else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
 				{
 					settings.setNameSuffix(egd.getNextString());
@@ -344,7 +334,7 @@ public class CropResults implements PlugIn
 		}
 		else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
 		{
-			String suffix = settings.getNameSuffix();
+			final String suffix = settings.getNameSuffix();
 			if (TextUtils.isNullOrEmpty(suffix))
 			{
 				IJ.error(TITLE, "No output suffix");
@@ -357,15 +347,13 @@ public class CropResults implements PlugIn
 		else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
 		{
 			outputName = results.getName();
-			String suffix = settings.getNameSuffix();
+			final String suffix = settings.getNameSuffix();
 			if (!TextUtils.isNullOrEmpty(suffix))
-			{
 				//if (suffix.charAt(0) != ' ')
 				//	outputName += " " + suffix;
 				//else
 				outputName += suffix;
-			}
-			int c = settings.getNameCounter();
+			final int c = settings.getNameCounter();
 			outputName += c;
 			settings.setNameCounter(c + 1); // Increment for next time
 		}
@@ -380,22 +368,22 @@ public class CropResults implements PlugIn
 		final MemoryPeakResults newResults = createNewResults();
 
 		// These bounds are integer. But this is because the results are meant to come from an image.
-		Rectangle integerBounds = results.getBounds(true);
+		final Rectangle integerBounds = results.getBounds(true);
 
 		// The crop bounds can be floating point...
 
 		// Border
-		double border = settings.getBorder();
-		double xx = integerBounds.x + border;
-		double yy = integerBounds.y + border;
-		double w = Math.max(0, integerBounds.width - 2 * border);
-		double h = Math.max(0, integerBounds.height - 2 * border);
+		final double border = settings.getBorder();
+		final double xx = integerBounds.x + border;
+		final double yy = integerBounds.y + border;
+		final double w = Math.max(0, integerBounds.width - 2 * border);
+		final double h = Math.max(0, integerBounds.height - 2 * border);
 		Rectangle2D pixelBounds = new Rectangle2D.Double(xx, yy, w, h);
 
 		// Bounding box
 		if (settings.getSelectRegion())
 		{
-			Rectangle2D boxBounds = new Rectangle2D.Double(settings.getX(), settings.getY(), settings.getWidth(),
+			final Rectangle2D boxBounds = new Rectangle2D.Double(settings.getX(), settings.getY(), settings.getWidth(),
 					settings.getHeight());
 			pixelBounds = pixelBounds.createIntersection(boxBounds);
 		}
@@ -404,17 +392,17 @@ public class CropResults implements PlugIn
 		// and create another intersection
 		if (myUseRoi)
 		{
-			ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
+			final ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
 			if (imp != null && imp.getRoi() != null)
 			{
-				Rectangle roi = imp.getRoi().getBounds();
-				int roiImageWidth = imp.getWidth();
-				int roiImageHeight = imp.getHeight();
+				final Rectangle roi = imp.getRoi().getBounds();
+				final int roiImageWidth = imp.getWidth();
+				final int roiImageHeight = imp.getHeight();
 
-				double xscale = (double) roiImageWidth / integerBounds.width;
-				double yscale = (double) roiImageHeight / integerBounds.height;
+				final double xscale = (double) roiImageWidth / integerBounds.width;
+				final double yscale = (double) roiImageHeight / integerBounds.height;
 
-				Rectangle2D roiBounds = new Rectangle2D.Double(roi.x / xscale, roi.y / yscale, roi.width / xscale,
+				final Rectangle2D roiBounds = new Rectangle2D.Double(roi.x / xscale, roi.y / yscale, roi.width / xscale,
 						roi.height / yscale);
 				pixelBounds = pixelBounds.createIntersection(roiBounds);
 			}
@@ -425,7 +413,6 @@ public class CropResults implements PlugIn
 		final PeakResultPredicate testZ = getZFilter();
 
 		if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
-		{
 			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
 				@Override
@@ -435,14 +422,13 @@ public class CropResults implements PlugIn
 						newResults.add(result);
 				}
 			});
-		}
 
 		newResults.setBounds(new Rectangle((int) Math.floor(bounds.getX()), (int) Math.floor(bounds.getY()),
 				(int) Math.ceil(bounds.getWidth()), (int) Math.ceil(bounds.getHeight())));
 
 		if (settings.getResetOrigin())
 		{
-			Rectangle b = newResults.getBounds();
+			final Rectangle b = newResults.getBounds();
 			newResults.translate(-b.x, -b.y);
 		}
 
@@ -457,10 +443,8 @@ public class CropResults implements PlugIn
 	private PeakResultPredicate getZFilter()
 	{
 		if (myLimitZ)
-		{
 			return new MinMaxPeakResultPredicate((float) settings.getMinZ(), (float) settings.getMaxZ(),
 					new PeakResultValueParameter(PeakResult.Z));
-		}
 		return new PassPeakResultPredicate();
 	}
 
@@ -482,10 +466,10 @@ public class CropResults implements PlugIn
 
 	private boolean showRoiCropDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		String[] items = titles.toArray(new String[titles.size()]);
+		final String[] items = titles.toArray(new String[titles.size()]);
 		gd.addMessage("Use ROI from ...");
 		gd.addChoice("Image", items, settings.getRoiImage());
 		addStandardFields(gd);
@@ -508,9 +492,9 @@ public class CropResults implements PlugIn
 		final MemoryPeakResults newResults = createNewResults();
 
 		// These bounds are integer. But this is because the results are meant to come from an image.
-		Rectangle integerBounds = results.getBounds(true);
+		final Rectangle integerBounds = results.getBounds(true);
 
-		ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
+		final ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No ROI image: " + settings.getRoiImage());
@@ -524,8 +508,8 @@ public class CropResults implements PlugIn
 		}
 
 		// Scale the results to the size of the image with the ROI
-		int roiImageWidth = imp.getWidth();
-		int roiImageHeight = imp.getHeight();
+		final int roiImageWidth = imp.getWidth();
+		final int roiImageHeight = imp.getHeight();
 		final double xscale = (double) roiImageWidth / integerBounds.width;
 		final double yscale = (double) roiImageHeight / integerBounds.height;
 

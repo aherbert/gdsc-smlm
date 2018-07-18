@@ -77,27 +77,19 @@ public class ParameterBounds
 		if (isClamped)
 		{
 			for (int j = gradientIndices.length; j-- > 0;)
-			{
 				if (clampInitial[j] == 0)
-				{
 					// Use the update parameter directly
 					newA[gradientIndices[j]] = a[gradientIndices[j]] + step[j];
-				}
 				else
-				{
 					// This parameter is clamped
 					newA[gradientIndices[j]] = a[gradientIndices[j]] + step[j] / clamp(step[j], j);
-				}
-			}
 			applyBounds(newA);
 		}
 		else
 		{
 			for (int j = gradientIndices.length; j-- > 0;)
-			{
 				// Use the update parameter directly
 				newA[gradientIndices[j]] = a[gradientIndices[j]] + step[j];
-			}
 			applyBounds(newA);
 		}
 	}
@@ -111,21 +103,13 @@ public class ParameterBounds
 	private void applyBounds(double[] point)
 	{
 		if (isUpper)
-		{
 			for (int j = gradientIndices.length; j-- > 0;)
 				if (point[gradientIndices[j]] > upper[j])
-				{
 					point[gradientIndices[j]] = upper[j];
-				}
-		}
 		if (isLower)
-		{
 			for (int j = gradientIndices.length; j-- > 0;)
 				if (point[gradientIndices[j]] < lower[j])
-				{
 					point[gradientIndices[j]] = lower[j];
-				}
-		}
 	}
 
 	/**
@@ -154,10 +138,8 @@ public class ParameterBounds
 
 			// This addition overcomes the issue when the direction vector is new (i.e. zero filled)
 			if (newDir + dir[k] == 0)
-			{
 				// Note: By reducing the size of the clamping factor we are restricting the movement
 				ck *= 0.5;
-			}
 
 			// Note: We do not update the clamp[k] array yet as the move may be rejected.
 		}
@@ -177,10 +159,8 @@ public class ParameterBounds
 	public void accepted(double[] a, double[] newA)
 	{
 		if (isClamped && dynamicClamp)
-		{
 			// Get the direction and update the clamp parameter if the direction has changed
 			for (int k = gradientIndices.length; k-- > 0;)
-			{
 				if (clamp[k] != 0)
 				{
 					final double u = newA[gradientIndices[k]] - a[gradientIndices[k]];
@@ -189,14 +169,10 @@ public class ParameterBounds
 					final int newDir = (u > 0) ? 1 : -1;
 					// This addition overcomes the issue when the direction vector is new (i.e. zero filled)
 					if (newDir + dir[k] == 0)
-					{
 						// Note: By reducing the size of the clamping factor we are restricting the movement
 						clamp[k] *= 0.5;
-					}
 					dir[k] = newDir;
 				}
-			}
-		}
 	}
 
 	/**
@@ -206,7 +182,6 @@ public class ParameterBounds
 	{
 		// Initialise for clamping
 		if (isClamped)
-		{
 			// Prevent the clamping value being destroyed by dynamic updates
 			if (dynamicClamp)
 			{
@@ -214,20 +189,13 @@ public class ParameterBounds
 				clamp = Arrays.copyOf(clampInitial, m);
 				// Reset the direction
 				if (dir == null || dir.length < m)
-				{
 					dir = new int[m];
-				}
 				else
-				{
 					for (int i = m; i-- > 0;)
 						dir[i] = 0;
-				}
 			}
 			else
-			{
 				clamp = clampInitial;
-			}
-		}
 	}
 
 	/**
@@ -254,9 +222,7 @@ public class ParameterBounds
 			final int[] indices = f.gradientIndices();
 			lower = new double[indices.length];
 			for (int i = 0; i < indices.length; i++)
-			{
 				lower[i] = lowerBounds[indices[i]];
-			}
 			isLower = checkArray(lower, Double.NEGATIVE_INFINITY);
 		}
 		if (upperBounds == null)
@@ -269,19 +235,15 @@ public class ParameterBounds
 			final int[] indices = f.gradientIndices();
 			upper = new double[indices.length];
 			for (int i = 0; i < indices.length; i++)
-			{
 				upper[i] = upperBounds[indices[i]];
-			}
 			isUpper = checkArray(upper, Double.POSITIVE_INFINITY);
 		}
 		// Check that the upper bound is above the lower bound
 		if (isUpper && isLower)
-		{
 			for (int i = 0; i < lower.length; i++)
 				if (lower[i] > upper[i])
 					throw new IllegalArgumentException(
 							"Lower bound is above upper bound: " + lower[i] + " > " + upper[i]);
-		}
 	}
 
 	/**
@@ -311,21 +273,13 @@ public class ParameterBounds
 	public boolean atBounds(double[] a)
 	{
 		if (isUpper)
-		{
 			for (int i = 0; i < gradientIndices.length; i++)
 				if (a[gradientIndices[i]] == upper[i])
-				{
 					return true;
-				}
-		}
 		if (isLower)
-		{
 			for (int i = 0; i < gradientIndices.length; i++)
 				if (a[gradientIndices[i]] == lower[i])
-				{
 					return true;
-				}
-		}
 		return false;
 	}
 

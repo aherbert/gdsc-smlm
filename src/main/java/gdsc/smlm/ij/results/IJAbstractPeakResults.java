@@ -42,7 +42,7 @@ public abstract class IJAbstractPeakResults extends AbstractPeakResults implemen
 	 */
 	public void setCalibration(double nmPerPixel, double gain)
 	{
-		CalibrationWriter cw = getCalibrationWriterSafe();
+		final CalibrationWriter cw = getCalibrationWriterSafe();
 		cw.setNmPerPixel(nmPerPixel);
 		cw.setCountPerPhoton(gain);
 		setCalibration(cw.getCalibration());

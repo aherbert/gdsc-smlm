@@ -42,7 +42,7 @@ public abstract class FastLog
 
 	/**
 	 * Gets the scale to convert from log2 to logB (using the given base) by multiplication.
-	 * 
+	 *
 	 * <pre>
 	 * scale = Math.log(2) / Math.log(base)
 	 * </pre>

@@ -31,7 +31,7 @@ public abstract class CameraNoiseModel implements NoiseModel
 {
 	/** The bias. */
 	protected double bias = 0;
-	
+
 	/** The read noise squared (read variance). */
 	protected double readNoise2 = 0;
 

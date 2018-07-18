@@ -375,8 +375,8 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	{
 		// Parameters are:
 		// Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
-		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
-		int[] indices = new int[nparams];
+		final int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
+		final int[] indices = new int[nparams];
 
 		int p = 0;
 		if (gf.evaluatesBackground())
@@ -422,7 +422,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 */
 	public int findGradientIndex(int parameterIndex)
 	{
-		int[] gradientIndices = gradientIndices();
+		final int[] gradientIndices = gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
 			if (gradientIndices[i] == parameterIndex)
 				return i;

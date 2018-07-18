@@ -45,12 +45,12 @@ public class HoltzerAstigmatismZModelTest
 	@Test
 	public void canStaticComputeGradient()
 	{
-		double s0 = 1.234;
-		double d = 0.531;
-		double Ax = -0.0708;
-		double Bx = -0.073;
-		double Ay = 0.164;
-		double By = 0.0417;
+		final double s0 = 1.234;
+		final double d = 0.531;
+		final double Ax = -0.0708;
+		final double Bx = -0.073;
+		final double Ay = 0.164;
+		final double By = 0.0417;
 
 		canStaticComputeGradient(s0, d, Ax, Bx);
 		canStaticComputeGradient(s0, d, Ay, By);
@@ -58,34 +58,34 @@ public class HoltzerAstigmatismZModelTest
 
 	private void canStaticComputeGradient(double s, double d, double Ax, double Bx)
 	{
-		double one_d2 = 1.0 / d / d;
+		final double one_d2 = 1.0 / d / d;
 
-		double[] ds_dz = new double[1];
-		double[] ds_dz2 = new double[2];
-		double[] ds_duz = new double[1];
-		double[] ds_dlz = new double[1];
-		boolean record = TestSettings.allow(LogLevel.INFO);
+		final double[] ds_dz = new double[1];
+		final double[] ds_dz2 = new double[2];
+		final double[] ds_duz = new double[1];
+		final double[] ds_dlz = new double[1];
+		final boolean record = TestSettings.allow(LogLevel.INFO);
 		for (double z = -0.5; z < 0.5; z += 0.01)
 		{
-			double s0 = HoltzerAstigmatismZModel.getS(s, z, one_d2, Ax, Bx);
-			double s1 = HoltzerAstigmatismZModel.getS1(s, z, one_d2, Ax, Bx, ds_dz);
-			double s2 = HoltzerAstigmatismZModel.getS2(s, z, one_d2, Ax, Bx, ds_dz2);
+			final double s0 = HoltzerAstigmatismZModel.getS(s, z, one_d2, Ax, Bx);
+			final double s1 = HoltzerAstigmatismZModel.getS1(s, z, one_d2, Ax, Bx, ds_dz);
+			final double s2 = HoltzerAstigmatismZModel.getS2(s, z, one_d2, Ax, Bx, ds_dz2);
 
 			Assert.assertEquals(s0, s1, 0);
 			Assert.assertEquals(s0, s2, 0);
 			Assert.assertEquals(ds_dz[0], ds_dz2[0], 0);
 
-			double uz = z + h_;
-			double lz = z - h_;
-			double upper = HoltzerAstigmatismZModel.getS1(s, uz, one_d2, Ax, Bx, ds_duz);
-			double lower = HoltzerAstigmatismZModel.getS1(s, lz, one_d2, Ax, Bx, ds_dlz);
+			final double uz = z + h_;
+			final double lz = z - h_;
+			final double upper = HoltzerAstigmatismZModel.getS1(s, uz, one_d2, Ax, Bx, ds_duz);
+			final double lower = HoltzerAstigmatismZModel.getS1(s, lz, one_d2, Ax, Bx, ds_dlz);
 
-			double e1 = (upper - lower) / (uz - lz);
-			double o1 = ds_dz[0];
+			final double e1 = (upper - lower) / (uz - lz);
+			final double o1 = ds_dz[0];
 
 			// Second gradient
-			double e2 = (ds_duz[0] - ds_dlz[0]) / (uz - lz);
-			double o2 = ds_dz2[1];
+			final double e2 = (ds_duz[0] - ds_dlz[0]) / (uz - lz);
+			final double o2 = ds_dz2[1];
 
 			if (record)
 				TestSettings.info("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,

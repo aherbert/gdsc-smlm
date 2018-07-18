@@ -101,7 +101,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 		synchronized Job next()
 		{
-			Job job = this.job;
+			final Job job = this.job;
 			this.job = null;
 			return job;
 		}
@@ -112,12 +112,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		}
 	}
 
-	private InBox inbox = new InBox();
+	private final InBox inbox = new InBox();
 
 	private class Worker implements Runnable
 	{
 		private boolean running = true;
-		private boolean[] error = new boolean[ids.length];
+		private final boolean[] error = new boolean[ids.length];
 		// The results text window (so we can close it)
 		private TextWindow tw = null;
 		private Rectangle windowBounds = null;
@@ -131,7 +131,6 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		public void run()
 		{
 			while (running)
-			{
 				try
 				{
 					Job job = null;
@@ -157,11 +156,10 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 					currentIndex = job.index;
 					drawOverlay();
 				}
-				catch (InterruptedException e)
+				catch (final InterruptedException e)
 				{
 					break;
 				}
-			}
 			clearOldOverlay();
 			closeTextWindow();
 		}
@@ -170,7 +168,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		{
 			if (currentIndex != 0)
 			{
-				ImagePlus oldImp = WindowManager.getImage(ids[currentIndex]);
+				final ImagePlus oldImp = WindowManager.getImage(ids[currentIndex]);
 				if (oldImp != null)
 					oldImp.setOverlay(null);
 			}
@@ -196,8 +194,8 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		 */
 		private void drawOverlay()
 		{
-			ImagePlus imp = WindowManager.getImage(ids[currentIndex]);
-			String name = names[currentIndex];
+			final ImagePlus imp = WindowManager.getImage(ids[currentIndex]);
+			final String name = names[currentIndex];
 
 			if (imp == null)
 			{
@@ -207,17 +205,17 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			}
 
 			// Check slice
-			int newSlice = imp.getCurrentSlice();
+			final int newSlice = imp.getCurrentSlice();
 			if (currentSlice == newSlice)
 			{
-				boolean isShowing = tw != null;
+				final boolean isShowing = tw != null;
 				if (showTable == isShowing)
 					// No change from last time
 					return;
 			}
 			currentSlice = newSlice;
 
-			MemoryPeakResults results = MemoryPeakResults.getResults(name);
+			final MemoryPeakResults results = MemoryPeakResults.getResults(name);
 			if (results == null)
 			{
 				// Results have been cleared from memory (or renamed).
@@ -230,22 +228,22 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			TIntHashSet selectedId = null;
 			if (showTable)
 			{
-				boolean hasId = results.hasId();
+				final boolean hasId = results.hasId();
 
 				// Old selected item
 				boolean is3D = false;
 				if (hasId && tw != null)
 				{
-					TextPanel tp = tw.getTextPanel();
-					int idColumn = Utils.getColumn(tp, "Id");
-					int start = tp.getSelectionStart();
+					final TextPanel tp = tw.getTextPanel();
+					final int idColumn = Utils.getColumn(tp, "Id");
+					final int start = tp.getSelectionStart();
 					if (start != -1 && idColumn != -1)
 					{
 						selectedId = new TIntHashSet();
-						int end = tp.getSelectionEnd();
+						final int end = tp.getSelectionEnd();
 						for (int index = start; index <= end; index++)
 						{
-							String text = tp.getLine(index).split("\t")[idColumn];
+							final String text = tp.getLine(index).split("\t")[idColumn];
 							selectedId.add(Integer.parseInt(text));
 						}
 					}
@@ -269,14 +267,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 				tw = table.getResultsWindow();
 				if (windowBounds != null)
-				{
 					tw.setBounds(windowBounds);
-				}
 				else
 				{
 					// Position under the window
-					ImageWindow win = imp.getWindow();
-					Point p = win.getLocation();
+					final ImageWindow win = imp.getWindow();
+					final Point p = win.getLocation();
 					p.y += win.getHeight();
 					tw.setLocation(p);
 				}
@@ -295,17 +291,16 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				converter = results.getDistanceConverter(DistanceUnit.PIXEL);
 			}
 			int select = -1;
-			PeakResult[] frameResults = view.getResultsByFrame(currentSlice);
+			final PeakResult[] frameResults = view.getResultsByFrame(currentSlice);
 			for (int i = 0; i < frameResults.length; i++)
 			{
-				PeakResult r = frameResults[i];
+				final PeakResult r = frameResults[i];
 				ox.add(converter.convert(r.getXPosition()));
 				oy.add(converter.convert(r.getYPosition()));
 				if (table != null)
 				{
 					table.add(r);
 					if (selectedId != null)
-					{
 						if (selectedId.contains(r.getId()))
 						{
 							// For now just preserve the first selected ID.
@@ -313,7 +308,6 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 							select = i;
 							selectedId = null;
 						}
-					}
 				}
 			}
 			// Old method without the cached view
@@ -330,7 +324,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			//					}
 			//				}
 			//			});
-			PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+			final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
 			roi.setPointType(3);
 			// Leave to ImageJ default. Then the user can change it using the options.
 			//Color c = Color.GREEN;
@@ -342,8 +336,8 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			if (table != null)
 			{
 				table.end();
-				TextWindow tw = table.getResultsWindow();
-				TextPanel tp = tw.getTextPanel();
+				final TextWindow tw = table.getResultsWindow();
+				final TextPanel tp = tw.getTextPanel();
 				tp.scrollToTop();
 
 				// Reselect the same Id
@@ -390,19 +384,17 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		ids = new int[names.length];
 		int c = 0;
 		names[c++] = "(None)";
-		for (MemoryPeakResults results : MemoryPeakResults.getAllResults())
-		{
+		for (final MemoryPeakResults results : MemoryPeakResults.getAllResults())
 			if (results.getSource() != null && results.getSource().getOriginal() instanceof IJImageSource)
 			{
-				IJImageSource source = (IJImageSource) (results.getSource().getOriginal());
-				ImagePlus imp = WindowManager.getImage(source.getName());
+				final IJImageSource source = (IJImageSource) (results.getSource().getOriginal());
+				final ImagePlus imp = WindowManager.getImage(source.getName());
 				if (imp != null)
 				{
 					ids[c] = imp.getID();
 					names[c++] = results.getName();
 				}
 			}
-		}
 		if (c == 1)
 		{
 			IJ.error(TITLE, "There are no result images available");
@@ -412,7 +404,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 		Thread t = null;
 		Worker w = null;
-		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addMessage("Overlay results on current image frame");
 		gd.addChoice("Results", names, (name == null) ? "" : name);
 		gd.addCheckbox("Show_table", showTable);
@@ -453,7 +445,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			{
 				t.join(0);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				// Ignore
 			}
@@ -485,9 +477,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		if (imp == null)
 			return;
 		if (ids[currentIndex] == imp.getID())
-		{
 			show();
-		}
 	}
 
 	private void show()

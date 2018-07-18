@@ -165,7 +165,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	public void forEach(ValueProcedure procedure)
 	{
 		if (tB == 0 && nPeaks == 2)
-		{
 			// Specialised implementation without a background.
 			// (This function is likely to be used to compute the Gaussian integral
 			// without a background.)
@@ -176,15 +175,10 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 				final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
 				for (int x = 0; x < maxx; x++)
-				{
 					procedure.execute(tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
-				}
 			}
-		}
 		else
-		{
 			super.forEach(procedure);
-		}
 	}
 
 	/*
@@ -197,7 +191,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	{
 		final double[] duda = new double[getNumberOfGradients()];
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -212,7 +205,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 				}
 				procedure.execute(I, duda);
 			}
-		}
 	}
 
 	/*
@@ -226,7 +218,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 		final double[] duda = new double[getNumberOfGradients()];
 		final double[] d2uda2 = new double[getNumberOfGradients()];
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -245,7 +236,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 				}
 				procedure.execute(I, duda, d2uda2);
 			}
-		}
 	}
 
 	/*
@@ -287,7 +277,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// Compute all the partial second order derivatives
 					final double tI = this.tI[n];
 
-					int k = a * ng + a;
+					final int k = a * ng + a;
 					// Signal,X
 					d2udadb[k + 1] = duda[a + 1] / tI;
 					// Signal,Y
@@ -299,7 +289,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 
 					a += 5;
 
-					int kk = k + ng;
+					final int kk = k + ng;
 					// X,Signal
 					d2udadb[kk] = d2udadb[k + 1];
 					// X,X
@@ -311,7 +301,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// X,Y SD
 					d2udadb[kk + 4] = du_dtx[xx] * du_dtsy_tI[n];
 
-					int kkk = kk + ng;
+					final int kkk = kk + ng;
 					// Y,Signal
 					d2udadb[kkk] = d2udadb[k + 2];
 					// Y,X
@@ -323,7 +313,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// Y,Y SD
 					d2udadb[kkk + 4] = deltaEx[xx] * d2deltaEy_dtsydy[yy];
 
-					int kkkk = kkk + ng;
+					final int kkkk = kkk + ng;
 					// X SD,Signal
 					d2udadb[kkkk] = d2udadb[k + 3];
 					// X SD,X
@@ -335,7 +325,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// X SD,Y SD
 					d2udadb[kkkk + 4] = du_dtsy[yy] * du_dtsx_tI[xx];
 
-					int kkkkk = kkkk + ng;
+					final int kkkkk = kkkk + ng;
 					// Y SD,Signal
 					d2udadb[kkkkk] = d2udadb[k + 4];
 					// Y SD,X

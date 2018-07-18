@@ -101,7 +101,7 @@ public class GaussianOverlapAnalysis
 	 */
 	public static int getRange(double s, double range)
 	{
-		long l = (long) Math.ceil(2 * s * range);
+		final long l = (long) Math.ceil(2 * s * range);
 		if (l < 1L)
 			return 1;
 		if (l >= MAX_VALUE)
@@ -124,7 +124,7 @@ public class GaussianOverlapAnalysis
 	 */
 	public static int getRange(double s, double range, int max)
 	{
-		long l = (long) Math.ceil(2 * s * range);
+		final long l = (long) Math.ceil(2 * s * range);
 		if (l < 1L)
 			return 1;
 		if (l >= max)
@@ -168,7 +168,7 @@ public class GaussianOverlapAnalysis
 			// Initialise the input function
 			data = new double[size];
 			overlap = new double[size];
-			Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxy, this.flags, zModel);
+			final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxy, this.flags, zModel);
 
 			// Note that the position should be in the centre of the sample region
 			final double cx = params0[Gaussian2DFunction.X_POSITION];
@@ -178,9 +178,7 @@ public class GaussianOverlapAnalysis
 
 			f.initialise(params0);
 			for (int k = 0; k < size; k++)
-			{
 				data[k] = f.eval(k);
-			}
 			// Reset
 			params0[Gaussian2DFunction.X_POSITION] = cx;
 			params0[Gaussian2DFunction.Y_POSITION] = cy;
@@ -196,7 +194,7 @@ public class GaussianOverlapAnalysis
 					indices[k] = k;
 				}
 				Sort.sort(indices, data);
-				double expected = sum * fraction;
+				final double expected = sum * fraction;
 				double last = 0;
 				boolean useMask = false;
 				mask = new boolean[data.length];
@@ -223,7 +221,7 @@ public class GaussianOverlapAnalysis
 
 		// Add the function to the overlap
 		final int nPeaks = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags, zModel);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags, zModel);
 		params = params.clone();
 		for (int n = 0; n < nPeaks; n++)
 		{
@@ -234,22 +232,12 @@ public class GaussianOverlapAnalysis
 		}
 		f.initialise(params);
 		if (mask == null || !withinMask)
-		{
 			for (int k = 0; k < size; k++)
-			{
 				overlap[k] += f.eval(k);
-			}
-		}
 		else
-		{
 			for (int k = 0; k < size; k++)
-			{
 				if (mask[k])
-				{
 					overlap[k] += f.eval(k);
-				}
-			}
-		}
 
 		//		// Debug
 		//		double[] combined = data.clone();
@@ -271,30 +259,24 @@ public class GaussianOverlapAnalysis
 	 */
 	public double[] getOverlapData()
 	{
-		double[] result = new double[2];
+		final double[] result = new double[2];
 		if (overlap != null)
 		{
 			double sumF = 0;
 			double sumO = 0;
 			if (mask == null)
-			{
 				for (int k = 0; k < size; k++)
 				{
 					sumF += data[k];
 					sumO += overlap[k];
 				}
-			}
 			else
-			{
 				for (int k = 0; k < size; k++)
-				{
 					if (mask[k])
 					{
 						sumF += data[k];
 						sumO += overlap[k];
 					}
-				}
-			}
 
 			result[0] = sumF;
 			result[1] = sumO;

@@ -183,13 +183,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		super(checker);
 
 		if (rel < MIN_RELATIVE_TOLERANCE)
-		{
 			throw new NumberIsTooSmallException(rel, MIN_RELATIVE_TOLERANCE, true);
-		}
 		if (abs <= 0)
-		{
 			throw new NotStrictlyPositiveException(abs);
-		}
 		relativeThreshold = rel;
 		absoluteThreshold = abs;
 		this.basisConvergence = basisConvergence;
@@ -295,58 +291,37 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			final PointValuePair current = new PointValuePair(x, fVal, false);
 			boolean stop = false;
 			if (positionChecker != null)
-			{
 				// Check for convergence on the position
 				stop = positionChecker.converged(getIterations(), previous, current);
-			}
 			if (!stop)
-			{
-				// Default convergence check on value
-				//stop = 2 * (fX - fVal) <= (relativeThreshold * (FastMath.abs(fX) + FastMath.abs(fVal)) + absoluteThreshold);
-
 				// Check if we have improved from an impossible position
 				if (Double.isInfinite(fX) || Double.isNaN(fX))
 				{
 					if (Double.isInfinite(fVal) || Double.isNaN(fVal))
-					{
-						// Nowhere to go
+					 // Nowhere to go
 						stop = true;
-					}
-					// else: this is better as we now have a value, so continue
 				}
 				else
-				{
 					stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, fVal, relativeThreshold, absoluteThreshold);
-				}
-			}
 
 			if (!stop && checker != null)
-			{ // User-defined stopping criteria.
 				stop = checker.converged(getIterations(), previous, current);
-			}
 
 			boolean reset = false;
 			if (stop)
-			{
 				// Only allow convergence using the basis vectors, i.e. we cannot move along any dimension
 				if (basisConvergence && nonBasis)
-				{
 					// Reset to the basis vectors and continue
 					reset = true;
 					//resets++;
-				}
 				else
 				{
 					//System.out.printf("Resets = %d\n", resets);
 					final PointValuePair answer;
 					if (goal == GoalType.MINIMIZE)
-					{
 						answer = (fVal < fX) ? current : previous;
-					}
 					else
-					{
 						answer = (fVal > fX) ? current : previous;
-					}
 					return answer;
 
 					// XXX Debugging
@@ -359,7 +334,6 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 					//}
 					//finalSolution = answer;
 				}
-			}
 
 			if (reset)
 			{
@@ -401,7 +375,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 						x = newPoint(x, d, optimum.getPoint());
 						continue;
 					}
-					
+
 					final double[][] result = newPointAndDirection(x, d, optimum.getPoint());
 					x = result[0];
 
@@ -428,21 +402,17 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 
 	private double[][] createBasisVectors(final int n)
 	{
-		double[][] direc = new double[n][n];
+		final double[][] direc = new double[n][n];
 		double[] step;
 		if (basis != null && basis.length == n)
-		{
 			step = basis;
-		}
 		else
 		{
 			step = new double[n];
 			Arrays.fill(step, 1);
 		}
 		for (int i = 0; i < n; i++)
-		{
 			direc[i][i] = step[i];
-		}
 		return direc;
 	}
 
@@ -494,9 +464,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		final int n = p.length;
 		final double[] nP = new double[n];
 		for (int i = 0; i < n; i++)
-		{
 			nP[i] = p[i] + d[i] * optimum;
-		}
 		applyBounds(nP);
 		return nP;
 	}
@@ -566,9 +534,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				public double value(double alpha)
 				{
 					for (int i = 0; i < n; i++)
-					{
 						x[i] = p[i] + alpha * d[i];
-					}
 					// Ensure the point is within bounds
 					applyBounds(x);
 					return CustomPowellOptimizer.this.computeObjectiveValue(x);
@@ -605,7 +571,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 
 		// The existing values (as set by the previous call) are reused if
 		// not provided in the argument list.
-		for (OptimizationData data : optData)
+		for (final OptimizationData data : optData)
 		{
 			if (data instanceof PositionChecker)
 			{
@@ -638,17 +604,13 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		isUpper = checkArray(upper, Double.POSITIVE_INFINITY);
 		// Check that the upper bound is above the lower bound
 		if (isUpper && isLower)
-		{
 			for (int i = 0; i < lower.length; i++)
 				if (lower[i] > upper[i])
 					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
-		}
 		if (basis != null)
-		{
-			for (double d : basis)
+			for (final double d : basis)
 				if (d == 0)
 					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
-		}
 	}
 
 	/**
@@ -679,16 +641,12 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	private void applyBounds(double[] point)
 	{
 		if (isUpper)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] > upper[i])
 					point[i] = upper[i];
-		}
 		if (isLower)
-		{
 			for (int i = 0; i < point.length; i++)
 				if (point[i] < lower[i])
 					point[i] = lower[i];
-		}
 	}
 }

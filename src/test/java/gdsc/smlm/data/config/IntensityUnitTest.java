@@ -35,8 +35,8 @@ public class IntensityUnitTest
 	@Test
 	public void canConvert()
 	{
-		double offset = 120;
-		double countPerPhoton = 45.5;
+		final double offset = 120;
+		final double countPerPhoton = 45.5;
 		for (int photon = 1; photon < 100; photon++)
 		{
 			//@formatter:off
@@ -56,37 +56,37 @@ public class IntensityUnitTest
 		}
 	}
 
-	private void check(double offset, double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
+	private static void check(double offset, double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
 	{
-		int n = expectedUnits.length;
+		final int n = expectedUnits.length;
 		TypeConverter<IntensityUnit> c;
 		for (int i = 0; i < n; i++)
 		{
-			IntensityUnit u1 = expectedUnits[i].u;
-			double v1 = expectedUnits[i].value;
+			final IntensityUnit u1 = expectedUnits[i].u;
+			final double v1 = expectedUnits[i].value;
 			for (int j = 0; j < n; j++)
 			{
-				IntensityUnit u2 = expectedUnits[j].u;
+				final IntensityUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
-				double o = c.convert(v1);
+				final double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}
 		}
 	}
 
-	private void check(double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
+	private static void check(double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
 	{
-		int n = expectedUnits.length;
+		final int n = expectedUnits.length;
 		TypeConverter<IntensityUnit> c;
 		for (int i = 0; i < n; i++)
 		{
-			IntensityUnit u1 = expectedUnits[i].u;
-			double v1 = expectedUnits[i].value;
+			final IntensityUnit u1 = expectedUnits[i].u;
+			final double v1 = expectedUnits[i].value;
 			for (int j = 0; j < n; j++)
 			{
-				IntensityUnit u2 = expectedUnits[j].u;
+				final IntensityUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2, countPerPhoton);
-				double o = c.convert(v1);
+				final double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}
 		}

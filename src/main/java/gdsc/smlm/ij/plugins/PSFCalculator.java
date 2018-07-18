@@ -77,16 +77,16 @@ public class PSFCalculator implements PlugIn, DialogListener
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		PSFCalculatorSettings settings = SettingsManager.readPSFCalculatorSettings(0);
+		final PSFCalculatorSettings settings = SettingsManager.readPSFCalculatorSettings(0);
 
-		double sd = calculate(settings, false);
+		final double sd = calculate(settings, false);
 		if (sd < 0)
 			return;
 
 		SettingsManager.writeSettings(this.settings);
 
-		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setNmPerPixel(getPixelPitch());
 		fitConfig.setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
 		fitConfig.setInitialPeakStdDev(sd);
@@ -141,7 +141,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		}
 		gd.addNumericField("StdDev (nm)", calculateStdDev(settings.getWavelength(), settings.getNumericalAperture(),
 				settings.getProportionalityFactor()), 3);
-		double sd = calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
+		final double sd = calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
 				settings.getWavelength(), settings.getNumericalAperture(), settings.getProportionalityFactor(),
 				settings.getAdjustForSquarePixels());
 		gd.addNumericField("StdDev (pixels)", sd, 3);
@@ -171,7 +171,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 		gd.addDialogListener(this);
 
-		double s = calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
+		final double s = calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
 				settings.getWavelength(), settings.getNumericalAperture(), 1, false);
 		plotProfile(
 				calculateAiryWidth(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
@@ -181,9 +181,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		gd.showDialog();
 
 		if (gd.wasCanceled())
-		{
 			return -1;
-		}
 
 		return calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
 				settings.getWavelength(), settings.getNumericalAperture(), settings.getProportionalityFactor(),
@@ -222,7 +220,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 			Parameters.isAboveZero("Numerical aperture", settings.getNumericalAperture());
 			Parameters.isAboveZero("Proportionality factor", settings.getProportionalityFactor());
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			// Q. Is logging the error necessary given that we will be in a live update preview?
 			//IJ.log(ex.getMessage());
@@ -337,7 +335,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 */
 	public static double calculateAiryWidth(double wavelength, double numericalAperture)
 	{
-		double width = wavelength / (2.0 * Math.PI * numericalAperture);
+		final double width = wavelength / (2.0 * Math.PI * numericalAperture);
 		return width;
 	}
 
@@ -357,7 +355,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	public static double calculateAiryWidth(double pixelPitch, double magnification, double wavelength,
 			double numericalAperture)
 	{
-		double width = calculateAiryWidth(wavelength, numericalAperture);
+		final double width = calculateAiryWidth(wavelength, numericalAperture);
 		final double pixelPitchInNm = pixelPitch * 1000 / magnification;
 		return width / pixelPitchInNm;
 	}
@@ -376,17 +374,14 @@ public class PSFCalculator implements PlugIn, DialogListener
 	{
 		if (e == null)
 			return true;
-		Object o = e.getSource();
+		final Object o = e.getSource();
 		if (o == sdNmText || o == sdPixelsText || o == fwhmPixelsText || o == abbeLimitLabel)
 			return true;
 		if (widthNmText != null)
-		{
 			if (o == pixelPitchLabel || o == widthNmText || o == widthPixelsText)
 				return true;
-		}
 
 		if (aquireLock())
-		{
 			try
 			{
 				// Continue while the parameter is changing
@@ -397,13 +392,13 @@ public class PSFCalculator implements PlugIn, DialogListener
 						return false;
 
 					// Store the parameters to be processed
-					double pixelPitch = settings.getPixelPitch();
-					double magnification = settings.getMagnification();
-					double beamExpander = settings.getBeamExpander();
-					double wavelength = settings.getWavelength();
-					double numericalAperture = settings.getNumericalAperture();
-					boolean adjustForSquarePixels = settings.getAdjustForSquarePixels();
-					double proportionalityFactor = settings.getProportionalityFactor();
+					final double pixelPitch = settings.getPixelPitch();
+					final double magnification = settings.getMagnification();
+					final double beamExpander = settings.getBeamExpander();
+					final double wavelength = settings.getWavelength();
+					final double numericalAperture = settings.getNumericalAperture();
+					final boolean adjustForSquarePixels = settings.getAdjustForSquarePixels();
+					final double proportionalityFactor = settings.getProportionalityFactor();
 
 					// Do something with parameters
 					if (widthNmText != null)
@@ -415,12 +410,12 @@ public class PSFCalculator implements PlugIn, DialogListener
 					}
 					abbeLimitLabel.setText(getAbbeLimitLabel());
 					sdNmText.setText(IJ.d2s(calculateStdDev(wavelength, numericalAperture, proportionalityFactor), 3));
-					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
+					final double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
 							proportionalityFactor, adjustForSquarePixels);
 					sdPixelsText.setText(IJ.d2s(sd, 3));
 					fwhmPixelsText.setText(IJ.d2s(sd * Gaussian2DFunction.SD_TO_HWHM_FACTOR, 3));
 
-					double s = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
+					final double s = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
 							1, false);
 					plotProfile(
 							calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength, numericalAperture),
@@ -439,7 +434,6 @@ public class PSFCalculator implements PlugIn, DialogListener
 				// Ensure the running flag is reset
 				lock = false;
 			}
-		}
 
 		return true;
 	}
@@ -458,18 +452,16 @@ public class PSFCalculator implements PlugIn, DialogListener
 			y = new double[x.length];
 			y2 = new double[x.length];
 			for (int i = 0; i < x.length; i++)
-			{
 				y[i] = AiryPattern.intensity(x[i]);
-			}
 		}
-		double[] x2 = new double[x.length];
+		final double[] x2 = new double[x.length];
 		for (int i = 0; i < x2.length; i++)
 		{
 			x2[i] = x[i] * airyWidth;
 			y2[i] = AiryPattern.intensityGaussian(x[i] / factor);
 		}
-		String title = "PSF profile";
-		Plot2 p = new Plot2(title, "px", "", x2, y);
+		final String title = "PSF profile";
+		final Plot2 p = new Plot2(title, "px", "", x2, y);
 		p.addLabel(0, 0, "Blue = Airy; Red = Gaussian");
 		p.setColor(Color.RED);
 		p.addPoints(x2, y2, Plot.LINE);

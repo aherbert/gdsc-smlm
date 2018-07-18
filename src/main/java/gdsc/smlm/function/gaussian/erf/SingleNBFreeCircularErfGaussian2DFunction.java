@@ -183,7 +183,6 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	public void forEach(ValueProcedure procedure)
 	{
 		if (tB == 0)
-		{
 			// Specialised implementation without a background.
 			// (This function is likely to be used to compute the Gaussian integral
 			// without a background.)
@@ -191,15 +190,10 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 			{
 				final double tI_deltaEy = tI * deltaEy[y];
 				for (int x = 0; x < maxx; x++)
-				{
 					procedure.execute(tI_deltaEy * deltaEx[x]);
-				}
 			}
-		}
 		else
-		{
 			super.forEach(procedure);
-		}
 	}
 
 	/*

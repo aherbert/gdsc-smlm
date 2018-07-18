@@ -82,9 +82,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 			insignificantImprovmentCounter = 0;
 		}
 		else
-		{
 			insignificantImprovmentIteration = getMaximumIterations();
-		}
 	}
 
 	/*
@@ -136,35 +134,28 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 			boolean negligable = false;
 			if (DoubleEquality.almostEqualRelativeOrAbsolute(oldError, newError, maxRelativeError, 0) ||
 					newError < 0.001 || false)
-			{
 				negligable = true;
-			}
-			else
+			else // The desire is to avoid a lot of computation if the error is not really moving anywhere.
+			// Once we have reached a set number of iterations, e.g. maximumIterations/2
+			// then allow stopping if the absolute change is the same.
+			if (getIteration() > insignificantImprovmentIteration)
 			{
-				// The desire is to avoid a lot of computation if the error is not really moving anywhere.
-				// Once we have reached a set number of iterations, e.g. maximumIterations/2
-				// then allow stopping if the absolute change is the same.
-				if (getIteration() > insignificantImprovmentIteration)
-				{
-					// Get the exponent of the improvement
-					int exp = getExponent(DoubleEquality.relativeError(newError, oldError));
+				// Get the exponent of the improvement
+				final int exp = getExponent(DoubleEquality.relativeError(newError, oldError));
 
-					// All we know is that there is an improvement but not enough to signal convergence.
-					// If the improvements get smaller then it may converge anyway.
-					// If the improvements get larger then the routine should be allowed to run.
-					// So check to see if the improvement is the same.
-					// Q. Should a check be made to see if the exponent is small?
-					if (improvementExponent == exp)
-					{
-						negligable = (++insignificantImprovmentCounter >= CONSECUTIVE_INSIGNIFICANT_IMPROVEMENT_LIMIT);
-						//System.out.printf("Tiny improvement %f = %f @ %d\n", oldError - newError,
-						//		DoubleEquality.relativeError(newError, oldError), getIteration());
-					}
-					else
-					{
-						insignificantImprovmentCounter = 0;
-						improvementExponent = exp;
-					}
+				// All we know is that there is an improvement but not enough to signal convergence.
+				// If the improvements get smaller then it may converge anyway.
+				// If the improvements get larger then the routine should be allowed to run.
+				// So check to see if the improvement is the same.
+				// Q. Should a check be made to see if the exponent is small?
+				if (improvementExponent == exp)
+					negligable = (++insignificantImprovmentCounter >= CONSECUTIVE_INSIGNIFICANT_IMPROVEMENT_LIMIT);
+					//System.out.printf("Tiny improvement %f = %f @ %d\n", oldError - newError,
+					//		DoubleEquality.relativeError(newError, oldError), getIteration());
+				else
+				{
+					insignificantImprovmentCounter = 0;
+					improvementExponent = exp;
 				}
 			}
 
@@ -192,13 +183,11 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 		}
 
 		if (log != null)
-		{
 			log.info("iter = %d, error = %f -> %f : %s : Continue = %b", getIteration(), oldError, newError,
 					(result == 1) ? "worse"
 							: "Delta = " + DoubleEquality.relativeError(oldError, newError) +
 									((result == 0) ? " (negligible)" : ""),
 					notSatisfied);
-		}
 	}
 
 	/**

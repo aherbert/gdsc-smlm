@@ -90,15 +90,15 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		CCD { @Override	public String getName() { return "CCD"; }
 			  @Override	public boolean isFast() { return false; }
 			  @Override	public boolean isLowerFixedI() { return true; } },
-		/** 
+		/**
 		 * CCD approximation has Poisson shot noise and uses a Poisson distribution to simulate Gaussian noise (s).
 		 * The distribution is Approx(u,s) = Poisson(u) + Poisson(s) = Poisson(u+s)
 		 */
 		CCD_APPROXIMATION { @Override public String getName() { return "CCD Approximation"; }
 							@Override public String getShortName() { return "CCD Approx"; }},
-		/** 
-		 * EM-CCD camera has Poisson shot noise, a Gamma distribution model for EM-gain 
-		 * and Gaussian read noise 
+		/**
+		 * EM-CCD camera has Poisson shot noise, a Gamma distribution model for EM-gain
+		 * and Gaussian read noise
 		 */
 		EM_CCD { @Override public String getName() { return "EM-CCD"; }
 		         @Override public boolean isFast() { return false; } };
@@ -135,7 +135,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		 */
 		public static CameraType forNumber(int number)
 		{
-			CameraType[] values = CameraType.values();
+			final CameraType[] values = CameraType.values();
 			if (number >= 0 && number < values.length)
 				return values[number];
 			return values[0];
@@ -196,7 +196,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			// type check and cast
 			if (getClass() != o.getClass())
 				return false;
-			FIKey key = (FIKey) o;
+			final FIKey key = (FIKey) o;
 			// field comparison
 			return type == key.type && gain == key.gain && noise == key.noise;
 		}
@@ -209,7 +209,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		@Override
 		public String toString()
 		{
-			CameraType type = getType();
+			final CameraType type = getType();
 			String name = type.getShortName();
 			switch (type)
 			{
@@ -228,15 +228,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	static
 	{
-		PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
+		final PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
 				PoissonFisherInformationCache.getDefaultInstance()).read();
 		if (cacheData != null)
-		{
-			for (PoissonFisherInformationData data : cacheData.getDataList())
-			{
+			for (final PoissonFisherInformationData data : cacheData.getDataList())
 				cache.put(new FIKey(data), data);
-			}
-		}
 	}
 
 	/**
@@ -251,7 +247,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	 */
 	private static void save(FIKey key, double[] log10photons, double[] alpha)
 	{
-		CameraType type = key.getType();
+		final CameraType type = key.getType();
 		if (type.isFast())
 			return;
 		PoissonFisherInformationData data = cache.get(key);
@@ -260,15 +256,15 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			// This should only be called if new values have been computed.
 			// so assume we must merge the lists.
 			// Note: The lists must be sorted.
-			AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
+			final AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
 			//AlphaSample[] list2 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
-			TurboList<AlphaSample> list = new TurboList<>(list1.length + log10photons.length);
+			final TurboList<AlphaSample> list = new TurboList<>(list1.length + log10photons.length);
 			int i = 0, j = 0;
-			AlphaSample.Builder a2 = AlphaSample.newBuilder();
+			final AlphaSample.Builder a2 = AlphaSample.newBuilder();
 			while (i < list1.length && j < log10photons.length)
 			{
-				AlphaSample a1 = list1[i];
-				double mean = log10photons[j];
+				final AlphaSample a1 = list1[i];
+				final double mean = log10photons[j];
 				if (a1.getLog10Mean() == mean)
 				{
 					list.add(a1);
@@ -295,7 +291,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 				a2.setAlpha(alpha[j++]);
 				list.add(a2.build());
 			}
-			PoissonFisherInformationData.Builder b = data.toBuilder();
+			final PoissonFisherInformationData.Builder b = data.toBuilder();
 			b.clearAlphaSample();
 			b.addAllAlphaSample(list);
 			data = b.build();
@@ -304,8 +300,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 		else
 		{
-			PoissonFisherInformationData.Builder b = PoissonFisherInformationData.newBuilder();
-			AlphaSample.Builder sample = AlphaSample.newBuilder();
+			final PoissonFisherInformationData.Builder b = PoissonFisherInformationData.newBuilder();
+			final AlphaSample.Builder sample = AlphaSample.newBuilder();
 			b.setType(key.type);
 			b.setGain(key.gain);
 			b.setNoise(key.noise);
@@ -322,19 +318,14 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		// Also save EM-CCD data to file
 		if (type == CameraType.EM_CCD)
 		{
-			int t = type.ordinal();
+			final int t = type.ordinal();
 			// Get the EM-CCD keys
-			TurboList<FIKey> list = new TurboList<>(cache.size());
-			for (FIKey k : cache.keySet())
-			{
+			final TurboList<FIKey> list = new TurboList<>(cache.size());
+			for (final FIKey k : cache.keySet())
 				if (k.type == t)
-				{
 					list.add(k);
-				}
-			}
-			int MAX = 10;
+			final int MAX = 10;
 			if (list.size() > MAX)
-			{
 				// Sort by age
 				list.sort(new Comparator<FIKey>()
 				{
@@ -345,8 +336,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 						return -Long.compare(o1.age, o2.age);
 					}
 				});
-			}
-			PoissonFisherInformationCache.Builder cacheData = PoissonFisherInformationCache.newBuilder();
+			final PoissonFisherInformationCache.Builder cacheData = PoissonFisherInformationCache.newBuilder();
 			for (int i = Math.min(list.size(), MAX); i-- > 0;)
 				cacheData.addData(cache.get(list.getf(i)));
 			SettingsManager.writeSettings(cacheData);
@@ -392,22 +382,22 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	public static PoissonFisherInformationData loadData(CameraType type, double gain, double noise,
 			double relativeError)
 	{
-		FIKey key = new FIKey(type, gain, noise);
+		final FIKey key = new FIKey(type, gain, noise);
 		PoissonFisherInformationData data = load(key);
 		if (data == null && relativeError > 0 && relativeError < 0.1)
 		{
 			// Fuzzy matching
 			double error = 1;
-			for (PoissonFisherInformationData d : cache.values())
+			for (final PoissonFisherInformationData d : cache.values())
 			{
-				double e1 = DoubleEquality.relativeError(gain, d.getGain());
+				final double e1 = DoubleEquality.relativeError(gain, d.getGain());
 				if (e1 < relativeError)
 				{
-					double e2 = DoubleEquality.relativeError(noise, d.getNoise());
+					final double e2 = DoubleEquality.relativeError(noise, d.getNoise());
 					if (e2 < relativeError)
 					{
 						// Combined error - Euclidean distance
-						double e = e1 * e1 + e2 * e2;
+						final double e = e1 * e1 + e2 * e2;
 						if (error > e)
 						{
 							error = e;
@@ -455,22 +445,22 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	{
 		if (type == null || type.isFast())
 			return null;
-		FIKey key = new FIKey(type, gain, noise);
+		final FIKey key = new FIKey(type, gain, noise);
 		PoissonFisherInformationData data = load(key);
 		if (data == null && relativeError > 0 && relativeError < 0.1)
 		{
 			// Fuzzy matching
 			double error = 1;
-			for (PoissonFisherInformationData d : cache.values())
+			for (final PoissonFisherInformationData d : cache.values())
 			{
-				double e1 = DoubleEquality.relativeError(gain, d.getGain());
+				final double e1 = DoubleEquality.relativeError(gain, d.getGain());
 				if (e1 < relativeError)
 				{
-					double e2 = DoubleEquality.relativeError(noise, d.getNoise());
+					final double e2 = DoubleEquality.relativeError(noise, d.getNoise());
 					if (e2 < relativeError)
 					{
 						// Combined error - Euclidean distance
-						double e = e1 * e1 + e2 * e2;
+						final double e = e1 * e1 + e2 * e2;
 						if (error > e)
 						{
 							error = e;
@@ -483,18 +473,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		if (data == null)
 			return null;
 		// Dump the samples. Convert to base e.
-		double scale = Math.log(10);
-		TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
-		TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
-		for (AlphaSample sample : data.getAlphaSampleList())
+		final double scale = Math.log(10);
+		final TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
+		final TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
+		for (final AlphaSample sample : data.getAlphaSampleList())
 		{
 			meanList.add(sample.getLog10Mean() * scale);
 			alphalist.add(sample.getAlpha());
 		}
-		double[] means = meanList.toArray();
-		double[] alphas = alphalist.toArray();
+		final double[] means = meanList.toArray();
+		final double[] alphas = alphalist.toArray();
 		Sort.sortArrays(alphas, means, true);
-		BasePoissonFisherInformation upperf = (type == CameraType.EM_CCD) ? new HalfPoissonFisherInformation()
+		final BasePoissonFisherInformation upperf = (type == CameraType.EM_CCD) ? new HalfPoissonFisherInformation()
 				: createPoissonGaussianApproximationFisherInformation(noise / gain);
 		return new InterpolatedPoissonFisherInformation(means, alphas, type.isLowerFixedI(), upperf);
 	}
@@ -535,7 +525,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	{
 		settings = SettingsManager.readCameraModelFisherInformationAnalysisSettings(0).toBuilder();
 
-		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		//@formatter:off
@@ -582,65 +572,67 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return true;
 	}
 
+	// Set the debug flag
+	private final static boolean debug = System.getProperty("gdsc.smlm.debug") != null;
+	
 	private void analyse()
 	{
-		CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
-		CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
+		final CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
+		final CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
 
-		FIKey key1 = new FIKey(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
-		FIKey key2 = new FIKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
+		final FIKey key1 = new FIKey(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
+		final FIKey key2 = new FIKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
 
-		BasePoissonFisherInformation f1 = createPoissonFisherInformation(key1);
+		final BasePoissonFisherInformation f1 = createPoissonFisherInformation(key1);
 		if (f1 == null)
 			return;
-		BasePoissonFisherInformation f2 = createPoissonFisherInformation(key2);
+		final BasePoissonFisherInformation f2 = createPoissonFisherInformation(key2);
 		if (f2 == null)
 			return;
 
-		double[] exp = createExponents();
+		final double[] exp = createExponents();
 		if (exp == null)
 			return;
 
-		double[] photons = new double[exp.length];
+		final double[] photons = new double[exp.length];
 		for (int i = 0; i < photons.length; i++)
 			photons[i] = FastMath.pow(10, exp[i]);
 
 		// Get the alpha. This may be from the cache
-		double[] alpha1 = getAlpha(photons, exp, f1, key1);
-		double[] alpha2 = getAlpha(photons, exp, f2, key2);
+		final double[] alpha1 = getAlpha(photons, exp, f1, key1);
+		final double[] alpha2 = getAlpha(photons, exp, f2, key2);
 
 		// Compute the Poisson Fisher information
-		double[] fi1 = getFisherInformation(alpha1, photons);
-		double[] fi2 = getFisherInformation(alpha2, photons);
+		final double[] fi1 = getFisherInformation(alpha1, photons);
+		final double[] fi2 = getFisherInformation(alpha2, photons);
 
 		// ==============
 		// Debug PGG
-		boolean debug = false;
 		// ==============
 		if (debug && f2 instanceof PoissonGammaGaussianFisherInformation)
 		{
-			PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) f2;
-			double t = 200;
+			final PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) f2;
+			final double t = 200;
 			//for (int i=0; i<rpggFI.length; i++)
 			//{
 			//	if (photons[i] > 100 && rpggFI[i] < 0.3)
 			//		t = photons[i];
 			//}
 
-			double fi = pgg.getFisherInformation(t);
-			double alpha = fi * t;
-			double[][] data1 = pgg.getFisherInformationFunction(false);
-			double[][] data2 = pgg.getFisherInformationFunction(true);
+			final double fi = pgg.getFisherInformation(t);
+			final double alpha = fi * t;
+			final double[][] data1 = pgg.getFisherInformationFunction(false);
+			final double[][] data2 = pgg.getFisherInformationFunction(true);
 
-			double[] fif = data1[1];
+			final double[] fif = data1[1];
 			int max = 0;
 			for (int j = 1; j < fif.length; j++)
 				if (fif[max] < fif[j])
 					max = j;
 			System.out.printf("PGG(p=%g) max=%g\n", t, data1[0][max]);
 
-			String title = TITLE + " photons=" + Utils.rounded(t) + " alpha=" + Utils.rounded(alpha);
-			Plot plot = new Plot(title, "Count", "FI function");
+			final String title = TITLE + " photons=" + Utils.rounded(t) + " alpha=" + Utils.rounded(alpha);
+			final Plot plot = new Plot(title, "Count", "FI function");
 			double yMax = Maths.max(data1[1]);
 			yMax = Maths.maxDefault(yMax, data2[1]);
 			plot.setLimits(data2[0][0], data2[0][data2[0].length - 1], 0, yMax);
@@ -652,43 +644,43 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 		// ==============
 
-		Color color1 = Color.BLUE;
-		Color color2 = Color.RED;
+		final Color color1 = Color.BLUE;
+		final Color color2 = Color.RED;
 
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 
 		// Test if we can use ImageJ support for a X log scale
-		boolean logScaleX = ((float) photons[0] != 0);
-		double[] x = (logScaleX) ? photons : exp;
-		String xTitle = (logScaleX) ? "photons" : "log10(photons)";
+		final boolean logScaleX = ((float) photons[0] != 0);
+		final double[] x = (logScaleX) ? photons : exp;
+		final String xTitle = (logScaleX) ? "photons" : "log10(photons)";
 
 		// Get interpolation for alpha. Convert to base e.
-		double[] logU = exp.clone();
-		double scale = Math.log(10);
+		final double[] logU = exp.clone();
+		final double scale = Math.log(10);
 		for (int i = 0; i < logU.length; i++)
 			logU[i] *= scale;
-		BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(type1, logU, alpha1, f1);
-		BasePoissonFisherInformation if2 = getInterpolatedPoissonFisherInformation(type2, logU, alpha2, f2);
+		final BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(type1, logU, alpha1, f1);
+		final BasePoissonFisherInformation if2 = getInterpolatedPoissonFisherInformation(type2, logU, alpha2, f2);
 
 		// Interpolate with 5 points per sample for smooth curve
-		int n = 5 * exp.length;
-		double[] iexp = new double[n + 1];
-		double[] iphotons = new double[iexp.length];
-		double h = (exp[exp.length - 1] - exp[0]) / n;
+		final int n = 5 * exp.length;
+		final double[] iexp = new double[n + 1];
+		final double[] iphotons = new double[iexp.length];
+		final double h = (exp[exp.length - 1] - exp[0]) / n;
 		for (int i = 0; i <= n; i++)
 		{
 			iexp[i] = exp[0] + i * h;
 			iphotons[i] = FastMath.pow(10, iexp[i]);
 		}
-		double[] ix = (logScaleX) ? iphotons : iexp;
-		double[] ialpha1 = getAlpha(if1, iphotons);
-		double[] ialpha2 = getAlpha(if2, iphotons);
+		final double[] ix = (logScaleX) ? iphotons : iexp;
+		final double[] ialpha1 = getAlpha(if1, iphotons);
+		final double[] ialpha2 = getAlpha(if2, iphotons);
 
-		int pointShape = getPointShape(settings.getPointOption());
+		final int pointShape = getPointShape(settings.getPointOption());
 
-		String name1 = getName(key1);
-		String name2 = getName(key2);
-		String legend = name1 + "\n" + name2;
+		final String name1 = getName(key1);
+		final String name2 = getName(key2);
+		final String legend = name1 + "\n" + name2;
 
 		String title = "Relative Fisher Information";
 		Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
@@ -718,7 +710,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		limits = limits(limits, fi2);
 
 		// Check if we can use ImageJ support for a Y log scale
-		boolean logScaleY = ((float) limits[1] <= Float.MAX_VALUE);
+		final boolean logScaleY = ((float) limits[1] <= Float.MAX_VALUE);
 		if (!logScaleY)
 		{
 			for (int i = 0; i < fi1.length; i++)
@@ -730,7 +722,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			limits[1] = Math.log10(limits[1]);
 		}
 
-		String yTitle = (logScaleY) ? "Fisher Information" : "log10(Fisher Information)";
+		final String yTitle = (logScaleY) ? "Fisher Information" : "log10(Fisher Information)";
 
 		title = "Fisher Information";
 		plot = new Plot(title, xTitle, yTitle);
@@ -780,7 +772,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private static String getName(FIKey key)
 	{
-		CameraType type = key.getType();
+		final CameraType type = key.getType();
 		String name = type.getShortName();
 		switch (type)
 		{
@@ -802,9 +794,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return null;
 		}
 
-		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
+		final int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
 		//sampling <<= 2;
-		PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(s, sampling);
+		final PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
 		//fi.setMinRange(5);
 		fi.setMeanThreshold(1000);
@@ -835,9 +827,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return null;
 		}
 
-		int sampling = PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING;
+		final int sampling = PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING;
 		//sampling = 2;
-		PoissonGammaGaussianFisherInformation fi = new PoissonGammaGaussianFisherInformation(m, s, sampling);
+		final PoissonGammaGaussianFisherInformation fi = new PoissonGammaGaussianFisherInformation(m, s, sampling);
 		//fi.setRelativeProbabilityThreshold(1e-6);
 		//fi.setMinRange(10);
 		//fi.setMaxIterations(3);
@@ -849,23 +841,23 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private double[] createExponents()
 	{
-		int n = 1 + Math.max(0, settings.getSubDivisions());
-		double h = 1.0 / n;
-		double minExp = settings.getMinExponent();
-		double maxExp = settings.getMaxExponent();
-		double size = (maxExp - minExp) * n + 1;
+		final int n = 1 + Math.max(0, settings.getSubDivisions());
+		final double h = 1.0 / n;
+		final double minExp = settings.getMinExponent();
+		final double maxExp = settings.getMaxExponent();
+		final double size = (maxExp - minExp) * n + 1;
 		if (size > 100)
 		{
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Number of exponents is " + Math.ceil(size) + ". OK to continue?");
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return null;
 		}
-		TDoubleArrayList list = new TDoubleArrayList();
+		final TDoubleArrayList list = new TDoubleArrayList();
 		for (int i = 0;; i++)
 		{
-			double e = minExp + i * h;
+			final double e = minExp + i * h;
 			list.add(e);
 			if (e >= settings.getMaxExponent())
 				break;
@@ -875,34 +867,34 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private double[] getAlpha(final double[] photons, double[] exp, final BasePoissonFisherInformation fi, FIKey key)
 	{
-		CameraType type = key.getType();
+		final CameraType type = key.getType();
 		final double[] alpha = new double[photons.length];
 		if (!type.isFast())
 		{
 			final int[] index;
 
 			// Try and load from the cache
-			PoissonFisherInformationData data = load(key);
+			final PoissonFisherInformationData data = load(key);
 			if (data != null)
 			{
 				// Dump the samples
-				TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
-				TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
-				for (AlphaSample sample : data.getAlphaSampleList())
+				final TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
+				final TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
+				for (final AlphaSample sample : data.getAlphaSampleList())
 				{
 					meanList.add(sample.getLog10Mean());
 					alphalist.add(sample.getAlpha());
 				}
-				double[] exp2 = meanList.toArray();
-				double[] alphas = alphalist.toArray();
+				final double[] exp2 = meanList.toArray();
+				final double[] alphas = alphalist.toArray();
 				Sort.sortArrays(alphas, exp2, true);
 
 				// Find any exponent not in the array
-				TIntArrayList list = new TIntArrayList(exp.length);
+				final TIntArrayList list = new TIntArrayList(exp.length);
 				for (int i = 0; i < exp.length; i++)
 				{
 					// Assume exp2 is sorted
-					int j = Arrays.binarySearch(exp2, exp[i]);
+					final int j = Arrays.binarySearch(exp2, exp[i]);
 					if (j < 0)
 						list.add(i); // Add to indices to compute
 					else
@@ -911,20 +903,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 				index = list.toArray();
 			}
 			else
-			{
 				// Compute all
 				index = SimpleArrayUtils.newArray(alpha.length, 0, 1);
-			}
 
 			if (index.length > 0)
 			{
 				IJ.showStatus("Computing " + getName(key));
-				int nThreads = Prefs.getThreads();
+				final int nThreads = Prefs.getThreads();
 				if (es == null)
 					es = Executors.newFixedThreadPool(nThreads);
 				final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), index.length, nThreads != 1);
-				int nPerThread = (int) Math.ceil((double) index.length / nThreads);
-				TurboList<Future<?>> futures = new TurboList<>(nThreads);
+				final int nPerThread = (int) Math.ceil((double) index.length / nThreads);
+				final TurboList<Future<?>> futures = new TurboList<>(nThreads);
 				for (int i = 0; i < index.length; i += nPerThread)
 				{
 					final int start = i;
@@ -934,10 +924,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 						@Override
 						public void run()
 						{
-							BasePoissonFisherInformation fi2 = fi.clone();
+							final BasePoissonFisherInformation fi2 = fi.clone();
 							for (int ii = start; ii < end; ii++)
 							{
-								int j = index[ii];
+								final int j = index[ii];
 								alpha[j] = fi2.getAlpha(photons[j]);
 								ticker.tick();
 							}
@@ -952,34 +942,26 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			}
 		}
 		else
-		{
 			// Simple single threaded method.
 			for (int i = 0; i < alpha.length; i++)
-			{
 				alpha[i] = fi.getAlpha(photons[i]);
-			}
-		}
 		return alpha;
 	}
 
 	private static double[] getFisherInformation(double[] alpha, double[] photons)
 	{
-		double[] I = new double[photons.length];
+		final double[] I = new double[photons.length];
 		for (int i = 0; i < photons.length; i++)
-		{
 			I[i] = alpha[i] / photons[i];
-		}
 		return I;
 	}
 
 	private static double[] getAlpha(BasePoissonFisherInformation fi, double[] photons)
 	{
 		// Do not multi-thread as this is an interpolated/fast function
-		double[] rI = new double[photons.length];
+		final double[] rI = new double[photons.length];
 		for (int i = 0; i < photons.length; i++)
-		{
 			rI[i] = fi.getAlpha(photons[i]);
-		}
 		return rI;
 	}
 
@@ -1017,7 +999,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double max = limits[1];
 		for (int i = 0; i < f.length; i++)
 		{
-			double d = f[i];
+			final double d = f[i];
 			// Find limits of numbers that can be logged
 			if (d <= 0 || d == Double.POSITIVE_INFINITY)
 				continue;
@@ -1037,33 +1019,33 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	private static void plotFromCache()
 	{
 		// Build a list of curve stored in the cache
-		String[] names = new String[cache.size()];
-		PoissonFisherInformationData[] datas = new PoissonFisherInformationData[cache.size()];
+		final String[] names = new String[cache.size()];
+		final PoissonFisherInformationData[] datas = new PoissonFisherInformationData[cache.size()];
 		int c = 0;
-		for (Entry<FIKey, PoissonFisherInformationData> e : cache.entrySet())
+		for (final Entry<FIKey, PoissonFisherInformationData> e : cache.entrySet())
 		{
 			names[c] = e.getKey().toString();
 			datas[c] = e.getValue();
 			c++;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Fisher_information", names, cachePlot);
 		gd.addChoice("Plot_point", POINT_OPTION, pointOption);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		int index = gd.getNextChoiceIndex();
+		final int index = gd.getNextChoiceIndex();
 		pointOption = gd.getNextChoiceIndex();
 		cachePlot = names[index];
 
-		PoissonFisherInformationData data = datas[index];
-		FIKey key = new FIKey(data);
+		final PoissonFisherInformationData data = datas[index];
+		final FIKey key = new FIKey(data);
 
 		c = 0;
-		double[] exp = new double[data.getAlphaSampleCount()];
-		double[] alpha = new double[data.getAlphaSampleCount()];
-		for (AlphaSample s : data.getAlphaSampleList())
+		final double[] exp = new double[data.getAlphaSampleCount()];
+		final double[] alpha = new double[data.getAlphaSampleCount()];
+		for (final AlphaSample s : data.getAlphaSampleList())
 		{
 			exp[c] = s.getLog10Mean();
 			alpha[c] = s.getAlpha();
@@ -1073,12 +1055,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		//Sort.sortArrays(alpha, exp, true);
 
 		// Test if we can use ImageJ support for a X log scale
-		boolean logScaleX = ((float) FastMath.pow(10, exp[0]) != 0);
+		final boolean logScaleX = ((float) FastMath.pow(10, exp[0]) != 0);
 		double[] x = exp;
 		String xTitle = "log10(photons)";
 		if (logScaleX)
 		{
-			double[] photons = new double[exp.length];
+			final double[] photons = new double[exp.length];
 			for (int i = 0; i < photons.length; i++)
 				photons[i] = FastMath.pow(10, exp[i]);
 			x = photons;
@@ -1086,37 +1068,38 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 
 		// Get interpolation for alpha. Convert to base e.
-		double[] logU = exp.clone();
-		double scale = Math.log(10);
+		final double[] logU = exp.clone();
+		final double scale = Math.log(10);
 		for (int i = 0; i < logU.length; i++)
 			logU[i] *= scale;
-		BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(key.getType(), logU, alpha, null);
+		final BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(key.getType(), logU, alpha,
+				null);
 
 		// Interpolate with 5 points per sample for smooth curve
-		int n = 5;
-		TDoubleArrayList iexp = new TDoubleArrayList();
-		TDoubleArrayList iphotons = new TDoubleArrayList();
+		final int n = 5;
+		final TDoubleArrayList iexp = new TDoubleArrayList();
+		final TDoubleArrayList iphotons = new TDoubleArrayList();
 		for (int i = 1; i < exp.length; i++)
 		{
-			int i_1 = i - 1;
-			double h = (exp[i] - exp[i_1]) / n;
+			final int i_1 = i - 1;
+			final double h = (exp[i] - exp[i_1]) / n;
 			for (int j = 0; j < n; j++)
 			{
-				double e = exp[i_1] + j * h;
+				final double e = exp[i_1] + j * h;
 				iexp.add(e);
 				iphotons.add(FastMath.pow(10, e));
 			}
 		}
 		iexp.add(exp[exp.length - 1]);
 		iphotons.add(FastMath.pow(10, exp[exp.length - 1]));
-		double[] photons = iphotons.toArray();
-		double[] ix = (logScaleX) ? photons : iexp.toArray();
-		double[] ialpha1 = getAlpha(if1, photons);
+		final double[] photons = iphotons.toArray();
+		final double[] ix = (logScaleX) ? photons : iexp.toArray();
+		final double[] ialpha1 = getAlpha(if1, photons);
 
-		int pointShape = getPointShape(pointOption);
+		final int pointShape = getPointShape(pointOption);
 
-		String title = "Cached Relative Fisher Information";
-		Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
+		final String title = "Cached Relative Fisher Information";
+		final Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
 		plot.setLimits(x[0], x[x.length - 1], -0.05, 1.05);
 		if (logScaleX)
 			plot.setLogScaleX();
@@ -1124,9 +1107,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		plot.addPoints(ix, ialpha1, Plot.LINE);
 		// Option to show nodes
 		if (pointShape != -1)
-		{
 			plot.addPoints(x, alpha, pointShape);
-		}
 		plot.setColor(Color.BLACK);
 		plot.addLabel(0, 0, cachePlot);
 		Utils.display(title, plot);

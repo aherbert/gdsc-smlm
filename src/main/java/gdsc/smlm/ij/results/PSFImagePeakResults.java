@@ -90,38 +90,33 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		// Note: we do not catch configuration exceptions if required Gaussian 2D configuration is missing
 
 		if (fixedWidth)
-		{
 			// Check if we need the amplitude for the fixed width PSF
 			requirePSFParameters = flags != 0;
+		else if (calculatedPrecision)
+		{
+			flags |= Gaussian2DPeakResultHelper.LSE_PRECISION;
+
+			// To convert the precision to pixels
+			if (!hasCalibration())
+				throw new ConfigurationException("nm/pixel is required when drawing using the precision");
+
+			dc = UnitConverterFactory.createConverter(DistanceUnit.NM, DistanceUnit.PIXEL,
+					getCalibrationReader().getNmPerPixel());
 		}
 		else
 		{
-			if (calculatedPrecision)
+			// We need to know the parameters for the Gaussian 2D PSF
+			final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+			isx = indices[0];
+			isy = indices[1];
+			try
 			{
-				flags |= Gaussian2DPeakResultHelper.LSE_PRECISION;
-
-				// To convert the precision to pixels
-				if (!hasCalibration())
-					throw new ConfigurationException("nm/pixel is required when drawing using the precision");
-
-				dc = UnitConverterFactory.createConverter(DistanceUnit.NM, DistanceUnit.PIXEL,
-						getCalibrationReader().getNmPerPixel());
+				ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
 			}
-			else
+			catch (final ConfigurationException e)
 			{
-				// We need to know the parameters for the Gaussian 2D PSF
-				int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
-				isx = indices[0];
-				isy = indices[1];
-				try
-				{
-					ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
-				}
-				catch (ConfigurationException e)
-				{
-					// No rotation angle
-					ia = 0;
-				}
+				// No rotation angle
+				ia = 0;
 			}
 		}
 
@@ -208,7 +203,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -240,9 +235,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 		final double[] psfParams;
 		if (fixedWidth)
-		{
 			psfParams = fixedParams;
-		}
 		else
 		{
 			// Precalculate multiplication factors
@@ -290,7 +283,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		for (int y0 = ymin; y0 <= ymax; y0++)
 			for (int x0 = xmin; x0 <= xmax; x0++)
 			{
-				int ii = y0 * imageWidth + x0;
+				final int ii = y0 * imageWidth + x0;
 				index[i] = ii;
 				final float dx = (x0 - x) / scale;
 				final float dy = (y0 - y) / scale;
@@ -303,9 +296,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		{
 			size++;
 			while (i-- > 0)
-			{
 				data[index[i]] += value[i];
-			}
 		}
 	}
 
@@ -386,7 +377,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 		// TODO - Make this more efficient. It could use worker threads to increase speed.
 		int i = 0;
-		for (PeakResult result : results)
+		for (final PeakResult result : results)
 		{
 			addPeak(result.getFrame(), result.getNoise(), result.getParameters());
 			if (++i % 64 == 0)

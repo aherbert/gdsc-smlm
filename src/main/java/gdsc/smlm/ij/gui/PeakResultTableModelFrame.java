@@ -84,7 +84,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 {
 	private static final long serialVersionUID = -3671174621388288975L;
 
-	private PeakResultTableModelJTable table;
+	private final PeakResultTableModelJTable table;
 	private JMenuItem fileSave;
 	private JCheckBoxMenuItem editReadOnly;
 	private JMenuItem editDelete;
@@ -139,7 +139,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		// This is required to get the column sizes for the model data.
 		model.setLive(true);
 
-		int[] indices = (selectionModel != null) ? ListSelectionModelHelper.getSelectedIndices(selectionModel) : null;
+		final int[] indices = (selectionModel != null) ? ListSelectionModelHelper.getSelectedIndices(selectionModel) : null;
 
 		table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
 
@@ -148,7 +148,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 		final JScrollPane scroll = new JScrollPane(table);
 
-		ScreenDimensionHelper helper = new ScreenDimensionHelper();
+		final ScreenDimensionHelper helper = new ScreenDimensionHelper();
 		helper.setMinHeight(300);
 		helper.setup(scroll);
 
@@ -191,7 +191,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private JMenuBar createMenuBar()
 	{
-		JMenuBar menubar = new JMenuBar();
+		final JMenuBar menubar = new JMenuBar();
 		menubar.add(createFileMenu());
 		menubar.add(createEditMenu());
 		menubar.add(createSourceMenu());
@@ -229,7 +229,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				boolean allowDelete = !isReadOnly();
+				final boolean allowDelete = !isReadOnly();
 				editDelete.setEnabled(allowDelete);
 				editDeleteAll.setEnabled(allowDelete);
 			}
@@ -249,7 +249,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private JMenuItem add(String text, int mnemonic, String keyStroke)
 	{
-		JMenuItem item = new JMenuItem(text, mnemonic);
+		final JMenuItem item = new JMenuItem(text, mnemonic);
 		if (keyStroke != null)
 			item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
 		item.addActionListener(this);
@@ -258,7 +258,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private JCheckBoxMenuItem addToggle(String text, int mnemonic, String keyStroke, boolean selected)
 	{
-		JCheckBoxMenuItem item = new JCheckBoxMenuItem(text, selected);
+		final JCheckBoxMenuItem item = new JCheckBoxMenuItem(text, selected);
 		item.setMnemonic(mnemonic);
 		if (keyStroke != null)
 			item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
@@ -297,10 +297,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private void doSave()
 	{
-		PeakResultTableModel model = getModel();
+		final PeakResultTableModel model = getModel();
 		if (model == null || model.getRowCount() == 0)
 			return;
-		ExtendedGenericDialog gd = new ExtendedGenericDialog("Save Results", this);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog("Save Results", this);
 		if (TextUtils.isNullOrEmpty(saveName))
 			saveName = getTitle();
 		gd.addStringField("Results_set_name", saveName, 30);
@@ -313,7 +313,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			IJ.error("No results set name");
 			return;
 		}
-		MemoryPeakResults results = model.toMemoryPeakResults();
+		final MemoryPeakResults results = model.toMemoryPeakResults();
 		results.setName(saveName);
 		MemoryPeakResults.addResults(results);
 	}
@@ -341,17 +341,17 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private void doDelete()
 	{
-		PeakResultTableModel model = getModel();
+		final PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
-		int[] indices = table.getSelectedRows();
+		final int[] indices = table.getSelectedRows();
 		table.convertRowIndexToModel(indices);
 		model.remove(this, indices);
 	}
 
 	private void doDeleteAll()
 	{
-		PeakResultTableModel model = getModel();
+		final PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
 		model.clear(this);
@@ -369,19 +369,19 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private void doUnsort()
 	{
-		RowSorter<?> rs = table.getRowSorter();
+		final RowSorter<?> rs = table.getRowSorter();
 		if (rs != null)
 			rs.setSortKeys(null);
 	}
 
 	private void doEditTableSettings()
 	{
-		PeakResultTableModel model = getModel();
+		final PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
-		ResultsTableSettings.Builder tableSettings = model.getTableSettings().toBuilder();
+		final ResultsTableSettings.Builder tableSettings = model.getTableSettings().toBuilder();
 		// Copied from ResultsManager.addTableResultsOptions
-		ExtendedGenericDialog egd = new ExtendedGenericDialog("Table Settings", this);
+		final ExtendedGenericDialog egd = new ExtendedGenericDialog("Table Settings", this);
 		egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
 				tableSettings.getDistanceUnit().getNumber());
 		egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
@@ -409,36 +409,32 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private void doShowSource()
 	{
-		PeakResultTableModel model = getModel();
+		final PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
-		ImageSource source = model.getSource();
+		final ImageSource source = model.getSource();
 		String text = getTitle() + " source";
 		if (source == null)
-		{
 			text += " = NA";
-		}
 		else
-		{
 			text += "\n" + XmlUtils.prettyPrintXml(source.toXML());
-		}
 		IJ.log(text);
 	}
 
 	private void doShowOverlay()
 	{
-		PeakResultTableModel model = getModel();
+		final PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
-		PeakResult[] list = table.getSelectedData();
+		final PeakResult[] list = table.getSelectedData();
 		if (list.length == 0)
 			return;
-		ImageSource source = model.getSource();
+		final ImageSource source = model.getSource();
 		if (source == null)
 			return;
 
-		String title = source.getOriginal().getName();
-		ImagePlus imp = WindowManager.getImage(title);
+		final String title = source.getOriginal().getName();
+		final ImagePlus imp = WindowManager.getImage(title);
 		if (imp == null)
 			return;
 		// Assumes 3D stack (no channel/time)
@@ -446,14 +442,14 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			return;
 		try
 		{
-			TypeConverter<DistanceUnit> converter = CalibrationHelper.getDistanceConverter(model.getCalibration(),
+			final TypeConverter<DistanceUnit> converter = CalibrationHelper.getDistanceConverter(model.getCalibration(),
 					DistanceUnit.PIXEL);
-			Overlay o = new Overlay();
+			final Overlay o = new Overlay();
 
 			if (list.length == 1)
 			{
-				PeakResult p = list[0];
-				PointRoi roi = new PointRoi(converter.convert(p.getXPosition()), converter.convert(p.getYPosition()));
+				final PeakResult p = list[0];
+				final PointRoi roi = new PointRoi(converter.convert(p.getXPosition()), converter.convert(p.getYPosition()));
 				roi.setPointType(3);
 				roi.setPosition(p.getFrame());
 				o.add(roi);
@@ -461,8 +457,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			else
 			{
 				Arrays.sort(list, FramePeakResultComparator.INSTANCE);
-				TFloatArrayList ox = new TFloatArrayList(list.length);
-				TFloatArrayList oy = new TFloatArrayList(list.length);
+				final TFloatArrayList ox = new TFloatArrayList(list.length);
+				final TFloatArrayList oy = new TFloatArrayList(list.length);
 				int t = list[0].getFrame() - 1;
 				for (int i = 0; i < list.length; i++)
 				{
@@ -470,7 +466,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					{
 						if (ox.size() > 0)
 						{
-							PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+							final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
 							roi.setPointType(3);
 							roi.setPosition(t);
 							ox.resetQuick();
@@ -484,20 +480,20 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 				}
 				if (ox.size() > 0)
 				{
-					PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+					final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
 					roi.setPointType(3);
 					roi.setPosition(t);
 					o.add(roi);
 				}
 			}
 			imp.setOverlay(o);
-			PeakResult p = list[0];
+			final PeakResult p = list[0];
 			imp.setSlice(p.getFrame());
 			Utils.adjustSourceRect(imp, 0, (int) converter.convert(p.getXPosition()),
 					(int) converter.convert(p.getYPosition()));
 			imp.getWindow().toFront();
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			return;
 		}
@@ -505,7 +501,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private PeakResultTableModel getModel()
 	{
-		TableModel model = table.getModel();
+		final TableModel model = table.getModel();
 		return (model instanceof PeakResultTableModel) ? (PeakResultTableModel) model : null;
 	}
 
@@ -623,20 +619,18 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 				{
 					final PeakResultStoreList store = new ArrayPeakResultStore(10);
 					for (int i = n; i-- > 0;)
-					{
 						store.add(new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(),
 								r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(), r.nextFloat(),
 										r.nextFloat(), r.nextFloat(), r.nextFloat()),
 								null));
-					}
 
-					CalibrationWriter cw = new CalibrationWriter();
+					final CalibrationWriter cw = new CalibrationWriter();
 					cw.setNmPerPixel(100);
 					cw.setCountPerPhoton(10);
 					cw.setDistanceUnit(DistanceUnit.PIXEL);
 					cw.setIntensityUnit(IntensityUnit.COUNT);
 
-					ResultsTableSettings.Builder tableSettings = ResultsTableSettings.newBuilder();
+					final ResultsTableSettings.Builder tableSettings = ResultsTableSettings.newBuilder();
 					tableSettings.setDistanceUnit(DistanceUnit.NM);
 					tableSettings.setIntensityUnit(IntensityUnit.PHOTON);
 					tableSettings.setShowFittingData(true);
@@ -693,7 +687,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
 					d2.setVisible(true);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					e.printStackTrace();
 				}

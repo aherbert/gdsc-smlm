@@ -51,32 +51,32 @@ public class QuadraticAstigmatismZModelTest
 
 	private void canStaticComputeGradient(double zDepth)
 	{
-		double[] ds_dz = new double[1];
-		double[] ds_dz2 = new double[2];
-		double[] ds_duz = new double[1];
-		double[] ds_dlz = new double[1];
-		boolean record = TestSettings.allow(LogLevel.INFO);
+		final double[] ds_dz = new double[1];
+		final double[] ds_dz2 = new double[2];
+		final double[] ds_duz = new double[1];
+		final double[] ds_dlz = new double[1];
+		final boolean record = TestSettings.allow(LogLevel.INFO);
 		for (double z = -0.5; z < 0.5; z += 0.01)
 		{
-			double s0 = QuadraticAstigmatismZModel.getS(z, zDepth);
-			double s1 = QuadraticAstigmatismZModel.getS1(z, zDepth, ds_dz);
-			double s2 = QuadraticAstigmatismZModel.getS2(z, zDepth, ds_dz2);
+			final double s0 = QuadraticAstigmatismZModel.getS(z, zDepth);
+			final double s1 = QuadraticAstigmatismZModel.getS1(z, zDepth, ds_dz);
+			final double s2 = QuadraticAstigmatismZModel.getS2(z, zDepth, ds_dz2);
 
 			Assert.assertEquals(s0, s1, 0);
 			Assert.assertEquals(s0, s2, 0);
 			Assert.assertEquals(ds_dz[0], ds_dz2[0], 0);
 
-			double uz = z + h_;
-			double lz = z - h_;
-			double upper = QuadraticAstigmatismZModel.getS1(uz, zDepth, ds_duz);
-			double lower = QuadraticAstigmatismZModel.getS1(lz, zDepth, ds_dlz);
+			final double uz = z + h_;
+			final double lz = z - h_;
+			final double upper = QuadraticAstigmatismZModel.getS1(uz, zDepth, ds_duz);
+			final double lower = QuadraticAstigmatismZModel.getS1(lz, zDepth, ds_dlz);
 
-			double e1 = (upper - lower) / (uz - lz);
-			double o1 = ds_dz[0];
+			final double e1 = (upper - lower) / (uz - lz);
+			final double o1 = ds_dz[0];
 
 			// Second gradient
-			double e2 = (ds_duz[0] - ds_dlz[0]) / (uz - lz);
-			double o2 = ds_dz2[1];
+			final double e2 = (ds_duz[0] - ds_dlz[0]) / (uz - lz);
+			final double o2 = ds_dz2[1];
 
 			if (record)
 				TestSettings.info("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,

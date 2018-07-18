@@ -56,13 +56,13 @@ public class FRC
 	{
 		try
 		{
-			int size = 8;
-			FloatFFT_2D fft = new FloatFFT_2D(size, size);
-			float[] data = new float[size * size * 2];
+			final int size = 8;
+			final FloatFFT_2D fft = new FloatFFT_2D(size, size);
+			final float[] data = new float[size * size * 2];
 			fft.realForwardFull(data);
 			JTRANSFORMS = true;
 		}
-		catch (Throwable t)
+		catch (final Throwable t)
 		{
 			JTRANSFORMS = false;
 		}
@@ -340,7 +340,7 @@ public class FRC
 			{
 				return (FRCCurveResult) super.clone();
 			}
-			catch (CloneNotSupportedException e)
+			catch (final CloneNotSupportedException e)
 			{
 				return null; // This should not happen
 			}
@@ -419,7 +419,7 @@ public class FRC
 		public FRCCurve copy()
 		{
 			// Let the Java framework copy the primitives
-			FRCCurve curve = this.clone();
+			final FRCCurve curve = this.clone();
 			// Clone the curve entries
 			curve.results = new FRCCurveResult[results.length];
 			for (int i = results.length; i-- > 0;)
@@ -439,7 +439,7 @@ public class FRC
 			{
 				return (FRCCurve) super.clone();
 			}
-			catch (CloneNotSupportedException e)
+			catch (final CloneNotSupportedException e)
 			{
 				return null; // This should not happen
 			}
@@ -452,7 +452,7 @@ public class FRC
 		 */
 		public double[] getRadiusValues()
 		{
-			double[] values = new double[getSize()];
+			final double[] values = new double[getSize()];
 			for (int i = values.length; i-- > 0;)
 				values[i] = get(i).getRadius();
 			return values;
@@ -465,7 +465,7 @@ public class FRC
 		 */
 		public double[] getCorrelationValues()
 		{
-			double[] values = new double[getSize()];
+			final double[] values = new double[getSize()];
 			for (int i = values.length; i-- > 0;)
 				values[i] = get(i).getCorrelation();
 			return values;
@@ -646,7 +646,7 @@ public class FRC
 	public FRCCurve calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel)
 	{
 		// Allow a progress tracker to be input
-		TrackProgress progess = getTrackProgress();
+		final TrackProgress progess = getTrackProgress();
 		progess.incrementProgress(0);
 		progess.status("Calculating complex FFT images...");
 
@@ -677,8 +677,8 @@ public class FRC
 		if (JTRANSFORMS && fourierMethod == FourierMethod.JTRANSFORMS)
 		{
 			// Speed up by reusing the FFT object which performs pre-computation
-			float[] data = new float[size * size * 2];
-			FloatFFT_2D fft = new FloatFFT_2D(size, size);
+			final float[] data = new float[size * size * 2];
+			final FloatFFT_2D fft = new FloatFFT_2D(size, size);
 
 			float[] pixels = (float[]) ip1.getPixels();
 			System.arraycopy(pixels, 0, data, 0, pixels.length);
@@ -734,8 +734,8 @@ public class FRC
 
 			// Speed up by reusing the FHT object which performs pre-computation
 
-			float[] f1 = (float[]) ip1.getPixels();
-			FHT2 fht1 = new FHT2(f1, ip1.getWidth(), false);
+			final float[] f1 = (float[]) ip1.getPixels();
+			final FHT2 fht1 = new FHT2(f1, ip1.getWidth(), false);
 			fht1.transform();
 			FloatProcessor[] fft = fht1.getComplexTransformProcessors();
 			re1 = (float[]) fft[0].getPixels();
@@ -745,8 +745,8 @@ public class FRC
 			ip2 = getSquareTaperedImage(ip2);
 			mean2 = taperedImageMean;
 
-			float[] f2 = (float[]) ip2.getPixels();
-			FHT2 fht2 = new FHT2(f2, ip2.getWidth(), false);
+			final float[] f2 = (float[]) ip2.getPixels();
+			final FHT2 fht2 = new FHT2(f2, ip2.getWidth(), false);
 			fht2.copyTables(fht1);
 			fft = fht2.getComplexTransformProcessors();
 			re2 = (float[]) fft[0].getPixels();
@@ -759,9 +759,9 @@ public class FRC
 		final int centre = size / 2;
 
 		// In-line for speed
-		float[] conjMult = new float[re1.length];
-		float[] absFFT1 = new float[re1.length];
-		float[] absFFT2 = new float[re1.length];
+		final float[] conjMult = new float[re1.length];
+		final float[] absFFT1 = new float[re1.length];
+		final float[] absFFT2 = new float[re1.length];
 
 		// Normalise the FFT to the field of view, i.e. normalise by 1/sqrt(N) for each dimension
 		final double norm = 1.0 / fieldOfView;
@@ -773,28 +773,24 @@ public class FRC
 			im2[i] *= norm;
 		}
 
-		boolean basic = false;
+		final boolean basic = false;
 		if (basic)
-		{
 			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2);
-		}
 		else
-		{
 			computeMirroredFast(size, conjMult, absFFT1, absFFT2, re1, im1, re2, im2);
-		}
 
 		progess.status("Calculating FRC curve...");
 
 		final int max = centre - 1;
-		FRCCurveResult[] results = new FRCCurveResult[max];
+		final FRCCurveResult[] results = new FRCCurveResult[max];
 
 		if (samplingMethod == SamplingMethod.INTERPOLATED_CIRCLE)
 		{
 			// Set the results for the centre pixel
-			int cx = size * centre + centre;
+			final int cx = size * centre + centre;
 			results[0] = new FRCCurveResult(0, 1, conjMult[cx], absFFT1[cx], absFFT2[cx]);
 
-			float[][] images = new float[][] { conjMult, absFFT1, absFFT2 };
+			final float[][] images = new float[][] { conjMult, absFFT1, absFFT2 };
 			for (int radius = 1; radius < max; radius++)
 			{
 				// Inline the calculation for speed
@@ -814,12 +810,12 @@ public class FRC
 
 				while (angle < Math.PI)
 				{
-					double cosA = FastMath.cos(angle);
-					double x = centre + radius * cosA;
+					final double cosA = FastMath.cos(angle);
+					final double x = centre + radius * cosA;
 					//double sinA = FastMath.sin(angle);
-					double sinA = getSine(angle, cosA);
-					double y = centre + radius * sinA;
-					double[] values = getInterpolatedValues(x, y, images, size);
+					final double sinA = getSine(angle, cosA);
+					final double y = centre + radius * sinA;
+					final double[] values = getInterpolatedValues(x, y, images, size);
 					sum0 += values[0];
 					sum1 += values[1];
 					sum2 += values[2];
@@ -834,12 +830,10 @@ public class FRC
 		else
 		{
 			// Compute the radial sum as per the DIP image Matlab toolbox
-			double[][] sum = RadialStatistics.radialSumAndCount(size, conjMult, absFFT1, absFFT2);
+			final double[][] sum = RadialStatistics.radialSumAndCount(size, conjMult, absFFT1, absFFT2);
 			for (int radius = 0; radius < max; radius++)
-			{
 				results[radius] = new FRCCurveResult(radius, (int) sum[3][radius], sum[0][radius], sum[1][radius],
 						sum[2][radius]);
-			}
 		}
 
 		progess.incrementProgress(LAST_THIRD);
@@ -871,9 +865,7 @@ public class FRC
 			float[] im2)
 	{
 		for (int i = re1.length; i-- > 0;)
-		{
 			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i);
-		}
 	}
 
 	/**
@@ -910,9 +902,7 @@ public class FRC
 		// Do the first row, This is not mirrored
 		int i = 0;
 		while (i < size)
-		{
 			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i++);
-		}
 
 		// Compute remaining rows up to the centre. These are mirrored
 		int j = conjMult.length - 1;
@@ -1054,28 +1044,20 @@ public class FRC
 	static boolean checkSymmetry(float[] data, int size)
 	{
 		// Symmetry is around the centre
-		int centre = size / 2;
+		final int centre = size / 2;
 
-		float maxRelativeError = 1e-10f, maxAbsoluteError = 1e-16f;
+		final float maxRelativeError = 1e-10f, maxAbsoluteError = 1e-16f;
 		int error = 0;
 
 		for (int y = centre, y2 = centre; y >= 0 && y2 < size; y--, y2++)
-		{
 			for (int x = centre, x2 = centre, i = size * y + x, j = size * y2 + x2; x >= 0 &&
 					x2 < size; x--, x2++, i--, j++)
-			{
 				if (data[i] != data[j] || !FloatEquality.almostEqualRelativeOrAbsolute(data[i], data[j],
 						maxRelativeError, maxAbsoluteError))
-				{
 					//System.out.printf("[%d] %f != [%d] %f\n", i, data[i], j, data[j]);
 					if (--error < 0)
-					{
 						//gdsc.core.ij.Utils.display("check", new FloatProcessor(size, size, data));
 						return false;
-					}
-				}
-			}
-		}
 		return true;
 	}
 
@@ -1109,7 +1091,7 @@ public class FRC
 	{
 		if (ip.getWidth() != width || ip.getHeight() != height)
 		{
-			ImageProcessor ip2 = ip.createProcessor(width, height);
+			final ImageProcessor ip2 = ip.createProcessor(width, height);
 			ip2.insert(ip, 0, 0);
 			return ip2;
 		}
@@ -1125,9 +1107,9 @@ public class FRC
 	 */
 	public FloatProcessor[] getComplexFFT(ImageProcessor ip)
 	{
-		FloatProcessor taperedDataImage = getSquareTaperedImage(ip);
+		final FloatProcessor taperedDataImage = getSquareTaperedImage(ip);
 
-		FHT2 fht = new FHT2(taperedDataImage);
+		final FHT2 fht = new FHT2(taperedDataImage);
 		fht.transform();
 
 		return fht.getComplexTransformProcessors();
@@ -1150,9 +1132,7 @@ public class FRC
 		if (x < 1)
 			throw new IllegalArgumentException("x must be greater or equal 1");
 		if ((x & (x - 1)) == 0)
-		{
 			return x; // x is already a power-of-two number
-		}
 		x |= (x >>> 1);
 		x |= (x >>> 2);
 		x |= (x >>> 4);
@@ -1181,15 +1161,15 @@ public class FRC
 			return null; // Too large so error
 
 		// Use a Tukey window function
-		float[] taperX = getWindowFunctionX(dataImage.getWidth());
-		float[] taperY = getWindowFunctionY(dataImage.getHeight());
+		final float[] taperX = getWindowFunctionX(dataImage.getWidth());
+		final float[] taperY = getWindowFunctionY(dataImage.getHeight());
 
 		// Pad to a power of 2
 		final int newSize = nextPow2(size);
 
 		dataImage = dataImage.toFloat(0, null);
-		float[] data = (float[]) dataImage.getPixels();
-		float[] pixels = new float[newSize * newSize];
+		final float[] data = (float[]) dataImage.getPixels();
+		final float[] pixels = new float[newSize * newSize];
 		// Note that the limits at 0 and size-1 the taper is zero so this can be ignored
 		final int maxy_1 = dataImage.getHeight() - 1;
 		final int maxx_1 = dataImage.getWidth() - 1;
@@ -1199,7 +1179,7 @@ public class FRC
 			final float yTmp = taperY[y];
 			for (int x = 1, i = y * oldWidth + 1, ii = y * newSize + 1; x < maxx_1; x++, i++, ii++)
 			{
-				float v = data[i] * taperX[x] * yTmp;
+				final float v = data[i] * taperX[x] * yTmp;
 				taperedImageMean += v;
 				pixels[ii] = v;
 			}
@@ -1224,7 +1204,7 @@ public class FRC
 	 */
 	private static float[] getWindowFunctionX(int size)
 	{
-		float[] taper = getWindowFunction(taperX, size);
+		final float[] taper = getWindowFunction(taperX, size);
 		taperX = taper;
 		return taper;
 	}
@@ -1238,7 +1218,7 @@ public class FRC
 	 */
 	private static float[] getWindowFunctionY(int size)
 	{
-		float[] taper = getWindowFunction(taperY, size);
+		final float[] taper = getWindowFunction(taperY, size);
 		taperY = taper;
 		return taper;
 	}
@@ -1291,7 +1271,7 @@ public class FRC
 	 */
 	private static float[] getTukeyWindowFunction(int size)
 	{
-		float[] taper = new float[size];
+		final float[] taper = new float[size];
 
 		//// Original code. This created a non-symmetric window
 		//final int boundary = size / 8;
@@ -1321,9 +1301,7 @@ public class FRC
 				taper[i++] = taper[j--] = (float) (d * d);
 			}
 			while (i <= middle)
-			{
 				taper[i++] = taper[j--] = 1f;
-			}
 		}
 
 		//// Use the GDSC ImageWindow class:
@@ -1370,7 +1348,7 @@ public class FRC
 		final int upperRightIndex = upperLeftIndex + 1;
 
 		final int noImages = 3; //images.length;
-		double[] values = new double[noImages];
+		final double[] values = new double[noImages];
 		for (int i = 0; i < noImages; i++)
 		{
 			final float[] image = images[i];
@@ -1405,8 +1383,8 @@ public class FRC
 	 */
 	private static FRCCurve getSmoothedCurve(FRCCurve frcCurve, double bandwidth, int robustness, boolean inPlace)
 	{
-		double[] xVals = new double[frcCurve.getSize()];
-		double[] yVals = new double[frcCurve.getSize()];
+		final double[] xVals = new double[frcCurve.getSize()];
+		final double[] yVals = new double[frcCurve.getSize()];
 
 		for (int i = 0; i < frcCurve.getSize(); i++)
 		{
@@ -1418,7 +1396,7 @@ public class FRC
 
 		try
 		{
-			LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
+			final LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
 			ySmoothed = loess.smooth(xVals, yVals);
 
 			if (!inPlace)
@@ -1427,7 +1405,7 @@ public class FRC
 			for (int i = 0; i < frcCurve.getSize(); i++)
 				frcCurve.get(i).setCorrelation(ySmoothed[i]);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -1450,8 +1428,8 @@ public class FRC
 	 */
 	public static FRCCurve getSmoothedCurve(FRCCurve frcCurve, boolean inPlace)
 	{
-		double bandwidth = 0.0707;
-		int robustness = 0;
+		final double bandwidth = 0.0707;
+		final int robustness = 0;
 		return getSmoothedCurve(frcCurve, bandwidth, robustness, inPlace);
 	}
 
@@ -1471,7 +1449,7 @@ public class FRC
 	 */
 	public static double[] calculateThresholdCurve(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
 	{
-		double[] threshold = new double[frcCurve.getSize()];
+		final double[] threshold = new double[frcCurve.getSize()];
 
 		// ADH:
 		// Half-Bit and 3 Sigma are explained in Supp section 5.4. However this is based on
@@ -1526,15 +1504,10 @@ public class FRC
 			case ONE_SIGMA:
 				sigma++;
 				for (int i = 0; i < threshold.length; i++, nr = TWO_PI * i)
-				{
-					// Note: frcCurve.get(i)[2] holds the number of samples that were taken from the circle.
-					//threshold[i] = (3.0 / Math.sqrt(frcCurve.get(i)[2] / 2.0));
-
 					// Heel, Equation (2):
 					// We actually want to know the number of pixels contained in the Fourier shell of radius r.
 					// We can compute this assuming we sampled the full circle 2*pi*r.
 					threshold[i] = sigma / Math.sqrt(nr / 2.0);
-				}
 				break;
 
 			default:
@@ -1604,7 +1577,7 @@ public class FRC
 			return null;
 		}
 
-		double[][] intersections = new double[Math.min(max, frcCurve.getSize() - 1)][];
+		final double[][] intersections = new double[Math.min(max, frcCurve.getSize() - 1)][];
 		int count = 0;
 
 		for (int i = 1; i < frcCurve.getSize(); i++)
@@ -1628,9 +1601,7 @@ public class FRC
 
 			// Check if they cross
 			if (!((y3 >= y1 && y4 < y2) || (y1 >= y3 && y2 < y4)))
-			{
 				continue;
-			}
 
 			final double x1 = frcCurve.get(i - 1).getRadius();
 			final double x2 = frcCurve.get(i).getRadius();
@@ -1652,7 +1623,7 @@ public class FRC
 			else
 			{
 				// Find intersection
-				double px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) /
+				final double px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) /
 						(x1_x2 * y3_y4 - y1_y2 * x3_x4);
 				//double px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) /
 				//		((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
@@ -1663,7 +1634,7 @@ public class FRC
 				// Q. Is this necessary given the intersection check above?
 				if (px >= x1 && px < x2)
 				{
-					double py = Maths.interpolateY(x1, y3, x2, y4, px);
+					final double py = Maths.interpolateY(x1, y3, x2, y4, px);
 					intersections[count++] = new double[] { px, py };
 				}
 			}
@@ -1706,11 +1677,9 @@ public class FRC
 			// If so the second crossing is the one that is desired.
 			default:
 				if (intersections.length == 2)
-				{
 					// Choose the intersection. Just discard an intersection with a correlation above 0.9
 					if (intersections[0][1] > 0.9)
 						pos++;
-				}
 		}
 
 		return intersections[pos];
@@ -1732,7 +1701,7 @@ public class FRC
 	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel,
 			ThresholdMethod thresholdMethod)
 	{
-		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2, nmPerPixel);
+		final FRCCurve frcCurve = calculateFrcCurve(ip1, ip2, nmPerPixel);
 		if (frcCurve == null)
 			return Double.NaN;
 		return calculateFireNumber(frcCurve, thresholdMethod);
@@ -1750,7 +1719,7 @@ public class FRC
 	 */
 	public static double calculateFireNumber(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
 	{
-		FIREResult result = calculateFire(frcCurve, thresholdMethod);
+		final FIREResult result = calculateFire(frcCurve, thresholdMethod);
 		if (result == null)
 			return Double.NaN;
 		return result.fireNumber;
@@ -1791,13 +1760,13 @@ public class FRC
 	 */
 	public static FIREResult calculateFire(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
 	{
-		double[] thresholdCurve = calculateThresholdCurve(frcCurve, thresholdMethod);
-		double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
+		final double[] thresholdCurve = calculateThresholdCurve(frcCurve, thresholdMethod);
+		final double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
 
 		if (intersections != null && intersections.length != 0)
 		{
-			double[] intersection = getCorrectIntersection(intersections, thresholdMethod);
-			double fireNumber = frcCurve.fieldOfView / intersection[0];
+			final double[] intersection = getCorrectIntersection(intersections, thresholdMethod);
+			final double fireNumber = frcCurve.fieldOfView / intersection[0];
 			return new FIREResult(frcCurve.nmPerPixel * fireNumber, intersection[1]);
 		}
 		// Edge case where the entire curve has a correlation of 1.
@@ -1817,10 +1786,8 @@ public class FRC
 	private static boolean perfect(FRCCurve frcCurve)
 	{
 		for (int i = 0; i < frcCurve.getSize(); i++)
-		{
 			if (frcCurve.get(i).getCorrelation() != 1)
 				return false;
-		}
 		return true;
 	}
 
@@ -1861,15 +1828,15 @@ public class FRC
 		}
 
 		// q must be in pixel units
-		double[] q = computeQ(frcCurve, false);
+		final double[] q = computeQ(frcCurve, false);
 
 		// H(q) is the factor in the correlation averages related to the localization
 		// uncertainties that depends on the mean and width of the
 		// distribution of localization uncertainties
-		double[] hq = computeHq(q, mean / frcCurve.nmPerPixel, sigma / frcCurve.nmPerPixel);
+		final double[] hq = computeHq(q, mean / frcCurve.nmPerPixel, sigma / frcCurve.nmPerPixel);
 
 		// Precompute Q normalisation
-		double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
+		final double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
 		qValue /= qNorm;
 
 		// Subtract the average residual correlation from the numerator and add to the denominator
@@ -1877,15 +1844,15 @@ public class FRC
 		{
 			// The numerator and denominator are computed using the radial sum.
 			// Convert this to the radial mean by dividing by the number of samples.
-			int n = frcCurve.get(i).getNumberOfSamples();
-			double numerator = frcCurve.get(i).getNumerator() / n;
-			double denominator = frcCurve.get(i).getDenominator() / n;
+			final int n = frcCurve.get(i).getNumberOfSamples();
+			final double numerator = frcCurve.get(i).getNumerator() / n;
+			final double denominator = frcCurve.get(i).getDenominator() / n;
 			// Matlab code provided by Bernd Reiger computes the residual as:
 			// Q/Qnorm*sinc(q).^2.*exp(-4*pi^2*sigma_mean^2*q.^2./(1+8*pi^2*sigma_std^2*q.^2))./sqrt(1+8*pi^2*sigma_std^2*q.^2);
 			// Qnorm = (1/mean1+1/mean2);
 			// Matlab sinc is sin(pi*x) / pi*x
-			double sinc_q = sinc(Math.PI * q[i]);
-			double residual = qValue * sinc_q * sinc_q * hq[i];
+			final double sinc_q = sinc(Math.PI * q[i]);
+			final double residual = qValue * sinc_q * sinc_q * hq[i];
 			frcCurve.get(i).setCorrelation((numerator - residual) / (denominator + residual));
 		}
 	}
@@ -1916,12 +1883,10 @@ public class FRC
 	{
 		final double L = frcCurve.fieldOfView;
 
-		double[] q = new double[frcCurve.getSize()];
-		double conversion = 1.0 / (L * nmPerPixel);
+		final double[] q = new double[frcCurve.getSize()];
+		final double conversion = 1.0 / (L * nmPerPixel);
 		for (int i = 0; i < q.length; i++)
-		{
 			q[i] = frcCurve.get(i).radius * conversion;
-		}
 		return q;
 	}
 
@@ -1957,14 +1922,14 @@ public class FRC
 		// H(q) is the factor in the correlation averages related to the localization
 		// uncertainties that depends on the mean and width of the
 		// distribution of localization uncertainties
-		double[] hq = new double[q.length];
+		final double[] hq = new double[q.length];
 		final double four_pi2 = 4 * Math.PI * Math.PI;
-		double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
+		final double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
 		hq[0] = 1;
 		for (int i = 1; i < q.length; i++)
 		{
-			double q2 = q[i] * q[i];
-			double d = 1 + eight_pi2_s2 * q2;
+			final double q2 = q[i] * q[i];
+			final double d = 1 + eight_pi2_s2 * q2;
 			hq[i] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
 		}
 		return hq;

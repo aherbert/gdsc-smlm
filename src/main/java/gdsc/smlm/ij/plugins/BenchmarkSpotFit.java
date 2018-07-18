@@ -315,13 +315,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	/** The fit config. */
 	static FitConfiguration fitConfig;
-	
+
 	/** The fit engine config. */
 	static FitEngineConfiguration config;
-	
+
 	/** The multi filter. */
 	static MultiPathFilter multiFilter;
-	
+
 	private static final MultiPathFilter defaultMultiFilter;
 	private static final double[] defaultParameters;
 	private static IDirectFilter minimalFilter;
@@ -348,8 +348,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Add a filter to use for storing the slice results:
 		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
-		FitConfiguration tmp = new FitConfiguration();
-		PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
+		final FitConfiguration tmp = new FitConfiguration();
+		final PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
 		tmp.setPrecisionMethod(precisionMethod);
 
 		// Add a minimum filter to use for storing estimates
@@ -411,7 +411,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static int lastId = -1;
 	/** The last filter id. */
 	static int lastFilterId = -1;
-	
+
 	private static Settings lastSettings = null;
 
 	// Allow other plugins to access the results
@@ -604,7 +604,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final double rsf = predictedSignal / actualSignal;
 		// The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for above.
 		// Reset the signal factor from 0
-		double sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
+		final double sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
 		return sf;
 	}
 
@@ -722,7 +722,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			{
 				return (FilterCandidates) super.clone();
 			}
-			catch (CloneNotSupportedException e)
+			catch (final CloneNotSupportedException e)
 			{
 				return null;
 			}
@@ -796,7 +796,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			{
 				while (true)
 				{
-					Integer job = jobs.take();
+					final Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
 						break;
 					if (!finished)
@@ -804,7 +804,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 						run(job.intValue());
 				}
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				System.out.println(e.toString());
 				throw new RuntimeException(e);
@@ -829,19 +829,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
 			FilterCandidates candidates = filterCandidates.get(frame);
-			int totalCandidates = candidates.spots.length;
+			final int totalCandidates = candidates.spots.length;
 			final MultiPathFitResult[] fitResult = new MultiPathFitResult[totalCandidates];
 
 			// Fit the candidates and store the results
 			final FitParameters parameters = new FitParameters();
 			final Spot[] spots = new Spot[candidates.spots.length];
 			for (int i = 0; i < spots.length; i++)
-			{
 				spots[i] = candidates.spots[i].spot;
 				// Debug candidates...
 				//if (frame == 5)
 				//	System.out.printf("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity);
-			}
 			parameters.spots = spots;
 			parameters.maxCandidate = candidates.maxCandidate;
 			parameters.fitTask = FitTask.BENCHMARKING;
@@ -851,9 +849,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitWorker.run(job); // Results will be stored in the fit job
 
 			for (int i = 0; i < totalCandidates; i++)
-			{
 				fitResult[i] = job.getMultiPathFitResult(i);
-			}
 
 			// Compute the matches of the fitted spots to the simulated positions.
 			// We will match all fitting results so providing the upper limit for the match score after filtering.
@@ -869,7 +865,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				// Build a list of the coordinates z-depth using the PeakResultPoint
 				for (int i = 0; i < actual.length; i++)
 				{
-					PeakResultPoint p = (PeakResultPoint) actual[i];
+					final PeakResultPoint p = (PeakResultPoint) actual[i];
 					zPosition[i] = p.peakResult.getZPosition();
 				}
 
@@ -889,11 +885,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					add(predicted, fitResult[i].getDoubletFitResult(), MultiPathPoint.DOUBLET, i);
 					add(predicted, fitResult[i].getMultiDoubletFitResult(), MultiPathPoint.MULTI, i);
 					if (size == predicted.size())
-					{
 						// Use the candidate position instead
 						predicted.add(
 								new MultiPathPoint(spots[i].x + 0.5f, spots[i].y + 0.5f, i, MultiPathPoint.SPOT, i));
-					}
 				}
 				// If we made any fits then score them
 				if (!predicted.isEmpty())
@@ -904,12 +898,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					// Perhaps we should pair up the closest matches using the signal factor as well.
 
 					final double matchDistance = distanceInPixels * distanceInPixels;
-					ArrayList<Assignment> assignments = new ArrayList<>();
+					final ArrayList<Assignment> assignments = new ArrayList<>();
 
 					// Match all the fit results to spots. We want to match all fit results to actual spots.
 					// All remaining candidate spots can then be matched to any remaining actual spots.
-					ResultAssignment[][] resultAssignments = new ResultAssignment[predicted.size()][];
-					int[] resultAssignmentsSize = new int[resultAssignments.length];
+					final ResultAssignment[][] resultAssignments = new ResultAssignment[predicted.size()][];
+					final int[] resultAssignmentsSize = new int[resultAssignments.length];
 					for (int ii = 0; ii < actual.length; ii++)
 					{
 						final float x = actual[ii].getX();
@@ -931,7 +925,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									{
 										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
 										// Assume the simulation is in photons
-										double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
+										final double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
 												p3.peakResult.getIntensity());
 										score *= signalScore.score(Math.abs(sf));
 
@@ -957,11 +951,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 											distance, score);
 								}
 								else
-								{
 									// This is not a fit. Ensure that remaining candidate spots are assigned
 									// after any fit results.
 									distance += matchDistance + 1;
-								}
 
 								// Store the index of the predicted point in the score
 								assignments
@@ -977,7 +969,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 							continue;
 						if (resultAssignmentsSize[jj] != 0)
 						{
-							BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) predicted.get(jj).result;
+							final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) predicted.get(jj).result;
 							result.setAssignments(Arrays.copyOf(resultAssignments[jj], resultAssignmentsSize[jj]));
 						}
 					}
@@ -988,17 +980,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					// We use the candidate Id as the id
 					final boolean[] predictedAssignment = new boolean[fitResult.length];
 
-					for (Assignment assignment : assignments)
-					{
+					for (final Assignment assignment : assignments)
 						if (!actualAssignment[assignment.getTargetId()])
-						{
 							if (!predictedAssignment[assignment.getPredictedId()])
 							{
 								actualAssignment[assignment.getTargetId()] = true;
 								predictedAssignment[assignment.getPredictedId()] = true;
 
 								final PeakResultPoint p3 = (PeakResultPoint) actual[assignment.getTargetId()];
-								int jj = (int) ((ImmutableFractionalAssignment) assignment).getScore();
+								final int jj = (int) ((ImmutableFractionalAssignment) assignment).getScore();
 								final MultiPathPoint point = predicted.get(jj);
 
 								final double d = point.distanceXY(p3);
@@ -1013,13 +1003,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									match[matchCount++] = new FitMatch(point, d, p3.peakResult.getZPosition(), p, a);
 								}
 								else
-								{
 									// This is a candidate that could not be fitted
 									match[matchCount++] = new CandidateMatch(point.i, d, p3.peakResult.getZPosition());
-								}
 							}
-						}
-					}
 				}
 			}
 			match = Arrays.copyOf(match, matchCount);
@@ -1071,11 +1057,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				return;
 
 			for (int i = 0; i < fitResult.results.length; i++)
-			{
 				if (fitResult.results[i].isNewResult())
 					predicted.add(new MultiPathPoint(fitResult.results[i], fitResult.results[i].getCandidateId(), type,
 							spotId));
-			}
 		}
 	}
 
@@ -1162,7 +1146,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		gd.addSlider("Match_signal", 0, 3.5, signalFactor);
 		gd.addSlider("Lower_signal", 0, 3.5, lowerSignalFactor);
 
-		FitEngineConfigurationProvider fitEngineConfigurationProvider = new PeakFit.SimpleFitEngineConfigurationProvider(
+		final FitEngineConfigurationProvider fitEngineConfigurationProvider = new PeakFit.SimpleFitEngineConfigurationProvider(
 				config);
 
 		// Collect options for fitting
@@ -1175,7 +1159,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
 
 		// Allow loading the best filter for these results
-		boolean benchmarkSettingsCheckbox = fitResultsId == BenchmarkFilterAnalysis.lastId;
+		final boolean benchmarkSettingsCheckbox = fitResultsId == BenchmarkFilterAnalysis.lastId;
 
 		// This should always be an opt-in decision. Otherwise the user cannot use the previous settings
 		useBenchmarkSettings = false;
@@ -1210,8 +1194,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			if (useBenchmarkSettings)
 			{
-				FitEngineConfiguration tmp = new FitEngineConfiguration();
-				FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
+				final FitEngineConfiguration tmp = new FitEngineConfiguration();
+				final FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
 				tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
 				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 				{
@@ -1250,12 +1234,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			myUseBenchmarkSettings = gd.getNextBoolean();
 
 		// Read dialog settings
-		String xml = gd.getNextText();
-		int failLimit = (int) gd.getNextNumber();
-		boolean includeNeighbours = gd.getNextBoolean();
-		double neighbourHeightThreshold = gd.getNextNumber();
-		boolean myComputeDoublets = gd.getNextBoolean();
-		double myDuplicateDistance = gd.getNextNumber();
+		final String xml = gd.getNextText();
+		final int failLimit = (int) gd.getNextNumber();
+		final boolean includeNeighbours = gd.getNextBoolean();
+		final double neighbourHeightThreshold = gd.getNextNumber();
+		final boolean myComputeDoublets = gd.getNextBoolean();
+		final double myDuplicateDistance = gd.getNextNumber();
 
 		gd.collectOptions();
 
@@ -1263,8 +1247,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		if (myUseBenchmarkSettings && !Utils.isShowGenericDialog())
 		{
 			// Only copy the benchmark settings if not interactive
-			FitEngineConfiguration tmp = new FitEngineConfiguration();
-			FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
+			final FitEngineConfiguration tmp = new FitEngineConfiguration();
+			final FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
 			tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
 			if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 			{
@@ -1302,9 +1286,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				return false;
 		}
 		else
-		{
 			multiFilter = myMultiFilter;
-		}
 
 		if (computeDoublets)
 		{
@@ -1381,10 +1363,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private synchronized void showProgress()
 	{
 		if (progress % stepProgress == 0)
-		{
 			if (Utils.showStatus("Fitting frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
-		}
 		progress++;
 	}
 
@@ -1419,7 +1399,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		clearFitResults();
 
 		// Save results to memory
-		MemoryPeakResults peakResults = new MemoryPeakResults();
+		final MemoryPeakResults peakResults = new MemoryPeakResults();
 		peakResults.copySettings(this.results);
 		peakResults.setName(TITLE);
 		config.configureOutputUnits();
@@ -1428,14 +1408,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-		List<Worker> workers = new LinkedList<>();
-		List<Thread> threads = new LinkedList<>();
-		PeakResults syncResults = SynchronizedPeakResults.create(peakResults, nThreads);
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		final List<Worker> workers = new LinkedList<>();
+		final List<Thread> threads = new LinkedList<>();
+		final PeakResults syncResults = SynchronizedPeakResults.create(peakResults, nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults);
-			Thread t = new Thread(worker);
+			final Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults);
+			final Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
 			t.start();
@@ -1447,36 +1427,28 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
 		for (int i = 1; i <= totalProgress; i++)
-		{
 			put(jobs, i);
-		}
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
-		{
 			put(jobs, -1);
-		}
 
 		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
-		{
 			try
 			{
 				threads.get(i).join();
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
-		}
 		threads.clear();
 
 		IJ.showProgress(1);
 		runTime = System.nanoTime() - runTime;
 
 		if (Utils.isInterrupted())
-		{
 			return;
-		}
 
 		stopWatch.stop();
 		final String timeString = stopWatch.toString();
@@ -1485,24 +1457,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		IJ.showStatus("Collecting results ...");
 
 		if (fitConfig.isFitCameraCounts())
-		{
 			// Convert to photons for consistency
 			results.convertToPreferredUnits();
-		}
 
 		fitResultsId++;
 		fitResults = new TIntObjectHashMap<>();
-		for (Worker w : workers)
-		{
+		for (final Worker w : workers)
 			fitResults.putAll(w.results);
-		}
 
 		// Assign a unique ID to each result
 		int count = 0;
 		// Materialise into an array since we use it twice
-		FilterCandidates[] candidates = fitResults.values(new FilterCandidates[fitResults.size()]);
-		for (FilterCandidates result : candidates)
-		{
+		final FilterCandidates[] candidates = fitResults.values(new FilterCandidates[fitResults.size()]);
+		for (final FilterCandidates result : candidates)
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
 				final MultiPathFitResult fitResult = result.fitResult[i];
@@ -1511,11 +1478,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				count += count(fitResult.getDoubletFitResult());
 				count += count(fitResult.getMultiDoubletFitResult());
 			}
-		}
-		PreprocessedPeakResult[] preprocessedPeakResults = new PreprocessedPeakResult[count];
+		final PreprocessedPeakResult[] preprocessedPeakResults = new PreprocessedPeakResult[count];
 		count = 0;
-		for (FilterCandidates result : candidates)
-		{
+		for (final FilterCandidates result : candidates)
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
 				final MultiPathFitResult fitResult = result.fitResult[i];
@@ -1524,7 +1489,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				count = store(fitResult.getDoubletFitResult(), count, preprocessedPeakResults);
 				count = store(fitResult.getMultiDoubletFitResult(), count, preprocessedPeakResults);
 			}
-		}
 
 		summariseResults(fitResults, runTime, preprocessedPeakResults, count);
 
@@ -1548,7 +1512,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		int count = 0;
 		for (int i = 0; i < fitResult.results.length; i++)
 		{
-			PreprocessedPeakResult result = fitResult.results[i];
+			final PreprocessedPeakResult result = fitResult.results[i];
 			if (result.isNewResult())
 				count++;
 		}
@@ -1562,7 +1526,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return count;
 		for (int i = 0; i < fitResult.results.length; i++)
 		{
-			BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[i];
+			final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[i];
 			if (result.isNewResult())
 			{
 				result.uniqueId = count++;
@@ -1609,10 +1573,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				// A. Not if we used fractional scoring.
 				int c = 0;
 				for (int i = r.spots.length; i-- > 0;)
-				{
 					if (r.spots[i].match)
 						c++;
-				}
 				nX[0] += c;
 				nX[1] += (r.spots.length - c);
 
@@ -1625,23 +1587,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				{
 					double np = 0;
 					double min = r.result.getTP();
-					for (ScoredSpot spot : r.spots)
-					{
+					for (final ScoredSpot spot : r.spots)
 						if (spot.match)
 						{
 							np += spot.getScore();
-							double d = np2 - np;
+							final double d = np2 - np;
 							if (d < min)
 							{
 								min = d;
 								targetP = np;
 							}
 							else
-							{
 								break;
-							}
 						}
-					}
 
 					//if (targetP < np2)
 					//	System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
@@ -1655,7 +1613,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				int nAfter = 0;
 
 				int count = 0;
-				for (ScoredSpot spot : r.spots)
+				for (final ScoredSpot spot : r.spots)
 				{
 					count++;
 					nn += spot.antiScore();
@@ -1664,25 +1622,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 						np += spot.getScore();
 						p++;
 						if (!reachedTarget)
-						{
 							reachedTarget = np >= targetP;
-						}
 					}
 					else
 					{
 						n++;
 						if (reachedTarget)
-						{
 							nAfter++;
-						}
 					}
 
 					if (reachedTarget)
-					{
 						// Check if we have reached both the limits
 						if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2)
 							break;
-					}
 				}
 
 				counter[0] += count;
@@ -1705,9 +1657,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		nN = nX[1];
 
 		// We now add all the candidates but only fit the first N
-		int target = counter[0];
-		int total = counter[1];
-		int added = total - target;
+		final int target = counter[0];
+		final int total = counter[1];
+		final int added = total - target;
 
 		if (extraOptions && added > target)
 			Utils.log("Added %s to %s (total = %d)", TextUtils.pleural(added, "neighbour"),
@@ -1722,7 +1674,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		{
 			jobs.put(i);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			throw new RuntimeException("Unexpected interruption", e);
 		}
@@ -1749,13 +1701,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Summarise the fitting results. N fits, N failures.
 		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
-		StoredDataStatistics distanceStats = new StoredDataStatistics();
-		StoredDataStatistics depthStats = new StoredDataStatistics();
+		final StoredDataStatistics distanceStats = new StoredDataStatistics();
+		final StoredDataStatistics depthStats = new StoredDataStatistics();
 
 		// Get stats for all fitted results and those that match
 		// Signal, SNR, Width, xShift, yShift, Precision
 		createFilterCriteria();
-		StoredDataStatistics[][] stats = new StoredDataStatistics[3][filterCriteria.length];
+		final StoredDataStatistics[][] stats = new StoredDataStatistics[3][filterCriteria.length];
 		for (int i = 0; i < stats.length; i++)
 			for (int j = 0; j < stats[i].length; j++)
 				stats[i][j] = new StoredDataStatistics();
@@ -1786,7 +1738,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 		});
 
-		for (FilterCandidates result : candidates)
+		for (final FilterCandidates result : candidates)
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
 			tp += result.tp;
@@ -1810,12 +1762,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 
 				if (noMatch(fitResult))
-				{
 					if (result.spots[i].match)
 						failcTP++;
 					else
 						failcFP++;
-				}
 
 				// We have multi-path results.
 				// We want statistics for:
@@ -1835,7 +1785,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					// For now just ignore the candidates that matched
 					continue;
 
-				FitMatch fitMatch = (FitMatch) result.match[i];
+				final FitMatch fitMatch = (FitMatch) result.match[i];
 				distanceStats.add(fitMatch.d * nmPerPixel);
 				depthStats.add(fitMatch.z * nmPerPixel);
 			}
@@ -1848,44 +1798,42 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		// Store data for computing correlation
-		double[] i1 = new double[depthStats.getN()];
-		double[] i2 = new double[i1.length];
-		double[] is = new double[i1.length];
+		final double[] i1 = new double[depthStats.getN()];
+		final double[] i2 = new double[i1.length];
+		final double[] is = new double[i1.length];
 		int ci = 0;
-		for (FilterCandidates result : candidates)
-		{
+		for (final FilterCandidates result : candidates)
 			for (int i = 0; i < result.match.length; i++)
 			{
 				if (!result.match[i].isFitResult())
 					// For now just ignore the candidates that matched
 					continue;
 
-				FitMatch fitMatch = (FitMatch) result.match[i];
-				ScoredSpot spot = result.spots[fitMatch.i];
+				final FitMatch fitMatch = (FitMatch) result.match[i];
+				final ScoredSpot spot = result.spots[fitMatch.i];
 				i1[ci] = fitMatch.predictedSignal;
 				i2[ci] = fitMatch.actualSignal;
 				is[ci] = spot.spot.intensity;
 				ci++;
 			}
-		}
 
 		// We want to compute the Jaccard against the spot metric
 
 		// Filter the results using the multi-path filter
-		ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<>(filterCandidates.size());
+		final ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<>(filterCandidates.size());
 		for (int i = 0; i < frames.length; i++)
 		{
-			int frame = frames[i];
-			MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;
-			int totalCandidates = candidates[i].spots.length;
-			ArrayList<Coordinate> list = actualCoordinates.get(frame);
-			int nActual = (list == null) ? 0 : list.size();
+			final int frame = frames[i];
+			final MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;
+			final int totalCandidates = candidates[i].spots.length;
+			final ArrayList<Coordinate> list = actualCoordinates.get(frame);
+			final int nActual = (list == null) ? 0 : list.size();
 			multiPathResults.add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));
 		}
 		// Score the results and count the number returned
-		List<FractionalAssignment[]> assignments = new ArrayList<>();
+		final List<FractionalAssignment[]> assignments = new ArrayList<>();
 		final TIntHashSet set = new TIntHashSet(nUniqueIDs);
-		FractionScoreStore scoreStore = new FractionScoreStore()
+		final FractionScoreStore scoreStore = new FractionScoreStore()
 		{
 			@Override
 			public void add(int uniqueId)
@@ -1894,10 +1842,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 		};
 
-		MultiPathFitResults[] multiResults = multiPathResults.toArray(new MultiPathFitResults[multiPathResults.size()]);
+		final MultiPathFitResults[] multiResults = multiPathResults.toArray(new MultiPathFitResults[multiPathResults.size()]);
 		// Filter with no filter
-		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
+		final MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
 		@SuppressWarnings("unused")
+		final
 		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, NullFailCounter.INSTANCE,
 				this.results.size(), assignments, scoreStore, CoordinateStoreFactory.create(0, 0, imp.getWidth(),
 						imp.getHeight(), config.convertUsingHWHMax(config.getDuplicateDistanceParameter())));
@@ -1908,7 +1857,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		int count = 0;
 		for (int i = 0; i < assignments.size(); i++)
 		{
-			FractionalAssignment[] a = assignments.get(i);
+			final FractionalAssignment[] a = assignments.get(i);
 			if (a == null)
 				continue;
 			for (int j = 0; j < a.length; j++)
@@ -1945,7 +1894,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			public boolean execute(int uniqueId)
 			{
 				// This should not be null or something has gone wrong
-				PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
+				final PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
 				if (r == null)
 					throw new RuntimeException("Missing result: " + uniqueId);
 				final double precision = Math.sqrt(r.getLocationVariance());
@@ -1984,7 +1933,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			printFailures("Multi doublet", multiDoubletStatus);
 		}
 
-		StringBuilder sb = new StringBuilder(300);
+		final StringBuilder sb = new StringBuilder(300);
 
 		// Add information about the simulation
 		final double signal = simulationParameters.averageSignal; //(simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
@@ -1995,7 +1944,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		sb.append(w).append('\t');
 		sb.append(h).append('\t');
 		sb.append(n).append('\t');
-		double density = ((double) n / imp.getStackSize()) / (w * h) /
+		final double density = ((double) n / imp.getStackSize()) / (w * h) /
 				(simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append('\t');
 		sb.append(Utils.rounded(signal)).append('\t');
@@ -2081,7 +2030,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		double median = distanceStats.getMedian();
 		add(sb, median);
 
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 
 		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", Utils.rounded(m.getRecall()),
 				distanceStats.getN(), Utils.rounded(median), Utils.rounded(distanceStats.getStandardDeviation()));
@@ -2093,14 +2042,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		add(sb, median);
 
 		// Sort by spot intensity and produce correlation
-		int[] indices = SimpleArrayUtils.newArray(i1.length, 0, 1);
+		final int[] indices = SimpleArrayUtils.newArray(i1.length, 0, 1);
 		Sort.sort(indices, is, rankByIntensity);
 		double[] r = null;
 		double[] sr = null;
 		double[] rank = null;
-		FastCorrelator fastCorrelator = new FastCorrelator();
-		ArrayList<Ranking> pc1 = new ArrayList<>();
-		ArrayList<Ranking> pc2 = new ArrayList<>();
+		final FastCorrelator fastCorrelator = new FastCorrelator();
+		final ArrayList<Ranking> pc1 = new ArrayList<>();
+		final ArrayList<Ranking> pc2 = new ArrayList<>();
 		ci = 0;
 		if (showCorrelation)
 		{
@@ -2108,7 +2057,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			r = new double[i1.length];
 			sr = new double[i1.length];
 			rank = new double[i1.length];
-			for (int ci2 : indices)
+			for (final int ci2 : indices)
 			{
 				fastCorrelator.add(Math.round(i1[ci2]), Math.round(i2[ci2]));
 				pc1.add(new Ranking(i1[ci2], ci));
@@ -2123,21 +2072,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 		}
 		else
-		{
-			for (int ci2 : indices)
+			for (final int ci2 : indices)
 			{
 				fastCorrelator.add(Math.round(i1[ci2]), Math.round(i2[ci2]));
 				pc1.add(new Ranking(i1[ci2], ci));
 				pc2.add(new Ranking(i2[ci2], ci));
 				ci++;
 			}
-		}
 
 		final double pearsonCorr = fastCorrelator.getCorrelation();
 		final double rankedCorr = Correlator.correlation(rank(pc1), rank(pc2));
 
 		// Get the regression
-		SimpleRegression regression = new SimpleRegression(false);
+		final SimpleRegression regression = new SimpleRegression(false);
 		for (int i = 0; i < pc1.size(); i++)
 			regression.addData(pc1.get(i).value, pc2.get(i).value);
 		//final double intercept = regression.getIntercept();
@@ -2147,8 +2094,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		{
 			String title = TITLE + " Intensity";
 			Plot plot = new Plot(title, "Candidate", "Spot");
-			double[] limits1 = Maths.limits(i1);
-			double[] limits2 = Maths.limits(i2);
+			final double[] limits1 = Maths.limits(i1);
+			final double[] limits2 = Maths.limits(i2);
 			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
 			label = String.format("Correlation=%s; Ranked=%s; Slope=%s", Utils.rounded(pearsonCorr),
 					Utils.rounded(rankedCorr), Utils.rounded(slope));
@@ -2165,7 +2112,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			title = TITLE + " Correlation";
 			plot = new Plot(title, "Spot Rank", "Correlation");
-			double[] xlimits = Maths.limits(rank);
+			final double[] xlimits = Maths.limits(rank);
 			double[] ylimits = Maths.limits(r);
 			ylimits = Maths.limits(ylimits, sr);
 			plot.setLimits(xlimits[0], xlimits[1], ylimits[0], ylimits[1]);
@@ -2190,13 +2137,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			wo.add(id);
 
 		// Plot histograms of the stats on the same window
-		double[] lower = new double[filterCriteria.length];
-		double[] upper = new double[lower.length];
+		final double[] lower = new double[filterCriteria.length];
+		final double[] upper = new double[lower.length];
 		min = new double[lower.length];
 		max = new double[lower.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
-			double[] limits = showDoubleHistogram(stats, i, wo, matchScores);
+			final double[] limits = showDoubleHistogram(stats, i, wo, matchScores);
 			lower[i] = limits[0];
 			upper[i] = limits[1];
 			min[i] = limits[2];
@@ -2206,7 +2153,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Reconfigure some of the range limits
 		upper[FILTER_SIGNAL] *= 2; // Make this a bit bigger
 		upper[FILTER_SNR] *= 2; // Make this a bit bigger
-		double factor = 0.25;
+		final double factor = 0.25;
 		if (lower[FILTER_MIN_WIDTH] != 0)
 			upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
 		if (upper[FILTER_MIN_WIDTH] != 0)
@@ -2225,19 +2172,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		interval[FILTER_EVALUATIONS] = 0.1;
 
 		// Create a range increment
-		double[] increment = new double[lower.length];
+		final double[] increment = new double[lower.length];
 		for (int i = 0; i < increment.length; i++)
 		{
 			lower[i] = Maths.floor(lower[i], interval[i]);
 			upper[i] = Maths.ceil(upper[i], interval[i]);
-			double range = upper[i] - lower[i];
+			final double range = upper[i] - lower[i];
 			// Allow clipping if the range is small compared to the min increment
 			double multiples = range / interval[i];
 			// Use 8 multiples for the equivalent of +/- 4 steps around the centre
 			if (multiples < 8)
-			{
 				multiples = Math.ceil(multiples);
-			}
 			else
 				multiples = 8;
 			increment[i] = Maths.ceil(range / multiples, interval[i]);
@@ -2285,7 +2230,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<>(3);
-			MultiFilter2 mf = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
+			final MultiFilter2 mf = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 			filters.add(mf.create(lower));
 			filters.add(mf.create(upper));
 			filters.add(mf.create(increment));
@@ -2310,7 +2255,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private static boolean saveFilters(String filename, ArrayList<Filter> filters)
 	{
-		ArrayList<FilterSet> filterList = new ArrayList<>(1);
+		final ArrayList<FilterSet> filterList = new ArrayList<>(1);
 		// Add Range keyword to identify as a range filter set
 		filterList.add(new FilterSet("Range", filters));
 		try (FileOutputStream fos = new FileOutputStream(filename))
@@ -2319,7 +2264,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			XStreamWrapper.getInstance().toXML(filterList, fos);
 			return true;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.log("Unable to save the filter set to file: " + e.getMessage());
 		}
@@ -2331,24 +2276,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		int total = 0;
 		// Count failures
 		for (int i = 1; i < status.length; i++)
-		{
 			if (status[i] != 0)
-			{
 				total += status[i];
-			}
-		}
 		// Print failures
 		if (total != 0)
 			for (int i = 1; i < status.length; i++)
-			{
 				if (status[i] != 0)
-				{
 					System.out.printf("%s %s = %d / %d  (%.2f)\n", title, FitStatus.values()[i].toString(), status[i],
 							total, 100.0 * status[i] / total);
-				}
-			}
 		// Print total
-		int all = total + status[0];
+		final int all = total + status[0];
 		if (all != 0)
 			System.out.printf("%s %s = %d / %d  (%.2f)\n", title, "Total", total, all, 100.0 * total / all);
 	}
@@ -2382,7 +2319,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		for (int resultIndex = 0; resultIndex < fitResult.results.length; resultIndex++)
 		{
-			BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[resultIndex];
+			final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[resultIndex];
 
 			// Q. Only build stats on new results?
 			if (!result.isNewResult())
@@ -2463,7 +2400,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return false;
 		for (int resultIndex = 0; resultIndex < fitResult.results.length; resultIndex++)
 		{
-			BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[resultIndex];
+			final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[resultIndex];
 			if (!result.isNewResult())
 				continue;
 			if (result.hasAssignments())
@@ -2475,19 +2412,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static int[] rank(ArrayList<Ranking> pc)
 	{
 		Collections.sort(pc);
-		int[] ranking = new int[pc.size()];
+		final int[] ranking = new int[pc.size()];
 		int rank = 1;
-		for (Ranking r : pc)
-		{
+		for (final Ranking r : pc)
 			ranking[r.index] = rank++;
-		}
 		return ranking;
 	}
 
 	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, final int i, WindowOrganiser wo,
 			double[][] matchScores)
 	{
-		String xLabel = filterCriteria[i].name;
+		final String xLabel = filterCriteria[i].name;
 		LowerLimit lower = filterCriteria[i].lower;
 		UpperLimit upper = filterCriteria[i].upper;
 
@@ -2511,7 +2446,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			});
 
 			final int scoreIndex = FILTER_PRECISION + 1;
-			int n = results.size();
+			final int n = results.size();
 			double tp = 0;
 			double fp = 0;
 			j = new double[matchScores.length + 1];
@@ -2529,17 +2464,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			if (showFilterScoreHistograms)
 			{
-				String title = TITLE + " Jaccard " + xLabel;
-				Plot plot = new Plot(title, xLabel, "Jaccard", metric, j);
+				final String title = TITLE + " Jaccard " + xLabel;
+				final Plot plot = new Plot(title, xLabel, "Jaccard", metric, j);
 				// Remove outliers
-				double[] limitsx = Maths.limits(metric);
-				Percentile p = new Percentile();
-				double l = p.evaluate(metric, 25);
-				double u = p.evaluate(metric, 75);
-				double iqr = 1.5 * (u - l);
+				final double[] limitsx = Maths.limits(metric);
+				final Percentile p = new Percentile();
+				final double l = p.evaluate(metric, 25);
+				final double u = p.evaluate(metric, 75);
+				final double iqr = 1.5 * (u - l);
 				limitsx[1] = Math.min(limitsx[1], u + iqr);
 				plot.setLimits(limitsx[0], limitsx[1], 0, Maths.max(j));
-				PlotWindow pw = Utils.display(title, plot);
+				final PlotWindow pw = Utils.display(title, plot);
 				if (Utils.isNewWindow())
 					wo.add(pw);
 			}
@@ -2548,14 +2483,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// [0] is all
 		// [1] is matches
 		// [2] is no match
-		StoredDataStatistics s1 = stats[0][i];
-		StoredDataStatistics s2 = stats[1][i];
-		StoredDataStatistics s3 = stats[2][i];
+		final StoredDataStatistics s1 = stats[0][i];
+		final StoredDataStatistics s2 = stats[1][i];
+		final StoredDataStatistics s3 = stats[2][i];
 
 		if (s1.getN() == 0)
 			return new double[4];
 
-		DescriptiveStatistics d = s1.getStatistics();
+		final DescriptiveStatistics d = s1.getStatistics();
 		double median = 0;
 		Plot2 plot = null;
 		String title = null;
@@ -2563,8 +2498,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		if (showFilterScoreHistograms)
 		{
 			median = d.getPercentile(50);
-			String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
-			int id = Utils.showHistogram(TITLE, s1, xLabel, filterCriteria[i].minBinWidth,
+			final String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
+			final int id = Utils.showHistogram(TITLE, s1, xLabel, filterCriteria[i].minBinWidth,
 					(filterCriteria[i].restrictRange) ? 1 : 0, 0, label);
 			if (id == 0)
 			{
@@ -2579,16 +2514,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			// Reverse engineer the histogram settings
 			plot = Utils.plot;
-			double[] xValues = Utils.xValues;
-			int bins = xValues.length;
-			double yMin = xValues[0];
-			double binSize = xValues[1] - xValues[0];
-			double yMax = xValues[0] + (bins - 1) * binSize;
+			final double[] xValues = Utils.xValues;
+			final int bins = xValues.length;
+			final double yMin = xValues[0];
+			final double binSize = xValues[1] - xValues[0];
+			final double yMax = xValues[0] + (bins - 1) * binSize;
 
 			if (s2.getN() > 0)
 			{
-				double[] values = s2.getValues();
-				double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+				final double[] values = s2.getValues();
+				final double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
 
 				if (hist[0].length > 0)
 				{
@@ -2600,8 +2535,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			if (s3.getN() > 0)
 			{
-				double[] values = s3.getValues();
-				double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+				final double[] values = s3.getValues();
+				final double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
 
 				if (hist[0].length > 0)
 				{
@@ -2613,9 +2548,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		// Do cumulative histogram
-		double[][] h1 = Maths.cumulativeHistogram(s1.getValues(), true);
-		double[][] h2 = Maths.cumulativeHistogram(s2.getValues(), true);
-		double[][] h3 = Maths.cumulativeHistogram(s3.getValues(), true);
+		final double[][] h1 = Maths.cumulativeHistogram(s1.getValues(), true);
+		final double[][] h2 = Maths.cumulativeHistogram(s2.getValues(), true);
+		final double[][] h3 = Maths.cumulativeHistogram(s3.getValues(), true);
 
 		if (showFilterScoreHistograms)
 		{
@@ -2628,9 +2563,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// Restrict using the inter-quartile range
 			if (filterCriteria[i].restrictRange)
 			{
-				double q1 = d.getPercentile(25);
-				double q2 = d.getPercentile(75);
-				double iqr = (q2 - q1) * 2.5;
+				final double q1 = d.getPercentile(25);
+				final double q2 = d.getPercentile(75);
+				final double iqr = (q2 - q1) * 2.5;
 				xlimit[0] = Maths.max(xlimit[0], median - iqr);
 				xlimit[1] = Maths.min(xlimit[1], median + iqr);
 			}
@@ -2657,21 +2592,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		final boolean requireLabel = (showFilterScoreHistograms && filterCriteria[i].requireLabel);
 		if (requireLabel || upper.requiresDeltaHistogram() || lower.requiresDeltaHistogram())
-		{
 			if (s2.getN() != 0 && s3.getN() != 0)
 			{
-				LinearInterpolator li = new LinearInterpolator();
-				PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
-				PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
-				for (double x : h1[0])
+				final LinearInterpolator li = new LinearInterpolator();
+				final PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
+				final PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
+				for (final double x : h1[0])
 				{
 					if (x < h2[0][0] || x < h3[0][0])
 						continue;
 					try
 					{
-						double v1 = f1.value(x);
-						double v2 = f2.value(x);
-						double diff = v2 - v1;
+						final double v1 = f1.value(x);
+						final double v2 = f2.value(x);
+						final double diff = v2 - v1;
 						if (diff > 0)
 						{
 							if (max1 < diff)
@@ -2680,16 +2614,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 								maxx1 = x;
 							}
 						}
-						else
+						else if (max2 > diff)
 						{
-							if (max2 > diff)
-							{
-								max2 = diff;
-								maxx2 = x;
-							}
+							max2 = diff;
+							maxx2 = x;
 						}
 					}
-					catch (OutOfRangeException e)
+					catch (final OutOfRangeException e)
 					{
 						// Because we reached the end
 						break;
@@ -2705,21 +2636,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					lower = LowerLimit.ONE_PERCENT;
 			}
 
-			//			System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, Utils.rounded(getPercentile(h2, 0.01)),
-			//					Utils.rounded(maxx1), Utils.rounded(maxx2), Utils.rounded(getPercentile(h1, 0.99)));
-		}
-
 		if (plot != null)
 		{
 			// We use bins=1 on charts where we do not need a label
 			if (requireLabel)
 			{
-				String label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
+				final String label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
 						Utils.rounded(max2), Utils.rounded(maxx2));
 				plot.setColor(Color.black);
 				plot.addLabel(0, 0, label);
 			}
-			PlotWindow pw = Utils.display(title, plot);
+			final PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				wo.add(pw.getImagePlus().getID());
 		}
@@ -2764,8 +2691,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			default:
 				throw new RuntimeException("Missing upper limit method");
 		}
-		double min = getPercentile(h1, 0);
-		double max = getPercentile(h1, 1);
+		final double min = getPercentile(h1, 0);
+		final double max = getPercentile(h1, 1);
 		return new double[] { l, u, min, max };
 	}
 
@@ -2780,8 +2707,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 */
 	private static double getPercentile(double[][] h, double p)
 	{
-		double[] x = h[0];
-		double[] y = h[1];
+		final double[] x = h[0];
+		final double[] y = h[1];
 		return getValue(x, y, p);
 	}
 
@@ -2799,16 +2726,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static double getValue(double[] x, double[] y, double p)
 	{
 		for (int i = 0; i < x.length; i++)
-		{
 			if (y[i] >= p)
 			{
 				if (i == 0 || y[i] == p)
 					return x[i];
 				// Interpolation
-				double delta = (p - y[i - 1]) / (y[i] - y[i - 1]);
+				final double delta = (p - y[i - 1]) / (y[i] - y[i - 1]);
 				return x[i - 1] + delta * (x[i] - x[i - 1]);
 			}
-		}
 		return x[x.length - 1];
 	}
 
@@ -2831,17 +2756,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		// Check if the double holds an integer count
 		if ((int) value == value)
-		{
 			sb.append('\t').append((int) value);
-		}
+		else // Otherwise add the counts using at least 2 dp
+		if (value > 100)
+			sb.append('\t').append(IJ.d2s(value));
 		else
-		{
-			// Otherwise add the counts using at least 2 dp
-			if (value > 100)
-				sb.append('\t').append(IJ.d2s(value));
-			else
-				add(sb, Utils.rounded(value));
-		}
+			add(sb, Utils.rounded(value));
 	}
 
 	private void createTable()
@@ -2855,7 +2775,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder(
+		final StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
 		sb.append("Filter\t");
 		sb.append("Spots\t");
@@ -2899,7 +2819,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		sb.append("Slope\t");
 
 		createFilterCriteria();
-		for (FilterCriteria f : filterCriteria)
+		for (final FilterCriteria f : filterCriteria)
 			sb.append(f.name).append('\t');
 
 		sb.append("Run time");
@@ -2957,7 +2877,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		if (e.getSource() instanceof Checkbox)
 		{
-			Checkbox checkbox = (Checkbox) e.getSource();
+			final Checkbox checkbox = (Checkbox) e.getSource();
 
 			int failLimit;
 			boolean includeNeighbours;
@@ -2967,8 +2887,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			if (checkbox.getState())
 			{
-				FitEngineConfiguration tmp = new FitEngineConfiguration();
-				FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
+				final FitEngineConfiguration tmp = new FitEngineConfiguration();
+				final FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
 				tmpFitConfig.setComputeResiduals(true); // Collect residuals threshold
 				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 				{
@@ -3046,10 +2966,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	public boolean resetMultiPathFilter()
 	{
 		if (defaultMultiFilter.equals(multiFilter))
-		{
 			if (equals(createParameters(), defaultParameters))
 				return false;
-		}
 		multiFilter = defaultMultiFilter;
 		config.setFailuresLimit((int) defaultParameters[0]);
 		// Note we are not resetting the residuals threshold in the config.

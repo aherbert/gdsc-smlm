@@ -124,7 +124,7 @@ public class PSFDrift implements PlugIn
 	private int total;
 	private double[][] results;
 
-	private int[] idList = new int[3];
+	private final int[] idList = new int[3];
 	private int idCount = 0;
 
 	private class Job
@@ -202,7 +202,7 @@ public class PSFDrift implements PlugIn
 			{
 				while (true)
 				{
-					Job job = jobs.take();
+					final Job job = jobs.take();
 					if (job == null || job.index < 0)
 						break;
 					if (!finished)
@@ -210,7 +210,7 @@ public class PSFDrift implements PlugIn
 						run(job);
 				}
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				System.out.println(e.toString());
 				throw new RuntimeException(e);
@@ -229,14 +229,14 @@ public class PSFDrift implements PlugIn
 				return;
 			}
 
-			double cx = centrePixel + job.cx;
-			double cy = centrePixel + job.cy;
+			final double cx = centrePixel + job.cx;
+			final double cy = centrePixel + job.cy;
 
 			// Draw the PSF
-			double[] data = new double[w2];
+			final double[] data = new double[w2];
 			if (useSampling)
 			{
-				int p = (int) random.nextPoisson(photons);
+				final int p = (int) random.nextPoisson(photons);
 				psf.sample3D(data, w, w, p, cx, cy, job.z);
 			}
 			else
@@ -258,21 +258,21 @@ public class PSFDrift implements PlugIn
 				xy[xy.length - 1][1] -= cy;
 			}
 
-			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+			final double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
 			initialParams[Gaussian2DFunction.X_SD] = sx;
 			initialParams[Gaussian2DFunction.Y_SD] = sy;
 
 			int resultPosition = job.index;
-			for (double[] centre : xy)
+			for (final double[] centre : xy)
 			{
 				// Do fitting
 				final double[] params = initialParams.clone();
 				params[Gaussian2DFunction.X_POSITION] = cx + centre[0];
 				params[Gaussian2DFunction.Y_POSITION] = cy + centre[1];
 				fitConfig2.initialise(1, w, w, params);
-				FunctionSolver solver = fitConfig2.getFunctionSolver();
+				final FunctionSolver solver = fitConfig2.getFunctionSolver();
 				if (solver.isBounded())
 					setBounds(solver);
 				else if (solver.isConstrained())
@@ -282,7 +282,6 @@ public class PSFDrift implements PlugIn
 				params[Gaussian2DFunction.X_POSITION] += 0.5;
 				params[Gaussian2DFunction.Y_POSITION] += 0.5;
 				if (isValid(status, params, w))
-				{
 					// XXX Decide what results are needed for analysis
 					// Store all the results for later analysis
 					//results[resultPosition] = params;
@@ -291,7 +290,6 @@ public class PSFDrift implements PlugIn
 							a * (params[Gaussian2DFunction.Y_POSITION] - cy), job.z };
 					//System.out.printf("Fit " + job + ". %f,%f\n", results[resultPosition][0],
 					//		results[resultPosition][1]);
-				}
 				else
 				{
 					//System.out.println("Failed to fit " + job + ". " + status);
@@ -322,7 +320,7 @@ public class PSFDrift implements PlugIn
 				ub[Gaussian2DFunction.ANGLE] = Math.PI;
 				lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 				ub[Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
-				double wf = 1.5;
+				final double wf = 1.5;
 				lb[Gaussian2DFunction.X_SD] = sx / wf;
 				ub[Gaussian2DFunction.X_SD] = sx * 5;
 				lb[Gaussian2DFunction.Y_SD] = sy / wf;
@@ -347,27 +345,21 @@ public class PSFDrift implements PlugIn
 		private boolean isValid(FitStatus status, double[] params, int size)
 		{
 			if (status != FitStatus.OK)
-			{
 				//System.out.println("Failed to fit: " + status);
 				return false;
-			}
 
 			// Reject fits that are outside the bounds of the data
 			if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.Y_POSITION] < 0 ||
 					params[Gaussian2DFunction.X_POSITION] > size || params[Gaussian2DFunction.Y_POSITION] > size)
-			{
 				//System.out.printf("Failed to fit position: x=%f,y=%f\n", params[Gaussian2DFunction.X_POSITION],
 				//		params[Gaussian2DFunction.Y_POSITION]);
 				return false;
-			}
 
 			// Reject fits that do not correctly estimate the signal
 			if (params[Gaussian2DFunction.SIGNAL] < lb[Gaussian2DFunction.SIGNAL] ||
 					params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL])
-			{
 				//System.out.printf("Failed to fit signal: %f\n", params[Gaussian2DFunction.SIGNAL]);
 				return false;
-			}
 
 			// Reject fits that have a background too far from zero
 			// TODO - configure this better
@@ -378,23 +370,15 @@ public class PSFDrift implements PlugIn
 
 			// Q. Should we do width bounds checking?
 			if (fitConfig2.isXSDFitting())
-			{
 				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
 						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
-				{
 					//System.out.printf("Failed to fit x-width: %f\n", params[Gaussian2DFunction.X_SD]);
 					return false;
-				}
-			}
 			if (fitConfig2.isYSDFitting())
-			{
 				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
 						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
-				{
 					//System.out.printf("Failed to fit y-width: %f\n", params[Gaussian2DFunction.Y_SD]);
 					return false;
-				}
-			}
 
 			return true;
 		}
@@ -418,7 +402,7 @@ public class PSFDrift implements PlugIn
 		}
 
 		// Build a list of suitable images
-		List<String> titles = createImageList(true);
+		final List<String> titles = createImageList(true);
 
 		if (titles.isEmpty())
 		{
@@ -426,7 +410,7 @@ public class PSFDrift implements PlugIn
 			return;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
 		gd.addCheckbox("Use_offset", useOffset);
@@ -503,8 +487,8 @@ public class PSFDrift implements PlugIn
 
 		// Configure the fit solver. We must wrap the settings with a
 		// FitEngineConfiguration to pass to the PeakFit method
-		FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
-		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
+		final FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
+		final FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
 				SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
 		if (!PeakFit.configurePSFModel(config))
@@ -528,7 +512,7 @@ public class PSFDrift implements PlugIn
 		centrePixel = w / 2;
 
 		// Check region size using the image PSF
-		double newPsfWidth = imp.getWidth() / scale;
+		final double newPsfWidth = imp.getWidth() / scale;
 		if (Math.ceil(newPsfWidth) > w)
 			Utils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
 
@@ -543,38 +527,38 @@ public class PSFDrift implements PlugIn
 		fitConfig.setDisableSimpleFilter(true);
 
 		// Create the PSF over the desired z-depth
-		int depth = (int) Math.round(zDepth / psfSettings.getPixelDepth());
+		final int depth = (int) Math.round(zDepth / psfSettings.getPixelDepth());
 		int startSlice = psfSettings.getCentreImage() - depth;
 		int endSlice = psfSettings.getCentreImage() + depth;
-		int nSlices = imp.getStackSize();
+		final int nSlices = imp.getStackSize();
 		startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
 		endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
 
-		ImagePSFModel psf = createImagePSF(startSlice, endSlice, scale);
+		final ImagePSFModel psf = createImagePSF(startSlice, endSlice, scale);
 
-		int minz = startSlice - psfSettings.getCentreImage();
-		int maxz = endSlice - psfSettings.getCentreImage();
+		final int minz = startSlice - psfSettings.getCentreImage();
+		final int maxz = endSlice - psfSettings.getCentreImage();
 
 		final int nZ = maxz - minz + 1;
 		final int gridSize2 = grid.length * grid.length;
 		total = nZ * gridSize2;
 
 		// Store all the fitting results
-		int nStartPoints = getNumberOfStartPoints();
+		final int nStartPoints = getNumberOfStartPoints();
 		results = new double[total * nStartPoints][];
 
 		// TODO - Add ability to iterate this, adjusting the current offset in the PSF
 		// each iteration
 
 		// Create a pool of workers
-		int nThreads = Prefs.getThreads();
-		BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-		List<Worker> workers = new LinkedList<>();
-		List<Thread> threads = new LinkedList<>();
+		final int nThreads = Prefs.getThreads();
+		final BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		final List<Worker> workers = new LinkedList<>();
+		final List<Thread> threads = new LinkedList<>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, psf, w, fitConfig);
-			Thread t = new Thread(worker);
+			final Worker worker = new Worker(jobs, psf, w, fitConfig);
+			final Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
 			t.start();
@@ -584,21 +568,15 @@ public class PSFDrift implements PlugIn
 		Utils.showStatus("Fitting ...");
 		final int step = Utils.getProgressInterval(total);
 		outer: for (int z = minz, i = 0; z <= maxz; z++)
-		{
 			for (int x = 0; x < grid.length; x++)
 				for (int y = 0; y < grid.length; y++, i++)
 				{
 					if (IJ.escapePressed())
-					{
 						break outer;
-					}
 					put(jobs, new Job(z, grid[x], grid[y], i));
 					if (i % step == 0)
-					{
 						IJ.showProgress(i, total);
-					}
 				}
-		}
 
 		// If escaped pressed then do not need to stop the workers, just return
 		if (Utils.isInterrupted())
@@ -609,22 +587,18 @@ public class PSFDrift implements PlugIn
 
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
-		{
 			put(jobs, new Job());
-		}
 
 		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
-		{
 			try
 			{
 				threads.get(i).join();
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
-		}
 		threads.clear();
 
 		IJ.showProgress(1);
@@ -632,16 +606,16 @@ public class PSFDrift implements PlugIn
 
 		// Plot the average and SE for the drift curve
 		// Plot the recall
-		double[] zPosition = new double[nZ];
-		double[] avX = new double[nZ];
-		double[] seX = new double[nZ];
-		double[] avY = new double[nZ];
-		double[] seY = new double[nZ];
-		double[] recall = new double[nZ];
+		final double[] zPosition = new double[nZ];
+		final double[] avX = new double[nZ];
+		final double[] seX = new double[nZ];
+		final double[] avY = new double[nZ];
+		final double[] seY = new double[nZ];
+		final double[] recall = new double[nZ];
 		for (int z = minz, i = 0; z <= maxz; z++, i++)
 		{
-			Statistics statsX = new Statistics();
-			Statistics statsY = new Statistics();
+			final Statistics statsX = new Statistics();
+			final Statistics statsY = new Statistics();
 			for (int s = 0; s < nStartPoints; s++)
 			{
 				int resultPosition = i * gridSize2 + s * total;
@@ -667,13 +641,11 @@ public class PSFDrift implements PlugIn
 		// Find the range from the z-centre above the recall limit
 		int centre = 0;
 		for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
-		{
 			if (slice == psfSettings.getCentreImage())
 			{
 				centre = i;
 				break;
 			}
-		}
 		if (recall[centre] < recallLimit)
 			return;
 		int start = centre, end = centre;
@@ -690,20 +662,20 @@ public class PSFDrift implements PlugIn
 			end = i;
 		}
 
-		int iterations = 1;
+		final int iterations = 1;
 		LoessInterpolator loess = null;
 		if (smoothing > 0)
 			loess = new LoessInterpolator(smoothing, iterations);
 
-		double[][] smoothx = displayPlot("Drift X", "X (nm)", zPosition, avX, seX, loess, start, end);
-		double[][] smoothy = displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, loess, start, end);
+		final double[][] smoothx = displayPlot("Drift X", "X (nm)", zPosition, avX, seX, loess, start, end);
+		final double[][] smoothy = displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, loess, start, end);
 		displayPlot("Recall", "Recall", zPosition, recall, null, null, start, end);
 
-		WindowOrganiser wo = new WindowOrganiser();
+		final WindowOrganiser wo = new WindowOrganiser();
 		wo.tileWindows(idList);
 
 		// Ask the user if they would like to store them in the image
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.enableYesNoCancel();
 		gd.hideCancelButton();
 		startSlice = psfSettings.getCentreImage() - (centre - start);
@@ -716,9 +688,9 @@ public class PSFDrift implements PlugIn
 		if (gd.wasOKed())
 		{
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
-			Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
-			boolean useOldOffset = useOffset && !oldOffset.isEmpty();
-			TurboList<double[]> offset = new TurboList<>();
+			final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
+			final boolean useOldOffset = useOffset && !oldOffset.isEmpty();
+			final TurboList<double[]> offset = new TurboList<>();
 			final double pitch = psfSettings.getPixelSize();
 			int j = 0;
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
@@ -734,7 +706,7 @@ public class PSFDrift implements PlugIn
 				double cy = smoothy[1][j] / pitch;
 				if (useOldOffset)
 				{
-					Offset o = oldOffset.get(slice);
+					final Offset o = oldOffset.get(slice);
 					if (o != null)
 					{
 						cx += o.getCx();
@@ -744,11 +716,11 @@ public class PSFDrift implements PlugIn
 				offset.add(new double[] { slice, cx, cy });
 			}
 			addMissingOffsets(startSlice, endSlice, nSlices, offset);
-			Offset.Builder offsetBuilder = Offset.newBuilder();
-			ImagePSF.Builder imagePSFBuilder = psfSettings.toBuilder();
-			for (double[] o : offset)
+			final Offset.Builder offsetBuilder = Offset.newBuilder();
+			final ImagePSF.Builder imagePSFBuilder = psfSettings.toBuilder();
+			for (final double[] o : offset)
 			{
-				int slice = (int) o[0];
+				final int slice = (int) o[0];
 				offsetBuilder.setCx(o[1]);
 				offsetBuilder.setCy(o[2]);
 				imagePSFBuilder.putOffsets(slice, offsetBuilder.build());
@@ -833,8 +805,8 @@ public class PSFDrift implements PlugIn
 		newY = Arrays.copyOf(newY, c);
 
 		title = TITLE + " " + title;
-		Plot2 plot = new Plot2(title, "z (nm)", yLabel);
-		double[] limitsx = Maths.limits(x);
+		final Plot2 plot = new Plot2(title, "z (nm)", yLabel);
+		final double[] limitsx = Maths.limits(x);
 		double[] limitsy = new double[2];
 		if (se != null)
 		{
@@ -848,19 +820,14 @@ public class PSFDrift implements PlugIn
 				}
 			}
 		}
-		else
-		{
-			if (c > 0)
-				limitsy = Maths.limits(newY);
-		}
-		double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
-		double rangey = Math.max(0.05 * (limitsy[1] - limitsy[0]), 0.1);
+		else if (c > 0)
+			limitsy = Maths.limits(newY);
+		final double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
+		final double rangey = Math.max(0.05 * (limitsy[1] - limitsy[0]), 0.1);
 		plot.setLimits(limitsx[0] - rangex, limitsx[1] + rangex, limitsy[0] - rangey, limitsy[1] + rangey);
 
 		if (loess == null)
-		{
 			addPoints(plot, Plot.LINE, newX, newY, x[start], x[end]);
-		}
 		else
 		{
 			addPoints(plot, Plot.DOT, newX, newY, x[start], x[end]);
@@ -871,10 +838,8 @@ public class PSFDrift implements PlugIn
 		{
 			plot.setColor(Color.magenta);
 			for (int i = 0; i < x.length; i++)
-			{
 				if (!Double.isNaN(y[i]))
 					plot.drawLine(x[i], y[i] - se[i], x[i], y[i] + se[i]);
-			}
 
 			// Draw the start and end lines for the valid range
 			plot.setColor(Color.green);
@@ -887,7 +852,7 @@ public class PSFDrift implements PlugIn
 			plot.setColor(Color.magenta);
 			plot.drawLine(limitsx[0] - rangex, recallLimit, limitsx[1] + rangex, recallLimit);
 		}
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw.getImagePlus().getID();
 
@@ -916,14 +881,12 @@ public class PSFDrift implements PlugIn
 		double[] y2 = new double[y.length];
 		int c = 0;
 		for (int i = 0; i < x.length; i++)
-		{
 			if (x[i] >= lower && x[i] <= upper)
 			{
 				x2[c] = x[i];
 				y2[c] = y[i];
 				c++;
 			}
-		}
 		if (c == 0)
 			return;
 		x2 = Arrays.copyOf(x2, c);
@@ -934,38 +897,34 @@ public class PSFDrift implements PlugIn
 
 	private ImagePSFModel createImagePSF(int lower, int upper, double scale)
 	{
-		int zCentre = psfSettings.getCentreImage();
+		final int zCentre = psfSettings.getCentreImage();
 
 		final double unitsPerPixel = 1.0 / scale;
 		final double unitsPerSlice = 1; // So we can move from -depth to depth
 
 		// Extract data uses index not slice number as arguments so subtract 1
-		double noiseFraction = 1e-3;
-		float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
-		ImagePSFModel model = new ImagePSFModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice,
+		final double noiseFraction = 1e-3;
+		final float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
+		final ImagePSFModel model = new ImagePSFModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice,
 				psfSettings.getFwhm(), noiseFraction);
 
 		// Add the calibrated centres
-		Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
+		final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
 		if (useOffset && !oldOffset.isEmpty())
 		{
-			int sliceOffset = lower;
-			for (Entry<Integer, Offset> entry : oldOffset.entrySet())
-			{
+			final int sliceOffset = lower;
+			for (final Entry<Integer, Offset> entry : oldOffset.entrySet())
 				model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
 						entry.getValue().getCy());
-			}
 		}
 		else
 		{
 			// Use the CoM if present
-			double cx = psfSettings.getXCentre();
-			double cy = psfSettings.getYCentre();
+			final double cx = psfSettings.getXCentre();
+			final double cy = psfSettings.getYCentre();
 			if (cx != 0 || cy != 0)
-			{
 				for (int slice = 0; slice < image.length; slice++)
 					model.setCentre(slice, cx, cy);
-			}
 		}
 
 		return model;
@@ -977,7 +936,7 @@ public class PSFDrift implements PlugIn
 		{
 			jobs.put(job);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			throw new RuntimeException("Unexpected interruption", e);
 		}
@@ -990,15 +949,12 @@ public class PSFDrift implements PlugIn
 	 */
 	private static double[][] getStartPoints()
 	{
-		double[][] xy = new double[getNumberOfStartPoints()][];
+		final double[][] xy = new double[getNumberOfStartPoints()][];
 		int ii = 0;
 
 		if (offsetFitting)
-		{
 			if (startOffset == 0)
-			{
 				xy[ii++] = new double[] { 0, 0 };
-			}
 			else
 			{
 				// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at
@@ -1007,11 +963,8 @@ public class PSFDrift implements PlugIn
 
 				for (int x = -1; x <= 1; x += 2)
 					for (int y = -1; y <= 1; y += 2)
-					{
 						xy[ii++] = new double[] { x * distance, y * distance };
-					}
 			}
-		}
 		// Add space for centre-of-mass at the end of the array
 		if (comFitting)
 			xy[ii++] = new double[2];
@@ -1028,24 +981,21 @@ public class PSFDrift implements PlugIn
 
 	private static List<String> createImageList(boolean requireFwhm)
 	{
-		List<String> titles = new LinkedList<>();
-		int[] ids = WindowManager.getIDList();
+		final List<String> titles = new LinkedList<>();
+		final int[] ids = WindowManager.getIDList();
 		if (ids != null)
-		{
-			for (int id : ids)
+			for (final int id : ids)
 			{
-				ImagePlus imp = WindowManager.getImage(id);
+				final ImagePlus imp = WindowManager.getImage(id);
 				if (imp != null)
-				{
 					// Image must be greyscale
 					if (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16 ||
 							imp.getType() == ImagePlus.GRAY32)
-					{
 						// Image must be square and a stack of a single channel
 						if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1)
 						{
 							// Check if these are PSF images created by the SMLM plugins
-							ImagePSF psfSettings = getPSFSettings(imp);
+							final ImagePSF psfSettings = getPSFSettings(imp);
 							if (psfSettings != null)
 							{
 								if (psfSettings.getCentreImage() <= 0)
@@ -1072,10 +1022,7 @@ public class PSFDrift implements PlugIn
 								titles.add(imp.getTitle());
 							}
 						}
-					}
-				}
 			}
-		}
 		return titles;
 	}
 
@@ -1089,18 +1036,16 @@ public class PSFDrift implements PlugIn
 	 */
 	public static ImagePSF getPSFSettings(ImagePlus imp)
 	{
-		Object info = imp.getProperty("Info");
+		final Object info = imp.getProperty("Info");
 		if (info != null)
-		{
 			return ImagePSFHelper.fromString(info.toString());
-		}
 		return null;
 	}
 
 	private void showHWHM()
 	{
 		// Build a list of suitable images
-		List<String> titles = createImageList(false);
+		final List<String> titles = createImageList(false);
 
 		if (titles.isEmpty())
 		{
@@ -1108,7 +1053,7 @@ public class PSFDrift implements PlugIn
 			return;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Approximate the volume of the PSF as a Gaussian and\ncompute the equivalent Gaussian width.");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
 		gd.addCheckbox("Use_offset", useOffset);
@@ -1135,21 +1080,21 @@ public class PSFDrift implements PlugIn
 			return;
 		}
 
-		int size = imp.getStackSize();
-		ImagePSFModel psf = createImagePSF(1, size, 1);
+		final int size = imp.getStackSize();
+		final ImagePSFModel psf = createImagePSF(1, size, 1);
 
-		double[] w0 = psf.getAllHWHM0();
-		double[] w1 = psf.getAllHWHM1();
+		final double[] w0 = psf.getAllHWHM0();
+		final double[] w1 = psf.getAllHWHM1();
 
 		// Get current centre
-		int centre = psfSettings.getCentreImage();
+		final int centre = psfSettings.getCentreImage();
 
 		// Extract valid values (some can be NaN)
 		double[] slice0, slice1;
 		double[] sw0 = new double[w0.length], sw1 = new double[w1.length];
 		{
-			TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
-			TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
+			final TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
+			final TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
 			int c0 = 0, c1 = 0;
 			for (int i = 0; i < w0.length; i++)
 			{
@@ -1178,33 +1123,27 @@ public class PSFDrift implements PlugIn
 		// Smooth
 		if (smoothing > 0)
 		{
-			LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+			final LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
 			sw0 = loess.smooth(slice0, sw0);
 			sw1 = loess.smooth(slice1, sw1);
 		}
 
 		//int newCentre = 0;
 		//double minW = Double.POSITIVE_INFINITY;
-		TDoubleArrayList minWX = new TDoubleArrayList();
-		TDoubleArrayList minWY = new TDoubleArrayList();
+		final TDoubleArrayList minWX = new TDoubleArrayList();
+		final TDoubleArrayList minWY = new TDoubleArrayList();
 		for (int i = 0; i < w0.length; i++)
 		{
 			double w = 0;
 			if (Maths.isFinite(w0[i]))
 			{
 				if (Maths.isFinite(w1[i]))
-				{
 					w = w0[i] * w1[i];
-				}
 				else
-				{
 					w = w0[i] * w0[i];
-				}
 			}
 			else if (Maths.isFinite(w1[i]))
-			{
 				w = w1[i] * w1[i];
-			}
 
 			if (w != 0)
 			{
@@ -1214,24 +1153,24 @@ public class PSFDrift implements PlugIn
 		}
 
 		// Smooth the combined line
-		double[] cx = minWX.toArray();
+		final double[] cx = minWX.toArray();
 		double[] cy = minWY.toArray();
 		if (smoothing > 0)
 		{
-			LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+			final LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
 			cy = loess.smooth(cx, cy);
 		}
 		final int newCentre = SimpleArrayUtils.findMinIndex(cy);
 
 		// Convert to FWHM
-		double fwhm = psfSettings.getFwhm();
+		final double fwhm = psfSettings.getFwhm();
 
 		// Widths are in pixels
-		String title = TITLE + " HWHM";
-		Plot plot = new Plot(title, "Slice", "HWHM (px)");
+		final String title = TITLE + " HWHM";
+		final Plot plot = new Plot(title, "Slice", "HWHM (px)");
 		double[] limits = Maths.limits(sw0);
 		limits = Maths.limits(limits, sw1);
-		double maxY = limits[1] * 1.05;
+		final double maxY = limits[1] * 1.05;
 		plot.setLimits(1, size, 0, maxY);
 		plot.setColor(Color.red);
 		plot.addPoints(slice0, sw0, Plot.LINE);
@@ -1241,12 +1180,12 @@ public class PSFDrift implements PlugIn
 		plot.addPoints(cx, cy, Plot.LINE);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "X=red; Y=blue, Combined=Magenta");
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 
 		// Show a non-blocking dialog to allow the centre to be updated ...
 		// Add a label and dynamically update when the centre is moved.
-		NonBlockingExtendedGenericDialog gd2 = new NonBlockingExtendedGenericDialog(TITLE);
-		double scale = psfSettings.getPixelSize();
+		final NonBlockingExtendedGenericDialog gd2 = new NonBlockingExtendedGenericDialog(TITLE);
+		final double scale = psfSettings.getPixelSize();
 		//@formatter:off
 		gd2.addMessage(String.format(
 				"Update the PSF information?\n \n" +
@@ -1264,26 +1203,24 @@ public class PSFDrift implements PlugIn
 				tf.setText(Integer.toString(newCentre));
 			}
 		});
-		Label label = gd2.getLastLabel();
+		final Label label = gd2.getLastLabel();
 		gd2.addCheckbox("Update_centre", updateCentre);
 		gd2.addCheckbox("Update_HWHM", updateHWHM);
 		gd2.enableYesNoCancel();
 		gd2.hideCancelButton();
-		UpdateDialogListener dl = new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
+		final UpdateDialogListener dl = new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
 		gd2.addDialogListener(dl);
 		gd2.showDialog();
 		if (gd2.wasOKed())
-		{
 			if (updateCentre || updateHWHM)
 			{
-				ImagePSF.Builder b = psfSettings.toBuilder();
+				final ImagePSF.Builder b = psfSettings.toBuilder();
 				if (updateCentre)
 					b.setCentreImage(dl.centre);
 				if (updateHWHM)
 					b.setFwhm(dl.getFWHM());
 				imp.setProperty("Info", ImagePSFHelper.toString(b));
 			}
-		}
 	}
 
 	private class UpdateDialogListener implements DialogListener
@@ -1304,11 +1241,11 @@ public class PSFDrift implements PlugIn
 			this.cy = cy;
 
 			// Interpolate missing values
-			int upper = cx.length - 1;
+			final int upper = cx.length - 1;
 			if (cx[upper] - cx[0] != upper)
 			{
-				LinearInterpolator in = new LinearInterpolator();
-				PolynomialSplineFunction f = in.interpolate(cx, cy);
+				final LinearInterpolator in = new LinearInterpolator();
+				final PolynomialSplineFunction f = in.interpolate(cx, cy);
 				cx = SimpleArrayUtils.newArray(upper + 1, cx[0], 1.0);
 				cy = new double[cx.length];
 				for (int i = 0; i < cx.length; i++)
@@ -1327,14 +1264,14 @@ public class PSFDrift implements PlugIn
 
 		private void update()
 		{
-			double fwhm = getFWHM();
+			final double fwhm = getFWHM();
 			label.setText(String.format("FWHM = %s px (%s nm)", Utils.rounded(fwhm), Utils.rounded(fwhm * scale)));
 
-			Plot plot = pw.getPlot();
+			final Plot plot = pw.getPlot();
 
-			double x = plot.scaleXtoPxl(centre);
-			double min = plot.scaleYtoPxl(0);
-			double max = plot.scaleYtoPxl(maxY);
+			final double x = plot.scaleXtoPxl(centre);
+			final double min = plot.scaleYtoPxl(0);
+			final double max = plot.scaleYtoPxl(maxY);
 
 			pw.getImagePlus().setRoi(new Line(x, min, x, max));
 

@@ -43,7 +43,6 @@ public class MLELVMGradientProcedureFactory
 	public static MLELVMGradientProcedure create(final double[] y, final Gradient1Function func)
 	{
 		if (isStrictlyPositive(y))
-		{
 			switch (func.getNumberOfGradients())
 			{
 				case 5:
@@ -56,7 +55,6 @@ public class MLELVMGradientProcedureFactory
 				default:
 					return new MLELVMGradientProcedureX(y, func);
 			}
-		}
 
 		switch (func.getNumberOfGradients())
 		{
@@ -87,7 +85,6 @@ public class MLELVMGradientProcedureFactory
 	public static MLELVMGradientProcedure create(final double[] y, final Gradient1Function func, FastLog fastLog)
 	{
 		if (isStrictlyPositive(y))
-		{
 			switch (func.getNumberOfGradients())
 			{
 				case 5:
@@ -100,7 +97,6 @@ public class MLELVMGradientProcedureFactory
 				default:
 					return new FastLogMLELVMGradientProcedureX(y, func, fastLog);
 			}
-		}
 
 		switch (func.getNumberOfGradients())
 		{

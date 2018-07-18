@@ -66,7 +66,6 @@ public class ZeroKernelFilter extends KernelFilter
 				int i = 0;
 				// Determine if at the edge
 				if (edgeY || x < uc || x >= xedge)
-				{
 					for (int v = -vc; v <= vc; v++)
 					{
 						// Create a safe y-index
@@ -80,24 +79,15 @@ public class ZeroKernelFilter extends KernelFilter
 						yIndex *= width;
 
 						for (int u = -uc; u <= uc; u++)
-						{
 							//if (i >= kernel.length) // work around for JIT compiler bug on Linux
 							//	IJ.log("kernel index error: " + i);
 							sum += getPixel(x + u, yIndex, in, width) * kernel[i++];
-						}
 					}
-				}
 				else
-				{
 					// Internal
 					for (int v = -vc; v <= vc; v++)
-					{
 						for (int u = -uc, offset = x - uc + (y + v) * width; u++ <= uc;)
-						{
 							sum += in[offset++] * kernel[i++];
-						}
-					}
-				}
 				out[c++] = (float) (sum * scale);
 			}
 		}
@@ -131,7 +121,7 @@ public class ZeroKernelFilter extends KernelFilter
 	@Override
 	public ZeroKernelFilter clone()
 	{
-		ZeroKernelFilter o = (ZeroKernelFilter) super.clone();
+		final ZeroKernelFilter o = (ZeroKernelFilter) super.clone();
 		return o;
 	}
 }

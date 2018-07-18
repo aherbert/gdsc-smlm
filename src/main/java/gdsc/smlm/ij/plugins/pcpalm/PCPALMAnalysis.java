@@ -81,7 +81,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	private static double correlationDistance = 800; // nm
 	private static double correlationInterval = 20; // nm
 	private static boolean binaryImage = false;
-	
+
 	/** The blinking rate. */
 	static double blinkingRate = -1;
 	private static double copiedBlinkingRate = -1;
@@ -151,7 +151,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		log(TITLE);
 		PCPALMMolecules.logSpacer();
 
-		ArrayList<Molecule> molecules = cropToRoi(imp);
+		final ArrayList<Molecule> molecules = cropToRoi(imp);
 		if (molecules.size() < 2)
 		{
 			error("No results within the crop region");
@@ -159,12 +159,12 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		log("Using %d molecules", molecules.size());
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 
 		analyse(molecules);
 
-		double seconds = (System.currentTimeMillis() - start) / 1000.0;
-		String msg = TITLE + " complete : " + seconds + "s";
+		final double seconds = (System.currentTimeMillis() - start) / 1000.0;
+		final String msg = TITLE + " complete : " + seconds + "s";
 		IJ.showStatus(msg);
 		log(msg);
 		return DONE;
@@ -189,15 +189,13 @@ public class PCPALMAnalysis implements PlugInFilter
 	private static int saveResults()
 	{
 		if (results.isEmpty())
-		{
 			error("No results in memory");
-		}
 		else if (getDirectory())
 		{
-			XStream xs = new XStream(new DomDriver());
+			final XStream xs = new XStream(new DomDriver());
 			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
 			xs.allowTypes(new Class[] { CorrelationResult.class });
-			for (CorrelationResult result : results)
+			for (final CorrelationResult result : results)
 				saveResult(xs, result);
 		}
 		return DONE;
@@ -205,18 +203,18 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	private static void saveResult(XStream xs, CorrelationResult result)
 	{
-		String outputFilename = String.format("%s/%s.%d.xml", resultsDirectory,
+		final String outputFilename = String.format("%s/%s.%d.xml", resultsDirectory,
 				(result.spatialDomain) ? "Spatial" : "Frequency", result.id);
 		try (FileOutputStream fs = new FileOutputStream(outputFilename))
 		{
 			xs.toXML(result, fs);
 		}
-		catch (XStreamException ex)
+		catch (final XStreamException ex)
 		{
 			//ex.printStackTrace();
 			IJ.log("Failed to save correlation result to file: " + outputFilename);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.log("Failed to save correlation result to file: " + outputFilename);
 		}
@@ -231,7 +229,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	{
 		if (getDirectory())
 		{
-			File[] fileList = (new File(resultsDirectory)).listFiles(new FilenameFilter()
+			final File[] fileList = (new File(resultsDirectory)).listFiles(new FilenameFilter()
 			{
 				@Override
 				public boolean accept(File arg0, String arg1)
@@ -245,7 +243,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			int count = 0;
 			for (int i = 0; i < fileList.length; i++)
 			{
-				XStream xs = new XStream(new DomDriver());
+				final XStream xs = new XStream(new DomDriver());
 				XStream.setupDefaultSecurity(xs); // to be removed after 1.5
 				xs.allowTypes(new Class[] { CorrelationResult.class });
 				if (fileList[i].isFile())
@@ -266,30 +264,28 @@ public class PCPALMAnalysis implements PlugInFilter
 			CorrelationResult result = (CorrelationResult) xs.fromXML(fs);
 			// Replace a result with the same id
 			for (int i = 0; i < results.size(); i++)
-			{
 				if (results.get(i).id == result.id)
 				{
 					results.set(i, result);
 					result = null;
 					break;
 				}
-			}
 			// Add to the results if we did not replace any
 			if (result != null)
 				results.add(result);
 			return true;
 		}
-		catch (ClassCastException ex)
+		catch (final ClassCastException ex)
 		{
 			//ex.printStackTrace();
 			IJ.log("Failed to load correlation result from file: " + path);
 		}
-		catch (XStreamException ex)
+		catch (final XStreamException ex)
 		{
 			//ex.printStackTrace();
 			IJ.log("Failed to load correlation result from file: " + path);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.log("Failed to load correlation result from file: " + path);
 		}
@@ -315,18 +311,14 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		if (blinkingRate < 1 || copiedBlinkingRate != PCPALMMolecules.blinkingRate)
-		{
 			copiedBlinkingRate = blinkingRate = PCPALMMolecules.blinkingRate;
-		}
 
 		if (nmPerPixel < 1 || copiedNmPerPixel != PCPALMMolecules.nmPerPixel)
-		{
 			copiedNmPerPixel = nmPerPixel = PCPALMMolecules.nmPerPixel;
-		}
 
 		gd.addMessage("Analyse clusters using Pair Correlation.");
 
@@ -381,11 +373,9 @@ public class PCPALMAnalysis implements PlugInFilter
 				Parameters.isAboveZero("nm per pixel", nmPerPixel);
 			}
 			else
-			{
 				Parameters.isAboveZero("Correlation interval", correlationInterval);
-			}
 		}
-		catch (IllegalArgumentException ex)
+		catch (final IllegalArgumentException ex)
 		{
 			error(ex.getMessage());
 			return false;
@@ -409,14 +399,12 @@ public class PCPALMAnalysis implements PlugInFilter
 	{
 		croppedArea = PCPALMMolecules.area;
 		if (PCPALMMolecules.molecules == null || PCPALMMolecules.molecules.isEmpty())
-		{
 			return PCPALMMolecules.molecules;
-		}
 
-		double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx;
-		double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny;
+		final double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx;
+		final double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny;
 
-		Roi roi = (imp == null) ? null : imp.getRoi();
+		final Roi roi = (imp == null) ? null : imp.getRoi();
 		if (roi == null || !roi.isArea())
 		{
 			log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(pcw, 3), Utils.rounded(pch, 3),
@@ -431,11 +419,11 @@ public class PCPALMAnalysis implements PlugInFilter
 		// To avoid null  pointer warnings
 		if (imp == null)
 			throw new NullPointerException("image is null");
-		
-		int w = imp.getWidth();
-		int h = imp.getHeight();
 
-		Rectangle bounds = roi.getBounds();
+		final int w = imp.getWidth();
+		final int h = imp.getHeight();
+
+		final Rectangle bounds = roi.getBounds();
 
 		// Construct relative coordinates
 		minx = PCPALMMolecules.minx + pcw * ((double) bounds.x / w);
@@ -446,24 +434,24 @@ public class PCPALMAnalysis implements PlugInFilter
 		final double roix = maxx - minx;
 		final double roiy = maxy - miny;
 
-		ArrayList<Molecule> newMolecules = new ArrayList<>(PCPALMMolecules.molecules.size() / 2);
+		final ArrayList<Molecule> newMolecules = new ArrayList<>(PCPALMMolecules.molecules.size() / 2);
 
 		// Support non-rectangular ROIs
 		if (roi.getMask() != null)
 		{
-			MaskDistribution dist = createMaskDistribution(roi.getMask(), roix, roiy);
+			final MaskDistribution dist = createMaskDistribution(roi.getMask(), roix, roiy);
 
-			double fraction = (double) dist.getSize() / (roi.getMask().getWidth() * roi.getMask().getHeight());
+			final double fraction = (double) dist.getSize() / (roi.getMask().getWidth() * roi.getMask().getHeight());
 			log("Roi is a mask of %d pixels", dist.getSize());
 			croppedArea = fraction * roix * roiy / 1e6;
 			log("Roi area %s x %s nm x %s nm = %s um^2", Utils.rounded(fraction), Utils.rounded(roix, 3),
 					Utils.rounded(roiy, 3), Utils.rounded(croppedArea, 3));
 
-			double[] xyz = new double[3];
+			final double[] xyz = new double[3];
 			// The mask is 0,0 in the centre so offset by this as well
-			double xoffset = minx + roix / 2;
-			double yoffset = miny + roiy / 2;
-			for (Molecule m : PCPALMMolecules.molecules)
+			final double xoffset = minx + roix / 2;
+			final double yoffset = miny + roiy / 2;
+			for (final Molecule m : PCPALMMolecules.molecules)
 			{
 				xyz[0] = m.x - xoffset;
 				xyz[1] = m.y - yoffset;
@@ -477,7 +465,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(roix, 3), Utils.rounded(roiy, 3),
 					Utils.rounded(croppedArea, 3));
 
-			for (Molecule m : PCPALMMolecules.molecules)
+			for (final Molecule m : PCPALMMolecules.molecules)
 			{
 				if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)
 					continue;
@@ -497,17 +485,15 @@ public class PCPALMAnalysis implements PlugInFilter
 		final double scaleY = roiy / h;
 
 		// Use an image for the distribution
-		int[] mask = extractMask(ip);
+		final int[] mask = extractMask(ip);
 		return new MaskDistribution(mask, w, h, 0, scaleX, scaleY);
 	}
 
 	private static int[] extractMask(ImageProcessor ip)
 	{
-		int[] mask = new int[ip.getPixelCount()];
+		final int[] mask = new int[ip.getPixelCount()];
 		for (int i = 0; i < mask.length; i++)
-		{
 			mask[i] = ip.get(i);
-		}
 		return mask;
 	}
 
@@ -533,13 +519,13 @@ public class PCPALMAnalysis implements PlugInFilter
 	private void analyse(ArrayList<Molecule> molecules)
 	{
 		// Check if the plots are currently shown
-		String spatialPlotTitle = TITLE + " molecules/um^2";
-		String frequencyDomainTitle = TITLE + " g(r)";
+		final String spatialPlotTitle = TITLE + " molecules/um^2";
+		final String frequencyDomainTitle = TITLE + " g(r)";
 
 		boolean noPlots;
 		String topPlotTitle;
 
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		if (spatialDomain)
 		{
 			// -----------------
@@ -554,7 +540,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			// Create histogram of distances at different radii.
 			final int nBins = (int) (correlationDistance / correlationInterval) + 1;
 			final double maxDistance2 = correlationDistance * correlationDistance;
-			int[] H = new int[nBins];
+			final int[] H = new int[nBins];
 
 			// TODO - Update this using a grid with a resolution of maxDistance to increase speed
 			// by only comparing to neighbours within range.
@@ -589,7 +575,6 @@ public class PCPALMAnalysis implements PlugInFilter
 				return;
 			}
 			else
-			{
 				for (int i = molecules.size(); i-- > 0;)
 				{
 					final Molecule m = molecules.get(i);
@@ -604,14 +589,11 @@ public class PCPALMAnalysis implements PlugInFilter
 						if (i == j)
 							continue;
 
-						double d = m.distance2(molecules.get(j));
+						final double d = m.distance2(molecules.get(j));
 						if (d < maxDistance2)
-						{
 							H[(int) (Math.sqrt(d) / correlationInterval)]++;
-						}
 					}
 				}
-			}
 
 			double[] r = new double[nBins + 1];
 			for (int i = 0; i <= nBins; i++)
@@ -622,11 +604,9 @@ public class PCPALMAnalysis implements PlugInFilter
 				// Note: Convert nm^2 to um^2
 				final double N_pi = N * Math.PI / 1000000.0;
 				for (int i = 0; i < nBins; i++)
-				{
 					// Pair-correlation is the count at the given distance divided by N and the area at distance ri:
 					// H(r_i) / (N x (pi x (r_i+1)^2 - pi x r_i^2))
 					pcf[i] = H[i] / (N_pi * (r[i + 1] * r[i + 1] - r[i] * r[i]));
-				}
 			}
 
 			// The final bin may be empty if the correlation interval was a factor of the correlation distance
@@ -636,13 +616,11 @@ public class PCPALMAnalysis implements PlugInFilter
 				pcf = Arrays.copyOf(pcf, nBins - 1);
 			}
 			else
-			{
 				r = Arrays.copyOf(r, nBins);
-			}
 
-			double[][] gr = new double[][] { r, pcf, null };
+			final double[][] gr = new double[][] { r, pcf, null };
 
-			CorrelationResult result = new CorrelationResult(results.size() + 1, PCPALMMolecules.results.getSource(),
+			final CorrelationResult result = new CorrelationResult(results.size() + 1, PCPALMMolecules.results.getSource(),
 					boundaryMinx, boundaryMiny, boundaryMaxx, boundaryMaxy, N, correlationInterval, 0, false, gr, true);
 			results.add(result);
 
@@ -666,15 +644,11 @@ public class PCPALMAnalysis implements PlugInFilter
 
 			// Apply a window function to the image to reduce FFT edge artifacts.
 			if (applyWindow)
-			{
 				im = applyWindow(im, imageWindow);
-			}
 
 			if (showHighResolutionImage)
-			{
 				PCPALMMolecules.displayImage(PCPALMMolecules.results.getName() + " " +
 						((binaryImage) ? "Binary" : "Count") + " Image (high res)", im, nmPerPixel);
-			}
 
 			// Create weight image (including windowing)
 			ImageProcessor w = createWeightImage(im, applyWindow);
@@ -682,9 +656,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			// Store the area of the image in um^2
 			weightedAreaInPx = areaInPx = im.getWidth() * im.getHeight();
 			if (applyWindow)
-			{
 				weightedAreaInPx *= w.getStatistics().mean;
-			}
 			area = areaInPx * nmPerPixel * nmPerPixel / 1e6;
 			weightedArea = weightedAreaInPx * nmPerPixel * nmPerPixel / 1e6;
 			noOfMolecules = molecules.size();
@@ -693,10 +665,10 @@ public class PCPALMAnalysis implements PlugInFilter
 			// Original Sengupta paper uses 800nm for the padding size.
 			// Limit to within 80% of the minimum dimension of the image.
 			double maxRadius = correlationDistance / nmPerPixel;
-			int imageSize = FastMath.min(im.getWidth(), im.getHeight());
+			final int imageSize = FastMath.min(im.getWidth(), im.getHeight());
 			if (imageSize < 1.25 * maxRadius)
 				maxRadius = imageSize / 1.25;
-			int pad = (int) Math.round(maxRadius);
+			final int pad = (int) Math.round(maxRadius);
 			log("Analysing up to %.0f nm = %d pixels", maxRadius * nmPerPixel, pad);
 			im = padImage(im, pad);
 			w = padImage(w, pad);
@@ -717,7 +689,7 @@ public class PCPALMAnalysis implements PlugInFilter
 				// Use the FFT library as it is multi-threaded. This may not be in the user's path.
 				gr = computeAutoCorrelationCurveFFT(im, w, pad, nmPerPixel, peakDensity);
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				// Default to the ImageJ built-in FHT
 				gr = computeAutoCorrelationCurveFHT(im, w, pad, nmPerPixel, peakDensity);
@@ -738,12 +710,12 @@ public class PCPALMAnalysis implements PlugInFilter
 		if (noPlots)
 		{
 			// Position the plot underneath the other one
-			Frame f1 = WindowManager.getFrame(topPlotTitle);
+			final Frame f1 = WindowManager.getFrame(topPlotTitle);
 			if (f1 != null)
 			{
-				String bottomPlotTitle = (topPlotTitle.equals(spatialPlotTitle) ? frequencyDomainTitle
+				final String bottomPlotTitle = (topPlotTitle.equals(spatialPlotTitle) ? frequencyDomainTitle
 						: spatialPlotTitle);
-				Frame f2 = WindowManager.getFrame(bottomPlotTitle);
+				final Frame f2 = WindowManager.getFrame(bottomPlotTitle);
 				if (f2 != null)
 					f2.setLocation(f2.getLocation().x, f2.getLocation().y + f1.getHeight());
 			}
@@ -781,12 +753,12 @@ public class PCPALMAnalysis implements PlugInFilter
 	public static Plot2 plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
 			boolean barChart, boolean showErrorBars)
 	{
-		double[] x = new double[gr[1].length - offset];
-		double[] y = new double[x.length];
+		final double[] x = new double[gr[1].length - offset];
+		final double[] y = new double[x.length];
 		System.arraycopy(gr[0], offset, x, 0, x.length);
 		System.arraycopy(gr[1], offset, y, 0, y.length);
 
-		Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
+		final Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
 		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
 		plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
 
@@ -797,7 +769,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			plot.setColor(Color.magenta);
 			for (int i = 0; i < x.length; i++)
 			{
-				double sd = gr[2][i + offset];
+				final double sd = gr[2][i + offset];
 				plot.drawLine(x[i], y[i] - sd, x[i], y[i] + sd);
 			}
 			Utils.display(plotTitle, plot);
@@ -819,10 +791,10 @@ public class PCPALMAnalysis implements PlugInFilter
 	{
 		// int newW = pad * 2 + im.getWidth();
 		// int newH = pad * 2 + im.getHeight();
-		int newW = pad + im.getWidth();
-		int newH = pad + im.getHeight();
+		final int newW = pad + im.getWidth();
+		final int newH = pad + im.getHeight();
 
-		ImageProcessor im2 = im.createProcessor(newW, newH);
+		final ImageProcessor im2 = im.createProcessor(newW, newH);
 		// im2.insert(im, pad, pad);
 		im2.insert(im, 0, 0);
 		return im2;
@@ -840,13 +812,11 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	private static ImageProcessor createWeightImage(ImageProcessor im, boolean applyWindow)
 	{
-		float[] data = new float[im.getWidth() * im.getHeight()];
+		final float[] data = new float[im.getWidth() * im.getHeight()];
 		Arrays.fill(data, 1);
 		ImageProcessor w = new FloatProcessor(im.getWidth(), im.getHeight(), data, null);
 		if (applyWindow)
-		{
 			w = applyWindow(w, imageWindow);
-		}
 		return w;
 	}
 
@@ -871,8 +841,8 @@ public class PCPALMAnalysis implements PlugInFilter
 			double nmPerPixel, double density)
 	{
 		log("Creating Hartley transforms");
-		FHT2 fht2Im = padToFHT2(im);
-		FHT2 fht2W = padToFHT2(w);
+		final FHT2 fht2Im = padToFHT2(im);
+		final FHT2 fht2W = padToFHT2(w);
 		if (fht2Im == null || fht2W == null)
 		{
 			error("Unable to perform Hartley transform");
@@ -880,13 +850,13 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		log("Performing correlation");
-		FloatProcessor corrIm = computeAutoCorrelationFHT(fht2Im);
-		FloatProcessor corrW = computeAutoCorrelationFHT(fht2W);
+		final FloatProcessor corrIm = computeAutoCorrelationFHT(fht2Im);
+		final FloatProcessor corrW = computeAutoCorrelationFHT(fht2W);
 
 		IJ.showProgress(1);
 
 		final int centre = corrIm.getHeight() / 2;
-		Rectangle crop = new Rectangle(centre - maxRadius, centre - maxRadius, maxRadius * 2, maxRadius * 2);
+		final Rectangle crop = new Rectangle(centre - maxRadius, centre - maxRadius, maxRadius * 2, maxRadius * 2);
 		if (showCorrelationImages)
 		{
 			displayCorrelation(corrIm, "Image correlation", crop);
@@ -894,7 +864,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		log("Normalising correlation");
-		FloatProcessor correlation = normaliseCorrelation(corrIm, corrW, density);
+		final FloatProcessor correlation = normaliseCorrelation(corrIm, corrW, density);
 
 		if (showCorrelationImages)
 			displayCorrelation(correlation, "Normalised correlation", crop);
@@ -912,19 +882,17 @@ public class PCPALMAnalysis implements PlugInFilter
 	private double getDensity(ImageProcessor im)
 	{
 		// PCPALMMolecules.densityPeaks is in nm^-2
-		double density = PCPALMMolecules.densityPeaks * 1e6;
+		final double density = PCPALMMolecules.densityPeaks * 1e6;
 
 		// Alternatively use the density in the sample
-		double sampleDensity = noOfMolecules / area;
+		final double sampleDensity = noOfMolecules / area;
 
 		// Actually count the density in the image
 		uniquePoints = 0;
 		for (int i = im.getPixelCount(); i-- > 0;)
-		{
 			// The image may not be binary so use the number
 			uniquePoints += im.getf(i);
-		}
-		double imageDensity = uniquePoints / weightedArea;
+		final double imageDensity = uniquePoints / weightedArea;
 
 		log("  %d molecules plotted as %.1f unique points", noOfMolecules, uniquePoints);
 		log("  Total Density = %g um^-2, Sample density = %g (%.2fx), Image density = %g (%.2fx)", density,
@@ -956,8 +924,8 @@ public class PCPALMAnalysis implements PlugInFilter
 			double nmPerPixel, double density)
 	{
 		log("Performing FFT correlation");
-		FloatProcessor corrIm = computeAutoCorrelationFFT(im);
-		FloatProcessor corrW = computeAutoCorrelationFFT(w);
+		final FloatProcessor corrIm = computeAutoCorrelationFFT(im);
+		final FloatProcessor corrW = computeAutoCorrelationFFT(w);
 		if (corrIm == null || corrW == null)
 		{
 			error("Unable to perform Fourier transform");
@@ -965,7 +933,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		final int centre = corrIm.getHeight() / 2;
-		Rectangle crop = new Rectangle(centre - maxRadius, centre - maxRadius, maxRadius * 2, maxRadius * 2);
+		final Rectangle crop = new Rectangle(centre - maxRadius, centre - maxRadius, maxRadius * 2, maxRadius * 2);
 		if (showCorrelationImages)
 		{
 			displayCorrelation(corrIm, "Image correlation FFT", crop);
@@ -973,7 +941,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		log("  Normalising correlation");
-		FloatProcessor correlation = normaliseCorrelation(corrIm, corrW, density);
+		final FloatProcessor correlation = normaliseCorrelation(corrIm, corrW, density);
 
 		if (showCorrelationImages)
 			displayCorrelation(correlation, "Normalised correlation FFT", crop);
@@ -999,25 +967,21 @@ public class PCPALMAnalysis implements PlugInFilter
 		final int centre = correlation.getHeight() / 2;
 
 		// Count the number of pixels at each distance and sum the correlations
-		Statistics[] gr = new Statistics[maxRadius + 1];
+		final Statistics[] gr = new Statistics[maxRadius + 1];
 
 		// Cache distances
-		int[] d2 = new int[maxRadius + 1];
+		final int[] d2 = new int[maxRadius + 1];
 		for (int dy = 0; dy <= maxRadius; dy++)
 		{
 			gr[dy] = new Statistics();
 			d2[dy] = dy * dy;
 		}
-		int[][] distance = new int[maxRadius + 1][maxRadius + 1];
+		final int[][] distance = new int[maxRadius + 1][maxRadius + 1];
 		for (int dy = 0; dy <= maxRadius; dy++)
-		{
 			for (int dx = dy; dx <= maxRadius; dx++)
-			{
 				distance[dy][dx] = distance[dx][dy] = (int) Math.round(Math.sqrt(d2[dx] + d2[dy]));
-			}
-		}
 
-		float[] data = (float[]) correlation.getPixels();
+		final float[] data = (float[]) correlation.getPixels();
 		for (int dy = -maxRadius; dy <= maxRadius; dy++)
 		{
 			final int absY = Math.abs(dy);
@@ -1032,9 +996,9 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		// Create the final data: a curve showing distance (in nm) verses the average correlation
-		double[] x = new double[maxRadius + 1];
-		double[] y = new double[maxRadius + 1];
-		double[] sd = new double[maxRadius + 1];
+		final double[] x = new double[maxRadius + 1];
+		final double[] y = new double[maxRadius + 1];
+		final double[] sd = new double[maxRadius + 1];
 		for (int i = 0; i < x.length; i++)
 		{
 			x[i] = i * nmPerPixel;
@@ -1056,7 +1020,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	private static void displayCorrelation(FloatProcessor correlation, String title, Rectangle crop)
 	{
 		correlation.setRoi(crop);
-		ImageProcessor ip = correlation.crop();
+		final ImageProcessor ip = correlation.crop();
 		ip.resetMinAndMax();
 		Utils.display(title, ip);
 	}
@@ -1070,7 +1034,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	private static FloatProcessor computeAutoCorrelationFHT(FHT2 fftIm)
 	{
-		FHT2 FHT2 = fftIm.conjugateMultiply(fftIm);
+		final FHT2 FHT2 = fftIm.conjugateMultiply(fftIm);
 		FHT2.inverseTransform();
 		FHT2.swapQuadrants();
 		return FHT2;
@@ -1078,18 +1042,16 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	private static FloatProcessor normaliseCorrelation(FloatProcessor corrIm, FloatProcessor corrW, double density)
 	{
-		float[] data = new float[corrIm.getWidth() * corrIm.getHeight()];
-		float[] dataIm = (float[]) corrIm.getPixels();
-		float[] dataW = (float[]) corrW.getPixels();
+		final float[] data = new float[corrIm.getWidth() * corrIm.getHeight()];
+		final float[] dataIm = (float[]) corrIm.getPixels();
+		final float[] dataW = (float[]) corrW.getPixels();
 
 		// Square the density for normalisation
 		density *= density;
 
 		for (int i = 0; i < data.length; i++)
-		{
 			data[i] = (float) (dataIm[i] / (density * dataW[i]));
-		}
-		FloatProcessor correlation = new FloatProcessor(corrIm.getWidth(), corrIm.getHeight(), data, null);
+		final FloatProcessor correlation = new FloatProcessor(corrIm.getWidth(), corrIm.getHeight(), data, null);
 		return correlation;
 	}
 
@@ -1102,10 +1064,10 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	private static FHT2 padToFHT2(ImageProcessor ip)
 	{
-		FloatProcessor im2 = pad(ip);
+		final FloatProcessor im2 = pad(ip);
 		if (im2 == null)
 			return null;
-		FHT2 FHT2 = new FHT2(im2);
+		final FHT2 FHT2 = new FHT2(im2);
 		FHT2.transform();
 		return FHT2;
 	}
@@ -1121,11 +1083,11 @@ public class PCPALMAnalysis implements PlugInFilter
 	{
 		// Pad to a power of 2
 		final int size = FastMath.max(ip.getWidth(), ip.getHeight());
-		int newSize = nextPowerOfTwo(size);
+		final int newSize = nextPowerOfTwo(size);
 		if (size > newSize)
 			return null; // Error
 
-		FloatProcessor im2 = new FloatProcessor(newSize, newSize);
+		final FloatProcessor im2 = new FloatProcessor(newSize, newSize);
 		// If the binary processor has a min and max this breaks the conversion to float
 		// since values are mapped from 0-255 using the min-max look-up calibration table
 		ip.resetMinAndMax();
@@ -1158,15 +1120,15 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	private static FloatProcessor computeAutoCorrelationFFT(ImageProcessor ip)
 	{
-		FloatProcessor paddedIp = pad(ip);
+		final FloatProcessor paddedIp = pad(ip);
 		if (paddedIp == null)
 			return null;
 		final int size = paddedIp.getWidth();
 
-		boolean doubleFFT = false;
-		float[] pixels = (float[]) paddedIp.getPixels();
+		final boolean doubleFFT = false;
+		final float[] pixels = (float[]) paddedIp.getPixels();
 
-		float[] correlation = new float[size * size];
+		final float[] correlation = new float[size * size];
 
 		// JTransform library
 		// ------------------
@@ -1178,17 +1140,15 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		if (doubleFFT)
 		{
-			DoubleFFT_2D fft = new DoubleFFT_2D(size, size);
-			double[] data = new double[size * size * 2];
+			final DoubleFFT_2D fft = new DoubleFFT_2D(size, size);
+			final double[] data = new double[size * size * 2];
 			for (int i = 0; i < pixels.length; i++)
 				data[i] = pixels[i];
 			fft.realForwardFull(data);
 
 			// Re-use data
 			for (int i = 0, j = 0; i < data.length; i += 2, j++)
-			{
 				data[j] = data[i] * data[i] + data[i + 1] * data[i + 1];
-			}
 			// Zero fill
 			for (int j = correlation.length; j < data.length; j++)
 				data[j] = 0;
@@ -1199,22 +1159,18 @@ public class PCPALMAnalysis implements PlugInFilter
 
 			// Get the real part of the data
 			for (int i = 0, j = 0; i < data.length; i += 2, j++)
-			{
 				correlation[j] = (float) data[i];
-			}
 		}
 		else
 		{
-			FloatFFT_2D fft = new FloatFFT_2D(size, size);
-			float[] data = new float[size * size * 2];
+			final FloatFFT_2D fft = new FloatFFT_2D(size, size);
+			final float[] data = new float[size * size * 2];
 			System.arraycopy(pixels, 0, data, 0, pixels.length);
 			fft.realForwardFull(data);
 
 			// Re-use data
 			for (int i = 0, j = 0; i < data.length; i += 2, j++)
-			{
 				data[j] = data[i] * data[i] + data[i + 1] * data[i + 1];
-			}
 			// Zero fill
 			for (int j = correlation.length; j < data.length; j++)
 				data[j] = 0;
@@ -1225,25 +1181,23 @@ public class PCPALMAnalysis implements PlugInFilter
 
 			// Get the real part of the data
 			for (int i = 0, j = 0; i < data.length; i += 2, j++)
-			{
 				correlation[j] = data[i];
-			}
 		}
 
 		// Swap quadrants
-		FloatProcessor fp = new FloatProcessor(size, size, correlation, null);
+		final FloatProcessor fp = new FloatProcessor(size, size, correlation, null);
 		FHT2.swapQuadrants(fp);
 		return fp;
 	}
 
 	private void addResult(double peakDensity, double[][] gr)
 	{
-		int id = results.size() + 1;
+		final int id = results.size() + 1;
 
 		// Convert density from pixel^-2 to um^-2
 		peakDensity *= 1e6 / (nmPerPixel * nmPerPixel);
 
-		CorrelationResult result = new CorrelationResult(id, PCPALMMolecules.results.getSource(), minx, miny, maxx,
+		final CorrelationResult result = new CorrelationResult(id, PCPALMMolecules.results.getSource(), minx, miny, maxx,
 				maxy, uniquePoints, nmPerPixel, peakDensity, binaryImage, gr, false);
 		results.add(result);
 
@@ -1252,7 +1206,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		final double pcw = (PCPALMMolecules.maxx - PCPALMMolecules.minx) / 100.0;
 		final double pch = (PCPALMMolecules.maxy - PCPALMMolecules.miny) / 100.0;
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(id).append('\t');
 		sb.append(PCPALMMolecules.results.getName()).append('\t');
 		sb.append(IJ.d2s(minx)).append('\t');
@@ -1274,7 +1228,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	{
 		if (resultsTable == null || !resultsTable.isVisible())
 		{
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("ID\t");
 			sb.append("Image Source\t");
 			sb.append("X\t");

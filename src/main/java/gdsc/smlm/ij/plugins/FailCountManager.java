@@ -112,7 +112,7 @@ public class FailCountManager implements PlugIn
 
 		public static FailCountOption forOrdinal(int ordinal)
 		{
-			FailCountOption[] values = FailCountOption.values();
+			final FailCountOption[] values = FailCountOption.values();
 			if (ordinal < 0 || ordinal >= values.length)
 					ordinal = 0;
 			return values[ordinal];
@@ -130,7 +130,7 @@ public class FailCountManager implements PlugIn
 		public final int id;
 
 		/** The results (pass/fail). */
-		private boolean[] results;
+		private final boolean[] results;
 
 		private int maxConsFailCount = -1;
 
@@ -158,18 +158,14 @@ public class FailCountManager implements PlugIn
 				int consFail = 0;
 				int max = 0;
 				for (int i = 0; i < results.length; i++)
-				{
 					if (results[i])
-					{
 						consFail = 0;
-					}
 					else
 					{
 						consFail++;
 						if (max < consFail)
 							max = consFail;
 					}
-				}
 				maxConsFailCount = max;
 			}
 			return maxConsFailCount;
@@ -199,7 +195,7 @@ public class FailCountManager implements PlugIn
 			int pass = 0;
 			int consFail = 0;
 
-			int size = results.length;
+			final int size = results.length;
 			candidate = new float[size];
 			passCount = new float[size];
 			passRate = new float[size];
@@ -225,9 +221,9 @@ public class FailCountManager implements PlugIn
 
 		public float[] getRollingFailCount(int rollingWindow)
 		{
-			BooleanRollingArray c = new BooleanRollingArray(rollingWindow);
-			int size = results.length;
-			float[] failCount = new float[size];
+			final BooleanRollingArray c = new BooleanRollingArray(rollingWindow);
+			final int size = results.length;
+			final float[] failCount = new float[size];
 			for (int i = 0; i < size; i++)
 			{
 				c.add(results[i]);
@@ -238,9 +234,9 @@ public class FailCountManager implements PlugIn
 
 		public float[] getWeightedFailCount(int passWeight, int failWeight)
 		{
-			WeightedFailCounter c = WeightedFailCounter.create(Integer.MAX_VALUE, failWeight, passWeight);
-			int size = results.length;
-			float[] failCount = new float[size];
+			final WeightedFailCounter c = WeightedFailCounter.create(Integer.MAX_VALUE, failWeight, passWeight);
+			final int size = results.length;
+			final float[] failCount = new float[size];
 			for (int i = 0; i < size; i++)
 			{
 				c.addResult(results[i]);
@@ -251,9 +247,9 @@ public class FailCountManager implements PlugIn
 
 		public float[] getResettingFailCount(double resetFraction)
 		{
-			ResettingFailCounter c = ResettingFailCounter.create(Integer.MAX_VALUE, resetFraction);
-			int size = results.length;
-			float[] failCount = new float[size];
+			final ResettingFailCounter c = ResettingFailCounter.create(Integer.MAX_VALUE, resetFraction);
+			final int size = results.length;
+			final float[] failCount = new float[size];
 			for (int i = 0; i < size; i++)
 			{
 				c.addResult(results[i]);
@@ -266,7 +262,7 @@ public class FailCountManager implements PlugIn
 		{
 			initialiseData();
 			targetPassCount = Math.round(passCount[passCount.length - 1] * targetPassFraction);
-			int size = results.length;
+			final int size = results.length;
 			target = 1;
 			while (target <= size)
 			{
@@ -279,7 +275,7 @@ public class FailCountManager implements PlugIn
 
 		public double score(FailCounter counter)
 		{
-			int size = results.length;
+			final int size = results.length;
 			int i = 0;
 			while (i < size)
 			{
@@ -301,7 +297,7 @@ public class FailCountManager implements PlugIn
 			if (n < target)
 			{
 				// Penalise stopping too early.
-				float remaining = (targetPassCount - passCount[n - 1]) / targetPassCount;
+				final float remaining = (targetPassCount - passCount[n - 1]) / targetPassCount;
 				// This has a score from 0 to 1.
 				//return remaining * remaining;
 				return remaining;
@@ -310,7 +306,7 @@ public class FailCountManager implements PlugIn
 			{
 				// Penalise running too long.
 				// Overrun will be above 0.
-				float overrun = ((float) (n - target)) / target;
+				final float overrun = ((float) (n - target)) / target;
 
 				// This has a score from 0 to Infinity.
 				//return overrun * overrun;
@@ -355,14 +351,14 @@ public class FailCountManager implements PlugIn
 
 		settings = SettingsManager.readFailCountManagerSettings(0).toBuilder();
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Option", OPTIONS, settings.getOption());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		settings.setOption(gd.getNextChoiceIndex());
 
-		FailCountOption option = FailCountOption.forOrdinal(settings.getOption());
+		final FailCountOption option = FailCountOption.forOrdinal(settings.getOption());
 		switch (option)
 		{
 			case CREATE_DATA:
@@ -392,7 +388,7 @@ public class FailCountManager implements PlugIn
 	 */
 	private void createData()
 	{
-		ImagePlus imp = WindowManager.getCurrentImage();
+		final ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No image for fitting");
@@ -403,47 +399,45 @@ public class FailCountManager implements PlugIn
 			return;
 
 		// Get the current fit configuration
-		Configuration c = new Configuration();
+		final Configuration c = new Configuration();
 		if (!c.showDialog(false))
 			return;
 
-		FitEngineConfiguration fitConfig = c.getFitEngineConfiguration();
+		final FitEngineConfiguration fitConfig = c.getFitEngineConfiguration();
 		// Update stopping criteria.
 		fitConfig.resetFailCounter();
 		fitConfig.setFailuresLimit(settings.getFailCountLimit());
 
-		ImageSource source = new IJImageSource(imp);
-		PeakFit peakFit = new PeakFit(fitConfig, ResultsSettings.getDefaultInstance());
+		final ImageSource source = new IJImageSource(imp);
+		final PeakFit peakFit = new PeakFit(fitConfig, ResultsSettings.getDefaultInstance());
 		peakFit.setResultsSuffix("(FailCountAnalysis)");
 		if (!peakFit.initialise(source, null, false))
 		{
 			IJ.error(TITLE, "Failed to initialise the fit engine");
 			return;
 		}
-		FitEngine engine = peakFit.createFitEngine();
+		final FitEngine engine = peakFit.createFitEngine();
 
-		Rectangle bounds = new Rectangle(source.getWidth(), source.getHeight());
+		final Rectangle bounds = new Rectangle(source.getWidth(), source.getHeight());
 
 		// Run
-		int totalFrames = Math.min(source.getFrames(), settings.getMaxFrames());
+		final int totalFrames = Math.min(source.getFrames(), settings.getMaxFrames());
 		final int step = Utils.getProgressInterval(totalFrames);
 		IJ.showProgress(0);
 		boolean shutdown = false;
 		int slice = 0;
-		TurboList<ParameterisedFitJob> jobs = new TurboList<>(totalFrames);
+		final TurboList<ParameterisedFitJob> jobs = new TurboList<>(totalFrames);
 		while (!shutdown && slice < totalFrames)
 		{
-			float[] data = source.next();
+			final float[] data = source.next();
 			if (data == null)
 				break;
 
 			if (slice++ % step == 0)
-			{
 				if (Utils.showStatus("Fitting slice: " + slice + " / " + totalFrames))
 					IJ.showProgress(slice, totalFrames);
-			}
 
-			ParameterisedFitJob job = createJob(source.getStartFrameNumber(), data, bounds);
+			final ParameterisedFitJob job = createJob(source.getStartFrameNumber(), data, bounds);
 			jobs.addf(job);
 			engine.run(job);
 
@@ -456,13 +450,13 @@ public class FailCountManager implements PlugIn
 		source.close();
 
 		// Extract the fail count data
-		TurboList<FailCountData> failCountData = new TurboList<>(jobs.size());
+		final TurboList<FailCountData> failCountData = new TurboList<>(jobs.size());
 		for (int i = 0; i < jobs.size(); i++)
 		{
-			ParameterisedFitJob job = jobs.getf(i);
+			final ParameterisedFitJob job = jobs.getf(i);
 			if (job.getStatus() == Status.FINISHED)
 			{
-				FitParameters fitParams = job.getFitParameters();
+				final FitParameters fitParams = job.getFitParameters();
 
 				// Find the last success
 				boolean[] results = fitParams.pass;
@@ -485,7 +479,7 @@ public class FailCountManager implements PlugIn
 
 	private boolean showCreateDataDialog(ImagePlus imp)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage(TextUtils.wrap("Run the fit engine on the current image to generate " +
 				"pass/fail data for sequential candidates in each frame. A second dialog will " +
 				"be shown to check the fit settings.", 80));
@@ -502,7 +496,7 @@ public class FailCountManager implements PlugIn
 		{
 			Parameters.isAboveZero("Max frames", settings.getMaxFrames());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -512,7 +506,7 @@ public class FailCountManager implements PlugIn
 
 	private static ParameterisedFitJob createJob(int startFrame, float[] data, Rectangle bounds)
 	{
-		FitParameters fitParams = new FitParameters();
+		final FitParameters fitParams = new FitParameters();
 		fitParams.fitTask = FitTask.PSF_FITTING;
 		// Signal that the fail count should be recorded
 		fitParams.pass = new boolean[0];
@@ -535,33 +529,33 @@ public class FailCountManager implements PlugIn
 	 */
 	private void loadData()
 	{
-		String filename = Utils.getFilename("Fail_count_data_filename", settings.getFilename());
+		final String filename = Utils.getFilename("Fail_count_data_filename", settings.getFilename());
 		if (filename == null)
 			return;
 		settings.setFilename(filename);
-		TurboList<FailCountData> failCountData = new TurboList<>();
+		final TurboList<FailCountData> failCountData = new TurboList<>();
 
 		try (BufferedReader br = new BufferedReader(new FileReader(filename)))
 		{
-			Pattern pattern = Pattern.compile("[\t, ]+");
+			final Pattern pattern = Pattern.compile("[\t, ]+");
 			// Ignore the first line
 			String line = br.readLine();
-			BooleanArray array = new BooleanArray(100);
+			final BooleanArray array = new BooleanArray(100);
 			int lastId = 0;
 			int lastCandidate = 0;
 			while ((line = br.readLine()) != null)
 			{
-				String[] data = pattern.split(line);
+				final String[] data = pattern.split(line);
 				if (data.length != 3)
 					throw new IOException("Require 3 fields in the data");
 
-				int id = Integer.parseInt(data[0]);
+				final int id = Integer.parseInt(data[0]);
 				if (id < 1)
 					throw new IOException("ID must be strictly positive");
-				int candidate = Integer.parseInt(data[1]);
+				final int candidate = Integer.parseInt(data[1]);
 				if (candidate < 1)
 					throw new IOException("Candidate must be strictly positive");
-				boolean ok = guessStatus(data[2]);
+				final boolean ok = guessStatus(data[2]);
 
 				if (lastId != id)
 				{
@@ -582,10 +576,8 @@ public class FailCountManager implements PlugIn
 					lastCandidate = candidate;
 				}
 				else
-				{
 					// Make impossible to add any more for this ID
 					lastCandidate = -1;
-				}
 			}
 			// Final ID
 			if (array.size() > 0)
@@ -594,11 +586,11 @@ public class FailCountManager implements PlugIn
 			IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(failCountData.size(), "sequence"));
 			FailCountManager.failCountData = failCountData;
 		}
-		catch (NumberFormatException e)
+		catch (final NumberFormatException e)
 		{
 			IJ.error(TITLE, "Failed to load data:\n" + e.getMessage());
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			IJ.error(TITLE, "Failed to load data:\n" + e.getMessage());
 		}
@@ -615,13 +607,13 @@ public class FailCountManager implements PlugIn
 	 */
 	private static boolean guessStatus(String string) throws IOException
 	{
-		int len = string.length();
+		final int len = string.length();
 		if (len < 1)
 			return false;
 
 		if (len == 1)
 		{
-			char c = string.charAt(0);
+			final char c = string.charAt(0);
 			if (c == 'y' || c == '1')
 				return true;
 			if (c == 'n' || c == '0')
@@ -645,13 +637,13 @@ public class FailCountManager implements PlugIn
 	 */
 	private void saveData()
 	{
-		TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+		final TurboList<FailCountData> failCountData = FailCountManager.failCountData;
 		if (failCountData.isEmpty())
 		{
 			IJ.error(TITLE, "No fail count data in memory");
 			return;
 		}
-		String filename = Utils.getFilename("Fail_count_data_filename", settings.getFilename());
+		final String filename = Utils.getFilename("Fail_count_data_filename", settings.getFilename());
 		if (filename == null)
 			return;
 		settings.setFilename(filename);
@@ -662,9 +654,9 @@ public class FailCountManager implements PlugIn
 			bw.newLine();
 			for (int i = 0; i < failCountData.size(); i++)
 			{
-				FailCountData d = failCountData.get(i);
-				String prefix = d.id + ",";
-				boolean[] pass = d.results;
+				final FailCountData d = failCountData.get(i);
+				final String prefix = d.id + ",";
+				final boolean[] pass = d.results;
 				for (int j = 0; j < pass.length; j++)
 				{
 					bw.write(prefix);
@@ -678,7 +670,7 @@ public class FailCountManager implements PlugIn
 				}
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			IJ.error(TITLE, "Failed to save data:\n" + e.getMessage());
 		}
@@ -751,9 +743,7 @@ public class FailCountManager implements PlugIn
 			this.stack = stack;
 			this.failCountData = failCountData;
 			for (int i = 0; i < failCountData.size(); i++)
-			{
 				maxSize = Math.max(maxSize, failCountData.getf(i).results.length);
-			}
 		}
 
 		@Override
@@ -761,10 +751,9 @@ public class FailCountManager implements PlugIn
 		{
 			//while (!Thread.interrupted())
 			while (true)
-			{
 				try
 				{
-					PlotData plotData = stack.pop();
+					final PlotData plotData = stack.pop();
 					if (plotData == null)
 						break;
 					if (plotData.equals(lastPlotData))
@@ -772,24 +761,23 @@ public class FailCountManager implements PlugIn
 					run(plotData);
 					lastPlotData = plotData;
 				}
-				catch (InterruptedException e)
+				catch (final InterruptedException e)
 				{
 					//Thread.currentThread().interrupt();
 					break;
 				}
-			}
 		}
 
 		private void run(PlotData plotData)
 		{
-			boolean isNew = plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
-			int item = plotData.item - 1; // 0-based index
+			final boolean isNew = plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
+			final int item = plotData.item - 1; // 0-based index
 			if (item < 0 || item >= failCountData.size())
 				return;
-			FailCountData data = failCountData.get(item);
+			final FailCountData data = failCountData.get(item);
 
 			data.createData();
-			WindowOrganiser wo = new WindowOrganiser();
+			final WindowOrganiser wo = new WindowOrganiser();
 			if (isNew)
 			{
 				display(wo, "Pass Count", data.candidate, data.passCount, plotData.fixedXAxis);
@@ -799,31 +787,25 @@ public class FailCountManager implements PlugIn
 
 			// Only rebuild if changed
 			if (isNew || plotData.rollingWindow != lastPlotData.rollingWindow)
-			{
 				display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow),
 						plotData.fixedXAxis);
-			}
 			if (isNew || plotData.passWeight != lastPlotData.passWeight ||
 					plotData.failWeight != lastPlotData.failWeight)
-			{
 				display(wo, "Weighted Fail Count", data.candidate,
 						data.getWeightedFailCount(plotData.passWeight, plotData.failWeight), plotData.fixedXAxis);
-			}
 			if (isNew || plotData.resetFraction != lastPlotData.resetFraction)
-			{
 				display(wo, "Resetting Fail Count", data.candidate, data.getResettingFailCount(plotData.resetFraction),
 						plotData.fixedXAxis);
-			}
 
 			wo.tile();
 		}
 
 		private void display(WindowOrganiser wo, String string, float[] x, float[] y, boolean fixedXAxis)
 		{
-			String title = TITLE + " " + string;
-			Plot plot = new Plot(title, "Candidate", string);
-			double maxx = (fixedXAxis) ? maxSize : x[x.length - 1];
-			double maxy = Maths.max(y);
+			final String title = TITLE + " " + string;
+			final Plot plot = new Plot(title, "Candidate", string);
+			final double maxx = (fixedXAxis) ? maxSize : x[x.length - 1];
+			final double maxy = Maths.max(y);
 			plot.setLimits(x[0], maxx, 0, maxy * 1.05);
 			plot.addPoints(x, y, Plot.LINE);
 			plot.addLabel(0, 0, "Max = " + maxy);
@@ -836,7 +818,7 @@ public class FailCountManager implements PlugIn
 	 */
 	private void plotData()
 	{
-		TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+		final TurboList<FailCountData> failCountData = FailCountManager.failCountData;
 		if (failCountData.isEmpty())
 		{
 			IJ.error(TITLE, "No fail count data in memory");
@@ -849,7 +831,7 @@ public class FailCountManager implements PlugIn
 		final ConcurrentMonoStack<PlotData> stack = new ConcurrentMonoStack<>();
 		new Thread(new PlotWorker(stack, failCountData)).start();
 
-		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
 		gd.addCheckbox("Fixed_x_axis", settings.getPlotFixedXAxis());
 		gd.addMessage("Rolling Window Fail Count");
@@ -864,12 +846,12 @@ public class FailCountManager implements PlugIn
 			@Override
 			public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 			{
-				int item = (int) gd.getNextNumber();
-				boolean fixedXAxis = gd.getNextBoolean();
-				int rollingWindow = (int) gd.getNextNumber();
-				int passWeight = (int) gd.getNextNumber();
-				int failWeight = (int) gd.getNextNumber();
-				double resetFraction = gd.getNextNumber();
+				final int item = (int) gd.getNextNumber();
+				final boolean fixedXAxis = gd.getNextBoolean();
+				final int rollingWindow = (int) gd.getNextNumber();
+				final int passWeight = (int) gd.getNextNumber();
+				final int failWeight = (int) gd.getNextNumber();
+				final double resetFraction = gd.getNextNumber();
 				settings.setPlotItem(item);
 				settings.setPlotRollingWindow(rollingWindow);
 				settings.setPlotPassWeight(passWeight);
@@ -891,9 +873,7 @@ public class FailCountManager implements PlugIn
 	{
 		int max = 1;
 		for (int i = 0; i < failCountData.size(); i++)
-		{
 			max = Math.max(max, failCountData.getf(i).getMaxConsecutiveFailCount());
-		}
 		return max;
 	}
 
@@ -901,9 +881,7 @@ public class FailCountManager implements PlugIn
 	{
 		int max = 1;
 		for (int i = 0; i < failCountData.size(); i++)
-		{
 			max = Math.max(max, failCountData.getf(i).getFailCount());
-		}
 		return max;
 	}
 
@@ -912,15 +890,13 @@ public class FailCountManager implements PlugIn
 	{
 		int max = 1;
 		for (int i = 0; i < failCountData.size(); i++)
-		{
 			max = Math.max(max, failCountData.getf(i).getPassCount());
-		}
 		return max;
 	}
 
 	private void analyseData()
 	{
-		TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+		final TurboList<FailCountData> failCountData = FailCountManager.failCountData;
 		if (failCountData.isEmpty())
 		{
 			IJ.error(TITLE, "No fail count data in memory");
@@ -936,11 +912,9 @@ public class FailCountManager implements PlugIn
 
 		// Create a set of fail counters
 		final TurboList<FailCounter> counters = new TurboList<>();
-		TByteArrayList type = new TByteArrayList();
+		final TByteArrayList type = new TByteArrayList();
 		for (int i = 0; i <= maxCons; i++)
-		{
 			counters.add(ConsecutiveFailCounter.create(i));
-		}
 		fill(type, counters, 0);
 
 		// The other counters are user configured.
@@ -955,9 +929,7 @@ public class FailCountManager implements PlugIn
 			// Note that n-1 failures in window n can be scored using the consecutive fail counter.
 			for (int window = Math.max(fail + 2, settings.getRollingCounterMinWindow()); window <= settings
 					.getRollingCounterMaxWindow(); window++)
-			{
 				counters.add(RollingWindowFailCounter.create(fail, window));
-			}
 			switch (checkCounters(counters))
 			{
 				case ANALYSE:
@@ -977,9 +949,7 @@ public class FailCountManager implements PlugIn
 		{
 			for (int w = settings.getWeightedCounterMinPassDecrement(); w <= settings
 					.getWeightedCounterMaxPassDecrement(); w++)
-			{
 				counters.add(WeightedFailCounter.create(fail, 1, w));
-			}
 			switch (checkCounters(counters))
 			{
 				case ANALYSE:
@@ -999,9 +969,7 @@ public class FailCountManager implements PlugIn
 		{
 			for (double f = settings.getResettingCounterMinResetFraction(); f <= settings
 					.getResettingCounterMaxResetFraction(); f += settings.getResettingCounterIncResetFraction())
-			{
 				counters.add(ResettingFailCounter.create(fail, f));
-			}
 			switch (checkCounters(counters))
 			{
 				case ANALYSE:
@@ -1021,9 +989,7 @@ public class FailCountManager implements PlugIn
 		{
 			for (double f = settings.getPassRateCounterMinPassRate(); f <= settings
 					.getPassRateCounterMaxPassRate(); f += settings.getPassRateCounterIncPassRate())
-			{
 				counters.add(PassRateFailCounter.create(count, f));
-			}
 			switch (checkCounters(counters))
 			{
 				case ANALYSE:
@@ -1045,9 +1011,9 @@ public class FailCountManager implements PlugIn
 		final double[] score = new double[counters.size()];
 		final double targetPassFraction = settings.getTargetPassFraction();
 
-		int nThreads = Prefs.getThreads();
-		ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-		TurboList<Future<?>> futures = new TurboList<>(nThreads);
+		final int nThreads = Prefs.getThreads();
+		final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+		final TurboList<Future<?>> futures = new TurboList<>(nThreads);
 
 		final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), failCountData.size(), nThreads > 1);
 		IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
@@ -1070,26 +1036,24 @@ public class FailCountManager implements PlugIn
 					data.initialiseAnalysis(targetPassFraction);
 
 					// Score in blocks and then do a synchronized write to the combined score
-					Thread t = Thread.currentThread();
-					double[] s = new double[8192];
+					final Thread t = Thread.currentThread();
+					final double[] s = new double[8192];
 					int i = 0;
 					while (i < counters.size())
 					{
 						if (t.isInterrupted())
 							break;
-						int block = Math.min(8192, counters.size() - i);
+						final int block = Math.min(8192, counters.size() - i);
 						for (int j = 0; j < block; j++)
 						{
-							FailCounter counter = counters.getf(i + j).newCounter();
+							final FailCounter counter = counters.getf(i + j).newCounter();
 							s[j] = data.score(counter);
 						}
 						// Write to the combined score
 						synchronized (score)
 						{
 							for (int j = 0; j < block; j++)
-							{
 								score[i + j] += s[j];
-							}
 						}
 						i += block;
 					}
@@ -1110,22 +1074,22 @@ public class FailCountManager implements PlugIn
 		IJ.showStatus("Summarising results ...");
 
 		// TODO - check if the top filter is at the bounds of the range
-		int minIndex = SimpleArrayUtils.findMinIndex(score);
+		final int minIndex = SimpleArrayUtils.findMinIndex(score);
 		Utils.log(TITLE + " Analysis : Best counter = %s (Score = %f)", counters.getf(minIndex).getDescription(),
 				score[minIndex]);
 
 		// Show a table of results for the top N for each type
-		int topN = Math.min(settings.getTableTopN(), score.length);
+		final int topN = Math.min(settings.getTableTopN(), score.length);
 		if (topN > 0)
 		{
-			byte[] types = type.toArray();
-			byte maxType = types[types.length - 1];
+			final byte[] types = type.toArray();
+			final byte maxType = types[types.length - 1];
 			createTable();
 			for (byte b = 0; b <= maxType; b++)
 			{
 				int[] indices;
 				// Use a heap to avoid a full sort
-				IntResultHeap heap = new IntResultHeap(topN);
+				final IntResultHeap heap = new IntResultHeap(topN);
 				for (int i = 0; i < score.length; i++)
 					if (types[i] == b)
 						heap.addValue(score[i], i);
@@ -1135,12 +1099,12 @@ public class FailCountManager implements PlugIn
 				// Ensure sorted
 				Sort.sortAscending(indices, score);
 
-				StringBuilder sb = new StringBuilder();
-				BufferedTextWindow tw = new BufferedTextWindow(resultsWindow);
+				final StringBuilder sb = new StringBuilder();
+				final BufferedTextWindow tw = new BufferedTextWindow(resultsWindow);
 				for (int i = 0; i < topN; i++)
 				{
 					sb.setLength(0);
-					int j = indices[i];
+					final int j = indices[i];
 					sb.append(i + 1).append('\t');
 					sb.append(counters.getf(j).getDescription()).append('\t');
 					sb.append(score[j]);
@@ -1157,7 +1121,7 @@ public class FailCountManager implements PlugIn
 
 	private static void fill(TByteArrayList type, TurboList<FailCounter> counters, int b)
 	{
-		int n = counters.size() - type.size();
+		final int n = counters.size() - type.size();
 		Utils.log("Type %d = %d", b, n);
 		type.fill(type.size(), counters.size(), (byte) b);
 	}
@@ -1173,7 +1137,7 @@ public class FailCountManager implements PlugIn
 	{
 		if (counters.size() > maxCounters)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			final GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Too many counters to analyse: " + counters.size());
 			gd.addNumericField("Max_counters", maxCounters, 0);
 			gd.enableYesNoCancel(" Analyse ", " Continue ");
@@ -1182,7 +1146,7 @@ public class FailCountManager implements PlugIn
 				return CounterStatus.RETURN;
 			if (gd.wasOKed())
 				return CounterStatus.ANALYSE;
-			int newMaxCounters = (int) gd.getNextNumber();
+			final int newMaxCounters = (int) gd.getNextNumber();
 			if (newMaxCounters <= maxCounters)
 			{
 				IJ.error(TITLE, "The max counters has not been increased, unable to continue");
@@ -1196,14 +1160,12 @@ public class FailCountManager implements PlugIn
 	private static void createTable()
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
-		{
 			resultsWindow = new TextWindow(TITLE + " Analysis Results", "Rank\tFail Counter\tScore", "", 600, 400);
-		}
 	}
 
 	private boolean showAnalysisDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage(TextUtils.wrap("Analysis a set of fail counters on the current pass/fail data.", 80));
 		gd.addSlider("Target_pass_fraction", 0.1, 1, settings.getTargetPassFraction());
 		gd.addSliderIncludeDefault("Table_top_n", 0, 100, settings.getTableTopN());
@@ -1257,7 +1219,7 @@ public class FailCountManager implements PlugIn
 					settings.getResettingCounterIncResetFraction());
 			Parameters.isAboveZero("Pass rate counter inc pass rate", settings.getPassRateCounterIncPassRate());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;

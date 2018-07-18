@@ -37,25 +37,25 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetValueFunctionWrapsPrecomputedValues()
 	{
-		int n = 3;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		ValueFunction f0 = new FakeGradientFunction(3, n);
-		int size = f0.size();
-		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
-		double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
-		ValueFunction f1 = OffsetValueFunction.wrapValueFunction(f0, b1);
-		ValueFunction f2 = OffsetValueFunction.wrapValueFunction(f1, b2);
-		double[] p = new double[n];
+		final int n = 3;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final ValueFunction f0 = new FakeGradientFunction(3, n);
+		final int size = f0.size();
+		final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
+		final double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
+		final ValueFunction f1 = OffsetValueFunction.wrapValueFunction(f0, b1);
+		final ValueFunction f2 = OffsetValueFunction.wrapValueFunction(f1, b2);
+		final double[] p = new double[n];
 		for (int i = 0; i < n; i++)
 			p[i] = r.nextDouble();
-		double[] v0 = evaluateValueFunction(f0, p);
-		double[] v1 = evaluateValueFunction(f1, p);
-		double[] v2 = evaluateValueFunction(f2, p);
+		final double[] v0 = evaluateValueFunction(f0, p);
+		final double[] v1 = evaluateValueFunction(f1, p);
+		final double[] v2 = evaluateValueFunction(f2, p);
 		for (int i = 0; i < v0.length; i++)
 		{
-			double e = v0[i] + b1[i] + b2[i];
-			double o1 = v1[i] + b2[i];
-			double o2 = v2[i];
+			final double e = v0[i] + b1[i] + b2[i];
+			final double o1 = v1[i] + b2[i];
+			final double o2 = v2[i];
 			Assert.assertEquals("o1", e, o1, 0);
 			Assert.assertEquals("o2", e, o2, 1e-6);
 		}
@@ -81,28 +81,28 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetGradient1FunctionWrapsPrecomputedValues()
 	{
-		int n = 3;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		Gradient1Function f0 = new FakeGradientFunction(3, n);
-		int size = f0.size();
-		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
-		double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
-		Gradient1Function f1 = OffsetGradient1Function.wrapGradient1Function(f0, b1);
-		Gradient1Function f2 = OffsetGradient1Function.wrapGradient1Function(f1, b2);
-		double[] p = new double[n];
+		final int n = 3;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final Gradient1Function f0 = new FakeGradientFunction(3, n);
+		final int size = f0.size();
+		final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
+		final double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
+		final Gradient1Function f1 = OffsetGradient1Function.wrapGradient1Function(f0, b1);
+		final Gradient1Function f2 = OffsetGradient1Function.wrapGradient1Function(f1, b2);
+		final double[] p = new double[n];
 		for (int i = 0; i < n; i++)
 			p[i] = r.nextDouble();
-		double[] d0 = new double[n];
-		double[] d1 = new double[n];
-		double[] d2 = new double[n];
-		double[] v0 = evaluateGradient1Function(f0, p, d0);
-		double[] v1 = evaluateGradient1Function(f1, p, d1);
-		double[] v2 = evaluateGradient1Function(f2, p, d2);
+		final double[] d0 = new double[n];
+		final double[] d1 = new double[n];
+		final double[] d2 = new double[n];
+		final double[] v0 = evaluateGradient1Function(f0, p, d0);
+		final double[] v1 = evaluateGradient1Function(f1, p, d1);
+		final double[] v2 = evaluateGradient1Function(f2, p, d2);
 		for (int i = 0; i < v0.length; i++)
 		{
-			double e = v0[i] + b1[i] + b2[i];
-			double o1 = v1[i] + b2[i];
-			double o2 = v2[i];
+			final double e = v0[i] + b1[i] + b2[i];
+			final double o1 = v1[i] + b2[i];
+			final double o2 = v2[i];
 			Assert.assertEquals("o1", e, o1, 0);
 			Assert.assertEquals("o2", e, o2, 1e-6);
 		}
@@ -132,31 +132,31 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetGradient2FunctionWrapsPrecomputedValues()
 	{
-		int n = 3;
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		Gradient2Function f0 = new FakeGradientFunction(3, n);
-		int size = f0.size();
-		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
-		double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
-		Gradient2Function f1 = OffsetGradient2Function.wrapGradient2Function(f0, b1);
-		Gradient2Function f2 = OffsetGradient2Function.wrapGradient2Function(f1, b2);
-		double[] p = new double[n];
+		final int n = 3;
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final Gradient2Function f0 = new FakeGradientFunction(3, n);
+		final int size = f0.size();
+		final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
+		final double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
+		final Gradient2Function f1 = OffsetGradient2Function.wrapGradient2Function(f0, b1);
+		final Gradient2Function f2 = OffsetGradient2Function.wrapGradient2Function(f1, b2);
+		final double[] p = new double[n];
 		for (int i = 0; i < n; i++)
 			p[i] = r.nextDouble();
-		double[] d0 = new double[n];
-		double[] d1 = new double[n];
-		double[] d2 = new double[n];
-		double[] d20 = new double[n];
-		double[] d21 = new double[n];
-		double[] d22 = new double[n];
-		double[] v0 = evaluateGradient2Function(f0, p, d0, d20);
-		double[] v1 = evaluateGradient2Function(f1, p, d1, d21);
-		double[] v2 = evaluateGradient2Function(f2, p, d2, d22);
+		final double[] d0 = new double[n];
+		final double[] d1 = new double[n];
+		final double[] d2 = new double[n];
+		final double[] d20 = new double[n];
+		final double[] d21 = new double[n];
+		final double[] d22 = new double[n];
+		final double[] v0 = evaluateGradient2Function(f0, p, d0, d20);
+		final double[] v1 = evaluateGradient2Function(f1, p, d1, d21);
+		final double[] v2 = evaluateGradient2Function(f2, p, d2, d22);
 		for (int i = 0; i < v0.length; i++)
 		{
-			double e = v0[i] + b1[i] + b2[i];
-			double o1 = v1[i] + b2[i];
-			double o2 = v2[i];
+			final double e = v0[i] + b1[i] + b2[i];
+			final double o1 = v1[i] + b2[i];
+			final double o2 = v2[i];
 			Assert.assertEquals("o1", e, o1, 0);
 			Assert.assertEquals("o2", e, o2, 1e-6);
 		}
@@ -192,16 +192,16 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetValueFunctionCanWrapPrecomputed()
 	{
-		double[] a = new double[] { 3.2, 5.6 };
-		FakeGradientFunction f = new FakeGradientFunction(10, a.length);
-		double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
-		StandardValueProcedure sp = new StandardValueProcedure();
-		double[] e = sp.getValues(f, a).clone();
+		final double[] a = new double[] { 3.2, 5.6 };
+		final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
+		final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
+		final StandardValueProcedure sp = new StandardValueProcedure();
+		final double[] e = sp.getValues(f, a).clone();
 		ValueFunction vf = f;
 		for (int n = 0; n < 3; n++)
 		{
 			vf = OffsetValueFunction.wrapValueFunction(vf, b);
-			double[] o = sp.getValues(vf, a);
+			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
@@ -212,16 +212,16 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetGradient1FunctionCanWrapPrecomputed()
 	{
-		double[] a = new double[] { 3.2, 5.6 };
-		FakeGradientFunction f = new FakeGradientFunction(10, a.length);
-		double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
-		StandardValueProcedure sp = new StandardValueProcedure();
-		double[] e = sp.getValues(f, a).clone();
+		final double[] a = new double[] { 3.2, 5.6 };
+		final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
+		final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
+		final StandardValueProcedure sp = new StandardValueProcedure();
+		final double[] e = sp.getValues(f, a).clone();
 		Gradient1Function vf = f;
 		for (int n = 0; n < 3; n++)
 		{
 			vf = OffsetGradient1Function.wrapGradient1Function(vf, b);
-			double[] o = sp.getValues(vf, a);
+			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
@@ -232,16 +232,16 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetGradient2FunctionCanWrapPrecomputed()
 	{
-		double[] a = new double[] { 3.2, 5.6 };
-		FakeGradientFunction f = new FakeGradientFunction(10, a.length);
-		double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
-		StandardValueProcedure sp = new StandardValueProcedure();
-		double[] e = sp.getValues(f, a).clone();
+		final double[] a = new double[] { 3.2, 5.6 };
+		final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
+		final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
+		final StandardValueProcedure sp = new StandardValueProcedure();
+		final double[] e = sp.getValues(f, a).clone();
 		Gradient2Function vf = f;
 		for (int n = 0; n < 3; n++)
 		{
 			vf = OffsetGradient2Function.wrapGradient2Function(vf, b);
-			double[] o = sp.getValues(vf, a);
+			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
@@ -252,16 +252,16 @@ public class OffsetFunctionTest
 	@Test
 	public void offsetExtendedGradient2FunctionCanWrapPrecomputed()
 	{
-		double[] a = new double[] { 3.2, 5.6 };
-		FakeGradientFunction f = new FakeGradientFunction(10, a.length);
-		double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
-		StandardValueProcedure sp = new StandardValueProcedure();
-		double[] e = sp.getValues(f, a).clone();
+		final double[] a = new double[] { 3.2, 5.6 };
+		final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
+		final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
+		final StandardValueProcedure sp = new StandardValueProcedure();
+		final double[] e = sp.getValues(f, a).clone();
 		ExtendedGradient2Function vf = f;
 		for (int n = 0; n < 3; n++)
 		{
 			vf = OffsetExtendedGradient2Function.wrapExtendedGradient2Function(vf, b);
-			double[] o = sp.getValues(vf, a);
+			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);

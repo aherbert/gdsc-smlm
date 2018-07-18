@@ -133,25 +133,21 @@ public class FisherInformationMatrix
 	 */
 	public FisherInformationMatrix subset(int[] indices)
 	{
-		int n = m.getNumCols();
+		final int n = m.getNumCols();
 
 		// Check the indices are within the matrix
 		for (int i = 0; i < indices.length; i++)
-		{
 			if (indices[i] < 0 || indices[i] >= n)
 				throw new IllegalArgumentException("Indices must be >=0 and <" + n + ": " + indices[i]);
-		}
 
-		double[] in = m.getData();
-		int m = indices.length;
-		double[] out = new double[m * m];
+		final double[] in = m.getData();
+		final int m = indices.length;
+		final double[] out = new double[m * m];
 		for (int i = 0, ii = 0; i < indices.length; i++)
 		{
-			int index = indices[i] * n;
+			final int index = indices[i] * n;
 			for (int j = 0; j < indices.length; j++, ii++)
-			{
 				out[ii] = in[index + indices[j]];
-			}
 		}
 
 		return new FisherInformationMatrix(out, m);
@@ -173,8 +169,8 @@ public class FisherInformationMatrix
 		inverted = NO;
 
 		// Matrix inversion
-		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(inversionTolerance);
-		double[] crlb = solver.invertDiagonal(m); // Does not modify the matrix
+		final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(inversionTolerance);
+		final double[] crlb = solver.invertDiagonal(m); // Does not modify the matrix
 		if (crlb != null)
 		{
 			// Check all diagonal values are zero or above
@@ -186,10 +182,8 @@ public class FisherInformationMatrix
 						crlb[i] = 0;
 			}
 			else
-			{
 				// A small error is OK
 				for (int i = m.numCols; i-- > 0;)
-				{
 					if (crlb[i] < 0)
 					{
 						if (crlb[i] > -DEFAULT_INVERSION_TOLERANCE)
@@ -199,8 +193,6 @@ public class FisherInformationMatrix
 						}
 						return;
 					}
-				}
-			}
 
 			// Check all diagonal values are zero or above
 
@@ -239,14 +231,10 @@ public class FisherInformationMatrix
 		invert();
 
 		if (inverted == YES)
-		{
 			return crlb;
-		}
 
 		if (allowReciprocal)
-		{
 			return crlbReciprocal();
-		}
 
 		return null;
 	}
@@ -306,9 +294,7 @@ public class FisherInformationMatrix
 		}
 
 		if (allowReciprocal)
-		{
 			return crlbReciprocalSqrt();
-		}
 
 		return null;
 	}
@@ -343,7 +329,7 @@ public class FisherInformationMatrix
 	 */
 	public static double[] crlbReciprocal(double[][] m)
 	{
-		int n = m.length;
+		final int n = m.length;
 		final double[] crlb = new double[n];
 		for (int i = 0; i < n; i++)
 			crlb[i] = reciprocal(m[i][i]);
@@ -363,7 +349,7 @@ public class FisherInformationMatrix
 	 */
 	public static double[] crlbReciprocalSqrt(double[][] m)
 	{
-		int n = m.length;
+		final int n = m.length;
 		final double[] crlb = new double[n];
 		for (int i = 0; i < n; i++)
 			crlb[i] = reciprocalSqrt(m[i][i]);

@@ -89,10 +89,8 @@ public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure
 			final double wgt = dy_da[j];
 
 			for (int k = 0; k <= j; k++)
-			{
 				//System.out.printf("alpha[%d] += dy_da[%d] * dy_da[%d];\n", i, j, k);
 				alpha[i++] += wgt * dy_da[k];
-			}
 			beta[j] += wgt * dy;
 		}
 		//if (true) throw new RuntimeException();

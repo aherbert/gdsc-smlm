@@ -34,13 +34,13 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 {
 	/** The bias. */
 	protected final float bias;
-	
+
 	/** The gain. */
 	protected final float gain;
-	
+
 	/** The variance. */
 	protected final float variance;
-	
+
 	/** The variance divided by the squared gain (variance/gain^2). */
 	protected final float var_g2;
 
@@ -445,7 +445,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 		{
 			return (FixedPixelCameraModel) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

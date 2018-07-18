@@ -51,7 +51,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	private final boolean showEndFrame;
 	private final boolean showId;
 	private final boolean showPrecision;
-	
+
 	/** The peak id column name. */
 	protected String peakIdColumnName = "Frame";
 
@@ -179,7 +179,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	@Override
 	protected String getVersion()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(isBinary() ? "Binary" : "Text");
 		sb.append(".");
 		sb.append(isShowDeviations() ? "D1" : "D0");

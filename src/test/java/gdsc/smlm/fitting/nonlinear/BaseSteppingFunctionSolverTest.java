@@ -98,8 +98,8 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type,
 			ToleranceChecker tc)
 	{
-		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
-		ParameterBounds bounds = new ParameterBounds(f);
+		final ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
+		final ParameterBounds bounds = new ParameterBounds(f);
 		switch (clamp)
 		{
 			case DYNAMIC_CLAMP:
@@ -118,7 +118,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 				break;
 			case MLELVM:
 			case FastLogMLELVM:
-				MLELVMSteppingFunctionSolver mleSolver = new MLELVMSteppingFunctionSolver(f, tc, bounds);
+				final MLELVMSteppingFunctionSolver mleSolver = new MLELVMSteppingFunctionSolver(f, tc, bounds);
 				solver = mleSolver;
 				// MLE requires a positive function value so use a lower bound
 				solver.setBounds(getLB(), null);
@@ -140,7 +140,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 				solver.setBounds(getLB(), null);
 				break;
 			case JFastMLE:
-				ExtendedFastMLESteppingFunctionSolver efmSolver = new ExtendedFastMLESteppingFunctionSolver(f, tc,
+				final ExtendedFastMLESteppingFunctionSolver efmSolver = new ExtendedFastMLESteppingFunctionSolver(f, tc,
 						bounds);
 				efmSolver.enableJacobianSolution(true);
 				// MLE requires a positive function value so use a lower bound
@@ -157,7 +157,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 
 	double[] getLB()
 	{
-		double[] lb = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] lb = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 		return lb;
 	}

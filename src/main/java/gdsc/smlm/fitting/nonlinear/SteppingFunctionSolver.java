@@ -139,7 +139,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		// Initialise for fitting
 		bounds.initialise();
 		tc.reset();
-		String name = this.getClass().getSimpleName();
+		final String name = this.getClass().getSimpleName();
 
 		try
 		{
@@ -160,7 +160,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 				bounds.applyBounds(a, step, newA);
 
 				// Evaluate
-				double newValue = computeFitValue(newA);
+				final double newValue = computeFitValue(newA);
 				log("%s Value [%s] = %s : %s\n", name, tc.getIterations(), newValue, newA);
 
 				// Check stopping criteria
@@ -203,10 +203,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			// We should not reach here unless we missed something
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
-		catch (FunctionSolverException e)
+		catch (final FunctionSolverException e)
 		{
 			// XXX - debugging
-			String msg = e.getMessage();
+			final String msg = e.getMessage();
 			if (msg != null)
 				System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(), e.fitStatus.getName(), msg);
 			else
@@ -337,7 +337,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	protected void computeValues(double[] yFit)
 	{
-		ValueFunction f = (ValueFunction) this.f;
+		final ValueFunction f = (ValueFunction) this.f;
 		f.forEach(new SimpleValueProcedure(yFit));
 	}
 
@@ -364,7 +364,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		gradientIndices = f.gradientIndices();
 		if (yFit != null && yFit.length == ((Gradient1Function) f).size())
 		{
-			GradientFunction tmp = f;
+			final GradientFunction tmp = f;
 			f = new Gradient1FunctionStore((Gradient1Function) f, yFit, null);
 			lastY = prepareFunctionValue(y, a);
 			value = computeFunctionValue(a);

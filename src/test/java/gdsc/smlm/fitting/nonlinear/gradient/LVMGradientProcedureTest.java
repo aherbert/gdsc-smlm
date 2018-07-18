@@ -90,22 +90,22 @@ public class LVMGradientProcedureTest
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
-		DummyGradientFunction[] f = new DummyGradientFunction[7];
+		final DummyGradientFunction[] f = new DummyGradientFunction[7];
 		for (int i = 1; i < f.length; i++)
 			f[i] = new DummyGradientFunction(i);
 
-		LVMGradientProcedureFactory.Type MLE = LVMGradientProcedureFactory.Type.MLE;
-		LVMGradientProcedureFactory.Type WLSQ = LVMGradientProcedureFactory.Type.WLSQ;
-		LVMGradientProcedureFactory.Type LSQ = LVMGradientProcedureFactory.Type.LSQ;
-		LVMGradientProcedureFactory.Type FMLE = LVMGradientProcedureFactory.Type.FastLogMLE;
+		final LVMGradientProcedureFactory.Type MLE = LVMGradientProcedureFactory.Type.MLE;
+		final LVMGradientProcedureFactory.Type WLSQ = LVMGradientProcedureFactory.Type.WLSQ;
+		final LVMGradientProcedureFactory.Type LSQ = LVMGradientProcedureFactory.Type.LSQ;
+		final LVMGradientProcedureFactory.Type FMLE = LVMGradientProcedureFactory.Type.FastLogMLE;
 
 		final FastLog fl = getFastLog();
 
 		//@formatter:off
 
 		// Generic factory
-		double[] y0 = new double[1];
-		double[] y1 = new double[]{ 1 };
+		final double[] y0 = new double[1];
+		final double[] y1 = new double[]{ 1 };
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[6], LSQ, fl).getClass(), LSQLVMGradientProcedure6.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[5], LSQ, fl).getClass(), LSQLVMGradientProcedure5.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[4], LSQ, fl).getClass(), LSQLVMGradientProcedure4.class);
@@ -223,43 +223,43 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, Type type, double error)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		double[][] alpha = new double[nparams][nparams];
-		double[] beta = new double[nparams];
+		final double[][] alpha = new double[nparams][nparams];
+		final double[] beta = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createFakeData(nparams, iter, paramsList, yList);
-		int n = x.length;
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final int[] x = createFakeData(nparams, iter, paramsList, yList);
+		final int n = x.length;
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		boolean mle = type != Type.LSQ;
-		FastLog fastLog = (type == Type.FastLogMLE) ? getFastLog() : null;
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
+		final boolean mle = type != Type.LSQ;
+		final FastLog fastLog = (type == Type.FastLogMLE) ? getFastLog() : null;
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 
-		String name = String.format("[%d] %b", nparams, mle);
+		final String name = String.format("[%d] %b", nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			// Reference implementation
-			double s = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
+			final double s = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 			// Procedure
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
+			final LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p.gradient(paramsList.get(i));
-			double s2 = p.value;
+			final double s2 = p.value;
 			// Value may be different depending on log implementation
 			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, Math.abs(s2) * error);
 			// Exactly the same ...
 			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p.beta, beta, 0);
 
-			double[] al = p.getAlphaLinear();
+			final double[] al = p.getAlphaLinear();
 			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al, new DenseMatrix64F(alpha).data,
 					0);
 
-			double[][] am = p.getAlphaMatrix();
+			final double[][] am = p.getAlphaMatrix();
 			for (int j = 0; j < nparams; j++)
 				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], alpha[j], 0);
 		}
@@ -285,7 +285,7 @@ public class LVMGradientProcedureTest
 			long t1 = time();
 			for (int i = 0; i < 10; i++)
 			{
-				long t2 = t1;
+				final long t2 = t1;
 				t1 = time();
 				if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) // 2% difference
 					break;
@@ -318,20 +318,20 @@ public class LVMGradientProcedureTest
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		int[] x = createFakeData(nparams, iter, paramsList, yList);
+		final int[] x = createFakeData(nparams, iter, paramsList, yList);
 		final int n = x.length;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		final boolean mle = type != Type.LSQ;
 		final FastLog fastLog = (type == Type.FastLogMLE) ? getFastLog() : null;
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
+		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
+			final LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p.gradient(paramsList.get(i));
 		}
 
@@ -339,35 +339,35 @@ public class LVMGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
+					final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 					for (int j = loops; j-- > 0;)
 						calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
+					final LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1,
 				"GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n", time1, nparams, type, time2,
@@ -431,30 +431,30 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, Type type, boolean precomputed)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
 		{
-			double[] b = SimpleArrayUtils.newArray(func.size(), 0.1, 1.3);
+			final double[] b = SimpleArrayUtils.newArray(func.size(), 0.1, 1.3);
 			func = OffsetGradient1Function.wrapGradient1Function(func, b);
 		}
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
-		String name = String.format("[%d] %b", nparams, type);
+		final String name = String.format("[%d] %b", nparams, type);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
+			final LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
+			final LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
@@ -464,14 +464,14 @@ public class LVMGradientProcedureTest
 			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getAlphaLinear(),
 					p2.getAlphaLinear(), 0);
 
-			double[][] am1 = p1.getAlphaMatrix();
-			double[][] am2 = p2.getAlphaMatrix();
+			final double[][] am1 = p1.getAlphaMatrix();
+			final double[][] am2 = p2.getAlphaMatrix();
 			for (int j = 0; j < nparams; j++)
 				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am1[j], am2[j], 0);
 		}
 	}
 
-	private LVMGradientProcedure createProcedure(Type type, double[] y, Gradient1Function func, FastLog fastLog)
+	private static LVMGradientProcedure createProcedure(Type type, double[] y, Gradient1Function func, FastLog fastLog)
 	{
 		switch (type)
 		{
@@ -555,7 +555,7 @@ public class LVMGradientProcedureTest
 		createData(1, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function
-		FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func;
 		if (precomputed)
 		{
@@ -563,19 +563,17 @@ public class LVMGradientProcedureTest
 			func = OffsetGradient1Function.wrapGradient1Function(fgf, b);
 		}
 		else
-		{
 			func = fgf;
-		}
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
+			final LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
 			p1.gradient(paramsList.get(i));
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
+			final LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
@@ -588,35 +586,35 @@ public class LVMGradientProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
+					final LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
 					for (int j = loops; j-- > 0;)
 						p1.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
+					final LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 					for (int j = loops; j-- > 0;)
 						p2.gradient(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n",
 				type, precomputed, time1, nparams, time2, (1.0 * time1) / time2);
@@ -658,7 +656,7 @@ public class LVMGradientProcedureTest
 				gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
 						Type.FastLogMLE, false);
 			}
-			catch (AssertionError e)
+			catch (final AssertionError e)
 			{
 				continue;
 			}
@@ -710,44 +708,42 @@ public class LVMGradientProcedureTest
 	@SuppressWarnings("null")
 	private void gradientProcedureComputesGradient(ErfGaussian2DFunction func, Type type, boolean precomputed)
 	{
-		int nparams = func.getNumberOfGradients();
-		int[] indices = func.gradientIndices();
+		final int nparams = func.getNumberOfGradients();
+		final int[] indices = func.gradientIndices();
 
-		int iter = 100;
+		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList, true);
 
 		// for the gradients
-		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+		final double delta = 1e-4;
+		final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
 		// Must compute most of the time
-		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-		TestCounter failCounter = new TestCounter(failureLimit, nparams);
+		final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		final TestCounter failCounter = new TestCounter(failureLimit, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final int ii = i;
-			double[] y = yList.get(i);
-			double[] a = paramsList.get(i);
-			double[] a2 = a.clone();
+			final double[] y = yList.get(i);
+			final double[] a = paramsList.get(i);
+			final double[] a2 = a.clone();
 
 			LVMGradientProcedure p;
 			if (precomputed)
 			{
 				// Mock fitting part of the function already
 				for (int j = 0; j < b.length; j++)
-				{
 					b[j] = y[j] * 0.5;
-				}
 				p = LVMGradientProcedureFactory.create(y, OffsetGradient1Function.wrapGradient1Function(func, b), type,
 						fastLog);
 			}
@@ -755,26 +751,26 @@ public class LVMGradientProcedureTest
 				p = LVMGradientProcedureFactory.create(y, func, type, fastLog);
 			p.gradient(a);
 			//double s = p.value;
-			double[] beta = p.beta.clone();
+			final double[] beta = p.beta.clone();
 			for (int j = 0; j < nparams; j++)
 			{
 				final int jj = j;
-				int k = indices[j];
+				final int k = indices[j];
 				//double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
-				double d = Precision.representableDelta(a[k], delta);
+				final double d = Precision.representableDelta(a[k], delta);
 				a2[k] = a[k] + d;
 				p.value(a2);
-				double s1 = p.value;
+				final double s1 = p.value;
 				a2[k] = a[k] - d;
 				p.value(a2);
-				double s2 = p.value;
+				final double s2 = p.value;
 				a2[k] = a[k];
 
 				// Apply a factor of -2 to compute the actual gradients:
 				// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
 				beta[j] *= -2;
 
-				double gradient = (s1 - s2) / (2 * d);
+				final double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, Gaussian2DFunction.getName(k),
 				//		a[k], d, beta[j], gradient);
 
@@ -825,11 +821,11 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureSupportsPrecomputed(final Type type, boolean checkGradients)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		// 3 peaks
 		createData(3, iter, paramsList, yList, true);
@@ -838,7 +834,7 @@ public class LVMGradientProcedureTest
 		{
 			final double[] y = yList.get(i);
 			// Add Gaussian read noise so we have negatives
-			double min = Maths.min(y);
+			final double min = Maths.min(y);
 			for (int j = 0; j < y.length; j++)
 				y[j] = y[i] - min + rdg.nextGaussian(0, Noise);
 		}
@@ -850,41 +846,41 @@ public class LVMGradientProcedureTest
 		// i.e. we cannot subtract a precomputed peak from the data, it must be included in the fit
 		// E.G. LSQ - subtraction is OK, MLE/WLSQ - subtraction is not allowed
 
-		Gaussian2DFunction f123 = GaussianFunctionFactory.create2D(3, blockWidth, blockWidth,
+		final Gaussian2DFunction f123 = GaussianFunctionFactory.create2D(3, blockWidth, blockWidth,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-		Gaussian2DFunction f12 = GaussianFunctionFactory.create2D(2, blockWidth, blockWidth,
+		final Gaussian2DFunction f12 = GaussianFunctionFactory.create2D(2, blockWidth, blockWidth,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-		Gaussian2DFunction f3 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth,
+		final Gaussian2DFunction f3 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
-		int nparams = f12.getNumberOfGradients();
-		int[] indices = f12.gradientIndices();
+		final int nparams = f12.getNumberOfGradients();
+		final int[] indices = f12.gradientIndices();
 		final double[] b = new double[f12.size()];
 
-		DoubleEquality eq = new DoubleEquality(1e-8, 1e-16); // for checking strict equivalence
+		final DoubleEquality eq = new DoubleEquality(1e-8, 1e-16); // for checking strict equivalence
 
 		// for the gradients
-		double delta = 1e-4;
-		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16);
+		final double delta = 1e-4;
+		final DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16);
 
-		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
 
 		// Count the number of failures for each gradient
-		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-		TestCounter failCounter = new TestCounter(failureLimit, nparams * 2);
+		final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		final TestCounter failCounter = new TestCounter(failureLimit, nparams * 2);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final int ii = i;
 			final double[] y = yList.get(i);
-			double[] a3peaks = paramsList.get(i);
+			final double[] a3peaks = paramsList.get(i);
 			//System.out.printf("[%d] a=%s\n", i, Arrays.toString(a3peaks));
 
-			double[] a2peaks = Arrays.copyOf(a3peaks, 1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK);
-			double[] a2peaks2 = a2peaks.clone();
+			final double[] a2peaks = Arrays.copyOf(a3peaks, 1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK);
+			final double[] a2peaks2 = a2peaks.clone();
 			for (int j = 1; j < a1peaks.length; j++)
 				a1peaks[j] = a3peaks[j + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
@@ -905,24 +901,22 @@ public class LVMGradientProcedureTest
 						y_b[k] = Math.max(0, y[k] - value);
 					}
 					else
-					{
 						y_b[k] = y[k] - value;
-					}
 					k++;
 				}
 			});
 
-			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type, fastLog);
+			final LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type, fastLog);
 
 			/////////////////////////////////////
 			// These should be the same
 			/////////////////////////////////////
-			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y,
+			final LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y,
 					OffsetGradient1Function.wrapGradient1Function(f12, b), type, fastLog);
 
 			// Check they are the same
 			p123.gradient(a3peaks);
-			double[][] m123 = p123.getAlphaMatrix();
+			final double[][] m123 = p123.getAlphaMatrix();
 
 			p12b3.gradient(a2peaks);
 			double s = p12b3.value;
@@ -939,36 +933,33 @@ public class LVMGradientProcedureTest
 						DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 						Arrays.toString(p123.beta));
 			for (int j = 0; j < alpha.length; j++)
-			{
 				//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
 				if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
 					TestAssert.fail("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
 							DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
 							Arrays.toString(m123[j]));
-			}
 
 			// Check actual gradients are correct
 			if (checkGradients)
-			{
 				for (int j = 0; j < nparams; j++)
 				{
 					final int jj = j;
-					int k = indices[j];
+					final int k = indices[j];
 					//double d = Precision.representableDelta(a2peaks[k], (a2peaks[k] == 0) ? 1e-3 : a2peaks[k] * delta);
-					double d = Precision.representableDelta(a2peaks[k], delta);
+					final double d = Precision.representableDelta(a2peaks[k], delta);
 					a2peaks2[k] = a2peaks[k] + d;
 					p12b3.value(a2peaks2);
-					double s1 = p12b3.value;
+					final double s1 = p12b3.value;
 					a2peaks2[k] = a2peaks[k] - d;
 					p12b3.value(a2peaks2);
-					double s2 = p12b3.value;
+					final double s2 = p12b3.value;
 					a2peaks2[k] = a2peaks[k];
 
 					// Apply a factor of -2 to compute the actual gradients:
 					// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
 					beta[j] *= -2;
 
-					double gradient = (s1 - s2) / (2 * d);
+					final double gradient = (s1 - s2) / (2 * d);
 					//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 					//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 					//		DoubleEquality.relativeError(gradient, beta[j]));
@@ -979,12 +970,11 @@ public class LVMGradientProcedureTest
 								DoubleEquality.relativeError(beta[jj], gradient));
 					});
 				}
-			}
 
 			/////////////////////////////////////
 			// This may be different
 			/////////////////////////////////////
-			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
+			final LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
 
 			// Check these may be different.
 			// Sometimes they are not different.
@@ -1012,14 +1002,12 @@ public class LVMGradientProcedureTest
 				// Note: Test the matrix is different by finding 1 different column
 				int dj = -1;
 				for (int j = 0; j < alpha.length; j++)
-				{
 					//System.out.printf("%s !=\n%s\n\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
 					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
 					{
 						dj = j; // Different column
 						break;
 					}
-				}
 				if (dj == -1)
 				{
 					// Find biggest error for reporting. This helps set the test tolerance.
@@ -1027,7 +1015,7 @@ public class LVMGradientProcedureTest
 					dj = -1;
 					for (int j = 0; j < alpha.length; j++)
 					{
-						double e = DoubleEquality.relativeError(alpha[j], m123[j]);
+						final double e = DoubleEquality.relativeError(alpha[j], m123[j]);
 						if (error <= e)
 						{
 							error = e;
@@ -1048,13 +1036,11 @@ public class LVMGradientProcedureTest
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
 				for (int j = 0; j < alpha.length; j++)
-				{
 					//System.out.printf("%s !=\n%s\n\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
 					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
 						TestSettings.logFailure("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s\n", i, j,
 								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
 								Arrays.toString(m123[j]));
-				}
 			}
 
 			// Check actual gradients are correct
@@ -1064,22 +1050,22 @@ public class LVMGradientProcedureTest
 			for (int j = 0; j < nparams; j++)
 			{
 				final int jj = j;
-				int k = indices[j];
+				final int k = indices[j];
 				//double d = Precision.representableDelta(a2peaks[k], (a2peaks[k] == 0) ? 1e-3 : a2peaks[k] * delta);
-				double d = Precision.representableDelta(a2peaks[k], delta);
+				final double d = Precision.representableDelta(a2peaks[k], delta);
 				a2peaks2[k] = a2peaks[k] + d;
 				p12m3.value(a2peaks2);
-				double s1 = p12m3.value;
+				final double s1 = p12m3.value;
 				a2peaks2[k] = a2peaks[k] - d;
 				p12m3.value(a2peaks2);
-				double s2 = p12m3.value;
+				final double s2 = p12m3.value;
 				a2peaks2[k] = a2peaks[k];
 
 				// Apply a factor of -2 to compute the actual gradients:
 				// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
 				beta[j] *= -2;
 
-				double gradient = (s1 - s2) / (2 * d);
+				final double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 				//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 				//		DoubleEquality.relativeError(gradient, beta[j]));
@@ -1108,10 +1094,10 @@ public class LVMGradientProcedureTest
 	 */
 	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
 	{
-		int n = blockWidth * blockWidth;
+		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
+		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
@@ -1126,7 +1112,7 @@ public class LVMGradientProcedureTest
 		if (npeaks > 1)
 		{
 			// Move the peaks around so they do not overlap
-			double[] shift = SimpleArrayUtils.newArray(npeaks, -2, 4.0 / (npeaks - 1));
+			final double[] shift = SimpleArrayUtils.newArray(npeaks, -2, 4.0 / (npeaks - 1));
 			Random.shuffle(shift, rdg.getRandomGenerator());
 			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				params[j + Gaussian2DFunction.X_POSITION] += shift[i];
@@ -1135,13 +1121,11 @@ public class LVMGradientProcedureTest
 				params[j + Gaussian2DFunction.Y_POSITION] += shift[i];
 		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
-		{
 			// Add random Poisson noise
 			y[i] = rdg.nextPoisson(func.eval(i));
-		}
 
 		if (randomiseParams)
 		{
@@ -1172,13 +1156,13 @@ public class LVMGradientProcedureTest
 	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
 			boolean randomiseParams)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
+			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
+			final double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -1187,13 +1171,13 @@ public class LVMGradientProcedureTest
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
-			double[] y = createFakeData(params);
+			final double[] params = new double[nparams];
+			final double[] y = createFakeData(params);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -1202,38 +1186,24 @@ public class LVMGradientProcedureTest
 
 	private double[] createFakeData(double[] params)
 	{
-		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
+		final int n = blockWidth * blockWidth;
+		final RandomGenerator r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] = r.nextDouble();
-		}
 
 		return y;
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
+		final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
-		{
-			params2List.add(copydouble(paramsList.get(i)));
-		}
+			params2List.add(paramsList.get(i).clone());
 		return params2List;
-	}
-
-	private double[] copydouble(double[] d)
-	{
-		double[] d2 = new double[d.length];
-		for (int i = 0; i < d.length; i++)
-			d2[i] = d[i];
-		return d2;
 	}
 }

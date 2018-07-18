@@ -84,7 +84,7 @@ public class SumFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -177,7 +177,7 @@ public class SumFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -241,11 +241,11 @@ public class SumFilter extends BaseFilter
 	@Deprecated
 	public void rollingBlockSumNxNInternalTransposed(float[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -361,11 +361,11 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSumNxNInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -375,9 +375,7 @@ public class SumFilter extends BaseFilter
 			{
 				float sum = 0;
 				for (int x2 = 0; x2 < blockSize; x2++)
-				{
 					sum += data[index + x2];
-				}
 				newData[(x + n) * maxy + y] = sum;
 			}
 		}
@@ -391,9 +389,7 @@ public class SumFilter extends BaseFilter
 			{
 				float sum = 0;
 				for (int y2 = 0; y2 < blockSize; y2++)
-				{
 					sum += newData[index + y2];
-				}
 				data[x + (y + n) * maxx] = sum;
 			}
 		}
@@ -418,7 +414,7 @@ public class SumFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -427,7 +423,7 @@ public class SumFilter extends BaseFilter
 			int index2 = maxy + y;
 			for (int x = 0; x <= maxx - 3; x++, index++)
 			{
-				float sum = data[index] + data[index + 1] + data[index + 2];
+				final float sum = data[index] + data[index + 1] + data[index + 2];
 				newData[index2] = sum;
 				index2 += maxy;
 			}
@@ -441,7 +437,7 @@ public class SumFilter extends BaseFilter
 			int index2 = x + maxx;
 			for (int y = 0; y <= maxy - 3; y++, index++)
 			{
-				float sum = newData[index] + newData[index + 1] + newData[index + 2];
+				final float sum = newData[index] + newData[index + 1] + newData[index + 2];
 				data[index2] = sum;
 				index2 += maxx;
 			}
@@ -494,9 +490,9 @@ public class SumFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
-		int[] offset = new int[blockSize * blockSize - 1];
+		final int[] offset = new int[blockSize * blockSize - 1];
 		for (int y = -n, d = 0; y <= n; y++)
 			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
@@ -514,10 +510,8 @@ public class SumFilter extends BaseFilter
 
 				// Sweep neighbourhood -
 				// No check for boundaries as this should be an internal sweep.
-				for (int offset_d : offset)
-				{
+				for (final int offset_d : offset)
 					sum += data[index + offset_d];
-				}
 
 				newData[index] = sum;
 			}
@@ -528,9 +522,7 @@ public class SumFilter extends BaseFilter
 		{
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -550,7 +542,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void blockSum3x3Internal(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		for (int y = 1; y < maxy - 1; y++)
 		{
@@ -559,7 +551,7 @@ public class SumFilter extends BaseFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+				final float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 						data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 				newData[index1] = sum;
 				index0++;
@@ -573,18 +565,14 @@ public class SumFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
 	private float[] floatBuffer(int size)
 	{
 		if (floatDataBuffer == null || floatDataBuffer.length < size)
-		{
 			floatDataBuffer = new float[size];
-		}
 		return floatDataBuffer;
 	}
 
@@ -626,7 +614,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void rollingBlockSumNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -643,9 +631,7 @@ public class SumFilter extends BaseFilter
 			float sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -674,9 +660,7 @@ public class SumFilter extends BaseFilter
 			float sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -705,7 +689,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void rollingBlockSum3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -824,9 +808,9 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSumNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -846,9 +830,7 @@ public class SumFilter extends BaseFilter
 				float sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -875,9 +857,7 @@ public class SumFilter extends BaseFilter
 				float sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -914,9 +894,9 @@ public class SumFilter extends BaseFilter
 			return;
 		}
 
-		int blockSize = 2 * n1;
+		final int blockSize = 2 * n1;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float w1 = w - n;
 
@@ -942,9 +922,7 @@ public class SumFilter extends BaseFilter
 				// Sum strips
 				float sum = row[x] * w1;
 				for (int j = 1; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 				sum += row[x + blockSize] * w1;
 
 				// Store result in transpose
@@ -971,9 +949,7 @@ public class SumFilter extends BaseFilter
 				// Sum strips
 				float sum = row[x] * w1;
 				for (int j = 1; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 				sum += row[x + blockSize] * w1;
 
 				// Store result in transpose
@@ -997,7 +973,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSum3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -1014,7 +990,7 @@ public class SumFilter extends BaseFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2];
+				final float sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -1038,7 +1014,7 @@ public class SumFilter extends BaseFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2];
+				final float sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -1065,7 +1041,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSum3x3(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// NOTE:
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -1119,9 +1095,7 @@ public class SumFilter extends BaseFilter
 	private float[] floatRowBuffer(int size)
 	{
 		if (floatRowBuffer == null || floatRowBuffer.length < size)
-		{
 			floatRowBuffer = new float[size];
-		}
 		return floatRowBuffer;
 	}
 
@@ -1138,9 +1112,7 @@ public class SumFilter extends BaseFilter
 
 		// Fill in data
 		for (int x = 0, i = n; x < width; x++)
-		{
 			row[i++] = inData[index++];
-		}
 	}
 
 	private static void extractRow1(float[] inData, int y, int width, float[] row)
@@ -1153,9 +1125,7 @@ public class SumFilter extends BaseFilter
 
 		// Fill in data
 		for (int x = 0, i = 1; x < width; x++)
-		{
 			row[i++] = inData[index++];
-		}
 	}
 
 	/**
@@ -1196,17 +1166,17 @@ public class SumFilter extends BaseFilter
 	 */
 	public void blockSumNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		int xwidth = FastMath.min(n, maxx - 1);
-		int ywidth = FastMath.min(n, maxy - 1);
-		int xlimit = maxx - xwidth;
-		int ylimit = maxy - ywidth;
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
+		final int xlimit = maxx - xwidth;
+		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		int d = 0;
 		for (int y = -ywidth; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
@@ -1220,24 +1190,18 @@ public class SumFilter extends BaseFilter
 
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
 				float sum = data[index];
 
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
-				{
 					for (d = offset.length; d-- > 0;)
-					{
 						sum += data[index + offset[d]];
-					}
-				}
 				else
-				{
 					for (d = offset.length; d-- > 0;)
 					{
 						// Get the pixel with boundary checking
@@ -1253,10 +1217,8 @@ public class SumFilter extends BaseFilter
 							yy = maxy - 1;
 						sum += data[xx + yy * maxx];
 					}
-				}
 				newData[index] = sum;
 			}
-		}
 
 		// Copy back
 		System.arraycopy(newData, 0, data, 0, data.length);
@@ -1277,17 +1239,17 @@ public class SumFilter extends BaseFilter
 	public void blockSum3x3(float[] data, final int maxx, final int maxy)
 	{
 		final int n = 1;
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		int xwidth = FastMath.min(n, maxx - 1);
-		int ywidth = FastMath.min(n, maxy - 1);
-		int xlimit = maxx - xwidth;
-		int ylimit = maxy - ywidth;
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
+		final int xlimit = maxx - xwidth;
+		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		int d = 0;
 		for (int y = -ywidth; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
@@ -1307,12 +1269,12 @@ public class SumFilter extends BaseFilter
 			for (int x = 0; x < maxx; x++)
 			{
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+					final float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 							data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 					newData[index1] = sum;
 				}
@@ -1404,7 +1366,7 @@ public class SumFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -1497,7 +1459,7 @@ public class SumFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -1561,11 +1523,11 @@ public class SumFilter extends BaseFilter
 	@Deprecated
 	public void rollingBlockSumNxNInternalTransposed(int[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -1681,11 +1643,11 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSumNxNInternal(int[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -1695,9 +1657,7 @@ public class SumFilter extends BaseFilter
 			{
 				int sum = 0;
 				for (int x2 = 0; x2 < blockSize; x2++)
-				{
 					sum += data[index + x2];
-				}
 				newData[(x + n) * maxy + y] = sum;
 			}
 		}
@@ -1711,9 +1671,7 @@ public class SumFilter extends BaseFilter
 			{
 				int sum = 0;
 				for (int y2 = 0; y2 < blockSize; y2++)
-				{
 					sum += newData[index + y2];
-				}
 				data[x + (y + n) * maxx] = sum;
 			}
 		}
@@ -1738,7 +1696,7 @@ public class SumFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -1747,7 +1705,7 @@ public class SumFilter extends BaseFilter
 			int index2 = maxy + y;
 			for (int x = 0; x <= maxx - 3; x++, index++)
 			{
-				int sum = data[index] + data[index + 1] + data[index + 2];
+				final int sum = data[index] + data[index + 1] + data[index + 2];
 				newData[index2] = sum;
 				index2 += maxy;
 			}
@@ -1761,7 +1719,7 @@ public class SumFilter extends BaseFilter
 			int index2 = x + maxx;
 			for (int y = 0; y <= maxy - 3; y++, index++)
 			{
-				int sum = newData[index] + newData[index + 1] + newData[index + 2];
+				final int sum = newData[index] + newData[index + 1] + newData[index + 2];
 				data[index2] = sum;
 				index2 += maxx;
 			}
@@ -1814,9 +1772,9 @@ public class SumFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
-		int[] offset = new int[blockSize * blockSize - 1];
+		final int[] offset = new int[blockSize * blockSize - 1];
 		for (int y = -n, d = 0; y <= n; y++)
 			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
@@ -1834,10 +1792,8 @@ public class SumFilter extends BaseFilter
 
 				// Sweep neighbourhood -
 				// No check for boundaries as this should be an internal sweep.
-				for (int offset_d : offset)
-				{
+				for (final int offset_d : offset)
 					sum += data[index + offset_d];
-				}
 
 				newData[index] = sum;
 			}
@@ -1848,9 +1804,7 @@ public class SumFilter extends BaseFilter
 		{
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -1870,7 +1824,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void blockSum3x3Internal(int[] data, final int maxx, final int maxy)
 	{
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		for (int y = 1; y < maxy - 1; y++)
 		{
@@ -1879,7 +1833,7 @@ public class SumFilter extends BaseFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				int sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+				final int sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 						data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 				newData[index1] = sum;
 				index0++;
@@ -1893,18 +1847,14 @@ public class SumFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
 	private int[] intBuffer(int size)
 	{
 		if (intDataBuffer == null || intDataBuffer.length < size)
-		{
 			intDataBuffer = new int[size];
-		}
 		return intDataBuffer;
 	}
 
@@ -1946,7 +1896,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void rollingBlockSumNxN(int[] data, final int maxx, final int maxy, final int n)
 	{
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -1963,9 +1913,7 @@ public class SumFilter extends BaseFilter
 			int sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -1994,9 +1942,7 @@ public class SumFilter extends BaseFilter
 			int sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -2025,7 +1971,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void rollingBlockSum3x3(int[] data, final int maxx, final int maxy)
 	{
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -2120,9 +2066,9 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSumNxN(int[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -2142,9 +2088,7 @@ public class SumFilter extends BaseFilter
 				int sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -2171,9 +2115,7 @@ public class SumFilter extends BaseFilter
 				int sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -2196,7 +2138,7 @@ public class SumFilter extends BaseFilter
 	 */
 	public void stripedBlockSum3x3(int[] data, final int maxx, final int maxy)
 	{
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// X-direction
 		int width = maxx;
@@ -2213,7 +2155,7 @@ public class SumFilter extends BaseFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				int sum = row[x] + row[x + 1] + row[x + 2];
+				final int sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -2237,7 +2179,7 @@ public class SumFilter extends BaseFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				int sum = row[x] + row[x + 1] + row[x + 2];
+				final int sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -2249,9 +2191,7 @@ public class SumFilter extends BaseFilter
 	private int[] intRowBuffer(int size)
 	{
 		if (intRowBuffer == null || intRowBuffer.length < size)
-		{
 			intRowBuffer = new int[size];
-		}
 		return intRowBuffer;
 	}
 
@@ -2268,9 +2208,7 @@ public class SumFilter extends BaseFilter
 
 		// Fill in data
 		for (int x = 0, i = n; x < width; x++)
-		{
 			row[i++] = inData[index++];
-		}
 	}
 
 	private static void extractRow1(int[] inData, int y, int width, int[] row)
@@ -2283,9 +2221,7 @@ public class SumFilter extends BaseFilter
 
 		// Fill in data
 		for (int x = 0, i = 1; x < width; x++)
-		{
 			row[i++] = inData[index++];
-		}
 	}
 
 	/**
@@ -2326,17 +2262,17 @@ public class SumFilter extends BaseFilter
 	 */
 	public void blockSumNxN(int[] data, final int maxx, final int maxy, final int n)
 	{
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		int xwidth = FastMath.min(n, maxx - 1);
-		int ywidth = FastMath.min(n, maxy - 1);
-		int xlimit = maxx - xwidth;
-		int ylimit = maxy - ywidth;
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
+		final int xlimit = maxx - xwidth;
+		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		int d = 0;
 		for (int y = -ywidth; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
@@ -2350,24 +2286,18 @@ public class SumFilter extends BaseFilter
 
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
 				int sum = data[index];
 
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
-				{
 					for (d = offset.length; d-- > 0;)
-					{
 						sum += data[index + offset[d]];
-					}
-				}
 				else
-				{
 					for (d = offset.length; d-- > 0;)
 					{
 						// Get the pixel with boundary checking
@@ -2383,10 +2313,8 @@ public class SumFilter extends BaseFilter
 							yy = maxy - 1;
 						sum += data[xx + yy * maxx];
 					}
-				}
 				newData[index] = sum;
 			}
-		}
 
 		// Copy back
 		System.arraycopy(newData, 0, data, 0, data.length);
@@ -2407,17 +2335,17 @@ public class SumFilter extends BaseFilter
 	public void blockSum3x3(int[] data, final int maxx, final int maxy)
 	{
 		final int n = 1;
-		int[] newData = intBuffer(data.length);
+		final int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		int xwidth = FastMath.min(n, maxx - 1);
-		int ywidth = FastMath.min(n, maxy - 1);
-		int xlimit = maxx - xwidth;
-		int ylimit = maxy - ywidth;
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
+		final int xlimit = maxx - xwidth;
+		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		int d = 0;
 		for (int y = -ywidth; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
@@ -2437,12 +2365,12 @@ public class SumFilter extends BaseFilter
 			for (int x = 0; x < maxx; x++)
 			{
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					int sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+					final int sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 							data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 					newData[index1] = sum;
 				}
@@ -2485,7 +2413,7 @@ public class SumFilter extends BaseFilter
 	@Override
 	public SumFilter clone()
 	{
-		SumFilter o = (SumFilter) super.clone();
+		final SumFilter o = (SumFilter) super.clone();
 		o.floatDataBuffer = null;
 		o.floatRowBuffer = null;
 		return o;

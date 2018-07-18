@@ -81,16 +81,11 @@ public class AverageDataProcessor extends DataProcessor
 
 		// Only create the area filter if we need it
 		if (iSmooth > 0)
-		{
 			blockMeanFilter = new BlockMeanFilter();
-		}
+		else if (smooth > areaFilterLimit)
+			areaAverageFilter = new AreaAverageFilter();
 		else
-		{
-			if (smooth > areaFilterLimit)
-				areaAverageFilter = new AreaAverageFilter();
-			else
-				blockMeanFilter = new BlockMeanFilter();
-		}
+			blockMeanFilter = new BlockMeanFilter();
 	}
 
 	/**
@@ -127,7 +122,7 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
-		BaseWeightedFilter f = getFilter();
+		final BaseWeightedFilter f = getFilter();
 		if (f != null)
 			f.setWeights(weights, width, height);
 	}
@@ -140,13 +135,13 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public boolean hasWeights()
 	{
-		BaseWeightedFilter f = getFilter();
+		final BaseWeightedFilter f = getFilter();
 		return (f != null) ? f.hasWeights() : false;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
@@ -166,44 +161,21 @@ public class AverageDataProcessor extends DataProcessor
 			{
 				// Integer smoothing is faster using a rolling block algorithm
 				if (smooth <= getBorder())
-				{
 					blockMeanFilter.rollingBlockFilterInternal(smoothData, width, height, iSmooth);
-				}
 				else
-				{
 					blockMeanFilter.rollingBlockFilter(smoothData, width, height, iSmooth);
-				}
 			}
-			else
+			else if (areaAverageFilter != null)
 			{
-				// Float smoothing must use the striped block algorithm or the area average filter.
-				// The area average filter is faster when above a 7x7 block size.
-				// At this point the difference between the filters is small (the area average filter
-				// is biased to the corners) so switch to the faster filter.
-
-				if (areaAverageFilter != null)
-				{
-					if (smooth <= getBorder())
-					{
-						areaAverageFilter.areaAverageUsingSumsInternal(smoothData, width, height, smooth);
-					}
-					else
-					{
-						areaAverageFilter.areaAverageUsingSums(smoothData, width, height, smooth);
-					}
-				}
+				if (smooth <= getBorder())
+					areaAverageFilter.areaAverageUsingSumsInternal(smoothData, width, height, smooth);
 				else
-				{
-					if (smooth <= getBorder())
-					{
-						blockMeanFilter.stripedBlockFilterInternal(smoothData, width, height, smooth);
-					}
-					else
-					{
-						blockMeanFilter.stripedBlockFilter(smoothData, width, height, smooth);
-					}
-				}
+					areaAverageFilter.areaAverageUsingSums(smoothData, width, height, smooth);
 			}
+			else if (smooth <= getBorder())
+				blockMeanFilter.stripedBlockFilterInternal(smoothData, width, height, smooth);
+			else
+				blockMeanFilter.stripedBlockFilter(smoothData, width, height, smooth);
 		}
 		return smoothData;
 	}
@@ -211,23 +183,12 @@ public class AverageDataProcessor extends DataProcessor
 	private BaseWeightedFilter getFilter()
 	{
 		if (smooth > 0)
-		{
 			if (iSmooth > 1)
-			{
 				return blockMeanFilter;
-			}
+			else if (areaAverageFilter != null)
+				return areaAverageFilter;
 			else
-			{
-				if (areaAverageFilter != null)
-				{
-					return areaAverageFilter;
-				}
-				else
-				{
-					return blockMeanFilter;
-				}
-			}
-		}
+				return blockMeanFilter;
 		return null;
 	}
 
@@ -249,7 +210,7 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public AverageDataProcessor clone()
 	{
-		AverageDataProcessor f = (AverageDataProcessor) super.clone();
+		final AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		if (blockMeanFilter != null)
 			f.blockMeanFilter = blockMeanFilter.clone();
@@ -277,7 +238,7 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("smooth = " + Utils.rounded(smooth));
 		return list;
 	}

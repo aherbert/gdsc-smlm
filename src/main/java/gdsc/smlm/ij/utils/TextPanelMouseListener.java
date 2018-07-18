@@ -80,9 +80,7 @@ public abstract class TextPanelMouseListener implements MouseListener
 	{
 		// Show the result that was double clicked in the result table
 		if (e.getClickCount() > 1)
-		{
 			selected(textPanel.getSelectionStart());
-		}
 	}
 
 	/**
@@ -101,8 +99,8 @@ public abstract class TextPanelMouseListener implements MouseListener
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
-		int index = textPanel.getSelectionStart();
-		int index2 = textPanel.getSelectionEnd();
+		final int index = textPanel.getSelectionStart();
+		final int index2 = textPanel.getSelectionEnd();
 		if (index == index2)
 			return;
 		selected(textPanel.getSelectionStart(), textPanel.getSelectionEnd());

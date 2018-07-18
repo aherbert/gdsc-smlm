@@ -191,7 +191,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		// From here on we assume the current geometry will not be null
 		// as this only happens when the original size is zero. Size has
 		// been checked at this point to be the smaller of new and old.
-		GeometryArray ga = (GeometryArray) getGeometry();
+		final GeometryArray ga = (GeometryArray) getGeometry();
 
 		points = reorder(points, indices);
 		// Sizes could be null or a single size
@@ -201,18 +201,18 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		// Reorder all things in the geometry: coordinates and colour
 		// The normals can be copied as they are unchanged.
 		// The mesh should contain the same coordinates as the geometry array.
-		int objectSize = objectVertices.length;
-		Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
-		float[] oldColors = new float[oldCoords.length * 4];
+		final int objectSize = objectVertices.length;
+		final Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
+		final float[] oldColors = new float[oldCoords.length * 4];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size * objectSize];
 		final float[] colors = new float[coords.length * 4];
 		for (int i = 0; i < size; i++)
 		{
-			int j = indices[i];
+			final int j = indices[i];
 
-			int ii = i * objectSize;
-			int jj = j * objectSize;
+			final int ii = i * objectSize;
+			final int jj = j * objectSize;
 			System.arraycopy(oldCoords, jj, coords, ii, objectSize);
 			System.arraycopy(oldColors, jj * 4, colors, ii * 4, objectSize * 4);
 		}
@@ -223,7 +223,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 			@Override
 			public void updateData(Geometry geometry)
 			{
-				GeometryArray ga = (GeometryArray) geometry;
+				final GeometryArray ga = (GeometryArray) geometry;
 				// We re-use the geometry and just truncate the vertex count
 				ga.setCoordinates(0, coords);
 				ga.setColors(0, colors);
@@ -245,11 +245,11 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		if (color == null)
 			color = DEFAULT_COLOR;
 		this.color = color;
-		int size = size();
+		final int size = size();
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
 		ga.getColors(0, colors);
@@ -274,19 +274,18 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
 		ga.getColors(0, colors);
 		int i = 0;
-		for (Color3f c : color)
-		{
+		for (final Color3f c : color)
 			for (int j = objectSize; j-- > 0;)
 			{
 				colors[i++] = c.x;
@@ -294,7 +293,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 				colors[i++] = c.z;
 				i++; // Skip over alpha
 			}
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}
@@ -308,21 +306,19 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final Color4f[] colors = new Color4f[N];
 		int i = 0;
-		for (Color4f c : color)
-		{
+		for (final Color4f c : color)
 			for (int j = objectSize; j-- > 0;)
 				colors[i++] = c;
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}
@@ -335,25 +331,23 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	@Override
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
-		int size = size();
+		final int size = size();
 		if (alpha.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
 		ga.getColors(0, colors);
 		int i = 3;
-		for (float f : alpha)
-		{
+		for (final float f : alpha)
 			for (int j = objectSize; j-- > 0;)
 			{
 				colors[i] = f;
 				i += 4;
 			}
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}
@@ -370,19 +364,17 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
 		ga.getColors(0, colors);
 		int i = 3;
 		while (size-- > 0)
-		{
 			for (int j = objectSize; j-- > 0;)
 			{
 				colors[i] = alpha;
 				i += 4;
 			}
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}
@@ -395,20 +387,18 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	@Override
 	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
-		int size = size();
+		final int size = size();
 		if (alpha.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
 		ga.getColors(0, colors);
 		for (int i = 0; i < size; i++)
-		{
 			// Get only alpha
 			alpha[i] = colors[i * 4 * objectSize + 3];
-		}
 	}
 }

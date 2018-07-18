@@ -39,15 +39,15 @@ public class PoissonGammaGaussianFisherInformationTest
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		double[] M = { 20, 500 };
+		final double[] M = { 20, 500 };
 
-		for (double m : M)
+		for (final double m : M)
 			canFindMaximumAndUpperLimit(m);
 	}
 
-	private void canFindMaximumAndUpperLimit(double m)
+	private static void canFindMaximumAndUpperLimit(double m)
 	{
-		PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, 1);
+		final PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, 1);
 		f.setMeanThreshold(Double.POSITIVE_INFINITY);
 
 		// Due to a limited convolution (for an infinite range)
@@ -55,17 +55,15 @@ public class PoissonGammaGaussianFisherInformationTest
 		// half the Poisson Fisher information should be used instead.
 		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
 		for (int exp = -12; exp <= 4; exp++)
-		{
 			canFindMaximumAndUpperLimit(f, Math.pow(10, exp * 0.5));
-		}
 		for (int i = 0; i <= 10; i++)
 			canFindMaximumAndUpperLimit(f, 0.001 + i * 0.1);
 	}
 
-	private void canFindMaximumAndUpperLimit(PoissonGammaGaussianFisherInformation f, double u)
+	private static void canFindMaximumAndUpperLimit(PoissonGammaGaussianFisherInformation f, double u)
 	{
-		double[] max = f.findMaximum(u, 1e-6);
-		double[] upper = f.findUpperLimit(u, max, 1e-6);
+		final double[] max = f.findMaximum(u, 1e-6);
+		final double[] upper = f.findUpperLimit(u, max, 1e-6);
 		System.out.printf("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)\n", f.m, u, max[0], max[1], max[2], upper[0],
 				upper[1], upper[2]);
 	}
@@ -85,20 +83,20 @@ public class PoissonGammaGaussianFisherInformationTest
 		//if (true)
 		//	return;
 
-		double[] M = { 20, 500 };
-		double[] S = { 3, 13 };
+		final double[] M = { 20, 500 };
+		final double[] S = { 3, 13 };
 
-		for (double m : M)
-			for (double s : S)
+		for (final double m : M)
+			for (final double s : S)
 				canComputeFisherInformation(m, s);
 	}
 
-	private void canComputeFisherInformation(double m, double s)
+	private static void canComputeFisherInformation(double m, double s)
 	{
 		canComputeFisherInformation(new PoissonGammaGaussianFisherInformation(m, s));
 	}
 
-	private void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f)
+	private static void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f)
 	{
 		f.setMeanThreshold(Double.POSITIVE_INFINITY);
 
@@ -112,16 +110,14 @@ public class PoissonGammaGaussianFisherInformationTest
 		// exp ==   0 => p = 1
 		// exp ==   4 => p = 100
 		for (int exp = -8; exp <= 4; exp++)
-		{
 			//System.out.println(Math.pow(10, exp * 0.5));
 			canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
-		}
 	}
 
-	private void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f, double u)
+	private static void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f, double u)
 	{
-		double I = f.getPoissonGammaGaussianI(u);
-		double upper = PoissonFisherInformation.getPoissonI(u);
+		final double I = f.getPoissonGammaGaussianI(u);
+		final double upper = PoissonFisherInformation.getPoissonI(u);
 		//System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, I / upper);
 		Assert.assertTrue("Not less than Poisson information", I <= upper);
 		// This is true at higher mean
@@ -137,34 +133,34 @@ public class PoissonGammaGaussianFisherInformationTest
 
 		// Compute the alpha using a range of gain and standard deviation
 
-		int minm = 100;
-		int maxm = 200;
+		final int minm = 100;
+		final int maxm = 200;
 
 		// When Poisson mean is high s does not matter as the Dirac is insignificant
 		// and the convolution is mute. This may not be true when m is low but at higher
 		// m the function is smooth and convolution has little effect.
-		int mins = 5;
-		int maxs = 5;
+		final int mins = 5;
+		final int maxs = 5;
 
 		// The relative Fisher information plateaus at low photons.
 		// Output where this is.
-		double p = 1e-100;
-		double p2 = 1e-200; //Double.MIN_NORMAL; //Double.longBitsToDouble(0x4000000000001L);
+		final double p = 1e-100;
+		final double p2 = 1e-200; //Double.MIN_NORMAL; //Double.longBitsToDouble(0x4000000000001L);
 
-		double upper = PoissonFisherInformation.getPoissonI(p);
-		double upper2 = PoissonFisherInformation.getPoissonI(p2);
+		final double upper = PoissonFisherInformation.getPoissonI(p);
+		final double upper2 = PoissonFisherInformation.getPoissonI(p2);
 
 		for (int s = mins; s <= maxs; s++)
 		{
 			double lastAlpha = 1;
 			for (int m = minm; m <= maxm; m++)
 			{
-				PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
-				double I = f.getPoissonGammaGaussianI(p);
-				double I2 = f.getPoissonGammaGaussianI(p2);
-				double alpha = I / upper;
-				double alpha2 = I2 / upper2;
-				double change = lastAlpha / alpha;
+				final PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
+				final double I = f.getPoissonGammaGaussianI(p);
+				final double I2 = f.getPoissonGammaGaussianI(p2);
+				final double alpha = I / upper;
+				final double alpha2 = I2 / upper2;
+				final double change = lastAlpha / alpha;
 				System.out.printf("p=%g  p2=%s   m=%s  s=%s   I=%s (%s)  alpha=%s (%s)  (delta=%s)\n", p, p2, m, s, I,
 						I2, alpha, alpha2, change);
 				lastAlpha = alpha;
@@ -198,7 +194,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		double u = Double.longBitsToDouble(0x4000000000001L);
 
 		// Binary search for the min value
-		boolean doSearch = false;
+		final boolean doSearch = false;
 		if (doSearch)
 		{
 			// This is the full 52-bit mantissa of a double with zero for the unbiased exponent,
@@ -210,17 +206,13 @@ public class PoissonGammaGaussianFisherInformationTest
 			{
 				// 1/Upper is not infinity
 				// Test mid-point
-				long mid = (upper + lower) / 2;
+				final long mid = (upper + lower) / 2;
 				u = Double.longBitsToDouble(mid);
 				if (1 / u == Double.POSITIVE_INFINITY)
-				{
 					lower = mid;
-				}
 				else
-				{
 					// Mid point
 					upper = mid;
-				}
 			}
 
 			u = Double.longBitsToDouble(upper);
@@ -233,18 +225,18 @@ public class PoissonGammaGaussianFisherInformationTest
 		computeFisherInformationWithMean(u);
 	}
 
-	private void computeFisherInformationWithMean(double u)
+	private static void computeFisherInformationWithMean(double u)
 	{
-		double[] M = { 20, 500 };
-		double[] S = { 3, 13 };
+		final double[] M = { 20, 500 };
+		final double[] S = { 3, 13 };
 
-		for (double m : M)
-			for (double s : S)
+		for (final double m : M)
+			for (final double s : S)
 			{
-				PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
-				double I = f.getPoissonGammaGaussianI(u);
-				double upper = PoissonFisherInformation.getPoissonI(u);
-				double alpha = I / upper;
+				final PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
+				final double I = f.getPoissonGammaGaussianI(u);
+				final double upper = PoissonFisherInformation.getPoissonI(u);
+				final double alpha = I / upper;
 				TestSettings.debug("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
 				TestAssert.assertTrue(I < upper, "Fisher information (%s) is not below upper limit: %s", I, upper);
 				Assert.assertTrue("Alpha is not above zero", alpha > 0);

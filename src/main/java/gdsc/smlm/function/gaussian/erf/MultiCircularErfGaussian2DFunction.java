@@ -308,7 +308,6 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 		final double[] duda = new double[getNumberOfGradients()];
 		duda[0] = 1.0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -323,7 +322,6 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 				//invalidGradients(duda);
 				procedure.execute(I, duda);
 			}
-		}
 	}
 
 	/*
@@ -408,7 +406,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 					// Background are all 0
 
-					int k = a * ng + a;
+					final int k = a * ng + a;
 					// Signal,X
 					d2udadb[k + 1] = duda[a + 1] / tI;
 					// Signal,Y
@@ -418,7 +416,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
 					a += 4;
 
-					int kk = k + ng;
+					final int kk = k + ng;
 					// X,Signal
 					d2udadb[kk] = d2udadb[k + 1];
 					// X,X
@@ -428,7 +426,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 					// X,X SD
 					d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx] + du_dtx[xx] * du_dtsy_tI[n];
 
-					int kkk = kk + ng;
+					final int kkk = kk + ng;
 					// Y,Signal
 					d2udadb[kkk] = d2udadb[k + 2];
 					// Y,X
@@ -438,7 +436,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 					// Y,X SD
 					d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx] + deltaEx[xx] * d2deltaEy_dtsydy[yy];
 
-					int kkkk = kkk + ng;
+					final int kkkk = kkk + ng;
 					// X SD,Signal
 					d2udadb[kkkk] = d2udadb[k + 3];
 					// X SD,X

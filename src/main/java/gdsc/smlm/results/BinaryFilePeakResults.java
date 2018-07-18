@@ -135,7 +135,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			fos.write(data.getBytes());
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			closeOutput();
 		}
@@ -163,24 +163,20 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		fieldNames = new PeakResultConversionHelper(null, getPSF()).getNames();
 		nFields = fieldNames.length;
 
-		String[] comments = new String[2];
+		final String[] comments = new String[2];
 		comments[0] = "Records start after the final comment line";
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		if (isShowEndFrame())
 			sb.append('i');
 		if (isShowId())
 			sb.append('i');
 		sb.append("iiifdff");
 		if (isShowDeviations())
-		{
 			for (int i = 0; i < nFields; i++)
 				sb.append("ff");
-		}
 		else
-		{
 			for (int i = 0; i < nFields; i++)
 				sb.append('f');
-		}
 		if (isShowPrecision())
 			sb.append("f");
 		comments[1] = "Binary Format (raw Java bytes) = " + sb.toString();
@@ -195,7 +191,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	@Override
 	protected String[] getFieldNames()
 	{
-		ArrayList<String> names = new ArrayList<>(20);
+		final ArrayList<String> names = new ArrayList<>(20);
 		if (isShowId())
 			names.add("Id");
 		names.add(peakIdColumnName);
@@ -208,16 +204,10 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		names.add("Noise");
 		names.add("Signal");
 		for (int i = 0; i < nFields; i++)
-		{
 			names.add(fieldNames[i]);
-		}
 		if (isShowDeviations())
-		{
 			for (int i = 0; i < nFields; i++)
-			{
 				names.add(fieldNames[i] + " StdDev");
-			}
-		}
 		if (isShowPrecision())
 			names.add("Precision (nm)");
 		return names.toArray(new String[names.size()]);
@@ -235,7 +225,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			fos.close();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore exception
 		}
@@ -268,7 +258,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 				writeResult(1, bytes);
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Do nothing - This result will not be added to the file
 			return;
@@ -295,19 +285,15 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		for (int i = 0; i < nFields; i++)
 			buffer.writeFloat(params[i]);
 		if (isShowDeviations())
-		{
 			if (paramsStdDev == null)
-			{
 				for (int i = 0; i < nFields; i++)
 					buffer.writeInt(0); // An empty int is the same size as an empty float
-			}
 			else
 			{
 				checkSize(nFields, paramsStdDev);
 				for (int i = 0; i < nFields; i++)
 					buffer.writeFloat(paramsStdDev[i]);
 			}
-		}
 		if (isShowPrecision())
 			buffer.writeFloat((float) precision);
 	}
@@ -331,7 +317,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 				writeResult(1, bytes);
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Do nothing - This result will not be added to the file
 			return;
@@ -356,7 +342,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			try (DataOutputStream buffer = new DataOutputStream(bytes))
 			{
-				for (PeakResult result : results)
+				for (final PeakResult result : results)
 				{
 					addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
 							result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
@@ -379,7 +365,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 				writeResult(count, bytes);
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// Do nothing - This result will not be added to the file
 			return;
@@ -396,7 +382,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			bytes.writeTo(fos);
 		}
-		catch (IOException ioe)
+		catch (final IOException ioe)
 		{
 			closeOutput();
 		}
@@ -412,7 +398,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	{
 		try (DataInputStream input = new DataInputStream(new FileInputStream(filename)))
 		{
-			ArrayList<Result> results = new ArrayList<>(size);
+			final ArrayList<Result> results = new ArrayList<>(size);
 
 			String header;
 			header = readHeader(input);
@@ -424,11 +410,9 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 				flags += FLAG_ID;
 			if (isShowPrecision())
 				flags += FLAG_PRECISION;
-			byte[] line = new byte[getDataSize(isShowDeviations(), flags, nFields)];
+			final byte[] line = new byte[getDataSize(isShowDeviations(), flags, nFields)];
 			while (input.read(line) == line.length)
-			{
 				results.add(new Result(line));
-			}
 
 			input.close();
 
@@ -438,10 +422,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			try (FileOutputStream output = new FileOutputStream(filename))
 			{
 				output.write(header.getBytes());
-				for (Result result : results)
-				{
+				for (final Result result : results)
 					output.write(result.line);
-				}
 			}
 		}
 	}
@@ -461,7 +443,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 */
 	public static String readHeader(DataInputStream input) throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		String line;
 		do
 		{
@@ -476,7 +458,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	private static String readLine(DataInputStream input) throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		byte b;
 		do
 		{
@@ -533,11 +515,11 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 		private void extractSlice()
 		{
-			int offset = (isShowId()) ? 4 : 0;
-			int ch1 = line[offset + 0] & 0xff;
-			int ch2 = line[offset + 1] & 0xff;
-			int ch3 = line[offset + 2] & 0xff;
-			int ch4 = line[offset + 3] & 0xff;
+			final int offset = (isShowId()) ? 4 : 0;
+			final int ch1 = line[offset + 0] & 0xff;
+			final int ch2 = line[offset + 1] & 0xff;
+			final int ch3 = line[offset + 2] & 0xff;
+			final int ch4 = line[offset + 3] & 0xff;
 			slice = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
 		}
 

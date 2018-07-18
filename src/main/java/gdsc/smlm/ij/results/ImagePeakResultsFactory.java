@@ -73,18 +73,14 @@ public class ImagePeakResultsFactory
 			case DRAW_INTENSITY_AVERAGE_PRECISION:
 			case DRAW_LOCALISATIONS_AVERAGE_PRECISION:
 				// Special case for full PSF image
-				PSFImagePeakResults image2 = new PSFImagePeakResults(title, bounds, (float) imageScale);
+				final PSFImagePeakResults image2 = new PSFImagePeakResults(title, bounds, (float) imageScale);
 				if (resultsImage == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION ||
 						resultsImage == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION)
-				{
 					// Fixed width display (in pixels)
 					image2.setWidth((float) (((precision <= 0) ? nmPerPixel : precision) / nmPerPixel));
-				}
 				else if (resultsImage == ResultsImageType.DRAW_INTENSITY_PRECISION ||
 						resultsImage == ResultsImageType.DRAW_LOCALISATIONS_PRECISION)
-				{
 					image2.setCalculatedPrecision(true);
-				}
 				image = image2;
 				break;
 
@@ -129,13 +125,9 @@ public class ImagePeakResultsFactory
 		}
 
 		if (weighted)
-		{
 			flags |= IJImagePeakResults.DISPLAY_WEIGHTED;
-		}
 		if (equalised)
-		{
 			flags |= IJImagePeakResults.DISPLAY_EQUALIZED;
-		}
 		image.setDisplayFlags(flags);
 		image.setCalibration(nmPerPixel, gain);
 		return image;

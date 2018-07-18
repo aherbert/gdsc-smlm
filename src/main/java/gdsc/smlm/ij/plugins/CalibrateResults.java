@@ -55,7 +55,7 @@ public class CalibrateResults implements PlugIn
 		if (!showInputDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
+		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -70,14 +70,14 @@ public class CalibrateResults implements PlugIn
 
 	private static boolean showInputDialog()
 	{
-		int size = MemoryPeakResults.countMemorySize();
+		final int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return false;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select results to calibrate");
 
@@ -95,16 +95,14 @@ public class CalibrateResults implements PlugIn
 
 	private static boolean showDialog(MemoryPeakResults results)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		Calibration oldCalibration = results.getCalibration();
+		final Calibration oldCalibration = results.getCalibration();
 
-		boolean existingCalibration = oldCalibration != null;
+		final boolean existingCalibration = oldCalibration != null;
 		if (!existingCalibration)
-		{
 			gd.addMessage("No calibration found, using defaults");
-		}
 
 		final CalibrationWriter cw = results.getCalibrationWriterSafe();
 
@@ -119,11 +117,11 @@ public class CalibrateResults implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		String name = gd.getNextString();
+		final String name = gd.getNextString();
 		if (!results.getName().equals(name))
 		{
 			// If the name is changed then remove and add back to memory
-			MemoryPeakResults existingResults = MemoryPeakResults.removeResults(results.getName());
+			final MemoryPeakResults existingResults = MemoryPeakResults.removeResults(results.getName());
 			if (existingResults != null)
 			{
 				results = existingResults;
@@ -133,9 +131,7 @@ public class CalibrateResults implements PlugIn
 		}
 
 		if (existingCalibration)
-		{
 			updateAll = gd.getNextBoolean();
-		}
 
 		cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
@@ -143,22 +139,18 @@ public class CalibrateResults implements PlugIn
 
 		gd.collectOptions();
 
-		Calibration newCalibration = cw.getCalibration();
+		final Calibration newCalibration = cw.getCalibration();
 		results.setCalibration(newCalibration);
 
 		if (updateAll)
-		{
 			// Calibration is stored as a reference to an immutable object.
 			// Update any in memory results with the same object.
 			// Note that if any plugins have modified the calibration (rather
 			// than just copy it through to a new results set) then they will
 			// be missed.
-			for (MemoryPeakResults r : MemoryPeakResults.getAllResults())
-			{
+			for (final MemoryPeakResults r : MemoryPeakResults.getAllResults())
 				if (r.getCalibration() == oldCalibration)
 					r.setCalibration(newCalibration);
-			}
-		}
 
 		return true;
 	}

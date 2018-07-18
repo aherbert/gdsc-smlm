@@ -113,28 +113,22 @@ public class MeanVarianceTest implements PlugIn
 
 			// Extract the exposure time
 			exposure = -1;
-			String[] tokens = imp.getTitle().split("[ .]");
-			for (String token : tokens)
-			{
+			final String[] tokens = imp.getTitle().split("[ .]");
+			for (final String token : tokens)
 				try
 				{
 					exposure = Double.parseDouble(token);
 					if (exposure >= 0)
 						break;
 				}
-				catch (NumberFormatException e)
+				catch (final NumberFormatException e)
 				{
 					// Ignore
 				}
-			}
 
 			if (exposure < 0)
-			{
-				//throw new IllegalArgumentException("Image must have exposure time in the filename: " + imp.getTitle());
-
 				// If no exposure was found: assume exposure 0 for first input image otherwise set an arbitrary exposure
 				exposure = (exposureCounter == 1) ? 0 : 9999;
-			}
 
 			title = imp.getTitle();
 
@@ -143,7 +137,7 @@ public class MeanVarianceTest implements PlugIn
 			final int size = imp.getStackSize();
 			slices = new float[size][];
 			final float saturated = getSaturation(imp);
-			ImageStack stack = imp.getImageStack();
+			final ImageStack stack = imp.getImageStack();
 			final double step = (end - start) / size;
 			for (int slice = 1, c = 0; slice <= size; slice++)
 			{
@@ -175,7 +169,7 @@ public class MeanVarianceTest implements PlugIn
 		{
 			if (saturated == Float.NaN)
 				return;
-			for (float f : data)
+			for (final float f : data)
 				if (f >= saturated)
 					throw new IllegalArgumentException("Image " + title + " has saturated pixels in slice: " + i);
 		}
@@ -189,25 +183,23 @@ public class MeanVarianceTest implements PlugIn
 			// Cache data
 			means = new double[size];
 			for (int slice1 = 0; slice1 < size; slice1++)
-			{
 				means[slice1] = new Statistics(slices[slice1]).getMean();
-			}
 
 			// Compute mean and variance.
 			// See http://www.photometrics.com/resources/whitepapers/mean-variance.php
 			final double step = (end - start) / nSamples;
 			for (int slice1 = 0, c = 0; slice1 < size; slice1++)
 			{
-				float[] data1 = slices[slice1];
+				final float[] data1 = slices[slice1];
 				for (int slice2 = slice1 + 1; slice2 < size; slice2++)
 				{
 					if (c++ % 16 == 0)
 						IJ.showProgress(start + c * step);
-					float[] data2 = slices[slice2];
-					Statistics s = new Statistics();
+					final float[] data2 = slices[slice2];
+					final Statistics s = new Statistics();
 					for (int i = 0; i < data1.length; i++)
 						s.add(data1[i] - data2[i]);
-					double variance = s.getVariance() / 2.0;
+					final double variance = s.getVariance() / 2.0;
 					samples.add(new PairSample(slice1 + 1, slice2 + 1, means[slice1], means[slice2], variance));
 
 					if (consecutive)
@@ -230,10 +222,10 @@ public class MeanVarianceTest implements PlugIn
 
 		if (Utils.isExtraOptions())
 		{
-			ImagePlus imp = WindowManager.getCurrentImage();
+			final ImagePlus imp = WindowManager.getCurrentImage();
 			if (imp.getStackSize() > 1)
 			{
-				GenericDialog gd = new GenericDialog(TITLE);
+				final GenericDialog gd = new GenericDialog(TITLE);
 				gd.addMessage("Perform single image analysis on the current image?");
 				gd.addNumericField("Bias", _bias, 0);
 				gd.showDialog();
@@ -267,7 +259,7 @@ public class MeanVarianceTest implements PlugIn
 			if (inputDirectory == null)
 				return;
 
-			SeriesOpener series = new SeriesOpener(inputDirectory, false, 0);
+			final SeriesOpener series = new SeriesOpener(inputDirectory, false, 0);
 			series.setVariableSize(true);
 			if (series.getNumberOfImages() < 3)
 			{
@@ -276,9 +268,7 @@ public class MeanVarianceTest implements PlugIn
 			}
 			if (!IJ.showMessageWithCancel(TITLE, String.format("Analyse %d images, first image:\n%s",
 					series.getNumberOfImages(), series.getImageList()[0])))
-			{
 				return;
-			}
 
 			IJ.showStatus("Loading images");
 			images = getImages(series);
@@ -295,7 +285,7 @@ public class MeanVarianceTest implements PlugIn
 			}
 		}
 
-		boolean emMode = (arg != null && arg.contains("em"));
+		final boolean emMode = (arg != null && arg.contains("em"));
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Set the output options:");
@@ -313,9 +303,7 @@ public class MeanVarianceTest implements PlugIn
 		showTable = gd.getNextBoolean();
 		showCharts = gd.getNextBoolean();
 		if (emMode)
-		{
 			cameraGain = gd.getNextNumber();
-		}
 
 		IJ.showStatus("Computing mean & variance");
 		final double nImages = images.size();
@@ -330,25 +318,21 @@ public class MeanVarianceTest implements PlugIn
 
 		// Allow user to input multiple bias images
 		int start = 0;
-		Statistics biasStats = new Statistics();
-		Statistics noiseStats = new Statistics();
+		final Statistics biasStats = new Statistics();
+		final Statistics noiseStats = new Statistics();
 		final double bias;
 		if (singleImage)
-		{
 			bias = _bias;
-		}
 		else
 		{
 			while (start < images.size())
 			{
-				ImageSample sample = images.get(start);
+				final ImageSample sample = images.get(start);
 				if (sample.exposure == 0)
 				{
 					biasStats.add(sample.means);
-					for (PairSample pair : sample.samples)
-					{
+					for (final PairSample pair : sample.samples)
 						noiseStats.add(pair.variance);
-					}
 					start++;
 				}
 				else
@@ -373,17 +357,17 @@ public class MeanVarianceTest implements PlugIn
 			showTable = gd.getNextBoolean();
 		}
 
-		TextWindow results = (showTable) ? createResultsWindow() : null;
+		final TextWindow results = (showTable) ? createResultsWindow() : null;
 
 		double[] mean = new double[total];
 		double[] variance = new double[mean.length];
-		Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
+		final Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
 		final WeightedObservedPoints obs = new WeightedObservedPoints();
 		for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++)
 		{
-			StringBuilder sb = (showTable) ? new StringBuilder() : null;
-			ImageSample sample = images.get(i);
-			for (PairSample pair : sample.samples)
+			final StringBuilder sb = (showTable) ? new StringBuilder() : null;
+			final ImageSample sample = images.get(i);
+			for (final PairSample pair : sample.samples)
 			{
 				if (j % 16 == 0)
 					IJ.showProgress(j, total);
@@ -396,9 +380,7 @@ public class MeanVarianceTest implements PlugIn
 				obs.add(mean[j], variance[j]);
 
 				if (emMode)
-				{
 					gain /= (2 * cameraGain);
-				}
 
 				if (sb != null)
 				{
@@ -425,7 +407,7 @@ public class MeanVarianceTest implements PlugIn
 			Utils.log(TITLE);
 			if (emMode)
 			{
-				double[] values = stats.getValues();
+				final double[] values = stats.getValues();
 				MathArrays.scaleInPlace(0.5, values);
 				stats = new StoredDataStatistics(values);
 			}
@@ -433,18 +415,18 @@ public class MeanVarianceTest implements PlugIn
 			if (showCharts)
 			{
 				// Plot the gain over time
-				String title = TITLE + " Gain vs Frame";
-				Plot2 plot = new Plot2(title, "Slice", "Gain", SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0),
+				final String title = TITLE + " Gain vs Frame";
+				final Plot2 plot = new Plot2(title, "Slice", "Gain", SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0),
 						stats.getValues());
-				PlotWindow pw = Utils.display(title, plot);
+				final PlotWindow pw = Utils.display(title, plot);
 
 				// Show a histogram
-				String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
+				final String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
 						Utils.rounded(stats.getMedian()));
-				int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
+				final int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
 				if (Utils.isNewWindow())
 				{
-					Point point = pw.getLocation();
+					final Point point = pw.getLocation();
 					point.x = pw.getLocation().x;
 					point.y += pw.getHeight();
 					WindowManager.getImage(id).getWindow().setLocation(point);
@@ -473,7 +455,7 @@ public class MeanVarianceTest implements PlugIn
 			IJ.showStatus("Computing fit");
 
 			// Sort
-			int[] indices = rank(mean);
+			final int[] indices = rank(mean);
 			mean = reorder(mean, indices);
 			variance = reorder(variance, indices);
 
@@ -488,10 +470,10 @@ public class MeanVarianceTest implements PlugIn
 			if (showCharts)
 			{
 				// Plot mean verses variance. Gradient is gain in Count/e.
-				String title = TITLE + " results";
-				Plot2 plot = new Plot2(title, "Mean", "Variance");
-				double[] xlimits = Maths.limits(mean);
-				double[] ylimits = Maths.limits(variance);
+				final String title = TITLE + " results";
+				final Plot2 plot = new Plot2(title, "Mean", "Variance");
+				final double[] xlimits = Maths.limits(mean);
+				final double[] ylimits = Maths.limits(variance);
 				double xrange = (xlimits[1] - xlimits[0]) * 0.05;
 				if (xrange == 0)
 					xrange = 0.05;
@@ -526,9 +508,9 @@ public class MeanVarianceTest implements PlugIn
 				// Compute total gain
 				final double totalGain = emGain * cameraGain;
 
-				double readNoise = avBiasNoise / cameraGain;
+				final double readNoise = avBiasNoise / cameraGain;
 				// Effective noise is standard deviation of the bias image divided by the total gain (in Count/e-)
-				double readNoiseE = avBiasNoise / totalGain;
+				final double readNoiseE = avBiasNoise / totalGain;
 				Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(readNoise, 4),
 						Utils.rounded(avBiasNoise, 4));
 
@@ -554,11 +536,9 @@ public class MeanVarianceTest implements PlugIn
 
 	private static TextWindow createResultsWindow()
 	{
-		Frame f = WindowManager.getFrame(TITLE);
+		final Frame f = WindowManager.getFrame(TITLE);
 		if (f instanceof TextWindow)
-		{
 			return (TextWindow) f;
-		}
 		return new TextWindow(TITLE, "Image\tExposure\tSlice1\tSlice2\tMean1\tMean2\tMean\tVariance\tGain", "", 800,
 				500);
 	}
@@ -566,7 +546,7 @@ public class MeanVarianceTest implements PlugIn
 	private List<ImageSample> getImages(SeriesOpener series)
 	{
 		final double nImages = series.getNumberOfImages();
-		List<ImageSample> images = new ArrayList<>((int) nImages);
+		final List<ImageSample> images = new ArrayList<>((int) nImages);
 		ImagePlus imp = series.nextImage();
 		int c = 0;
 		while (imp != null)
@@ -575,7 +555,7 @@ public class MeanVarianceTest implements PlugIn
 			{
 				images.add(new ImageSample(imp, c / nImages, (c + 1) / nImages));
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				Utils.log(e.getMessage());
 			}
@@ -602,19 +582,17 @@ public class MeanVarianceTest implements PlugIn
 
 	private List<ImageSample> getImages()
 	{
-		List<ImageSample> images = new ArrayList<>(1);
-		ImagePlus imp = WindowManager.getCurrentImage();
+		final List<ImageSample> images = new ArrayList<>(1);
+		final ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp != null)
-		{
 			try
 			{
 				images.add(new ImageSample(imp, 0, 1));
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				Utils.log(e.getMessage());
 			}
-		}
 		IJ.showProgress(1);
 		return images;
 	}
@@ -630,7 +608,7 @@ public class MeanVarianceTest implements PlugIn
 	 */
 	public static int[] rank(double[] values)
 	{
-		int n = values.length;
+		final int n = values.length;
 		final Integer[] indexes = new Integer[n];
 		final Double[] data = new Double[n];
 		for (int i = 0; i < n; i++)
@@ -646,7 +624,7 @@ public class MeanVarianceTest implements PlugIn
 				return data[o1].compareTo(data[o2]);
 			}
 		});
-		int[] indexes2 = new int[n];
+		final int[] indexes2 = new int[n];
 		for (int i = 0; i < n; i++)
 			indexes2[i] = indexes[i].intValue();
 		return indexes2;
@@ -654,11 +632,9 @@ public class MeanVarianceTest implements PlugIn
 
 	private static double[] reorder(double[] data, int[] indices)
 	{
-		double[] array = new double[indices.length];
+		final double[] array = new double[indices.length];
 		for (int i = 0; i < array.length; i++)
-		{
 			array[i] = data[indices[i]];
-		}
 		return array;
 	}
 }

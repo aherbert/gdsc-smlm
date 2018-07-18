@@ -99,34 +99,34 @@ import ij.util.Java2;
  */
 public class ResultsManager implements PlugIn
 {
-	
+
 	/**
 	 * The Enum InputSource.
 	 */
 	public enum InputSource
 	{
-		
+
 		/** The file. */
 		//@formatter:off
 		FILE{ @Override
 		public String getName() { return "File"; }},
-		
+
 		/** The memory. */
 		MEMORY{ @Override
 		public String getName() { return "Memory"; }},
-		
+
 		/** The memory multi frame. */
 		MEMORY_MULTI_FRAME{ @Override
 		public String getName() { return "Memory (Multi-Frame)"; }},
-		
+
 		/** The memory single frame. */
 		MEMORY_SINGLE_FRAME{ @Override
 		public String getName() { return "Memory (Single-Frame)"; }},
-		
+
 		/** The memory clustered. */
 		MEMORY_CLUSTERED{ @Override
 		public String getName() { return "Memory (Clustered)"; }},
-		
+
 		/** The none. */
 		NONE{ @Override
 		public String getName() { return "None"; }};
@@ -150,10 +150,10 @@ public class ResultsManager implements PlugIn
 
 	/** The input file. */
 	static String INPUT_FILE = "File";
-	
+
 	/** The input memory. */
 	static String INPUT_MEMORY = "Memory";
-	
+
 	/** The input none. */
 	static String INPUT_NONE = "[None]";
 
@@ -199,7 +199,7 @@ public class ResultsManager implements PlugIn
 			boolean removeAll = false;
 			if (arg.contains("multi"))
 			{
-				MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
+				final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 				md.addSelected(selected);
 				md.showDialog();
 				if (md.wasCancelled())
@@ -208,9 +208,9 @@ public class ResultsManager implements PlugIn
 				if (selected.isEmpty())
 					return;
 				allResults = new ArrayList<>(selected.size());
-				for (String name : selected)
+				for (final String name : selected)
 				{
-					MemoryPeakResults r = MemoryPeakResults.getResults(name);
+					final MemoryPeakResults r = MemoryPeakResults.getResults(name);
 					if (r != null)
 						allResults.add(r);
 				}
@@ -225,16 +225,16 @@ public class ResultsManager implements PlugIn
 
 			long memorySize = 0;
 			int size = 0;
-			for (MemoryPeakResults results : allResults)
+			for (final MemoryPeakResults results : allResults)
 			{
 				memorySize += MemoryPeakResults.estimateMemorySize(results);
 				size += results.size();
 			}
-			String memory = MemoryPeakResults.memorySizeString(memorySize);
-			String count = TextUtils.pleural(size, "result");
-			String sets = TextUtils.pleural(allResults.size(), "set");
+			final String memory = MemoryPeakResults.memorySizeString(memorySize);
+			final String count = TextUtils.pleural(size, "result");
+			final String sets = TextUtils.pleural(allResults.size(), "set");
 
-			GenericDialog gd = new GenericDialog(TITLE);
+			final GenericDialog gd = new GenericDialog(TITLE);
 
 			gd.addMessage(String.format("Do you want to remove %s from memory (%s, %s)?", count, sets, memory));
 			gd.enableYesNoCancel();
@@ -245,10 +245,8 @@ public class ResultsManager implements PlugIn
 			if (removeAll)
 				MemoryPeakResults.clearMemory();
 			else
-			{
-				for (MemoryPeakResults results : allResults)
+				for (final MemoryPeakResults results : allResults)
 					MemoryPeakResults.removeResults(results.getName());
-			}
 
 			SummariseResults.clearSummaryTable();
 			Utils.log("Cleared %s (%s, %s)", count, sets, memory);
@@ -258,7 +256,7 @@ public class ResultsManager implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = loadResults(inputOption);
+		final MemoryPeakResults results = loadResults(inputOption);
 
 		if (results == null || results.size() == 0)
 		{
@@ -282,35 +280,29 @@ public class ResultsManager implements PlugIn
 		{
 			// No outputs. Error if results were not saved to memory
 			if (!saved)
-			{
 				IJ.error(TITLE, "No output selected");
-			}
 			return;
 		}
 
-		Rectangle bounds = results.getBounds(true);
-		boolean showDeviations = resultsSettings.getShowDeviations() && canShowDeviations(results);
-		boolean showEndFrame = canShowEndFrame(results);
-		boolean showId = canShowId(results);
+		final Rectangle bounds = results.getBounds(true);
+		final boolean showDeviations = resultsSettings.getShowDeviations() && canShowDeviations(results);
+		final boolean showEndFrame = canShowEndFrame(results);
+		final boolean showId = canShowId(results);
 
 		// Display the configured output
-		PeakResultsList outputList = new PeakResultsList();
+		final PeakResultsList outputList = new PeakResultsList();
 
 		outputList.copySettings(results);
 		//String title = results.getSource();
 		//if (title == null || title.length() == 0)
 		//	output.setSource(TITLE);
 
-		int tableFormat = resultsSettings.getResultsTableSettings().getResultsTableFormatValue();
+		final int tableFormat = resultsSettings.getResultsTableSettings().getResultsTableFormatValue();
 		if (tableFormat == ResultsTableFormat.IMAGEJ_VALUE)
-		{
 			addImageJTableResults(outputList, resultsSettings.getResultsTableSettings(), showDeviations, showEndFrame,
 					results.is3D(), showId);
-		}
 		else if (tableFormat == ResultsTableFormat.INTERACTIVE_VALUE)
-		{
 			showInteractiveTable(results, resultsSettings.getResultsTableSettings());
-		}
 
 		addImageResults(outputList, resultsSettings.getResultsImageSettings(), bounds,
 				(extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
@@ -410,9 +402,7 @@ public class ResultsManager implements PlugIn
 			boolean showDeviations, boolean showEndFrame, boolean showZ, boolean showId)
 	{
 		if (resultsSettings.getShowTable())
-		{
 			return addImageJTableResults(resultsList, resultsSettings, showDeviations, showEndFrame, showZ, showId);
-		}
 		return null;
 	}
 
@@ -420,7 +410,7 @@ public class ResultsManager implements PlugIn
 			ResultsTableSettings resultsSettings, boolean showDeviations, boolean showEndFrame, boolean showZ,
 			boolean showId)
 	{
-		IJTablePeakResults r = new IJTablePeakResults(showDeviations);
+		final IJTablePeakResults r = new IJTablePeakResults(showDeviations);
 		r.setDistanceUnit(resultsSettings.getDistanceUnit());
 		r.setIntensityUnit(resultsSettings.getIntensityUnit());
 		r.setAngleUnit(resultsSettings.getAngleUnit());
@@ -447,8 +437,8 @@ public class ResultsManager implements PlugIn
 	 */
 	public static void showInteractiveTable(MemoryPeakResults results, ResultsTableSettings resultsTableSettings)
 	{
-		PeakResultTableModel model = new PeakResultTableModel(results, true, resultsTableSettings);
-		PeakResultTableModelFrame frame = new PeakResultTableModelFrame(model);
+		final PeakResultTableModel model = new PeakResultTableModel(results, true, resultsTableSettings);
+		final PeakResultTableModelFrame frame = new PeakResultTableModelFrame(model);
 		frame.setTitle(results.getName());
 		frame.setVisible(true);
 	}
@@ -470,7 +460,7 @@ public class ResultsManager implements PlugIn
 	{
 		if (resultsSettings.getImageTypeValue() > 0)
 		{
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getImageType(),
+			final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getImageType(),
 					resultsSettings.getWeighted(), resultsSettings.getEqualised(), resultsList.getName(), bounds,
 					resultsList.getNmPerPixel(), resultsList.getGain(), resultsSettings.getScale(),
 					resultsSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
@@ -484,11 +474,11 @@ public class ResultsManager implements PlugIn
 	private void addFileResults(PeakResultsList resultsList, boolean showDeviations, boolean showEndFrame,
 			boolean showId)
 	{
-		ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
+		final ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
 		if (!TextUtils.isNullOrEmpty(resultsSettings.getResultsFilename()))
 		{
 			// Remove extension
-			String resultsFilename = Utils.replaceExtension(resultsSettings.getResultsFilename(),
+			final String resultsFilename = Utils.replaceExtension(resultsSettings.getResultsFilename(),
 					ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()));
 
 			if (fileInput && inputFilename.equals(resultsFilename))
@@ -502,10 +492,10 @@ public class ResultsManager implements PlugIn
 			SettingsManager.writeSettings(this.resultsSettings.build());
 
 			// Check if file exists
-			File file = new File(resultsFilename);
+			final File file = new File(resultsFilename);
 			if (file.exists())
 			{
-				YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE,
+				final YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE,
 						"Overwrite existing file?\n" + resultsFilename);
 				if (!d.yesPressed())
 					return;
@@ -537,8 +527,8 @@ public class ResultsManager implements PlugIn
 	{
 		if (resultsSettings.getFileFormatValue() > 0 && resultsFilename != null)
 		{
-			File file = new File(resultsFilename);
-			File parent = file.getParentFile();
+			final File file = new File(resultsFilename);
+			final File parent = file.getParentFile();
 			if (parent != null && parent.exists())
 			{
 				PeakResults r;
@@ -549,7 +539,7 @@ public class ResultsManager implements PlugIn
 								resultsSettings.getShowPrecision());
 						break;
 					case TEXT:
-						TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations, showEndFrame,
+						final TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations, showEndFrame,
 								showId, resultsSettings.getShowPrecision());
 						f.setDistanceUnit(resultsSettings.getDistanceUnit());
 						f.setIntensityUnit(resultsSettings.getIntensityUnit());
@@ -599,12 +589,12 @@ public class ResultsManager implements PlugIn
 		if (Utils.isShowGenericDialog())
 		{
 			final Label saveLabel = gd.getLastLabel();
-			ItemListener listener = new ItemListener()
+			final ItemListener listener = new ItemListener()
 			{
 				@Override
 				public void itemStateChanged(ItemEvent e)
 				{
-					boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
+					final boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
 					if (enable != messageLabel.isVisible())
 					{
 						messageLabel.setVisible(enable);
@@ -642,14 +632,12 @@ public class ResultsManager implements PlugIn
 			final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
 			if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION ||
 					imageSettings.getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION)
-			{
 				Parameters.isAboveZero("Image precision", imageSettings.getAveragePrecision());
-			}
 			Parameters.isAboveZero("Image scale", imageSettings.getScale());
 			if (extraOptions)
 				Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -703,7 +691,6 @@ public class ResultsManager implements PlugIn
 			gd.addMessage("--- Table output ---");
 		final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
 		if (BitFlags.anySet(flags, FLAG_TABLE_FORMAT))
-		{
 			gd.addChoice("Table", SettingsManager.getResultsTableFormatNames(),
 					tableSettings.getResultsTableFormatValue(), new OptionListener<Integer>()
 					{
@@ -711,7 +698,7 @@ public class ResultsManager implements PlugIn
 						public boolean collectOptions(Integer field)
 						{
 							tableSettings.setResultsTableFormatValue(field);
-							boolean result = collectOptions(false);
+							final boolean result = collectOptions(false);
 							return result;
 						}
 
@@ -724,10 +711,8 @@ public class ResultsManager implements PlugIn
 						private boolean collectOptions(boolean silent)
 						{
 							if (tableSettings.getResultsTableFormatValue() <= 0)
-							{
 								return false;
-							}
-							ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+							final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 							egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
 									tableSettings.getDistanceUnitValue());
 							egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
@@ -752,16 +737,14 @@ public class ResultsManager implements PlugIn
 							return true;
 						}
 					});
-		}
 		else
-		{
 			gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Boolean>()
 			{
 				@Override
 				public boolean collectOptions(Boolean field)
 				{
 					tableSettings.setShowTable(field);
-					boolean result = collectOptions(false);
+					final boolean result = collectOptions(false);
 					return result;
 				}
 
@@ -774,10 +757,8 @@ public class ResultsManager implements PlugIn
 				private boolean collectOptions(boolean silent)
 				{
 					if (!tableSettings.getShowTable())
-					{
 						return false;
-					}
-					ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+					final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 					egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
 							tableSettings.getDistanceUnitValue());
 					egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
@@ -802,7 +783,6 @@ public class ResultsManager implements PlugIn
 					return true;
 				}
 			});
-		}
 	}
 
 	private void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
@@ -838,7 +818,7 @@ public class ResultsManager implements PlugIn
 					public boolean collectOptions(Integer field)
 					{
 						imageSettings.setImageTypeValue(field);
-						boolean result = collectOptions(false);
+						final boolean result = collectOptions(false);
 						return result;
 					}
 
@@ -850,13 +830,11 @@ public class ResultsManager implements PlugIn
 
 					private boolean collectOptions(boolean silent)
 					{
-						ResultsImageType resultsImage = imageSettings.getImageType();
+						final ResultsImageType resultsImage = imageSettings.getImageType();
 						if (resultsImage.getNumber() <= 0)
-						{
 							return false;
-						}
-						boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						final boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (requireWeighted.contains(resultsImage))
 							egd.addCheckbox("Weighted", imageSettings.getWeighted());
 						egd.addCheckbox("Equalised", imageSettings.getEqualised());
@@ -905,7 +883,7 @@ public class ResultsManager implements PlugIn
 					public boolean collectOptions(Integer field)
 					{
 						fileSettings.setFileFormatValue(field);
-						boolean result = collectOptions(false);
+						final boolean result = collectOptions(false);
 						return result;
 					}
 
@@ -917,12 +895,10 @@ public class ResultsManager implements PlugIn
 
 					private boolean collectOptions(boolean silent)
 					{
-						ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
+						final ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
 						if (!ResultsProtosHelper.isGDSC(resultsFileFormat))
-						{
 							return false;
-						}
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (resultsFileFormat == ResultsFileFormat.TEXT)
 						{
 							egd.addChoice("File_distance_unit", SettingsManager.getDistanceUnitNames(),
@@ -956,7 +932,7 @@ public class ResultsManager implements PlugIn
 			// However we can set the initial directory if we have a results file.
 			if (fileSettings.getResultsFilename() != null)
 			{
-				File dir = new File(fileSettings.getResultsFilename()).getParentFile();
+				final File dir = new File(fileSettings.getResultsFilename()).getParentFile();
 				if (dir != null)
 					OpenDialog.setDefaultDirectory(dir.getPath());
 			}
@@ -1033,9 +1009,9 @@ public class ResultsManager implements PlugIn
 	 */
 	public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption, InputSource... inputs)
 	{
-		ArrayList<String> source = new ArrayList<>(3);
+		final ArrayList<String> source = new ArrayList<>(3);
 		boolean fileInput = false;
-		for (InputSource input : inputs)
+		for (final InputSource input : inputs)
 		{
 			ResultsManager.addInputSource(source, input);
 			if (input == InputSource.FILE)
@@ -1067,14 +1043,14 @@ public class ResultsManager implements PlugIn
 	public static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName, String inputOption,
 			ArrayList<String> source, boolean fileInput)
 	{
-		String[] options = source.toArray(new String[source.size()]);
+		final String[] options = source.toArray(new String[source.size()]);
 		// Find the option
 		inputOption = removeFormatting(inputOption);
 
 		int optionIndex = 0;
 		for (int i = 0; i < options.length; i++)
 		{
-			String name = removeFormatting(options[i]);
+			final String name = removeFormatting(options[i]);
 			if (name.equals(inputOption))
 			{
 				optionIndex = i;
@@ -1095,12 +1071,12 @@ public class ResultsManager implements PlugIn
 			{
 				final Label l = gd.getLastLabel();
 				final Panel p = gd.getLastPanel();
-				ItemListener listener = new ItemListener()
+				final ItemListener listener = new ItemListener()
 				{
 					@Override
 					public void itemStateChanged(ItemEvent e)
 					{
-						boolean enable = INPUT_FILE.equals(c.getSelectedItem());
+						final boolean enable = INPUT_FILE.equals(c.getSelectedItem());
 						if (enable != l.isVisible())
 						{
 							l.setVisible(enable);
@@ -1129,7 +1105,7 @@ public class ResultsManager implements PlugIn
 	 */
 	public static String removeFormatting(String name)
 	{
-		int index = name.lastIndexOf('[');
+		final int index = name.lastIndexOf('[');
 		if (index > 0)
 			name = name.substring(0, index - 1);
 		return name;
@@ -1160,10 +1136,8 @@ public class ResultsManager implements PlugIn
 			case MEMORY_MULTI_FRAME:
 			case MEMORY_SINGLE_FRAME:
 			case MEMORY_CLUSTERED:
-				for (String name : MemoryPeakResults.getResultNames())
-				{
+				for (final String name : MemoryPeakResults.getResultNames())
 					addInputSource(source, MemoryPeakResults.getResults(name), input);
-				}
 				break;
 		}
 	}
@@ -1313,7 +1287,7 @@ public class ResultsManager implements PlugIn
 	 */
 	public static String getInputSource(GenericDialog gd)
 	{
-		String source = gd.getNextChoice();
+		final String source = gd.getNextChoice();
 		return removeFormatting(source);
 	}
 
@@ -1403,7 +1377,7 @@ public class ResultsManager implements PlugIn
 			IJ.showStatus("Reading results file ...");
 			reader = new PeakResultsReader(inputFilename);
 			IJ.showStatus("Reading " + reader.getFormat() + " results file ...");
-			ResultOption[] options = reader.getOptions();
+			final ResultOption[] options = reader.getOptions();
 			if (options != null)
 				collectOptions(reader, options);
 			reader.setTracker(new IJTrackProgress());
@@ -1411,19 +1385,15 @@ public class ResultsManager implements PlugIn
 			reader.getTracker().progress(1.0);
 
 			if (results != null && results.size() > 0)
-			{
 				// If the name contains a .tif suffix then create an image source
 				if (results.getName() != null && results.getName().contains(".tif") && results.getSource() == null)
 				{
-					int index = results.getName().indexOf(".tif");
+					final int index = results.getName().indexOf(".tif");
 					results.setSource(new IJImageSource(results.getName().substring(0, index)));
 				}
-			}
 		}
 		else
-		{
 			results = loadMemoryResults(inputOption);
-		}
 
 		try
 		{
@@ -1433,10 +1403,8 @@ public class ResultsManager implements PlugIn
 				return results;
 
 			if (checkCalibration)
-			{
 				if (!checkCalibration(results, reader))
 					return null;
-			}
 			if (distanceUnit != null && results.getDistanceUnit() != distanceUnit)
 			{
 				Utils.log("Incorrect distance unit: " + results.getDistanceUnit());
@@ -1457,31 +1425,27 @@ public class ResultsManager implements PlugIn
 
 	private static void collectOptions(PeakResultsReader reader, ResultOption[] options)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Options required for file format: " + reader.getFormat().getName());
-		for (ResultOption option : options)
-		{
+		for (final ResultOption option : options)
 			if (option.hasValues())
 			{
-				String[] items = new String[option.values.length];
+				final String[] items = new String[option.values.length];
 				for (int i = 0; i < items.length; i++)
 					items[i] = option.values[i].toString();
 				gd.addChoice(getName(option), items, option.getValue().toString());
 			}
 			else if (option.getValue() instanceof Number)
 			{
-				Number n = (Number) option.getValue();
+				final Number n = (Number) option.getValue();
 				if (n.doubleValue() == n.intValue())
-				{
 					gd.addNumericField(getName(option), n.intValue(), 0);
-				}
 				else
 				{
-					String value = n.toString();
+					final String value = n.toString();
 					int sig = 0;
 					int index = value.indexOf('.');
 					if (index != -1)
-					{
 						// There is a decimal point. Count the digits after it
 						while (++index < value.length())
 						{
@@ -1493,53 +1457,37 @@ public class ResultsManager implements PlugIn
 							}
 							sig++;
 						}
-					}
 					gd.addNumericField(getName(option), n.doubleValue(), sig);
 				}
 			}
 			else if (option.getValue() instanceof String)
-			{
 				gd.addStringField(getName(option), (String) option.getValue());
-			}
 			else if (option.getValue() instanceof Boolean)
-			{
 				gd.addCheckbox(getName(option), (Boolean) option.getValue());
-			}
 			else
-			{
 				IJ.log(TITLE + ": Unsupported reader option: " + option.name + "=" + option.getValue().toString());
-			}
-		}
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		try
 		{
-			for (ResultOption option : options)
-			{
+			for (final ResultOption option : options)
 				if (option.hasValues())
-				{
 					option.setValue(option.values[gd.getNextChoiceIndex()]);
-				}
 				else if (option.getValue() instanceof Number)
 				{
-					double d = gd.getNextNumber();
+					final double d = gd.getNextNumber();
 					// Convert to the correct type using the String value constructor for the number
 					option.setValue(
 							option.getValue().getClass().getConstructor(String.class).newInstance(Double.toString(d)));
 				}
 				else if (option.getValue() instanceof String)
-				{
 					option.setValue(gd.getNextString());
-				}
 				else if (option.getValue() instanceof Boolean)
-				{
 					option.setValue(gd.getNextBoolean());
-				}
-			}
 			reader.setOptions(options);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// This can occur if the options are not valid
 			IJ.log(TITLE + ": Failed to configure reader options: " + e.getMessage());
@@ -1575,13 +1523,11 @@ public class ResultsManager implements PlugIn
 	private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader)
 	{
 		// Check for Calibration
-		CalibrationWriter calibration = results.getCalibrationWriterSafe();
+		final CalibrationWriter calibration = results.getCalibrationWriterSafe();
 		String msg = "partially calibrated";
 		if (!results.hasCalibration())
-		{
 			// Make sure the user knows all the values have not been set
 			msg = "uncalibrated";
-		}
 
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
 		boolean missing = false;
@@ -1618,9 +1564,9 @@ public class ResultsManager implements PlugIn
 
 		if (missing)
 		{
-			Rectangle2D.Float dataBounds = results.getDataBounds(null);
+			final Rectangle2D.Float dataBounds = results.getDataBounds(null);
 
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage(
 					String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg, Utils.rounded(dataBounds.x),
 							Utils.rounded(dataBounds.y), Utils.rounded(dataBounds.y + dataBounds.getWidth()),
@@ -1683,9 +1629,7 @@ public class ResultsManager implements PlugIn
 	private MemoryPeakResults loadResults(String inputOption)
 	{
 		if (inputOption.equals(INPUT_FILE))
-		{
 			fileInput = true;
-		}
 		return loadInputResults(inputOption, true, null, null);
 	}
 
@@ -1720,7 +1664,7 @@ public class ResultsManager implements PlugIn
 	{
 		// Adapted from ij.io.Opener.openMultiple
 
-		String resetInputFilename = inputFilename;
+		final String resetInputFilename = inputFilename;
 
 		Java2.setSystemLookAndFeel();
 		// run JFileChooser in a separate thread to avoid possible thread deadlocks
@@ -1731,15 +1675,15 @@ public class ResultsManager implements PlugIn
 				@Override
 				public void run()
 				{
-					JFileChooser fc = new JFileChooser();
+					final JFileChooser fc = new JFileChooser();
 					fc.setMultiSelectionEnabled(true);
 					File dir = null;
-					String sdir = OpenDialog.getDefaultDirectory();
+					final String sdir = OpenDialog.getDefaultDirectory();
 					if (sdir != null)
 						dir = new File(sdir);
 					if (dir != null)
 						fc.setCurrentDirectory(dir);
-					int returnVal = fc.showOpenDialog(IJ.getInstance());
+					final int returnVal = fc.showOpenDialog(IJ.getInstance());
 					if (returnVal != JFileChooser.APPROVE_OPTION)
 						return;
 					omFiles = fc.getSelectedFiles();
@@ -1752,7 +1696,7 @@ public class ResultsManager implements PlugIn
 				}
 			});
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore
 		}
@@ -1761,7 +1705,7 @@ public class ResultsManager implements PlugIn
 		OpenDialog.setDefaultDirectory(omDirectory);
 		for (int i = 0; i < omFiles.length; i++)
 		{
-			String path = omDirectory + omFiles[i].getName();
+			final String path = omDirectory + omFiles[i].getName();
 			load(path);
 		}
 
@@ -1784,11 +1728,9 @@ public class ResultsManager implements PlugIn
 			Recorder.recordOption("results_file", "[]");
 			Recorder.recordOption("save_to_memory");
 		}
-		MemoryPeakResults results = loadInputResults(INPUT_FILE, true, null, null);
+		final MemoryPeakResults results = loadInputResults(INPUT_FILE, true, null, null);
 		if (results == null || results.size() == 0)
-		{
 			IJ.error(TITLE, "No results could be loaded from " + path);
-		}
 		else
 		{
 			if (Recorder.record)
@@ -1807,7 +1749,7 @@ public class ResultsManager implements PlugIn
 			IJ.error(TITLE, "No localisations in memory");
 			return;
 		}
-		MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
+		final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 		md.addSelected(selected);
 		md.showDialog();
 		if (md.wasCancelled())
@@ -1816,14 +1758,14 @@ public class ResultsManager implements PlugIn
 		if (selected.isEmpty())
 			return;
 		resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		gd.collectOptions();
-		ResultsFileSettings.Builder b = resultsSettings.getResultsFileSettingsBuilder();
-		String dir = gd.getNextString();
+		final ResultsFileSettings.Builder b = resultsSettings.getResultsFileSettingsBuilder();
+		final String dir = gd.getNextString();
 		b.setFileFormatValue(gd.getNextChoiceIndex());
 		b.setResultsDirectory(dir);
 		SettingsManager.writeSettings(resultsSettings);
@@ -1832,16 +1774,16 @@ public class ResultsManager implements PlugIn
 			IJ.error(TITLE, "Output directory does not exist");
 			return;
 		}
-		ResultsFileSettings resultsFileSettings = resultsSettings.getResultsFileSettings();
+		final ResultsFileSettings resultsFileSettings = resultsSettings.getResultsFileSettings();
 		if (resultsFileSettings.getFileFormatValue() <= 0)
 		{
 			IJ.error(TITLE, "No output file format");
 			return;
 		}
 		int c = 0;
-		for (String name : selected)
+		for (final String name : selected)
 		{
-			MemoryPeakResults r = MemoryPeakResults.getResults(name);
+			final MemoryPeakResults r = MemoryPeakResults.getResults(name);
 			if (r != null && save(resultsFileSettings, r))
 				c++;
 		}
@@ -1858,7 +1800,7 @@ public class ResultsManager implements PlugIn
 					source.getName() + ".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()))
 							.getCanonicalPath();
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			return false;
 		}
@@ -1870,7 +1812,7 @@ public class ResultsManager implements PlugIn
 						source.hasId(), resultsSettings.getShowPrecision());
 				break;
 			case TEXT:
-				TextFilePeakResults f = new TextFilePeakResults(resultsFilename, source.hasDeviations(),
+				final TextFilePeakResults f = new TextFilePeakResults(resultsFilename, source.hasDeviations(),
 						source.hasEndFrame(), source.hasId(), resultsSettings.getShowPrecision());
 				f.setDistanceUnit(resultsSettings.getDistanceUnit());
 				f.setIntensityUnit(resultsSettings.getIntensityUnit());

@@ -69,7 +69,7 @@ public class PeakResultListModelFrame extends JFrame
 		{
 			// TODO - Make this a better representation of the Peak Result.
 			// Build a configurable layout using the TableResults settings.
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < PeakResult.STANDARD_PARAMETERS; i++)
 			{
 				if (sb.length() != 0)
@@ -77,7 +77,7 @@ public class PeakResultListModelFrame extends JFrame
 				sb.append(PeakResult.getParameterName(i)).append('=').append(value.getParameter(i));
 			}
 
-			String s = sb.toString();
+			final String s = sb.toString();
 			setText(s);
 			if (isSelected)
 			{
@@ -96,7 +96,7 @@ public class PeakResultListModelFrame extends JFrame
 		}
 	}
 
-	private JList<PeakResult> list;
+	private final JList<PeakResult> list;
 
 	/**
 	 * Instantiates a new peak result list model frame.
@@ -191,12 +191,10 @@ public class PeakResultListModelFrame extends JFrame
 				{
 					final PeakResultStoreList store = new ArrayPeakResultStore(10);
 					for (int i = n; i-- > 0;)
-					{
 						store.add(new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(),
 								r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(), r.nextFloat(),
 										r.nextFloat(), r.nextFloat(), r.nextFloat()),
 								null));
-					}
 					final PeakResultListModel model = new PeakResultListModel(store);
 
 					final PeakResultListModelFrame d = new PeakResultListModelFrame(model, selectionModel);
@@ -235,7 +233,7 @@ public class PeakResultListModelFrame extends JFrame
 					d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
 					d2.setVisible(true);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					e.printStackTrace();
 				}

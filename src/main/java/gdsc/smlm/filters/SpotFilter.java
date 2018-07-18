@@ -93,7 +93,7 @@ public abstract class SpotFilter implements Cloneable
 	 */
 	public Spot[] list(float[] data, int width, int height)
 	{
-		Spot[] spots = find(data, width, height);
+		final Spot[] spots = find(data, width, height);
 		return (spots == null) ? new Spot[0] : spots;
 	}
 
@@ -111,7 +111,7 @@ public abstract class SpotFilter implements Cloneable
 	 */
 	public Spot[] rank(float[] data, int width, int height)
 	{
-		Spot[] spots = find(data, width, height);
+		final Spot[] spots = find(data, width, height);
 		if (spots == null)
 			return new Spot[0];
 		Arrays.sort(spots);
@@ -139,7 +139,7 @@ public abstract class SpotFilter implements Cloneable
 		{
 			return (SpotFilter) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}

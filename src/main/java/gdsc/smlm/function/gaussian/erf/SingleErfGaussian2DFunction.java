@@ -37,7 +37,7 @@ import gdsc.smlm.function.ValueProcedure;
 public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 {
 	// Required for the PSF
-	
+
 	/** The intensity. */
 	protected double tI;
 
@@ -114,27 +114,19 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	public void forEach(ValueProcedure procedure)
 	{
 		if (tB == 0)
-		{
 			for (int y = 0; y < maxy; y++)
 			{
 				final double tI_deltaEy = tI * deltaEy[y];
 				for (int x = 0; x < maxx; x++)
-				{
 					procedure.execute(tI_deltaEy * deltaEx[x]);
-				}
 			}
-		}
 		else
-		{
 			for (int y = 0; y < maxy; y++)
 			{
 				final double tI_deltaEy = tI * deltaEy[y];
 				for (int x = 0; x < maxx; x++)
-				{
 					procedure.execute(tB + tI_deltaEy * deltaEx[x]);
-				}
 			}
-		}
 	}
 
 	/*
@@ -148,27 +140,19 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 		initialise0(variables);
 		final double[] values = new double[size()];
 		if (tB == 0)
-		{
 			for (int y = 0, i = 0; y < maxy; y++)
 			{
 				final double tI_deltaEy = tI * deltaEy[y];
 				for (int x = 0; x < maxx; x++)
-				{
 					values[i++] = tI_deltaEy * deltaEx[x];
-				}
 			}
-		}
 		else
-		{
 			for (int y = 0, i = 0; y < maxy; y++)
 			{
 				final double tI_deltaEy = tI * deltaEy[y];
 				for (int x = 0; x < maxx; x++)
-				{
 					values[i++] = tB + tI_deltaEy * deltaEx[x];
-				}
 			}
-		}
 		return values;
 	}
 

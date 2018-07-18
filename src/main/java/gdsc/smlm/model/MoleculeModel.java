@@ -32,13 +32,13 @@ public class MoleculeModel
 {
 	/** The id. */
 	private int id;
-	
+
 	/** The xyz. */
 	protected double[] xyz;
-	
+
 	/** The mass. */
 	protected double mass;
-	
+
 	/** The label. */
 	private int label;
 
@@ -228,9 +228,8 @@ public class MoleculeModel
 	 */
 	public double[] move(double diffusionRate, RandomGenerator random)
 	{
-		double[] xyz = getCoordinates();
+		final double[] xyz = getCoordinates();
 		if (diffusionRate > 0)
-		{
 			for (int i = 0; i < 3; i++)
 			{
 				final double shift = random.nextGaussian() * diffusionRate;
@@ -242,7 +241,6 @@ public class MoleculeModel
 				//else
 				xyz[i] += shift;
 			}
-		}
 		return xyz;
 	}
 
@@ -259,9 +257,8 @@ public class MoleculeModel
 	 */
 	public double[] move(double diffusionRate, RandomGenerator[] random)
 	{
-		double[] xyz = getCoordinates();
+		final double[] xyz = getCoordinates();
 		if (diffusionRate > 0)
-		{
 			for (int i = 0; i < 3; i++)
 			{
 				final double shift = random[i].nextGaussian() * diffusionRate;
@@ -273,7 +270,6 @@ public class MoleculeModel
 				//else
 				xyz[i] += shift;
 			}
-		}
 		return xyz;
 	}
 
@@ -290,17 +286,13 @@ public class MoleculeModel
 	 */
 	public double[] walk(double stepSize, RandomGenerator random)
 	{
-		double[] xyz = getCoordinates();
+		final double[] xyz = getCoordinates();
 		if (stepSize > 0)
-		{
 			for (int i = 0; i < 3; i++)
-			{
 				if (random.nextDouble() < 0.5)
 					xyz[i] += stepSize;
 				else
 					xyz[i] -= stepSize;
-			}
-		}
 		return xyz;
 	}
 
@@ -317,17 +309,13 @@ public class MoleculeModel
 	 */
 	public double[] walk(double stepSize, RandomGenerator[] random)
 	{
-		double[] xyz = getCoordinates();
+		final double[] xyz = getCoordinates();
 		if (stepSize > 0)
-		{
 			for (int i = 0; i < 3; i++)
-			{
 				if (random[i].nextDouble() < 0.5)
 					xyz[i] += stepSize;
 				else
 					xyz[i] -= stepSize;
-			}
-		}
 		return xyz;
 	}
 
@@ -347,7 +335,7 @@ public class MoleculeModel
 	 */
 	public double[] slide(double diffusionRate, double[] axis, RandomGenerator random)
 	{
-		double[] xyz = getCoordinates();
+		final double[] xyz = getCoordinates();
 		if (diffusionRate > 0)
 		{
 			final double shift;
@@ -365,9 +353,7 @@ public class MoleculeModel
 			//else if (shift < -5*diffusionRate)
 			//	shift = -5*diffusionRate;
 			for (int i = 0; i < 3; i++)
-			{
 				xyz[i] += shift * axis[i];
-			}
 		}
 		return xyz;
 	}

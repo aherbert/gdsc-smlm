@@ -210,8 +210,8 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		// Set the shift limit. The calculator can support both 1/2 axis widths
 		// when extracting the Standard Deviation from the parameters.
-		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
-		double s0 = (s[0] == s[1]) ? s[0] : Gaussian2DPeakResultHelper.getStandardDeviation(s[0], s[1]);
+		final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		final double s0 = (s[0] == s[1]) ? s[0] : Gaussian2DPeakResultHelper.getStandardDeviation(s[0], s[1]);
 		lowerSigmaThreshold = (float) (s0 * minWidth);
 		upperSigmaThreshold = Filter.getUpperLimit(s0 * maxWidth);
 		offsetx = getUpperLimit(s[0] * shift);
@@ -280,9 +280,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
 			// SNR, Max Width, Precision, Shift, Min width
 			if (isFiniteStrictlyPositive(snr))
-			{
 				components1[s1++] = new MultiFilterSNRComponent(snr);
-			}
 			if ((maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY) || (minWidth > 0 && minWidth < 1))
 			{
 				// Handle the width being 1/2 axis variable.
@@ -293,26 +291,18 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				widthComponentClass = components1[s1 - 1].getClass();
 			}
 			if (isFiniteStrictlyPositive(precision))
-			{
 				components1[s1++] = createPrecisionComponent();
-			}
 			if (isFiniteStrictlyPositive(shift))
 			{
 				components1[s1++] = new MultiFilterShiftComponent(shift);
 				shiftComponentClass = components1[s1 - 1].getClass();
 			}
 			if (isFiniteStrictlyPositive(signal))
-			{
 				components1[s1++] = new MultiFilterSignalComponent(signal);
-			}
 			if (isFiniteStrictlyPositive(eshift))
-			{
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
-			}
 			if (isZEnabled() && !areSet(flags, IDirectFilter.NO_Z))
-			{
 				components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
-			}
 
 			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1, widthComponentClass);
 			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1, shiftComponentClass);
@@ -325,19 +315,15 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			components_Width_NoShift = MultiFilterComponentSetFactory.create(components3, components3.length);
 			components_NoWidth_NoShift = MultiFilterComponentSetFactory.create(components4, components4.length);
 
-			MultiFilterComponent[] data = new MultiFilterComponent[components3.length + 1];
+			final MultiFilterComponent[] data = new MultiFilterComponent[components3.length + 1];
 			System.arraycopy(components3, 0, data, 1, components3.length);
 			components_Shift0 = MultiFilterComponentSetFactory.create(data, data.length);
 		}
 
 		if (widthEnabled)
-		{
 			components = (shiftEnabled) ? components_Width_Shift : components_NoWidth_Shift;
-		}
 		else
-		{
 			components = (shiftEnabled) ? components_NoWidth_Shift : components_NoWidth_NoShift;
-		}
 
 		//		// This is the legacy support for all components together
 		//		this.widthEnabled = widthEnabled;
@@ -378,13 +364,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		if (clazz == null)
 			return in;
-		MultiFilterComponent[] out = new MultiFilterComponent[size];
+		final MultiFilterComponent[] out = new MultiFilterComponent[size];
 		int length = 0;
 		for (int i = 0; i < size; i++)
-		{
 			if (in[i].getClass() != clazz)
 				out[length++] = in[i];
-		}
 		return Arrays.copyOf(out, length);
 	}
 
@@ -393,23 +377,19 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		setup(flags);
 		for (int i = filterSetupData.length; i-- > 0;)
-		{
 			if (filterSetupData[i] instanceof ShiftFilterSetupData)
 			{
 				this.filterSetupData = getFilterSetupData(filterSetupData[i]);
-				double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
+				final double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
 				if (shift > 0)
 				{
 					components_Shift0.replace0(new MultiFilterShiftComponent(shift));
 					components = components_Shift0;
 				}
 				else
-				{
 					components = components_Width_NoShift;
-				}
 				return;
 			}
-		}
 	}
 
 	@Override
@@ -684,7 +664,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ };
+		final double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ };
 		params[index] = updateParameter(params[index], delta, defaultRange[index]);
 		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6],
 				(float) params[7], (float) params[8]);
@@ -861,7 +841,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		// Replace any object that is manipulated by the instance
 		if (components_Shift0 != null)
 		{
-			boolean update = components == components_Shift0;
+			final boolean update = components == components_Shift0;
 			components_Shift0 = components_Shift0.clone();
 			if (update)
 				components = components_Shift0;

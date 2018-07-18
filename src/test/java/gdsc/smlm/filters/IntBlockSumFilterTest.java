@@ -49,19 +49,18 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 		if (boxSize <= 0)
 			return;
 
-		int n = (int) Math.ceil(boxSize);
-		int size = 2 * n + 1;
+		final int n = (int) Math.ceil(boxSize);
+		final int size = 2 * n + 1;
 
-		int[] out = new int[data.length];
+		final int[] out = new int[data.length];
 
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				int sum = 0;
 				for (int yy = 0; yy < size; yy++)
 				{
-					int yyy = y + yy - n;
+					final int yyy = y + yy - n;
 					if (yyy < 0)
 						//yyy = 0;
 						continue;
@@ -70,20 +69,19 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 						continue;
 					for (int xx = 0; xx < size; xx++)
 					{
-						int xxx = x + xx - n;
+						final int xxx = x + xx - n;
 						if (xxx < 0)
 							//xxx = 0;
 							continue;
 						if (xxx >= maxx)
 							//xxx = maxx - 1;
 							continue;
-						int index = yyy * maxx + xxx;
+						final int index = yyy * maxx + xxx;
 						sum += data[index];
 					}
 				}
 				out[y * maxx + x] = sum;
 			}
-		}
 		System.arraycopy(out, 0, data, 0, out.length);
 	}
 
@@ -121,8 +119,8 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 	private static void sumIsCorrect(int[] data, int width, int height, int boxSize, boolean internal,
 			BlockSumDataFilter filter) throws ArrayComparisonFailure
 	{
-		int[] data1 = data.clone();
-		int[] data2 = data.clone();
+		final int[] data1 = data.clone();
+		final int[] data2 = data.clone();
 
 		sum(data1, width, height, boxSize);
 		if (internal)
@@ -140,25 +138,23 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 
 	private static void checkIsCorrect(BlockSumDataFilter filter)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				int[] data = createIntData(rg, width, height);
+				final int[] data = createIntData(rg, width, height);
 
-				for (int boxSize : boxSizes)
-					for (boolean internal : checkInternal)
-					{
+				for (final int boxSize : boxSizes)
+					for (final boolean internal : checkInternal)
 						sumIsCorrect(data, width, height, boxSize, internal, filter);
-					}
 			}
 	}
 
 	@Test
 	public void rollingBlockFilterIsCorrect()
 	{
-		BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false)
+		final BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false)
 		{
 			@Override
 			public void filter(int[] data, int width, int height, int boxSize)

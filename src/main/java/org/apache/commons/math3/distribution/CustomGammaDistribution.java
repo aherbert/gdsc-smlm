@@ -206,9 +206,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	public void setShape(double shape)
 	{
 		if (shape <= 0)
-		{
 			throw new NotStrictlyPositiveException(LocalizedFormats.SHAPE, shape);
-		}
 		setShapeUnsafe(shape);
 	}
 
@@ -261,9 +259,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	public void setScale(double scale)
 	{
 		if (scale <= 0)
-		{
 			throw new NotStrictlyPositiveException(LocalizedFormats.SCALE, scale);
-		}
 		setScaleUnsafe(scale);
 	}
 
@@ -325,9 +321,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		 * a + g + 0.5 a + g + 0.5
 		 */
 		if (x < 0)
-		{
 			return 0;
-		}
 		computeFactors();
 		final double y = x / scale;
 		if ((y <= minY) || (FastMath.log(y) >= maxLogY))
@@ -378,13 +372,9 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		double ret;
 
 		if (x <= 0)
-		{
 			ret = 0;
-		}
 		else
-		{
 			ret = Gamma.regularizedGammaP(shape, x / scale);
-		}
 
 		return ret;
 	}
@@ -499,9 +489,6 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	public double sample()
 	{
 		if (shape < 1)
-		{
-			// [1]: p. 228, Algorithm GS
-
 			while (true)
 			{
 				// Step 1:
@@ -517,25 +504,20 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 					final double u2 = random.nextDouble();
 
 					if (u2 > FastMath.exp(-x))
-					{
 						// Reject
 						continue;
-					}
 					return scale * x;
 				}
-				
+
 				final double x = -1 * FastMath.log((bGS - p) / shape);
 				final double u2 = random.nextDouble();
 
 				if (u2 > FastMath.pow(x, shape - 1))
-				{
 					// Reject
 					continue;
-				}
-				
+
 				return scale * x;
 			}
-		}
 
 		// Now shape >= 1
 
@@ -548,23 +530,17 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 			final double v = (1 + c * x) * (1 + c * x) * (1 + c * x);
 
 			if (v <= 0)
-			{
 				continue;
-			}
 
 			final double x2 = x * x;
 			final double u = random.nextDouble();
 
 			// Squeeze
 			if (u < 1 - 0.0331 * x2 * x2)
-			{
 				return scale * d * v;
-			}
 
 			if (FastMath.log(u) < 0.5 * x2 + d * (1 - v + FastMath.log(v)))
-			{
 				return scale * d * v;
-			}
 		}
 	}
 }

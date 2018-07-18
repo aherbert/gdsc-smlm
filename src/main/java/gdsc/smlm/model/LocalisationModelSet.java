@@ -34,8 +34,9 @@ import java.util.List;
  */
 public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 {
-	private int id, time;
-	private List<LocalisationModel> localisations = new ArrayList<>();
+	private int id;
+	private final int time;
+	private final List<LocalisationModel> localisations = new ArrayList<>();
 	private double[] data = null;
 	private LocalisationModelSet previous, next;
 
@@ -131,9 +132,9 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 			return false;
 
 		// All localisations must be continuous and consecutive in time
-		int[] t = new int[localisations.size()];
+		final int[] t = new int[localisations.size()];
 		int c = 0;
-		for (LocalisationModel l : localisations)
+		for (final LocalisationModel l : localisations)
 		{
 			t[c++] = l.getTime();
 			if (!l.isContinuous())
@@ -176,8 +177,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 	public LocalisationModel toLocalisation()
 	{
 		double intensity = 0;
-		double[] xyz = new double[3];
-		for (LocalisationModel l : localisations)
+		final double[] xyz = new double[3];
+		for (final LocalisationModel l : localisations)
 		{
 			final double s = l.getIntensity();
 			intensity += s;
@@ -189,7 +190,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 			for (int i = 0; i < 3; i++)
 				xyz[i] /= intensity;
 
-		LocalisationModel l = new LocalisationModel(id, time, xyz, intensity,
+		final LocalisationModel l = new LocalisationModel(id, time, xyz, intensity,
 				isContinuous() ? LocalisationModel.CONTINUOUS : LocalisationModel.SINGLE);
 		l.setData(data);
 		return l;
@@ -201,7 +202,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 	public double getIntensity()
 	{
 		double intensity = 0;
-		for (LocalisationModel l : localisations)
+		for (final LocalisationModel l : localisations)
 			intensity += l.getIntensity();
 		return intensity;
 	}

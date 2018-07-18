@@ -28,9 +28,9 @@ package gdsc.smlm.function;
  */
 public class Gradient1FunctionStore extends ValueFunctionStore implements Gradient1Function, Gradient1Procedure
 {
-	private Gradient1Function f;
+	private final Gradient1Function f;
 	private Gradient1Procedure procedure;
-	
+
 	/** The number of gradients. */
 	protected final int length;
 

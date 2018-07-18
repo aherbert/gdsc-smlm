@@ -197,12 +197,10 @@ public class AggregatedImageSource extends ImageSource
 			bounds = null;
 
 		if (sequentialReadStatus == SequentialReadStatus.READY)
-		{
 			if (initialiseSequentialRead())
 				sequentialReadStatus = SequentialReadStatus.RUNNING;
 			else
 				sequentialReadStatus = SequentialReadStatus.CLOSED;
-		}
 		if (sequentialReadStatus != SequentialReadStatus.RUNNING)
 			return null;
 
@@ -217,7 +215,7 @@ public class AggregatedImageSource extends ImageSource
 			int end = imageSource.getEndFrameNumber();
 			for (int n = 1; n < aggregate; n++)
 			{
-				float[] image2 = imageSource.next(bounds);
+				final float[] image2 = imageSource.next(bounds);
 				if (image2 == null)
 					break;
 				end = imageSource.getEndFrameNumber();
@@ -268,7 +266,7 @@ public class AggregatedImageSource extends ImageSource
 			int nextFrame = frame;
 			while (collated < aggregate && imageSource.isValid(++nextFrame))
 			{
-				float[] image2 = imageSource.get(nextFrame, bounds);
+				final float[] image2 = imageSource.get(nextFrame, bounds);
 				if (image2 != null)
 				{
 					lastEndFrame = imageSource.getEndFrameNumber();
@@ -305,7 +303,7 @@ public class AggregatedImageSource extends ImageSource
 			int end = imageSource.getEndFrameNumber();
 			for (int n = 1; n < aggregate; n++)
 			{
-				float[] image2 = imageSource.next();
+				final float[] image2 = imageSource.next();
 				if (image2 == null)
 					break;
 				end = imageSource.getEndFrameNumber();
@@ -348,7 +346,7 @@ public class AggregatedImageSource extends ImageSource
 			int nextFrame = frame;
 			while (collated < aggregate && imageSource.isValid(++nextFrame))
 			{
-				float[] image2 = imageSource.get(nextFrame);
+				final float[] image2 = imageSource.get(nextFrame);
 				if (image2 != null)
 				{
 					lastEndFrame = imageSource.getEndFrameNumber();

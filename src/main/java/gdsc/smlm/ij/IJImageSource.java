@@ -97,17 +97,13 @@ public class IJImageSource extends ImageSource
 		imageStack = null;
 		if (imp == null)
 			return false;
-		ImageStack s = imp.getImageStack();
+		final ImageStack s = imp.getImageStack();
 		if (s.isVirtual())
-		{
 			// We must use the image stack to get the image data for virtual images
 			imageStack = s;
-		}
 		else
-		{
 			// We can access the image array directly
 			imageArray = s.getImageArray();
-		}
 		width = imp.getWidth();
 		height = imp.getHeight();
 		// Store the number of valid frames
@@ -116,10 +112,10 @@ public class IJImageSource extends ImageSource
 		else
 			frames = imp.getStackSize();
 		slice = 0;
-		FileInfo info = imp.getOriginalFileInfo();
+		final FileInfo info = imp.getOriginalFileInfo();
 		if (info != null)
 			path = info.directory + info.fileName;
-		int[] origin = getOrigin(imp);
+		final int[] origin = getOrigin(imp);
 		setOrigin(origin[0], origin[1]);
 		return true;
 	}
@@ -135,14 +131,13 @@ public class IJImageSource extends ImageSource
 	 */
 	public static int[] getOrigin(ImagePlus imp) throws IllegalArgumentException
 	{
-		Calibration cal = imp.getLocalCalibration();
+		final Calibration cal = imp.getLocalCalibration();
 		if (cal != null)
-		{
 			if (cal.xOrigin != 0 || cal.yOrigin != 0)
 			{
 				// Origin must be in integer pixels
-				double ox = Math.round(cal.xOrigin);
-				double oy = Math.round(cal.yOrigin);
+				final double ox = Math.round(cal.xOrigin);
+				final double oy = Math.round(cal.yOrigin);
 				if (ox != cal.xOrigin || oy != cal.yOrigin)
 					throw new IllegalArgumentException("Origin must be in integer pixels");
 				// ImageJ has a negative origin to indicate 0,0 of the image
@@ -150,7 +145,6 @@ public class IJImageSource extends ImageSource
 				// to have the origin represent the shift of the 0,0 pixel from the origin.
 				return new int[] { (int) -ox, (int) -oy };
 			}
-		}
 		return new int[2];
 	}
 
@@ -165,7 +159,7 @@ public class IJImageSource extends ImageSource
 	 */
 	public static Rectangle getBounds(ImagePlus imp) throws IllegalArgumentException
 	{
-		int[] origin = getOrigin(imp);
+		final int[] origin = getOrigin(imp);
 		return new Rectangle(origin[0], origin[1], imp.getWidth(), imp.getHeight());
 	}
 
@@ -249,7 +243,6 @@ public class IJImageSource extends ImageSource
 				imp = WindowManager.getImage(getName());
 
 			if (imp == null)
-			{
 				// Try and open the original image from file
 				if (path != null && path.length() > 0)
 				{
@@ -259,14 +252,10 @@ public class IJImageSource extends ImageSource
 						// Some readers return null and display the image, e.g. BioFormats.
 						// Add code to handle this.
 					}
-					else
-					{
-						// Ensure the image has the correct name
-						if (getName() != null)
-							imp.setTitle(getName());
-					}
+					else // Ensure the image has the correct name
+					if (getName() != null)
+						imp.setTitle(getName());
 				}
-			}
 			return initialise(imp);
 		}
 		return true;
@@ -293,7 +282,7 @@ public class IJImageSource extends ImageSource
 			return true;
 		// Check the image array. This is set to null when an image is closed by ImageJ
 		// allowing us to detect when the image is still available
-		for (Object o : imageArray)
+		for (final Object o : imageArray)
 			if (o == null)
 				return true;
 		return false;
@@ -321,10 +310,8 @@ public class IJImageSource extends ImageSource
 	{
 		++slice;
 		if (singleFrame > 0)
-		{
 			// Return frames from the starting frame until the extra frames limit is reached
 			return (slice - 1 <= extraFrames) ? get(singleFrame + slice - 1) : null;
-		}
 		return get(slice);
 	}
 
@@ -339,18 +326,12 @@ public class IJImageSource extends ImageSource
 		if (imageArray != null)
 		{
 			if (frame > 0 && frame <= imageArray.length)
-			{
 				return imageArray[frame - 1];
-			}
 		}
 		else if (imageStack != null)
-		{
 			// This is a virtual stack so access the image processor through the virtual stack object
 			if (frame > 0 && frame <= imageStack.getSize())
-			{
 				return imageStack.getPixels(frame);
-			}
-		}
 		return null;
 	}
 
@@ -358,9 +339,7 @@ public class IJImageSource extends ImageSource
 	public boolean isValid(int frame)
 	{
 		if (singleFrame > 0)
-		{
 			return (frame >= singleFrame && frame <= singleFrame + extraFrames);
-		}
 		return frame > 0 && frame <= frames;
 	}
 

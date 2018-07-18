@@ -45,16 +45,14 @@ public class XmlUtils extends gdsc.core.utils.XmlUtils
 	{
 		init();
 		if (xs != null)
-		{
 			try
 			{
 				return xs.toXML(obj);
 			}
-			catch (XStreamException ex)
+			catch (final XStreamException ex)
 			{
 				//ex.printStackTrace();
 			}
-		}
 		return "";
 	}
 
@@ -69,16 +67,14 @@ public class XmlUtils extends gdsc.core.utils.XmlUtils
 	{
 		init();
 		if (xs != null)
-		{
 			try
 			{
 				return xs.fromXML(xml);
 			}
-			catch (XStreamException ex)
+			catch (final XStreamException ex)
 			{
 				//ex.printStackTrace();
 			}
-		}
 		return null;
 	}
 

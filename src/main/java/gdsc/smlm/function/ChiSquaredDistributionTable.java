@@ -202,13 +202,9 @@ public class ChiSquaredDistributionTable
 	public static double computeQValue(double chiSquared, int degreesOfFreedom)
 	{
 		if (chiSquared <= 0)
-		{
 			return 1;
-		}
 		else
-		{
 			return Gamma.regularizedGammaQ(degreesOfFreedom / 2.0, chiSquared / 2.0);
-		}
 	}
 
 	/**
@@ -226,12 +222,8 @@ public class ChiSquaredDistributionTable
 	public static double computePValue(double chiSquared, int degreesOfFreedom)
 	{
 		if (chiSquared <= 0)
-		{
 			return 0;
-		}
 		else
-		{
 			return Gamma.regularizedGammaP(degreesOfFreedom / 2.0, chiSquared / 2.0);
-		}
 	}
 }

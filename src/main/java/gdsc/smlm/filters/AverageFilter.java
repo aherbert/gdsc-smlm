@@ -97,7 +97,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / (blockSize * blockSize));
 
@@ -192,7 +192,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 9);
 
@@ -319,7 +319,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / (blockSize * blockSize));
 
@@ -336,9 +336,7 @@ public class AverageFilter extends BaseFilter
 			{
 				float sum = 0;
 				for (int x2 = 0; x2 < blockSize; x2++)
-				{
 					sum += data[index + x2];
-				}
 				newData[(x + n) * maxy + y] = sum;
 			}
 		}
@@ -352,9 +350,7 @@ public class AverageFilter extends BaseFilter
 			{
 				float sum = 0;
 				for (int y2 = 0; y2 < blockSize; y2++)
-				{
 					sum += newData[index + y2];
-				}
 				data[x + (y + n) * maxx] = sum * divisor;
 			}
 		}
@@ -399,7 +395,7 @@ public class AverageFilter extends BaseFilter
 
 		final int blockSize = 2 * n1;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
 
@@ -418,9 +414,7 @@ public class AverageFilter extends BaseFilter
 			{
 				float sum = data[index] * w1;
 				for (int x2 = 1; x2 < blockSize; x2++)
-				{
 					sum += data[index + x2];
-				}
 				sum += data[index + blockSize] * w1;
 				newData[(x + n1) * maxy + y] = sum;
 			}
@@ -435,9 +429,7 @@ public class AverageFilter extends BaseFilter
 			{
 				float sum = newData[index] * w1;
 				for (int y2 = 1; y2 < blockSize; y2++)
-				{
 					sum += newData[index + y2];
-				}
 				sum += newData[index + blockSize] * w1;
 				data[x + (y + n1) * maxx] = sum * divisor;
 			}
@@ -463,7 +455,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 9);
 
@@ -521,7 +513,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / (1 + 4 * w * (1 + w)));
 
@@ -575,7 +567,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 5 || maxy < 5)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 25);
 
@@ -591,7 +583,7 @@ public class AverageFilter extends BaseFilter
 			int index2 = 2 * maxy + y;
 			for (int x = 0; x <= maxx - 5; x++, index++)
 			{
-				float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4];
+				final float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4];
 				newData[index2] = sum;
 				index2 += maxy;
 			}
@@ -605,7 +597,7 @@ public class AverageFilter extends BaseFilter
 			int index2 = x + 2 * maxx;
 			for (int y = 0; y <= maxy - 5; y++, index++)
 			{
-				float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
+				final float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
 						newData[index + 4];
 				data[index2] = sum * divisor;
 				index2 += maxx;
@@ -636,7 +628,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 5 || maxy < 5)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
 		final float divisor = (float) (1.0 / (9 + 12 * w1 + 4 * w1 * w1));
@@ -693,7 +685,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 7 || maxy < 7)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 49);
 
@@ -709,7 +701,7 @@ public class AverageFilter extends BaseFilter
 			int index2 = 3 * maxy + y;
 			for (int x = 0; x <= maxx - 7; x++, index++)
 			{
-				float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4] +
+				final float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4] +
 						data[index + 5] + data[index + 6];
 				newData[index2] = sum;
 				index2 += maxy;
@@ -724,7 +716,7 @@ public class AverageFilter extends BaseFilter
 			int index2 = x + 3 * maxx;
 			for (int y = 0; y <= maxy - 7; y++, index++)
 			{
-				float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
+				final float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
 						newData[index + 4] + newData[index + 5] + newData[index + 6];
 				data[index2] = sum * divisor;
 				index2 += maxx;
@@ -755,7 +747,7 @@ public class AverageFilter extends BaseFilter
 		if (maxx < 7 || maxy < 7)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
 		final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
@@ -868,9 +860,9 @@ public class AverageFilter extends BaseFilter
 		if (maxx < nX || maxy < nY)
 			return;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
-		int[] offset = new int[nX * nY - 1];
+		final int[] offset = new int[nX * nY - 1];
 		for (int y = -n, d = 0; y <= n; y++)
 			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
@@ -890,10 +882,8 @@ public class AverageFilter extends BaseFilter
 
 				// Sweep neighbourhood -
 				// No check for boundaries as this should be an internal sweep.
-				for (int offset_d : offset)
-				{
+				for (final int offset_d : offset)
 					sum += data[index + offset_d];
-				}
 
 				newData[index] = sum * divisor;
 			}
@@ -904,9 +894,7 @@ public class AverageFilter extends BaseFilter
 		{
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -1032,9 +1020,7 @@ public class AverageFilter extends BaseFilter
 		{
 			int index = y * maxx + n1;
 			for (int x = n1; x < xlimit; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -1054,7 +1040,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockAverage3x3Internal(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 9);
 
@@ -1065,7 +1051,7 @@ public class AverageFilter extends BaseFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+				final float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 						data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 				newData[index1] = sum * divisor;
 				index0++;
@@ -1079,9 +1065,7 @@ public class AverageFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -1105,7 +1089,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockAverage3x3Internal(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float w2 = w * w;
 		final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w2));
@@ -1118,9 +1102,9 @@ public class AverageFilter extends BaseFilter
 			for (int x = 1; x < maxx - 1; x++)
 			{
 				// Edges
-				float sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
+				final float sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
 				// Corners
-				float sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
+				final float sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
 
 				newData[index1] = (data[index1] + sum1 * w + sum2 * w2) * divisor;
 				index0++;
@@ -1134,9 +1118,7 @@ public class AverageFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
@@ -1158,7 +1140,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockGaussian3x3Internal(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 16);
 
@@ -1169,7 +1151,7 @@ public class AverageFilter extends BaseFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] +
+				final float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] +
 						4 * data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] +
 						data[index2 + 1];
 				newData[index1] = sum * divisor;
@@ -1184,18 +1166,14 @@ public class AverageFilter extends BaseFilter
 		{
 			int index = y * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++, index++)
-			{
 				data[index] = newData[index];
-			}
 		}
 	}
 
 	private float[] floatBuffer(int size)
 	{
 		if (floatDataBuffer == null || floatDataBuffer.length < size)
-		{
 			floatDataBuffer = new float[size];
-		}
 		return floatDataBuffer;
 	}
 
@@ -1237,7 +1215,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void rollingBlockAverageNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
 
@@ -1261,9 +1239,7 @@ public class AverageFilter extends BaseFilter
 			float sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum;
@@ -1292,9 +1268,7 @@ public class AverageFilter extends BaseFilter
 			float sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
-			{
 				sum += row[endIndex++];
-			}
 
 			int centreIndex = y;
 			outData[centreIndex] = sum * divisor;
@@ -1323,7 +1297,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void rollingBlockAverage3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 9);
 
@@ -1457,9 +1431,9 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverageNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
 
@@ -1486,9 +1460,7 @@ public class AverageFilter extends BaseFilter
 				float sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -1515,9 +1487,7 @@ public class AverageFilter extends BaseFilter
 				float sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 
 				// Store result in transpose
 				outData[centreIndex] = sum * divisor;
@@ -1554,9 +1524,9 @@ public class AverageFilter extends BaseFilter
 			return;
 		}
 
-		int blockSize = 2 * n1;
+		final int blockSize = 2 * n1;
 
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
 
@@ -1584,9 +1554,7 @@ public class AverageFilter extends BaseFilter
 				// Sum strips
 				float sum = row[x] * w1;
 				for (int j = 1; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 				sum += row[x + blockSize] * w1;
 
 				// Store result in transpose
@@ -1613,9 +1581,7 @@ public class AverageFilter extends BaseFilter
 				// Sum strips
 				float sum = row[x] * w1;
 				for (int j = 1; j < blockSize; j++)
-				{
 					sum += row[x + j];
-				}
 				sum += row[x + blockSize] * w1;
 
 				// Store result in transpose
@@ -1639,7 +1605,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverage3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 9);
 
@@ -1663,7 +1629,7 @@ public class AverageFilter extends BaseFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2];
+				final float sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = sum;
@@ -1687,7 +1653,7 @@ public class AverageFilter extends BaseFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2];
+				final float sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = sum * divisor;
@@ -1714,7 +1680,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverage3x3(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		//final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w * w));
 		final float divisor = (float) (1.0 / (1 + 4 * w * (1 + w)));
@@ -1782,7 +1748,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverage5x5(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 25);
 
@@ -1853,7 +1819,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverage5x5(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
 		final float divisor = (float) (1.0 / (9 + 12 * w1 + 4 * w1 * w1));
@@ -1921,7 +1887,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverage7x7(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float divisor = (float) (1.0 / 49);
 
@@ -1994,7 +1960,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void stripedBlockAverage7x7(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
 		final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
@@ -2053,9 +2019,7 @@ public class AverageFilter extends BaseFilter
 	private float[] floatRowBuffer(int size)
 	{
 		if (floatRowBuffer == null || floatRowBuffer.length < size)
-		{
 			floatRowBuffer = new float[size];
-		}
 		return floatRowBuffer;
 	}
 
@@ -2172,7 +2136,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockAverageNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// Boundary control
 		final int xwidth = FastMath.min(n, maxx - 1);
@@ -2180,9 +2144,9 @@ public class AverageFilter extends BaseFilter
 		final int xlimit = maxx - xwidth;
 		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		for (int y = -ywidth, d = 0; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
 				if (x != 0 || y != 0)
@@ -2197,24 +2161,18 @@ public class AverageFilter extends BaseFilter
 
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
 				float sum = data[index];
 
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
-				{
 					for (int d = offset.length; d-- > 0;)
-					{
 						sum += data[index + offset[d]];
-					}
-				}
 				else
-				{
 					for (int d = offset.length; d-- > 0;)
 					{
 						// Get the pixel with boundary checking
@@ -2230,10 +2188,8 @@ public class AverageFilter extends BaseFilter
 							yy = maxy - 1;
 						sum += data[xx + yy * maxx];
 					}
-				}
 				newData[index] = sum * divisor;
 			}
-		}
 
 		// Copy back
 		System.arraycopy(newData, 0, data, 0, data.length);
@@ -2327,7 +2283,6 @@ public class AverageFilter extends BaseFilter
 		final float w2 = w1 * w1;
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
 				float sum = data[index];
@@ -2335,7 +2290,7 @@ public class AverageFilter extends BaseFilter
 				float sum2 = 0;
 
 				// Flag to indicate this pixels has a complete (2n1+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
@@ -2399,7 +2354,6 @@ public class AverageFilter extends BaseFilter
 				}
 				newData[index] = (sum + sum1 * w1 + sum2 * w2) * divisor;
 			}
-		}
 
 		// Copy back
 		System.arraycopy(newData, 0, data, 0, data.length);
@@ -2419,7 +2373,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockAverage3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// Boundary control
 		final int xwidth = 1;
@@ -2427,9 +2381,9 @@ public class AverageFilter extends BaseFilter
 		final int xlimit = maxx - xwidth;
 		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[8];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[8];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		for (int y = -ywidth, d = 0; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
 				if (x != 0 || y != 0)
@@ -2450,12 +2404,12 @@ public class AverageFilter extends BaseFilter
 			for (int x = 0; x < maxx; x++)
 			{
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+					final float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 							data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 					newData[index1] = sum * divisor;
 				}
@@ -2508,7 +2462,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockAverage3x3(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// Boundary control
 		final int xlimit = maxx - 1;
@@ -2532,7 +2486,7 @@ public class AverageFilter extends BaseFilter
 			for (int x = 0; x < maxx; x++)
 			{
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y > 0 && y < ylimit) && (x > 0 && x < xlimit);
+				final boolean isInnerXY = (y > 0 && y < ylimit) && (x > 0 && x < xlimit);
 
 				// Sweep neighbourhood
 				float sum1 = 0;
@@ -2607,7 +2561,7 @@ public class AverageFilter extends BaseFilter
 	 */
 	public void blockGaussian3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = floatBuffer(data.length);
+		final float[] newData = floatBuffer(data.length);
 
 		// Boundary control
 		final int xwidth = 1;
@@ -2615,9 +2569,9 @@ public class AverageFilter extends BaseFilter
 		final int xlimit = maxx - xwidth;
 		final int ylimit = maxy - ywidth;
 
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
+		final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		final int[] xoffset = new int[offset.length];
+		final int[] yoffset = new int[offset.length];
 		for (int y = -ywidth, d = 0; y <= ywidth; y++)
 			for (int x = -xwidth; x <= xwidth; x++)
 				if (x != 0 || y != 0)
@@ -2628,7 +2582,7 @@ public class AverageFilter extends BaseFilter
 					d++;
 				}
 
-		float[] kernel = new float[] { 1f / 16, 2f / 16, 1f / 16, 2f / 16, /* 4f / 16, */2f / 16, 1f / 16, 2f / 16,
+		final float[] kernel = new float[] { 1f / 16, 2f / 16, 1f / 16, 2f / 16, /* 4f / 16, */2f / 16, 1f / 16, 2f / 16,
 				1f / 16 };
 		final float divisor = (float) (1.0 / 16.0);
 
@@ -2640,12 +2594,12 @@ public class AverageFilter extends BaseFilter
 			for (int x = 0; x < maxx; x++)
 			{
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+				final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] +
+					final float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] +
 							4 * data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] +
 							data[index2 + 1];
 					newData[index1] = sum * divisor;
@@ -2689,7 +2643,7 @@ public class AverageFilter extends BaseFilter
 	@Override
 	public AverageFilter clone()
 	{
-		AverageFilter o = (AverageFilter) super.clone();
+		final AverageFilter o = (AverageFilter) super.clone();
 		o.floatDataBuffer = null;
 		o.floatRowBuffer = null;
 		return o;

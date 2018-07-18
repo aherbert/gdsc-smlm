@@ -118,9 +118,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 		final float[] data1 = processor1.process(data, width, height);
 		final float[] data2 = processor2.process(data, width, height);
 		for (int i = 0; i < data1.length; i++)
-		{
 			data1[i] -= data2[i];
-		}
 		return data1;
 	}
 
@@ -132,7 +130,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	@Override
 	public DifferenceSpotFilter clone()
 	{
-		DifferenceSpotFilter f = (DifferenceSpotFilter) super.clone();
+		final DifferenceSpotFilter f = (DifferenceSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.processor1 = processor1.clone();
 		f.processor2 = processor2.clone();
@@ -158,7 +156,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("Filter 1 = " + processor1.getDescription());
 		list.add("Filter 2 = " + processor2.getDescription());
 		return list;

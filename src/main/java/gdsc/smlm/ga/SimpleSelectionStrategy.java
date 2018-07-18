@@ -44,7 +44,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	final int max;
 
 	private List<? extends Chromosome<T>> individuals = null;
-	
+
 	/** The tracker. */
 	TrackProgress tracker = null;
 
@@ -82,14 +82,13 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 		if (individuals == null || individuals.size() < 2)
 			return individuals;
 		@SuppressWarnings("unchecked")
+		final
 		Chromosome<T>[] subset = new Chromosome[individuals.size()];
 		int size = 0;
 		// Add only those with a fitness score
-		for (Chromosome<T> c : individuals)
+		for (final Chromosome<T> c : individuals)
 			if (c.getFitness() != null)
-			{
 				subset[size++] = c;
-			}
 		if (size < 3)
 			return Arrays.asList(Arrays.copyOf(subset, size));
 		if (tracker != null)

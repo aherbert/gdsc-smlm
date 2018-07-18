@@ -68,7 +68,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 	private final PolynomialSplineFunction alphaF;
 
 	/** The fast log function. */
-	private FastLog fastLog;
+	private final FastLog fastLog;
 
 	/**
 	 * Instantiates a new interpolated poisson fisher information.
@@ -126,7 +126,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 			BasePoissonFisherInformation upperFI)
 			throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
 	{
-		SplineInterpolator si = new SplineInterpolator();
+		final SplineInterpolator si = new SplineInterpolator();
 		alphaF = si.interpolate(logU, alpha);
 
 		this.lowerFixedI = lowerFixedI;
@@ -135,7 +135,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 		min = logU[0];
 		alphaMin = alpha[0];
 
-		int n_1 = logU.length - 1;
+		final int n_1 = logU.length - 1;
 		max = logU[n_1];
 		alphaMax = alpha[n_1];
 

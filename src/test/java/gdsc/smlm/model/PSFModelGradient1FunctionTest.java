@@ -41,42 +41,42 @@ public class PSFModelGradient1FunctionTest
 	public void canComputeValueAndGradient()
 	{
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-		double sx = 1.08;
-		double sy = 1.01;
-		double gamma = 0.389;
-		double d = 0.531;
-		double Ax = -0.0708;
-		double Bx = -0.073;
-		double Ay = 0.164;
-		double By = 0.0417;
-		AstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
+		final double sx = 1.08;
+		final double sy = 1.01;
+		final double gamma = 0.389;
+		final double d = 0.531;
+		final double Ax = -0.0708;
+		final double Bx = -0.073;
+		final double Ay = 0.164;
+		final double By = 0.0417;
+		final AstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
 		// Small size ensure the PSF model covers the entire image
-		int maxx = 11, maxy = 11;
+		final int maxx = 11, maxy = 11;
 		final double[] ve = new double[maxx * maxy];
 		final double[] vo = new double[maxx * maxy];
 		final double[][] ge = new double[maxx * maxy][];
 		final double[][] go = new double[maxx * maxy][];
 
-		PSFModelGradient1Function psf = new PSFModelGradient1Function(new GaussianPSFModel(zModel), maxx, maxy);
-		ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
+		final PSFModelGradient1Function psf = new PSFModelGradient1Function(new GaussianPSFModel(zModel), maxx, maxy);
+		final ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
 		f.setErfFunction(ErfFunction.COMMONS_MATH);
-		double[] a2 = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
+		final double[] a2 = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 
-		double c = maxx * 0.5;
+		final double c = maxx * 0.5;
 		for (int i = -1; i <= 1; i++)
 		{
-			double x0 = c + i * 0.33;
+			final double x0 = c + i * 0.33;
 			for (int j = -1; j <= 1; j++)
 			{
-				double x1 = c + j * 0.33;
+				final double x1 = c + j * 0.33;
 				for (int k = -1; k <= 1; k++)
 				{
-					double x2 = k * 0.33;
-					for (double in : new double[] { 23.2, 405.67 })
+					final double x2 = k * 0.33;
+					for (final double in : new double[] { 23.2, 405.67 })
 					{
 						// Background is constant for gradients so just use 1 value
-						double[] a = new double[] { 2.2, in, x0, x1, x2 };
+						final double[] a = new double[] { 2.2, in, x0, x1, x2 };
 						psf.initialise1(a);
 						psf.forEach(new Gradient1Procedure()
 						{

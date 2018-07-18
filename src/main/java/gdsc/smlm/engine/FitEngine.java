@@ -54,13 +54,13 @@ public class FitEngine
 	private final PeakResults results;
 	private boolean isAlive = true;
 
-	private FitJob sum = null;
+	private final FitJob sum = null;
 
 	// Used by the FitWorkers
-	private int fitting;
-	private MaximaSpotFilter spotFilter;
+	private final int fitting;
+	private final MaximaSpotFilter spotFilter;
 	private Logger logger = null;
-	private FileLogger fileLogger = null;
+	private final FileLogger fileLogger = null;
 	private FitTypeCounter counter = null;
 
 	/**
@@ -160,25 +160,25 @@ public class FitEngine
 
 		// Note - Copy the configuration for each worker.
 		// Set up for a direct copy of the settings.
-		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
-		FitConfiguration fitConfiguration = config.getFitConfiguration();
-		Calibration calibration = fitConfiguration.getCalibration();
-		PSF psf = fitConfiguration.getPSF();
+		final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
+		final FitConfiguration fitConfiguration = config.getFitConfiguration();
+		final Calibration calibration = fitConfiguration.getCalibration();
+		final PSF psf = fitConfiguration.getPSF();
 
 		for (int i = 0; i < threads; i++)
 		{
-			FitEngineConfiguration copy = new FitEngineConfiguration(fitEngineSettings, calibration, psf);
+			final FitEngineConfiguration copy = new FitEngineConfiguration(fitEngineSettings, calibration, psf);
 			// Copy anything else not in a proto object
 			copy.getFitConfiguration().copySettings(fitConfiguration);
 
-			FitWorker worker = new FitWorker(
+			final FitWorker worker = new FitWorker(
 					//config.clone(),
 					copy, results, jobs);
 			// Note - Clone the spot filter for each worker.
 			worker.setSearchParameters(getSpotFilter(), fitting);
 			worker.setLogger2(fileLogger);
 			worker.setCounter(counter);
-			Thread t = new Thread(worker);
+			final Thread t = new Thread(worker);
 
 			workers.add(worker);
 			this.threads.add(t);
@@ -208,9 +208,7 @@ public class FitEngine
 			put(job);
 		}
 		else
-		{
 			isAlive = false;
-		}
 	}
 
 	/**
@@ -225,7 +223,7 @@ public class FitEngine
 		{
 			jobs.put(job);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			// TODO - Handle thread errors
 			throw new RuntimeException("Unexpected interruption", e);
@@ -253,40 +251,32 @@ public class FitEngine
 		if (now)
 		{
 			// Request worker shutdown
-			for (FitWorker worker : workers)
+			for (final FitWorker worker : workers)
 				worker.finish();
 
 			// Workers may be waiting for a job.
 			// Add null jobs if the queue is not at capacity so they can be collected by alive workers.
 			// If there are already jobs then the worker will stop due to the finish() signal.
 			for (int i = 0; i < threads.size(); i++)
-			{
 				jobs.offer(new FitJob()); // non-blocking add to queue
-			}
 		}
 		else
-		{
 			// Finish all the worker threads by passing in a null job
 			for (int i = 0; i < threads.size(); i++)
-			{
 				put(new FitJob()); // blocking add to queue
-			}
-		}
 
 		// Collect all the threads
 		for (int i = 0; i < threads.size(); i++)
-		{
 			try
 			{
 				threads.get(i).join();
 				time += workers.get(i).getTime();
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				// TODO - Handle thread errors
 				e.printStackTrace();
 			}
-		}
 
 		if (fileLogger != null)
 			fileLogger.close();

@@ -34,7 +34,7 @@ public class PSFSpot extends BasePoint
 {
 	/** The time. */
 	public final int t;
-	
+
 	/** The peak result. */
 	public final PeakResult peakResult;
 	/**

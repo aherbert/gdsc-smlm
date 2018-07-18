@@ -73,7 +73,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	private static boolean enumerateEarly = true;
 	private GUIFilterSettings.Builder filterSettings;
 
-	private Pattern pattern = Pattern.compile("(\\S+)=\"(\\S+):(\\S+):(\\S+)\"(\\S*)");
+	private final Pattern pattern = Pattern.compile("(\\S+)=\"(\\S+):(\\S+):(\\S+)\"(\\S*)");
 
 	/*
 	 * (non-Javadoc)
@@ -97,28 +97,28 @@ public class CreateFilters implements PlugIn, ItemListener
 		// the output XML, replicating the element.
 
 		// Add a dummy root element to allow the XML to be loaded as a document
-		String xml = "<root>" + filterSettings.getFilterTemplate() + "</root>";
+		final String xml = "<root>" + filterSettings.getFilterTemplate() + "</root>";
 
 		// Load the XML as a document
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
 		IJ.showStatus("Creating filters");
 
 		try
 		{
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document dom = db.parse(new InputSource(new StringReader(xml)));
-			Element docElement = dom.getDocumentElement();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final Document dom = db.parse(new InputSource(new StringReader(xml)));
+			final Element docElement = dom.getDocumentElement();
 
-			StringWriter sw = new StringWriter();
+			final StringWriter sw = new StringWriter();
 			sw.write("<linked-list>");
 
 			// For each element
-			int childCount = docElement.getChildNodes().getLength();
+			final int childCount = docElement.getChildNodes().getLength();
 			int total = 0;
 			for (int c = 0; c < childCount; c++)
 			{
-				Node node = docElement.getChildNodes().item(c);
+				final Node node = docElement.getChildNodes().item(c);
 				if (node.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 
@@ -132,7 +132,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			else
 				IJ.error(TITLE, "No filters created");
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.error(TITLE, "Unable to load the input XML:\n" + e.getMessage());
 			IJ.showStatus("");
@@ -143,16 +143,16 @@ public class CreateFilters implements PlugIn, ItemListener
 			throws TransformerFactoryConfigurationError
 	{
 		// Get entire element as a string
-		String xmlString = gdsc.core.utils.XmlUtils.getString(node, false);
+		final String xmlString = gdsc.core.utils.XmlUtils.getString(node, false);
 
 		ArrayList<StringBuilder> out = new ArrayList<>();
 
 		// Process through the XML appending to the current output.
-		String[] tokens = xmlString.split("\\s+");
-		for (String token : tokens)
+		final String[] tokens = xmlString.split("\\s+");
+		for (final String token : tokens)
 		{
 			// Any attributes with enumerations should be expanded.
-			Matcher match = pattern.matcher(token);
+			final Matcher match = pattern.matcher(token);
 			if (match.find())
 			{
 				final String prefix = " " + match.group(1) + "=\"";
@@ -168,56 +168,41 @@ public class CreateFilters implements PlugIn, ItemListener
 					if (min.compareTo(max) > 0 || inc.compareTo(BigDecimal.ZERO) <= 0)
 						throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token);
 				}
-				catch (NumberFormatException e)
+				catch (final NumberFormatException e)
 				{
 					throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token, e);
 				}
 				final String suffix = "\"" + match.group(5);
 
 				// Enumerate the attribute
-				ArrayList<String> attributeText = new ArrayList<>();
+				final ArrayList<String> attributeText = new ArrayList<>();
 				for (BigDecimal bd = min; bd.compareTo(max) <= 0; bd = bd.add(inc))
 					attributeText.add(prefix + bd.toString() + suffix);
 
 				// Add to the current output
-				ArrayList<StringBuilder> out2 = new ArrayList<>(out.size() * attributeText.size());
+				final ArrayList<StringBuilder> out2 = new ArrayList<>(out.size() * attributeText.size());
 
 				if (enumerateEarly)
-				{
 					// Enumerate earlier attributes first
-					for (String text : attributeText)
-					{
-						for (StringBuilder sb : out)
-						{
+					for (final String text : attributeText)
+						for (final StringBuilder sb : out)
 							out2.add(new StringBuilder(sb.toString()).append(text));
-						}
-					}
-				}
 				else
-				{
 					// Enumerate later attributes first
-					for (StringBuilder sb : out)
+					for (final StringBuilder sb : out)
 					{
 						final String current = sb.toString();
-						for (String text : attributeText)
-						{
+						for (final String text : attributeText)
 							out2.add(new StringBuilder(current).append(text));
-						}
 					}
-				}
 
 				out = out2;
 			}
+			else if (out.isEmpty())
+				out.add(new StringBuilder(token));
 			else
-			{
-				if (out.isEmpty())
-					out.add(new StringBuilder(token));
-				else
-				{
-					for (StringBuilder sb : out)
-						sb.append(" ").append(token);
-				}
-			}
+				for (final StringBuilder sb : out)
+					sb.append(" ").append(token);
 		}
 
 		if (out.size() > 0)
@@ -225,7 +210,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			sw.write("<FilterSet name=\"");
 			sw.write(getName(out.get(0)));
 			sw.write("\"><filters class=\"linked-list\">");
-			for (StringBuilder sb : out)
+			for (final StringBuilder sb : out)
 				sw.write(sb.toString());
 			sw.write("</filters></FilterSet>");
 		}
@@ -234,7 +219,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 	private static String getName(StringBuilder sb)
 	{
-		Filter f = Filter.fromXML(sb.toString());
+		final Filter f = Filter.fromXML(sb.toString());
 		if (f != null)
 			return f.getType().replaceAll("&", "&amp;");
 		return "";
@@ -244,7 +229,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	{
 		// Save the output to file
 		IJ.showStatus("Saving filters");
-		String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
+		final String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
 		if (filename != null)
 		{
 			filterSettings.setFilterSetFilename(filename);
@@ -259,7 +244,7 @@ public class CreateFilters implements PlugIn, ItemListener
 				SettingsManager.writeSettings(filterSettings.build());
 				IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				IJ.log("Unable to save the filter sets to file: " + e.getMessage());
 			}
@@ -268,7 +253,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(
@@ -282,7 +267,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 		if (Utils.isShowGenericDialog())
 		{
-			Checkbox cb = (Checkbox) gd.getCheckboxes().get(1);
+			final Checkbox cb = (Checkbox) gd.getCheckboxes().get(1);
 			cb.addItemListener(this);
 		}
 
@@ -292,7 +277,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 		filterSettings.setFilterTemplate(gd.getNextText());
 		enumerateEarly = gd.getNextBoolean();
-		boolean demoFilters = gd.getNextBoolean();
+		final boolean demoFilters = gd.getNextBoolean();
 
 		if (demoFilters)
 		{
@@ -308,7 +293,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	{
 		// When the checkbox is clicked, output the list of available filters to the ImageJ log
 
-		Checkbox cb = (Checkbox) e.getSource();
+		final Checkbox cb = (Checkbox) e.getSource();
 		if (cb.getState())
 		{
 			cb.setState(false);
@@ -348,15 +333,15 @@ public class CreateFilters implements PlugIn, ItemListener
 		{
 			// Process the XML substituting attributes in the order they occur using a SAX parser.
 			// Write the new XMl to a buffer.
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			try
 			{
-				SAXParserFactory factory = SAXParserFactory.newInstance();
-				SAXParser saxParser = factory.newSAXParser();
+				final SAXParserFactory factory = SAXParserFactory.newInstance();
+				final SAXParser saxParser = factory.newSAXParser();
 				saxParser.parse(new InputSource(new StringReader(xml)),
 						new AttributeSubstitutionHandler(sb, attributeSubstitutions));
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				e.printStackTrace();
 			}
@@ -399,10 +384,10 @@ public class CreateFilters implements PlugIn, ItemListener
 			for (int attribute = 0; attribute < attributes.getLength(); attribute++)
 			{
 				sb.append(" ");
-				String name = attributes.getQName(attribute);
+				final String name = attributes.getQName(attribute);
 				if (substitutionCount < attributeSubstitutions.length && !name.equals("class"))
 				{
-					String nextSubstitution = attributeSubstitutions[substitutionCount++];
+					final String nextSubstitution = attributeSubstitutions[substitutionCount++];
 					if (nextSubstitution != null)
 					{
 						sb.append(name).append("=\"").append(nextSubstitution).append("\"");

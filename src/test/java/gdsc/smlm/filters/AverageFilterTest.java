@@ -37,10 +37,10 @@ import gdsc.test.TestSettings.TestComplexity;
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
 {
-	private int InternalITER3 = 500;
-	private int InternalITER = 50;
-	private int ITER3 = 200;
-	private int ITER = 20;
+	private final int InternalITER3 = 500;
+	private final int InternalITER = 50;
+	private final int ITER3 = 200;
+	private final int ITER = 20;
 
 	/**
 	 * Do a simple and stupid mean filter.
@@ -59,9 +59,9 @@ public class AverageFilterTest extends AbstractFilterTest
 		if (boxSize <= 0)
 			return;
 
-		int n = (int) Math.ceil(boxSize);
-		int size = 2 * n + 1;
-		float[] weight = new float[size];
+		final int n = (int) Math.ceil(boxSize);
+		final int size = 2 * n + 1;
+		final float[] weight = new float[size];
 		Arrays.fill(weight, 1);
 		if (boxSize != n)
 			weight[0] = weight[weight.length - 1] = boxSize - (n - 1);
@@ -72,10 +72,9 @@ public class AverageFilterTest extends AbstractFilterTest
 				norm += weight[yy] * weight[xx];
 		norm = (float) (1.0 / norm);
 
-		float[] out = new float[data.length];
+		final float[] out = new float[data.length];
 
 		for (int y = 0; y < maxy; y++)
-		{
 			for (int x = 0; x < maxx; x++)
 			{
 				float sum = 0;
@@ -93,13 +92,12 @@ public class AverageFilterTest extends AbstractFilterTest
 							xxx = 0;
 						if (xxx >= maxx)
 							xxx = maxx - 1;
-						int index = yyy * maxx + xxx;
+						final int index = yyy * maxx + xxx;
 						sum += data[index] * weight[yy] * weight[xx];
 					}
 				}
 				out[y * maxx + x] = sum * norm;
 			}
-		}
 		System.arraycopy(out, 0, data, 0, out.length);
 	}
 
@@ -127,9 +125,9 @@ public class AverageFilterTest extends AbstractFilterTest
 	private static void averageIsCorrect(RandomGenerator rg, int width, int height, float boxSize, boolean internal,
 			DataFilter filter) throws ArrayComparisonFailure
 	{
-		float[] data1 = createData(rg, width, height);
-		float[] data2 = data1.clone();
-		FloatEquality eq = new FloatEquality(5e-5f, 1e-10f);
+		final float[] data1 = createData(rg, width, height);
+		final float[] data2 = data1.clone();
+		final FloatEquality eq = new FloatEquality(5e-5f, 1e-10f);
 
 		AverageFilterTest.average(data1, width, height, boxSize);
 		if (internal)
@@ -148,11 +146,11 @@ public class AverageFilterTest extends AbstractFilterTest
 
 	private static void checkIsCorrect(DataFilter filter)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		for (int width : primes)
-			for (int height : primes)
-				for (float boxSize : boxSizes)
-					for (boolean internal : checkInternal)
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		for (final int width : primes)
+			for (final int height : primes)
+				for (final float boxSize : boxSizes)
+					for (final boolean internal : checkInternal)
 					{
 						averageIsCorrect(rg, width, height, boxSize, internal, filter);
 						if (filter.isInterpolated)
@@ -166,7 +164,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void blockAverageIsCorrect()
 	{
-		DataFilter filter = new DataFilter("block", true)
+		final DataFilter filter = new DataFilter("block", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -186,7 +184,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageIsCorrect()
 	{
-		DataFilter filter = new DataFilter("stripedBlock", true)
+		final DataFilter filter = new DataFilter("stripedBlock", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -206,7 +204,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void rollingBlockAverageIsCorrect()
 	{
-		DataFilter filter = new DataFilter("rollingBlock", false)
+		final DataFilter filter = new DataFilter("rollingBlock", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -235,30 +233,30 @@ public class AverageFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
-		float[] boxSizes = new float[testBoxSizes.length];
-		float offset = (fast.isInterpolated && slow.isInterpolated) ? 0.3f : 0;
+		final float[] boxSizes = new float[testBoxSizes.length];
+		final float offset = (fast.isInterpolated && slow.isInterpolated) ? 0.3f : 0;
 		for (int i = 0; i < boxSizes.length; i++)
 			boxSizes[i] = testBoxSizes[i] - offset;
 
 		// Initialise
-		for (float boxSize : boxSizes)
+		for (final float boxSize : boxSizes)
 		{
 			fast.filter(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			slow.filter(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : boxSizes)
+		for (final float boxSize : boxSizes)
 		{
-			int iter = (boxSize == 1) ? ITER3 : ITER;
-			for (int width : primes)
-				for (int height : primes)
+			final int iter = (boxSize == 1) ? ITER3 : ITER;
+			for (final int width : primes)
+				for (final int height : primes)
 				{
 					dataSet = getSpeedData(iter);
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet)
+					for (final float[] data : dataSet)
 						fast.filter(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -267,21 +265,21 @@ public class AverageFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : boxSizes)
+		for (final float boxSize : boxSizes)
 		{
-			int iter = (boxSize == 1) ? ITER3 : ITER;
+			final int iter = (boxSize == 1) ? ITER3 : ITER;
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
 					dataSet = getSpeedData(iter);
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet)
+					for (final float[] data : dataSet)
 						slow.filter(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -311,30 +309,30 @@ public class AverageFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<>();
+		final ArrayList<Long> fastTimes = new ArrayList<>();
 
-		float[] boxSizes = new float[testBoxSizes.length];
-		float offset = (fast.isInterpolated && slow.isInterpolated) ? 0.3f : 0;
+		final float[] boxSizes = new float[testBoxSizes.length];
+		final float offset = (fast.isInterpolated && slow.isInterpolated) ? 0.3f : 0;
 		for (int i = 0; i < boxSizes.length; i++)
 			boxSizes[i] = testBoxSizes[i] - offset;
 
 		// Initialise
-		for (float boxSize : boxSizes)
+		for (final float boxSize : boxSizes)
 		{
 			fast.filterInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			slow.filterInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : boxSizes)
+		for (final float boxSize : boxSizes)
 		{
-			int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
-			for (int width : primes)
-				for (int height : primes)
+			final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
+			for (final int width : primes)
+				for (final int height : primes)
 				{
 					dataSet = getSpeedData(iter);
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet)
+					for (final float[] data : dataSet)
 						fast.filterInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
@@ -343,21 +341,21 @@ public class AverageFilterTest extends AbstractFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : boxSizes)
+		for (final float boxSize : boxSizes)
 		{
-			int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
+			final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (final int width : primes)
+				for (final int height : primes)
 				{
 					dataSet = getSpeedData(iter);
 
 					long time = System.nanoTime();
-					for (float[] data : dataSet)
+					for (final float[] data : dataSet)
 						slow.filterInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
-					long fastTime = fastTimes.get(index++);
+					final long fastTime = fastTimes.get(index++);
 					slowTotal += time;
 					fastTotal += fastTime;
 					boxSlowTotal += time;
@@ -378,7 +376,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockIsFasterThanBlock()
 	{
-		DataFilter slow = new DataFilter("block", false)
+		final DataFilter slow = new DataFilter("block", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -392,7 +390,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.blockAverageInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock", false)
+		final DataFilter fast = new DataFilter("stripedBlock", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -414,7 +412,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void interpolatedStripedBlockIsFasterThanBlock()
 	{
-		DataFilter slow = new DataFilter("block", true)
+		final DataFilter slow = new DataFilter("block", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -428,7 +426,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.blockAverageInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock", true)
+		final DataFilter fast = new DataFilter("stripedBlock", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -450,7 +448,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void rollingBlockIsFasterThanBlock()
 	{
-		DataFilter slow = new DataFilter("block", false)
+		final DataFilter slow = new DataFilter("block", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -464,7 +462,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.blockAverageInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("rollingBlock", false)
+		final DataFilter fast = new DataFilter("rollingBlock", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -486,7 +484,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void rollingBlockIsFasterThanStripedBlock()
 	{
-		DataFilter slow = new DataFilter("stripedBlock", false)
+		final DataFilter slow = new DataFilter("stripedBlock", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -500,7 +498,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("rollingBlock", false)
+		final DataFilter fast = new DataFilter("rollingBlock", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -522,7 +520,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlock3x3IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		final DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -536,7 +534,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock3x3", false)
+		final DataFilter fast = new DataFilter("stripedBlock3x3", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -551,7 +549,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		int[] testBoxSizes = new int[] { 1 };
+		final int[] testBoxSizes = new int[] { 1 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}
@@ -559,7 +557,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void interpolatedStripedBlock3x3IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		final DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -573,7 +571,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock3x3", true)
+		final DataFilter fast = new DataFilter("stripedBlock3x3", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -588,7 +586,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		int[] testBoxSizes = new int[] { 1 };
+		final int[] testBoxSizes = new int[] { 1 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}
@@ -596,7 +594,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlock5x5IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		final DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -610,7 +608,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock5x5", false)
+		final DataFilter fast = new DataFilter("stripedBlock5x5", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -625,7 +623,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		int[] testBoxSizes = new int[] { 2 };
+		final int[] testBoxSizes = new int[] { 2 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}
@@ -633,7 +631,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void interpolatedStripedBlock5x5IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		final DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -647,7 +645,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock5x5", true)
+		final DataFilter fast = new DataFilter("stripedBlock5x5", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -662,7 +660,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		int[] testBoxSizes = new int[] { 2 };
+		final int[] testBoxSizes = new int[] { 2 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}
@@ -670,7 +668,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlock7x7IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		final DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -684,7 +682,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock7x7", false)
+		final DataFilter fast = new DataFilter("stripedBlock7x7", false)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -699,7 +697,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		int[] testBoxSizes = new int[] { 3 };
+		final int[] testBoxSizes = new int[] { 3 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}
@@ -707,7 +705,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	@Test
 	public void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		final DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -721,7 +719,7 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock7x7", true)
+		final DataFilter fast = new DataFilter("stripedBlock7x7", true)
 		{
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
@@ -736,7 +734,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		int[] testBoxSizes = new int[] { 3 };
+		final int[] testBoxSizes = new int[] { 3 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}

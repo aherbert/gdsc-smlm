@@ -38,17 +38,17 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			double norm = 1.0 / (Math.sqrt(2 * Math.PI) * s);
-			double var2 = 2 * s * s;
+			final double norm = 1.0 / (Math.sqrt(2 * Math.PI) * s);
+			final double var2 = 2 * s * s;
 
-			GaussianKernel k = new GaussianKernel(s);
-			double[] o = k.getGaussianKernel(1, 5, false);
-			double f = k.getConversionFactor(o);
+			final GaussianKernel k = new GaussianKernel(s);
+			final double[] o = k.getGaussianKernel(1, 5, false);
+			final double f = k.getConversionFactor(o);
 			for (int u = o.length / 2, x = u; x >= 0; x--)
 			{
-				double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
+				final double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
 				Assert.assertEquals(e, f * o[x], e * 1e-10);
 			}
 		}
@@ -59,23 +59,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int scale = 1; scale < 16; scale *= 2)
 				for (int range = 3; range < 5; range++)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-						double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+						final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
 
 						Assert.assertArrayEquals(e, o, 0.0);
 					}
-				}
 		}
 	}
 
@@ -84,23 +80,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int scale = 16; scale > 1; scale /= 2)
 				for (int range = 3; range < 5; range++)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-						double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+						final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
 
 						Assert.assertArrayEquals(e, o, 0.0);
 					}
-				}
 		}
 	}
 
@@ -109,23 +101,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int range = 3; range < 5; range++)
 				for (int scale = 1; scale < 16; scale *= 2)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-						double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+						final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
 
 						Assert.assertArrayEquals(e, o, 0.0);
 					}
-				}
 		}
 	}
 
@@ -134,23 +122,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int range = 3; range < 5; range++)
 				for (int scale = 16; scale > 1; scale /= 2)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-						double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+						final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
 
 						Assert.assertArrayEquals(e, o, 0.0);
 					}
-				}
 		}
 	}
 
@@ -159,23 +143,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int scale = 1; scale <= 5; scale++)
 				for (int range = 3; range < 5; range++)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+						final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
 						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
-				}
 		}
 	}
 
@@ -184,23 +164,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int scale = 5; scale >= 1; scale--)
 				for (int range = 3; range < 5; range++)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+						final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
 						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
-				}
 		}
 	}
 
@@ -209,23 +185,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int range = 3; range < 5; range++)
 				for (int scale = 1; scale <= 5; scale++)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+						final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
 						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
-				}
 		}
 	}
 
@@ -234,23 +206,19 @@ public class GaussianKernelTest
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			double s = 0.33 * (1 << i);
+			final double s = 0.33 * (1 << i);
 
-			GaussianKernel k = new GaussianKernel(s);
+			final GaussianKernel k = new GaussianKernel(s);
 
 			for (int range = 3; range < 5; range++)
 				for (int scale = 5; scale >= 1; scale--)
-				{
-					//System.out.printf("s=%g scale=%d range=%d\n", s, scale, range);
-
-					for (boolean edgeCorrection : new boolean[] { true, false })
+					for (final boolean edgeCorrection : new boolean[] { true, false })
 					{
-						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
+						final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+						final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
 						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
-				}
 		}
 	}
 }

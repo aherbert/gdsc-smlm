@@ -67,11 +67,11 @@ public class DistanceResultFilter extends ResultFilter
 	public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
 	{
 		boolean found = false;
-		for (PeakResult r : results)
+		for (final PeakResult r : results)
 		{
 			if (r == null)
 				continue;
-			for (float[] coord : filter)
+			for (final float[] coord : filter)
 			{
 				final float dx = r.getXPosition() - coord[0];
 				final float dy = r.getYPosition() - coord[1];
@@ -101,7 +101,7 @@ public class DistanceResultFilter extends ResultFilter
 	public void filter(FitResult fitResult, int maxIndex, float x, float y)
 	{
 		boolean found = false;
-		for (float[] coord : filter)
+		for (final float[] coord : filter)
 		{
 			final float dx = x - coord[0];
 			final float dy = y - coord[1];

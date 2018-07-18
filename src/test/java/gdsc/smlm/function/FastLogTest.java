@@ -196,7 +196,7 @@ public class FastLogTest
 		canComputeLog(new TestLog(tLog), true);
 	}
 
-	private void canComputeLog(BaseTestLog f, boolean edgeCases)
+	private static void canComputeLog(BaseTestLog f, boolean edgeCases)
 	{
 		testLog(f, Float.NaN, edgeCases);
 		testLog(f, Float.NEGATIVE_INFINITY, edgeCases);
@@ -215,11 +215,11 @@ public class FastLogTest
 		testLog(f, Float.POSITIVE_INFINITY, edgeCases);
 	}
 
-	private void testLog(BaseTestLog f, float v, boolean test)
+	private static void testLog(BaseTestLog f, float v, boolean test)
 	{
-		float e = (float) Math.log(v);
-		float o = f.log(v);
-		float error = FloatEquality.relativeError(e, o);
+		final float e = (float) Math.log(v);
+		final float o = f.log(v);
+		final float error = FloatEquality.relativeError(e, o);
 		TestSettings.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
@@ -279,7 +279,7 @@ public class FastLogTest
 		canComputeDoubleLog(new TestLog(tLog), true);
 	}
 
-	private void canComputeDoubleLog(BaseTestLog f, boolean edgeCases)
+	private static void canComputeDoubleLog(BaseTestLog f, boolean edgeCases)
 	{
 		testDoubleLog(f, Double.NaN, edgeCases);
 		testDoubleLog(f, Double.NEGATIVE_INFINITY, edgeCases);
@@ -299,11 +299,11 @@ public class FastLogTest
 		testDoubleLog(f, Double.POSITIVE_INFINITY, edgeCases);
 	}
 
-	private void testDoubleLog(BaseTestLog f, double v, boolean test)
+	private static void testDoubleLog(BaseTestLog f, double v, boolean test)
 	{
-		double e = Math.log(v);
-		double o = f.log(v);
-		double error = DoubleEquality.relativeError(e, o);
+		final double e = Math.log(v);
+		final double o = f.log(v);
+		final double error = DoubleEquality.relativeError(e, o);
 		TestSettings.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
@@ -325,14 +325,12 @@ public class FastLogTest
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
-		float[] d = generateRandomFloats(1000000);
-		float[] logD = new float[d.length];
+		final float[] d = generateRandomFloats(1000000);
+		final float[] logD = new float[d.length];
 		for (int i = 0; i < d.length; i++)
-		{
 			logD[i] = (float) Math.log(d[i]);
-		}
 
-		int min = 0, max = 23;
+		final int min = 0, max = 23;
 		//int min = 13, max = 13;
 
 		//		for (int n = min; n <= max; n++)
@@ -344,29 +342,23 @@ public class FastLogTest
 		//			canTestFloatError(new TestFastLog(new FFastLog(n)), d, logD);
 		//		}
 		for (int n = min; n <= max; n++)
-		{
 			canTestFloatError(new TestFastLog(new DFastLog(n)), d, logD);
-		}
 		for (int n = min; n <= max; n++)
-		{
 			canTestFloatError(new TestFastLog(new TurboLog(n)), d, logD);
-		}
 		for (int n = min; n <= max; n++)
-		{
 			canTestFloatError(new TestFastLog(new TurboLog2(n)), d, logD);
-		}
 	}
 
-	private float[] generateRandomFloats(int n)
+	private static float[] generateRandomFloats(int n)
 	{
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		float[] d = new float[n];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final float[] d = new float[n];
 		for (int i = 0; i < d.length; i++)
 			d[i] = nextUniformFloat(r);
 		return d;
 	}
 
-	private float nextUniformFloat(RandomGenerator r)
+	private static float nextUniformFloat(RandomGenerator r)
 	{
 		int u = r.nextInt();
 		// Mask out sign and the last bit of the exponent (avoid infinity and NaN)
@@ -380,8 +372,8 @@ public class FastLogTest
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		TurboList<TestFastLog> test = new TurboList<>();
-		int n = 13;
+		final TurboList<TestFastLog> test = new TurboList<>();
+		final int n = 13;
 		test.add(new TestFastLog(ICSIFastLog.create(n, DataType.FLOAT)));
 		test.add(new TestFastLog(new FFastLog(n)));
 		test.add(new TestFastLog(new DFastLog(n)));
@@ -390,7 +382,7 @@ public class FastLogTest
 
 		// Full range in blocks.
 		// Only when the number is around 1 or min value are there significant errors
-		float[] d = null, logD = null;
+		final float[] d = null, logD = null;
 
 		// All
 		//testFloatErrorRange(test, n, d, logD, 0, 255, 0);
@@ -410,38 +402,34 @@ public class FastLogTest
 			if (logD == null || logD.length < d.length)
 				logD = new float[d.length];
 			for (int i = 0; i < d.length; i++)
-			{
 				logD[i] = (float) Math.log(d[i]);
-			}
 			System.out.printf("e=%d-%d\n", e, e + ee);
-			for (TestFastLog f : test)
+			for (final TestFastLog f : test)
 				canTestFloatError(f, d, logD);
 		}
 	}
 
-	private float[] generateFloats(int mine, int maxe, float[] d)
+	private static float[] generateFloats(int mine, int maxe, float[] d)
 	{
 		// Mantissa = 23-bit, Exponent = 8-bit
-		int mbits = 23;
+		final int mbits = 23;
 		mine = Maths.clip(0, 255, mine);
 		maxe = Maths.clip(0, 255, maxe);
 		if (mine > maxe)
 			throw new IllegalStateException();
-		int mn = (1 << mbits);
-		int n = mn * (maxe - mine + 1);
+		final int mn = (1 << mbits);
+		final int n = mn * (maxe - mine + 1);
 		if (d == null || d.length < n)
 			d = new float[n];
 		int i = 0;
 		for (int m = 0; m < mn; m++)
-		{
 			for (int e = mine; e <= maxe; e++)
 			{
-				int bits = m | (e << 23);
-				float v = Float.intBitsToFloat(bits);
+				final int bits = m | (e << 23);
+				final float v = Float.intBitsToFloat(bits);
 				//System.out.printf("%g = %s\n", v, Integer.toBinaryString(bits));
 				d[i++] = v;
 			}
-		}
 		return d;
 	}
 
@@ -487,7 +475,7 @@ public class FastLogTest
 
 		double getSD()
 		{
-			double sd = ss - (s * s) / n;
+			final double sd = ss - (s * s) / n;
 			if (sd > 0.0)
 				return Math.sqrt(sd / (n - 1));
 			else
@@ -502,7 +490,7 @@ public class FastLogTest
 
 	private void canTestFloatError(BaseTestLog f, float[] d, float[] logD)
 	{
-		FPair pair = new FPair();
+		final FPair pair = new FPair();
 		if (!next(f, pair, d))
 			return;
 
@@ -513,8 +501,8 @@ public class FastLogTest
 		//		{
 		//			System.out.printf("Big error: %f %f\n", v, d[pair.i-1]);
 		//		}
-		Stats s1 = new Stats(delta, d[pair.i - 1]);
-		Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
+		final Stats s1 = new Stats(delta, d[pair.i - 1]);
+		final Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
 		while (next(f, pair, d))
 		{
 			v = logD[pair.i - 1];
@@ -532,11 +520,11 @@ public class FastLogTest
 		System.out.printf("%s, n=%d, c=%d : %s : relative %s\n", f.name, f.getN(), s1.n, s1.summary(), s2.summary());
 	}
 
-	private boolean next(BaseTestLog f, FPair pair, float[] d)
+	private static boolean next(BaseTestLog f, FPair pair, float[] d)
 	{
 		while (pair.i < d.length)
 		{
-			float x = d[pair.i++];
+			final float x = d[pair.i++];
 			if (x == 0)// Skip infinity
 				continue;
 			pair.f = f.log(x);
@@ -553,19 +541,19 @@ public class FastLogTest
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
-		double[] d = new double[10000000];
-		double[] logD = new double[d.length];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
+		final double[] d = new double[10000000];
+		final double[] logD = new double[d.length];
 		for (int i = 0; i < d.length; i++)
 		{
-			double v = nextUniformDouble(r);
+			final double v = nextUniformDouble(r);
 			d[i] = v;
 			logD[i] = Math.log(v);
 		}
 
 		//int min = 0, max = 23;
-		int min = 4, max = 13;
+		final int min = 4, max = 13;
 
 		//		for (int n = min; n <= max; n++)
 		//		{
@@ -592,13 +580,13 @@ public class FastLogTest
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
-		double[] d = new double[100000];
-		double[] logD = new double[d.length];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
+		final double[] d = new double[100000];
+		final double[] logD = new double[d.length];
 		for (int i = 0; i < d.length; i++)
 		{
-			double v = nextUniformDouble(r);
+			final double v = nextUniformDouble(r);
 			d[i] = v;
 			logD[i] = Math.log1p(v);
 		}
@@ -607,7 +595,7 @@ public class FastLogTest
 		canTestDoubleError(new TestLog1P(new MathLog()), d, logD);
 	}
 
-	private double nextUniformDouble(RandomGenerator r)
+	private static double nextUniformDouble(RandomGenerator r)
 	{
 		long u = r.nextLong();
 		// Mask out sign and the last bit of the exponent (avoid infinity and NaN)
@@ -621,10 +609,10 @@ public class FastLogTest
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 
-		TurboList<TestFastLog> test = new TurboList<>();
-		int n = 13;
+		final TurboList<TestFastLog> test = new TurboList<>();
+		final int n = 13;
 		test.add(new TestFastLog(ICSIFastLog.create(n, DataType.DOUBLE)));
 		test.add(new TestFastLog(new FFastLog(n)));
 		test.add(new TestFastLog(new DFastLog(n)));
@@ -632,7 +620,7 @@ public class FastLogTest
 
 		// Full range in blocks.
 		// Only when the number is around 1 or min value are there significant errors
-		double[] d = new double[10000000], logD = null;
+		final double[] d = new double[10000000], logD = null;
 
 		// All
 		//testDoubleErrorRange(test, n, d, logD, 0, 255, 0);
@@ -652,16 +640,14 @@ public class FastLogTest
 			if (logD == null || logD.length < d.length)
 				logD = new double[d.length];
 			for (int i = 0; i < d.length; i++)
-			{
 				logD[i] = Math.log(d[i]);
-			}
 			System.out.printf("e=%d-%d\n", e, e + ee);
-			for (TestFastLog f : test)
+			for (final TestFastLog f : test)
 				canTestDoubleError(f, d, logD);
 		}
 	}
 
-	private double[] generateDoubles(RandomGenerator r, int mine, int maxe, double[] d)
+	private static double[] generateDoubles(RandomGenerator r, int mine, int maxe, double[] d)
 	{
 		// Mantissa = 52-bit, Exponent = 11-bit
 		mine = Maths.clip(0, 2047, mine);
@@ -672,12 +658,12 @@ public class FastLogTest
 		while (i < d.length)
 		{
 			// Only generate the mantissa
-			long m = r.nextLong() & 0xfffffffffffffL;
+			final long m = r.nextLong() & 0xfffffffffffffL;
 
 			for (long e = mine; e <= maxe && i < d.length; e++)
 			{
-				long bits = m | (e << 52);
-				double v = Double.longBitsToDouble(bits);
+				final long bits = m | (e << 52);
+				final double v = Double.longBitsToDouble(bits);
 				//System.out.printf("%g = %s\n", v, Long.toBinaryString(bits));
 				d[i++] = v;
 			}
@@ -693,15 +679,15 @@ public class FastLogTest
 
 	private void canTestDoubleError(BaseTestLog f, double[] d, double[] logD)
 	{
-		DPair pair = new DPair();
+		final DPair pair = new DPair();
 		if (!next(f, pair, d))
 			return;
 
 		double v = logD[pair.i - 1];
 		double delta = v - pair.f;
 		delta = Math.abs(delta);
-		Stats s1 = new Stats(delta, d[pair.i - 1]);
-		Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
+		final Stats s1 = new Stats(delta, d[pair.i - 1]);
+		final Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
 		while (next(f, pair, d))
 		{
 			v = logD[pair.i - 1];
@@ -715,11 +701,11 @@ public class FastLogTest
 		System.out.printf("%s, n=%d, c=%d : %s : relative %s\n", f.name, f.getN(), s1.n, s1.summary(), s2.summary());
 	}
 
-	private boolean next(BaseTestLog f, DPair pair, double[] d)
+	private static boolean next(BaseTestLog f, DPair pair, double[] d)
 	{
 		while (pair.i < d.length)
 		{
-			double x = d[pair.i++];
+			final double x = d[pair.i++];
 			if (x == 0)// Skip infinity
 				continue;
 			pair.f = f.log(x);
@@ -769,7 +755,7 @@ public class FastLogTest
 		@Override
 		public Object run(Object data)
 		{
-			float[] r = new float[x.length];
+			final float[] r = new float[x.length];
 			for (int i = 0; i < x.length; i++)
 				r[i] = log.log(x[i]);
 			return r;
@@ -782,42 +768,40 @@ public class FastLogTest
 		// No assertions, this is just a report
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		float[] x = new float[1000000];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final float[] x = new float[1000000];
 		for (int i = 0; i < x.length; i++)
-		{
 			x[i] = nextUniformFloat(r);
-		}
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new FloatTimingTask(new TestLog(new MathLog()), 0, x));
 		ts.execute(new FloatTimingTask(new TestLog(new FastMathLog()), 0, x));
-		for (int q : new int[] { 11 })
+		for (final int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
-			int n = 23 - q;
-			ICSIFastLog f = ICSIFastLog.create(n, DataType.FLOAT);
+			final int n = 23 - q;
+			final ICSIFastLog f = ICSIFastLog.create(n, DataType.FLOAT);
 			ts.execute(new FloatTimingTask(new TestLog(f), q, x));
 			ts.execute(new FloatTimingTask(new TestFastLog(f), q, x));
-			FFastLog ff = new FFastLog(n);
+			final FFastLog ff = new FFastLog(n);
 			ts.execute(new FloatTimingTask(new TestLog(ff), q, x));
 			ts.execute(new FloatTimingTask(new TestFastLog(ff), q, x));
-			DFastLog df = new DFastLog(n);
+			final DFastLog df = new DFastLog(n);
 			ts.execute(new FloatTimingTask(new TestLog(df), q, x));
 			ts.execute(new FloatTimingTask(new TestFastLog(df), q, x));
-			TurboLog tf = new TurboLog(n);
+			final TurboLog tf = new TurboLog(n);
 			ts.execute(new FloatTimingTask(new TestLog(tf), q, x));
 			ts.execute(new FloatTimingTask(new TestFastLog(tf), q, x));
 			//TurboLog2 tf2 = new TurboLog2(n);
 			//ts.execute(new FloatTimingTask(new TestLog(tf2), q, x));
 			//ts.execute(new FloatTimingTask(new TestFastLog(tf2), q, x));
 			// For the same precision we can reduce n
-			TurboLog2 tf3 = new TurboLog2(n - 1);
+			final TurboLog2 tf3 = new TurboLog2(n - 1);
 			ts.execute(new FloatTimingTask(new TestLog(tf3), q + 1, x));
 			ts.execute(new FloatTimingTask(new TestFastLog(tf3), q + 1, x));
 		}
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
 	}
@@ -835,7 +819,7 @@ public class FastLogTest
 		@Override
 		public Object run(Object data)
 		{
-			double[] r = new double[x.length];
+			final double[] r = new double[x.length];
 			for (int i = 0; i < x.length; i++)
 				r[i] = log.log(x[i]);
 			return r;
@@ -857,7 +841,7 @@ public class FastLogTest
 		@Override
 		public Object run(Object data)
 		{
-			double[] r = new double[x.length];
+			final double[] r = new double[x.length];
 			for (int i = 0; i < x.length; i++)
 				r[i] = log.log((float) x[i]);
 			//r[i] = log.log(xf[i]);
@@ -871,37 +855,35 @@ public class FastLogTest
 		// No assertions, this is just a report
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		double[] x = new double[1000000];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
-		{
 			x[i] = nextUniformDouble(r);
-		}
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
 		ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
 		//// Test min acceptable precision
 		//TurboLog2 tf3 = new TurboLog2(8);
 		//ts.execute(new DoubleTimingTask(new TestLog(tf3), 15, x));
 		//ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
-		for (int q : new int[] { 11 })
+		for (final int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
-			int n = 23 - q;
-			ICSIFastLog f = ICSIFastLog.create(n, DataType.DOUBLE);
+			final int n = 23 - q;
+			final ICSIFastLog f = ICSIFastLog.create(n, DataType.DOUBLE);
 			ts.execute(new DoubleTimingTask(new TestLog(f), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(f), q, x));
-			DFastLog df = new DFastLog(n);
+			final DFastLog df = new DFastLog(n);
 			//ts.execute(new DoubleTimingTask(new DFastLog_log2(f), q, x));
 			//ts.execute(new DoubleTimingTask(new DTestFastLog2(f), q, x));
 			ts.execute(new DoubleTimingTask(new TestLog(df), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(df), q, x));
-			TurboLog tf = new TurboLog(n);
+			final TurboLog tf = new TurboLog(n);
 			ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
 			// Test same precision
-			TurboLog2 tf2 = new TurboLog2(n - 1);
+			final TurboLog2 tf2 = new TurboLog2(n - 1);
 			ts.execute(new DoubleTimingTask(new TestLog(tf2), q + 1, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q + 1, x));
 
@@ -911,7 +893,7 @@ public class FastLogTest
 			//ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
 		}
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
 	}
@@ -922,16 +904,14 @@ public class FastLogTest
 		// No assertions, this is just a report
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		double[] x = new double[1000000];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
-		{
 			x[i] = nextUniformDouble(r);
-		}
 
-		MathLog f = new MathLog();
+		final MathLog f = new MathLog();
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		//ts.execute(new DoubleTimingTask(new TestLog(f), 0, x));
 		ts.execute(new DoubleTimingTask(new Test1PLog(f), 0, x));
 		ts.execute(new DoubleTimingTask(new TestLog1P(f), 0, x));
@@ -941,7 +921,7 @@ public class FastLogTest
 		ts.execute(new DoubleTimingTask(new TestLog1P(f), 0, x));
 		ts.execute(new DoubleTimingTask(new TestLog1PApache(f), 0, x));
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
 	}
@@ -952,25 +932,25 @@ public class FastLogTest
 		// No assertions, this is just a report
 		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		RandomGenerator r = TestSettings.getRandomGenerator();
-		double[] x = new double[1000000];
-		float[] xf = new float[x.length];
+		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final double[] x = new double[1000000];
+		final float[] xf = new float[x.length];
 		for (int i = 0; i < x.length; i++)
 		{
 			x[i] = nextUniformFloat(r);
 			xf[i] = (float) x[i];
 		}
 
-		TimingService ts = new TimingService(5);
+		final TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
 		ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
-		for (int q : new int[] { 11 })
+		for (final int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
-			int n = 23 - q;
-			ICSIFastLog ff = ICSIFastLog.create(n, DataType.FLOAT);
-			ICSIFastLog fd = ICSIFastLog.create(n, DataType.DOUBLE);
-			ICSIFastLog ff2 = ICSIFastLog.create(n, DataType.FLOAT);
+			final int n = 23 - q;
+			final ICSIFastLog ff = ICSIFastLog.create(n, DataType.FLOAT);
+			final ICSIFastLog fd = ICSIFastLog.create(n, DataType.DOUBLE);
+			final ICSIFastLog ff2 = ICSIFastLog.create(n, DataType.FLOAT);
 			ts.execute(new DoubleToFloatTimingTask(new TestLog(ff), q, x, xf));
 			ts.execute(new DoubleToFloatTimingTask(new TestFastLog(ff), q, x, xf));
 			ts.execute(new FloatTimingTask(new TestLog(ff2), q, xf));
@@ -985,7 +965,7 @@ public class FastLogTest
 			//			ts.execute(new DoubleTimingTask(new TestLog(fd), q, x));
 			//			ts.execute(new DoubleTimingTask(new TestFastLog(fd), q, x));
 
-			TurboLog tf = new TurboLog(n);
+			final TurboLog tf = new TurboLog(n);
 			ts.execute(new DoubleToFloatTimingTask(new TestLog(tf), q, x, xf));
 			ts.execute(new DoubleToFloatTimingTask(new TestFastLog(tf), q, x, xf));
 			ts.execute(new FloatTimingTask(new TestLog(tf), q, xf));
@@ -993,7 +973,7 @@ public class FastLogTest
 			ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
 
-			TurboLog2 tf2 = new TurboLog2(n);
+			final TurboLog2 tf2 = new TurboLog2(n);
 			ts.execute(new DoubleToFloatTimingTask(new TestLog(tf2), q, x, xf));
 			ts.execute(new DoubleToFloatTimingTask(new TestFastLog(tf2), q, x, xf));
 			ts.execute(new FloatTimingTask(new TestLog(tf2), q, xf));
@@ -1002,15 +982,15 @@ public class FastLogTest
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q, x));
 
 			// Slower as the look-up table is bigger
-			FFastLog f1 = new FFastLog(n);
-			DFastLog f2 = new DFastLog(n);
+			final FFastLog f1 = new FFastLog(n);
+			final DFastLog f2 = new DFastLog(n);
 			ts.execute(new FloatTimingTask(new TestLog(f1), q, xf));
 			ts.execute(new FloatTimingTask(new TestFastLog(f1), q, xf));
 			ts.execute(new DoubleTimingTask(new TestLog(f2), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(f2), q, x));
 		}
 
-		int size = ts.getSize();
+		final int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
 	}

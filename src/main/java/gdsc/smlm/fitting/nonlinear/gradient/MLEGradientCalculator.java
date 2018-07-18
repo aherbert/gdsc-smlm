@@ -95,19 +95,16 @@ public class MLEGradientCalculator extends GradientCalculator
 				// We ignore this contribution to the gradient for stability
 				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
 			}
+			else // We assume y[i] is positive but must handle zero
+			if (xi <= 0.0)
+			{
+				chisq += fi;
+				compute0(beta, dfi_da, fi);
+			}
 			else
 			{
-				// We assume y[i] is positive but must handle zero
-				if (xi <= 0.0)
-				{
-					chisq += fi;
-					compute0(beta, dfi_da, fi);
-				}
-				else
-				{
-					chisq += (fi - xi - xi * Math.log(fi / xi));
-					compute(alpha, beta, dfi_da, fi, xi);
-				}
+				chisq += (fi - xi - xi * Math.log(fi / xi));
+				compute(alpha, beta, dfi_da, fi, xi);
 			}
 		}
 
@@ -138,7 +135,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		func.initialise(a);
 
-		int[] indices = new int[nparams];
+		final int[] indices = new int[nparams];
 		int nnparams = 0;
 		for (int j = 0; j < nparams; j++)
 		{
@@ -205,7 +202,6 @@ public class MLEGradientCalculator extends GradientCalculator
 		func.initialise(a);
 
 		if (yFit == null || yFit.length < x.length)
-		{
 			for (int i = 0; i < x.length; i++)
 			{
 				// Function must produce a positive output.
@@ -226,18 +222,13 @@ public class MLEGradientCalculator extends GradientCalculator
 						// Penalise the chi-squared value by assuming fi is a very small positive value
 						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
+				else // We assume y[i] is positive but must handle zero
+				if (xi <= 0.0)
+					chisq += fi;
 				else
-				{
-					// We assume y[i] is positive but must handle zero
-					if (xi <= 0.0)
-						chisq += fi;
-					else
-						chisq += (fi - xi - xi * Math.log(fi / xi));
-				}
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 			}
-		}
 		else
-		{
 			for (int i = 0; i < x.length; i++)
 			{
 				// Function must produce a positive output.
@@ -259,16 +250,12 @@ public class MLEGradientCalculator extends GradientCalculator
 						// Penalise the chi-squared value by assuming fi is a very small positive value
 						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
+				else // We assume y[i] is positive but must handle zero
+				if (xi <= 0.0)
+					chisq += fi;
 				else
-				{
-					// We assume y[i] is positive but must handle zero
-					if (xi <= 0.0)
-						chisq += fi;
-					else
-						chisq += (fi - xi - xi * Math.log(fi / xi));
-				}
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 			}
-		}
 
 		// Move the factor of 2 to the end
 		return chisq * 2;
@@ -316,19 +303,16 @@ public class MLEGradientCalculator extends GradientCalculator
 				// We ignore this contribution to the gradient for stability
 				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
 			}
+			else // We assume y[i] is positive but must handle zero
+			if (xi <= 0.0)
+			{
+				chisq += fi;
+				compute0(beta, dfi_da, fi);
+			}
 			else
 			{
-				// We assume y[i] is positive but must handle zero
-				if (xi <= 0.0)
-				{
-					chisq += fi;
-					compute0(beta, dfi_da, fi);
-				}
-				else
-				{
-					chisq += (fi - xi - xi * Math.log(fi / xi));
-					compute(alpha, beta, dfi_da, fi, xi);
-				}
+				chisq += (fi - xi - xi * Math.log(fi / xi));
+				compute(alpha, beta, dfi_da, fi, xi);
 			}
 
 			//checkGradients(alpha, beta, nparams, 0);
@@ -365,7 +349,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		func.initialise(a);
 
-		int[] indices = new int[nparams];
+		final int[] indices = new int[nparams];
 		int nnparams = 0;
 		for (int j = 0; j < nparams; j++)
 		{
@@ -450,7 +434,6 @@ public class MLEGradientCalculator extends GradientCalculator
 		func.initialise(a);
 
 		if (yFit == null || yFit.length < n)
-		{
 			for (int i = 0; i < n; i++)
 			{
 				// Function must produce a positive output.
@@ -471,18 +454,13 @@ public class MLEGradientCalculator extends GradientCalculator
 						// Penalise the chi-squared value by assuming fi is a very small positive value
 						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
+				else // We assume y[i] is positive but must handle zero
+				if (xi <= 0.0)
+					chisq += fi;
 				else
-				{
-					// We assume y[i] is positive but must handle zero
-					if (xi <= 0.0)
-						chisq += fi;
-					else
-						chisq += (fi - xi - xi * Math.log(fi / xi));
-				}
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 			}
-		}
 		else
-		{
 			for (int i = 0; i < n; i++)
 			{
 				// Function must produce a positive output.
@@ -504,16 +482,12 @@ public class MLEGradientCalculator extends GradientCalculator
 						// Penalise the chi-squared value by assuming fi is a very small positive value
 						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
+				else // We assume y[i] is positive but must handle zero
+				if (xi <= 0.0)
+					chisq += fi;
 				else
-				{
-					// We assume y[i] is positive but must handle zero
-					if (xi <= 0.0)
-						chisq += fi;
-					else
-						chisq += (fi - xi - xi * Math.log(fi / xi));
-				}
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 			}
-		}
 
 		// Move the factor of 2 to the end
 		return chisq * 2;
@@ -598,9 +572,7 @@ public class MLEGradientCalculator extends GradientCalculator
 		// Assume xi is zero. This removes most of the computation
 
 		for (int k = 0; k < nparams; k++)
-		{
 			beta[k] -= dfi_da[k];
-		}
 	}
 
 	/**
@@ -730,9 +702,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// df_da - the gradient vector of the function's partial first derivatives with respect to the parameters
 
 				for (int k = 0; k < nparams; k++)
-				{
 					df_da[k] += e * dfi_da[k];
-				}
 			}
 		}
 
@@ -806,9 +776,7 @@ public class MLEGradientCalculator extends GradientCalculator
 		double ll = 0;
 		func.initialise(a);
 		for (int i = 0; i < x.length; i++)
-		{
 			ll += logLikelihood(func.eval(i), x[i]);
-		}
 		return ll;
 	}
 }

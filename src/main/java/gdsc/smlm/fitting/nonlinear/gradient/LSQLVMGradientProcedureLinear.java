@@ -74,10 +74,8 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 		{
 			final double wgt = dy_da[i];
 			for (int k = i; k < n; k++)
-			{
 				//System.out.printf("alpha[%d] += dy_da[%d] * dy_da[%d];\n", index, i, k);
 				alpha[index++] += wgt * dy_da[k];
-			}
 			beta[i] += wgt * dy;
 		}
 		//if (true) throw new RuntimeException();
@@ -92,10 +90,8 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 		{
 			beta[i] = 0;
 			for (int k = i; k < n; k++)
-			{
 				//System.out.printf("alpha[%d] = 0;\n", index);
 				alpha[index++] = 0;
-			}
 		}
 		//if (true) throw new RuntimeException();
 	}
@@ -106,17 +102,9 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 		// Generate symmetric matrix
 		// Adapted from org.ejml.alg.dense.misc.TransposeAlgs.square()
 		for (int i = 0, index = 1; i < n; i++, index += i + 1)
-		{
-			for (int k = i + 1, indexOther = (i + 1) * n + i; k < n; k++, index++, indexOther += n)
-			//		for (int i = 0, index = 1, indexEnd = n; i < n; i++, index += i + 1, indexEnd += n)
-			//		{
-			//			for (int indexOther = (i + 1) * n + i; index < indexEnd; index++, indexOther += n)
-			{
+		 for (int k = i + 1, indexOther = (i + 1) * n + i; k < n; k++, index++, indexOther += n)
 				//System.out.printf("alpha[%d] = alpha[%d];\n", indexOther, index);
 				alpha[indexOther] = alpha[index];
-			}
-		}
-		//throw new RuntimeException();
 	}
 
 	@Override
@@ -127,10 +115,8 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 			if (Double.isNaN(beta[i]))
 				return true;
 			for (int k = i; k < n; k++)
-			{
 				if (Double.isNaN(alpha[index++]))
 					return true;
-			}
 		}
 		return false;
 	}

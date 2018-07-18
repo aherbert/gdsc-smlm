@@ -90,7 +90,7 @@ public class FastGaussianOverlapAnalysis
 	 */
 	public static int getRange(double s, double range)
 	{
-		long l = (long) Math.ceil(2 * s * range);
+		final long l = (long) Math.ceil(2 * s * range);
 		if (l < 1L)
 			return 1;
 		if (l >= MAX_VALUE)
@@ -113,7 +113,7 @@ public class FastGaussianOverlapAnalysis
 	 */
 	public static int getRange(double s, double range, int max)
 	{
-		long l = (long) Math.ceil(2 * s * range);
+		final long l = (long) Math.ceil(2 * s * range);
 		if (l < 1L)
 			return 1;
 		if (l >= max)
@@ -135,7 +135,7 @@ public class FastGaussianOverlapAnalysis
 	{
 		// Add the function to the overlap
 		final int nPeaks = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags, zModel);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags, zModel);
 		params = params.clone();
 		for (int n = 0; n < nPeaks; n++)
 		{

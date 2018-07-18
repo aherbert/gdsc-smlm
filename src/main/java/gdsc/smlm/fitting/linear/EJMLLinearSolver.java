@@ -64,7 +64,7 @@ public class EJMLLinearSolver
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ejml.factory.LinearSolver#setA(org.ejml.data.Matrix64F)
 		 */
 		@Override
@@ -74,13 +74,9 @@ public class EJMLLinearSolver
 			{
 				// Direct inversion using the determinant
 				if (A.numCols >= 2)
-				{
 					UnrolledInverseFromMinor.inv(A, A);
-				}
 				else
-				{
 					A.set(0, 1.0 / A.get(0));
-				}
 
 				// Check for NaN or Infinity
 				for (int i = A.data.length; i-- > 0;)
@@ -95,7 +91,7 @@ public class EJMLLinearSolver
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ejml.factory.LinearSolver#quality()
 		 */
 		@Override
@@ -106,7 +102,7 @@ public class EJMLLinearSolver
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ejml.factory.LinearSolver#solve(org.ejml.data.Matrix64F, org.ejml.data.Matrix64F)
 		 */
 		@Override
@@ -117,7 +113,7 @@ public class EJMLLinearSolver
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ejml.factory.LinearSolver#invert(org.ejml.data.Matrix64F)
 		 */
 		@Override
@@ -128,7 +124,7 @@ public class EJMLLinearSolver
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ejml.factory.LinearSolver#modifiesA()
 		 */
 		@Override
@@ -139,7 +135,7 @@ public class EJMLLinearSolver
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ejml.factory.LinearSolver#modifiesB()
 		 */
 		@Override
@@ -374,8 +370,8 @@ public class EJMLLinearSolver
 	 */
 	private boolean solve(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F B)
 	{
-		boolean copy = (errorChecking || solver.modifiesB());
-		DenseMatrix64F x = (copy) ? getX() : B;
+		final boolean copy = (errorChecking || solver.modifiesB());
+		final DenseMatrix64F x = (copy) ? getX() : B;
 
 		if (!solve(solver, A, B, x))
 			return false;
@@ -503,15 +499,11 @@ public class EJMLLinearSolver
 		{
 			double bi = 0;
 			for (int j = 0; j < b.numRows; j++)
-			{
 				bi += A.data[index++] * x.data[j];
-			}
 			if (!equal.almostEqualRelativeOrAbsolute(b.data[i], bi))
-			{
 				//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi,
 				//		DoubleEquality.relativeError(b.data[i], bi), DoubleEquality.complement(b.data[i], bi));
 				return false;
-			}
 		}
 		//System.out.println("OK");
 		return true;
@@ -544,13 +536,11 @@ public class EJMLLinearSolver
 		// solve attempt if failure
 
 		if (solveSafe(getCholeskySolver(), A, B, getX()))
-		{
 			if (!errorChecking || validate(A, X, B))
 			{
 				System.arraycopy(X.data, 0, B.data, 0, A.numCols);
 				return true;
 			}
-		}
 
 		// TODO - Count how often the primary method fails on a realistic set of fitting data
 		// since the PseudoInverse method is slow. We may want to try a different solver first,
@@ -599,7 +589,7 @@ public class EJMLLinearSolver
 		lastSuccessfulSolver.invert(getA_inv());
 
 		// Check for NaN or Infinity
-		double[] a_inv = A_inv.data;
+		final double[] a_inv = A_inv.data;
 		for (int i = a_inv.length; i-- > 0;)
 			if (!Maths.isFinite(a_inv[i]))
 				return false;
@@ -861,7 +851,7 @@ public class EJMLLinearSolver
 		// Note: The EJML factory returns a Cholesky solver for symmetric
 		// positive definite matrices so we use this in preference to a CholeskyLDLT.
 
-		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols < 5) ? getInversionSolver() : getCholeskySolver();
+		final LinearSolver<DenseMatrix64F> primarySolver = (A.numCols < 5) ? getInversionSolver() : getCholeskySolver();
 		if (invertSafe(primarySolver, A, false))
 			return true;
 
@@ -895,13 +885,13 @@ public class EJMLLinearSolver
 	 */
 	private boolean invertSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, boolean pseudoInverse)
 	{
-		DenseMatrix64F Ain = (solver.modifiesA() || isInversionTolerance()) ? A.copy() : A;
+		final DenseMatrix64F Ain = (solver.modifiesA() || isInversionTolerance()) ? A.copy() : A;
 		if (!initialiseSolver(solver, Ain))
 			return false;
 		solver.invert(getA_inv());
 
 		// Check for NaN or Infinity
-		double[] a_inv = A_inv.data;
+		final double[] a_inv = A_inv.data;
 		for (int i = a_inv.length; i-- > 0;)
 			if (!Maths.isFinite(a_inv[i]))
 				return false;
@@ -927,13 +917,13 @@ public class EJMLLinearSolver
 	 */
 	private boolean invertUnsafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, boolean pseudoInverse)
 	{
-		DenseMatrix64F Ain = (isInversionTolerance()) ? A.copy() : A;
+		final DenseMatrix64F Ain = (isInversionTolerance()) ? A.copy() : A;
 		if (!initialiseSolver(solver, Ain))
 			return false;
 		solver.invert(getA_inv());
 
 		// Check for NaN or Infinity
-		double[] a_inv = A_inv.data;
+		final double[] a_inv = A_inv.data;
 		for (int i = a_inv.length; i-- > 0;)
 			if (!Maths.isFinite(a_inv[i]))
 			{
@@ -963,15 +953,13 @@ public class EJMLLinearSolver
 		// Check for the identity matrix:
 		// Compute A A_inv = I
 		final int n = A.numCols;
-		DenseMatrix64F I = new DenseMatrix64F(n, n);
+		final DenseMatrix64F I = new DenseMatrix64F(n, n);
 		CommonOps.mult(A, A_inv, I);
 
 		if (pseudoInverse)
 		{
 			for (int i = n, index = I.data.length; i-- > 0;)
-			{
 				for (int j = n; j-- > 0;)
-				{
 					if (j == i)
 					{
 						--index;
@@ -979,25 +967,14 @@ public class EJMLLinearSolver
 						if (invalid(I.data[index], 1) && invalid(I.data[index], 0))
 							return true;
 					}
-					else
-					{
-						if (invalid(I.data[--index], 0))
-							return true;
-					}
-				}
-			}
+					else if (invalid(I.data[--index], 0))
+						return true;
 		}
 		else
-		{
 			for (int i = n, index = I.data.length; i-- > 0;)
-			{
 				for (int j = n; j-- > 0;)
-				{
 					if (invalid(I.data[--index], (j == i) ? 1 : 0))
 						return true;
-				}
-			}
-		}
 		return false;
 	}
 
@@ -1033,7 +1010,7 @@ public class EJMLLinearSolver
 		// Try a fast inversion of the diagonal
 		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
 		{
-			double[] d = UnrolledInverseFromMinorExt.inv(A);
+			final double[] d = UnrolledInverseFromMinorExt.inv(A);
 			if (d != null)
 				return d;
 		}
@@ -1046,18 +1023,13 @@ public class EJMLLinearSolver
 			if (!invertSafe(getPseudoInverseSolver(), A, true))
 				return null;
 		}
-		else
-		{
-			// The matrix was too big for fast inversion so try linear algebra
-			if (!invertSafe(getCholeskyLDLTSolver(), A, false))
-			{
-				if (!invertSafe(getPseudoInverseSolver(), A, true))
-					return null;
-			}
-		}
+		else // The matrix was too big for fast inversion so try linear algebra
+		if (!invertSafe(getCholeskyLDLTSolver(), A, false))
+			if (!invertSafe(getPseudoInverseSolver(), A, true))
+				return null;
 
 		// We reach here when 'a' has been inverted
-		double[] d = new double[A.numCols];
+		final double[] d = new double[A.numCols];
 		for (int i = 0, j = 0; i < d.length; i++, j += A.numCols + 1)
 			d[i] = A.get(j);
 		return d;
@@ -1078,7 +1050,7 @@ public class EJMLLinearSolver
 		// Try a fast inversion of the diagonal
 		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
 		{
-			double[] d = UnrolledInverseFromMinorExt.inv(A);
+			final double[] d = UnrolledInverseFromMinorExt.inv(A);
 			if (d != null)
 				return d;
 		}
@@ -1091,18 +1063,13 @@ public class EJMLLinearSolver
 			if (!invertUnsafe(getPseudoInverseSolver(), A, true))
 				return null;
 		}
-		else
-		{
-			// The matrix was too big for fast inversion so try linear algebra
-			if (!invertSafe(getCholeskyLDLTSolver(), A, false))
-			{
-				if (!invertUnsafe(getPseudoInverseSolver(), A, true))
-					return null;
-			}
-		}
+		else // The matrix was too big for fast inversion so try linear algebra
+		if (!invertSafe(getCholeskyLDLTSolver(), A, false))
+			if (!invertUnsafe(getPseudoInverseSolver(), A, true))
+				return null;
 
 		// We reach here when 'a' has been inverted
-		double[] d = new double[A.numCols];
+		final double[] d = new double[A.numCols];
 		for (int i = 0, j = 0; i < d.length; i++, j += A.numCols + 1)
 			d[i] = A.get(j);
 		return d;
@@ -1310,7 +1277,7 @@ public class EJMLLinearSolver
 		lastSuccessfulSolver.invert(getA_inv());
 
 		// Check for NaN or Infinity
-		double[] a_inv = A_inv.data;
+		final double[] a_inv = A_inv.data;
 		for (int i = a_inv.length; i-- > 0;)
 			if (!Maths.isFinite(a_inv[i]))
 				return false;
@@ -1331,7 +1298,7 @@ public class EJMLLinearSolver
 	 */
 	public boolean invertLinear(double[][] a)
 	{
-		DenseMatrix64F A = toA(a);
+		final DenseMatrix64F A = toA(a);
 		if (!invertLinear(A))
 			return false;
 		toSquareData(A, a);
@@ -1347,7 +1314,7 @@ public class EJMLLinearSolver
 	 */
 	public boolean invertCholesky(double[][] a)
 	{
-		DenseMatrix64F A = toA(a);
+		final DenseMatrix64F A = toA(a);
 		if (!invertCholesky(A))
 			return false;
 		toSquareData(A, a);
@@ -1363,7 +1330,7 @@ public class EJMLLinearSolver
 	 */
 	public boolean invertCholeskyLDLT(double[][] a)
 	{
-		DenseMatrix64F A = toA(a);
+		final DenseMatrix64F A = toA(a);
 		if (!invertCholeskyLDLT(A))
 			return false;
 		toSquareData(A, a);
@@ -1379,7 +1346,7 @@ public class EJMLLinearSolver
 	 */
 	public boolean invertPseudoInverse(double[][] a)
 	{
-		DenseMatrix64F A = toA(a);
+		final DenseMatrix64F A = toA(a);
 		if (!invertPseudoInverse(A))
 			return false;
 		toSquareData(A, a);
@@ -1395,7 +1362,7 @@ public class EJMLLinearSolver
 	 */
 	public boolean invertDirectInversion(double[][] a)
 	{
-		DenseMatrix64F A = toA(a);
+		final DenseMatrix64F A = toA(a);
 		if (!invertDirectInversion(A))
 			return false;
 		toSquareData(A, a);
@@ -1429,7 +1396,7 @@ public class EJMLLinearSolver
 	 */
 	public boolean invert(double[][] a)
 	{
-		DenseMatrix64F A = toA(a);
+		final DenseMatrix64F A = toA(a);
 		if (!invert(A))
 			return false;
 		toSquareData(A, a);
@@ -1568,7 +1535,7 @@ public class EJMLLinearSolver
 		lastSuccessfulSolver.invert(getA_inv());
 
 		// Check for NaN or Infinity
-		double[] a_inv = A_inv.data;
+		final double[] a_inv = A_inv.data;
 		for (int i = a_inv.length; i-- > 0;)
 			if (!Maths.isFinite(a_inv[i]))
 				return false;

@@ -33,7 +33,7 @@ public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>>
 {
 	/** The comparable object. */
 	final T t;
-	
+
 	/** The score. */
 	final double score;
 

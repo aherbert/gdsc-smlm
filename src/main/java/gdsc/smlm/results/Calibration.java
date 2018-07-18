@@ -480,7 +480,7 @@ class Calibration implements Cloneable
 		{
 			c = (Calibration) super.clone();
 		}
-		catch (CloneNotSupportedException e)
+		catch (final CloneNotSupportedException e)
 		{
 			return null;
 		}
@@ -903,9 +903,7 @@ class Calibration implements Cloneable
 	public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
 	{
 		if (hasDistanceUnit())
-		{
 			return UnitConverterFactory.createConverter(distanceUnit, toDistanceUnit, nmPerPixel);
-		}
 		throw new ConversionException();
 	}
 
@@ -923,9 +921,7 @@ class Calibration implements Cloneable
 	public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit toIntensityUnit)
 	{
 		if (hasIntensityUnit())
-		{
 			return UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, gain);
-		}
 		throw new ConversionException();
 	}
 
@@ -943,9 +939,7 @@ class Calibration implements Cloneable
 	public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
 	{
 		if (hasAngleUnit())
-		{
 			return UnitConverterFactory.createConverter(angleUnit, toAngleUnit);
-		}
 		throw new ConversionException();
 	}
 
@@ -964,7 +958,7 @@ class Calibration implements Cloneable
 		{
 			return getDistanceConverter(toDistanceUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			return new IdentityTypeConverter<>(distanceUnit);
 		}
@@ -985,7 +979,7 @@ class Calibration implements Cloneable
 		{
 			return getIntensityConverter(toIntensityUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			return new IdentityTypeConverter<>(intensityUnit);
 		}
@@ -1006,7 +1000,7 @@ class Calibration implements Cloneable
 		{
 			return getAngleConverter(toAngleUnit);
 		}
-		catch (ConversionException e)
+		catch (final ConversionException e)
 		{
 			return new IdentityTypeConverter<>(angleUnit);
 		}

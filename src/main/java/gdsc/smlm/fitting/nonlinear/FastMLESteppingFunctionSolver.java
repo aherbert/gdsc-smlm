@@ -125,10 +125,10 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/** The old parameters (a). */
 	protected double[] aOld;
-	
+
 	/** The search direction. */
 	protected double[]  searchDirection;
-	
+
 	/** The first evaluation flag. */
 	protected boolean firstEvaluation;
 
@@ -213,10 +213,8 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		{
 			final double[] x = new double[n];
 			for (int i = 0; i < n; i++)
-			{
 				// Also ensure the input y is positive
 				x[i] = (y[i] > 0) ? y[i] + w[i] : w[i];
-			}
 			return x;
 		}
 		else
@@ -236,9 +234,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// Huang, et al. (2015) by simply adding the variances to the computed value.
 		f2 = (Gradient2Function) f;
 		if (w != null)
-		{
 			f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
-		}
 		return FastMLEGradient2ProcedureFactory.create(y, f2);
 	}
 
@@ -251,7 +247,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected double computeFitValue(double[] a)
 	{
 		if (lineSearchMethod != LineSearchMethod.NONE)
-		{
 			// The code below will adjust the search direction
 			if (firstEvaluation)
 			{
@@ -267,7 +262,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 					// Configure the search direction with the full Newton step
 					searchDirection[i] = a[i] - aOld[i];
 
-				double[] gradient = gradientProcedure.d1;
+				final double[] gradient = gradientProcedure.d1;
 				final int[] gradientIndices = f.gradientIndices();
 
 				double slope = 0.0;
@@ -275,10 +270,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 					slope += gradient[i] * searchDirection[gradientIndices[i]];
 
 				if (slope <= 0.0)
-				{
-					// The slope is invalid so update the position by removing bad
-					// search direction components
-
 					switch (lineSearchMethod)
 					{
 						case IGNORE:
@@ -287,16 +278,12 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 							slope = 0.0;
 							for (int i = 0; i < gradient.length; i++)
 							{
-								double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
+								final double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
 								if (slopeComponent < 0)
-								{
 									// Ignore this component
 									a[gradientIndices[i]] = aOld[gradientIndices[i]];
-								}
 								else
-								{
 									slope += slopeComponent;
-								}
 							}
 							if (slope == 0)
 							{
@@ -310,15 +297,15 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 						case PARTIAL_IGNORE:
 							// Progressively ignore any search direction that is in the opposite direction to
 							// the first derivative gradient. Do this in order of the magnitude of the error
-							double[] slopeComponents = new double[gradient.length];
+							final double[] slopeComponents = new double[gradient.length];
 							for (int i = 0; i < slopeComponents.length; i++)
 								slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
-							int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
+							final int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
 							Sort.sortAscending(indices, slopeComponents);
 							int j = 0;
 							while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
 							{
-								int i = indices[j];
+								final int i = indices[j];
 								// Ignore this component
 								slope -= slopeComponents[i];
 								a[gradientIndices[i]] = aOld[gradientIndices[i]];
@@ -336,9 +323,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 						default:
 							throw new IllegalStateException("Unknown line search method: " + lineSearchMethod);
 					}
-				}
 			}
-		}
 
 		computeGradients(a);
 
@@ -457,14 +442,10 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	{
 		final double[] u = gradientProcedure.u;
 		if (w != null)
-		{
 			// The function was wrapped to add the per-observation variances
 			// to the computed value, these must be subtracted to get the actual value
 			for (int i = 0, n = u.length; i < n; i++)
-			{
 				yFit[i] = u[i] - w[i];
-			}
-		}
 		else
 			System.arraycopy(u, 0, yFit, 0, u.length);
 	}
@@ -486,16 +467,12 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		Gradient2Function f2 = (Gradient2Function) f;
 		// Capture the y-values if necessary
 		if (yFit != null && yFit.length == f2.size())
-		{
 			f2 = new Gradient2FunctionValueStore(f2, yFit);
-		}
 		// Add the weights if necessary
 		if (w != null)
-		{
 			f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
-		}
 		// The fisher information is that for a Poisson process
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
+		final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
 		initialiseAndRun(p);
 		if (p.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
@@ -528,10 +505,8 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// We must wrap the gradient function if weights are present.
 		Gradient1Function f1 = (Gradient1Function) f;
 		if (w != null)
-		{
 			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
-		}
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
+		final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(a);
 		if (p.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
@@ -581,9 +556,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	public double getLogLikelihoodRatio()
 	{
 		if (Double.isNaN(llr))
-		{
 			llr = gradientProcedure.computeLogLikelihoodRatio(getLogLikelihood());
-		}
 		return llr;
 	}
 

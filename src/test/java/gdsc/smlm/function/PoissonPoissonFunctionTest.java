@@ -61,32 +61,30 @@ public class PoissonPoissonFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOne()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					cumulativeProbabilityIsOne(g, p, s);
 	}
 
 	@Test
 	public void probabilityMatchesLogProbability()
 	{
-		for (double g : gain)
-			for (double p : photons)
-				for (double s : noise)
-				{
+		for (final double g : gain)
+			for (final double p : photons)
+				for (final double s : noise)
 					probabilityMatchesLogProbability(g, p, s);
-				}
 	}
 
-	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s)
+	private static void cumulativeProbabilityIsOne(final double gain, final double mu, final double s)
 	{
-		double p2 = cumulativeProbability(gain, mu, s);
+		final double p2 = cumulativeProbability(gain, mu, s);
 		// Only true with continuous distribution if the combined Poisson mean is above 4
 		if (mu + s / gain > 4)
 			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
-	private double cumulativeProbability(final double gain, final double mu, final double s)
+	private static double cumulativeProbability(final double gain, final double mu, final double s)
 	{
 		// Note: The input s parameter is pre-gain.
 		final PoissonPoissonFunction f = PoissonPoissonFunction.createWithStandardDeviation(1.0 / gain, s * gain);
@@ -107,7 +105,7 @@ public class PoissonPoissonFunctionTest
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
-			int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
+			final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
 			min = range[0];
 			max = range[1];
 			for (int x = min; x <= max; x++)
@@ -145,7 +143,7 @@ public class PoissonPoissonFunctionTest
 
 		// Do a formal integration
 		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
 			@Override
@@ -160,21 +158,21 @@ public class PoissonPoissonFunctionTest
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, final double s)
+	private static void probabilityMatchesLogProbability(final double gain, double mu, final double s)
 	{
 		// Note: The input s parameter is pre-gain.
-		PoissonPoissonFunction f = PoissonPoissonFunction.createWithStandardDeviation(1.0 / gain, s * gain);
+		final PoissonPoissonFunction f = PoissonPoissonFunction.createWithStandardDeviation(1.0 / gain, s * gain);
 
 		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
 		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
-		int min = range[0];
-		int max = range[1];
+		final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s);
+		final int min = range[0];
+		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		final String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);

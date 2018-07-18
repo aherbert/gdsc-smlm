@@ -56,7 +56,7 @@ public class CubicSplineFunctionFactory
 	{
 		if (n == 1)
 			return new SingleCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);
-		MultiCubicSplineFunction f = new MultiCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);
+		final MultiCubicSplineFunction f = new MultiCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);
 		f.setN(n);
 		return f;
 	}

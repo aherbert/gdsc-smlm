@@ -132,9 +132,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 			{
 				final double wgt = f * dy_da[j];
 				for (int k = 0; k <= j; k++)
-				{
 					data[i++] += wgt * dy_da[k];
-				}
 			}
 		}
 	}
@@ -159,7 +157,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public double[][] getMatrix()
 	{
-		double[][] a = new double[n][n];
+		final double[][] a = new double[n][n];
 		getMatrix(a);
 		return a;
 	}
@@ -182,7 +180,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public double[] getLinear()
 	{
-		double[] a = new double[n * n];
+		final double[] a = new double[n * n];
 		getLinear(a);
 		return a;
 	}

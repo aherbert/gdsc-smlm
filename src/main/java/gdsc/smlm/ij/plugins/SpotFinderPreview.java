@@ -106,12 +106,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private static double defaultSmooth;
 	static
 	{
-		FitEngineConfiguration c = new FitEngineConfiguration();
+		final FitEngineConfiguration c = new FitEngineConfiguration();
 		defaultDataFilterMethod = c.getDataFilterMethod(0);
 		defaultSmooth = c.getDataFilterParameterValue(0);
 	}
 
-	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+	private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig = null;
 	private Overlay o = null;
@@ -148,7 +148,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private boolean refreshing = false;
 	private NonBlockingExtendedGenericDialog gd;
 
-	private SpotFilterHelper spotFilterHelper = new SpotFilterHelper();
+	private final SpotFilterHelper spotFilterHelper = new SpotFilterHelper();
 
 	/*
 	 * (non-Javadoc)
@@ -166,7 +166,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			return DONE;
 		}
 
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() != Roi.RECTANGLE)
 		{
 			IJ.error("Rectangular ROI required");
@@ -201,14 +201,14 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Preview candidate maxima");
 
-		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		final String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		String[] models = CameraModelManager.listCameraModels(true);
+		final String[] models = CameraModelManager.listCameraModels(true);
 		gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 
 		PeakFit.addPSFOptions(gd, this);
-		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
+		final PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
 				config);
 		PeakFit.addDataFilterOptions(gd, provider);
 		gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
@@ -219,9 +219,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			@Override
 			void setAbsolute(boolean absolute)
 			{
-				FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
-				DataFilterMethod m = c.getDataFilterMethod(1, defaultDataFilterMethod);
-				double smooth = c.getDataFilterParameterValue(1, defaultSmooth);
+				final FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+				final DataFilterMethod m = c.getDataFilterMethod(1, defaultDataFilterMethod);
+				final double smooth = c.getDataFilterParameterValue(1, defaultSmooth);
 				c.setDataFilter(m, smooth, absolute, 1);
 			}
 
@@ -252,7 +252,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		// Find if this image was created with ground truth data
 		if (imp.getID() == CreateData.getImageId())
 		{
-			MemoryPeakResults results = CreateData.getResults();
+			final MemoryPeakResults results = CreateData.getResults();
 			if (results != null)
 			{
 				gd.addSlider("Match_distance", 0, 2.5, distance);
@@ -262,7 +262,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				gd.addCheckbox("Show_FP", showFP);
 				gd.addMessage("");
 				label = (Label) gd.getMessage();
-				boolean integerCoords = false;
+				final boolean integerCoords = false;
 				actualCoordinates = ResultsMatchCalculator.getCoordinates(results, integerCoords);
 			}
 		}
@@ -275,13 +275,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			ImagePlus.addImageListener(this);
 
 			// Support template settings
-			Vector<TextField> numerics = gd.getNumericFields();
-			Vector<Choice> choices = gd.getChoices();
+			final Vector<TextField> numerics = gd.getNumericFields();
+			final Vector<Choice> choices = gd.getChoices();
 
 			int n = 0;
 			int ch = 0;
 
-			Choice textTemplate = choices.get(ch++);
+			final Choice textTemplate = choices.get(ch++);
 			textTemplate.removeItemListener(gd);
 			textTemplate.removeKeyListener(gd);
 			textTemplate.addItemListener(this);
@@ -307,10 +307,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			ImagePlus.removeImageListener(this);
 
 		if (!gd.wasCanceled())
-		{
 			if (!SettingsManager.writeSettings(config, SettingsManager.FLAG_SILENT))
 				IJ.error(TITLE, "Failed to save settings");
-		}
 
 		// Reset
 		imp.setOverlay(o);
@@ -361,7 +359,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		((ExtendedGenericDialog) gd).collectOptions();
 
-		boolean result = !gd.invalidNumber();
+		final boolean result = !gd.invalidNumber();
 		if (!preview)
 		{
 			setLabel("");
@@ -396,12 +394,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		if (refreshing)
 			return;
 
-		Rectangle bounds = ip.getRoi();
+		final Rectangle bounds = ip.getRoi();
 
 		// Only do this if the settings changed
-		Calibration calibration = fitConfig.getCalibration();
-		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
-		PSF psf = fitConfig.getPSF();
+		final Calibration calibration = fitConfig.getCalibration();
+		final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
+		final PSF psf = fitConfig.getPSF();
 
 		boolean newCameraModel = filter == null;
 		if (!calibration.equals(lastCalibration))
@@ -420,7 +418,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				fitConfig.setCameraType(CameraType.SCMOS);
 
 				// Support cropped origin selection.
-				Rectangle sourceBounds = IJImageSource.getBounds(imp);
+				final Rectangle sourceBounds = IJImageSource.getBounds(imp);
 				cameraModel = PeakFit.cropCameraModel(cameraModel, sourceBounds, null, true);
 				if (cameraModel == null)
 				{
@@ -435,19 +433,17 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		{
 			// Configure a jury filter
 			if (config.getDataFilterType() == DataFilterType.JURY)
-			{
 				if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE))
 				{
 					gd.getPreviewCheckbox().setState(false);
 					return;
 				}
-			}
 
 			try
 			{
 				filter = config.createSpotFilter();
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				filter = null;
 				this.imp.setOverlay(o);
@@ -467,32 +463,26 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		{
 			// Instead just warn if the roi cannot be extracted from the selected model
 			// or there is a mismatch
-			Rectangle modelBounds = fitConfig.getCameraModel().getBounds();
+			final Rectangle modelBounds = fitConfig.getCameraModel().getBounds();
 			if (modelBounds != null)
-			{
 				if (!modelBounds.contains(bounds))
-				{
-			//@formatter:off
-			Utils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
-					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
-					bounds.x, bounds.y, bounds.width, bounds.height
-					);
-			//@formatter:on
-				}
+					//@formatter:off
+					Utils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
+							bounds.x, bounds.y, bounds.width, bounds.height
+							);
+					//@formatter:on
 				else
 				// Warn if the model bounds are mismatched than the image as this may be an incorrect
 				// selection for the camera model
 				if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth() ||
 						modelBounds.height > ip.getHeight())
-				{
-			//@formatter:off
-			Utils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
-					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
-					ip.getWidth(),  ip.getHeight()
-					);
-			//@formatter:on
-				}
-			}
+					//@formatter:off
+					Utils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
+							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
+							ip.getWidth(),  ip.getHeight()
+							);
+					//@formatter:on
 		}
 
 		run(ip, filter);
@@ -505,15 +495,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		currentSlice = imp.getCurrentSlice();
 
-		Rectangle bounds = ip.getRoi();
+		final Rectangle bounds = ip.getRoi();
 
 		// Crop to the ROI
 		FloatProcessor fp = ip.crop().toFloat(0, null);
 
 		float[] data = (float[]) fp.getPixels();
 
-		int width = fp.getWidth();
-		int height = fp.getHeight();
+		final int width = fp.getWidth();
+		final int height = fp.getHeight();
 
 		// Store the mean bias and gain of the region data.
 		// This is used to correctly overlay the filtered data on the original image.
@@ -522,11 +512,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		boolean adjust = false;
 
 		// Set weights
-		CameraModel cameraModel = fitConfig.getCameraModel();
+		final CameraModel cameraModel = fitConfig.getCameraModel();
 		if (!(cameraModel instanceof FakePerPixelCameraModel))
 		{
 			// This should be done on the normalised data
-			float[] w = cameraModel.getNormalisedWeights(bounds);
+			final float[] w = cameraModel.getNormalisedWeights(bounds);
 			filter.setWeights(w, width, height);
 			data = data.clone();
 			if (data.length < ip.getPixelCount())
@@ -538,15 +528,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			cameraModel.removeBiasAndGain(bounds, data);
 		}
 
-		Spot[] spots = filter.rank(data, width, height);
+		final Spot[] spots = filter.rank(data, width, height);
 		data = filter.getPreprocessedData();
 
-		int size = spots.length;
+		final int size = spots.length;
 		topNScrollBar.setMaximum(size);
 		selectScrollBar.setMaximum(size);
 
 		fp = new FloatProcessor(width, height, data);
-		FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
+		final FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
 		out.copyBits(ip, 0, 0, Blitter.COPY);
 		if (adjust)
 		{
@@ -555,27 +545,25 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		}
 		out.insert(fp, bounds.x, bounds.y);
 		//ip.resetMinAndMax();
-		double min = fp.getMin();
-		double max = fp.getMax();
+		final double min = fp.getMin();
+		final double max = fp.getMax();
 		out.setMinAndMax(min, max);
 
-		Overlay o = new Overlay();
+		final Overlay o = new Overlay();
 		o.add(new ImageRoi(0, 0, out));
 
 		if (label != null)
 		{
 			// Get results for frame
-			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, imp.getCurrentSlice());
+			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, imp.getCurrentSlice());
 
-			Coordinate[] predicted = new Coordinate[size];
+			final Coordinate[] predicted = new Coordinate[size];
 			for (int i = 0; i < size; i++)
-			{
 				predicted[i] = new BasePoint(spots[i].x + bounds.x, spots[i].y + bounds.y);
-			}
 
 			// Compute assignments
-			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(3 * predicted.length);
-			double matchDistance = distance * fitConfig.getInitialPeakStdDev();
+			final TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(3 * predicted.length);
+			final double matchDistance = distance * fitConfig.getInitialPeakStdDev();
 			final RampedScore score = new RampedScore(matchDistance * lowerDistance / 100, matchDistance);
 			final double dmin = matchDistance * matchDistance;
 			final int nActual = actual.length;
@@ -594,20 +582,18 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					if (d2 <= dmin)
 					{
 						final double d = Math.sqrt(d2);
-						double s = score.score(d);
+						final double s = score.score(d);
 
 						if (s == 0)
 							continue;
 
 						double distance = 1 - s;
 						if (distance == 0)
-						{
 							// In the case of a match below the distance thresholds
 							// the distance will be 0. To distinguish between candidates all below
 							// the thresholds just take the closest.
 							// We know d2 is below dmin so we subtract the delta.
 							distance -= (dmin - d2);
-						}
 
 						// Store the match
 						fractionalAssignments.add(new ImmutableFractionalAssignment(i, j, distance, s));
@@ -615,31 +601,31 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				}
 			}
 
-			FractionalAssignment[] assignments = fractionalAssignments
+			final FractionalAssignment[] assignments = fractionalAssignments
 					.toArray(new FractionalAssignment[fractionalAssignments.size()]);
 
 			// Compute matches
-			RankedScoreCalculator calc = new RankedScoreCalculator(assignments, nActual - 1, nPredicted - 1);
-			boolean save = showTP || showFP;
-			double[] calcScore = calc.score(nPredicted, multipleMatches, save);
-			ClassificationResult result = RankedScoreCalculator.toClassificationResult(calcScore, nActual);
+			final RankedScoreCalculator calc = new RankedScoreCalculator(assignments, nActual - 1, nPredicted - 1);
+			final boolean save = showTP || showFP;
+			final double[] calcScore = calc.score(nPredicted, multipleMatches, save);
+			final ClassificationResult result = RankedScoreCalculator.toClassificationResult(calcScore, nActual);
 
 			// Compute AUC and max jaccard (and plot)
-			double[][] curve = RankedScoreCalculator.getPrecisionRecallCurve(assignments, nActual, nPredicted);
-			double[] precision = curve[0];
-			double[] recall = curve[1];
-			double[] jaccard = curve[2];
-			double auc = AUCCalculator.auc(precision, recall);
+			final double[][] curve = RankedScoreCalculator.getPrecisionRecallCurve(assignments, nActual, nPredicted);
+			final double[] precision = curve[0];
+			final double[] recall = curve[1];
+			final double[] jaccard = curve[2];
+			final double auc = AUCCalculator.auc(precision, recall);
 
 			// Show scores
-			String label = String.format("Slice=%d, AUC=%s, R=%s, Max J=%s", imp.getCurrentSlice(), Utils.rounded(auc),
+			final String label = String.format("Slice=%d, AUC=%s, R=%s, Max J=%s", imp.getCurrentSlice(), Utils.rounded(auc),
 					Utils.rounded(result.getRecall()), Utils.rounded(Maths.maxDefault(0, jaccard)));
 			setLabel(label);
 
 			// Plot
 			String title = TITLE + " Performance";
 			Plot2 plot = new Plot2(title, "Spot Rank", "");
-			double[] rank = SimpleArrayUtils.newArray(precision.length, 0, 1.0);
+			final double[] rank = SimpleArrayUtils.newArray(precision.length, 0, 1.0);
 			plot.setLimits(0, nPredicted, 0, 1.05);
 			plot.setColor(Color.blue);
 			plot.addPoints(rank, precision, Plot.LINE);
@@ -650,7 +636,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
 
-			WindowOrganiser windowOrganiser = new WindowOrganiser();
+			final WindowOrganiser windowOrganiser = new WindowOrganiser();
 			Utils.display(title, plot, 0, windowOrganiser);
 
 			title = TITLE + " Precision-Recall";
@@ -668,43 +654,39 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			// Create Rois for TP and FP
 			if (save)
 			{
-				double[] matchScore = RankedScoreCalculator.getMatchScore(calc.getScoredAssignments(), nPredicted);
+				final double[] matchScore = RankedScoreCalculator.getMatchScore(calc.getScoredAssignments(), nPredicted);
 				int matches = 0;
 				for (int i = 0; i < matchScore.length; i++)
 					if (matchScore[i] != 0)
 						matches++;
 				if (showTP)
 				{
-					float[] x = new float[matches];
-					float[] y = new float[x.length];
+					final float[] x = new float[matches];
+					final float[] y = new float[x.length];
 					int n = 0;
 					for (int i = 0; i < matchScore.length; i++)
-					{
 						if (matchScore[i] != 0)
 						{
-							BasePoint p = (BasePoint) predicted[i];
+							final BasePoint p = (BasePoint) predicted[i];
 							x[n] = p.getX() + 0.5f;
 							y[n] = p.getY() + 0.5f;
 							n++;
 						}
-					}
 					addRoi(0, o, x, y, n, Color.green);
 				}
 				if (showFP)
 				{
-					float[] x = new float[nPredicted - matches];
-					float[] y = new float[x.length];
+					final float[] x = new float[nPredicted - matches];
+					final float[] y = new float[x.length];
 					int n = 0;
 					for (int i = 0; i < matchScore.length; i++)
-					{
 						if (matchScore[i] == 0)
 						{
-							BasePoint p = (BasePoint) predicted[i];
+							final BasePoint p = (BasePoint) predicted[i];
 							x[n] = p.getX() + 0.5f;
 							y[n] = p.getY() + 0.5f;
 							n++;
 						}
-					}
 					addRoi(0, o, x, y, n, Color.red);
 				}
 			}
@@ -722,13 +704,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			//// Add options to configure colour and labels
 			//o.add(roi);
 
-			WindowOrganiser wo = new WindowOrganiser();
+			final WindowOrganiser wo = new WindowOrganiser();
 
 			// Option to show the number of neighbours within a set pixel box radius
-			int[] count = spotFilterHelper.countNeighbours(spots, width, height, neighbourRadius);
+			final int[] count = spotFilterHelper.countNeighbours(spots, width, height, neighbourRadius);
 
 			// Show as histogram the totals...
-			int id = Utils.showHistogram(TITLE, new StoredData(count), "Neighbours", 1, 0, 0,
+			final int id = Utils.showHistogram(TITLE, new StoredData(count), "Neighbours", 1, 0, 0,
 					"Radius = " + neighbourRadius);
 			if (Utils.isNewWindow())
 				wo.add(id);
@@ -737,13 +719,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 			final LUT lut = LUTHelper.createLUT(LutColour.FIRE_LIGHT);
 			// These are copied by the ROI
-			float[] x = new float[1];
-			float[] y = new float[1];
+			final float[] x = new float[1];
+			final float[] y = new float[1];
 			// Plot the intensity
-			double[] intensity = new double[size];
-			double[] rank = SimpleArrayUtils.newArray(size, 1, 1.0);
-			int top = (topN > 0) ? topN : size;
-			int size_1 = size - 1;
+			final double[] intensity = new double[size];
+			final double[] rank = SimpleArrayUtils.newArray(size, 1, 1.0);
+			final int top = (topN > 0) ? topN : size;
+			final int size_1 = size - 1;
 			for (int i = 0; i < size; i++)
 			{
 				intensity[i] = spots[i].intensity;
@@ -751,13 +733,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				{
 					x[0] = spots[i].x + bounds.x + 0.5f;
 					y[0] = spots[i].y + bounds.y + 0.5f;
-					Color c = LUTHelper.getColour(lut, size_1 - i, size);
+					final Color c = LUTHelper.getColour(lut, size_1 - i, size);
 					addRoi(0, o, x, y, 1, c, 2, 1);
 				}
 			}
 
-			String title = TITLE + " Intensity";
-			Plot plot = new Plot(title, "Rank", "Intensity");
+			final String title = TITLE + " Intensity";
+			final Plot plot = new Plot(title, "Rank", "Intensity");
 			plot.setColor(Color.blue);
 			plot.addPoints(rank, intensity, Plot.LINE);
 			if (topN > 0 && topN < size)
@@ -768,11 +750,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			if (select > 0 && select < size)
 			{
 				plot.setColor(Color.yellow);
-				double in = intensity[select - 1];
+				final double in = intensity[select - 1];
 				plot.drawLine(select, 0, select, in);
 				x[0] = spots[select].x + bounds.x + 0.5f;
 				y[0] = spots[select].y + bounds.y + 0.5f;
-				Color c = LUTHelper.getColour(lut, size_1 - select, size);
+				final Color c = LUTHelper.getColour(lut, size_1 - select, size);
 				addRoi(0, o, x, y, 1, c, 3, 3);
 				plot.setColor(Color.black);
 				plot.addLabel(0, 0, "Selected spot intensity = " + Utils.rounded(in));
@@ -867,7 +849,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	{
 		if (n == 0)
 			return;
-		PointRoi roi = new PointRoi(x, y, n);
+		final PointRoi roi = new PointRoi(x, y, n);
 		roi.setPointType(pointType);
 		roi.setFillColor(colour);
 		roi.setStrokeColor(colour);
@@ -905,12 +887,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	public void imageUpdated(ImagePlus imp)
 	{
 		if (this.imp.getID() == imp.getID() && preview)
-		{
 			if (imp.getCurrentSlice() != currentSlice && filter != null)
-			{
 				run(imp.getProcessor(), filter);
-			}
-		}
 	}
 
 	@Override
@@ -919,12 +897,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		if (e.getSource() instanceof Choice)
 		{
 			// Update the settings from the template
-			Choice choice = (Choice) e.getSource();
-			String templateName = choice.getSelectedItem();
+			final Choice choice = (Choice) e.getSource();
+			final String templateName = choice.getSelectedItem();
 			//System.out.println("Update to " + templateName);
 
 			// Get the configuration template
-			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
+			final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
 
 			if (template != null)
 			{
@@ -932,18 +910,14 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 				IJ.log("Applying template: " + templateName);
 
-				for (String note : template.getNotesList())
+				for (final String note : template.getNotesList())
 					IJ.log(note);
 
-				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+				final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
 				if (template.hasPsf())
-				{
 					refreshSettings(template.getPsf(), custom);
-				}
 				if (template.hasFitEngineSettings())
-				{
 					refreshSettings(template.getFitEngineSettings(), custom);
-				}
 
 				refreshing = false;
 				//dialogItemChanged(gd, null);

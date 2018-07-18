@@ -93,7 +93,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		{
 			version = ImageJ_3D_Viewer.getJava3DVersion();
 		}
-		catch (Throwable t)
+		catch (final Throwable t)
 		{
 			t.printStackTrace();
 			version = null;
@@ -114,28 +114,29 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			return;
 		}
 
-		boolean renderingTest = true;
+		final boolean renderingTest = true;
 		if (renderingTest)
 		{
 			// Put all the shapes from rendering on a view and see how they look.
 			final Image3DUniverse univ = new Image3DUniverse();
 			univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 			univ.show();
-			ImageWindow3D w = univ.getWindow();
+			final ImageWindow3D w = univ.getWindow();
 			GUI.center(w);
 
 			// Test how many vertices a primitive sphere has
-			float x = 0, y = 0;
-			float space = 2.5f;
+			float x = 0;
+			final float y = 0;
+			final float space = 2.5f;
 
 			//for (Rendering rendering : new Rendering[] { Rendering.SQUARE, Rendering.OCTAGON, Rendering.ICOSAHEDRON })
-			for (Rendering rendering : Rendering.values())
+			for (final Rendering rendering : Rendering.values())
 			{
-				Shape3D shape = Shape3DHelper.createShape(rendering, 3);
+				final Shape3D shape = Shape3DHelper.createShape(rendering, 3);
 
-				Appearance a = shape.getAppearance();
+				final Appearance a = shape.getAppearance();
 
-				ItemMesh mesh = new ReferenceItemMesh(new Point3f[] { new Point3f(x, y, 0) },
+				final ItemMesh mesh = new ReferenceItemMesh(new Point3f[] { new Point3f(x, y, 0) },
 						(GeometryArray) shape.getGeometry(), a, null, null, 0f);
 
 				System.out.printf("R=%s %s  Vc=%d  V=%d  T=%d\n", rendering,
@@ -151,7 +152,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			return;
 		}
 
-		boolean sphereTest = true;
+		final boolean sphereTest = true;
 		if (sphereTest)
 		{
 			// Sphere test
@@ -161,20 +162,20 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			final Image3DUniverse univ = new Image3DUniverse();
 			univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 			univ.show();
-			ImageWindow3D w = univ.getWindow();
+			final ImageWindow3D w = univ.getWindow();
 			GUI.center(w);
 
 			// Test how many vertices a primitive sphere has
 			float x = 0, y = 0;
-			float space = 2.5f;
+			final float space = 2.5f;
 
 			Appearance a = null;
 			for (int d = 0; d < 4; d++)
 			{
-				List<Point3f> points = customnode.MeshMaker.createIcosahedron(d, 1f);
-				Pair<Point3f[], int[]> p = CustomContentHelper.createIndexedObject(points);
-				int v = points.size();
-				int t = v / 3;
+				final List<Point3f> points = customnode.MeshMaker.createIcosahedron(d, 1f);
+				final Pair<Point3f[], int[]> p = CustomContentHelper.createIndexedObject(points);
+				final int v = points.size();
+				final int t = v / 3;
 				System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d (%.2f), i=%d\n", d, v, t, p.a.length,
 						v / (double) p.a.length, p.b.length);
 
@@ -184,7 +185,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 				a = mesh.getAppearance();
 				univ.addCustomMesh(mesh, x + "," + y + "," + t);
 
-				float y2 = y + space;
+				final float y2 = y + space;
 				mesh = new ItemIndexedTriangleMesh(p.a, p.b, new Point3f[] { new Point3f(x, y2, 0) }, null, null, 0);
 				univ.addCustomMesh(mesh, x + "," + y2 + "," + t);
 
@@ -206,14 +207,14 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			for (int d = 4; d < 50; d += 4)
 			{
 				// This is a triangle strip array so is more space efficient
-				Sphere s = new Sphere(1, Primitive.GENERATE_NORMALS, d);
-				int t = s.getNumTriangles();
+				final Sphere s = new Sphere(1, Primitive.GENERATE_NORMALS, d);
+				final int t = s.getNumTriangles();
 				System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), t);
 
-				ItemGeometryGroup g = new ItemGeometryGroup(new Point3f[] { new Point3f(x, y, 0) },
+				final ItemGeometryGroup g = new ItemGeometryGroup(new Point3f[] { new Point3f(x, y, 0) },
 						(GeometryArray) s.getShape().getGeometry(), a, null, null, null);
-				String name = x + "," + y + "," + t;
-				CustomContent content = new CustomContent(name, true);
+				final String name = x + "," + y + "," + t;
+				final CustomContent content = new CustomContent(name, true);
 				content.getCurrent().display(new ItemGroupNode(g));
 				univ.addContent(content);
 
@@ -236,15 +237,9 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			//range = 22; // 45^3 = 91125 points
 			//range = 49; // 99^3 = 970299 points
 			for (int x = -range; x <= range; x++)
-			{
 				for (int y = -range; y <= range; y++)
-				{
 					for (int z = -range; z <= range; z++)
-					{
 						pointList.add(new Point3f(x, y, z));
-					}
-				}
-			}
 			scale = 0.25f;
 		}
 		else
@@ -261,7 +256,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			settings.setInputOption(name);
 
 			SettingsManager.writeSettings(settings);
-			MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
+			final MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -277,20 +272,20 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		final Image3DUniverse univ = new Image3DUniverse();
 		univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 		univ.show();
-		ImageWindow3D w = univ.getWindow();
+		final ImageWindow3D w = univ.getWindow();
 		GUI.center(w);
 
-		View view = univ.getViewer().getView();
+		final View view = univ.getViewer().getView();
 		view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
 		// I am not sure if this is required if objects are sorted.
 		//view.setDepthBufferFreezeTransparent(false);
 
 		IJ.showStatus("Creating points ...");
-		Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);
-		Point3f[] sizes = new Point3f[] { new Point3f(scale, scale, scale) };
+		final Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);
+		final Point3f[] sizes = new Point3f[] { new Point3f(scale, scale, scale) };
 		ItemGeometryGroup pointGroup;
-		Appearance appearance = new Appearance();
-		TransparencyAttributes ta = new TransparencyAttributes();
+		final Appearance appearance = new Appearance();
+		final TransparencyAttributes ta = new TransparencyAttributes();
 		ta.setTransparency(0.5f);
 		ta.setTransparencyMode(TransparencyAttributes.FASTEST);
 		appearance.setTransparencyAttributes(ta);

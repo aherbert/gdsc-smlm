@@ -125,9 +125,9 @@ public class SpotFilterHelper
 		// Initialise
 		if (sumFilter == null)
 			sumFilter = new IntBlockSumFilter();
-		int width = maxx - minx + 1;
-		int height = maxy - miny + 1;
-		int size = width * height;
+		final int width = maxx - minx + 1;
+		final int height = maxy - miny + 1;
+		final int size = width * height;
 		if (data == null || data.length < size)
 			data = new int[size];
 		else
@@ -139,7 +139,7 @@ public class SpotFilterHelper
 
 		sumFilter.rollingBlockFilter(data, width, height, n);
 
-		int[] count = new int[spots.length];
+		final int[] count = new int[spots.length];
 		for (int i = 0; i < spots.length; i++)
 			// Subtract the actual spot from the count
 			count[i] = data[(spots[i].x - minx) + (spots[i].y - miny) * width] - 1;

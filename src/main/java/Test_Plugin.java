@@ -50,7 +50,7 @@ public class Test_Plugin implements PlugIn
 		final String[] optionFields = { "", "", "" };
 		final double[] numberFields = { 2.567, 7, 4.567, 7.898 };
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog("Test");
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog("Test");
 		gd.addChoice("Select1", new String[] { "One", "Two" }, optionFields[0]);
 		final Choice c2 = gd.addAndGetChoice("Select2", new String[] { "Three", "Four" }, optionFields[1]);
 		gd.addAndGetButton("Options", new ActionListener()
@@ -58,7 +58,7 @@ public class Test_Plugin implements PlugIn
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it model
+				final ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it model
 				gd2.addMessage(c2.getSelectedItem());
 				gd2.showDialog(true);
 				gd2.getNextChoice();

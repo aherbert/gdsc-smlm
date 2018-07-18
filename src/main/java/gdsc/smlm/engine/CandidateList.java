@@ -88,11 +88,8 @@ class CandidateList
 			if (list.length < size)
 				throw new IllegalArgumentException("List is smaller than size");
 		}
-		else
-		{
-			if (size != 0)
-				throw new IllegalArgumentException("List is null and size is not zero");
-		}
+		else if (size != 0)
+			throw new IllegalArgumentException("List is null and size is not zero");
 
 		this.size = size;
 		this.list = list;
@@ -120,11 +117,7 @@ class CandidateList
 	public void add(Candidate candidate)
 	{
 		if (list == null)
-		{
 			list = new Candidate[4];
-		}
-		// This assumes that the list is never created with length less than size
-		// and that the
 		else if (list.length == size)
 		{
 			// Allow creating a new list even if size is currently zero
@@ -201,12 +194,8 @@ class CandidateList
 		// This in place resizes the list
 		size = 0;
 		for (int i = 0; i < oldSize; i++)
-		{
 			if (!filter.test(list[i]))
-			{
 				list[size++] = list[i];
-			}
-		}
 	}
 
 	/**

@@ -101,7 +101,7 @@ public class MedianDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
 	 */
 	@Override
@@ -133,14 +133,8 @@ public class MedianDataProcessor extends DataProcessor
 			//else
 			//{
 			if (tmpSmooth <= getBorder())
-			{
 				filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
-			}
-			else
-			{
-				filter.blockMedian(smoothData, width, height, tmpSmooth);
-			}
-			//}
+			else filter.blockMedian(smoothData, width, height, tmpSmooth);
 		}
 		return smoothData;
 	}
@@ -161,7 +155,7 @@ public class MedianDataProcessor extends DataProcessor
 	@Override
 	public MedianDataProcessor clone()
 	{
-		MedianDataProcessor f = (MedianDataProcessor) super.clone();
+		final MedianDataProcessor f = (MedianDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.filter = filter.clone();
 		return f;
@@ -186,7 +180,7 @@ public class MedianDataProcessor extends DataProcessor
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("smooth = " + smooth);
 		return list;
 	}

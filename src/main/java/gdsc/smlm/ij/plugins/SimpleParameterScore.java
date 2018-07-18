@@ -58,8 +58,8 @@ public class SimpleParameterScore extends FilterScore
 		// 0 = failCount
 		// 1 = residudalsThreshold
 		// 2 = duplicateDistance
-		double[] p1 = this.r.parameters;
-		double[] p2 = ((SimpleParameterScore) that).r.parameters;
+		final double[] p1 = this.r.parameters;
+		final double[] p2 = ((SimpleParameterScore) that).r.parameters;
 
 		// Lowest fail count
 		if (p1[0] < p2[0])

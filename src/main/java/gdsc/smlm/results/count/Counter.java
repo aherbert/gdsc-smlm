@@ -117,7 +117,7 @@ public class Counter
 	 */
 	public int getAndIncrement(int value)
 	{
-		int old = count;
+		final int old = count;
 		count += value;
 		return old;
 	}
@@ -182,7 +182,7 @@ public class Counter
 	 */
 	public int getAndDecrement(int value)
 	{
-		int old = count;
+		final int old = count;
 		count -= value;
 		return old;
 	}

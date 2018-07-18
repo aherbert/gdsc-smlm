@@ -114,15 +114,15 @@ public class TurboLog2 extends TurboLog
 		qd = 52 - n;
 		int x = 0x3F800000; // Set the exponent to 0 so the float value=1.0
 		//assert Float.intBitsToFloat(x) == 1.0f : "value is not 1.0f";
-		int inc = 1 << q; // Amount to increase the mantissa
+		final int inc = 1 << q; // Amount to increase the mantissa
 
 		final int size = 1 << n;
 		// Add an extra value in case the final mantissa is rounded up
 		logMantissa = new float[size + 1];
 		for (int i = 0; i < size; i++)
 		{
-			float value = Float.intBitsToFloat(x);
-			float logv = (float) Math.log(value);
+			final float value = Float.intBitsToFloat(x);
+			final float logv = (float) Math.log(value);
 			logMantissa[i] = logv;
 			x += inc;
 
@@ -171,10 +171,8 @@ public class TurboLog2 extends TurboLog
 
 		// Edge case for negatives
 		if ((bits & 0x80000000) != 0)
-		{
 			// Only allow -0
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		// Note the documentation from Float.intBitsToFloat(int):
 		// int s = ((bits >> 31) == 0) ? 1 : -1;
@@ -200,9 +198,7 @@ public class TurboLog2 extends TurboLog
 
 		// When the value is close to 1 then the relative error can be very large
 		if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF))
-		{
 			return (float) Math.log(x);
-		}
 
 		// Round the mantissa
 		return logMantissa[(m + roundF) >>> q] + logExpF[e];
@@ -233,9 +229,7 @@ public class TurboLog2 extends TurboLog
 		if (e == 0)
 			return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
 		if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF))
-		{
 			return (float) Math.log(x);
-		}
 		return logMantissa[(m + roundF) >>> q] + logExpF[e];
 	}
 
@@ -256,10 +250,8 @@ public class TurboLog2 extends TurboLog
 
 		// Edge case for negatives
 		if ((bits & 0x8000000000000000L) != 0L)
-		{
 			// Only allow -0
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
-		}
 
 		// Note the documentation from Double.longBitsToDouble(int):
 		// int s = ((bits >> 63) == 0) ? 1 : -1;
@@ -284,9 +276,7 @@ public class TurboLog2 extends TurboLog
 
 		// When the value is close to 1 then the relative error can be very large
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return (float) Math.log(x);
-		}
 
 		// Round the mantissa
 		return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
@@ -317,9 +307,7 @@ public class TurboLog2 extends TurboLog
 		if (e == 0)
 			return (m == 0L) ? Float.NEGATIVE_INFINITY : computeSubnormalF(m << 1);
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return (float) Math.log(x);
-		}
 		// Round the mantissa
 		return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
 	}
@@ -341,10 +329,8 @@ public class TurboLog2 extends TurboLog
 
 		// Edge case for negatives
 		if ((bits & 0x8000000000000000L) != 0L)
-		{
 			// Only allow -0
 			return (e == 0 && m == 0L) ? Double.NEGATIVE_INFINITY : Double.NaN;
-		}
 
 		// Note the documentation from Double.longBitsToDouble(int):
 		// int s = ((bits >> 63) == 0) ? 1 : -1;
@@ -369,9 +355,7 @@ public class TurboLog2 extends TurboLog
 
 		// When the value is close to 1 then the relative error can be very large
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return Math.log(x);
-		}
 
 		// Round the mantissa
 		//return logMantissa[(int) ((m+roundD) >>> qd)] + logExpD[e];
@@ -403,9 +387,7 @@ public class TurboLog2 extends TurboLog
 		if (e == 0)
 			return (m == 0L) ? Double.NEGATIVE_INFINITY : computeSubnormal(m << 1);
 		if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa))
-		{
 			return Math.log(x);
-		}
 		//return logMantissa[(int) ((m+roundD) >>> qd)] + logExpD[e];
 		return logMantissa[(int) ((m + roundD) >>> qd)] + (e - 1023) * LN2;
 	}

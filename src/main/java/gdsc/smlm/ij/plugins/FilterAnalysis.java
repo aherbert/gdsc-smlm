@@ -123,7 +123,7 @@ public class FilterAnalysis implements PlugIn
 	private String inputDirectory;
 	private static String lastInputDirectory = "";
 
-	private boolean isHeadless;
+	private final boolean isHeadless;
 
 	/**
 	 * Instantiates a new filter analysis.
@@ -155,7 +155,7 @@ public class FilterAnalysis implements PlugIn
 
 		// Load filters from file or generate from dialog input
 		List<FilterSet> filterSets = null;
-		boolean fileInput = (arg != null && arg.contains("file"));
+		final boolean fileInput = (arg != null && arg.contains("file"));
 
 		if (!showDialog(resultsList, fileInput))
 			return;
@@ -167,9 +167,7 @@ public class FilterAnalysis implements PlugIn
 				return;
 		}
 		else
-		{
 			filterSets = createFilters();
-		}
 
 		if (filterSets == null || filterSets.isEmpty())
 		{
@@ -185,7 +183,7 @@ public class FilterAnalysis implements PlugIn
 
 	private String getInputDirectory()
 	{
-		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+		final GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
 		if (filterSettings.getFilterAnalysisDirectory() != null)
 			OpenDialog.setDefaultDirectory(filterSettings.getFilterAnalysisDirectory());
@@ -201,10 +199,10 @@ public class FilterAnalysis implements PlugIn
 	@SuppressWarnings("unchecked")
 	private static List<FilterSet> readFilterSets()
 	{
-		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+		final GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
-		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
+		final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			IJ.showStatus("Reading filters ...");
@@ -213,7 +211,7 @@ public class FilterAnalysis implements PlugIn
 			try (BufferedReader input = new BufferedReader(
 					new UnicodeReader(new FileInputStream(filterSettings.getFilterSetFilename()), null)))
 			{
-				Object o = XStreamWrapper.getInstance().fromXML(input);
+				final Object o = XStreamWrapper.getInstance().fromXML(input);
 				if (o != null && o instanceof List<?>)
 				{
 					SettingsManager.writeSettings(filterSettings.build());
@@ -221,7 +219,7 @@ public class FilterAnalysis implements PlugIn
 				}
 				IJ.log("No filter sets defined in the specified file: " + filterSettings.getFilterSetFilename());
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				IJ.log("Unable to load the filter sets from file: " + e.getMessage());
 			}
@@ -235,10 +233,10 @@ public class FilterAnalysis implements PlugIn
 
 	private static void saveFilterSets(List<FilterSet> filterSets)
 	{
-		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+		final GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
-		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
+		final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
@@ -248,7 +246,7 @@ public class FilterAnalysis implements PlugIn
 				XStreamWrapper.getInstance().toXML(filterSets, out);
 				SettingsManager.writeSettings(filterSettings.build());
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				IJ.log("Unable to save the filter sets to file: " + e.getMessage());
 			}
@@ -259,7 +257,7 @@ public class FilterAnalysis implements PlugIn
 	{
 		if (resultsList != null && inputDirectory.equals(lastInputDirectory))
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			final GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Re-use results from the same directory (no to refresh)?");
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
@@ -268,8 +266,8 @@ public class FilterAnalysis implements PlugIn
 				return resultsList;
 		}
 
-		List<MemoryPeakResults> resultsList = new LinkedList<>();
-		File[] fileList = (new File(inputDirectory)).listFiles(new FilenameFilter()
+		final List<MemoryPeakResults> resultsList = new LinkedList<>();
+		final File[] fileList = (new File(inputDirectory)).listFiles(new FilenameFilter()
 		{
 			@Override
 			public boolean accept(File dir, String name)
@@ -278,23 +276,17 @@ public class FilterAnalysis implements PlugIn
 			}
 		});
 		if (fileList != null)
-		{
 			// Exclude directories
 			for (int i = 0; i < fileList.length; i++)
-			{
 				if (fileList[i].isFile())
 				{
 					IJ.showStatus(String.format("Reading results ... %d/%d", i + 1, fileList.length));
 					IJ.showProgress(i, fileList.length);
-					PeakResultsReader reader = new PeakResultsReader(fileList[i].getPath());
-					MemoryPeakResults results = reader.getResults();
+					final PeakResultsReader reader = new PeakResultsReader(fileList[i].getPath());
+					final MemoryPeakResults results = reader.getResults();
 					if (results != null && results.size() > 0)
-					{
 						resultsList.add(results);
-					}
 				}
-			}
-		}
 		IJ.showStatus("");
 		IJ.showProgress(1);
 		lastInputDirectory = inputDirectory;
@@ -304,12 +296,12 @@ public class FilterAnalysis implements PlugIn
 
 	private static boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		int total = 0;
 		final Counter tp = new Counter();
-		for (MemoryPeakResults r : resultsList)
+		for (final MemoryPeakResults r : resultsList)
 		{
 			total += r.size();
 			r.forEach(new PeakResultProcedure()
@@ -446,7 +438,7 @@ public class FilterAnalysis implements PlugIn
 			Parameters.isAboveZero("Delta", delta);
 			Parameters.isBelow("Delta", delta, 1);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -458,7 +450,7 @@ public class FilterAnalysis implements PlugIn
 	private static List<FilterSet> createFilters()
 	{
 		IJ.showStatus("Creating filters ...");
-		List<FilterSet> filterSets = new LinkedList<>();
+		final List<FilterSet> filterSets = new LinkedList<>();
 		addSNRFilters(filterSets);
 		addPrecisionFilters(filterSets);
 		addTraceFilters(filterSets);
@@ -474,12 +466,10 @@ public class FilterAnalysis implements PlugIn
 			return;
 		for (double w = minWidth; w <= maxWidth; w += incWidth)
 		{
-			WidthFilter wf = new WidthFilter((float) w);
-			List<Filter> filters = new LinkedList<>();
+			final WidthFilter wf = new WidthFilter((float) w);
+			final List<Filter> filters = new LinkedList<>();
 			for (int snr = minSnr; snr <= maxSnr; snr++)
-			{
 				filters.add(new AndFilter(wf, new SNRFilter(snr)));
-			}
 			filterSets.add(new FilterSet(filters));
 		}
 	}
@@ -488,11 +478,9 @@ public class FilterAnalysis implements PlugIn
 	{
 		if (!precisionFilter)
 			return;
-		List<Filter> filters = new LinkedList<>();
+		final List<Filter> filters = new LinkedList<>();
 		for (int p = minPrecision; p <= maxPrecision; p++)
-		{
 			filters.add(new PrecisionFilter(p));
-		}
 		filterSets.add(new FilterSet(filters));
 	}
 
@@ -502,12 +490,10 @@ public class FilterAnalysis implements PlugIn
 			return;
 		for (double d = minDistance; d <= maxDistance; d += incDistance)
 		{
-			SNRFilter snr = new SNRFilter(maxSnr);
-			List<Filter> filters = new LinkedList<>();
+			final SNRFilter snr = new SNRFilter(maxSnr);
+			final List<Filter> filters = new LinkedList<>();
 			for (int t = minTime; t <= maxTime; t += incTime)
-			{
 				filters.add(new OrFilter(snr, new TraceFilter(d, t)));
-			}
 			filterSets.add(new FilterSet(filters));
 		}
 	}
@@ -518,14 +504,12 @@ public class FilterAnalysis implements PlugIn
 			return;
 		for (double w = minWidth; w <= maxWidth; w += incWidth)
 		{
-			WidthFilter wf = new WidthFilter((float) w);
+			final WidthFilter wf = new WidthFilter((float) w);
 			for (int snrGap = minSnrGap; snrGap <= maxSnrGap; snrGap += incSnrGap)
 			{
-				List<Filter> filters = new LinkedList<>();
+				final List<Filter> filters = new LinkedList<>();
 				for (int snr = minSnr; snr <= maxSnr; snr++)
-				{
 					filters.add(new AndFilter(wf, new SNRHysteresisFilter(2, 0, 1, 0, snr, snrGap)));
-				}
 				filterSets.add(new FilterSet(filters));
 			}
 		}
@@ -537,11 +521,9 @@ public class FilterAnalysis implements PlugIn
 			return;
 		for (int precisionGap = minPrecisionGap; precisionGap <= maxPrecisionGap; precisionGap += incPrecisionGap)
 		{
-			List<Filter> filters = new LinkedList<>();
+			final List<Filter> filters = new LinkedList<>();
 			for (int precision = minPrecision; precision <= maxPrecision; precision++)
-			{
 				filters.add(new PrecisionHysteresisFilter(2, 0, 1, 0, precision, precisionGap));
-			}
 			filterSets.add(new FilterSet(filters));
 		}
 	}
@@ -571,9 +553,9 @@ public class FilterAnalysis implements PlugIn
 		bestFilterOrder = new LinkedList<>();
 
 		IJ.showStatus("Analysing filters ...");
-		int total = countFilters(filterSets);
+		final int total = countFilters(filterSets);
 		int count = 0;
-		for (FilterSet filterSet : filterSets)
+		for (final FilterSet filterSet : filterSets)
 		{
 			IJ.showStatus("Analysing " + filterSet.getName() + " ...");
 			count = run(filterSet, resultsList, count, total);
@@ -588,7 +570,7 @@ public class FilterAnalysis implements PlugIn
 	private static int countFilters(List<FilterSet> filterSets)
 	{
 		int count = 0;
-		for (FilterSet filterSet : filterSets)
+		for (final FilterSet filterSet : filterSets)
 			count += filterSet.size();
 		return count;
 	}
@@ -599,17 +581,17 @@ public class FilterAnalysis implements PlugIn
 			return;
 
 		// Display the top N plots
-		int[] list = new int[plots.size()];
+		final int[] list = new int[plots.size()];
 		int i = 0;
-		for (NamedPlot p : plots)
+		for (final NamedPlot p : plots)
 		{
-			Plot2 plot = new Plot2(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
+			final Plot2 plot = new Plot2(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
 			plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
 			plot.setColor(Color.RED);
 			plot.draw();
 			plot.setColor(Color.BLUE);
 			plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
-			PlotWindow plotWindow = Utils.display(p.name, plot);
+			final PlotWindow plotWindow = Utils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}
 		new WindowOrganiser().tileWindows(list);
@@ -625,67 +607,55 @@ public class FilterAnalysis implements PlugIn
 			createSensitivityWindow();
 
 			int currentIndex = 0;
-			for (String type : bestFilterOrder)
+			for (final String type : bestFilterOrder)
 			{
 				IJ.showProgress(currentIndex++, bestFilter.size());
 
-				Filter filter = bestFilter.get(type).filter;
+				final Filter filter = bestFilter.get(type).filter;
 
-				ClassificationResult s = filter.score(resultsList);
+				final ClassificationResult s = filter.score(resultsList);
 
-				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
+				final String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
 						Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
 
 				if (isHeadless)
-				{
 					IJ.log(message);
-				}
 				else
-				{
 					sensitivityWindow.append(message);
-				}
 
 				// List all the parameters that can be adjusted.
 				final int parameters = filter.getNumberOfParameters();
 				for (int index = 0; index < parameters; index++)
 				{
 					// For each parameter compute as upward + downward delta and get the average gradient
-					Filter higher = filter.adjustParameter(index, delta);
-					Filter lower = filter.adjustParameter(index, -delta);
+					final Filter higher = filter.adjustParameter(index, delta);
+					final Filter lower = filter.adjustParameter(index, -delta);
 
-					ClassificationResult sHigher = higher.score(resultsList);
-					ClassificationResult sLower = lower.score(resultsList);
+					final ClassificationResult sHigher = higher.score(resultsList);
+					final ClassificationResult sLower = lower.score(resultsList);
 
-					StringBuilder sb = new StringBuilder();
+					final StringBuilder sb = new StringBuilder();
 					sb.append('\t').append(filter.getParameterName(index)).append('\t');
 					sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append('\t');
 
-					double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
-					double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
+					final double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
+					final double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
 					addSensitivityScore(sb, s.getJaccard(), sHigher.getJaccard(), sLower.getJaccard(), dx1, dx2);
 					addSensitivityScore(sb, s.getPrecision(), sHigher.getPrecision(), sLower.getPrecision(), dx1, dx2);
 					addSensitivityScore(sb, s.getRecall(), sHigher.getRecall(), sLower.getRecall(), dx1, dx2);
 
 					if (isHeadless)
-					{
 						IJ.log(sb.toString());
-					}
 					else
-					{
 						sensitivityWindow.append(sb.toString());
-					}
 				}
 			}
 
-			String message = "-=-=-=-";
+			final String message = "-=-=-=-";
 			if (isHeadless)
-			{
 				IJ.log(message);
-			}
 			else
-			{
 				sensitivityWindow.append(message);
-			}
 
 			IJ.showProgress(1);
 			IJ.showStatus("");
@@ -696,12 +666,12 @@ public class FilterAnalysis implements PlugIn
 	{
 		// Use absolute in case this is not a local maximum. We are mainly interested in how
 		// flat the curve is at this point in relation to parameter changes.
-		double abs1 = Math.abs(s - s1);
-		double abs2 = Math.abs(s - s2);
-		double dydx1 = (abs1) / dx1;
-		double dydx2 = (abs2) / dx2;
-		double relativeSensitivity = (abs1 + abs2) * 0.5;
-		double sensitivity = (dydx1 + dydx2) * 0.5;
+		final double abs1 = Math.abs(s - s1);
+		final double abs2 = Math.abs(s - s2);
+		final double dydx1 = (abs1) / dx1;
+		final double dydx2 = (abs2) / dx2;
+		final double relativeSensitivity = (abs1 + abs2) * 0.5;
+		final double sensitivity = (dydx1 + dydx2) * 0.5;
 
 		sb.append(Utils.rounded(relativeSensitivity, 4)).append('\t');
 		sb.append(Utils.rounded(sensitivity, 4)).append('\t');
@@ -713,22 +683,17 @@ public class FilterAnalysis implements PlugIn
 			return;
 
 		if (isHeadless)
-		{
 			IJ.log(createResultsHeader());
-		}
-		else
+		else if (resultsWindow == null || !resultsWindow.isShowing())
 		{
-			if (resultsWindow == null || !resultsWindow.isShowing())
-			{
-				String header = createResultsHeader();
-				resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
-			}
+			final String header = createResultsHeader();
+			resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
 		}
 	}
 
 	private static String createResultsHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Name\t");
 		sb.append("N\t");
 		sb.append("TP\t");
@@ -745,22 +710,17 @@ public class FilterAnalysis implements PlugIn
 	private void createSensitivityWindow()
 	{
 		if (isHeadless)
-		{
 			IJ.log(createSensitivityHeader());
-		}
-		else
+		else if (sensitivityWindow == null || !sensitivityWindow.isShowing())
 		{
-			if (sensitivityWindow == null || !sensitivityWindow.isShowing())
-			{
-				String header = createSensitivityHeader();
-				sensitivityWindow = new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
-			}
+			final String header = createSensitivityHeader();
+			sensitivityWindow = new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
 		}
 	}
 
 	private static String createSensitivityHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Filter\t");
 		sb.append("Param\t");
 		sb.append("Value\t");
@@ -775,8 +735,8 @@ public class FilterAnalysis implements PlugIn
 
 	private int run(FilterSet filterSet, List<MemoryPeakResults> resultsList, int count, final int total)
 	{
-		double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
-		double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
+		final double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
+		final double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
 		int i = 0;
 
 		filterSet.sort();
@@ -787,12 +747,12 @@ public class FilterAnalysis implements PlugIn
 		Filter maxFilter = null;
 		double maxScore = -1;
 
-		for (Filter filter : filterSet.getFilters())
+		for (final Filter filter : filterSet.getFilters())
 		{
 			if (count++ % 16 == 0)
 				IJ.showProgress(count, total);
 
-			ClassificationResult s = run(filter, resultsList);
+			final ClassificationResult s = run(filter, resultsList);
 
 			if (type == null)
 				type = filter.getType();
@@ -815,7 +775,7 @@ public class FilterAnalysis implements PlugIn
 
 		if (allSameType && calculateSensitivity)
 		{
-			FilterScore filterScore = bestFilter.get(type);
+			final FilterScore filterScore = bestFilter.get(type);
 			if (filterScore != null)
 			{
 				if (filterScore.score < maxScore)
@@ -845,23 +805,19 @@ public class FilterAnalysis implements PlugIn
 				// numeric value we only need to compare adjacent entries.
 				boolean unique = true;
 				for (int ii = 0; ii < xValues.length - 1; ii++)
-				{
 					if (xValues[ii] == xValues[ii + 1])
 					{
 						unique = false;
 						break;
 					}
-				}
 				String xAxisName = filterSet.getValueName();
 				// Check the values all refer to the same property
-				for (Filter filter : filterSet.getFilters())
-				{
+				for (final Filter filter : filterSet.getFilters())
 					if (!xAxisName.equals(filter.getNumericalValueName()))
 					{
 						unique = false;
 						break;
 					}
-				}
 				if (!unique)
 				{
 					// If not unique then renumber them and use an arbitrary label
@@ -870,7 +826,7 @@ public class FilterAnalysis implements PlugIn
 						xValues[ii] = ii + 1;
 				}
 
-				String title = filterSet.getName();
+				final String title = filterSet.getName();
 
 				// Check if a previous filter set had the same name, update if necessary
 				NamedPlot p = getNamedPlot(title);
@@ -892,7 +848,7 @@ public class FilterAnalysis implements PlugIn
 
 	private NamedPlot getNamedPlot(String title)
 	{
-		for (NamedPlot p : plots)
+		for (final NamedPlot p : plots)
 			if (p.name.equals(title))
 				return p;
 		return null;
@@ -902,22 +858,18 @@ public class FilterAnalysis implements PlugIn
 	{
 		double max = values[0];
 		for (int i = 1; i < values.length; i++)
-		{
 			if (values[i] > max)
-			{
 				max = values[i];
-			}
-		}
 		return max;
 	}
 
 	private ClassificationResult run(Filter filter, List<MemoryPeakResults> resultsList)
 	{
-		ClassificationResult s = filter.score(resultsList);
+		final ClassificationResult s = filter.score(resultsList);
 
 		if (showResultsTable)
 		{
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append(filter.getName()).append('\t');
 			sb.append(s.getTP() + s.getFP()).append('\t');
 			sb.append(s.getTP()).append('\t');
@@ -929,13 +881,9 @@ public class FilterAnalysis implements PlugIn
 			sb.append(s.getRecall()).append('\t');
 			sb.append(s.getF1Score());
 			if (isHeadless)
-			{
 				IJ.log(sb.toString());
-			}
 			else
-			{
 				resultsWindow.append(sb.toString());
-			}
 		}
 		return s;
 	}

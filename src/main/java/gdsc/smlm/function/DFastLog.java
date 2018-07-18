@@ -106,41 +106,7 @@ public class DFastLog extends FastLog
 		data = new float[size];
 
 		for (int i = 0; i < size; i++)
-		{
-			// Store log2 value of a range of floating point numbers using a limited
-			// precision mantissa (m). The purpose of this code is to enumerate all
-			// possible mantissas of a double with limited precision (52-q). Note the
-			// 53 for a 52-bit mantissa comes from the fact that the mantissa
-			// represents the digits of a binary number after the binary-point: .10101010101
-			// It is assumed that the digit before the point is a 1 if the exponent
-			// is non-zero. Otherwise the binary point is moved to the right of the first
-			// digit (i.e. a bit shift left).
-
-			// See Double.longBitsToDouble(int):
-			// int s = ((bits >>> 63) == 0) ? 1 : -1;
-			// int e = (int)((bits >>> 52) & 0x7ffL);
-			// long m = (e == 0) ?
-			//                 (bits & 0xfffffffffffffL) << 1 :
-			//                 (bits & 0xfffffffffffffL) | 0x10000000000000L;
-			//
-			// Then the floating-point result equals the value of the mathematical
-			// expression s x m x 2^(e-1075)
-
-			// For a precision of n=(52-q)=6
-			// We enumerate:
-			// ( .000000 to  .111111) * 2^q (i.e. q additional zeros)
-			// (1.000000 to 1.111111) * 2^q
-
-			// The bit shift is performed on integer data to construct the desired mantissa
-			// which is then converted to a double for the call to exactLog2(double).
-
-			// int m = i << q
-			// log2(m x 2^(e-1075)) == log2(m) + log2(2^e-1075) = log2(m) +(e-1075)
-			// We subtract the -1075 here so that the log2(float) can be reconstructed
-			// from the table of log2(m) + e.
-
 			data[i] = (float) (exactLog2(((long) i) << q) - 1075);
-		}
 
 		// We need the complete table to do this.
 		// Comment out for production code since the tolerance is variable.

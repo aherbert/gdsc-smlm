@@ -40,9 +40,9 @@ import gdsc.smlm.utils.ImageConverter;
 public class SimplePeakResultValidationData implements PeakResultValidationData
 {
 	private final ImageConverter ic = new ImageConverter();
-	private GaussianFunctionFactory factory;
-	private Object data;
-	private int ox, oy, maxx, maxy;
+	private final GaussianFunctionFactory factory;
+	private final Object data;
+	private final int ox, oy, maxx, maxy;
 
 	private int n;
 	private double[] params;
@@ -110,22 +110,22 @@ public class SimplePeakResultValidationData implements PeakResultValidationData
 		if (noise != -1)
 			return;
 
-		double[] spotParams = extractSpotParams(params, n);
+		final double[] spotParams = extractSpotParams(params, n);
 
 		// Adjust to the data frame
 		spotParams[Gaussian2DFunction.X_POSITION] += ox;
 		spotParams[Gaussian2DFunction.Y_POSITION] += oy;
 
 		// Add the 0.5 pixel offset to get the centre pixel
-		int x = (int) (spotParams[Gaussian2DFunction.X_POSITION] + 0.5);
-		int y = (int) (spotParams[Gaussian2DFunction.Y_POSITION] + 0.5);
+		final int x = (int) (spotParams[Gaussian2DFunction.X_POSITION] + 0.5);
+		final int y = (int) (spotParams[Gaussian2DFunction.Y_POSITION] + 0.5);
 		// Do not evaluate over a large region for speed.
 		// Use only 50% of the Gaussian volume or 3 pixels.
 		int nx = getRange(spotParams[Gaussian2DFunction.X_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
 		int ny = getRange(spotParams[Gaussian2DFunction.Y_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
 
-		Rectangle r1 = new Rectangle(x - nx, y - ny, 2 * nx + 1, 2 * ny + 1);
-		Rectangle r2 = r1.intersection(new Rectangle(0, 0, maxx, maxy));
+		final Rectangle r1 = new Rectangle(x - nx, y - ny, 2 * nx + 1, 2 * ny + 1);
+		final Rectangle r2 = r1.intersection(new Rectangle(0, 0, maxx, maxy));
 
 		if (r2.width * r2.height <= 1)
 		{
@@ -135,7 +135,7 @@ public class SimplePeakResultValidationData implements PeakResultValidationData
 		}
 
 		// Get the region of the data
-		double[] region = ic.getDoubleData(data, maxx, maxy, r2, null);
+		final double[] region = ic.getDoubleData(data, maxx, maxy, r2, null);
 
 		// Compute the function in the same region.
 		// Adjust the coordinates for clipping (r2 will be >= r1).
@@ -145,14 +145,12 @@ public class SimplePeakResultValidationData implements PeakResultValidationData
 		// Put the spot in the centre of the region
 		spotParams[Gaussian2DFunction.X_POSITION] += nx - x;
 		spotParams[Gaussian2DFunction.Y_POSITION] += ny - y;
-		Gaussian2DFunction f = factory.create2D(1, r2.width, r2.height);
-		double[] v = f.computeValues(spotParams);
+		final Gaussian2DFunction f = factory.create2D(1, r2.width, r2.height);
+		final double[] v = f.computeValues(spotParams);
 
-		Statistics stats = new Statistics();
+		final Statistics stats = new Statistics();
 		for (int i = 0; i < v.length; i++)
-		{
 			stats.add(region[i] - v[i]);
-		}
 
 		b = stats.getMean();
 		noise = stats.getStandardDeviation();
@@ -188,7 +186,7 @@ public class SimplePeakResultValidationData implements PeakResultValidationData
 	 */
 	private static int getRange(double range, int max)
 	{
-		double l = Math.ceil(range);
+		final double l = Math.ceil(range);
 		if (l < 1L)
 			return 1;
 		if (l >= max)

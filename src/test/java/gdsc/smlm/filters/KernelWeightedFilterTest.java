@@ -40,7 +40,7 @@ public class KernelWeightedFilterTest extends WeightedKernelFilterTest
 			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				int k = (int) boxSize;
+				final int k = (int) boxSize;
 				// Only do odd box sizes
 				if ((k & 1) != 1)
 					return;
@@ -51,7 +51,7 @@ public class KernelWeightedFilterTest extends WeightedKernelFilterTest
 			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				int k = (int) boxSize;
+				final int k = (int) boxSize;
 				// Only do odd box sizes
 				if ((k & 1) != 1)
 					return;
@@ -69,7 +69,7 @@ public class KernelWeightedFilterTest extends WeightedKernelFilterTest
 
 			private KernelFilter createKernelFilter(int k)
 			{
-				KernelFilter f = new KernelFilter(KernelFilterTest.createKernel(k, k), k, k);
+				final KernelFilter f = new KernelFilter(KernelFilterTest.createKernel(k, k), k, k);
 				return f;
 			}
 

@@ -461,21 +461,21 @@ public class PeakResultsReaderTest
 	@Test
 	public void canConvertMalkToNMAndPhotons()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
 		// Output in pixel and count
-		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
+		final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.PIXEL);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
 		out.setCalibration(cal.getCalibration());
 		out.setPSF(PSFHelper.create(PSFType.CUSTOM));
 
-		String filename = createFile();
+		final String filename = createFile();
 
 		writeFile(false, ResultsFileFormat.MALK, false, false, false, false, false, out, filename);
 
-		MemoryPeakResults in = readFile(filename, false);
+		final MemoryPeakResults in = readFile(filename, false);
 
 		// Change to nm and photon for the validation
 		out.convertToUnits(DistanceUnit.NM, IntensityUnit.PHOTON, null);
@@ -487,17 +487,17 @@ public class PeakResultsReaderTest
 	public void writeTextWithComputedPrecisionMatchesRead()
 	{
 		// Create without precision
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults results = createResults(rg, 200, false, false, false, false);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults results = createResults(rg, 200, false, false, false, false);
 		// Ensure units are OK for computing precision
-		CalibrationWriter cw = results.getCalibrationWriter();
+		final CalibrationWriter cw = results.getCalibrationWriter();
 		cw.setIntensityUnit(IntensityUnit.PHOTON);
 		cw.setDistanceUnit(DistanceUnit.PIXEL);
 		results.setCalibration(cw.getCalibration());
 
-		String filename = createFile();
+		final String filename = createFile();
 
-		TextFilePeakResults out = new TextFilePeakResults(filename, false, false, false, true);
+		final TextFilePeakResults out = new TextFilePeakResults(filename, false, false, false, true);
 		// Compute precision
 		out.setComputePrecision(true);
 		out.copySettings(results);
@@ -505,7 +505,7 @@ public class PeakResultsReaderTest
 		out.addAll(Arrays.asList(results.toArray()));
 		out.end();
 
-		MemoryPeakResults in = readFile(filename, false);
+		final MemoryPeakResults in = readFile(filename, false);
 
 		checkEqual(ResultsFileFormat.TEXT, false, false, false, false, false, results, in);
 	}
@@ -530,25 +530,23 @@ public class PeakResultsReaderTest
 
 	private static void canReadIntoPreferredUnits(ResultsFileFormat fileFormat)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
 		// Output in nm and count
-		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
+		final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.NM);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
 		if (fileFormat == ResultsFileFormat.TSF)
-		{
 			// For now just support using the native float TSF value
 			cal.setNmPerPixel((float) cal.getNmPerPixel());
-		}
 		out.setCalibration(cal.getCalibration());
 
-		String filename = createFile();
+		final String filename = createFile();
 
 		writeFile(false, fileFormat, false, false, false, false, false, out, filename);
 
-		MemoryPeakResults in = readFile(filename, false, false);
+		final MemoryPeakResults in = readFile(filename, false, false);
 
 		// Change to preferred units
 		out.convertToUnits(MemoryPeakResults.PREFERRED_DISTANCE_UNIT, MemoryPeakResults.PREFERRED_INTENSITY_UNIT,
@@ -577,18 +575,16 @@ public class PeakResultsReaderTest
 
 	private static void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
 
-		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
+		final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
 		cal.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
 		cal.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
 		if (fileFormat == ResultsFileFormat.TSF)
-		{
 			// For now just support using the native float TSF value
 			cal.setNmPerPixel((float) cal.getNmPerPixel());
-		}
 		out.setCalibration(cal.getCalibration());
 
 		// Remove angle
@@ -602,7 +598,7 @@ public class PeakResultsReaderTest
 			}
 		});
 
-		String filename = createFile();
+		final String filename = createFile();
 
 		writeFile(false, fileFormat, false, false, false, false, false, out, filename);
 
@@ -631,7 +627,7 @@ public class PeakResultsReaderTest
 			@Override
 			public void execute(PeakResult peakResult)
 			{
-				float[] p = peakResult.getParameters();
+				final float[] p = peakResult.getParameters();
 				p[isy] = p[isx];
 			}
 		});
@@ -661,15 +657,15 @@ public class PeakResultsReaderTest
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults out = createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);
-		String filename = createFile();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults out = createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);
+		final String filename = createFile();
 
 		writeFile(false, f1, showDeviations, showEndFrame, showId, showPrecision, false, out, filename);
-		long time1 = getReadTime(filename, useScanner1, loops);
+		final long time1 = getReadTime(filename, useScanner1, loops);
 
 		writeFile(false, f2, showDeviations, showEndFrame, showId, showPrecision, false, out, filename);
-		long time2 = getReadTime(filename, useScanner2, loops);
+		final long time2 = getReadTime(filename, useScanner2, loops);
 
 		if (useScanner1 != useScanner2)
 			System.out.printf("%s (scan=%b) is %.2fx faster than %s (scan=%b)\n", f2, useScanner2,
@@ -684,11 +680,11 @@ public class PeakResultsReaderTest
 	private static void writeMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		MemoryPeakResults out = createResults(rg, 200, showDeviations, showEndFrame, showId, showPrecision);
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final MemoryPeakResults out = createResults(rg, 200, showDeviations, showEndFrame, showId, showPrecision);
 		if (fileFormat == ResultsFileFormat.MALK)
 		{
-			CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
+			final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 			cal.setDistanceUnit(DistanceUnit.NM);
 			cal.setIntensityUnit(IntensityUnit.PHOTON);
 			out.setCalibration(cal.getCalibration());
@@ -696,7 +692,7 @@ public class PeakResultsReaderTest
 		}
 		if (fileFormat == ResultsFileFormat.TSF)
 		{
-			CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
+			final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 			// For now just support using the native float TSF datatype
 			cal.setNmPerPixel((float) cal.getNmPerPixel());
 			out.setCalibration(cal.getCalibration());
@@ -740,39 +736,33 @@ public class PeakResultsReaderTest
 		//			// This shouldn't happen so throw it
 		//		}
 
-		String filename = createFile();
+		final String filename = createFile();
 
 		writeFile(sequential, fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, filename);
 
-		MemoryPeakResults in = readFile(filename, false);
+		final MemoryPeakResults in = readFile(filename, false);
 
 		checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, in);
 	}
 
 	private static void writeWithCombinationsMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean sort)
 	{
-		for (boolean showDeviations : onOff)
-		{
-			for (boolean showEndFrame : onOff)
-			{
-				for (boolean showId : onOff)
-				{
-					for (boolean showPrecision : onOff)
+		for (final boolean showDeviations : onOff)
+			for (final boolean showEndFrame : onOff)
+				for (final boolean showId : onOff)
+					for (final boolean showPrecision : onOff)
 					{
 						if (count(showDeviations, showEndFrame, showId, showPrecision) < 2)
 							continue;
 						writeMatchesRead(sequential, fileFormat, showDeviations, showEndFrame, showId, showPrecision,
 								sort);
 					}
-				}
-			}
-		}
 	}
 
 	private static int count(boolean... flags)
 	{
 		int c = 0;
-		for (boolean flag : flags)
+		for (final boolean flag : flags)
 			if (flag)
 				c++;
 		return c;
@@ -781,43 +771,37 @@ public class PeakResultsReaderTest
 	private static void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision, boolean sort)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
 	}
 
 	private static void readWithScannerMatchesNonScanner(RandomGenerator rg, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
 	{
-		MemoryPeakResults out = createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision);
-		String filename = createFile();
+		final MemoryPeakResults out = createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision);
+		final String filename = createFile();
 
-		ResultsFileFormat fileFormat = ResultsFileFormat.TEXT;
+		final ResultsFileFormat fileFormat = ResultsFileFormat.TEXT;
 		writeFile(false, fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, filename);
 
-		MemoryPeakResults in = readFile(filename, false);
-		MemoryPeakResults in2 = readFile(filename, true);
+		final MemoryPeakResults in = readFile(filename, false);
+		final MemoryPeakResults in2 = readFile(filename, true);
 
 		checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, in, in2);
 	}
 
 	private static void readWithScannerMatchesNonScannerWithCombinations(boolean sort)
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
-		for (boolean showDeviations : onOff)
-		{
-			for (boolean showEndFrame : onOff)
-			{
-				for (boolean showId : onOff)
-				{
-					for (boolean showPrecision : onOff)
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		for (final boolean showDeviations : onOff)
+			for (final boolean showEndFrame : onOff)
+				for (final boolean showId : onOff)
+					for (final boolean showPrecision : onOff)
 					{
 						if (count(showDeviations, showEndFrame, showId, showPrecision) < 2)
 							continue;
 						readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
 					}
-				}
-			}
-		}
 	}
 
 	private static void checkEqual(ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame,
@@ -829,10 +813,9 @@ public class PeakResultsReaderTest
 
 		final double delta = (fileFormat == ResultsFileFormat.BINARY) ? 0 : 1e-5f;
 
-		PeakResult[] expected = expectedResults.toArray();
-		PeakResult[] actual = actualResults.toArray();
+		final PeakResult[] expected = expectedResults.toArray();
+		final PeakResult[] actual = actualResults.toArray();
 		if (sort)
-		{
 			// Results should be sorted by time
 			Arrays.sort(expected, new Comparator<PeakResult>()
 			{
@@ -842,15 +825,14 @@ public class PeakResultsReaderTest
 					return o1.getFrame() - o2.getFrame();
 				}
 			});
-		}
 
 		// TSF requires the bias be subtracted
 		//		double bias = expectedResults.getCalibration().getBias();
 
 		for (int i = 0; i < actualResults.size(); i++)
 		{
-			PeakResult p1 = expected[i];
-			PeakResult p2 = actual[i];
+			final PeakResult p1 = expected[i];
+			final PeakResult p2 = actual[i];
 
 			TestAssert.assertEquals(p1.getFrame(), p2.getFrame(), "Peak mismatch @ [%d]", i);
 
@@ -872,12 +854,10 @@ public class PeakResultsReaderTest
 					"Mean intensity mismatch @ [%d]", i);
 			TestAssert.assertNotNull(p2.getParameters(), "Params is null @ [%d]", i);
 
-			float[] p = p2.getParameters();
-			for (float f : p)
-			{
+			final float[] p = p2.getParameters();
+			for (final float f : p)
 				if (Float.isNaN(f))
 					System.out.println(Arrays.toString(p1.getParameters()));
-			}
 
 			TestAssert.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
 					"Params mismatch @ [%d]", i);
@@ -888,26 +868,20 @@ public class PeakResultsReaderTest
 						"Params StdDev mismatch @ [%d]", i);
 			}
 			if (showEndFrame)
-			{
 				TestAssert.assertEquals(p1.getEndFrame(), p2.getEndFrame(), "End frame mismatch @ [%d]", i);
-			}
 			if (showId)
-			{
 				TestAssert.assertEquals(p1.getId(), p2.getId(), "ID mismatch @ [%d]", i);
-			}
 			if (showPrecision)
-			{
 				TestAssert.assertEqualsRelative(p1.getPrecision(), p2.getPrecision(), delta,
 						"Precision mismatch @ [%d]", i);
-			}
 		}
 
 		// Check the header information
 		Assert.assertEquals("Name", expectedResults.getName(), actualResults.getName());
 		Assert.assertEquals("Configuration", expectedResults.getConfiguration(), actualResults.getConfiguration());
 
-		Rectangle r1 = expectedResults.getBounds();
-		Rectangle r2 = actualResults.getBounds();
+		final Rectangle r1 = expectedResults.getBounds();
+		final Rectangle r2 = actualResults.getBounds();
 		if (r1 != null)
 		{
 			Assert.assertNotNull("Bounds", r2);
@@ -917,12 +891,10 @@ public class PeakResultsReaderTest
 			Assert.assertEquals("Bounds height", r1.height, r2.height);
 		}
 		else
-		{
 			Assert.assertNull("Bounds", r2);
-		}
 
-		Calibration c1 = expectedResults.getCalibration();
-		Calibration c2 = actualResults.getCalibration();
+		final Calibration c1 = expectedResults.getCalibration();
+		final Calibration c2 = actualResults.getCalibration();
 		//try
 		//{
 		//	Printer printer = JsonFormat.printer().omittingInsignificantWhitespace()
@@ -942,45 +914,41 @@ public class PeakResultsReaderTest
 			Assert.assertTrue("Calibration", c1.equals(c2));
 		}
 		else
-		{
 			Assert.assertNull("Calibration", c2);
-		}
 
-		PSF p1 = expectedResults.getPSF();
-		PSF p2 = actualResults.getPSF();
+		final PSF p1 = expectedResults.getPSF();
+		final PSF p2 = actualResults.getPSF();
 		if (p1 != null)
 		{
 			Assert.assertNotNull("PSF", p2);
 			Assert.assertTrue("PSF", p1.equals(p2));
 		}
 		else
-		{
 			Assert.assertNull("PSF", p2);
-		}
 	}
 
 	private static MemoryPeakResults createResults(RandomGenerator rg, int i, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision)
 	{
-		double bias = rg.nextDouble();
+		final double bias = rg.nextDouble();
 
-		boolean extended = showEndFrame || showId || showPrecision;
+		final boolean extended = showEndFrame || showId || showPrecision;
 
-		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
+		final MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
 		while (i-- > 0)
 		{
-			int startFrame = rg.nextInt(i + 1);
-			int origX = rg.nextInt(256);
-			int origY = rg.nextInt(256);
-			float origValue = rg.nextFloat();
-			double error = rg.nextDouble();
-			float noise = rg.nextFloat();
-			float meanIntensity = rg.nextFloat();
-			float[] params = createData(rg);
-			float[] paramsStdDev = (showDeviations) ? createData(rg) : null;
+			final int startFrame = rg.nextInt(i + 1);
+			final int origX = rg.nextInt(256);
+			final int origY = rg.nextInt(256);
+			final float origValue = rg.nextFloat();
+			final double error = rg.nextDouble();
+			final float noise = rg.nextFloat();
+			final float meanIntensity = rg.nextFloat();
+			final float[] params = createData(rg);
+			final float[] paramsStdDev = (showDeviations) ? createData(rg) : null;
 			if (extended)
 			{
-				AttributePeakResult r = new AttributePeakResult(startFrame, origX, origY, origValue, error, noise,
+				final AttributePeakResult r = new AttributePeakResult(startFrame, origX, origY, origValue, error, noise,
 						meanIntensity, params, paramsStdDev);
 				if (showEndFrame)
 					r.setEndFrame(startFrame + rg.nextInt(10));
@@ -996,7 +964,7 @@ public class PeakResultsReaderTest
 		results.setName(Long.toString(rg.nextLong()));
 		results.setConfiguration(Long.toString(rg.nextLong()));
 		results.setBounds(new Rectangle(rg.nextInt(10), rg.nextInt(10), rg.nextInt(100), rg.nextInt(100)));
-		CalibrationWriter cal = new CalibrationWriter();
+		final CalibrationWriter cal = new CalibrationWriter();
 		cal.setNmPerPixel(rg.nextDouble());
 		cal.setCountPerPhoton(rg.nextDouble());
 		cal.setExposureTime(rg.nextDouble());
@@ -1025,10 +993,10 @@ public class PeakResultsReaderTest
 		{
 			file = File.createTempFile("test", null);
 			file.deleteOnExit();
-			String filename = file.getPath();
+			final String filename = file.getPath();
 			return filename;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			Assert.fail("Cannot create temp files for IO testing");
 		}
@@ -1059,9 +1027,7 @@ public class PeakResultsReaderTest
 		}
 		out.copySettings(results);
 		if (sort && out instanceof FilePeakResults)
-		{
 			((FilePeakResults) out).setSortAfterEnd(sort);
-		}
 		out.begin();
 
 		// TODO - option to test adding using:
@@ -1069,7 +1035,6 @@ public class PeakResultsReaderTest
 		// addAll(PeakResult[])
 
 		if (sequential)
-		{
 			results.forEach(new PeakResultProcedure()
 			{
 				@Override
@@ -1080,11 +1045,8 @@ public class PeakResultsReaderTest
 							peak.getParameterDeviations());
 				}
 			});
-		}
 		else
-		{
 			out.addAll(Arrays.asList(results.toArray()));
-		}
 		out.end();
 	}
 
@@ -1095,10 +1057,10 @@ public class PeakResultsReaderTest
 
 	private static MemoryPeakResults readFile(String filename, boolean useScanner, boolean rawResults)
 	{
-		PeakResultsReader reader = new PeakResultsReader(filename);
+		final PeakResultsReader reader = new PeakResultsReader(filename);
 		reader.setUseScanner(useScanner);
 		reader.setRawResults(rawResults);
-		MemoryPeakResults in = reader.getResults();
+		final MemoryPeakResults in = reader.getResults();
 		return in;
 	}
 
@@ -1107,10 +1069,10 @@ public class PeakResultsReaderTest
 		// Initialise reading code
 		readFile(filename, useScanner);
 
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		for (int i = loops; i-- > 0;)
 			readFile(filename, useScanner);
-		long time = System.nanoTime() - start;
+		final long time = System.nanoTime() - start;
 		return time;
 	}
 }

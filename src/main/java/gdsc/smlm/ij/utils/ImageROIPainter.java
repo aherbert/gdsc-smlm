@@ -42,7 +42,7 @@ import ij.text.TextPanel;
  */
 public class ImageROIPainter extends TextPanelMouseListener
 {
-	private TextPanel textPanel;
+	private final TextPanel textPanel;
 	private String title;
 	private CoordinateProvider coordProvider;
 
@@ -78,18 +78,18 @@ public class ImageROIPainter extends TextPanelMouseListener
 		if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
 			return;
 
-		ImagePlus imp = WindowManager.getImage(title);
+		final ImagePlus imp = WindowManager.getImage(title);
 		if (imp == null)
 			return;
 
-		double[] position = coordProvider.getCoordinates(textPanel.getLine(selectedIndex));
+		final double[] position = coordProvider.getCoordinates(textPanel.getLine(selectedIndex));
 
 		if (position == null || position.length < 3)
 			return;
 
-		int slice = (int) position[0];
-		double x = position[1];
-		double y = position[2];
+		final int slice = (int) position[0];
+		final double x = position[1];
+		final double y = position[2];
 
 		addRoi(imp, slice, new PointRoi(x, y));
 
@@ -112,18 +112,18 @@ public class ImageROIPainter extends TextPanelMouseListener
 			return;
 		if (selectionEnd < selectionStart || selectionEnd >= textPanel.getLineCount())
 			return;
-		ImagePlus imp = WindowManager.getImage(title);
+		final ImagePlus imp = WindowManager.getImage(title);
 		if (imp == null)
 			return;
 
 		// Show all
 		int points = 0;
-		float[] x = new float[selectionEnd - selectionStart + 1];
-		float[] y = new float[x.length];
-		int[] slice = new int[x.length];
+		final float[] x = new float[selectionEnd - selectionStart + 1];
+		final float[] y = new float[x.length];
+		final int[] slice = new int[x.length];
 		while (selectionStart <= selectionEnd)
 		{
-			double[] position = coordProvider.getCoordinates(textPanel.getLine(selectionStart));
+			final double[] position = coordProvider.getCoordinates(textPanel.getLine(selectionStart));
 
 			if (position == null || position.length < 3)
 				continue;
@@ -143,24 +143,22 @@ public class ImageROIPainter extends TextPanelMouseListener
 		// Add the ROI to each relevant slice
 
 		// Sort the slices
-		int[] indices = new int[points];
+		final int[] indices = new int[points];
 		for (int i = 0; i < points; i++)
 			indices[i] = i;
 
 		Sort.sort(indices, slice);
 
-		Overlay o = new Overlay();
+		final Overlay o = new Overlay();
 
 		// Create an ROI for each slice
 		int start = 0;
 		for (int i = 0; i < points; i++)
-		{
 			if (slice[indices[i]] != slice[indices[start]])
 			{
 				appendRoi(x, y, slice, indices, o, start, i);
 				start = i;
 			}
-		}
 		appendRoi(x, y, slice, indices, o, start, points);
 
 		// Choose the first slice and add the final overlay
@@ -191,15 +189,15 @@ public class ImageROIPainter extends TextPanelMouseListener
 	 */
 	private static void appendRoi(float[] x, float[] y, int[] slice, int[] indices, Overlay o, int start, int end)
 	{
-		int p = end - start;
-		float[] x2 = new float[p];
-		float[] y2 = new float[p];
+		final int p = end - start;
+		final float[] x2 = new float[p];
+		final float[] y2 = new float[p];
 		for (int j = start, ii = 0; j < end; j++, ii++)
 		{
 			x2[ii] = x[indices[j]];
 			y2[ii] = y[indices[j]];
 		}
-		PointRoi roi = new PointRoi(x2, y2, p);
+		final PointRoi roi = new PointRoi(x2, y2, p);
 		roi.setPosition(slice[indices[start]]);
 		o.add(roi);
 	}
@@ -228,14 +226,12 @@ public class ImageROIPainter extends TextPanelMouseListener
 
 				if (imp.getStackSize() > 1)
 					roi.setPosition(slice);
-				Overlay o = new Overlay(roi);
+				final Overlay o = new Overlay(roi);
 				o.setStrokeColor(Color.green);
 				imp.setOverlay(o);
 			}
 			else
-			{
 				imp.setOverlay(null);
-			}
 		}
 	}
 

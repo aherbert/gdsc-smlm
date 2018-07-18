@@ -82,7 +82,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	protected static final int AA2 = 3;
 	/** The index for the x width gradient pre-factor */
 	protected static final int AX = 4;
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -203,9 +203,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final int x0 = x % maxx;
 
 		for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK)
-		{
 			y += gaussian(x0, x1, apos, peakFactors[j]);
-		}
 
 		return y;
 	}

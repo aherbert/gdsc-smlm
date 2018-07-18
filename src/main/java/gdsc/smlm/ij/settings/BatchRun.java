@@ -32,7 +32,7 @@ public class BatchRun
 {
 	/** The image. */
 	public String image;
-	
+
 	/** The fit engine configuration. */
 	public FitEngineConfiguration fitEngineConfiguration = null;
 

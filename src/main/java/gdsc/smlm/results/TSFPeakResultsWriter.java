@@ -111,7 +111,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			closeOutput();
 			return;
 		}
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+		final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 		isx = indices[0];
 		isy = indices[1];
 		try
@@ -119,7 +119,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
 			fitMode = FitMode.TWOAXISANDTHETA;
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			// This is not an angled PSF. Revert to 1/2 axis:
 			fitMode = (isx == isy) ? FitMode.ONEAXIS : FitMode.TWOAXIS;
@@ -130,7 +130,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		{
 			out = new FileOutputStream(filename);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("Failed to write open TSF file: " + filename);
 			e.printStackTrace();
@@ -141,11 +141,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		// Write the offsets used in the TSF format
 		try
 		{
-			DataOutputStream dos = new DataOutputStream(out);
+			final DataOutputStream dos = new DataOutputStream(out);
 			dos.writeInt(0);
 			dos.writeLong(0);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			System.err.println("Failed to write TSF offset fields");
 			e.printStackTrace();
@@ -162,7 +162,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		{
 			out.close();
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore exception
 		}
@@ -195,7 +195,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (out == null)
 			return;
 
-		Spot.Builder builder = Spot.newBuilder();
+		final Spot.Builder builder = Spot.newBuilder();
 		builder.setMolecule(id.incrementAndGet());
 		builder.setChannel(1);
 		builder.setFluorophoreType(1);
@@ -212,7 +212,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (paramsStdDev != null)
 			addNewParamStdDevs(builder, paramsStdDev);
 
-		Spot spot = builder.build();
+		final Spot spot = builder.build();
 
 		writeResult(1, spot);
 	}
@@ -222,7 +222,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	{
 		final float[] params = result.getParameters();
 
-		Spot.Builder builder = Spot.newBuilder();
+		final Spot.Builder builder = Spot.newBuilder();
 		builder.setMolecule(id.incrementAndGet());
 		builder.setChannel(1);
 		builder.setFluorophoreType(1);
@@ -235,7 +235,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (result.hasPrecision())
 		{
 			// Use the actual precision
-			float precision = (float) result.getPrecision();
+			final float precision = (float) result.getPrecision();
 			builder.setXPrecision(precision);
 			builder.setYPrecision(precision);
 		}
@@ -252,7 +252,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (result.hasParameterDeviations())
 			addNewParamStdDevs(builder, result.getParameterDeviations());
 
-		Spot spot = builder.build();
+		final Spot spot = builder.build();
 
 		writeResult(1, spot);
 	}
@@ -315,10 +315,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (out == null)
 			return;
 
-		Spot[] spots = new Spot[20];
+		final Spot[] spots = new Spot[20];
 		int count = 0;
-		Spot.Builder builder = Spot.newBuilder();
-		for (PeakResult result : results)
+		final Spot.Builder builder = Spot.newBuilder();
+		for (final PeakResult result : results)
 		{
 			final float[] params = result.getParameters();
 
@@ -334,7 +334,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			if (result.hasPrecision())
 			{
 				// Use the actual precision
-				float precision = (float) result.getPrecision();
+				final float precision = (float) result.getPrecision();
 				builder.setXPrecision(precision);
 				builder.setYPrecision(precision);
 			}
@@ -388,10 +388,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		// Reuse the space
 		if (builder.getParamStdDevsCount() == paramStdDev.length)
-		{
 			for (int i = 0; i < paramStdDev.length; i++)
 				builder.setParamStdDevs(i, paramStdDev[i]);
-		}
 		else
 		{
 			builder.clearParamStdDevs();
@@ -408,11 +406,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		try
 		{
 			for (int i = 0; i < count; i++)
-			{
 				spots[i].writeDelimitedTo(out);
-			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			System.err.println("Failed to write Spot message");
 			closeOutput();
@@ -470,7 +466,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			//out.flush();
 			offset = out.getChannel().position() - 12;
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			// This is bad.
 			System.err.println("Failed to determine offset for SpotList message");
@@ -480,7 +476,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 
 		// Record the SpotList message
-		SpotList.Builder builder = SpotList.newBuilder();
+		final SpotList.Builder builder = SpotList.newBuilder();
 
 		builder.setApplicationId(APPLICATION_ID);
 
@@ -488,9 +484,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		// Add the standard details the TSF supports. We use extensions to add GDSC SMLM data.
 		if (!TextUtils.isNullOrEmpty(getName()))
-		{
 			builder.setName(getName());
-		}
 		if (getSource() != null)
 		{
 			builder.setNrPixelsX(getSource().width);
@@ -501,7 +495,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 		if (getBounds() != null)
 		{
-			ROI.Builder roiBuilder = builder.getRoiBuilder();
+			final ROI.Builder roiBuilder = builder.getRoiBuilder();
 			roiBuilder.setX(getBounds().x);
 			roiBuilder.setY(getBounds().y);
 			roiBuilder.setXWidth(getBounds().width);
@@ -510,7 +504,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 		if (hasCalibration())
 		{
-			CalibrationReader cr = getCalibrationReader();
+			final CalibrationReader cr = getCalibrationReader();
 			if (cr.hasNmPerPixel())
 				builder.setPixelSize((float) cr.getNmPerPixel());
 
@@ -524,48 +518,38 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setCameraType(cameraTypeMap[cr.getCameraType().ordinal()]);
 
 			if (cr.hasDistanceUnit())
-			{
 				builder.setLocationUnits(locationUnitsMap[cr.getDistanceUnit().ordinal()]);
-			}
 			if (cr.hasIntensityUnit())
-			{
 				builder.setIntensityUnits(intensityUnitsMap[cr.getIntensityUnit().ordinal()]);
-			}
 			if (cr.hasAngleUnit())
-			{
 				builder.setThetaUnits(thetaUnitsMap[cr.getAngleUnit().ordinal()]);
-			}
 
 			// We can use some logic here to get the QE
 			if (cr.hasCountPerPhoton())
 			{
 				builder.setGain(cr.getCountPerPhoton());
 
-				double qe = (cr.hasQuantumEfficiency()) ? cr.getQuantumEfficiency() : 1;
+				final double qe = (cr.hasQuantumEfficiency()) ? cr.getQuantumEfficiency() : 1;
 				// e-/photon / count/photon => e-/count
-				double ecf = qe / cr.getCountPerPhoton();
+				final double ecf = qe / cr.getCountPerPhoton();
 
 				builder.addEcf(ecf);
 				builder.addQe(qe);
 			}
 		}
 		if (!TextUtils.isNullOrEmpty(getConfiguration()))
-		{
 			builder.setConfiguration(singleLine(getConfiguration()));
-		}
 		if (getPSF() != null)
-		{
 			try
 			{
-				Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
+				final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 				builder.setPSF(printer.print(getPSF()));
 			}
-			catch (InvalidProtocolBufferException e)
+			catch (final InvalidProtocolBufferException e)
 			{
 				// This shouldn't happen so throw it
 				throw new NotImplementedException("Unable to serialise the PSF settings", e);
 			}
-		}
 
 		// Have a property so the boxSize can be set
 		if (boxSize > 0)
@@ -573,18 +557,18 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		builder.setFitMode(fitMode);
 
-		FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
+		final FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
 		typeBuilder.setId(1);
 		typeBuilder.setDescription("Default fluorophore");
 		typeBuilder.setIsFiducial(false);
 		builder.addFluorophoreTypes(typeBuilder.build());
 
-		SpotList spotList = builder.build();
+		final SpotList spotList = builder.build();
 		try
 		{
 			spotList.writeDelimitedTo(out);
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			System.err.println("Failed to write SpotList message");
 			e.printStackTrace();
@@ -605,7 +589,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			f.seek(4);
 			f.writeLong(offset);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("Failed to record offset for SpotList message");
 			e.printStackTrace();

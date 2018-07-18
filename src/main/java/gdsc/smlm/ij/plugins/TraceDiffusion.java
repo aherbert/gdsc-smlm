@@ -169,14 +169,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return;
 		}
 
-		ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
+		final ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
 
 		// Option to pick multiple input datasets together using a list box.
 		if ("multi".equals(arg))
-		{
 			if (!showMultiDialog(allResults))
 				return;
-		}
 
 		// This shows the dialog for selecting trace options
 		if (!showTraceDialog(allResults))
@@ -189,7 +187,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		// - Trace each single dataset (and store in memory)
 		// - Combine trace results held in memory
-		Trace[] traces = getTraces(allResults);
+		final Trace[] traces = getTraces(allResults);
 
 		// -=-=-
 		// Analyse the traces
@@ -201,7 +199,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (!showDialog())
 				return;
 
-		int count = traces.length;
+		final int count = traces.length;
 		double[] fitMSDResult = null;
 		int n = 0;
 		double[][] jdParams = null;
@@ -218,13 +216,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Get the maximum trace length
 			int length = settings.getMinimumTraceLength();
 			if (!settings.getTruncate())
-			{
-				for (Trace trace : traces)
-				{
+				for (final Trace trace : traces)
 					if (length < trace.size())
 						length = trace.size();
-				}
-			}
 
 			// Get the localisation error (4s^2) in um^2
 			final double error = (settings.getPrecisionCorrection()) ? 4 * precision * precision / 1e6 : 0;
@@ -242,34 +236,32 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					factors[t] = JumpDistanceAnalysis.getConversionfactor(t);
 			}
 			else
-			{
 				factors = SimpleArrayUtils.newArray(length, 0.0, 1.0);
-			}
 
 			// Extract the mean-squared distance statistics
-			Statistics[] stats = new Statistics[length];
+			final Statistics[] stats = new Statistics[length];
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = new Statistics();
 
-			ArrayList<double[]> distances = (saveTraceDistances || displayTraceLength) ? new ArrayList<>(traces.length)
+			final ArrayList<double[]> distances = (saveTraceDistances || displayTraceLength) ? new ArrayList<>(traces.length)
 					: null;
 
 			// Store all the jump distances at the specified interval
-			StoredDataStatistics jumpDistances = new StoredDataStatistics();
+			final StoredDataStatistics jumpDistances = new StoredDataStatistics();
 			final int jumpDistanceInterval = settings.getJumpDistance();
 
 			// Compute squared distances
-			StoredDataStatistics msdPerMoleculeAllVsAll = new StoredDataStatistics();
-			StoredDataStatistics msdPerMoleculeAdjacent = new StoredDataStatistics();
-			for (Trace trace : traces)
+			final StoredDataStatistics msdPerMoleculeAllVsAll = new StoredDataStatistics();
+			final StoredDataStatistics msdPerMoleculeAdjacent = new StoredDataStatistics();
+			for (final Trace trace : traces)
 			{
-				PeakResultStoreList results = trace.getPoints();
+				final PeakResultStoreList results = trace.getPoints();
 				// Sum the MSD and the time
 				final int traceLength = (settings.getTruncate()) ? settings.getMinimumTraceLength() : trace.size();
 
 				// Get the mean for each time separation
-				double[] sumDistance = new double[traceLength + 1];
-				double[] sumTime = new double[sumDistance.length];
+				final double[] sumDistance = new double[traceLength + 1];
+				final double[] sumTime = new double[sumDistance.length];
 
 				// Do the distances to the origin (saving if necessary)
 				{
@@ -277,7 +269,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					final float y = results.get(0).getYPosition();
 					if (distances != null)
 					{
-						double[] msd = new double[traceLength - 1];
+						final double[] msd = new double[traceLength - 1];
 						for (int j = 1; j < traceLength; j++)
 						{
 							final int t = j;
@@ -291,7 +283,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						distances.add(msd);
 					}
 					else
-					{
 						for (int j = 1; j < traceLength; j++)
 						{
 							final int t = j;
@@ -301,7 +292,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							sumDistance[t] += d;
 							sumTime[t] += t;
 						}
-					}
 				}
 
 				if (settings.getInternalDistances())
@@ -324,19 +314,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 					// Add the average distance per time separation to the population
 					for (int t = 1; t < traceLength; t++)
-					{
 						// Note: (traceLength - t) == count
 						stats[t].add(sumDistance[t] / (traceLength - t));
-					}
 				}
 				else
-				{
 					// Add the distance per time separation to the population
 					for (int t = 1; t < traceLength; t++)
-					{
 						stats[t].add(sumDistance[t]);
-					}
-				}
 
 				// Fix this for the precision and MSD adjustment.
 				// It may be necessary to:
@@ -345,8 +329,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				// - apply correction factor for the n-frames to get actual MSD
 				// - sum the actual MSD
 
-				double sumD = 0, sumD_adjacent = Math.max(0, sumDistance[1] - error) * factors[1];
-				double sumT = 0, sumT_adjacent = sumTime[1];
+				double sumD = 0;
+				final double sumD_adjacent = Math.max(0, sumDistance[1] - error) * factors[1];
+				double sumT = 0;
+				final double sumT_adjacent = sumTime[1];
 				for (int t = 1; t < traceLength; t++)
 				{
 					sumD += Math.max(0, sumDistance[t] - error) * factors[t];
@@ -369,20 +355,18 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 
 			if (saveTraceDistances)
-			{
 				saveTraceDistances(traces.length, distances, msdPerMoleculeAllVsAll, msdPerMoleculeAdjacent,
 						dPerMoleculeAllVsAll, dPerMoleculeAdjacent);
-			}
 
 			if (displayTraceLength)
 			{
-				StoredDataStatistics lengths = calculateTraceLengths(distances);
+				final StoredDataStatistics lengths = calculateTraceLengths(distances);
 				showHistogram(lengths, "Trace length (um)");
 			}
 
 			if (displayTraceSize)
 			{
-				StoredDataStatistics sizes = calculateTraceSizes(traces);
+				final StoredDataStatistics sizes = calculateTraceSizes(traces);
 				showHistogram(sizes, "Trace size", true);
 			}
 
@@ -402,9 +386,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 
 			// Calculate the mean squared distance (MSD)
-			double[] x = new double[stats.length];
-			double[] y = new double[x.length];
-			double[] sd = new double[x.length];
+			final double[] x = new double[stats.length];
+			final double[] y = new double[x.length];
+			final double[] sd = new double[x.length];
 			// Intercept is the 4s^2 (in um^2)
 			y[0] = 4 * precision * precision / 1e6;
 			for (int i = 1; i < stats.length; i++)
@@ -415,8 +399,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				sd[i] = stats[i].getStandardError() * px2ToUm2;
 			}
 
-			String title = TITLE + " MSD";
-			Plot2 plot = plotMSD(x, y, sd, title);
+			final String title = TITLE + " MSD";
+			final Plot2 plot = plotMSD(x, y, sd, title);
 
 			// Fit the MSD using a linear fit
 			fitMSDResult = fitMSD(x, y, title, plot);
@@ -426,7 +410,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				saveStatistics(jumpDistances, "Jump Distance", "Distance (um^2)", false);
 
 			// Calculate the cumulative jump-distance histogram
-			double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(jumpDistances.getValues());
+			final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(jumpDistances.getValues());
 
 			// Always show the jump distance histogram
 			jdTitle = TITLE + " Jump Distance";
@@ -450,14 +434,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	public static StoredDataStatistics calculateTraceLengths(ArrayList<double[]> distances)
 	{
-		StoredDataStatistics lengths = new StoredDataStatistics();
-		for (double[] trace : distances)
+		final StoredDataStatistics lengths = new StoredDataStatistics();
+		for (final double[] trace : distances)
 		{
 			double sum = 0;
-			for (double d : trace)
-			{
+			for (final double d : trace)
 				sum += Math.sqrt(d);
-			}
 			lengths.add(sum);
 		}
 		return lengths;
@@ -465,17 +447,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private static StoredDataStatistics calculateTraceSizes(Trace[] traces)
 	{
-		StoredDataStatistics sizes = new StoredDataStatistics();
-		for (Trace trace : traces)
-		{
+		final StoredDataStatistics sizes = new StoredDataStatistics();
+		for (final Trace trace : traces)
 			sizes.add(trace.size());
-		}
 		return sizes;
 	}
 
 	private void display(String title, Plot2 plot)
 	{
-		PlotWindow pw = Utils.display(title, plot);
+		final PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw.getImagePlus().getID();
 	}
@@ -496,8 +476,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (saveRawData)
 			saveStatistics(stats, title, title, rounded);
 
-		double minWidth = (integerData) ? 1 : 0;
-		int id = Utils.showHistogram(TITLE, stats, title, minWidth,
+		final double minWidth = (integerData) ? 1 : 0;
+		final int id = Utils.showHistogram(TITLE, stats, title, minWidth,
 				(settings.getRemoveOutliers() || alwaysRemoveOutliers) ? 1 : 0, settings.getHistogramBins());
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
@@ -524,31 +504,29 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		// Check the diffusion simulation for a precision
 		if (DiffusionRateTest.isSimulated(results.getName()) && !multi)
-		{
 			precision = DiffusionRateTest.lastSimulatedPrecision;
-		}
 		else
 		{
 			precision = 999;
 			try
 			{
-				Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(results.getPSF(),
+				final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(results.getPSF(),
 						results.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
 				// Get the average precision of the localisations
 				precision = 0;
 				int n = 0;
-				for (Trace trace : traces)
+				for (final Trace trace : traces)
 				{
 					for (int k = 0; k < trace.size(); k++)
 					{
-						PeakResult r = trace.get(k);
+						final PeakResult r = trace.get(k);
 						precision += calculator.getLSEPrecision(r.getParameters(), r.getNoise());
 					}
 					n += trace.size();
 				}
 				precision /= n;
 			}
-			catch (ConfigurationException e)
+			catch (final ConfigurationException e)
 			{
 				// Ignore this and we will ask the user for the precision
 			}
@@ -556,15 +534,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		if (precision > 100)
 		{
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("The average precision of the traced results is " + Utils.rounded(precision, 4) +
 					" nm.\nPlease verify the precision.");
 			gd.addSlider("Precision (nm)", 5, 100, precision);
 			gd.showDialog();
 			if (!(gd.wasCanceled() || gd.invalidNumber()))
-			{
 				precision = Math.abs(gd.getNextNumber());
-			}
 		}
 	}
 
@@ -581,12 +557,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	private static StoredDataStatistics calculateDiffusionCoefficient(StoredDataStatistics msdPerMoleculeAdjacent)
 	{
-		StoredDataStatistics dPerMolecule = new StoredDataStatistics();
+		final StoredDataStatistics dPerMolecule = new StoredDataStatistics();
 		final double diffusionCoefficientConversion = 1.0 / 4.0;
-		for (double msd : msdPerMoleculeAdjacent.getValues())
-		{
+		for (final double msd : msdPerMoleculeAdjacent.getValues())
 			dPerMolecule.add(msd * diffusionCoefficientConversion);
-		}
 		return dPerMolecule;
 	}
 
@@ -602,10 +576,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			try (BufferedWriter out = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(distancesFilename), "UTF-8")))
 			{
-				double[] msd = msdPerMolecule.getValues();
-				double[] msd2 = msdPerMoleculeAdjacent.getValues();
-				double[] dStar = dStarPerMolecule.getValues();
-				double[] dStar2 = dStarPerMoleculeAdjacent.getValues();
+				final double[] msd = msdPerMolecule.getValues();
+				final double[] msd2 = msdPerMoleculeAdjacent.getValues();
+				final double[] dStar = dStarPerMolecule.getValues();
+				final double[] dStar2 = dStarPerMoleculeAdjacent.getValues();
 				out.write(String.format("#%d traces : Precision = %s nm : Exposure time = %s s", nTraces,
 						Utils.rounded(precision, 4), Utils.rounded(exposureTime, 4)));
 				out.newLine();
@@ -624,7 +598,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					out.write(Utils.rounded(dStar[i], 4));
 					out.write('\t');
 					out.write(Utils.rounded(dStar2[i], 4));
-					for (double d : distances.get(i))
+					for (final double d : distances.get(i))
 					{
 						out.write('\t');
 						out.write(Utils.rounded(d, 4));
@@ -632,7 +606,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					out.newLine();
 				}
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				// Ignore
 			}
@@ -646,7 +620,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		directoryChosen = true;
 		if (rawDataDirectory == null)
 			return;
-		String filename = rawDataDirectory + "MSD.txt";
+		final String filename = rawDataDirectory + "MSD.txt";
 
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")))
 		{
@@ -662,7 +636,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				out.newLine();
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore
 		}
@@ -675,32 +649,28 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		directoryChosen = true;
 		if (rawDataDirectory == null)
 			return;
-		String filename = rawDataDirectory + title.replace("/", " per ").replace("*", "star") + ".txt";
+		final String filename = rawDataDirectory + title.replace("/", " per ").replace("*", "star") + ".txt";
 
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")))
 		{
 			out.write(label);
 			out.newLine();
-			double[] data = stats.getValues();
+			final double[] data = stats.getValues();
 			Arrays.sort(data);
 			if (rounded)
-			{
-				for (double d : data)
+				for (final double d : data)
 				{
 					out.write(Utils.rounded(d, 4));
 					out.newLine();
 				}
-			}
 			else
-			{
-				for (double d : data)
+				for (final double d : data)
 				{
 					out.write(Double.toString(d));
 					out.newLine();
 				}
-			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore
 		}
@@ -713,7 +683,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		directoryChosen = true;
 		if (rawDataDirectory == null)
 			return;
-		String filename = rawDataDirectory + "Fit." + title + ".txt";
+		final String filename = rawDataDirectory + "Fit." + title + ".txt";
 
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")))
 		{
@@ -727,7 +697,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				out.newLine();
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			// Ignore
 		}
@@ -758,14 +728,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		final int minLength = (ignoreEnds) ? minimumTraceLength + 2 : minimumTraceLength;
 		int count = 0;
 		for (int i = 0; i < traces.length; i++)
-		{
 			if (traces[i].size() >= minLength)
 			{
 				if (ignoreEnds)
 					traces[i].removeEnds();
 				traces[count++] = traces[i];
 			}
-		}
 
 		Utils.log("Filtered results '%s' : %s filtered to %d using minimum length %d (Ignore ends = %b)", name,
 				TextUtils.pleural(traces.length, "trace"), count, minimumTraceLength, ignoreEnds);
@@ -784,12 +752,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Create summary table
 		createSummaryTable();
 
-		Statistics[] stats = new Statistics[NAMES.length];
+		final Statistics[] stats = new Statistics[NAMES.length];
 		for (int i = 0; i < stats.length; i++)
-		{
 			stats[i] = (settings.getShowHistograms()) ? new StoredDataStatistics() : new Statistics();
-		}
-		for (Trace trace : traces)
+		for (final Trace trace : traces)
 		{
 			stats[T_ON].add(trace.getOnTime() * exposureTime);
 			final double signal = trace.getSignal() / results.getGain();
@@ -798,7 +764,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 
 		// Add to the summary table
-		StringBuilder sb = new StringBuilder(title);
+		final StringBuilder sb = new StringBuilder(title);
 		sb.append('\t').append(createCombinedName());
 		sb.append('\t');
 		sb.append(Utils.rounded(exposureTime * 1000, 3)).append('\t');
@@ -826,9 +792,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(n).append('\t');
 		sb.append(Utils.rounded(beta, 4)).append('\t');
 		if (jdParams == null)
-		{
 			sb.append("\t\t\t");
-		}
 		else
 		{
 			sb.append(format(jdParams[0])).append('\t');
@@ -837,9 +801,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 
 		for (int i = 0; i < stats.length; i++)
-		{
 			sb.append(Utils.rounded(stats[i].getMean(), 3)).append('\t');
-		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
 			IJ.log(sb.toString());
@@ -852,13 +814,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			IJ.showStatus("Calculating histograms ...");
 
 			for (int i = 0; i < NAMES.length; i++)
-			{
 				if (displayHistograms[i])
-				{
 					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i], ROUNDED[i],
 							false);
-				}
-			}
 		}
 
 		tileNewWindows();
@@ -870,7 +828,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		if (jumpD == null || jumpD.length == 0)
 			return "";
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < jumpD.length; i++)
 		{
 			if (i != 0)
@@ -890,33 +848,28 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				IJ.log(header);
 			}
 		}
-		else
+		else if (summaryTable == null || !summaryTable.isVisible())
 		{
-			if (summaryTable == null || !summaryTable.isVisible())
-			{
-				summaryTable = new TextWindow(TITLE + " Data Summary", createHeader(), "", 800, 300);
-				summaryTable.setVisible(true);
-			}
+			summaryTable = new TextWindow(TITLE + " Data Summary", createHeader(), "", 800, 300);
+			summaryTable.setVisible(true);
 		}
 	}
 
 	private static String createHeader()
 	{
-		StringBuilder sb = new StringBuilder("Title\tDataset\tExposure time (ms)\tD-threshold (nm)");
+		final StringBuilder sb = new StringBuilder("Title\tDataset\tExposure time (ms)\tD-threshold (nm)");
 		sb.append("\tEx-threshold (nm)\t");
 		sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
 		sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)");
 		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tFit Score");
 		for (int i = 0; i < NAMES.length; i++)
-		{
 			sb.append('\t').append(NAMES[i]);
-		}
 		return sb.toString();
 	}
 
 	private boolean showTraceDialog(ArrayList<MemoryPeakResults> allResults)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		if (!multiMode)
@@ -941,7 +894,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Load the results
 		if (!multiMode)
 		{
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
+			final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -971,9 +924,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (results.getCalibration() == null || !results.getCalibrationReader().hasExposureTime() ||
 				!results.getCalibrationReader().hasNmPerPixel())
 		{
-			CalibrationWriter cal = results.getCalibrationWriterSafe();
+			final CalibrationWriter cal = results.getCalibrationWriterSafe();
 
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Uncalibrated results! Please enter the calibration:");
 			gd.addNumericField("Exposure_time (ms)", cal.getExposureTime(), 2);
 			gd.addNumericField("Pixel_pitch (nm)", cal.getNmPerPixel(), 2);
@@ -1008,7 +961,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Parameters.isAboveZero("Distance threshold", settings.getDistanceThreshold());
 			Parameters.isAbove("Min trace length", settings.getMinimumTraceLength(), 1);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -1025,17 +978,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
 
 		// Convert from NM to the native units of the results
-		Converter c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
-		double distanceThreshold = c.convertBack(settings.getDistanceThreshold());
-		double distanceExclusion = c.convertBack(settings.getDistanceExclusion());
+		final Converter c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+		final double distanceThreshold = c.convertBack(settings.getDistanceThreshold());
+		final double distanceExclusion = c.convertBack(settings.getDistanceExclusion());
 
-		ArrayList<Trace> allTraces = new ArrayList<>();
+		final ArrayList<Trace> allTraces = new ArrayList<>();
 		additionalDatasets = -1;
-		for (MemoryPeakResults r : allResults)
+		for (final MemoryPeakResults r : allResults)
 		{
 			additionalDatasets++;
 
-			TraceManager manager = new TraceManager(r);
+			final TraceManager manager = new TraceManager(r);
 
 			// Run the tracing
 			manager.setTracker(new IJTrackProgress());
@@ -1058,7 +1011,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					// Sort traces by time to assist the results source in extracting frames sequentially.
 					// Do this before saving to assist in debugging using the saved traces file.
 					TraceMolecules.sortByTime(traces);
-					String newFilename = TraceMolecules.saveTraces(r, traces, createSettingsComment(), tracesFilename,
+					final String newFilename = TraceMolecules.saveTraces(r, traces, createSettingsComment(), tracesFilename,
 							additionalDatasets);
 					// Only keep the main filename in memory
 					if (additionalDatasets == 0)
@@ -1067,13 +1020,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 		}
 
-		Trace[] all = allTraces.toArray(new Trace[allTraces.size()]);
+		final Trace[] all = allTraces.toArray(new Trace[allTraces.size()]);
 
 		if (additionalDatasets > 0)
 		{
 			Utils.log("Multiple inputs provide %d traces", allTraces.size());
 
-			MemoryPeakResults tracedResults = TraceManager.toPeakResults(all, results.getCalibration(), true);
+			final MemoryPeakResults tracedResults = TraceManager.toPeakResults(all, results.getCalibration(), true);
 			tracedResults.copySettings(results);
 			tracedResults.setName(createCombinedName() + " Tracks");
 			MemoryPeakResults.addResults(tracedResults);
@@ -1091,7 +1044,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		settings = SettingsManager.readClusteringSettings(0).toBuilder();
@@ -1189,7 +1142,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (settings.getMle())
 				Parameters.isAboveZero("Significance level", significanceLevel);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -1203,20 +1156,18 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (saveRawData)
 			saveMSD(x, y, sd);
 
-		Plot2 plot = new Plot2(title, "Time (s)", "Distance (um^2)", x, y);
+		final Plot2 plot = new Plot2(title, "Time (s)", "Distance (um^2)", x, y);
 		// Set limits before any plotting
 		double max = 0;
 		for (int i = 1; i < x.length; i++)
 		{
-			double value = y[i] + sd[i];
+			final double value = y[i] + sd[i];
 			max = FastMath.max(max, value);
 		}
 		plot.setLimits(0, x[x.length - 1] + exposureTime * 0.5, 0, max);
 		plot.setColor(Color.blue);
 		for (int i = 1; i < x.length; i++)
-		{
 			plot.drawLine(x[i], y[i] - sd[i], x[i], y[i] + sd[i]);
-		}
 		plot.setColor(Color.red);
 		display(title, plot);
 		return plot;
@@ -1253,7 +1204,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double intercept = 0;
 		double precision = 0;
 
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+		final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		Optimum lvmSolution;
 		double ic = 0;
 
@@ -1261,10 +1212,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		try
 		{
 			final LinearFunction function = new LinearFunction(x, y, settings.getFitLength());
-			double[] parameters = new double[] { function.guess() };
+			final double[] parameters = new double[] { function.guess() };
 
 			//@formatter:off
-			LeastSquaresProblem problem = new LeastSquaresBuilder()
+			final LeastSquaresProblem problem = new LeastSquaresBuilder()
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(3000)
 					.start(parameters)
@@ -1281,7 +1232,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			lvmSolution = optimizer.optimize(problem);
 
-			double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+			final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 			//double ss = 0;
 			//double[] obs = function.getY();
 			//double[] exp = lvmSolution.getValue();
@@ -1290,32 +1241,32 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 1);
 
-			double gradient = lvmSolution.getPoint().getEntry(0);
+			final double gradient = lvmSolution.getPoint().getEntry(0);
 			D = gradient / 4;
 
 			Utils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
 					function.getY().length, Utils.rounded(gradient, 4), Utils.rounded(D, 4), Utils.rounded(ss),
 					Utils.rounded(ic), lvmSolution.getEvaluations());
 		}
-		catch (TooManyIterationsException e)
+		catch (final TooManyIterationsException e)
 		{
 			Utils.log("Failed to fit : Too many iterations (%s)", e.getMessage());
 		}
-		catch (ConvergenceException e)
+		catch (final ConvergenceException e)
 		{
 			Utils.log("Failed to fit : %s", e.getMessage());
 		}
 
 		// Fit with intercept.
 		// Optionally include the intercept (which is the estimated precision).
-		boolean fitIntercept = true;
+		final boolean fitIntercept = true;
 		try
 		{
 			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.getFitLength(),
 					fitIntercept);
 
 			//@formatter:off
-			LeastSquaresProblem problem = new LeastSquaresBuilder()
+			final LeastSquaresProblem problem = new LeastSquaresBuilder()
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(3000)
 					.start(function.guess())
@@ -1332,27 +1283,25 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			lvmSolution = optimizer.optimize(problem);
 
-			double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+			final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 			//double ss = 0;
 			//double[] obs = function.getY();
 			//double[] exp = lvmSolution.getValue();
 			//for (int i = 0; i < obs.length; i++)
 			//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-			double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
-			double gradient = lvmSolution.getPoint().getEntry(0);
+			final double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
+			final double gradient = lvmSolution.getPoint().getEntry(0);
 			final double s = lvmSolution.getPoint().getEntry(1);
-			double intercept2 = 4 * s * s;
+			final double intercept2 = 4 * s * s;
 
 			if (ic2 < ic || debugFitting)
-			{
 				// Convert fitted precision in um to nm
 				Utils.log(
 						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
 						function.getY().length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
 						Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
 						Utils.rounded(ic2), lvmSolution.getEvaluations());
-			}
 
 			if (lvmSolution == null || ic2 < ic)
 			{
@@ -1361,17 +1310,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				precision = s;
 			}
 		}
-		catch (TooManyIterationsException e)
+		catch (final TooManyIterationsException e)
 		{
 			Utils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
 		}
-		catch (ConvergenceException e)
+		catch (final ConvergenceException e)
 		{
 			Utils.log("Failed to fit with intercept : %s", e.getMessage());
 		}
 
 		if (settings.getMsdCorrection())
-		{
 			// Fit with intercept including the MSD correction in the intercept.
 			// For the MSD correction we fit including the correction factor (n-1/3)/n:
 			// MSD = 4Dt n * (n - 1/3)/n + 4 s^2
@@ -1380,7 +1328,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			try
 			{
 				// This function fits the jump distance (n) not the time (nt) so update x
-				double[] x2 = new double[x.length];
+				final double[] x2 = new double[x.length];
 				for (int i = 0; i < x2.length; i++)
 					x2[i] = x[i] / exposureTime;
 
@@ -1388,7 +1336,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						y, settings.getFitLength(), fitIntercept);
 
 				//@formatter:off
-				LeastSquaresProblem problem = new LeastSquaresBuilder()
+				final LeastSquaresProblem problem = new LeastSquaresBuilder()
 						.maxEvaluations(Integer.MAX_VALUE)
 						.maxIterations(3000)
 						.start(function.guess())
@@ -1405,17 +1353,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 				lvmSolution = optimizer.optimize(problem);
 
-				double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+				final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				//double ss = 0;
 				//double[] obs = function.getY();
 				//double[] exp = lvmSolution.getValue();
 				//for (int i = 0; i < obs.length; i++)
 				//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-				double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
+				final double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
 				double gradient = lvmSolution.getPoint().getEntry(0);
 				final double s = lvmSolution.getPoint().getEntry(1);
-				double intercept2 = 4 * s * s - gradient / 3;
+				final double intercept2 = 4 * s * s - gradient / 3;
 
 				// Q. Is this working?
 				// Try fixed precision fitting. Is the gradient correct?
@@ -1428,14 +1376,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				gradient /= exposureTime;
 
 				if (ic2 < ic || debugFitting)
-				{
 					// Convert fitted precision in um to nm
 					Utils.log(
 							"Linear fit with MSD corrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
 							function.getY().length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
 							Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
 							Utils.rounded(ic2), lvmSolution.getEvaluations());
-				}
 
 				if (lvmSolution == null || ic2 < ic)
 				{
@@ -1444,15 +1390,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					precision = s;
 				}
 			}
-			catch (TooManyIterationsException e)
+			catch (final TooManyIterationsException e)
 			{
 				Utils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
 			}
-			catch (ConvergenceException e)
+			catch (final ConvergenceException e)
 			{
 				Utils.log("Failed to fit with intercept : %s", e.getMessage());
 			}
-		}
 
 		// Add the fit to the plot
 		if (D > 0)
@@ -1475,17 +1420,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	private void checkTraceDistance(double d)
 	{
-		double t = exposureTime;
+		final double t = exposureTime;
 		// Cumul P(r^2) = 1 - exp(-r^2 / 4dt)
-		double r = settings.getDistanceThreshold() / 1000;
-		double msd = 4 * d * t;
-		double p = 1 - FastMath.exp(-r * r / msd);
+		final double r = settings.getDistanceThreshold() / 1000;
+		final double msd = 4 * d * t;
+		final double p = 1 - FastMath.exp(-r * r / msd);
 		Utils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
 				settings.getDistanceThreshold(), Utils.rounded(d), Utils.rounded(p));
 		if (p < 0.95)
-		{
 			Utils.log("WARNING *** The tracing distance may not be large enough! ***");
-		}
 	}
 
 	private class LinearFunction implements MultivariateVectorFunction
@@ -1495,7 +1438,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		public LinearFunction(double[] x, double[] y, int length)
 		{
-			int to = FastMath.min(x.length, 1 + length);
+			final int to = FastMath.min(x.length, 1 + length);
 			this.x = Arrays.copyOfRange(x, 1, to);
 			this.y = Arrays.copyOfRange(y, 1, to);
 			jacobian = calculateJacobian();
@@ -1513,7 +1456,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		private double[] getWeights()
 		{
-			double[] w = new double[x.length];
+			final double[] w = new double[x.length];
 			Arrays.fill(w, 1);
 			return w;
 		}
@@ -1531,11 +1474,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		@Override
 		public double[] value(double[] variables)
 		{
-			double[] values = new double[x.length];
+			final double[] values = new double[x.length];
 			for (int i = 0; i < values.length; i++)
-			{
 				values[i] = x[i] * variables[0];
-			}
 			return values;
 		}
 
@@ -1556,12 +1497,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Compute the gradients using calculus differentiation:
 			// y = ax + c
 			// dy_da = x
-			double[][] jacobian = new double[x.length][1];
+			final double[][] jacobian = new double[x.length][1];
 
 			for (int i = 0; i < jacobian.length; ++i)
-			{
 				jacobian[i][0] = x[i];
-			}
 
 			return jacobian;
 		}
@@ -1575,9 +1514,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		public LinearFunctionWithIntercept(double[] x, double[] y, int length, boolean fitIntercept)
 		{
 			this.fitIntercept = fitIntercept;
-			int to = FastMath.min(x.length, 1 + length);
+			final int to = FastMath.min(x.length, 1 + length);
 			// Optionally include the intercept
-			int from = (fitIntercept) ? 0 : 1;
+			final int from = (fitIntercept) ? 0 : 1;
 			this.x = Arrays.copyOfRange(x, from, to);
 			this.y = Arrays.copyOfRange(y, from, to);
 		}
@@ -1587,25 +1526,25 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 */
 		public double[] guess()
 		{
-			int n1 = (fitIntercept) ? 1 : 0;
+			final int n1 = (fitIntercept) ? 1 : 0;
 
 			if (y.length == n1 + 1)
 				return new double[] { y[n1] / x[n1], 0 };
 
-			double a = (y[y.length - 1] - y[n1]) / (x[x.length - 1] - x[n1]);
+			final double a = (y[y.length - 1] - y[n1]) / (x[x.length - 1] - x[n1]);
 			// y = ax + 4c^2
 			// y = ax + intercept
 			// intercept = y - ax
 			//           = 4c^2
-			double intercept = y[y.length - 1] - a * x[x.length - 1];
-			double c = (intercept < 0) ? 0 : Math.sqrt(intercept / 4);
+			final double intercept = y[y.length - 1] - a * x[x.length - 1];
+			final double c = (intercept < 0) ? 0 : Math.sqrt(intercept / 4);
 
 			return new double[] { a, c };
 		}
 
 		public double[] getWeights()
 		{
-			double[] w = new double[x.length];
+			final double[] w = new double[x.length];
 			Arrays.fill(w, 1);
 			return w;
 		}
@@ -1628,9 +1567,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			final double a = variables[0];
 			final double intercept = 4 * variables[1] * variables[1];
 			for (int i = 0; i < values.length; i++)
-			{
 				values[i] = a * x[i] + intercept;
-			}
 			return values;
 		}
 
@@ -1640,7 +1577,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// y = ax + 4c^2
 			// dy_da = x
 			// dy_dc = 8c
-			double[][] jacobian = new double[x.length][2];
+			final double[][] jacobian = new double[x.length][2];
 			final double dy_dc = 8 * variables[1];
 
 			for (int i = 0; i < jacobian.length; ++i)
@@ -1662,9 +1599,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		public LinearFunctionWithMSDCorrectedIntercept(double[] x, double[] y, int length, boolean fitIntercept)
 		{
 			this.fitIntercept = fitIntercept;
-			int to = FastMath.min(x.length, 1 + length);
+			final int to = FastMath.min(x.length, 1 + length);
 			// Optionally include the intercept
-			int from = (fitIntercept) ? 0 : 1;
+			final int from = (fitIntercept) ? 0 : 1;
 			this.x = Arrays.copyOfRange(x, from, to);
 			this.y = Arrays.copyOfRange(y, from, to);
 		}
@@ -1674,12 +1611,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 */
 		public double[] guess()
 		{
-			int n1 = (fitIntercept) ? 1 : 0;
+			final int n1 = (fitIntercept) ? 1 : 0;
 
 			if (y.length == n1 + 1)
 				return new double[] { y[n1] / x[n1], 0 };
 
-			double a = (y[y.length - 1] - y[n1]) / (x[x.length - 1] - x[n1]);
+			final double a = (y[y.length - 1] - y[n1]) / (x[x.length - 1] - x[n1]);
 			// y = ax - a/3 + 4c^2
 			// y = ax + intercept
 			// intercept = y - ax
@@ -1687,14 +1624,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// 4c^2 = intercept + a/3
 			double intercept = y[y.length - 1] - a * x[x.length - 1];
 			intercept += a * THIRD;
-			double c = (intercept < 0) ? 0 : Math.sqrt(intercept / 4);
+			final double c = (intercept < 0) ? 0 : Math.sqrt(intercept / 4);
 
 			return new double[] { a, c };
 		}
 
 		public double[] getWeights()
 		{
-			double[] w = new double[x.length];
+			final double[] w = new double[x.length];
 			Arrays.fill(w, 1);
 			return w;
 		}
@@ -1725,9 +1662,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (fitIntercept)
 				values[i++] = intercept;
 			for (; i < values.length; i++)
-			{
 				values[i] = a * x[i] + error;
-			}
 			return values;
 		}
 
@@ -1737,7 +1672,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// y = ax - a/3 + 4c^2
 			// dy_da = x - 1/3
 			// dy_dc = 8c
-			double[][] jacobian = new double[x.length][2];
+			final double[][] jacobian = new double[x.length][2];
 			final double dy_dc = 8 * variables[1];
 
 			for (int i = 0; i < jacobian.length; ++i)
@@ -1775,7 +1710,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		//       4D = precision^2
 		//        D = precision^2 / 4
 		//        D = (precision/2)^2
-		double minD = Maths.pow2(precision / 2000.0); // Extra 1000 factor to convert nm to um
+		final double minD = Maths.pow2(precision / 2000.0); // Extra 1000 factor to convert nm to um
 		Utils.log(
 				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s, minD = %s um^2/jump",
 				jumpDistances.getN(), settings.getJumpDistance(),
@@ -1783,8 +1718,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				Utils.rounded(meanDistance, 4), Utils.rounded(precision, 4), Utils.rounded(beta, 4),
 				Utils.rounded(minD, 4));
 
-		IJLogger logger = new IJLogger(debugFitting, debugFitting);
-		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
+		final IJLogger logger = new IJLogger(debugFitting, debugFitting);
+		final JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
 		jd.setFitRestarts(settings.getFitRestarts());
 		jd.setMinFraction(minFraction);
 		jd.setMinDifference(minDifference);
@@ -1829,8 +1764,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	@Override
 	public void saveSinglePopulationCurve(double[][] curve)
 	{
-		double[] x = curve[0];
-		double[] y = curve[1];
+		final double[] x = curve[0];
+		final double[] y = curve[1];
 		if (saveRawData)
 			saveFit(x, y, "Single");
 		addToJumpDistancePlot(x, y, Color.magenta);
@@ -1839,8 +1774,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	@Override
 	public void saveMixedPopulationCurve(double[][] curve)
 	{
-		double[] x = curve[0];
-		double[] y = curve[1];
+		final double[] x = curve[0];
+		final double[] y = curve[1];
 		if (saveRawData)
 			saveFit(x, y, "Mixed");
 		addToJumpDistancePlot(x, y, Color.yellow);
@@ -1866,10 +1801,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		int n = 0;
 		if (jumpDistanceParameters != null)
-		{
 			n = jumpDistanceParameters[0].length;
-		}
-		Double[] array = (Double[]) args[0];
+		final Double[] array = (Double[]) args[0];
 		array[0] = new Double(n);
 		return "";
 	}
@@ -1888,7 +1821,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double value = 0;
 		if (jumpDistanceParameters != null)
 		{
-			int i = ((Double) args[0]).intValue();
+			final int i = ((Double) args[0]).intValue();
 			if (i >= 0 && i < jumpDistanceParameters[0].length)
 				value = jumpDistanceParameters[0][i];
 		}
@@ -1910,7 +1843,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double value = 0;
 		if (jumpDistanceParameters != null)
 		{
-			int i = ((Double) args[0]).intValue();
+			final int i = ((Double) args[0]).intValue();
 			if (i >= 0 && i < jumpDistanceParameters[1].length)
 				value = jumpDistanceParameters[1][i];
 		}
@@ -1934,7 +1867,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double value = 0, value2 = 0;
 		if (jumpDistanceParameters != null)
 		{
-			int i = ((Double) args[0]).intValue();
+			final int i = ((Double) args[0]).intValue();
 			if (i >= 0 && i < jumpDistanceParameters[0].length)
 			{
 				value = jumpDistanceParameters[0][i];
@@ -1951,7 +1884,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		multiMode = true;
 
 		// Show a list box containing all the results. This should remember the last set of chosen items.
-		MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
+		final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 		md.addSelected(selected);
 
 		md.showDialog();
@@ -1966,9 +1899,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return false;
 		}
 
-		for (String name : selected)
+		for (final String name : selected)
 		{
-			MemoryPeakResults r = MemoryPeakResults.getResults(name);
+			final MemoryPeakResults r = MemoryPeakResults.getResults(name);
 			if (r != null)
 				allResults.add(r);
 		}
@@ -1981,13 +1914,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return false;
 
 		// Check the calibration is the same for the rest
-		CalibrationReader cal = allResults.get(0).getCalibrationReader();
+		final CalibrationReader cal = allResults.get(0).getCalibrationReader();
 		final double nmPerPixel = cal.getNmPerPixel();
 		final double exposureTime = cal.getExposureTime();
 		final DistanceUnit distanceUnit = cal.getDistanceUnit();
 		for (int i = 1; i < allResults.size(); i++)
 		{
-			MemoryPeakResults results = allResults.get(1);
+			final MemoryPeakResults results = allResults.get(1);
 
 			if (!results.hasCalibration() || results.getCalibrationReader().getExposureTime() != exposureTime ||
 					results.getNmPerPixel() != nmPerPixel || results.getDistanceUnit() != distanceUnit)

@@ -121,13 +121,11 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 		u[k] = uk;
 		final double xk = x[k++];
 		if (xk == 0)
-		{
 			for (int i = 0; i < n; i++)
 			{
 				d1[i] -= duk_dt[i];
 				d2[i] -= d2uk_dt2[i];
 			}
-		}
 		else
 		{
 			final double xk_uk_minus1 = xk / uk - 1.0;
@@ -177,19 +175,13 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 		u[k] = uk;
 		final double xk = x[k++];
 		if (xk == 0)
-		{
 			for (int i = 0; i < n; i++)
-			{
 				d1[i] -= duk_dt[i];
-			}
-		}
 		else
 		{
 			final double xk_uk_minus1 = xk / uk - 1.0;
 			for (int i = 0; i < n; i++)
-			{
 				d1[i] += duk_dt[i] * xk_uk_minus1;
-			}
 		}
 	}
 

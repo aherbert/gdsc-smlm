@@ -108,7 +108,7 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 					Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 			useBackground = true;
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
 					Gaussian2DPeakResultHelper.LSE_PRECISION);
@@ -120,9 +120,7 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 	protected double getVariance(PeakResult result)
 	{
 		if (useBackground)
-		{
 			return calculator.getLSEVariance(result.getParameters());
-		}
 		return calculator.getLSEVariance(result.getParameters(), result.getNoise());
 	}
 

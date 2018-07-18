@@ -50,16 +50,16 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 {
 	/** The object vertices. */
 	protected Point3f[] objectVertices;
-	
+
 	/** The object normals. */
 	protected Vector3f[] objectNormals;
-	
+
 	/** The points. */
 	protected Point3f[] points;
-	
+
 	/** The sizes. */
 	protected Point3f[] sizes;
-	
+
 	/** Flag set to true when modified after construction. */
 	protected boolean dirty = false;
 
@@ -134,12 +134,12 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		this.points = points;
 		this.sizes = sizes;
 
-		Point3f[] vertices = new Point3f[objectVertices.length * points.length];
+		final Point3f[] vertices = new Point3f[objectVertices.length * points.length];
 
 		final int n = objectVertices.length;
 		if (progress.isStatus())
 			progress.status("Computing vertices");
-		Ticker ticker = Ticker.createStarted(progress, n, false);
+		final Ticker ticker = Ticker.createStarted(progress, n, false);
 		boolean sameSize = false;
 		if (sizes == null || (sameSize = sameSize(sizes)))
 		{
@@ -171,15 +171,12 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 				final float dy = p.y;
 				final float dz = p.z;
 				for (int j = 0; j < n; j++)
-				{
 					vertices[k++] = new Point3f(objectVertices[j].x + dx, objectVertices[j].y + dy,
 							objectVertices[j].z + dz);
-				}
 				ticker.tick();
 			}
 		}
 		else
-		{
 			// Translate and scale
 			for (int i = 0, k = 0; i < points.length; i++)
 			{
@@ -192,13 +189,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 				final float sy = s.y;
 				final float sz = s.z;
 				for (int j = 0; j < n; j++)
-				{
 					vertices[k++] = new Point3f(objectVertices[j].x * sx + dx, objectVertices[j].y * sy + dy,
 							objectVertices[j].z * sz + dz);
-				}
 				ticker.tick();
 			}
-		}
 
 		ticker.stop();
 
@@ -223,10 +217,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			return true;
 		final Point3f s = sizes[0];
 		for (int j = 1; j < sizes.length; j++)
-		{
 			if (!sizes[j].equals(s))
 				return false;
-		}
 		return true;
 	}
 
@@ -379,9 +371,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	public static void setTransparencyMode(int mode) throws IllegalArgumentException
 	{
 		if ((mode < TransparencyAttributes.FASTEST) || (mode > TransparencyAttributes.NONE))
-		{
 			throw new IllegalArgumentException("Not a valid transparency mode");
-		}
 		transparencyMode = mode;
 	}
 
@@ -401,7 +391,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	{
 		// We want to use a different transparency from the ij3d default which is FASTEST
 		// so override this method.
-		Appearance appearance = getAppearance();
+		final Appearance appearance = getAppearance();
 		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
 		if (transparency <= .01f)
 		{
@@ -419,7 +409,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	@Override
 	protected Appearance createAppearance()
 	{
-		Appearance appearance = super.createAppearance();
+		final Appearance appearance = super.createAppearance();
 		// Update the transparency to the default mode
 		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
 		if (ta.getTransparencyMode() != TransparencyAttributes.NONE)
@@ -438,7 +428,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	public static int checkFacets(Point3f[] vertices)
 	{
 		int count = 0;
-		int nVertices = vertices.length;
+		final int nVertices = vertices.length;
 		final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
 		for (int i = 0; i < nVertices; i += 3)
 		{
@@ -454,13 +444,13 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			// projected point = (x+ta,y+tb,z+tc)
 
 			// Project 0,0,0 to the facet
-			double a = v1.x;
-			double b = v1.y;
-			double c = v1.z;
-			double d = vertices[i].x;
-			double e = vertices[i].y;
-			double f = vertices[i].z;
-			double t = a * d + b * e + c * f;
+			final double a = v1.x;
+			final double b = v1.y;
+			final double c = v1.z;
+			final double d = vertices[i].x;
+			final double e = vertices[i].y;
+			final double f = vertices[i].z;
+			final double t = a * d + b * e + c * f;
 			if (t < 0)
 			{
 				count++;
@@ -473,7 +463,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 	private static void swap(Point3f[] vertices, int i, int j)
 	{
-		Point3f tmp = vertices[i];
+		final Point3f tmp = vertices[i];
 		vertices[i] = vertices[j];
 		vertices[j] = tmp;
 	}
@@ -489,8 +479,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 */
 	public static Vector3f[] getNormals(Point3f[] vertices, double creaseAngle)
 	{
-		int nVertices = vertices.length;
-		Vector3f[] normals = new Vector3f[nVertices];
+		final int nVertices = vertices.length;
+		final Vector3f[] normals = new Vector3f[nVertices];
 
 		final GeometryArray ta = new TriangleArray(nVertices, GeometryArray.COORDINATES | GeometryArray.NORMALS);
 		ta.setCoordinates(0, vertices);
@@ -499,12 +489,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		if (creaseAngle >= 0 && creaseAngle <= 180)
 			ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
 		ng.generateNormals(gi);
-		Vector3f[] n = gi.getNormals();
-		int[] indices = gi.getNormalIndices();
+		final Vector3f[] n = gi.getNormals();
+		final int[] indices = gi.getNormalIndices();
 		for (int i = 0; i < nVertices; i++)
-		{
 			normals[i] = n[indices[i]];
-		}
 
 		return normals;
 	}
@@ -536,7 +524,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			throw new IllegalArgumentException("Mesh has been modified");
 
 		changed = true;
-		
+
 		final int oldSize = size();
 		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
@@ -552,7 +540,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		// From here on we assume the current geometry will not be null
 		// as this only happens when the original size is zero. Size has
 		// been checked at this point to be the smaller of new and old.
-		GeometryArray ga = (GeometryArray) getGeometry();
+		final GeometryArray ga = (GeometryArray) getGeometry();
 
 		points = reorder(points, indices);
 		// Sizes could be null or a single size
@@ -562,18 +550,18 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		// Reorder all things in the geometry: coordinates and colour
 		// The normals can be copied as they are unchanged.
 		// The mesh should contain the same coordinates as the geometry array.
-		int objectSize = objectVertices.length;
-		Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
-		float[] oldColors = new float[oldCoords.length * 3];
+		final int objectSize = objectVertices.length;
+		final Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
+		final float[] oldColors = new float[oldCoords.length * 3];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size * objectSize];
 		final float[] colors = new float[coords.length * 3];
 		for (int i = 0; i < size; i++)
 		{
-			int j = indices[i];
+			final int j = indices[i];
 
-			int ii = i * objectSize;
-			int jj = j * objectSize;
+			final int ii = i * objectSize;
+			final int jj = j * objectSize;
 			System.arraycopy(oldCoords, jj, coords, ii, objectSize);
 			System.arraycopy(oldColors, jj * 3, colors, ii * 3, objectSize * 3);
 		}
@@ -584,7 +572,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			@Override
 			public void updateData(Geometry geometry)
 			{
-				GeometryArray ga = (GeometryArray) geometry;
+				final GeometryArray ga = (GeometryArray) geometry;
 				// We re-use the geometry and just truncate the vertex count
 				ga.setCoordinates(0, coords);
 				ga.setColors(0, colors);
@@ -606,7 +594,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 */
 	static Point3f[] reorder(Point3f[] p, int[] indices)
 	{
-		Point3f[] c = new Point3f[indices.length];
+		final Point3f[] c = new Point3f[indices.length];
 		for (int i = indices.length; i-- > 0;)
 			c[i] = p[indices[i]];
 		return c;
@@ -667,21 +655,19 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = objectVertices.length;
+		final int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final Color3f[] colors = new Color3f[N];
 		int i = 0;
-		for (Color3f c : color)
-		{
+		for (final Color3f c : color)
 			for (int j = objectSize; j-- > 0;)
 				colors[i++] = c;
-		}
 		ga.setColors(0, colors);
 		changed = true;
 	}

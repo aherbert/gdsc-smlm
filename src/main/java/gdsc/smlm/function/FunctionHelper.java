@@ -69,7 +69,7 @@ public class FunctionHelper
 			if (sum >= target)
 			{
 				// Interpolate the count X to obtain the target
-				int x = values.length - i;
+				final int x = values.length - i;
 				return target / Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
 			}
 		}
@@ -114,7 +114,7 @@ public class FunctionHelper
 			if (sum >= target)
 			{
 				// Interpolate the count X to obtain the target
-				int x = values.length - i;
+				final int x = values.length - i;
 				return Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
 			}
 		}

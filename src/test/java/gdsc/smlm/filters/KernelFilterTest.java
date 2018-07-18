@@ -48,20 +48,20 @@ public class KernelFilterTest
 	static float[] createKernel(int kw, int kh)
 	{
 		// Simple linear ramp
-		float[] k = new float[kw * kh];
-		int cx = kw / 2;
-		int cy = kh / 2;
+		final float[] k = new float[kw * kh];
+		final int cx = kw / 2;
+		final int cy = kh / 2;
 		for (int y = 0, i = 0; y < kh; y++)
 		{
-			int dy2 = Maths.pow2(cy - y);
+			final int dy2 = Maths.pow2(cy - y);
 			for (int x = 0; x < kw; x++)
 			{
-				int dx2 = Maths.pow2(cx - x);
+				final int dx2 = Maths.pow2(cx - x);
 				k[i++] = (float) Math.sqrt(dx2 + dy2);
 			}
 		}
 		// Invert
-		float max = k[0];
+		final float max = k[0];
 		for (int i = 0; i < k.length; i++)
 			k[i] = max - k[i];
 		return k;
@@ -103,10 +103,10 @@ public class KernelFilterTest
 		@Override
 		float[] filter(float[] d, int border)
 		{
-			FloatProcessor fp = new FloatProcessor(size, size, d);
+			final FloatProcessor fp = new FloatProcessor(size, size, d);
 			if (border > 0)
 			{
-				Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
+				final Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
 				fp.setRoi(roi);
 			}
 			kf.convolveFloat(fp, kernel, kw, kh);
@@ -172,8 +172,8 @@ public class KernelFilterTest
 		for (int kw = 1; kw < 3; kw++)
 			for (int kh = 1; kh < 3; kh++)
 			{
-				float[] kernel = createKernel(kw, kh);
-				FloatProcessor fp = new FloatProcessor(kw, kh, kernel.clone());
+				final float[] kernel = createKernel(kw, kh);
+				final FloatProcessor fp = new FloatProcessor(kw, kh, kernel.clone());
 				fp.flipHorizontal();
 				fp.flipVertical();
 				KernelFilter.rotate180(kernel);
@@ -184,8 +184,8 @@ public class KernelFilterTest
 	@Test
 	public void kernelFilterIsSameAsIJFilter()
 	{
-		int kw = 5, kh = 5;
-		float[] kernel = createKernel(kw, kh);
+		final int kw = 5, kh = 5;
+		final float[] kernel = createKernel(kw, kh);
 		filter1IsSameAsFilter2(new KernelFilterWrapper(kernel, kw, kh), new ConvolverWrapper(kernel, kw, kh), false,
 				1e-2);
 	}
@@ -193,54 +193,48 @@ public class KernelFilterTest
 	@Test
 	public void zeroKernelFilterIsSameAsIJFilter()
 	{
-		int kw = 5, kh = 5;
-		float[] kernel = createKernel(kw, kh);
+		final int kw = 5, kh = 5;
+		final float[] kernel = createKernel(kw, kh);
 		filter1IsSameAsFilter2(new ZeroKernelFilterWrapper(kernel, kw, kh), new ConvolverWrapper(kernel, kw, kh), true,
 				1e-2);
 	}
 
 	private void filter1IsSameAsFilter2(FilterWrapper f1, FilterWrapper f2, boolean internal, double tolerance)
 	{
-		RandomGenerator rand = TestSettings.getRandomGenerator();
-		float[] data = createData(rand, size, size);
+		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final float[] data = createData(rand, size, size);
 
-		int testBorder = (internal) ? f1.kw / 2 : 0;
-		for (int border : borders)
-		{
+		final int testBorder = (internal) ? f1.kw / 2 : 0;
+		for (final int border : borders)
 			filter1IsSameAsFilter2(f1, f2, data, border, testBorder, tolerance);
-		}
 	}
 
 	private void filter1IsSameAsFilter2(FilterWrapper f1, FilterWrapper f2, float[] data, int border, int testBorder,
 			double tolerance)
 	{
-		float[] e = data.clone();
+		final float[] e = data.clone();
 		f2.filter(e, border);
-		float[] o = data.clone();
+		final float[] o = data.clone();
 		f1.filter(o, border);
 
 		double max = 0;
 		if (testBorder == 0)
-		{
 			for (int i = 0; i < e.length; i++)
 			{
-				double d = DoubleEquality.relativeError(e[i], o[i]);
+				final double d = DoubleEquality.relativeError(e[i], o[i]);
 				if (max < d)
 					max = d;
 			}
-		}
 		else
 		{
-			int limit = size - testBorder;
+			final int limit = size - testBorder;
 			for (int y = testBorder; y < limit; y++)
-			{
 				for (int x = testBorder, i = y * size + x; x < limit; x++, i++)
 				{
-					double d = DoubleEquality.relativeError(e[i], o[i]);
+					final double d = DoubleEquality.relativeError(e[i], o[i]);
 					if (max < d)
 						max = d;
 				}
-			}
 		}
 
 		TestSettings.info("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
@@ -276,7 +270,7 @@ public class KernelFilterTest
 		@Override
 		public Object run(Object data)
 		{
-			float[] d = (float[]) data;
+			final float[] d = (float[]) data;
 			return filter.filter(d, border);
 		}
 	}
@@ -291,20 +285,20 @@ public class KernelFilterTest
 	private void floatFilterIsFasterThanIJFilter(int k)
 	{
 		TestSettings.assumeSpeedTest();
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		float[][] data = new float[10][];
+		final float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
 			data[i] = createData(rg, size, size);
 
-		float[] kernel = createKernel(k, k);
-		for (int border : borders)
+		final float[] kernel = createKernel(k, k);
+		for (final int border : borders)
 		{
-			TimingService ts = new TimingService();
+			final TimingService ts = new TimingService();
 			ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, k, k), data, border));
 			ts.execute(new MyTimingTask(new KernelFilterWrapper(kernel, k, k), data, border));
 			ts.execute(new MyTimingTask(new ZeroKernelFilterWrapper(kernel, k, k), data, border));
-			int size = ts.getSize();
+			final int size = ts.getSize();
 			ts.repeat();
 			if (TestSettings.allow(LogLevel.INFO))
 				ts.report(size);
@@ -314,7 +308,7 @@ public class KernelFilterTest
 
 	private static float[] createData(RandomGenerator rg, int width, int height)
 	{
-		float[] data = new float[width * height];
+		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = i;
 

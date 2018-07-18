@@ -207,10 +207,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		this.s = s;
 		noGaussian = (s * MAX_RANGE < 1);
 		if (noGaussian)
-		{
 			// This is OK. Just return the information for the Poisson-Gamma.
 			defaultScale = 0;
-		}
 		else
 		{
 			// This is set to work for reasonable values of the Gaussian kernel and sampling
@@ -220,10 +218,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 			// Don't support excess scaling caused by small kernels
 			if (defaultScale * s * MAX_RANGE > 1000000000)
-			{
 				throw new IllegalArgumentException(
 						"Maximum Gaussian kernel size too large: " + defaultScale * s * MAX_RANGE);
-			}
 
 			gaussianKernel = new GaussianKernel(s);
 		}
@@ -238,7 +234,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 */
 	protected static int getPow2Scale(double s)
 	{
-		double scale = Math.ceil(s);
+		final double scale = Math.ceil(s);
 		if (scale > MAX_SCALE)
 			return MAX_SCALE;
 		return Maths.nextPow2((int) scale);
@@ -281,10 +277,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// to compute the Fisher information.
 
 		if (t > upperMeanThreshold)
-		{
 			// Use an approximation as half the Poisson Fisher information
 			return 0.5;
-		}
 
 		return t * getFisherInformation(t);
 	}
@@ -321,18 +315,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			return Double.POSITIVE_INFINITY;
 
 		if (t > upperMeanThreshold)
-		{
 			return largeApproximation(t);
-		}
 
 		final double dirac = PoissonGammaFunction.dirac(t);
 
 		// Special case where the start of the range will have no probability.
 		// This occurs when mean > limit of exp(-p) => 746.
 		if (1 / dirac == Double.POSITIVE_INFINITY)
-		{
 			return largeApproximation(t);
-		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
 		// The value of this is p(z).
@@ -459,8 +449,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// So the integral can be computed as [integral range1] + [integral range2]
 
 		// Determine the extent of the function: A^2/P
-		double[] maximum = findMaximum(t, 1e-4);
-		double[] upper = findUpperLimit(t, maximum, relativeProbabilityThreshold);
+		final double[] maximum = findMaximum(t, 1e-4);
+		final double[] upper = findUpperLimit(t, maximum, relativeProbabilityThreshold);
 		double upperLimit = upper[0];
 
 		if (upperLimit > UPPER_LIMIT)
@@ -473,7 +463,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// discrete output electrons.
 
 		// The exponent provides a rough idea of the size of the mean (i.e. log2(mean))
-		int exp = NumberUtils.getSignedExponent(t);
+		final int exp = NumberUtils.getSignedExponent(t);
 		// As the mean reduces the Poisson distribution is more skewed
 		// and the extent of the kernel must change. Just increase the range
 		// for the kernel for each power of 2 the number is below 1.
@@ -489,12 +479,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 			// No interpolated integration necessary as this is discrete
 			double sum = 0;
-			double[] p = listP.toArray();
-			double[] a = listA.toArray();
+			final double[] p = listP.toArray();
+			final double[] a = listA.toArray();
 			for (int i = 0; i < p.length; i++)
-			{
 				sum += getF(p[i], a[i]);
-			}
 			if (sum == Double.POSITIVE_INFINITY)
 				return extremeLimit(t);
 			// Remember to rescale to the correct range
@@ -531,17 +519,17 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// Compute the Poisson-Gamma over the range. This is a PDF but for
 		// simplicity it is integrated to a discrete PMF.
-		int iEndRange = (int) Math.ceil(upperLimit);
+		final int iEndRange = (int) Math.ceil(upperLimit);
 		if (!computePMF(dirac, t, maximum, iEndRange))
 			return largeApproximation(t);
 
-		double[] p = listP.toArray();
-		double[] a = listA.toArray();
+		final double[] p = listP.toArray();
+		final double[] a = listA.toArray();
 
 		// Find the minimum value to determine if A^2/P can be unchecked
 		// for divide by zero error.
 		// The min is always at the end.
-		double minP = FastMath.min(FastMath.min(p[0], p[1]), p[p.length - 1]);
+		final double minP = FastMath.min(FastMath.min(p[0], p[1]), p[p.length - 1]);
 
 		//int iMinP = SimpleArrayUtils.findMinIndex(p);
 		//int iMinA = SimpleArrayUtils.findMinIndex(a);
@@ -569,7 +557,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			{
 				//System.out.printf("s=%g t=%g final iteration=%d scale=%d\n", s, t, iteration, scale);
 			}
-			double oldSum = sum;
+			final double oldSum = sum;
 			try
 			{
 				sum = compute(scale, range1, p, a, minP);
@@ -579,7 +567,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 					break;
 				}
 			}
-			catch (IllegalArgumentException e)
+			catch (final IllegalArgumentException e)
 			{
 				// Occurs when the convolution has grown too big
 				break;
@@ -592,9 +580,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			final double rLimit = (getRelativeAccuracy() * FastMath.abs(oldSum) +
 					getRelativeAccuracy() * FastMath.abs(sum)) * 0.5;
 			if (delta <= rLimit)
-			{
 				break;
-			}
 		}
 
 		// Remember to rescale to the correct range
@@ -631,7 +617,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	private boolean computePMF(double dirac, double t, double[] max, int endX)
 	{
 		double G;
-		double[] dG_dp = new double[1];
+		final double[] dG_dp = new double[1];
 
 		// Initialise at x=0
 		G = PoissonGammaFunction.unscaledPoissonGammaPartial(0, t, m, dG_dp);
@@ -639,15 +625,15 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// At x=0 integrate from 0 to 0.5 without the Dirac contribution
 		// (i.e. make it a a smooth function for integration).
 		// Note the Dirac contribution for the unscaled function is 1.
-		double diracContirbution = 1;
+		final double diracContirbution = 1;
 		G -= diracContirbution;
 		G = add(t, G, dG_dp, 0, 0.25, 0.5);
 		listP.setQuick(0, listP.getQuick(0) + diracContirbution);
 
 		// The next x value after the max
-		int maxx = (int) Math.ceil(max[0]);
+		final int maxx = (int) Math.ceil(max[0]);
 		// Threshold for switch to single point sampling
-		double threshold = max[1] * 0.5;
+		final double threshold = max[1] * 0.5;
 
 		// For the start of the range integrate from x-0.5 to x+0.5
 		int x = 1;
@@ -663,7 +649,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			else if (x >= maxx)
 			{
 				// Compute f
-				double f = getF(listP.getQuick(x), listA.getQuick(x));
+				final double f = getF(listP.getQuick(x), listA.getQuick(x));
 				// If this is less than half the max then break and switch to a single
 				// point evaluation.
 				if (f < threshold)
@@ -671,7 +657,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			}
 		}
 		if (G != 0)
-		{
 			// For rest of the range just sample at point x
 			for (x = listP.size(); x <= endX; x++)
 			{
@@ -681,7 +666,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 				listP.add(G);
 				listA.add(dG_dp[0]);
 			}
-		}
 
 		// The PoissonGammaFunction can switch to an approximation
 		// of the Bessel functions and the totals may not be correct.
@@ -691,7 +675,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// then this will have little effect so do it anyway.
 
 		// The sum of the unscaled P and A should be 1/Dirac
-		double expected = 1 / dirac;
+		final double expected = 1 / dirac;
 
 		//if (t > 10)
 		{
@@ -699,10 +683,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			// This may be due to not using enough of the range. It may be due
 			// to the Bessel approximation failing.
 
-			double sumP = listP.sum();
+			final double sumP = listP.sum();
 			if (sumP == Double.POSITIVE_INFINITY || sumP / expected < 0.75)
 				return false;
-			double sumA = listA.sum();
+			final double sumA = listA.sum();
 			if (sumA == Double.POSITIVE_INFINITY || sumA / expected < 0.75)
 				return false;
 			//System.out.printf("t=%g 0=%d Expected=%s SumP=%s (%s) SumA=%s (%s)\n", t, endX, expected, sumP,
@@ -744,7 +728,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		sG += 4 * G;
 		sA += 4 * dG_dp[0];
 		G = PoissonGammaFunction.unscaledPoissonGammaPartial(upper, t, m, dG_dp);
-		double h_3 = (upper - lower) / 6;
+		final double h_3 = (upper - lower) / 6;
 		listP.add((sG + G) * h_3);
 		listA.add((sA + dG_dp[0]) * h_3);
 		return G;
@@ -765,10 +749,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			// which is only possible for extremely low mean. Check for this.
 			final double f = (az / pz) * az;
 			if (f == Double.POSITIVE_INFINITY)
-			{
 				//System.out.printf("p=%s a=%s f=%s\n", pz, az, az * az / pz);
 				return (az * az) / pz;
-			}
 			return f;
 		}
 
@@ -784,7 +766,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		{
 			++i;
 			if (pz > 0)
-			{
 				// Simpson's rule.
 				// This computes the sum as:
 				// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
@@ -792,7 +773,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 					sum2 += getF(pz, az);
 				else
 					sum4 += getF(pz, az);
-			}
 			return true;
 		}
 
@@ -817,7 +797,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		{
 			++i;
 			if (pz > 0)
-			{
 				// Simpson's 3/8 rule based on cubic interpolation has a lower error.
 				// This computes the sum as:
 				// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
@@ -825,7 +804,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 					sum2 += getF(pz, az);
 				else
 					sum3 += getF(pz, az);
-			}
 			return true;
 		}
 
@@ -893,7 +871,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// If the product of the minimum kernel value and the min value is non-zero
 		// then the convolution will never be zero.
-		boolean unchecked = g[0] * minP > 0;
+		final boolean unchecked = g[0] * minP > 0;
 		//System.out.printf("t=%g  unchecked=%b\n", lastT, unchecked);
 
 		// If zeros can occur then the convolution could be reduced but the ends of
@@ -901,7 +879,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// So the resulting convolution output is checked for zero.
 
 		//@formatter:off
-		IntegrationProcedure ip = (use38)
+		final IntegrationProcedure ip = (use38)
 				? (unchecked) ? new UncheckedSimpson38IntegrationProcedure()
 						      : new Simpson38IntegrationProcedure()
 				: (unchecked) ? new UncheckedSimpsonIntegrationProcedure()
@@ -947,15 +925,15 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		if (listP.isEmpty())
 			return null;
 
-		double[] p = listP.toArray();
-		double[] a = listA.toArray();
+		final double[] p = listP.toArray();
+		final double[] a = listA.toArray();
 
 		double[] A, P;
 		double h, offset, scaleFactor;
 		if (withGaussian && g != null)
 		{
 			// Do the convolution
-			double[][] result = Convolution.convolve(g, p, a, lastScale);
+			final double[][] result = Convolution.convolve(g, p, a, lastScale);
 			P = result[0];
 			A = result[1];
 			h = 1.0 / lastScale;
@@ -972,11 +950,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		}
 
 		// Correct the unscaled function to the scaled function
-		double dirac = FastMath.exp(-lastT);
+		final double dirac = FastMath.exp(-lastT);
 		scaleFactor *= dirac;
 
-		double[] f = new double[A.length];
-		double[] x = new double[A.length];
+		final double[] f = new double[A.length];
+		final double[] x = new double[A.length];
 		//System.out.printf("sumP=%s, sumA=%s\n", Maths.sum(P)*dirac, Maths.sum(A)*dirac);
 		for (int i = 0; i < A.length; i++)
 		{
@@ -1222,9 +1200,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	public double[] findMaximum(final double t, double rel)
 	{
 		if (t < MIN_MEAN)
-		{
 			throw new IllegalArgumentException("Poisson mean must be positive");
-		}
 
 		final double dirac = PoissonGammaFunction.dirac(t);
 
@@ -1256,26 +1232,26 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Determine the extent of the function: A^2/P
 		// Without convolution this will have a maximum that is above, and
 		// converges to [Poisson mean * amplification].
-		double mean = t * m;
+		final double mean = t * m;
 
-		int iterations = 10;
-		QuickConvergenceChecker checker = new QuickConvergenceChecker(iterations);
-		BrentOptimizer opt = new BrentOptimizer(rel, Double.MIN_VALUE, checker);
+		final int iterations = 10;
+		final QuickConvergenceChecker checker = new QuickConvergenceChecker(iterations);
+		final BrentOptimizer opt = new BrentOptimizer(rel, Double.MIN_VALUE, checker);
 		UnivariatePointValuePair pair;
 		try
 		{
-			double start = (t < 1) ? 0 : mean;
+			final double start = (t < 1) ? 0 : mean;
 			pair = opt.optimize(new SearchInterval(0, mean * 1.5, start), GoalType.MAXIMIZE, new MaxEval(50000),
 					new UnivariateObjectiveFunction(f));
 		}
-		catch (TooManyEvaluationsException e)
+		catch (final TooManyEvaluationsException e)
 		{
 			// This should not occur with the quick checker fixed iterations
 			// - just get the current best
 			pair = checker.getBest();
 		}
 
-		double[] max = new double[3];
+		final double[] max = new double[3];
 		max[0] = pair.getPoint();
 		max[1] = pair.getValue();
 		max[2] = opt.getEvaluations();
@@ -1307,9 +1283,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	public double[] findUpperLimit(final double t, double[] max, double rel)
 	{
 		if (rel < MIN_RELATIVE_TOLERANCE)
-		{
 			throw new IllegalArgumentException("Relative tolerance too small: " + rel);
-		}
 
 		final UnivariateFunction f = new UnivariateFunction()
 		{
@@ -1318,7 +1292,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			@Override
 			public double value(double x)
 			{
-				double G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
+				final double G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
 				return getF(G, dG_dp[0]);
 			}
 		};
@@ -1328,12 +1302,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Increase from the max until the tolerance is achieved.
 
 		// Use the mean to get a rough initial step size
-		double mean = t * m;
+		final double mean = t * m;
 		double step = Math.max(mean, 1);
 
 		double upper = max[0];
 		double g = max[1];
-		double threshold = g * rel;
+		final double threshold = g * rel;
 
 		double lower = upper;
 		while (g > threshold)
@@ -1348,13 +1322,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Binary search the bracket between lower and upper
 		while (lower + 1 < upper)
 		{
-			double mid = (lower + upper) * 0.5;
+			final double mid = (lower + upper) * 0.5;
 			eval++;
-			double midg = f.value(mid);
+			final double midg = f.value(mid);
 			if (midg > threshold)
-			{
 				lower = mid;
-			}
 			else
 			{
 				upper = mid;

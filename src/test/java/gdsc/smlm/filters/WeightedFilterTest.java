@@ -52,7 +52,7 @@ public abstract class WeightedFilterTest
 
 	float[] createData(int width, int height, RandomGenerator rg)
 	{
-		float[] data = new float[width * height];
+		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = i;
 		Random.shuffle(data, rg);
@@ -64,38 +64,38 @@ public abstract class WeightedFilterTest
 	@Test
 	public void evenWeightsDoesNotAlterFiltering()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		DataFilter filter1 = createDataFilter();
-		DataFilter filter2 = createDataFilter();
-		float[] offsets = getOffsets(filter1);
-		int[] boxSizes = getBoxSizes(filter1);
+		final DataFilter filter1 = createDataFilter();
+		final DataFilter filter2 = createDataFilter();
+		final float[] offsets = getOffsets(filter1);
+		final int[] boxSizes = getBoxSizes(filter1);
 
-		int[] primes = Arrays.copyOf(WeightedFilterTest.primes, WeightedFilterTest.primes.length - 1);
+		final int[] primes = Arrays.copyOf(WeightedFilterTest.primes, WeightedFilterTest.primes.length - 1);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				float[] data = createData(width, height, rg);
+				final float[] data = createData(width, height, rg);
 
 				// Uniform weights
-				float[] w = new float[width * height];
+				final float[] w = new float[width * height];
 				Arrays.fill(w, 0.5f);
 				filter2.setWeights(w, width, height);
 
-				for (int boxSize : boxSizes)
-					for (float offset : offsets)
-						for (boolean internal : checkInternal)
+				for (final int boxSize : boxSizes)
+					for (final float offset : offsets)
+						for (final boolean internal : checkInternal)
 						{
-							float[] e = filter(data, width, height, boxSize - offset, internal, filter1);
-							float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
+							final float[] e = filter(data, width, height, boxSize - offset, internal, filter1);
+							final float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
 							try
 							{
 								TestAssert.assertArrayEqualsRelative(e, o, 1e-4f);
 							}
-							catch (AssertionError ex)
+							catch (final AssertionError ex)
 							{
-								String msg = String.format("%s : [%dx%d] @ %.1f [internal=%b]", filter2.name, width,
+								final String msg = String.format("%s : [%dx%d] @ %.1f [internal=%b]", filter2.name, width,
 										height, boxSize - offset, internal);
 								throw new AssertionError(msg, ex);
 							}
@@ -105,7 +105,7 @@ public abstract class WeightedFilterTest
 
 	protected static float[] getOffsets(DataFilter filter1)
 	{
-		float[] offsets = (filter1.isInterpolated) ? WeightedFilterTest.offsets : new float[1];
+		final float[] offsets = (filter1.isInterpolated) ? WeightedFilterTest.offsets : new float[1];
 		return offsets;
 	}
 
@@ -113,8 +113,8 @@ public abstract class WeightedFilterTest
 	{
 		if (filter1.minBoxSize == 0)
 			return boxSizes;
-		TIntArrayList list = new TIntArrayList();
-		for (int b : boxSizes)
+		final TIntArrayList list = new TIntArrayList();
+		for (final int b : boxSizes)
 			if (b >= filter1.minBoxSize)
 				list.add(b);
 		return list.toArray();
@@ -123,76 +123,64 @@ public abstract class WeightedFilterTest
 	@Test
 	public void filterDoesNotAlterFilteredImageMean()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		//ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
 		//		ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
-		DataFilter filter = createDataFilter();
-		float[] offsets = getOffsets(filter);
-		int[] boxSizes = getBoxSizes(filter);
+		final DataFilter filter = createDataFilter();
+		final float[] offsets = getOffsets(filter);
+		final int[] boxSizes = getBoxSizes(filter);
 
-		TDoubleArrayList l1 = new TDoubleArrayList();
+		final TDoubleArrayList l1 = new TDoubleArrayList();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				float[] data = createData(width, height, rg);
+				final float[] data = createData(width, height, rg);
 				l1.reset();
 
 				filter.setWeights(null, width, height);
-				for (int boxSize : boxSizes)
-					for (float offset : offsets)
-						for (boolean internal : checkInternal)
-						{
+				for (final int boxSize : boxSizes)
+					for (final float offset : offsets)
+						for (final boolean internal : checkInternal)
 							l1.add(getMean(data, width, height, boxSize - offset, internal, filter));
-						}
 
-				double[] e = l1.toArray();
+				final double[] e = l1.toArray();
 				int ei = 0;
 
 				// Uniform weights
-				float[] w = new float[width * height];
+				final float[] w = new float[width * height];
 
 				Arrays.fill(w, 0.5f);
 				filter.setWeights(w, width, height);
-				for (int boxSize : boxSizes)
-					for (float offset : offsets)
-						for (boolean internal : checkInternal)
-						{
+				for (final int boxSize : boxSizes)
+					for (final float offset : offsets)
+						for (final boolean internal : checkInternal)
 							testMean(data, width, height, boxSize - offset, internal, filter, "w=0.5", e[ei++], 1e-5);
-						}
 
 				// Weights simulating the variance of sCMOS pixels
 				for (int i = 0; i < w.length; i++)
-				{
 					//w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
 					w[i] = (float) (1.0 / Math.max(0.01, rg.nextGaussian() * 0.2 + 2));
 					//w[i] = 0.5f;
-				}
 
 				ei = 0;
 				filter.setWeights(w, width, height);
-				for (int boxSize : boxSizes)
-					for (float offset : offsets)
-						for (boolean internal : checkInternal)
-						{
+				for (final int boxSize : boxSizes)
+					for (final float offset : offsets)
+						for (final boolean internal : checkInternal)
 							testMean(data, width, height, boxSize - offset, internal, filter, "w=?", e[ei++], 5e-2);
-						}
 			}
 	}
 
 	protected static float[] filter(float[] data, int width, int height, float boxSize, boolean internal,
 			DataFilter filter)
 	{
-		float[] data1 = data.clone();
+		final float[] data1 = data.clone();
 		if (internal)
-		{
 			filter.filterInternal(data1, width, height, boxSize);
-		}
 		else
-		{
 			filter.filter(data1, width, height, boxSize);
-		}
 		return data1;
 	}
 
@@ -205,8 +193,8 @@ public abstract class WeightedFilterTest
 	protected static double testMean(float[] data, int width, int height, float boxSize, boolean internal,
 			DataFilter filter, String title, double u1, double tol)
 	{
-		double u2 = getMean(data, width, height, boxSize, internal, filter);
-		double error = DoubleEquality.relativeError(u1, u2);
+		final double u2 = getMean(data, width, height, boxSize, internal, filter);
+		final double error = DoubleEquality.relativeError(u1, u2);
 		//System.out.printf("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)\n", filter.name, title,
 		//		width, height, boxSize, internal, u1, u2, error);
 		TestAssert.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,

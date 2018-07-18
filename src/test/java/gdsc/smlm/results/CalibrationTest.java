@@ -37,7 +37,7 @@ public class CalibrationTest
 	@Test
 	public void canGet()
 	{
-		Calibration c = new Calibration();
+		final Calibration c = new Calibration();
 		c.getNmPerPixel();
 		c.getGain();
 		c.getExposureTime();
@@ -50,7 +50,7 @@ public class CalibrationTest
 	@Test
 	public void canGetWithNoException()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setNmPerPixel(1);
 		c.setGain(2);
 		c.setExposureTime(3);
@@ -113,7 +113,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getNmPerPixelThrowsExceptionWhenInvalid()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setNmPerPixel(0);
 		c.getNmPerPixel();
 	}
@@ -121,7 +121,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getGainThrowsExceptionWhenInvalid()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setGain(0);
 		c.getGain();
 	}
@@ -129,7 +129,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getExposureTimeThrowsExceptionWhenInvalid()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setExposureTime(0);
 		c.getExposureTime();
 	}
@@ -137,7 +137,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getReadNoiseThrowsExceptionWhenInvalid()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setReadNoise(-1);
 		c.getReadNoise();
 	}
@@ -145,7 +145,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getBiasThrowsExceptionWhenInvalid()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setBias(-1);
 		c.getBias();
 	}
@@ -153,7 +153,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getAmplificationThrowsExceptionWhenInvalid()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setAmplification(0);
 		c.getAmplification();
 	}
@@ -161,7 +161,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getNmPerPixelThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setNmPerPixel(1);
 		c.clearHasNmPerPixel();
 		c.getNmPerPixel();
@@ -170,7 +170,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getGainThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setGain(1);
 		c.clearHasGain();
 		c.getGain();
@@ -179,7 +179,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getExposureTimeThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setExposureTime(1);
 		c.clearHasExposureTime();
 		c.getExposureTime();
@@ -188,7 +188,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getReadNoiseThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setReadNoise(1);
 		c.clearHasReadNoise();
 		c.getReadNoise();
@@ -197,7 +197,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getBiasThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setBias(1);
 		c.clearHasBias();
 		c.getBias();
@@ -206,7 +206,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getEmCCDThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setEmCCD(true);
 		c.clearHasEMCCD();
 		c.isEmCCD();
@@ -215,7 +215,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void getAmplificationThrowsExceptionAfterClear()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setAmplification(1);
 		c.clearHasAmplification();
 		c.getAmplification();
@@ -224,7 +224,7 @@ public class CalibrationTest
 	@Test(expected = IllegalStateException.class)
 	public void clearDoesNotResetFieldMissingFlag()
 	{
-		Calibration c = new Calibration(true);
+		final Calibration c = new Calibration(true);
 		c.setAmplification(0);
 
 		c.clear();

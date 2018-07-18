@@ -98,7 +98,7 @@ public class DensityImage implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		// Require some fit results and selected regions
-		int size = MemoryPeakResults.countMemorySize();
+		final int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
@@ -116,7 +116,7 @@ public class DensityImage implements PlugIn
 			return;
 		}
 
-		boolean[] isWithin = new boolean[1];
+		final boolean[] isWithin = new boolean[1];
 		results = cropWithBorder(results, isWithin);
 		if (results.size() == 0)
 		{
@@ -125,12 +125,12 @@ public class DensityImage implements PlugIn
 			return;
 		}
 
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		IJ.showStatus("Calculating density ...");
 
-		boolean useAdjustment = adjustForBorder && !isWithin[0];
+		final boolean useAdjustment = adjustForBorder && !isWithin[0];
 
-		DensityManager dm = createDensityManager(results);
+		final DensityManager dm = createDensityManager(results);
 		int[] density = null;
 		if (useSquareApproximation)
 			density = dm.calculateSquareDensity(radius, resolution, useAdjustment);
@@ -140,17 +140,17 @@ public class DensityImage implements PlugIn
 		density = cropBorder(results, density);
 
 		// Convert to float
-		ScoreCalculator calc = createCalculator(results);
-		float[] densityScore = calc.calculate(density);
+		final ScoreCalculator calc = createCalculator(results);
+		final float[] densityScore = calc.calculate(density);
 
-		int filtered = plotResults(results, densityScore, calc);
+		final int filtered = plotResults(results, densityScore, calc);
 
 		logDensityResults(results, density, radius, filtered);
 
 		if (computeRipleysPlot)
 			computeRipleysPlot(results);
 
-		double seconds = (System.currentTimeMillis() - start) / 1000.0;
+		final double seconds = (System.currentTimeMillis() - start) / 1000.0;
 		IJ.showStatus(TITLE + " complete : " + seconds + "s");
 	}
 
@@ -159,7 +159,7 @@ public class DensityImage implements PlugIn
 		if (results == null || results.size() == 0)
 			throw new IllegalArgumentException("Results are null or empty");
 
-		StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+		final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
 		sp.getXY();
 		return new DensityManager(sp.x, sp.y, results.getBounds());
 	}
@@ -229,7 +229,7 @@ public class DensityImage implements PlugIn
 		@Override
 		public float[] calculate(int[] density)
 		{
-			float[] score = new float[density.length];
+			final float[] score = new float[density.length];
 			for (int i = 0; i < score.length; i++)
 				score[i] = density[i];
 			return score;
@@ -237,8 +237,8 @@ public class DensityImage implements PlugIn
 
 		protected float getAverageDensity()
 		{
-			Rectangle bounds = results.getBounds();
-			float area = bounds.width * bounds.height;
+			final Rectangle bounds = results.getBounds();
+			final float area = bounds.width * bounds.height;
 			return results.size() / area;
 		}
 
@@ -250,7 +250,7 @@ public class DensityImage implements PlugIn
 		@Override
 		public float getThreshold()
 		{
-			float expected = getAverageDensity() * getRegionArea();
+			final float expected = getAverageDensity() * getRegionArea();
 			return (float) (expected * filterThreshold);
 		}
 	}
@@ -268,16 +268,14 @@ public class DensityImage implements PlugIn
 		@Override
 		public float[] calculate(int[] density)
 		{
-			float[] score = new float[density.length];
+			final float[] score = new float[density.length];
 			// K(r)
 			float regionDivisor = getAverageDensity();
 			if (mode == 1)
 				// K(r) / area
 				regionDivisor *= getRegionArea();
 			for (int i = 0; i < score.length; i++)
-			{
 				score[i] = density[i] / regionDivisor;
-			}
 			return score;
 		}
 
@@ -315,27 +313,21 @@ public class DensityImage implements PlugIn
 			//   Li(r) = Math.sqrt((Sample density / Average density) / pi) - r
 			// This should be above zero if the density around the spot is higher than the average sample density.
 
-			float[] score = new float[density.length];
-			float regionDivisor = getAverageDensity() * ((useSquareApproximation) ? 4 : (float) Math.PI);
+			final float[] score = new float[density.length];
+			final float regionDivisor = getAverageDensity() * ((useSquareApproximation) ? 4 : (float) Math.PI);
 			for (int i = 0; i < score.length; i++)
-			{
 				// L(r)
 				score[i] = (float) Math.sqrt(density[i] / regionDivisor);
-			}
 			if (mode == 1 || mode == 3)
-			{
 				// L(r) - r
 				// (L(r) - r) / r
 				for (int i = 0; i < score.length; i++)
 					score[i] -= radius;
-			}
 			if (mode == 2 || mode == 3)
-			{
 				// L(r) / r
 				// (L(r) - r) / r
 				for (int i = 0; i < score.length; i++)
 					score[i] /= radius;
-			}
 			return score;
 		}
 
@@ -348,7 +340,7 @@ public class DensityImage implements PlugIn
 			// To make the filtered results the same to the K(r) function we could use the
 			// sqrt of the filterThreshold
 
-			double threshold = filterThreshold;
+			final double threshold = filterThreshold;
 			//double threshold = Math.sqrt(filterThreshold);
 
 			// Note: L(r) ~ r
@@ -389,9 +381,9 @@ public class DensityImage implements PlugIn
 		// Adjust bounds relative to input results image:
 		// Use the ROI relative to the frame the ROI is drawn on.
 		// Map those fractional coordinates back to the original data bounds.
-		Rectangle bounds = results.getBounds();
-		double xscale = (double) roiImageWidth / bounds.width;
-		double yscale = (double) roiImageHeight / bounds.height;
+		final Rectangle bounds = results.getBounds();
+		final double xscale = (double) roiImageWidth / bounds.width;
+		final double yscale = (double) roiImageHeight / bounds.height;
 
 		// Compute relative to the results bounds (if present)
 		scaledRoiMinX = bounds.x + roiBounds.x / xscale;
@@ -444,14 +436,14 @@ public class DensityImage implements PlugIn
 		final float minY = (int) (scaledRoiMinY);
 		final float maxY = (int) Math.ceil(scaledRoiMaxY);
 		// Clone the results then add back those that are within the bounds
-		PeakResult[] peakResults = results.toArray();
+		final PeakResult[] peakResults = results.toArray();
 		results.begin();
 		int count = 0;
 		for (int i = 0; i < peakResults.length; i++)
 		{
-			PeakResult peakResult = peakResults[i];
-			float x = peakResult.getXPosition();
-			float y = peakResult.getYPosition();
+			final PeakResult peakResult = peakResults[i];
+			final float x = peakResult.getXPosition();
+			final float y = peakResult.getYPosition();
 			if (x < minX || x > maxX || y < minY || y > maxY)
 				continue;
 			results.add(peakResult);
@@ -478,19 +470,17 @@ public class DensityImage implements PlugIn
 	private static SummaryStatistics logDensityResults(MemoryPeakResults results, int[] density, float radius,
 			int filtered)
 	{
-		float region = (float) (radius * radius * ((useSquareApproximation) ? 4 : Math.PI));
+		final float region = (float) (radius * radius * ((useSquareApproximation) ? 4 : Math.PI));
 
-		Rectangle bounds = results.getBounds();
-		float area = bounds.width * bounds.height;
-		float expected = results.size() * region / area;
-		SummaryStatistics summary = new SummaryStatistics();
+		final Rectangle bounds = results.getBounds();
+		final float area = bounds.width * bounds.height;
+		final float expected = results.size() * region / area;
+		final SummaryStatistics summary = new SummaryStatistics();
 
 		for (int i = 0; i < results.size(); i++)
-		{
 			summary.addValue(density[i]);
-		}
 
-		DensityManager dm = createDensityManager(results);
+		final DensityManager dm = createDensityManager(results);
 
 		// Compute this using the input density scores since the radius is the same.
 		final double l = (useSquareApproximation) ? dm.ripleysLFunction(radius) : dm.ripleysLFunction(density, radius);
@@ -537,14 +527,14 @@ public class DensityImage implements PlugIn
 		}
 
 		// Draw an image - Use error so that a floating point value can be used on a single pixel
-		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY,
+		final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY,
 				false, false, results.getName() + " Density", results.getBounds(), results.getNmPerPixel(),
 				results.getGain(), imageScale, 0,
 				(cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
 		image.setDisplayFlags(image.getDisplayFlags() | IJImagePeakResults.DISPLAY_NEGATIVES);
 		image.setLutName("grays");
 		image.begin();
-		StandardResultProcedure sp = new StandardResultProcedure(newResults, DistanceUnit.PIXEL);
+		final StandardResultProcedure sp = new StandardResultProcedure(newResults, DistanceUnit.PIXEL);
 		sp.getXYR();
 		for (int i = 0; i < density.length; i++)
 		{
@@ -569,10 +559,10 @@ public class DensityImage implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<>();
-		for (int imageID : Utils.getIDList())
+		final List<String> titles = new LinkedList<>();
+		for (final int imageID : Utils.getIDList())
 		{
-			ImagePlus imp = WindowManager.getImage(imageID);
+			final ImagePlus imp = WindowManager.getImage(imageID);
 			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
 				titles.add(imp.getTitle());
 		}
@@ -629,7 +619,7 @@ public class DensityImage implements PlugIn
 			Parameters.isAboveZero("Image scale", imageScale);
 			Parameters.isAboveZero("Resolution", resolution);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -644,7 +634,7 @@ public class DensityImage implements PlugIn
 			}
 			else
 			{
-				String[] items = titles.toArray(new String[titles.size()]);
+				final String[] items = titles.toArray(new String[titles.size()]);
 				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
@@ -653,16 +643,14 @@ public class DensityImage implements PlugIn
 					return false;
 				roiImage = gd.getNextChoice();
 			}
-			ImagePlus imp = WindowManager.getImage(roiImage);
+			final ImagePlus imp = WindowManager.getImage(roiImage);
 
 			roiBounds = imp.getRoi().getBounds();
 			roiImageWidth = imp.getWidth();
 			roiImageHeight = imp.getHeight();
 		}
 		else
-		{
 			roiBounds = null;
-		}
 
 		return true;
 	}
@@ -675,7 +663,7 @@ public class DensityImage implements PlugIn
 	 */
 	private void computeRipleysPlot(MemoryPeakResults results)
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Compute Ripley's L(r) - r plot");
 		gd.addNumericField("Min_radius", minR, 2);
 		gd.addNumericField("Max_radius", maxR, 2);
@@ -696,16 +684,16 @@ public class DensityImage implements PlugIn
 			return;
 		}
 
-		DensityManager dm = createDensityManager(results);
-		double[][] values = calculateLScores(dm);
+		final DensityManager dm = createDensityManager(results);
+		final double[][] values = calculateLScores(dm);
 
 		// 99% confidence intervals
 		final int iterations = (confidenceIntervals) ? 99 : 0;
 		double[] upper = null;
 		double[] lower = null;
-		Rectangle bounds = results.getBounds();
+		final Rectangle bounds = results.getBounds();
 		// Use a uniform distribution for the coordinates
-		HaltonSequenceGenerator dist = new HaltonSequenceGenerator(2);
+		final HaltonSequenceGenerator dist = new HaltonSequenceGenerator(2);
 		dist.skipTo(new Well19937c(System.currentTimeMillis() + System.identityHashCode(this)).nextInt());
 		for (int i = 0; i < iterations; i++)
 		{
@@ -713,22 +701,21 @@ public class DensityImage implements PlugIn
 			IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, iterations));
 
 			// Randomise coordinates
-			float[] x = new float[results.size()];
-			float[] y = new float[x.length];
+			final float[] x = new float[results.size()];
+			final float[] y = new float[x.length];
 			for (int j = x.length; j-- > 0;)
 			{
 				final double[] d = dist.nextVector();
 				x[j] = (float) (d[0] * bounds.width);
 				y[j] = (float) (d[1] * bounds.height);
 			}
-			double[][] values2 = calculateLScores(new DensityManager(x, y, bounds));
+			final double[][] values2 = calculateLScores(new DensityManager(x, y, bounds));
 			if (upper == null || lower == null)
 			{
 				upper = values2[1];
 				lower = upper.clone();
 			}
 			else
-			{
 				for (int m = upper.length; m-- > 0;)
 				{
 					if (upper[m] < values2[1][m])
@@ -736,11 +723,10 @@ public class DensityImage implements PlugIn
 					if (lower[m] > values2[1][m])
 						lower[m] = values2[1][m];
 				}
-			}
 		}
 
-		String title = results.getName() + " Ripley's (L(r) - r) / r";
-		Plot2 plot = new Plot2(title, "Radius", "(L(r) - r) / r", values[0], values[1]);
+		final String title = results.getName() + " Ripley's (L(r) - r) / r";
+		final Plot2 plot = new Plot2(title, "Radius", "(L(r) - r) / r", values[0], values[1]);
 		// Get the limits
 		double yMin = min(0, values[1]);
 		double yMax = max(0, values[1]);
@@ -763,7 +749,7 @@ public class DensityImage implements PlugIn
 
 	private static double min(double min, double[] data)
 	{
-		for (double d : data)
+		for (final double d : data)
 			if (min > d)
 				min = d;
 		return min;
@@ -771,7 +757,7 @@ public class DensityImage implements PlugIn
 
 	private static double max(double max, double[] data)
 	{
-		for (double d : data)
+		for (final double d : data)
 			if (max < d)
 				max = d;
 		return max;
@@ -779,20 +765,20 @@ public class DensityImage implements PlugIn
 
 	private static double[][] calculateLScores(DensityManager dm)
 	{
-		TDoubleArrayList x = new TDoubleArrayList();
-		TDoubleArrayList y = new TDoubleArrayList();
+		final TDoubleArrayList x = new TDoubleArrayList();
+		final TDoubleArrayList y = new TDoubleArrayList();
 		x.add(0.0);
 		y.add(0.0);
 
 		for (double r = minR; r < maxR; r += incrementR)
 		{
-			double l = dm.ripleysLFunction(r);
+			final double l = dm.ripleysLFunction(r);
 			x.add(r);
-			double score = (r > 0) ? (l - r) / r : 0;
+			final double score = (r > 0) ? (l - r) / r : 0;
 			y.add(score);
 		}
 
-		double[][] values = new double[2][];
+		final double[][] values = new double[2][];
 		values[0] = x.toArray();
 		values[1] = y.toArray();
 		return values;

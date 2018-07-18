@@ -115,7 +115,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 	@Override
 	public SingleSpotFilter clone()
 	{
-		SingleSpotFilter f = (SingleSpotFilter) super.clone();
+		final SingleSpotFilter f = (SingleSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.processor = processor.clone();
 		return f;
@@ -140,7 +140,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 	@Override
 	public List<String> getParameters()
 	{
-		List<String> list = super.getParameters();
+		final List<String> list = super.getParameters();
 		list.add("Filter = " + processor.getDescription());
 		return list;
 	}

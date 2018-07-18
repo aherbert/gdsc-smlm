@@ -72,7 +72,7 @@ public class FastMLEGradient2ProcedureTest
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
-		double[] y = new double[0];
+		final double[] y = new double[0];
 		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
 				FastMLEGradient2Procedure4.class);
 		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
@@ -106,22 +106,22 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(int nparams)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
+		final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
-			double s = p.computeLogLikelihood(paramsList.get(i));
-			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
+			final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			final double s = p.computeLogLikelihood(paramsList.get(i));
+			final double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Virtually the same ...
 			TestAssert.assertEqualsRelative(s, s2, 1e-5, "[%d] Result: Not same @ %d", nparams, i);
 		}
@@ -130,16 +130,16 @@ public class FastMLEGradient2ProcedureTest
 	@Test
 	public void gradientProcedureComputesSameWithPrecomputed()
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
+		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-		ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(2, 10, 10,
+		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(2, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
-		double[] a1 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		double[] a2 = new double[1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] a1 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final double[] a2 = new double[1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 		final double[] x = new double[f1.size()];
 		final double[] b = new double[f1.size()];
@@ -194,28 +194,28 @@ public class FastMLEGradient2ProcedureTest
 				a1[j] = a2[j];
 
 			// Compute peak 1+2
-			FastMLEGradient2Procedure p12 = FastMLEGradient2ProcedureFactory.create(x, f2);
+			final FastMLEGradient2Procedure p12 = FastMLEGradient2ProcedureFactory.create(x, f2);
 			p12.computeSecondDerivative(a2);
-			double[] d11 = Arrays.copyOf(p12.d1, f1.getNumberOfGradients());
-			double[] d21 = Arrays.copyOf(p12.d2, f1.getNumberOfGradients());
+			final double[] d11 = Arrays.copyOf(p12.d1, f1.getNumberOfGradients());
+			final double[] d21 = Arrays.copyOf(p12.d2, f1.getNumberOfGradients());
 
 			// Compute peak 1+(precomputed 2)
-			FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x,
+			final FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x,
 					OffsetGradient2Function.wrapGradient2Function(f1, b));
 			p1b2.computeSecondDerivative(a1);
-			double[] d12 = p1b2.d1;
-			double[] d22 = p1b2.d2;
+			final double[] d12 = p1b2.d1;
+			final double[] d22 = p1b2.d2;
 
 			Assert.assertArrayEquals(" Result: Not same @ " + i, p12.u, p1b2.u, 1e-10);
 			Assert.assertArrayEquals(" D1: Not same @ " + i, d11, d12, 1e-10);
 			Assert.assertArrayEquals(" D2: Not same @ " + i, d21, d22, 1e-10);
 
-			double[] v1 = p12.computeValue(a2);
-			double[] v2 = p1b2.computeValue(a1);
+			final double[] v1 = p12.computeValue(a2);
+			final double[] v2 = p1b2.computeValue(a1);
 			Assert.assertArrayEquals(" Value: Not same @ " + i, v1, v2, 1e-10);
 
-			double[] d1 = Arrays.copyOf(p12.computeFirstDerivative(a2), f1.getNumberOfGradients());
-			double[] d2 = p1b2.computeFirstDerivative(a1);
+			final double[] d1 = Arrays.copyOf(p12.computeFirstDerivative(a2), f1.getNumberOfGradients());
+			final double[] d2 = p1b2.computeFirstDerivative(a1);
 			Assert.assertArrayEquals(" 1st derivative: Not same @ " + i, d1, d2, 1e-10);
 		}
 	}
@@ -240,7 +240,7 @@ public class FastMLEGradient2ProcedureTest
 			long t1 = time();
 			for (int i = 0; i < 10; i++)
 			{
-				long t2 = t1;
+				final long t2 = t1;
 				t1 = time();
 				if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) // 2% difference
 					break;
@@ -274,14 +274,14 @@ public class FastMLEGradient2ProcedureTest
 		createFakeData(nparams, iter, paramsList, yList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
+		final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p.computeLogLikelihood(paramsList.get(i));
 		}
 
@@ -289,36 +289,36 @@ public class FastMLEGradient2ProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory
+					final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory
 							.newCalculator(nparams, true);
 					for (int j = loops; j-- > 0;)
 						calc.logLikelihood(yList.get(i), paramsList.get(k++ % iter), func);
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+					final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.computeLogLikelihood(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.logSpeedTestResult(time2 < time1,
 				"GradientCalculator = %d : FastMLEGradient2Procedure %d = %d : %fx\n", time1, nparams, time2,
@@ -335,24 +335,24 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams)
 	{
-		int iter = 10;
+		final int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		FastMLEGradient2Procedure p1, p2;
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
-			double[] a = paramsList.get(i);
+			final double[] a = paramsList.get(i);
 
-			double ll1 = p1.computeLogLikelihood(a);
-			double ll2 = p2.computeLogLikelihood(a);
+			final double ll1 = p1.computeLogLikelihood(a);
+			final double ll2 = p2.computeLogLikelihood(a);
 			TestAssert.assertEquals(ll1, ll2, 0, "[%d] LL: Not same @ %d", nparams, i);
 
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
@@ -397,11 +397,11 @@ public class FastMLEGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
+			final FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p1.computeSecondDerivative(paramsList.get(i));
 			p1.computeSecondDerivative(paramsList.get(i));
 
-			FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			final FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p2.computeSecondDerivative(paramsList.get(i));
 			p2.computeSecondDerivative(paramsList.get(i));
 
@@ -414,35 +414,35 @@ public class FastMLEGradient2ProcedureTest
 		final int loops = 15;
 
 		// Run till stable timing
-		Timer t1 = new Timer()
+		final Timer t1 = new Timer()
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
+					final FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p1.computeSecondDerivative(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time1 = t1.getTime();
+		final long time1 = t1.getTime();
 
-		Timer t2 = new Timer(t1.loops)
+		final Timer t2 = new Timer(t1.loops)
 		{
 			@Override
 			void run()
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+					final FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p2.computeSecondDerivative(paramsList.get(k++ % iter));
 				}
 			}
 		};
-		long time2 = t2.getTime();
+		final long time2 = t2.getTime();
 
 		TestSettings.info("Standard = %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1 * 1.5);
@@ -454,68 +454,68 @@ public class FastMLEGradient2ProcedureTest
 		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
 
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-		double sx = 1.08;
-		double sy = 1.01;
-		double gamma = 0.389;
-		double d = 0.531;
-		double Ax = -0.0708;
-		double Bx = -0.073;
-		double Ay = 0.164;
-		double By = 0.0417;
-		HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
+		final double sx = 1.08;
+		final double sy = 1.01;
+		final double gamma = 0.389;
+		final double d = 0.531;
+		final double Ax = -0.0708;
+		final double Bx = -0.073;
+		final double Ay = 0.164;
+		final double By = 0.0417;
+		final HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 		gradientCalculatorComputesGradient(new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}
 
 	private void gradientCalculatorComputesGradient(ErfGaussian2DFunction func)
 	{
 		// Check the first and second derivatives
-		int nparams = func.getNumberOfGradients();
-		int[] indices = func.gradientIndices();
+		final int nparams = func.getNumberOfGradients();
+		final int[] indices = func.gradientIndices();
 
-		int iter = 100;
+		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<>(iter);
-		ArrayList<double[]> yList = new ArrayList<>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createData(1, iter, paramsList, yList, true);
 
 		// for the gradients
-		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+		final double delta = 1e-4;
+		final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
 		// Must compute most of the time
-		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-		TestCounter failCounter = new TestCounter(failureLimit, nparams);
+		final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		final TestCounter failCounter = new TestCounter(failureLimit, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final int ii = i;
-			double[] y = yList.get(i);
-			double[] a = paramsList.get(i);
-			double[] a2 = a.clone();
-			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.create(y, func);
+			final double[] y = yList.get(i);
+			final double[] a = paramsList.get(i);
+			final double[] a2 = a.clone();
+			final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.create(y, func);
 			//double ll = p.computeLogLikelihood(a);
 			p.computeSecondDerivative(a);
-			double[] d1 = p.d1.clone();
-			double[] d2 = p.d2.clone();
+			final double[] d1 = p.d1.clone();
+			final double[] d2 = p.d2.clone();
 			for (int j = 0; j < nparams; j++)
 			{
 				final int j_ = j;
-				int k = indices[j];
-				double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
+				final int k = indices[j];
+				final double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
 				a2[k] = a[k] + d;
-				double llh = p.computeLogLikelihood(a2);
+				final double llh = p.computeLogLikelihood(a2);
 				p.computeFirstDerivative(a2);
-				double[] d1h = p.d1.clone();
+				final double[] d1h = p.d1.clone();
 				a2[k] = a[k] - d;
-				double lll = p.computeLogLikelihood(a2);
+				final double lll = p.computeLogLikelihood(a2);
 				p.computeFirstDerivative(a2);
-				double[] d1l = p.d1.clone();
+				final double[] d1l = p.d1.clone();
 				a2[k] = a[k];
 
-				double gradient1 = (llh - lll) / (2 * d);
-				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
+				final double gradient1 = (llh - lll) / (2 * d);
+				final double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
 				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d,
 				//		gradient1, d1[j], gradient2, d2[j]);
 				failCounter.run(j, () -> {
@@ -549,10 +549,10 @@ public class FastMLEGradient2ProcedureTest
 	 */
 	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
 	{
-		int n = blockWidth * blockWidth;
+		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
+		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
@@ -564,13 +564,11 @@ public class FastMLEGradient2ProcedureTest
 			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
 		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
-		{
 			// Add random Poisson noise
 			y[i] = rdg.nextPoisson(func.eval(i));
-		}
 
 		if (randomiseParams)
 		{
@@ -601,13 +599,13 @@ public class FastMLEGradient2ProcedureTest
 	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
 			boolean randomiseParams)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
+			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
+			final double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -616,13 +614,13 @@ public class FastMLEGradient2ProcedureTest
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
-		int[] x = new int[blockWidth * blockWidth];
+		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[nparams];
-			double[] y = createFakeData(params);
+			final double[] params = new double[nparams];
+			final double[] y = createFakeData(params);
 			paramsList.add(params);
 			yList.add(y);
 		}
@@ -631,38 +629,24 @@ public class FastMLEGradient2ProcedureTest
 
 	private double[] createFakeData(double[] params)
 	{
-		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
+		final int n = blockWidth * blockWidth;
+		final RandomGenerator r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
-		{
 			params[i] = r.nextDouble();
-		}
 
-		double[] y = new double[n];
+		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
-		{
 			y[i] = r.nextDouble() * 10;
-		}
 
 		return y;
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
+		final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
-		{
-			params2List.add(copydouble(paramsList.get(i)));
-		}
+			params2List.add(paramsList.get(i).clone());
 		return params2List;
-	}
-
-	private double[] copydouble(double[] d)
-	{
-		double[] d2 = new double[d.length];
-		for (int i = 0; i < d.length; i++)
-			d2[i] = d[i];
-		return d2;
 	}
 }

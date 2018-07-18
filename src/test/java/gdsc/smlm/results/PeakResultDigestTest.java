@@ -37,8 +37,8 @@ public class PeakResultDigestTest
 	public void sameResultsAreEqual()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -47,8 +47,8 @@ public class PeakResultDigestTest
 	public void sameSize1ResultsAreEqual()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -57,8 +57,8 @@ public class PeakResultDigestTest
 	public void sameEmptyResultsAreEqual()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -67,8 +67,8 @@ public class PeakResultDigestTest
 	public void sameResultsAreEqualWithDeviation()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -77,8 +77,8 @@ public class PeakResultDigestTest
 	public void sameResultsAreEqualWithId()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -87,8 +87,8 @@ public class PeakResultDigestTest
 	public void sameResultsAreEqualWithEndFrame()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -97,8 +97,8 @@ public class PeakResultDigestTest
 	public void sameResultsAreEqualWithPrecision()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertTrue(digest.matches(digest));
 	}
@@ -107,11 +107,11 @@ public class PeakResultDigestTest
 	public void differentResultsAreNotEqual()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
-		for (int size : new int[] { 10, 1, 0 })
+		final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
+		for (final int size : new int[] { 10, 1, 0 })
 		{
-			PeakResult[] r2 = createResults(r, size, 5, false, false, false, false);
+			final PeakResult[] r2 = createResults(r, size, 5, false, false, false, false);
 			Assert.assertFalse(digest.matches(r2));
 			Assert.assertFalse(digest.matches(new PeakResultsDigest(r2)));
 		}
@@ -123,11 +123,11 @@ public class PeakResultDigestTest
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int size = 1; size < 5; size++)
 		{
-			PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
-			PeakResultsDigest digest = new PeakResultsDigest(r1);
+			final PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
+			final PeakResultsDigest digest = new PeakResultsDigest(r1);
 
-			PeakResultDigest d = new PeakResultDigest();
-			for (PeakResult rr : r1)
+			final PeakResultDigest d = new PeakResultDigest();
+			for (final PeakResult rr : r1)
 				d.update(rr);
 			Assert.assertEquals(d.digest(), digest.getDigest());
 		}
@@ -142,9 +142,9 @@ public class PeakResultDigestTest
 	@Test
 	public void digestHandlesNull()
 	{
-		PeakResult[] r1 = null;
-		PeakResult[] r0 = new PeakResult[0];
-		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		final PeakResult[] r1 = null;
+		final PeakResult[] r0 = new PeakResult[0];
+		final PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertFalse(digest.matches(r0));
 	}
@@ -152,9 +152,9 @@ public class PeakResultDigestTest
 	@Test
 	public void digestHandlesEmptyArray()
 	{
-		PeakResult[] r1 = null;
-		PeakResult[] r0 = new PeakResult[0];
-		PeakResultsDigest digest = new PeakResultsDigest(r0);
+		final PeakResult[] r1 = null;
+		final PeakResult[] r0 = new PeakResult[0];
+		final PeakResultsDigest digest = new PeakResultsDigest(r0);
 		Assert.assertTrue(digest.matches(r0));
 		Assert.assertFalse(digest.matches(r1));
 	}
@@ -165,11 +165,11 @@ public class PeakResultDigestTest
 		Assume.assumeTrue(false);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
-		PeakResultsDigest digest = new PeakResultsDigest();
-		int N = 5;
+		final PeakResultsDigest digest = new PeakResultsDigest();
+		final int N = 5;
 		for (int size = 1000; size < 2000000; size *= 2)
 		{
-			PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
+			final PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
 			long time = System.nanoTime();
 			for (int i = N; i-- > 0;)
 				digest.digest(r1);
@@ -178,15 +178,15 @@ public class PeakResultDigestTest
 		}
 	}
 
-	private PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations, boolean withId,
+	private static PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations, boolean withId,
 			boolean withEndFrame, boolean withPrecision)
 	{
 		final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
 		while (size-- > 0)
 		{
-			float[] params = createParams(n, r);
-			float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
-			AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
+			final float[] params = createParams(n, r);
+			final float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
+			final AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
 					r.nextDouble(), r.nextFloat(), r.nextFloat(), params, paramsDev);
 			if (withId)
 				p.setId(r.nextInt());
@@ -200,9 +200,9 @@ public class PeakResultDigestTest
 		return store.toArray();
 	}
 
-	private float[] createParams(int n, RandomGenerator r)
+	private static float[] createParams(int n, RandomGenerator r)
 	{
-		float[] p = new float[n];
+		final float[] p = new float[n];
 		while (n-- > 0)
 			p[n] = r.nextFloat();
 		return p;

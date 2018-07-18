@@ -119,11 +119,11 @@ public class ReferenceItemMesh extends ItemMesh
 		// Handle indexed array
 		if (isIndexGeometryArray())
 		{
-			IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
-			IndexedGeometryArray iga = (IndexedGeometryArray) ga;
-			int objectIndexCount = sourceIGA.getValidIndexCount();
-			int[] objectIndices = new int[objectIndexCount];
-			int[] allIndices = new int[objectIndices.length * points.length];
+			final IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
+			final IndexedGeometryArray iga = (IndexedGeometryArray) ga;
+			final int objectIndexCount = sourceIGA.getValidIndexCount();
+			final int[] objectIndices = new int[objectIndexCount];
+			final int[] allIndices = new int[objectIndices.length * points.length];
 			sourceIGA.getCoordinateIndices(0, objectIndices);
 			duplicateIndices(objectIndices, allIndices);
 			iga.setCoordinateIndices(0, allIndices);
@@ -151,9 +151,9 @@ public class ReferenceItemMesh extends ItemMesh
 		// Handle normals
 		if (hasNormals())
 		{
-			float[] objectNormals = new float[vertexCount * 3];
+			final float[] objectNormals = new float[vertexCount * 3];
 			sourceGA.getNormals(0, objectNormals);
-			float[] allNormals = new float[objectNormals.length * points.length];
+			final float[] allNormals = new float[objectNormals.length * points.length];
 			duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
 			ga.setNormalRefFloat(allNormals);
 		}
@@ -192,7 +192,7 @@ public class ReferenceItemMesh extends ItemMesh
 		// From here on we assume the current geometry will not be null
 		// as this only happens when the original size is zero. Size has
 		// been checked at this point to be the smaller of new and old.
-		GeometryArray ga = (GeometryArray) getGeometry();
+		final GeometryArray ga = (GeometryArray) getGeometry();
 
 		points = reorder(points, indices);
 		// Sizes could be null or a single size
@@ -208,9 +208,9 @@ public class ReferenceItemMesh extends ItemMesh
 		final float[] coords = new float[size * n];
 		for (int i = 0; i < size; i++)
 		{
-			int j = indices[i];
-			int ii = i * n;
-			int jj = j * n;
+			final int j = indices[i];
+			final int ii = i * n;
+			final int jj = j * n;
 			System.arraycopy(oldCoords, jj, coords, ii, n);
 		}
 
@@ -218,34 +218,31 @@ public class ReferenceItemMesh extends ItemMesh
 		if (hasColor())
 		{
 			n = colorUpdater.size();
-			float[] oldColors = ga.getColorRefFloat();
+			final float[] oldColors = ga.getColorRefFloat();
 			colors = new float[size * n];
 			for (int i = 0; i < size; i++)
 			{
-				int j = indices[i];
-				int ii = i * n;
-				int jj = j * n;
+				final int j = indices[i];
+				final int ii = i * n;
+				final int jj = j * n;
 				System.arraycopy(oldColors, jj, colors, ii, n);
 			}
 		}
 		else
-		{
 			colors = null;
-		}
 
 		ga.updateData(new GeometryUpdater()
 		{
 			@Override
 			public void updateData(Geometry geometry)
 			{
-				GeometryArray ga = (GeometryArray) geometry;
+				final GeometryArray ga = (GeometryArray) geometry;
 				// We re-use the geometry and just truncate the vertex count
 				ga.setCoordRefFloat(coords);
 				if (colors != null)
 					ga.setColorRefFloat(colors);
 
 				if (size != oldSize)
-				{
 					if (isIndexGeometryArray())
 					{
 						if (isStripGeometryArray())
@@ -256,9 +253,7 @@ public class ReferenceItemMesh extends ItemMesh
 							((IndexedGeometryStripArray) ga).setStripIndexCounts(indices);
 						}
 						else
-						{
 							((IndexedGeometryArray) ga).setValidIndexCount(size * indexCount);
-						}
 					}
 					else if (isStripGeometryArray())
 					{
@@ -268,10 +263,7 @@ public class ReferenceItemMesh extends ItemMesh
 						((GeometryStripArray) ga).setStripVertexCounts(indices);
 					}
 					else
-					{
 						ga.setValidVertexCount(size * vertexCount);
-					}
-				}
 			}
 		});
 	}
@@ -302,7 +294,7 @@ public class ReferenceItemMesh extends ItemMesh
 		if (hasColor3())
 		{
 			colors = new float[size() * colorUpdater.size()];
-			float[] tmp = new float[3];
+			final float[] tmp = new float[3];
 			color.get(tmp);
 			duplicate(tmp, 0, 3, colors.length / 3, colors, 0);
 		}
@@ -335,21 +327,19 @@ public class ReferenceItemMesh extends ItemMesh
 			return;
 		}
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int n = colorUpdater.size();
+		final int n = colorUpdater.size();
 		final float[] colors;
 		if (hasColor3())
 		{
 			colors = new float[size() * n];
 			for (int i = 0; i < color.length; i++)
-			{
 				System.arraycopy(colorUpdater.getColors(color[i]), 0, colors, i * n, n);
-			}
 		}
 		else
 		{
@@ -357,7 +347,7 @@ public class ReferenceItemMesh extends ItemMesh
 			colors = ga.getColorRefFloat().clone();
 			for (int i = 0; i < color.length; i++)
 			{
-				int offset = i * n;
+				final int offset = i * n;
 				colorUpdater.getColors(color[i], colors[offset + 3]);
 				System.arraycopy(colorUpdater.pointColor, 0, colors, offset, n);
 			}
@@ -378,18 +368,16 @@ public class ReferenceItemMesh extends ItemMesh
 			throw new IllegalArgumentException("Per-item alpha not supported");
 
 		this.color = null;
-		int size = size();
+		final int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int n = colorUpdater.size();
+		final int n = colorUpdater.size();
 		final float[] colors = new float[size() * n];
 		for (int i = 0; i < color.length; i++)
-		{
 			System.arraycopy(colorUpdater.getColors(color[i]), 0, colors, i * n, n);
-		}
 		ga.setColorRefFloat(colors);
 		changed = true;
 	}
@@ -405,18 +393,18 @@ public class ReferenceItemMesh extends ItemMesh
 		if (!hasColor4())
 			throw new IllegalArgumentException("Per-item alpha not supported");
 
-		int size = size();
+		final int size = size();
 		if (alpha.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int n = colorUpdater.size();
+		final int n = colorUpdater.size();
 		// Preserve color
 		final float[] colors = ga.getColorRefFloat().clone();
 		for (int i = 0; i < size; i++)
 		{
-			int offset = i * n;
+			final int offset = i * n;
 			for (int j = 3; j < n; j += 4)
 				colors[j + offset] = alpha[i];
 		}
@@ -435,16 +423,16 @@ public class ReferenceItemMesh extends ItemMesh
 		if (!hasColor4())
 			throw new IllegalArgumentException("Per-item alpha not supported");
 
-		int size = size();
+		final int size = size();
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int n = colorUpdater.size();
+		final int n = colorUpdater.size();
 		// Preserve color
 		final float[] colors = ga.getColorRefFloat().clone();
 		for (int i = 0; i < size; i++)
 		{
-			int offset = i * n;
+			final int offset = i * n;
 			for (int j = 3; j < n; j += 4)
 				colors[j + offset] = alpha;
 		}
@@ -463,18 +451,16 @@ public class ReferenceItemMesh extends ItemMesh
 		if (!hasColor4())
 			throw new IllegalArgumentException("Per-item alpha not supported");
 
-		int size = size();
+		final int size = size();
 		if (alpha.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int n = colorUpdater.size();
+		final int n = colorUpdater.size();
 		final float[] colors = ga.getColorRefFloat();
 		for (int i = 0; i < size; i++)
-		{
 			// Get only alpha
 			alpha[i] = colors[i * n + 3];
-		}
 	}
 }

@@ -76,14 +76,12 @@ public class LSQVarianceGradientProcedure6 extends LSQVarianceGradientProcedure
 	public void execute(final double Ei, double[] Eix)
 	{
 		for (int a = 0; a < n; a++)
-		{
 			for (int b = 0, j = a * n; b <= a; b++, j++)
 			{
-				double v = Eix[a] * Eix[b];
+				final double v = Eix[a] * Eix[b];
 				I[j] += v;
 				E[j] += Ei * v;
 			}
-		}
 	}
 
 	@Override

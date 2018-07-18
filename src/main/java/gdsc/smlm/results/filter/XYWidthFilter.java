@@ -51,7 +51,7 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
 
 		// Set the width limit
-		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
 		upperSigmaThreshold = Filter.getUpperLimit(s[0] * s[1] * width * width);
 	}
 
@@ -78,10 +78,8 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (widthEnabled)
-		{
 			if (peak.getXSDFactor() * peak.getYSDFactor() > upperSigmaThreshold)
 				return V_X_SD_FACTOR | V_Y_SD_FACTOR;
-		}
 		return 0;
 	}
 

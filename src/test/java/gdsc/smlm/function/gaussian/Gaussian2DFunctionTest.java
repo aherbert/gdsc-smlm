@@ -85,9 +85,7 @@ public abstract class Gaussian2DFunctionTest
 
 		// Setup Tests
 		if (!f1.evaluatesBackground())
-		{
 			testbackground = new double[] { testbackground[0] };
-		}
 		if (!f1.evaluatesSignal())
 		{
 			testsignal1 = new double[] { testsignal1[0] };
@@ -117,13 +115,11 @@ public abstract class Gaussian2DFunctionTest
 			noSecondWidth = true;
 		}
 		if (noSecondWidth)
-		{
 			for (int i = 0; i < testw1.length; i++)
 			{
 				testw1[i][1] = testw1[i][0];
 				testw2[i][1] = testw2[i][0];
 			}
-		}
 		if (!f1.evaluatesAngle())
 		{
 			testangle1 = new double[] { 0 };
@@ -155,7 +151,7 @@ public abstract class Gaussian2DFunctionTest
 		if (gf == null)
 			return;
 
-		int[] gradientIndices = gf.gradientIndices();
+		final int[] gradientIndices = gf.gradientIndices();
 		if (TestSettings.allow(LogLevel.INFO))
 			TestSettings.info("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
 
@@ -204,27 +200,27 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesTargetWithAndWithoutGradient()
 	{
-		double[] dyda = new double[f1.gradientIndices().length];
+		final double[] dyda = new double[f1.gradientIndices().length];
 		double[] a;
 
 		boolean record = TestSettings.allow(LogLevel.INFO);
 
-		for (double background : testbackground)
+		for (final double background : testbackground)
 			// Peak 1
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double cz1 : testcz1)
-							for (double[] w1 : testw1)
-								for (double angle1 : testangle1)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double cz1 : testcz1)
+							for (final double[] w1 : testw1)
+								for (final double angle1 : testangle1)
 								{
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
 									f1.initialise(a);
 
 									// Test the frozen version
-									int flags = GaussianFunctionFactory.freeze(this.flags, zModel, a);
-									Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, f1.getMaxX(),
+									final int flags = GaussianFunctionFactory.freeze(this.flags, zModel, a);
+									final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, f1.getMaxX(),
 											f1.getMaxY(), flags, zModel);
 									f.initialise(a);
 									if (record)
@@ -234,11 +230,11 @@ public abstract class Gaussian2DFunctionTest
 												f.getClass().getSimpleName());
 									}
 
-									for (int x : testx)
-										for (int y : testy)
+									for (final int x : testx)
+										for (final int y : testy)
 										{
-											int xx = y * maxx + x;
-											double y1 = f1.eval(xx, dyda);
+											final int xx = y * maxx + x;
+											final double y1 = f1.eval(xx, dyda);
 											double y2 = f1.eval(xx);
 
 											Assert.assertTrue(y1 + " != " + y2,
@@ -308,23 +304,23 @@ public abstract class Gaussian2DFunctionTest
 
 	private void functionComputesTargetGradient(int targetParameter)
 	{
-		int gradientIndex = findGradientIndex(f1, targetParameter);
-		double[] dyda = new double[f1.gradientIndices().length];
-		double[] dyda2 = new double[dyda.length];
+		final int gradientIndex = findGradientIndex(f1, targetParameter);
+		final double[] dyda = new double[f1.gradientIndices().length];
+		final double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
-		Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
-		Statistics s = new Statistics();
+		final Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
+		final Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
+		final Statistics s = new Statistics();
 
-		for (double background : testbackground)
+		for (final double background : testbackground)
 			// Peak 1
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double cz1 : testcz1)
-							for (double[] w1 : testw1)
-								for (double angle1 : testangle1)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double cz1 : testcz1)
+							for (final double[] w1 : testw1)
+								for (final double angle1 : testangle1)
 								{
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 									f1.initialise(a);
@@ -334,7 +330,7 @@ public abstract class Gaussian2DFunctionTest
 									final double xx = a[targetParameter];
 
 									// Get h to minimise roundoff error
-									double h = Precision.representableDelta(xx, h_);
+									final double h = Precision.representableDelta(xx, h_);
 
 									// Evaluate at (x+h) and (x-h)
 									a[targetParameter] = xx + h;
@@ -343,16 +339,16 @@ public abstract class Gaussian2DFunctionTest
 									a[targetParameter] = xx - h;
 									f1b.initialise(a.clone());
 
-									for (int x : testx)
-										for (int y : testy)
+									for (final int x : testx)
+										for (final int y : testy)
 										{
-											int i = y * maxx + x;
+											final int i = y * maxx + x;
 											f1.eval(i, dyda);
-											double value2 = f1a.eval(i, dyda2);
-											double value3 = f1b.eval(i, dyda2);
+											final double value2 = f1a.eval(i, dyda2);
+											final double value3 = f1b.eval(i, dyda2);
 
-											double gradient = (value2 - value3) / (2 * h);
-											double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
+											final double gradient = (value2 - value3) / (2 * h);
+											final double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
 											s.add(error);
 											Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
 													(gradient * dyda2[gradientIndex]) >= 0);
@@ -377,7 +373,7 @@ public abstract class Gaussian2DFunctionTest
 
 	protected int findGradientIndex(Gaussian2DFunction f, int targetParameter)
 	{
-		int i = f.findGradientIndex(targetParameter);
+		final int i = f.findGradientIndex(targetParameter);
 		Assert.assertTrue("Cannot find gradient index", i >= 0);
 		return i;
 	}
@@ -388,26 +384,26 @@ public abstract class Gaussian2DFunctionTest
 		if (f2 == null)
 			return;
 
-		double[] dyda = new double[f2.gradientIndices().length];
+		final double[] dyda = new double[f2.gradientIndices().length];
 		double[] a;
 
 		boolean record = TestSettings.allow(LogLevel.INFO);
 
-		for (double background : testbackground)
+		for (final double background : testbackground)
 			// Peak 1
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double cz1 : testcz1)
-							for (double[] w1 : testw1)
-								for (double angle1 : testangle1)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double cz1 : testcz1)
+							for (final double[] w1 : testw1)
+								for (final double angle1 : testangle1)
 									// Peak 2
-									for (double signal2 : testsignal2)
-										for (double cx2 : testcx2)
-											for (double cy2 : testcy2)
-												for (double cz2 : testcz2)
-													for (double[] w2 : testw2)
-														for (double angle2 : testangle2)
+									for (final double signal2 : testsignal2)
+										for (final double cx2 : testcx2)
+											for (final double cy2 : testcy2)
+												for (final double cz2 : testcz2)
+													for (final double[] w2 : testw2)
+														for (final double angle2 : testangle2)
 														{
 															a = createParameters(background, signal1, cx1, cy1, cz1,
 																	w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
@@ -416,9 +412,9 @@ public abstract class Gaussian2DFunctionTest
 															f2.initialise(a);
 
 															// Test the frozen version
-															int flags = GaussianFunctionFactory.freeze(this.flags,
+															final int flags = GaussianFunctionFactory.freeze(this.flags,
 																	zModel, a);
-															Gaussian2DFunction f = GaussianFunctionFactory.create2D(2,
+															final Gaussian2DFunction f = GaussianFunctionFactory.create2D(2,
 																	f2.getMaxX(), f2.getMaxY(), flags, zModel);
 															f.initialise(a);
 															if (record)
@@ -429,11 +425,11 @@ public abstract class Gaussian2DFunctionTest
 																		f.getClass().getSimpleName());
 															}
 
-															for (int x : testx)
-																for (int y : testy)
+															for (final int x : testx)
+																for (final int y : testy)
 																{
-																	int xx = y * maxx + x;
-																	double y1 = f2.eval(xx, dyda);
+																	final int xx = y * maxx + x;
+																	final double y1 = f2.eval(xx, dyda);
 																	double y2 = f2.eval(xx);
 
 																	Assert.assertTrue(y1 + " != " + y2,
@@ -521,30 +517,30 @@ public abstract class Gaussian2DFunctionTest
 
 	private void functionComputesTargetGradientWith2Peaks(int targetParameter)
 	{
-		int gradientIndex = findGradientIndex(f2, targetParameter);
-		double[] dyda = new double[f2.gradientIndices().length];
-		double[] dyda2 = new double[dyda.length];
+		final int gradientIndex = findGradientIndex(f2, targetParameter);
+		final double[] dyda = new double[f2.gradientIndices().length];
+		final double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
-		Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
-		Statistics s = new Statistics();
+		final Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
+		final Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
+		final Statistics s = new Statistics();
 
-		for (double background : testbackground)
+		for (final double background : testbackground)
 			// Peak 1
-			for (double signal1 : testsignal1)
-				for (double cx1 : testcx1)
-					for (double cy1 : testcy1)
-						for (double cz1 : testcz1)
-							for (double[] w1 : testw1)
-								for (double angle1 : testangle1)
+			for (final double signal1 : testsignal1)
+				for (final double cx1 : testcx1)
+					for (final double cy1 : testcy1)
+						for (final double cz1 : testcz1)
+							for (final double[] w1 : testw1)
+								for (final double angle1 : testangle1)
 									// Peak 2
-									for (double signal2 : testsignal2)
-										for (double cx2 : testcx2)
-											for (double cy2 : testcy2)
-												for (double cz2 : testcz2)
-													for (double[] w2 : testw2)
-														for (double angle2 : testangle2)
+									for (final double signal2 : testsignal2)
+										for (final double cx2 : testcx2)
+											for (final double cy2 : testcy2)
+												for (final double cz2 : testcz2)
+													for (final double[] w2 : testw2)
+														for (final double angle2 : testangle2)
 														{
 															a = createParameters(background, signal1, cx1, cy1, cz1,
 																	w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
@@ -557,7 +553,7 @@ public abstract class Gaussian2DFunctionTest
 															final double xx = a[targetParameter];
 
 															// Get h to minimise roundoff error
-															double h = Precision.representableDelta(xx, h_);
+															final double h = Precision.representableDelta(xx, h_);
 
 															// Evaluate at (x+h) and (x-h)
 															a[targetParameter] = xx + h;
@@ -566,16 +562,16 @@ public abstract class Gaussian2DFunctionTest
 															a[targetParameter] = xx - h;
 															f2b.initialise(a.clone());
 
-															for (int x : testx)
-																for (int y : testy)
+															for (final int x : testx)
+																for (final int y : testy)
 																{
-																	int i = y * maxx + x;
+																	final int i = y * maxx + x;
 																	f2.eval(i, dyda);
-																	double value2 = f2a.eval(i, dyda2);
-																	double value3 = f2b.eval(i, dyda2);
+																	final double value2 = f2a.eval(i, dyda2);
+																	final double value3 = f2b.eval(i, dyda2);
 
-																	double gradient = (value2 - value3) / (2 * h);
-																	double error = DoubleEquality.relativeError(
+																	final double gradient = (value2 - value3) / (2 * h);
+																	final double error = DoubleEquality.relativeError(
 																			gradient, dyda2[gradientIndex]);
 																	s.add(error);
 																	Assert.assertTrue(
@@ -607,26 +603,26 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesGaussian()
 	{
-		double background = 0;
-		int maxx = 30;
+		final double background = 0;
+		final int maxx = 30;
 
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
 		Gaussian2DFunction f2;
 		if ((flags & GaussianFunctionFactory.FIT_ERF) == 0)
 			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL, zModel);
 		else
 			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, zModel);
 
-		boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
+		final boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
 
-		for (double signal1 : testsignal1)
-			for (double cx1 : new double[] { maxx / 2 + 0.373f })
-				for (double cy1 : new double[] { maxx / 2 + 0.876f })
-					for (double cz1 : testcz1)
-						for (double[] w1 : testw1)
-							for (double angle1 : testangle1)
+		for (final double signal1 : testsignal1)
+			for (final double cx1 : new double[] { maxx / 2 + 0.373f })
+				for (final double cy1 : new double[] { maxx / 2 + 0.876f })
+					for (final double cz1 : testcz1)
+						for (final double[] w1 : testw1)
+							for (final double angle1 : testangle1)
 							{
-								double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+								final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
 								f.initialise(a);
 								if (zDepth)
@@ -640,8 +636,8 @@ public abstract class Gaussian2DFunctionTest
 								double sum = 0;
 								for (int index = maxx * maxx; index-- > 0;)
 								{
-									double r1 = f.eval(index);
-									double r2 = f2.eval(index);
+									final double r1 = f.eval(index);
+									final double r2 = f2.eval(index);
 									//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
 									sum += r1;
 									final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);

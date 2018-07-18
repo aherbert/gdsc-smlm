@@ -63,14 +63,12 @@ public class Gaussian2DPeakResultHelperTest
 			min = 3;
 			max = 20;
 		}
-		for (double a : test_a)
-			for (double s : test_s)
-				for (double N : test_N)
-					for (double b2 : test_b2)
+		for (final double a : test_a)
+			for (final double s : test_s)
+				for (final double N : test_N)
+					for (final double b2 : test_b2)
 						for (int points = min; points <= max; points++)
-						{
 							Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
-						}
 	}
 
 	@Test
@@ -78,32 +76,28 @@ public class Gaussian2DPeakResultHelperTest
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		double[] sum = new double[maxPoints + 1];
+		final double[] sum = new double[maxPoints + 1];
 		int count = 0;
-		for (double a : test_a)
-			for (double s : test_s)
-				for (double N : test_N)
-					for (double b2 : test_b2)
+		for (final double a : test_a)
+			for (final double s : test_s)
+				for (final double N : test_N)
+					for (final double b2 : test_b2)
 					{
 						count++;
-						double e = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, 30);
+						final double e = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, 30);
 						for (int points = minPoints; points <= maxPoints; points++)
 						{
-							double o = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
-							double error = DoubleEquality.relativeError(e, o);
+							final double o = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
+							final double error = DoubleEquality.relativeError(e, o);
 							sum[points] += error;
 							if (error > 1e-2)
-							{
 								TestAssert.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s, N, b2,
 										points, e, o, error);
-							}
 						}
 					}
 
 		for (int points = minPoints; points <= maxPoints; points++)
-		{
 			System.out.printf("Points = %d, Av error = %f\n", points, sum[points] / count);
-		}
 	}
 
 	@Test
@@ -114,25 +108,23 @@ public class Gaussian2DPeakResultHelperTest
 		// Test with realistic parameters
 
 		// Warm-up
-		for (double a : new double[] { 108 })
-			for (double s : new double[] { 120 })
-				for (double N : new double[] { 50, 100, 300 })
-					for (double b2 : new double[] { 0.5, 1, 2 })
+		for (final double a : new double[] { 108 })
+			for (final double s : new double[] { 120 })
+				for (final double N : new double[] { 50, 100, 300 })
+					for (final double b2 : new double[] { 0.5, 1, 2 })
 						for (int points = 3; points <= 20; points++)
-						{
 							Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
-						}
 
 		// Get average performance
-		double[] sum = new double[maxPoints + 1];
-		double[] sum2 = new double[sum.length];
-		long[] time = new long[sum.length];
+		final double[] sum = new double[maxPoints + 1];
+		final double[] sum2 = new double[sum.length];
+		final long[] time = new long[sum.length];
 		long count = 0, count2 = 0;
 
-		for (double a : new double[] { 108 })
-			for (double s : new double[] { 120 })
-				for (double N : new double[] { 50, 100, 300 })
-					for (double b2 : new double[] { 0.5, 1, 2 })
+		for (final double a : new double[] { 108 })
+			for (final double s : new double[] { 120 })
+				for (final double N : new double[] { 50, 100, 300 })
+					for (final double b2 : new double[] { 0.5, 1, 2 })
 					{
 						long min = Long.MAX_VALUE;
 						for (int points = 3; points <= 20; points++)
@@ -149,7 +141,7 @@ public class Gaussian2DPeakResultHelperTest
 						count2 += min;
 
 						// Store relative performance
-						double factor = 1.0 / min;
+						final double factor = 1.0 / min;
 						for (int points = 3; points <= 20; points++)
 						{
 							sum[points] += time[points] * factor;
@@ -158,31 +150,29 @@ public class Gaussian2DPeakResultHelperTest
 					}
 
 		for (int points = minPoints; points <= maxPoints; points++)
-		{
 			System.out.printf("Points = %d, Av relative time = %f, Slow down factor = %f\n", points,
 					sum[points] / count, sum2[points] / count2);
-		}
 	}
 
 	@Test
 	public void canComputePixelAmplitude()
 	{
-		float[] x = new float[] { 0f, 0.1f, 0.3f, 0.5f, 0.7f, 1f };
-		float[] s = new float[] { 0.8f, 1f, 1.5f, 2.2f };
+		final float[] x = new float[] { 0f, 0.1f, 0.3f, 0.5f, 0.7f, 1f };
+		final float[] s = new float[] { 0.8f, 1f, 1.5f, 2.2f };
 
-		float[] paramsf = new float[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		final float[] paramsf = new float[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		paramsf[Gaussian2DFunction.BACKGROUND] = 0;
 		paramsf[Gaussian2DFunction.SIGNAL] = 105;
 
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE,
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE,
 				null);
 
-		SimpleRegression r = new SimpleRegression(false);
+		final SimpleRegression r = new SimpleRegression(false);
 
-		for (float tx : x)
-			for (float ty : x)
-				for (float sx : s)
-					for (float sy : s)
+		for (final float tx : x)
+			for (final float ty : x)
+				for (final float sx : s)
+					for (final float sy : s)
 					{
 						paramsf[Gaussian2DFunction.X_POSITION] = tx;
 						paramsf[Gaussian2DFunction.Y_POSITION] = ty;
@@ -191,22 +181,22 @@ public class Gaussian2DPeakResultHelperTest
 
 						// Get the answer using a single pixel image
 						// Note the Gaussian2D functions set the centre of the pixel as 0,0 so offset
-						double[] params = SimpleArrayUtils.toDouble(paramsf);
+						final double[] params = SimpleArrayUtils.toDouble(paramsf);
 						params[Gaussian2DFunction.X_POSITION] -= 0.5;
 						params[Gaussian2DFunction.Y_POSITION] -= 0.5;
 						f.initialise0(params);
-						double e = f.eval(0);
+						final double e = f.eval(0);
 
-						PSF psf = PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D);
-						CalibrationWriter calibration = new CalibrationWriter();
+						final PSF psf = PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D);
+						final CalibrationWriter calibration = new CalibrationWriter();
 						calibration.setCountPerPhoton(1);
 						calibration.setIntensityUnit(IntensityUnit.PHOTON);
 						calibration.setNmPerPixel(1);
 						calibration.setDistanceUnit(DistanceUnit.PIXEL);
-						Gaussian2DPeakResultCalculator calc = Gaussian2DPeakResultHelper.create(psf, calibration,
+						final Gaussian2DPeakResultCalculator calc = Gaussian2DPeakResultHelper.create(psf, calibration,
 								Gaussian2DPeakResultHelper.AMPLITUDE | Gaussian2DPeakResultHelper.PIXEL_AMPLITUDE);
-						double o1 = calc.getAmplitude(paramsf);
-						double o2 = calc.getPixelAmplitude(paramsf);
+						final double o1 = calc.getAmplitude(paramsf);
+						final double o2 = calc.getPixelAmplitude(paramsf);
 
 						//System.out.printf("e=%f, o1=%f, o2=%f\n", e, o1, o2);
 						Assert.assertEquals(e, o2, 1e-3);
@@ -238,9 +228,9 @@ public class Gaussian2DPeakResultHelperTest
 		Assert.assertTrue(Double.POSITIVE_INFINITY == Gaussian2DPeakResultHelper.inverseCumulative2D(1));
 		for (int i = 1; i <= 10; i++)
 		{
-			double r = i / 10.0;
-			double p = Gaussian2DPeakResultHelper.cumulative2D(r);
-			double r2 = Gaussian2DPeakResultHelper.inverseCumulative2D(p);
+			final double r = i / 10.0;
+			final double p = Gaussian2DPeakResultHelper.cumulative2D(r);
+			final double r2 = Gaussian2DPeakResultHelper.inverseCumulative2D(p);
 			Assert.assertEquals(r, r2, r * 1e-8);
 		}
 	}
@@ -248,14 +238,14 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void canComputeMeanSignalUsingR()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		for (int i = 0; i < 10; i++)
 		{
-			double intensity = rg.nextDouble() * 100;
-			double sx = rg.nextDouble() * 2;
-			double sy = rg.nextDouble() * 2;
-			double r = rg.nextDouble() * 5;
+			final double intensity = rg.nextDouble() * 100;
+			final double sx = rg.nextDouble() * 2;
+			final double sy = rg.nextDouble() * 2;
+			final double r = rg.nextDouble() * 5;
 			assertEquals(intensity * Gaussian2DPeakResultHelper.cumulative2D(r) / (Math.PI * r * r * sx * sy),
 					Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, r));
 
@@ -275,14 +265,14 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void canComputeMeanSignalUsingP()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		for (int i = 0; i < 10; i++)
 		{
-			double intensity = rg.nextDouble() * 100;
-			double sx = rg.nextDouble() * 2;
-			double sy = rg.nextDouble() * 2;
-			double p = rg.nextDouble();
+			final double intensity = rg.nextDouble() * 100;
+			final double sx = rg.nextDouble() * 2;
+			final double sy = rg.nextDouble() * 2;
+			final double p = rg.nextDouble();
 			double e = intensity * p /
 					(Math.PI * Maths.pow2(Gaussian2DPeakResultHelper.inverseCumulative2D(p)) * sx * sy);
 			double o = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, p);

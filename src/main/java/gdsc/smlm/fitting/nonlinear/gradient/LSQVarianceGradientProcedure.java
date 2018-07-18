@@ -139,14 +139,12 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	public void execute(final double Ei, double[] Eix)
 	{
 		for (int a = 0; a < n; a++)
-		{
 			for (int b = 0, j = a * n; b <= a; b++, j++)
 			{
-				double v = Eix[a] * Eix[b];
+				final double v = Eix[a] * Eix[b];
 				I[j] += v;
 				E[j] += Ei * v;
 			}
-		}
 	}
 
 	/**
@@ -155,14 +153,12 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	protected void initialise()
 	{
 		for (int a = 0; a < n; a++)
-		{
 			for (int b = 0, j = a * n; b <= a; b++, j++)
 			{
 				//System.out.printf("I[%d] = 0; E[%d] = 0;\n", j, j);
 				I[j] = 0;
 				E[j] = 0;
 			}
-		}
 		Arrays.fill(variance, 0);
 	}
 
@@ -177,18 +173,16 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 		//System.out.printf("if (");
 		for (int a = 0; a < n; a++)
 			for (int b = 0, j = a * n; b <= a; b++, j++)
-			{
 				//System.out.printf("%s I[%d]!=I[%d] ", (a+b==0)?"":"||", j, j);
 				if (Double.isNaN(I[j]))
 					return true;
-			}
 		//System.out.printf(") return true;\n");
 		// Generate symmetric matrix
 		for (int a = 0; a < n; a++)
 			for (int b = 0; b < a; b++)
 			{
-				int j = a * n + b;
-				int k = b * n + a;
+				final int j = a * n + b;
+				final int k = b * n + a;
 				//System.out.printf("I[%d] = I[%d];\n", k, j);
 				//System.out.printf("E[%d] = E[%d];\n", k, j);
 				I[k] = I[j];
@@ -213,13 +207,9 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 			//System.out.printf("variance[%d] = \n", a);
 			double v = 0;
 			for (int ap = 0; ap < n; ap++)
-			{
 				for (int bp = 0; bp < n; bp++)
-				{
 					//System.out.printf("%s I[%d]*E[%d]*I[%d]\n", (ap+bp==0)?"":"+", a*n+ap, ap*n+bp, bp*n+a);
 					v += I[a * n + ap] * E[ap * n + bp] * I[bp * n + a];
-				}
-			}
 			//System.out.printf(";\n");
 			variance[a] = v;
 		}

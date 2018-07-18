@@ -119,7 +119,7 @@ public class FixedPeakResultList
 	 */
 	public PeakResult[] toArray()
 	{
-		PeakResult[] array = new PeakResult[size];
+		final PeakResult[] array = new PeakResult[size];
 		System.arraycopy(results, 0, array, 0, size);
 		return array;
 	}

@@ -43,18 +43,12 @@ public class OffsetFunctionFactory
 		{
 			// Wrap appropriately
 			if (func instanceof ExtendedGradient2Function)
-			{
 				return OffsetExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) func,
 						b);
-			}
 			if (func instanceof Gradient2Function)
-			{
 				return OffsetGradient2Function.wrapGradient2Function((Gradient2Function) func, b);
-			}
 			if (func instanceof Gradient1Function)
-			{
 				return OffsetGradient1Function.wrapGradient1Function((Gradient1Function) func, b);
-			}
 			return OffsetValueFunction.wrapValueFunction(func, b);
 		}
 		return func;

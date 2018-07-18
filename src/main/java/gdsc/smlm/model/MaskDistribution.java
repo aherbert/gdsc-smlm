@@ -40,10 +40,10 @@ import org.apache.commons.math3.random.Well19937c;
  */
 public class MaskDistribution implements SpatialDistribution
 {
-	private RandomGenerator randomGenerator;
+	private final RandomGenerator randomGenerator;
 	private UniformDistribution uniformDistribution;
-	private int[] mask;
-	private int[] indices;
+	private final int[] mask;
+	private final int[] indices;
 	private final int maxx, maxy;
 	private final double halfWidth, halfHeight;
 	private final double minDepth, depth;
@@ -120,12 +120,10 @@ public class MaskDistribution implements SpatialDistribution
 	{
 		if (mask == null)
 			return null;
-		int[] newMask = new int[mask.length];
+		final int[] newMask = new int[mask.length];
 		for (int i = 0; i < mask.length; i++)
-		{
 			if (mask[i] != 0)
 				newMask[i] = 1;
-		}
 		return newMask;
 	}
 
@@ -230,10 +228,8 @@ public class MaskDistribution implements SpatialDistribution
 		final int size = width * height;
 		int count = 0;
 		for (int i = 0; i < size; i++)
-		{
 			if (mask[i] != 0)
 				count++;
-		}
 
 		if (count == 0 && !allowZeroMask)
 			throw new IllegalArgumentException("Mask must have non-zero pixels");
@@ -241,10 +237,8 @@ public class MaskDistribution implements SpatialDistribution
 		indices = new int[count];
 		count = 0;
 		for (int i = 0; i < size; i++)
-		{
 			if (mask[i] != 0)
 				indices[count++] = i;
-		}
 
 		// Fischer-Yates shuffle the indices to scramble the mask positions
 		for (int i = indices.length; i-- > 1;)
@@ -299,26 +293,24 @@ public class MaskDistribution implements SpatialDistribution
 	public boolean isWithinXY(double[] xyz)
 	{
 		// Ensure XY = 0 is the centre of the image
-		int index = getIndex(xyz);
+		final int index = getIndex(xyz);
 		if (index < 0 || index >= mask.length || mask[index] == 0)
 			return false;
 		// Check if the search was initialised in a particle
 		if (particle == 0)
-		{
 			// No starting particle so just accept the position
 			return true;
-		}
 		// Must be in the same particle as the initial position
 		return mask[index] == particle;
 	}
 
 	private int getIndex(double[] xyz)
 	{
-		int x = (int) (halfWidth + xyz[0] / scaleX);
-		int y = (int) (halfHeight + xyz[1] / scaleY);
+		final int x = (int) (halfWidth + xyz[0] / scaleX);
+		final int y = (int) (halfHeight + xyz[1] / scaleY);
 		if (x < 0 || x >= maxx || y < 0 || y >= maxy)
 			return -1;
-		int index = y * maxx + x;
+		final int index = y * maxx + x;
 		return index;
 	}
 
@@ -359,26 +351,20 @@ public class MaskDistribution implements SpatialDistribution
 		// Create the offset table (for single array 2D neighbour comparisons)
 		offset = new int[DIR_X_OFFSET.length];
 		for (int d = offset.length; d-- > 0;)
-		{
 			offset[d] = maxx * DIR_Y_OFFSET[d] + DIR_X_OFFSET[d];
-		}
 
-		int[] pList = new int[mask.length];
+		final int[] pList = new int[mask.length];
 
 		// Store all the non-zero positions
-		boolean[] binaryMask = new boolean[mask.length];
+		final boolean[] binaryMask = new boolean[mask.length];
 		for (int i = 0; i < mask.length; i++)
 			binaryMask[i] = (mask[i] != 0);
 
 		// Find particles
 		int particles = 0;
 		for (int i = 0; i < binaryMask.length; i++)
-		{
 			if (binaryMask[i])
-			{
 				expandParticle(binaryMask, mask, pList, i, ++particles);
-			}
-		}
 
 		// Free memory
 		offset = null;
@@ -398,7 +384,7 @@ public class MaskDistribution implements SpatialDistribution
 
 		do
 		{
-			int index1 = pList[listI];
+			final int index1 = pList[listI];
 			// Mark this position as part of the particle
 			mask[index1] = particle;
 
@@ -409,10 +395,9 @@ public class MaskDistribution implements SpatialDistribution
 			final boolean isInnerXY = (x1 != 0 && x1 != xlimit) && (y1 != 0 && y1 != ylimit);
 
 			if (isInnerXY)
-			{
 				for (int d = 8; d-- > 0;)
 				{
-					int index2 = index1 + offset[d];
+					final int index2 = index1 + offset[d];
 					if (binaryMask[index2])
 					{
 						binaryMask[index2] = false; // mark as processed
@@ -420,14 +405,11 @@ public class MaskDistribution implements SpatialDistribution
 						pList[listLen++] = index2;
 					}
 				}
-			}
 			else
-			{
 				for (int d = 8; d-- > 0;)
-				{
 					if (isWithin(x1, y1, d))
 					{
-						int index2 = index1 + offset[d];
+						final int index2 = index1 + offset[d];
 						if (binaryMask[index2])
 						{
 							binaryMask[index2] = false; // mark as processed
@@ -435,8 +417,6 @@ public class MaskDistribution implements SpatialDistribution
 							pList[listLen++] = index2;
 						}
 					}
-				}
-			}
 
 			listI++;
 

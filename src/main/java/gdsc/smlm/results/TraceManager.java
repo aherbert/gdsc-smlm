@@ -219,20 +219,16 @@ public class TraceManager
 		index = new int[maxT + 2];
 		int t = -1;
 		for (int i = 0; i < localisations.length; i++)
-		{
 			while (t < localisations[i].t)
 				index[++t] = i;
-		}
 		index[maxT + 1] = totalTraces;
 
 		maxT = endLocalisations[totalTraces - 1].endT;
 		endIndex = new int[maxT + 2];
 		t = -1;
 		for (int i = 0; i < endLocalisations.length; i++)
-		{
 			while (t < endLocalisations[i].endT)
 				endIndex[++t] = i;
-		}
 		endIndex[maxT + 1] = totalTraces;
 
 		// TODO - Assign a more efficient localisation representation using a grid
@@ -270,14 +266,12 @@ public class TraceManager
 
 		// Used to track the highest frame containing spots for a trace
 		maxT = new int[localisations.length + 1];
-		int[] traceIdToLocalisationsIndexMap = new int[localisations.length + 1];
+		final int[] traceIdToLocalisationsIndexMap = new int[localisations.length + 1];
 
 		// Initialise the first traces using the first frame
 		int nextIndex = index[localisations[0].t + 1]; //findNextStartTimeIndex(0);
 		for (int index = 0; index < nextIndex; index++)
-		{
 			localisations[index].trace = addTrace(index, traceIdToLocalisationsIndexMap, maxT);
-		}
 
 		Assignment[] assigned = new Assignment[10];
 
@@ -295,7 +289,7 @@ public class TraceManager
 			{
 				// Support for splitting traces across pulse boundaries. Simply round the
 				// previous timepoint to the next pulse boundary. Assume pulses start at t=1
-				int intervalBoundary = 1 + pulseInterval * ((t - 1) / pulseInterval);
+				final int intervalBoundary = 1 + pulseInterval * ((t - 1) / pulseInterval);
 				if (pastT < intervalBoundary)
 					pastT = intervalBoundary;
 			}
@@ -306,32 +300,24 @@ public class TraceManager
 			if (pastEndIndex == currentEndIndex)
 			{
 				for (int index = currentIndex; index < nextIndex; index++)
-				{
 					localisations[index].trace = addTrace(index, traceIdToLocalisationsIndexMap, maxT);
-				}
 				continue;
 			}
 
 			// Check the allocated buffer is larger enough
 			if (assigned.length < nextIndex - currentIndex)
-			{
 				assigned = new Assignment[nextIndex - currentIndex];
-			}
 
 			// Process all spots from this frame. Note if a spot is allocated to an existing trace.
 			int assignedToTrace = 0;
 			for (int index = currentIndex; index < nextIndex; index++)
 			{
-				int traceId = findForerunner(index, pastEndIndex, currentEndIndex);
+				final int traceId = findForerunner(index, pastEndIndex, currentEndIndex);
 				if (traceId == 0)
-				{
 					localisations[index].trace = addTrace(index, traceIdToLocalisationsIndexMap, maxT);
-				}
 				else
-				{
 					// Tentatively assign
 					assigned[assignedToTrace++] = new Assignment(index, minD, traceId);
-				}
 			}
 
 			if (assignedToTrace > 1)
@@ -339,8 +325,8 @@ public class TraceManager
 				// Check if duplicate allocations are made. Each trace can only
 				// be allocated one localisation so in the event of a multiple
 				// allocation then only the closest spot should be allocated
-				int[] dualAllocation = new int[assignedToTrace];
-				int[] ignore = new int[assignedToTrace];
+				final int[] dualAllocation = new int[assignedToTrace];
+				final int[] ignore = new int[assignedToTrace];
 				int ignoreCount = 0;
 
 				// Only check for duplicates if two assignments are remaining
@@ -377,17 +363,14 @@ public class TraceManager
 					int dualAllocationCount = 0;
 
 					for (int j = i + 1; j < assignedToTrace; j++)
-					{
 						// Dual allocation
 						if (assigned[i].traceId == assigned[j].traceId)
 							dualAllocation[dualAllocationCount++] = j;
-					}
 
 					// This trace has been taken so ignore when finding alternatives
 					ignore[ignoreCount++] = assigned[i].traceId;
 
 					if (dualAllocationCount > 0)
-					{
 						// Re-allocate the other spots
 						for (int a = 0; a < dualAllocationCount; a++)
 						{
@@ -409,7 +392,6 @@ public class TraceManager
 							}
 							assigned[j].traceId = traceId;
 						}
-					}
 					// Ensure nothing can be sorted ahead of this trace assignment
 					assigned[i].distance = -1;
 				}
@@ -432,14 +414,12 @@ public class TraceManager
 	private int addTrace(int index, int[] traceIdToLocalisationsIndexMap, int[] maxT)
 	{
 		if (filterActivationFrames)
-		{
 			// Count the number of traces that will be filtered
 			// (i.e. the time is not within an activation window)
 			if (outsideActivationWindow(localisations[index].t))
 				totalFiltered++;
-		}
 
-		int traceId = ++totalTraces;
+		final int traceId = ++totalTraces;
 		traceIdToLocalisationsIndexMap[traceId] = index;
 		maxT[traceId] = localisations[index].endT;
 		return traceId;
@@ -455,23 +435,23 @@ public class TraceManager
 	 */
 	public Trace[] getTraces()
 	{
-		PeakResult[] peakResults = results.toArray();
+		final PeakResult[] peakResults = results.toArray();
 
 		// No tracing yet performed or no thresholds
 		if (totalTraces == localisations.length)
 		{
 			if (filterActivationFrames)
 			{
-				ArrayList<Trace> traces = new ArrayList<>();
+				final ArrayList<Trace> traces = new ArrayList<>();
 				for (int index = 0; index < totalTraces; index++)
 				{
-					PeakResult peakResult = peakResults[localisations[index].id];
+					final PeakResult peakResult = peakResults[localisations[index].id];
 					if (!outsideActivationWindow(peakResult.getFrame()))
 						traces.add(new Trace(peakResult));
 				}
 				return traces.toArray(new Trace[traces.size()]);
 			}
-			Trace[] traces = new Trace[localisations.length];
+			final Trace[] traces = new Trace[localisations.length];
 			for (int index = 0; index < traces.length; index++)
 				traces[index] = new Trace(peakResults[localisations[index].id]);
 			return traces;
@@ -481,7 +461,7 @@ public class TraceManager
 			tracker.progress(0);
 
 		// Build the list of traces
-		Trace[] traces = new Trace[getTotalTraces()];
+		final Trace[] traces = new Trace[getTotalTraces()];
 		int n = 0;
 
 		//for (int index = 0; index < localisations.length; index++)
@@ -492,7 +472,7 @@ public class TraceManager
 		// trace number out-of-order. This occurs if re-allocation has been performed,
 		// e.g.  [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group 2.
 
-		TIntHashSet processedTraces = new TIntHashSet(traces.length);
+		final TIntHashSet processedTraces = new TIntHashSet(traces.length);
 		for (int index = 0; index < localisations.length; index++)
 		{
 			if (tracker != null && index % 256 == 0)
@@ -507,28 +487,24 @@ public class TraceManager
 			if (filterActivationFrames && outsideActivationWindow(localisations[index].t))
 				continue;
 
-			PeakResult peakResult = peakResults[localisations[index].id];
+			final PeakResult peakResult = peakResults[localisations[index].id];
 
-			Trace nextTrace = new Trace(peakResult);
+			final Trace nextTrace = new Trace(peakResult);
 			nextTrace.setId(traceId);
 			final int tLimit = maxT[traceId];
 
 			// Check if the trace has later frames
 			if (tLimit > localisations[index].t)
-			{
 				for (int j = index + 1; j < localisations.length; j++)
 				{
 					if (localisations[j].t > tLimit)
-					{
 						//for (; j < localisations.length; j++)
 						//	if (localisations[j].trace == traceId)
 						//		System.out.printf("missed %d\n", j);
 						break;
-					}
 					if (localisations[j].trace == traceId)
 						nextTrace.add(peakResults[localisations[j].id]);
 				}
-			}
 
 			//// DEBUG: Check the trace does not contain two localisations from the same time frame.
 			//// This should be handled by the findAlternativeForerunner code.
@@ -566,13 +542,12 @@ public class TraceManager
 	 */
 	public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces)
 	{
-		int capacity = 1 + ((traces != null) ? traces.length : 0);
-		MemoryPeakResults results = new MemoryPeakResults(capacity);
+		final int capacity = 1 + ((traces != null) ? traces.length : 0);
+		final MemoryPeakResults results = new MemoryPeakResults(capacity);
 		if (traces != null)
-		{
 			for (int i = 0; i < traces.length; i++)
 			{
-				PeakResult result = traces[i].getHead();
+				final PeakResult result = traces[i].getHead();
 				if (result == null)
 					continue;
 				final float[] centroid = traces[i].getCentroid();
@@ -584,7 +559,6 @@ public class TraceManager
 				results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
 						result.getOrigValue(), 0, 0, 0, params, null, endFrame, i + 1));
 			}
-		}
 		return results;
 	}
 
@@ -603,8 +577,8 @@ public class TraceManager
 	 */
 	public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces, final Calibration calibration)
 	{
-		int capacity = 1 + ((traces != null) ? traces.length : 0);
-		MemoryPeakResults results = new MemoryPeakResults(capacity);
+		final int capacity = 1 + ((traces != null) ? traces.length : 0);
+		final MemoryPeakResults results = new MemoryPeakResults(capacity);
 		results.setCalibration(calibration);
 		if (traces != null)
 		{
@@ -614,7 +588,7 @@ public class TraceManager
 				{
 					converter = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
 				}
-				catch (ConversionException e)
+				catch (final ConversionException e)
 				{
 					// Ignore
 				}
@@ -625,10 +599,10 @@ public class TraceManager
 				if (traces[i] == null || traces[i].size() == 0)
 					continue;
 
-				PeakResult result = traces[i].getHead();
+				final PeakResult result = traces[i].getHead();
 				if (traces[i].size() == 1)
 				{
-					AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), result.getOrigX(),
+					final AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), result.getOrigX(),
 							result.getOrigY(), result.getOrigValue(), 0, result.getNoise(), result.getMeanIntensity(),
 							result.getParameters(), null);
 					peakResult.setId(traces[i].getId());
@@ -641,19 +615,19 @@ public class TraceManager
 
 				traces[i].sort();
 				traces[i].resetCentroid();
-				float[] centroid = traces[i].getCentroid();
+				final float[] centroid = traces[i].getCentroid();
 				float background = 0;
 				double noise = 0;
-				for (PeakResult r : traces[i].getPoints().toArray())
+				for (final PeakResult r : traces[i].getPoints().toArray())
 				{
 					noise += r.getNoise() * r.getNoise();
 					background += r.getBackground();
 				}
 				noise = Math.sqrt(noise);
 				background /= traces[i].size();
-				double signal = traces[i].getSignal();
-				int endFrame = traces[i].getTail().getEndFrame();
-				AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), centroid[0], centroid[1],
+				final double signal = traces[i].getSignal();
+				final int endFrame = traces[i].getTail().getEndFrame();
+				final AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), centroid[0], centroid[1],
 						(float) signal);
 				// Build standard peak data
 				peakResult.setBackground(background);
@@ -704,14 +678,14 @@ public class TraceManager
 	 */
 	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration, boolean newId)
 	{
-		int capacity = 1 + ((traces != null) ? traces.length : 0);
+		final int capacity = 1 + ((traces != null) ? traces.length : 0);
 		final MemoryPeakResults results = new MemoryPeakResults(capacity);
 		results.setCalibration(calibration);
 		if (traces != null)
 		{
 			// Ensure all results are added as extended peak results with their trace ID.
 			int id = 0;
-			for (Trace trace : traces)
+			for (final Trace trace : traces)
 			{
 				if (trace == null || trace.size() == 0)
 					continue;
@@ -764,7 +738,7 @@ public class TraceManager
 	 */
 	public static MemoryPeakResults convertToCentroidPeakResults(MemoryPeakResults source, final Trace[] traces)
 	{
-		MemoryPeakResults results = toCentroidPeakResults(traces, source.getCalibration());
+		final MemoryPeakResults results = toCentroidPeakResults(traces, source.getCalibration());
 		results.copySettings(source);
 		// Change name
 		results.setName(source.getSource() + " Traced Centroids");
@@ -799,7 +773,7 @@ public class TraceManager
 	 */
 	public static MemoryPeakResults convertToPeakResults(MemoryPeakResults source, final Trace[] traces)
 	{
-		MemoryPeakResults results = toPeakResults(traces, source.getCalibration());
+		final MemoryPeakResults results = toPeakResults(traces, source.getCalibration());
 		results.copySettings(source);
 		// Change name
 		results.setName(source.getSource() + " Traced");
@@ -820,9 +794,7 @@ public class TraceManager
 	{
 		final int t = localisations[index].t;
 		while (index < localisations.length && localisations[index].t <= t)
-		{
 			index++;
-		}
 		return index;
 	}
 
@@ -841,9 +813,7 @@ public class TraceManager
 	{
 		final int t = localisations[index].t + timeThreshold;
 		while (index < localisations.length && localisations[index].t <= t)
-		{
 			index++;
-		}
 		return index;
 	}
 
@@ -907,9 +877,8 @@ public class TraceManager
 	 */
 	private int findForerunnerNoExclusion(final int index, final int pastIndex, final int currentIndex)
 	{
-		Localisation spot = localisations[index];
+		final Localisation spot = localisations[index];
 		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
-		{
 			for (int i = pastIndex; i < currentIndex; i++)
 			{
 				final float d2 = spot.distance2(endLocalisations[i]);
@@ -919,7 +888,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots that end in this time frame and pick the closest
-					int nextIndex = endIndex[endLocalisations[i].endT + 1];
+					final int nextIndex = endIndex[endLocalisations[i].endT + 1];
 					for (int ii = i + 1; ii < nextIndex; ii++)
 					{
 						final float dd2 = spot.distance2(endLocalisations[ii]);
@@ -933,9 +902,7 @@ public class TraceManager
 					return trace;
 				}
 			}
-		}
 		else if (traceMode == TraceMode.LATEST_FORERUNNER)
-		{
 			for (int i = currentIndex; i-- > pastIndex;)
 			{
 				final float d2 = spot.distance2(endLocalisations[i]);
@@ -945,7 +912,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots in this time frame and pick the closest
-					int previousIndex = endIndex[endLocalisations[i].endT];
+					final int previousIndex = endIndex[endLocalisations[i].endT];
 					//// DEBUG
 					//int previousIndex = i;
 					//// Look for the index for the previous time-frame
@@ -969,7 +936,6 @@ public class TraceManager
 					return trace;
 				}
 			}
-		}
 		else
 		// traceMode == TraceMode.SINGLE_LINKAGE
 		{
@@ -1012,7 +978,7 @@ public class TraceManager
 	 */
 	private int findForerunnerWithExclusion(final int index, final int pastIndex, final int currentIndex)
 	{
-		Localisation spot = localisations[index];
+		final Localisation spot = localisations[index];
 		// Check that the next farthest spot is above the exclusion distance
 		float nextMinD = Float.POSITIVE_INFINITY;
 		int currentT;
@@ -1028,7 +994,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots that end in this time frame and pick the closest
-					int nextIndex = endIndex[endLocalisations[i].endT + 1];
+					final int nextIndex = endIndex[endLocalisations[i].endT + 1];
 					for (int ii = i + 1; ii < nextIndex; ii++)
 					{
 						final float dd2 = spot.distance2(endLocalisations[ii]);
@@ -1047,15 +1013,11 @@ public class TraceManager
 				{
 					// Store the minimum distance to the next spot in the same frame
 					if (d2 < nextMinD)
-					{
 						nextMinD = d2;
-					}
 				}
 				else
-				{
 					// New time frame so reset the distance to the next spot in the same frame
 					nextMinD = d2;
-				}
 				currentT = endLocalisations[i].t;
 			}
 		}
@@ -1071,7 +1033,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots in this time frame and pick the closest
-					int previousIndex = endIndex[endLocalisations[i].endT];
+					final int previousIndex = endIndex[endLocalisations[i].endT];
 					//int previousIndex = i;
 					//// Look for the index for the previous time-frame
 					//while (previousIndex > 0 && endLocalisations[previousIndex-1].t == endLocalisations[i].t)
@@ -1099,15 +1061,11 @@ public class TraceManager
 				{
 					// Store the minimum distance to the next spot in the same frame
 					if (d2 < nextMinD)
-					{
 						nextMinD = d2;
-					}
 				}
 				else
-				{
 					// New time frame so reset the distance to the next spot in the same frame
 					nextMinD = d2;
-				}
 				currentT = endLocalisations[i].t;
 			}
 		}
@@ -1133,8 +1091,8 @@ public class TraceManager
 			if (dExclusion2 > 0)
 			{
 				// Check all spots in the same frame
-				int previousIndex = endIndex[endLocalisations[minI].endT];
-				int nextIndex = endIndex[endLocalisations[minI].endT + 1];
+				final int previousIndex = endIndex[endLocalisations[minI].endT];
+				final int nextIndex = endIndex[endLocalisations[minI].endT + 1];
 
 				for (int i = previousIndex; i < nextIndex; i++)
 				{
@@ -1142,9 +1100,7 @@ public class TraceManager
 						continue;
 					final float d2 = spot.distance2(endLocalisations[i]);
 					if (d2 <= nextMinD)
-					{
 						nextMinD = d2;
-					}
 				}
 			}
 
@@ -1202,10 +1158,9 @@ public class TraceManager
 	private int findAlternativeForerunnerNoExclusion(final int index, final int pastIndex, final int currentIndex,
 			final int ignoreCount, final int[] ignore)
 	{
-		Localisation spot = localisations[index];
+		final Localisation spot = localisations[index];
 
 		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
-		{
 			for (int i = pastIndex; i < currentIndex; i++)
 			{
 				if (ignore(i, ignoreCount, ignore))
@@ -1218,7 +1173,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots in this time frame and pick the closest
-					int nextIndex = endIndex[endLocalisations[i].endT + 1];
+					final int nextIndex = endIndex[endLocalisations[i].endT + 1];
 					//					int nextIndex = i;
 					//					// Look for the index for the next time-frame
 					//					for (int tt = endLocalisations[i].endT + 1; tt < endIndex.length; tt++)
@@ -1243,9 +1198,7 @@ public class TraceManager
 					return trace;
 				}
 			}
-		}
 		else if (traceMode == TraceMode.LATEST_FORERUNNER)
-		{
 			for (int i = currentIndex; i-- > pastIndex;)
 			{
 				if (ignore(i, ignoreCount, ignore))
@@ -1258,7 +1211,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots in this time frame and pick the closest
-					int previousIndex = endIndex[endLocalisations[i].endT];
+					final int previousIndex = endIndex[endLocalisations[i].endT];
 					//int previousIndex = i;
 					//// Look for the index for the previous time-frame
 					//while (previousIndex > 0 && endLocalisations[previousIndex-1].t == endLocalisations[i].t)
@@ -1284,7 +1237,6 @@ public class TraceManager
 					return trace;
 				}
 			}
-		}
 		else
 		// traceMode == TraceMode.SINGLE_LINKAGE
 		{
@@ -1337,7 +1289,7 @@ public class TraceManager
 	private int findAlternativeForerunnerWithExclusion(final int index, final int pastIndex, final int currentIndex,
 			final int ignoreCount, final int[] ignore)
 	{
-		Localisation spot = localisations[index];
+		final Localisation spot = localisations[index];
 
 		// Check that the next farthest spot is above the exclusion distance.
 		// Note: It is assumed that the spots to ignore have already been assigned following the
@@ -1361,7 +1313,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots in this time frame and pick the closest
-					int nextIndex = endIndex[endLocalisations[i].endT + 1];
+					final int nextIndex = endIndex[endLocalisations[i].endT + 1];
 					//					int nextIndex = i;
 					//					// Look for the index for the next time-frame
 					//					for (int tt = endLocalisations[i].endT + 1; tt < endIndex.length; tt++)
@@ -1391,15 +1343,11 @@ public class TraceManager
 				{
 					// Store the minimum distance to the next spot in the same frame
 					if (d2 < nextMinD)
-					{
 						nextMinD = d2;
-					}
 				}
 				else
-				{
 					// New time frame so reset the distance to the next spot in the same frame
 					nextMinD = d2;
-				}
 				currentT = endLocalisations[i].t;
 			}
 		}
@@ -1418,7 +1366,7 @@ public class TraceManager
 					int trace = endLocalisations[i].trace;
 
 					// Search all remaining spots in this time frame and pick the closest
-					int previousIndex = endIndex[endLocalisations[i].endT];
+					final int previousIndex = endIndex[endLocalisations[i].endT];
 					//int previousIndex = i;
 					//// Look for the index for the previous time-frame
 					//while (previousIndex > 0 && endLocalisations[previousIndex-1].t == endLocalisations[i].t)
@@ -1449,15 +1397,11 @@ public class TraceManager
 				{
 					// Store the minimum distance to the next spot in the same frame
 					if (d2 < nextMinD)
-					{
 						nextMinD = d2;
-					}
 				}
 				else
-				{
 					// New time frame so reset the distance to the next spot in the same frame
 					nextMinD = d2;
-				}
 				currentT = endLocalisations[i].t;
 			}
 		}
@@ -1486,8 +1430,8 @@ public class TraceManager
 			if (dExclusion2 > 0)
 			{
 				// Check all spots in the same frame
-				int previousIndex = endIndex[endLocalisations[minI].endT];
-				int nextIndex = endIndex[endLocalisations[minI].endT + 1];
+				final int previousIndex = endIndex[endLocalisations[minI].endT];
+				final int nextIndex = endIndex[endLocalisations[minI].endT + 1];
 
 				for (int i = previousIndex; i < nextIndex; i++)
 				{
@@ -1498,9 +1442,7 @@ public class TraceManager
 
 					final float d2 = spot.distance2(endLocalisations[i]);
 					if (d2 <= nextMinD)
-					{
 						nextMinD = d2;
-					}
 				}
 			}
 
@@ -1591,15 +1533,13 @@ public class TraceManager
 	 */
 	public Trace[] filterTraces(Trace[] traces, int activationFrameInterval)
 	{
-		Trace[] newTraces = new Trace[traces.length];
+		final Trace[] newTraces = new Trace[traces.length];
 		int n = 0;
-		for (Trace trace : traces)
+		for (final Trace trace : traces)
 		{
-			PeakResult r = trace.getHead();
+			final PeakResult r = trace.getHead();
 			if (r != null && (r.getFrame() % activationFrameInterval) == 1)
-			{
 				newTraces[n++] = trace;
-			}
 		}
 		return Arrays.copyOf(newTraces, n);
 	}
@@ -1699,7 +1639,7 @@ public class TraceManager
 		if (distanceThreshold <= 0 || timeThreshold <= 0)
 			throw new IllegalArgumentException("Distancet and time thresholds must be positive");
 
-		Trace[] neighbours = new Trace[results.size()];
+		final Trace[] neighbours = new Trace[results.size()];
 		final PeakResult[] peakResults = results.toArray();
 
 		final float dThresh2 = (float) (distanceThreshold * distanceThreshold);
@@ -1740,34 +1680,30 @@ public class TraceManager
 
 				// Look back
 				for (int i = pastEndIndex; i < currentEndIndex; i++)
-				{
 					if (l.distance2(endLocalisations[i]) < dThresh2)
 					{
-						float signal = peakResults[endLocalisations[i].id].getIntensity();
+						final float signal = peakResults[endLocalisations[i].id].getIntensity();
 						if (maxSignal < signal)
 						{
 							maxSignal = signal;
 							neighbour = endLocalisations[i].id;
 						}
 					}
-				}
 
 				// Look forward
 				for (int i = nextIndex; i < futureIndex; i++)
-				{
 					if (l.distance2(localisations[i]) < dThresh2)
 					{
-						float signal = peakResults[localisations[i].id].getIntensity();
+						final float signal = peakResults[localisations[i].id].getIntensity();
 						if (maxSignal < signal)
 						{
 							maxSignal = signal;
 							neighbour = localisations[i].id;
 						}
 					}
-				}
 
 				// Assign
-				Trace trace = new Trace(peakResults[l.id]);
+				final Trace trace = new Trace(peakResults[l.id]);
 				if (neighbour > -1)
 					trace.add(peakResults[neighbour]);
 				neighbours[index] = trace;
@@ -1792,10 +1728,10 @@ public class TraceManager
 		if (results == null || results.size() == 0)
 			return new Trace[0];
 
-		PeakResult[] list = results.toArray();
+		final PeakResult[] list = results.toArray();
 		// Find the max trace ID
 		int max = 0;
-		for (PeakResult result : list)
+		for (final PeakResult result : list)
 			if (max < result.getId())
 				max = result.getId();
 		if (max == 0)
@@ -1804,8 +1740,8 @@ public class TraceManager
 		if (max < 10000)
 		{
 			// Small set of IDs so just use an array look-up table
-			Trace[] traces = new Trace[max + 1];
-			for (PeakResult result : list)
+			final Trace[] traces = new Trace[max + 1];
+			for (final PeakResult result : list)
 			{
 				final int id = result.getId();
 				if (id > 0)
@@ -1827,9 +1763,9 @@ public class TraceManager
 			return Arrays.copyOf(traces, count);
 		}
 		// Use a map when the size is potentially large
-		TIntObjectHashMap<Trace> map = new TIntObjectHashMap<>();
+		final TIntObjectHashMap<Trace> map = new TIntObjectHashMap<>();
 		Trace next = new Trace();
-		for (PeakResult result : list)
+		for (final PeakResult result : list)
 		{
 			final int id = result.getId();
 			if (id > 0)
@@ -1848,7 +1784,7 @@ public class TraceManager
 		}
 
 		// Extract the traces
-		Trace[] traces = map.values(new Trace[map.size()]);
+		final Trace[] traces = map.values(new Trace[map.size()]);
 		Arrays.sort(traces);
 		return traces;
 	}

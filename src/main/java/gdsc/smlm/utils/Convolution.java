@@ -108,9 +108,7 @@ public class Convolution
 			int k = FastMath.max(0, n + 1 - xLen);
 			int j = n - k;
 			while (k < hLen && j >= 0)
-			{
 				yn += x[j--] * h[k++];
-			}
 			y[n] = yn;
 		}
 
@@ -161,9 +159,7 @@ public class Convolution
 			int k = FastMath.max(0, n + 1 - xLen);
 			int j = n - k;
 			while (k < hLen && j >= 0)
-			{
 				yn += x[j--] * h[k++];
-			}
 			if (!v.execute(yn))
 				break;
 		}
@@ -205,13 +201,13 @@ public class Convolution
 		final int totalLength = xLen + hLen - 1;
 
 		// Get length to a power of 2
-		int newL = CommonUtils.nextPow2(totalLength);
+		final int newL = CommonUtils.nextPow2(totalLength);
 
 		// Double the new length for complex values in DoubleFFT_1D
 		x = Arrays.copyOf(x, 2 * newL);
 		h = Arrays.copyOf(h, x.length);
 
-		DoubleFFT_1D fft = new DoubleFFT_1D(newL);
+		final DoubleFFT_1D fft = new DoubleFFT_1D(newL);
 
 		// FFT
 		fft.realForwardFull(x);
@@ -220,11 +216,11 @@ public class Convolution
 		// Complex multiply. Reuse data array
 		for (int i = 0; i < x.length; i += 2)
 		{
-			int j = i + 1;
-			double xi = x[i];
-			double xj = x[j];
-			double hi = h[i];
-			double hj = h[j];
+			final int j = i + 1;
+			final double xi = x[i];
+			final double xj = x[j];
+			final double hi = h[i];
+			final double hj = h[j];
 			h[i] = hi * xi - hj * xj;
 			h[j] = hi * xj + hj * xi;
 		}
@@ -235,9 +231,7 @@ public class Convolution
 		// Fill result with real part
 		final double[] y = new double[totalLength];
 		for (int i = 0; i < totalLength; i++)
-		{
 			y[i] = h[2 * i];
-		}
 		return y;
 	}
 
@@ -318,9 +312,7 @@ public class Convolution
 			throw new IllegalArgumentException("Input h is null");
 
 		if (x.length == 0 || h.length == 0)
-		{
 			throw new IllegalArgumentException("Input x or h have no length");
-		}
 	}
 
 	/**
@@ -458,14 +450,14 @@ public class Convolution
 		final int totalLength = xLen + hLen - 1;
 
 		// Get length to a power of 2
-		int newL = CommonUtils.nextPow2(totalLength);
+		final int newL = CommonUtils.nextPow2(totalLength);
 
 		// Double the new length for complex values in DoubleFFT_1D
 		x = Arrays.copyOf(x, 2 * newL);
 		h1 = Arrays.copyOf(h1, x.length);
 		h2 = Arrays.copyOf(h2, x.length);
 
-		DoubleFFT_1D fft = new DoubleFFT_1D(newL);
+		final DoubleFFT_1D fft = new DoubleFFT_1D(newL);
 
 		// FFT
 		fft.realForwardFull(x);
@@ -475,9 +467,9 @@ public class Convolution
 		// Complex multiply. Reuse data array
 		for (int i = 0; i < x.length; i += 2)
 		{
-			int j = i + 1;
-			double xi = x[i];
-			double xj = x[j];
+			final int j = i + 1;
+			final double xi = x[i];
+			final double xj = x[j];
 			double hi = h1[i];
 			double hj = h1[j];
 			h1[i] = hi * xi - hj * xj;
@@ -554,13 +546,9 @@ public class Convolution
 			throw new IllegalArgumentException("Input h2 is null");
 
 		if (x.length == 0 || h1.length == 0)
-		{
 			throw new IllegalArgumentException("Input x or h1 have no length");
-		}
 		if (h1.length != h2.length)
-		{
 			throw new IllegalArgumentException("Input h1 and h2 have different length");
-		}
 	}
 
 	/**
@@ -613,14 +601,14 @@ public class Convolution
 		{
 			double yn = 0;
 			// k is the index in the scaled up distribution H
-			int k = FastMath.max(0, n + 1 - xLen);
+			final int k = FastMath.max(0, n + 1 - xLen);
 			// j is the index in the input distribution x
 			int j = n - k;
 
 			// k has to be scaled.
 			// The modulus indicates how many values are zero
 			// before the first non-zero value in H (in the descending direction).
-			int mod = k % scale;
+			final int mod = k % scale;
 			// kk is the index in input distribution h (in the descending direction).
 			int kk = k / scale;
 			// If there are non-zero value shift the indices
@@ -694,9 +682,9 @@ public class Convolution
 		for (int n = 0; n < iTotalLength; n++)
 		{
 			double yn = 0;
-			int k = FastMath.max(0, n + 1 - xLen);
+			final int k = FastMath.max(0, n + 1 - xLen);
 			int j = n - k;
-			int mod = k % scale;
+			final int mod = k % scale;
 			int kk = k / scale;
 			if (mod != 0)
 			{
@@ -765,14 +753,14 @@ public class Convolution
 		{
 			double yn1 = 0, yn2 = 0;
 			// k is the index in the scaled up distribution H
-			int k = FastMath.max(0, n + 1 - xLen);
+			final int k = FastMath.max(0, n + 1 - xLen);
 			// j is the index in the input distribution x
 			int j = n - k;
 
 			// k has to be scaled.
 			// The modulus indicates how many values are zero
 			// before the first non-zero value in H (in the descending direction).
-			int mod = k % scale;
+			final int mod = k % scale;
 			// kk is the index in input distribution h (in the descending direction).
 			int kk = k / scale;
 			// If there are non-zero value shift the indices
@@ -851,9 +839,9 @@ public class Convolution
 		for (int n = 0; n < iTotalLength; n++)
 		{
 			double yn1 = 0, yn2 = 0;
-			int k = FastMath.max(0, n + 1 - xLen);
+			final int k = FastMath.max(0, n + 1 - xLen);
 			int j = n - k;
-			int mod = k % scale;
+			final int mod = k % scale;
 			int kk = k / scale;
 			if (mod != 0)
 			{

@@ -41,19 +41,19 @@ public class FunctionHelperTest
 	@Test
 	public void canGetMeanValue()
 	{
-		int n = 10;
-		double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
+		final int n = 10;
+		final double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
 		Assert.assertEquals(10, FunctionHelper.getMeanValue(values.clone(), 0), 0);
-		double total = sum(values, n);
+		final double total = sum(values, n);
 		Assert.assertEquals(total / n, FunctionHelper.getMeanValue(values.clone(), 1), 0);
 		for (int i = 1; i < n; i++)
 		{
-			double sum = sum(values, i);
+			final double sum = sum(values, i);
 			Assert.assertEquals(sum / i, FunctionHelper.getMeanValue(values.clone(), sum / total), 0);
 		}
 	}
 
-	private double sum(double[] values, int top)
+	private static double sum(double[] values, int top)
 	{
 		double sum = 0;
 		int n = 0;
@@ -65,12 +65,12 @@ public class FunctionHelperTest
 	@Test
 	public void canGetFractionalMeanValue()
 	{
-		int n = 10;
-		double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
+		final int n = 10;
+		final double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
 		Assert.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), 0), 0);
 		for (int i = 1; i < n; i++)
 		{
-			double f = (double) i / n;
+			final double f = (double) i / n;
 			Assert.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), f), 0);
 			Assert.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), f - 0.5), 0);
 		}
@@ -86,14 +86,14 @@ public class FunctionHelperTest
 	@Test
 	public void canGetXValue()
 	{
-		int n = 10;
-		double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
+		final int n = 10;
+		final double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
 		Assert.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0), 0);
 		Assert.assertEquals(n, FunctionHelper.getXValue(values.clone(), 1), 0);
-		double total = sum(values, n);
+		final double total = sum(values, n);
 		for (int i = 1; i < n; i++)
 		{
-			double sum = sum(values, i);
+			final double sum = sum(values, i);
 			Assert.assertEquals(i, FunctionHelper.getXValue(values.clone(), sum / total), 0);
 		}
 	}
@@ -101,13 +101,13 @@ public class FunctionHelperTest
 	@Test
 	public void canGetFractionalXValue()
 	{
-		int n = 10;
-		double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
+		final int n = 10;
+		final double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
 		Assert.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0), 0);
 		Assert.assertEquals(n, FunctionHelper.getXValue(values.clone(), 1), 0);
 		for (int i = 1; i < n; i++)
 		{
-			double f = (double) i / n;
+			final double f = (double) i / n;
 			Assert.assertEquals(i, FunctionHelper.getXValue(values.clone(), f), 0);
 			Assert.assertEquals(i - 0.5, FunctionHelper.getXValue(values.clone(), f - 0.05), 1e-8);
 		}
@@ -123,37 +123,37 @@ public class FunctionHelperTest
 	@Test
 	public void canGetMeanValueForGaussian()
 	{
-		float intensity = 100;
+		final float intensity = 100;
 		// Realistic standard deviations.
 		// Only test the highest
-		float[] s = { 1, 1.2f, 1.5f, 2, 2.5f };
-		int n_1 = s.length - 1;
+		final float[] s = { 1, 1.2f, 1.5f, 2, 2.5f };
+		final int n_1 = s.length - 1;
 		// Flag to indicate that all levels should be run and the difference reported
-		boolean debug = false;
+		final boolean debug = false;
 		for (int i = (debug) ? 0 : n_1; i < s.length; i++)
 		{
-			float sx = s[i];
+			final float sx = s[i];
 			for (int j = i; j < s.length; j++)
 			{
-				float sy = s[j];
-				int size = 1 + 2 * (int) Math.ceil(Math.max(sx, sy) * 4);
-				float[] a = Gaussian2DPeakResultHelper.createParams(0.f, intensity, size / 2f, size / 2f, 0.f, sx, sy,
+				final float sy = s[j];
+				final int size = 1 + 2 * (int) Math.ceil(Math.max(sx, sy) * 4);
+				final float[] a = Gaussian2DPeakResultHelper.createParams(0.f, intensity, size / 2f, size / 2f, 0.f, sx, sy,
 						0);
-				Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
+				final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
 						GaussianFunctionFactory.FIT_FREE_CIRCLE
 						//| GaussianFunctionFactory.FIT_SIMPLE
 						, null);
-				double[] values = f.computeValues(SimpleArrayUtils.toDouble(a));
+				final double[] values = f.computeValues(SimpleArrayUtils.toDouble(a));
 				//ImagePlus imp = new ImagePlus("gauss", new FloatProcessor(size, size, values));
 				//double cx = size / 2.;
 				//Shape shape = new Ellipse2D.Double(cx - sx, cx - sy, 2 * sx, 2 * sy);
 				//imp.setRoi(new ShapeRoi(shape));
 				//IJ.save(imp, "/Users/ah403/1.tif");
-				double scale = Maths.sum(values) / intensity;
+				final double scale = Maths.sum(values) / intensity;
 				for (int range = 1; range <= 3; range++)
 				{
-					double e = Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, range);
-					double o = FunctionHelper.getMeanValue(values.clone(),
+					final double e = Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, range);
+					final double o = FunctionHelper.getMeanValue(values.clone(),
 							scale * Gaussian2DPeakResultHelper.cumulative2D(range));
 					if (debug)
 						System.out.printf("%g,%g   %d  %g %g  %g\n", sx, sy, range, e, o,

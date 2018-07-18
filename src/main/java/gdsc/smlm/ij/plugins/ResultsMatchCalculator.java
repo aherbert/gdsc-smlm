@@ -77,7 +77,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private static TextWindow pairsWindow = null;
 	private static ImageROIPainter pairPainter = null;
 
-	private Rounder rounder = RounderFactory.create(4);
+	private final Rounder rounder = RounderFactory.create(4);
 
 	/*
 	 * (non-Javadoc)
@@ -99,8 +99,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			return;
 
 		// Load the results
-		MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false, null, null);
-		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
+		final MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false, null, null);
+		final MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
 		IJ.showStatus("");
 		if (results1 == null || results1.size() == 0)
 		{
@@ -120,14 +120,14 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 		final long start = System.nanoTime();
 		compareCoordinates(results1, results2, dThreshold, increments, delta);
-		double seconds = (System.nanoTime() - start) / 1000000000.0;
+		final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
 		IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
 	}
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
 		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY);
@@ -172,7 +172,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			Parameters.isAboveZero("Delta", delta);
 			Parameters.isPositive("Beta", beta);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
@@ -185,32 +185,32 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2, double dThreshold,
 			int increments, double delta)
 	{
-		boolean requirePairs = showPairs || saveClassifications;
+		final boolean requirePairs = showPairs || saveClassifications;
 
-		TextFilePeakResults fileResults = createFilePeakResults(results2);
+		final TextFilePeakResults fileResults = createFilePeakResults(results2);
 
-		List<PointPair> allMatches = new LinkedList<>();
-		List<PointPair> pairs = (requirePairs) ? new LinkedList<>() : null;
+		final List<PointPair> allMatches = new LinkedList<>();
+		final List<PointPair> pairs = (requirePairs) ? new LinkedList<>() : null;
 
-		double maxDistance = dThreshold + increments * delta;
+		final double maxDistance = dThreshold + increments * delta;
 
 		// Divide the results into time points
-		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
-		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
+		final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
+		final TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
 
 		int n1 = 0;
 		int n2 = 0;
 
 		// Process each time point
-		for (Integer t : getTimepoints(actualCoordinates, predictedCoordinates))
+		for (final Integer t : getTimepoints(actualCoordinates, predictedCoordinates))
 		{
-			Coordinate[] actual = getCoordinates(actualCoordinates, t);
-			Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
+			final Coordinate[] actual = getCoordinates(actualCoordinates, t);
+			final Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
 
-			List<Coordinate> TP = null;
+			final List<Coordinate> TP = null;
 			List<Coordinate> FP = null;
 			List<Coordinate> FN = null;
-			List<PointPair> matches = new LinkedList<>();
+			final List<PointPair> matches = new LinkedList<>();
 			if (requirePairs)
 			{
 				FP = new LinkedList<>();
@@ -227,22 +227,22 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			if (showPairs)
 			{
 				pairs.addAll(matches);
-				for (Coordinate c : FN)
+				for (final Coordinate c : FN)
 					pairs.add(new PointPair(c, null));
-				for (Coordinate c : FP)
+				for (final Coordinate c : FP)
 					pairs.add(new PointPair(null, c));
 			}
 			if (fileResults != null)
 			{
 				// Matches are marked in the original value with 1 for true, 0 for false
-				for (PointPair pair : matches)
+				for (final PointPair pair : matches)
 				{
 					PeakResult p = ((PeakResultPoint) pair.getPoint2()).peakResult;
 					p = p.clone();
 					p.setOrigValue(1);
 					fileResults.add(p);
 				}
-				for (Coordinate c : FP)
+				for (final Coordinate c : FP)
 				{
 					PeakResult p = ((PeakResultPoint) c).peakResult;
 					p = p.clone();
@@ -287,20 +287,18 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		 * }
 		 */
 
-		boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;
-		boolean doIdAnalysis2 = (idAnalysis) ? haveIds(results2) : false;
-		boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;
+		final boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;
+		final boolean doIdAnalysis2 = (idAnalysis) ? haveIds(results2) : false;
+		final boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;
 
 		// Create output
 		if (!java.awt.GraphicsEnvironment.isHeadless())
 		{
-			String header = createResultsHeader(doIdAnalysis);
+			final String header = createResultsHeader(doIdAnalysis);
 			Utils.refreshHeadings(resultsWindow, header, true);
 
 			if (showTable && (resultsWindow == null || !resultsWindow.isShowing()))
-			{
 				resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
-			}
 			if (showPairs)
 			{
 				if (pairsWindow == null || !pairsWindow.isShowing())
@@ -308,7 +306,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 					pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
 					if (resultsWindow != null)
 					{
-						Point p = resultsWindow.getLocation();
+						final Point p = resultsWindow.getLocation();
 						p.y += resultsWindow.getHeight();
 						pairsWindow.setLocation(p);
 					}
@@ -326,7 +324,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				final int step = Utils.getProgressInterval(total);
 				final ArrayList<String> list = new ArrayList<>(total);
 				boolean flush = true;
-				for (PointPair pair : pairs)
+				for (final PointPair pair : pairs)
 				{
 
 					if (++c % step == 0)
@@ -343,13 +341,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				IJ.showProgress(1);
 			}
 		}
-		else
+		else if (writeHeader && showTable)
 		{
-			if (writeHeader && showTable)
-			{
-				writeHeader = false;
-				IJ.log(createResultsHeader(idAnalysis));
-			}
+			writeHeader = false;
+			IJ.log(createResultsHeader(idAnalysis));
 		}
 
 		if (!showTable)
@@ -357,8 +352,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 		// We have the results for the largest distance.
 		// Now reduce the distance threshold and recalculate the results
-		double[] distanceThresholds = getDistances(dThreshold, increments, delta);
-		double[] pairDistances = getPairDistances(allMatches);
+		final double[] distanceThresholds = getDistances(dThreshold, increments, delta);
+		final double[] pairDistances = getPairDistances(allMatches);
 		// Re-use storage for the ID analysis
 		TIntHashSet id1 = null, id2 = null, matchId1 = null, matchId2 = null;
 		if (doIdAnalysis)
@@ -374,24 +369,22 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				matchId2 = new TIntHashSet(id2.size());
 			}
 		}
-		for (double distanceThreshold : distanceThresholds)
+		for (final double distanceThreshold : distanceThresholds)
 		{
 			double rms = 0;
 			int tp2 = 0;
 			final double d2 = distanceThreshold * distanceThreshold;
-			for (double d : pairDistances)
-			{
+			for (final double d : pairDistances)
 				if (d <= d2)
 				{
 					rms += d;
 					tp2++;
 				}
-			}
 			// All non-true positives must be added to the false totals.
-			int fp2 = n2 - tp2;
-			int fn2 = n1 - tp2;
+			final int fp2 = n2 - tp2;
+			final int fn2 = n1 - tp2;
 
-			MatchResult result = new MatchResult(tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
+			final MatchResult result = new MatchResult(tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
 
 			MatchResult idResult1 = null, idResult2 = null;
 			if (doIdAnalysis)
@@ -401,8 +394,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				if (doIdAnalysis2)
 					matchId2.clear();
 				int i = 0;
-				for (PointPair pair : allMatches)
-				{
+				for (final PointPair pair : allMatches)
 					if (pairDistances[i++] <= d2)
 					{
 						if (doIdAnalysis1)
@@ -410,7 +402,6 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 						if (doIdAnalysis2)
 							matchId2.add(((PeakResultPoint) pair.getPoint2()).peakResult.getId());
 					}
-				}
 				// Only the actual points are checked for Ids. For example these could be from the
 				// Create Data plugin with actual fluorophore Ids.
 				// => Only the recall will be valid: tp / (tp + fn)
@@ -439,12 +430,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		if (!saveClassifications)
 			return null;
-		String[] path = Utils.decodePath(classificationsFile);
-		OpenDialog chooser = new OpenDialog("Classifications_File", path[0], path[1]);
+		final String[] path = Utils.decodePath(classificationsFile);
+		final OpenDialog chooser = new OpenDialog("Classifications_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			classificationsFile = chooser.getDirectory() + chooser.getFileName();
-			TextFilePeakResults r = new TextFilePeakResults(classificationsFile, false, false);
+			final TextFilePeakResults r = new TextFilePeakResults(classificationsFile, false, false);
 			r.copySettings(results2);
 			r.begin();
 			return r;
@@ -476,7 +467,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
 			final boolean integerCoordinates)
 	{
-		TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<>();
+		final TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<>();
 		if (results.size() > 0)
 		{
 			// Do not use HashMap directly to build the coords object since there
@@ -489,9 +480,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			// Create lists
 			final ArrayList<ArrayList<Coordinate>> tmpCoords = new ArrayList<>(maxT - minT + 1);
 			for (int t = minT; t <= maxT; t++)
-			{
 				tmpCoords.add(new ArrayList<Coordinate>());
-			}
 
 			// Add the results to the lists
 			results.forEach(new PeakResultProcedure()
@@ -519,9 +508,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 			// Put in the map
 			for (int t = minT, i = 0; t <= maxT; t++, i++)
-			{
 				coords.put(t, tmpCoords.get(i));
-			}
 		}
 		return coords;
 	}
@@ -547,7 +534,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see gnu.trove.procedure.TIntProcedure#execute(int)
 			 */
 			@Override
@@ -559,7 +546,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		};
 		actualCoordinates.forEachKey(p);
 		predictedCoordinates.forEachKey(p);
-		int[] set = hashset.toArray();
+		final int[] set = hashset.toArray();
 
 		Arrays.sort(set);
 		return set;
@@ -576,11 +563,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 */
 	public static Coordinate[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t)
 	{
-		ArrayList<Coordinate> tmp = coords.get(t);
+		final ArrayList<Coordinate> tmp = coords.get(t);
 		if (tmp != null)
-		{
 			return tmp.toArray(new Coordinate[tmp.size()]);
-		}
 		return new Coordinate[0];
 	}
 
@@ -596,19 +581,19 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	@SuppressWarnings("unused")
 	private static int[] getTimepoints(List<PeakResult> actualPoints, List<PeakResult> predictedPoints)
 	{
-		TIntHashSet set = new TIntHashSet();
-		for (PeakResult r : actualPoints)
+		final TIntHashSet set = new TIntHashSet();
+		for (final PeakResult r : actualPoints)
 			set.add(r.getFrame());
-		for (PeakResult r : predictedPoints)
+		for (final PeakResult r : predictedPoints)
 			set.add(r.getFrame());
-		int[] t = set.toArray();
+		final int[] t = set.toArray();
 		Arrays.sort(t);
 		return t;
 	}
 
 	private static String createResultsHeader(boolean idAnalysis)
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("Image 1\t");
 		sb.append("Image 2\t");
 		sb.append("Distance (px)\t");
@@ -639,7 +624,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private void addResult(String i1, String i2, double dThrehsold, MatchResult result, MatchResult idResult1,
 			MatchResult idResult2)
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(i1).append('\t');
 		sb.append(i2).append('\t');
 		sb.append(rounder.round(dThrehsold)).append('\t');
@@ -662,9 +647,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			sb.append('\t').append(rounder.round(idResult1.getRecall()));
 		}
 		else if (idResult2 != null)
-		{
 			sb.append("\t-\t-\t-");
-		}
 		if (idResult2 != null)
 		{
 			sb.append('\t').append(idResult2.getNumberPredicted());
@@ -672,23 +655,17 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			sb.append('\t').append(rounder.round(idResult2.getRecall()));
 		}
 		else if (idResult1 != null)
-		{
 			sb.append("\t-\t-\t-");
-		}
 
 		if (java.awt.GraphicsEnvironment.isHeadless())
-		{
 			IJ.log(sb.toString());
-		}
 		else
-		{
 			resultsWindow.append(sb.toString());
-		}
 	}
 
 	private static String createPairsHeader()
 	{
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("T\t");
 		sb.append("X1\t");
 		sb.append("Y1\t");
@@ -710,32 +687,30 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		// Extract the startT and x,y coordinates from the first pulse in the line
 		final int[] index = { 1, 4 };
-		String[] fields = line.split("\t");
-		int startT = Integer.valueOf(fields[0]);
-		for (int i : index)
-		{
+		final String[] fields = line.split("\t");
+		final int startT = Integer.valueOf(fields[0]);
+		for (final int i : index)
 			if (i < fields.length)
 			{
 				if (fields[i].equals("-"))
 					continue;
-				double x = Double.valueOf(fields[i]);
-				double y = Double.valueOf(fields[i + 1]);
+				final double x = Double.valueOf(fields[i]);
+				final double y = Double.valueOf(fields[i + 1]);
 				return new double[] { startT, x, y };
 			}
-		}
 		return null;
 	}
 
 	private String addPairResult(PointPair pair)
 	{
-		StringBuilder sb = new StringBuilder();
-		PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
-		PeakResultPoint p2 = (PeakResultPoint) pair.getPoint2();
-		int t = (p1 != null) ? p1.getTime() : p2.getTime();
+		final StringBuilder sb = new StringBuilder();
+		final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
+		final PeakResultPoint p2 = (PeakResultPoint) pair.getPoint2();
+		final int t = (p1 != null) ? p1.getTime() : p2.getTime();
 		sb.append(t).append('\t');
 		addPoint(sb, p1);
 		addPoint(sb, p2);
-		double d = pair.getXYDistance();
+		final double d = pair.getXYDistance();
 		if (d >= 0)
 			sb.append(rounder.round(d)).append('\t');
 		else
@@ -746,9 +721,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private void addPoint(StringBuilder sb, PeakResultPoint p)
 	{
 		if (p == null)
-		{
 			sb.append("-\t-\t-\t");
-		}
 		else
 		{
 			sb.append(rounder.round(p.getX())).append('\t');
@@ -773,7 +746,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private static double[] getDistances(double dThreshold, int increments, double delta)
 	{
-		double[] d = new double[increments + 1];
+		final double[] d = new double[increments + 1];
 		for (int i = 0; i <= increments; i++)
 			d[i] = dThreshold + i * delta;
 		return d;
@@ -781,12 +754,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private static double[] getPairDistances(List<PointPair> pairs)
 	{
-		double[] d = new double[pairs.size()];
+		final double[] d = new double[pairs.size()];
 		int i = 0;
-		for (PointPair pair : pairs)
-		{
+		for (final PointPair pair : pairs)
 			d[i++] = pair.getXYDistance2();
-		}
 		return d;
 	}
 
@@ -797,7 +768,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		/** The time. */
 		int t;
-		
+
 		/** The peak result. */
 		PeakResult peakResult;
 
@@ -831,7 +802,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		{
 			return t;
 		}
-		
+
 		/**
 		 * Gets the peak result.
 		 *
@@ -858,8 +829,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			double distance)
 	{
 		// Divide the results into time points
-		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
-		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
+		final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
+		final TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
 
 		return compareCoordinates(actualCoordinates, predictedCoordinates, distance);
 	}
@@ -883,12 +854,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		int fn = 0;
 
 		// Process each time point
-		for (Integer t : getTimepoints(actualCoordinates, predictedCoordinates))
+		for (final Integer t : getTimepoints(actualCoordinates, predictedCoordinates))
 		{
-			Coordinate[] actual = getCoordinates(actualCoordinates, t);
-			Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
+			final Coordinate[] actual = getCoordinates(actualCoordinates, t);
+			final Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
 
-			MatchResult r = MatchCalculator.analyseResults2D(actual, predicted, distance);
+			final MatchResult r = MatchCalculator.analyseResults2D(actual, predicted, distance);
 
 			// Aggregate
 			tp += r.getTruePositives();

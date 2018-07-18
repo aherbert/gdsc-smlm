@@ -74,10 +74,10 @@ public class SeriesImageSourceTest
 
 	private void canReadBigTIFFSequentially(boolean inMemory, boolean intelByteOrder) throws IOException
 	{
-		int n = 2;
-		String[] filenames = createFilenames(n);
-		ImageStack[] stacks = createSeries(filenames, intelByteOrder);
-		SeriesImageSource source = new SeriesImageSource("Test", filenames);
+		final int n = 2;
+		final String[] filenames = createFilenames(n);
+		final ImageStack[] stacks = createSeries(filenames, intelByteOrder);
+		final SeriesImageSource source = new SeriesImageSource("Test", filenames);
 		if (!inMemory)
 			source.setBufferLimit(0); // To force standard reading functionality
 		source.setReadHint(ReadHint.SEQUENTIAL);
@@ -86,14 +86,12 @@ public class SeriesImageSourceTest
 		Assert.assertEquals(h, source.getHeight());
 		Assert.assertEquals(d * n, source.getFrames());
 		for (int i = 0; i < stacks.length; i++)
-		{
 			for (int j = 0; j < d; j++)
 			{
-				float[] e = (float[]) stacks[i].getPixels(j + 1);
-				float[] o = source.next();
+				final float[] e = (float[]) stacks[i].getPixels(j + 1);
+				final float[] o = source.next();
 				Assert.assertArrayEquals(e, o, 0);
 			}
-		}
 		Assert.assertNull(source.next());
 		source.close();
 	}
@@ -124,10 +122,10 @@ public class SeriesImageSourceTest
 
 	private void canReadBigTIFFNonSequentially(boolean inMemory, boolean intelByteOrder) throws IOException
 	{
-		int n = 2;
-		String[] filenames = createFilenames(n);
-		ImageStack[] stacks = createSeries(filenames, intelByteOrder);
-		SeriesImageSource source = new SeriesImageSource("Test", filenames);
+		final int n = 2;
+		final String[] filenames = createFilenames(n);
+		final ImageStack[] stacks = createSeries(filenames, intelByteOrder);
+		final SeriesImageSource source = new SeriesImageSource("Test", filenames);
 		if (!inMemory)
 			source.setBufferLimit(0); // To force standard reading functionality
 		source.setReadHint(ReadHint.NONSEQUENTIAL);
@@ -135,24 +133,20 @@ public class SeriesImageSourceTest
 		Assert.assertEquals(w, source.getWidth());
 		Assert.assertEquals(h, source.getHeight());
 		Assert.assertEquals(d * n, source.getFrames());
-		float[][] pixels = new float[n * d][];
+		final float[][] pixels = new float[n * d][];
 		for (int i = 0, k = 0; i < stacks.length; i++)
-		{
 			for (int j = 0; j < d; j++)
-			{
 				pixels[k++] = (float[]) stacks[i].getPixels(j + 1);
-			}
-		}
 
-		RandomGenerator r = TestSettings.getRandomGenerator();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int i = 0; i < 3; i++)
 		{
-			int[] random = Random.sample(pixels.length / 2, pixels.length, r);
-			for (int frame : random)
+			final int[] random = Random.sample(pixels.length / 2, pixels.length, r);
+			for (final int frame : random)
 			{
 				//System.out.printf("[%d] frame = %d\n", i, frame);
-				float[] e = pixels[frame];
-				float[] o = source.get(frame + 1); // 1-base index on the frame
+				final float[] e = pixels[frame];
+				final float[] o = source.get(frame + 1); // 1-base index on the frame
 				Assert.assertArrayEquals(e, o, 0);
 			}
 		}
@@ -160,10 +154,10 @@ public class SeriesImageSourceTest
 
 	private String[] createFilenames(int n) throws IOException
 	{
-		String[] filenames = new String[n];
+		final String[] filenames = new String[n];
 		for (int i = 0; i < n; i++)
 		{
-			File path = File.createTempFile(this.getClass().getSimpleName(), ".tif");
+			final File path = File.createTempFile(this.getClass().getSimpleName(), ".tif");
 			path.deleteOnExit();
 			filenames[i] = path.getCanonicalPath();
 		}
@@ -172,21 +166,21 @@ public class SeriesImageSourceTest
 
 	private ImageStack[] createSeries(String[] filenames, boolean intelByteOrder) throws IOException
 	{
-		int n = filenames.length;
-		ImageStack[] stacks = new ImageStack[n];
+		final int n = filenames.length;
+		final ImageStack[] stacks = new ImageStack[n];
 		int index = 0;
-		int length = w * h;
+		final int length = w * h;
 		for (int i = 0; i < n; i++)
 		{
-			ImageStack stack = new ImageStack(w, h);
+			final ImageStack stack = new ImageStack(w, h);
 			for (int j = 0; j < d; j++)
 			{
 				stack.addSlice(null, SimpleArrayUtils.newArray(length, index, 1f));
 				index += length;
 			}
-			ImagePlus imp = new ImagePlus(null, stack);
+			final ImagePlus imp = new ImagePlus(null, stack);
 			// Add a calibration with origin
-			Calibration c = imp.getCalibration();
+			final Calibration c = imp.getCalibration();
 			c.xOrigin = 4;
 			c.yOrigin = 5;
 			saveAsTiff(imp, filenames[i], intelByteOrder);
@@ -199,12 +193,12 @@ public class SeriesImageSourceTest
 	{
 		// IJ.saveAsTiff(imp, path);
 
-		FileInfo fi = imp.getFileInfo();
+		final FileInfo fi = imp.getFileInfo();
 		fi.nImages = imp.getStackSize();
 		ij.Prefs.intelByteOrder = intelByteOrder;
 		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path))))
 		{
-			TiffEncoder file = new TiffEncoder(fi);
+			final TiffEncoder file = new TiffEncoder(fi);
 			file.write(out);
 		}
 	}

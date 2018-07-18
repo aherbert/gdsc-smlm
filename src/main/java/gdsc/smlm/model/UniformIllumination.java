@@ -28,9 +28,9 @@ package gdsc.smlm.model;
  */
 public class UniformIllumination implements SpatialIllumination
 {
-	private double photons;
-	private double pulsePhotons;
-	private int pulseInterval;
+	private final double photons;
+	private final double pulsePhotons;
+	private final int pulseInterval;
 
 	/**
 	 * @param photons
@@ -77,9 +77,7 @@ public class UniformIllumination implements SpatialIllumination
 	{
 
 		if (pulseInterval > 1)
-		{
 			return new double[] { (t % pulseInterval == 1) ? pulsePhotons : 0, photons };
-		}
 		return new double[] { 0, photons };
 	}
 
@@ -92,9 +90,7 @@ public class UniformIllumination implements SpatialIllumination
 	public double getAveragePhotons()
 	{
 		if (pulseInterval > 1)
-		{
 			return photons + pulsePhotons / pulseInterval;
-		}
 		return photons;
 	}
 }

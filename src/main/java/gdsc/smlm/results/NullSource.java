@@ -28,7 +28,7 @@ package gdsc.smlm.results;
  */
 public class NullSource extends ImageSource
 {
-	
+
 	/**
 	 * Create a new image source.
 	 *

@@ -170,7 +170,7 @@ public class PSFHelper
 	{
 		if (psf.getParametersCount() > i)
 		{
-			double v = psf.getParameters(i).getValue();
+			final double v = psf.getParameters(i).getValue();
 			if (v > 0)
 				return v;
 		}
@@ -248,7 +248,7 @@ public class PSFHelper
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
 
-		List<PSFParameter> list = psf.getParametersList();
+		final List<PSFParameter> list = psf.getParametersList();
 		switch (psf.getPsfType())
 		{
 			case ONE_AXIS_GAUSSIAN_2D:
@@ -320,7 +320,7 @@ public class PSFHelper
 		{
 			return getParameterCount(psf);
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			return 0;
 		}
@@ -342,11 +342,9 @@ public class PSFHelper
 		{
 			// Check each
 			int i = 0;
-			for (PSFParameter p : list)
-			{
+			for (final PSFParameter p : list)
 				if (p.getUnit() != defaultList.get(i++).getUnit())
 					return defaultList;
-			}
 			return list;
 		}
 		return defaultList;
@@ -361,7 +359,7 @@ public class PSFHelper
 	 */
 	public static PSF.Builder createBuilder(PSFType psfType)
 	{
-		PSF.Builder builder = PSF.newBuilder();
+		final PSF.Builder builder = PSF.newBuilder();
 		builder.setPsfType(psfType);
 		return builder;
 	}
@@ -388,9 +386,7 @@ public class PSFHelper
 	public static boolean is3D(PSFOrBuilder psf)
 	{
 		if (psf != null)
-		{
 			return psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
-		}
 		return false;
 	}
 
@@ -424,11 +420,9 @@ public class PSFHelper
 	public static boolean hasAngleParameters(PSFOrBuilder psf)
 	{
 		if (psf != null)
-		{
-			for (PSFParameter p : getParameters(psf))
+			for (final PSFParameter p : getParameters(psf))
 				if (p.getUnit() == PSFParameterUnit.ANGLE)
 					return true;
-		}
 		return false;
 	}
 }

@@ -50,7 +50,7 @@ public class BinaryDisplay implements PlugInFilter
 
 		if (arg.equals("reset"))
 		{
-			ImageProcessor ip = imp.getProcessor();
+			final ImageProcessor ip = imp.getProcessor();
 			ip.reset();
 			imp.setProcessor(ip);
 			imp.resetDisplayRange();
@@ -82,8 +82,8 @@ public class BinaryDisplay implements PlugInFilter
 		//		ip.setMinAndMax(0, min);
 		//		imp.updateAndDraw();
 
-		FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
-		float[] data = (float[]) fp.getPixels();
+		final FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
+		final float[] data = (float[]) fp.getPixels();
 		for (int i = 0; i < ip.getPixelCount(); i++)
 		{
 			final float value = ip.getf(i);

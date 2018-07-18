@@ -38,43 +38,41 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
 	@Test
 	public void filterPerformsWeightedSumFiltering()
 	{
-		DataFilter filter = createDataFilter();
+		final DataFilter filter = createDataFilter();
 
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		float[] offsets = getOffsets(filter);
-		int[] boxSizes = getBoxSizes(filter);
+		final float[] offsets = getOffsets(filter);
+		final int[] boxSizes = getBoxSizes(filter);
 
-		TDoubleArrayList l1 = new TDoubleArrayList();
+		final TDoubleArrayList l1 = new TDoubleArrayList();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				float[] data = createData(width, height, rg);
+				final float[] data = createData(width, height, rg);
 				l1.reset();
 
 				// Ones used for normalisation
-				float[] ones = new float[width * height];
+				final float[] ones = new float[width * height];
 				Arrays.fill(ones, 1f);
 
 				// Uniform weights
-				float[] w1 = new float[width * height];
+				final float[] w1 = new float[width * height];
 				Arrays.fill(w1, 0.5f);
 
 				// Weights simulating the variance of sCMOS pixels
-				float[] w2 = new float[width * height];
+				final float[] w2 = new float[width * height];
 				for (int i = 0; i < w2.length; i++)
-				{
 					w2[i] = (float) (1.0 / Math.max(0.01, rg.nextGaussian() * 0.2 + 2));
-				}
 
-				for (int boxSize : boxSizes)
-					for (float offset : offsets)
-						for (boolean internal : checkInternal)
+				for (final int boxSize : boxSizes)
+					for (final float offset : offsets)
+						for (final boolean internal : checkInternal)
 						{
 							// For each pixel over the range around the pixel (vi).
 							// Sum filter: sum(vi)
-							// Weighted sum: sum(vi * wi) / mean(wi) 
+							// Weighted sum: sum(vi * wi) / mean(wi)
 							// (This makes the output image have a similar mean)
 
 							filter.setWeights(null, width, height);
@@ -94,21 +92,21 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
 			float[] w, int boxSize, float offset, boolean internal, float[] ones) throws AssertionError
 	{
 		// The filter f(x) should compute:
-		//    sum(vi * wi) / mean(wi) 
+		//    sum(vi * wi) / mean(wi)
 		// where: mean(wi) = sum(wi) / sum(1)
 
 		filter.setWeights(null, width, height);
-		float[] fWi = filter(w, width, height, boxSize - offset, internal, filter);
-		float[] f1 = filter(ones, width, height, boxSize - offset, internal, filter);
-		float[] e = data.clone();
+		final float[] fWi = filter(w, width, height, boxSize - offset, internal, filter);
+		final float[] f1 = filter(ones, width, height, boxSize - offset, internal, filter);
+		final float[] e = data.clone();
 		for (int i = 0; i < e.length; i++)
 			e[i] = data[i] * w[i];
-		float[] fViWi = filter(e, width, height, boxSize - offset, internal, filter);
+		final float[] fViWi = filter(e, width, height, boxSize - offset, internal, filter);
 		for (int i = 0; i < e.length; i++)
 			e[i] = fViWi[i] / (fWi[i] / f1[i]);
 
 		filter.setWeights(w, width, height);
-		float[] o = filter(data, width, height, boxSize - offset, internal, filter);
+		final float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
 		TestAssert.assertArrayEqualsRelative(e, o, 1e-6, "%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
 				height, boxSize - offset, internal);

@@ -129,7 +129,7 @@ public class EMGainAnalysis implements PlugInFilter
 		final int size = getSize(h);
 		if (imp != null)
 		{
-			Roi roi = imp.getRoi();
+			final Roi roi = imp.getRoi();
 			Rectangle bounds;
 			if (roi == null)
 				bounds = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
@@ -178,13 +178,13 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private int[] simulateFromPDF()
 	{
-		double step = getStepSize(_photons, _gain, _noise);
+		final double step = getStepSize(_photons, _gain, _noise);
 
-		PDF pdf = pdf(0, step, _photons, _gain, _noise);
+		final PDF pdf = pdf(0, step, _photons, _gain, _noise);
 
 		// Debug this
-		double[] g = pdf.p;
-		double[] x = pdf.x;
+		final double[] g = pdf.p;
+		final double[] x = pdf.x;
 		Utils.display(TITLE + " PDF", new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
 
 		// Get cumulative probability
@@ -201,12 +201,12 @@ public class EMGainAnalysis implements PlugInFilter
 		g[g.length - 1] = 1; // Ensure value of 1 at the end
 
 		// Randomly sample
-		RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
-		int bias = (int) _bias;
-		int[] bins = new int[x.length];
+		final RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+		final int bias = (int) _bias;
+		final int[] bins = new int[x.length];
 		for (int i = 0; i < x.length; i++)
 			bins[i] = bias + (int) x[i];
-		int[] h = new int[bins[bins.length - 1] + 1];
+		final int[] h = new int[bins[bins.length - 1] + 1];
 		final int steps = simulationSize;
 		for (int n = 0; n < steps; n++)
 		{
@@ -235,8 +235,8 @@ public class EMGainAnalysis implements PlugInFilter
 
 		while (low <= high)
 		{
-			int mid = (low + high) >>> 1;
-			double midVal = a[mid];
+			final int mid = (low + high) >>> 1;
+			final double midVal = a[mid];
 
 			if (midVal < key)
 				low = mid + 1; // Neither val is NaN, thisVal is smaller
@@ -256,16 +256,16 @@ public class EMGainAnalysis implements PlugInFilter
 	private int[] simulateFromPoissonGammaGaussian()
 	{
 		// Randomly sample
-		RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+		final RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
 
-		PoissonDistribution poisson = new PoissonDistribution(random, _photons, PoissonDistribution.DEFAULT_EPSILON,
+		final PoissonDistribution poisson = new PoissonDistribution(random, _photons, PoissonDistribution.DEFAULT_EPSILON,
 				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 
-		CustomGammaDistribution gamma = new CustomGammaDistribution(random, _photons, _gain,
+		final CustomGammaDistribution gamma = new CustomGammaDistribution(random, _photons, _gain,
 				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 		final int steps = simulationSize;
-		int[] sample = new int[steps];
+		final int[] sample = new int[steps];
 		for (int n = 0; n < steps; n++)
 		{
 			if (n % 64 == 0)
@@ -288,9 +288,9 @@ public class EMGainAnalysis implements PlugInFilter
 			sample[n] = (int) Math.round(d + _bias);
 		}
 
-		int max = Maths.max(sample);
-		int[] h = new int[max + 1];
-		for (int s : sample)
+		final int max = Maths.max(sample);
+		final int[] h = new int[max + 1];
+		for (final int s : sample)
 			h[s]++;
 		return h;
 	}
@@ -304,12 +304,12 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private static int[] buildHistogram(ImagePlus imp)
 	{
-		ImageStack stack = imp.getImageStack();
-		Roi roi = imp.getRoi();
-		int[] data = getHistogram(stack.getProcessor(1), roi);
+		final ImageStack stack = imp.getImageStack();
+		final Roi roi = imp.getRoi();
+		final int[] data = getHistogram(stack.getProcessor(1), roi);
 		for (int n = 2; n <= stack.getSize(); n++)
 		{
-			int[] tmp = getHistogram(stack.getProcessor(n), roi);
+			final int[] tmp = getHistogram(stack.getProcessor(n), roi);
 			for (int i = 0; i < tmp.length; i++)
 				data[i] += tmp[i];
 		}
@@ -317,9 +317,7 @@ public class EMGainAnalysis implements PlugInFilter
 		// Avoid super-saturated pixels by using 98% of histogram
 		long sum = 0;
 		for (int i = 0; i < data.length; i++)
-		{
 			sum += data[i];
-		}
 
 		final long sum2 = (long) (sum * 0.99);
 		sum = 0;
@@ -340,7 +338,7 @@ public class EMGainAnalysis implements PlugInFilter
 	private static int[] getHistogram(ImageProcessor ip, Roi roi)
 	{
 		ip.setRoi(roi);
-		int[] h = ip.getHistogram();
+		final int[] h = ip.getHistogram();
 		return h;
 	}
 
@@ -391,14 +389,14 @@ public class EMGainAnalysis implements PlugInFilter
 		Utils.display(TITLE, plot);
 
 		// Perform a fit
-		CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
-		double[] startPoint = new double[] { photons, gain, noise, bias };
+		final CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
+		final double[] startPoint = new double[] { photons, gain, noise, bias };
 		int maxEval = 3000;
 
-		String[] paramNames = { "Photons", "Gain", "Noise", "Bias" };
+		final String[] paramNames = { "Photons", "Gain", "Noise", "Bias" };
 		// Set bounds
-		double[] lower = new double[] { 0, 0.5 * gain, 0, bias - noise };
-		double[] upper = new double[] { 2 * photons, 2 * gain, gain, bias + noise };
+		final double[] lower = new double[] { 0, 0.5 * gain, 0, bias - noise };
+		final double[] upper = new double[] { 2 * photons, 2 * gain, gain, bias + noise };
 
 		// Restart until converged.
 		// TODO - Maybe fix this with a better optimiser. This needs to be tested on real data.
@@ -410,55 +408,45 @@ public class EMGainAnalysis implements PlugInFilter
 			try
 			{
 				// Basic Powell optimiser
-				MultivariateFunction fun = getFunction(limits, y, max, maxEval);
-				PointValuePair optimum = o.optimize(new MaxEval(maxEval), new ObjectiveFunction(fun), GoalType.MINIMIZE,
+				final MultivariateFunction fun = getFunction(limits, y, max, maxEval);
+				final PointValuePair optimum = o.optimize(new MaxEval(maxEval), new ObjectiveFunction(fun), GoalType.MINIMIZE,
 						new InitialGuess((solution == null) ? startPoint : solution.getPointRef()));
 				if (solution == null || optimum.getValue() < solution.getValue())
 				{
-					double[] point = optimum.getPointRef();
+					final double[] point = optimum.getPointRef();
 					// Check the bounds
 					for (int i = 0; i < point.length; i++)
-					{
 						if (point[i] < lower[i] || point[i] > upper[i])
-						{
 							throw new RuntimeException(
 									String.format("Fit out of of estimated range: %s %f", paramNames[i], point[i]));
-						}
-					}
 					solution = optimum;
 				}
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				IJ.log("Powell error: " + e.getMessage());
 				if (e instanceof TooManyEvaluationsException)
-				{
 					maxEval = (int) (maxEval * 1.5);
-				}
 			}
 			try
 			{
 				// Bounded Powell optimiser
-				MultivariateFunction fun = getFunction(limits, y, max, maxEval);
-				MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower, upper);
+				final MultivariateFunction fun = getFunction(limits, y, max, maxEval);
+				final MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower, upper);
 				PointValuePair optimum = o.optimize(new MaxEval(maxEval), new ObjectiveFunction(adapter),
 						GoalType.MINIMIZE, new InitialGuess(
 								adapter.boundedToUnbounded((solution == null) ? startPoint : solution.getPointRef())));
-				double[] point = adapter.unboundedToBounded(optimum.getPointRef());
+				final double[] point = adapter.unboundedToBounded(optimum.getPointRef());
 				optimum = new PointValuePair(point, optimum.getValue());
 
 				if (solution == null || optimum.getValue() < solution.getValue())
-				{
 					solution = optimum;
-				}
 			}
-			catch (Exception e)
+			catch (final Exception e)
 			{
 				IJ.log("Bounded Powell error: " + e.getMessage());
 				if (e instanceof TooManyEvaluationsException)
-				{
 					maxEval = (int) (maxEval * 1.5);
-				}
 			}
 		}
 
@@ -471,35 +459,31 @@ public class EMGainAnalysis implements PlugInFilter
 			return;
 		}
 
-		double[] point = solution.getPointRef();
+		final double[] point = solution.getPointRef();
 		photons = point[0];
 		gain = point[1];
 		noise = point[2];
 		bias = (int) Math.round(point[3]);
-		String label = String.format("Fitted bias=%d, gain=%s, noise=%s, photons=%s", (int) bias, Utils.rounded(gain),
+		final String label = String.format("Fitted bias=%d, gain=%s, noise=%s, photons=%s", (int) bias, Utils.rounded(gain),
 				Utils.rounded(noise), Utils.rounded(photons));
 		Utils.log(label);
 
 		if (simulate)
-		{
 			Utils.log("Relative Error bias=%s, gain=%s, noise=%s, photons=%s",
 					Utils.rounded(relativeError(bias, _bias)), Utils.rounded(relativeError(gain, _gain)),
 					Utils.rounded(relativeError(noise, _noise)), Utils.rounded(relativeError(photons, _photons)));
-		}
 
 		// Show the PoissonGammaGaussian approximation
 		double[] f = null;
 		if (showApproximation)
 		{
 			f = new double[x.length];
-			PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / gain, noise);
+			final PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / gain, noise);
 			final double expected = photons * gain;
 			for (int i = 0; i < f.length; i++)
-			{
 				f[i] = fun.likelihood(x[i] - bias, expected);
 				//System.out.printf("x=%d, g=%f, f=%f, error=%f\n", (int) x[i], g[i], f[i],
 				//		gdsc.smlm.fitting.utils.DoubleEquality.relativeError(g[i], f[i]));
-			}
 			yMax = Maths.maxDefault(yMax, f);
 		}
 
@@ -533,7 +517,7 @@ public class EMGainAnalysis implements PlugInFilter
 	private static MultivariateFunction getFunction(final int[] limits, final double[] y, final int max,
 			final int maxEval)
 	{
-		MultivariateFunction fun = new MultivariateFunction()
+		final MultivariateFunction fun = new MultivariateFunction()
 		{
 			int eval = 0;
 
@@ -544,10 +528,10 @@ public class EMGainAnalysis implements PlugInFilter
 				if (Utils.isInterrupted())
 					throw new TooManyEvaluationsException(maxEval);
 				// Compute the sum of squares between the two functions
-				double photons = point[0];
-				double gain = point[1];
-				double noise = point[2];
-				int bias = (int) Math.round(point[3]);
+				final double photons = point[0];
+				final double gain = point[1];
+				final double noise = point[2];
+				final int bias = (int) Math.round(point[3]);
 				//System.out.printf("[%d] = %s\n", eval, Arrays.toString(point));
 				final double[] g = pdf(max, photons, gain, noise, bias);
 				double ss = 0;
@@ -578,7 +562,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private static double[] pdfEMGain(final double step, final double p, final double m)
 	{
-		StoredDataStatistics stats = new StoredDataStatistics(100);
+		final StoredDataStatistics stats = new StoredDataStatistics(100);
 		stats.add(FastMath.exp(-p));
 		for (int c = 1;; c++)
 		{
@@ -629,11 +613,11 @@ public class EMGainAnalysis implements PlugInFilter
 	{
 		if (max == 0)
 			return pdfEMGain(step, p, m);
-		double[] g = new double[max + 1];
+		final double[] g = new double[max + 1];
 		g[0] = FastMath.exp(-p);
 		for (int c = 1;; c++)
 		{
-			double count = c * step;
+			final double count = c * step;
 			g[c] = pEMGain(count, p, m);
 			if (g[c] == 0 || count >= max)
 				break;
@@ -671,7 +655,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private PDF pdf(final int max, final double step, final double p, final double m, final double s)
 	{
-		double[] g = pdfEMGain(max, step, p, m);
+		final double[] g = pdfEMGain(max, step, p, m);
 		double[] gg;
 
 		int zero = 0;
@@ -680,7 +664,7 @@ public class EMGainAnalysis implements PlugInFilter
 		{
 			// Convolve with Gaussian kernel up to 4 times the standard deviation
 			final int radius = (int) Math.ceil(Math.abs(s) * 4 / step) + 1;
-			double[] kernel = new double[2 * radius + 1];
+			final double[] kernel = new double[2 * radius + 1];
 			final double norm = -0.5 / (s * s);
 			for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
 				kernel[j] = kernel[jj] = FastMath.exp(norm * Maths.pow2(i * step));
@@ -709,11 +693,9 @@ public class EMGainAnalysis implements PlugInFilter
 			zero = radius;
 		}
 		else
-		{
 			gg = g;
-		}
 
-		double[] x = new double[gg.length];
+		final double[] x = new double[gg.length];
 		for (int i = 0, j = -zero; i < x.length; i++, j++)
 			x[i] = j * step;
 
@@ -739,14 +721,14 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private static double[] pdf(final int max, final double p, final double m, final double s, int c0)
 	{
-		double[] g = pdfEMGain(max, p, m);
+		final double[] g = pdfEMGain(max, p, m);
 		double[] gg;
 
 		if (s > 0)
 		{
 			// Convolve with Gaussian kernel up to 4 times the standard deviation
 			final int radius = (int) Math.ceil(Math.abs(s) * 4) + 1;
-			double[] kernel = new double[2 * radius + 1];
+			final double[] kernel = new double[2 * radius + 1];
 			final double norm = -0.5 / (s * s);
 			for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
 				kernel[j] = kernel[jj] = FastMath.exp(norm * i * i);
@@ -765,7 +747,7 @@ public class EMGainAnalysis implements PlugInFilter
 			gg = g;
 
 		// Pad with constant c0
-		double[] g0 = new double[gg.length + c0];
+		final double[] g0 = new double[gg.length + c0];
 		for (int c = 0; c < gg.length; c++)
 			if (c + c0 >= 0)
 				g0[c + c0] = gg[c];
@@ -831,7 +813,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	private int showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Analyse the white-light histogram of an image stack to determine EM-gain parameters.\n \n" +
@@ -887,9 +869,9 @@ public class EMGainAnalysis implements PlugInFilter
 		if (!showPMFDialog())
 			return;
 
-		double step = getStepSize(_photons, _gain, _noise);
+		final double step = getStepSize(_photons, _gain, _noise);
 
-		PDF pdf = pdf(0, step, _photons, _gain, _noise);
+		final PDF pdf = pdf(0, step, _photons, _gain, _noise);
 		double[] pmf = pdf.p;
 		double[] x = pdf.x;
 		double yMax = Maths.max(pmf);
@@ -915,7 +897,7 @@ public class EMGainAnalysis implements PlugInFilter
 				myNoise = 0;
 			case 0:
 			default:
-				PoissonGammaGaussianFunction myFun = new PoissonGammaGaussianFunction(1.0 / _gain, myNoise);
+				final PoissonGammaGaussianFunction myFun = new PoissonGammaGaussianFunction(1.0 / _gain, myNoise);
 				myFun.setMinimumProbability(0);
 				fun = myFun;
 		}
@@ -925,10 +907,10 @@ public class EMGainAnalysis implements PlugInFilter
 		//expected *= _gain;
 
 		// Normalise
-		boolean normalise = false;
+		final boolean normalise = false;
 		if (normalise)
 		{
-			double sum = Maths.sum(pmf);
+			final double sum = Maths.sum(pmf);
 			for (int i = pmf.length; i-- > 0;)
 				pmf[i] /= sum;
 		}
@@ -941,7 +923,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double[] f = new double[x.length];
 		double[] cdf1 = new double[pmf.length];
 		double[] cdf2 = new double[pmf.length];
-		double step_2 = step / 2;
+		final double step_2 = step / 2;
 		for (int i = 0; i < cdf1.length; i++)
 		{
 			// Trapezoid integration
@@ -991,10 +973,10 @@ public class EMGainAnalysis implements PlugInFilter
 		if (showApproximation)
 			yMax = Maths.maxDefault(yMax, f);
 
-		String label = String.format("Gain=%s, noise=%s, photons=%s", Utils.rounded(_gain), Utils.rounded(_noise),
+		final String label = String.format("Gain=%s, noise=%s, photons=%s", Utils.rounded(_gain), Utils.rounded(_noise),
 				Utils.rounded(_photons));
 
-		Plot2 plot = new Plot2("PMF", "ADUs", "p");
+		final Plot2 plot = new Plot2("PMF", "ADUs", "p");
 		plot.setLimits(x[0], x[x.length - 1], 0, yMax);
 		plot.setColor(Color.red);
 		plot.addPoints(x, pmf, Plot.LINE);
@@ -1008,10 +990,10 @@ public class EMGainAnalysis implements PlugInFilter
 		plot.drawLine(_photons * _gain, 0, _photons * _gain, yMax);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, label);
-		PlotWindow win1 = Utils.display("PMF", plot);
+		final PlotWindow win1 = Utils.display("PMF", plot);
 
 		// Plot the difference between the actual and approximation
-		double[] delta = new double[f.length];
+		final double[] delta = new double[f.length];
 		for (int i = 0; i < f.length; i++)
 		{
 			if (pmf[i] == 0 && f[i] == 0)
@@ -1022,8 +1004,8 @@ public class EMGainAnalysis implements PlugInFilter
 				delta[i] = f[i] - pmf[i];
 		}
 
-		Plot2 plot2 = new Plot2("PMF delta", "ADUs", (relativeDelta) ? "Relative delta" : "delta");
-		double[] limits = Maths.limits(delta);
+		final Plot2 plot2 = new Plot2("PMF delta", "ADUs", (relativeDelta) ? "Relative delta" : "delta");
+		final double[] limits = Maths.limits(delta);
 		plot2.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
 		plot2.setColor(Color.red);
 		plot2.addPoints(x, delta, Plot.LINE);
@@ -1031,11 +1013,11 @@ public class EMGainAnalysis implements PlugInFilter
 		plot2.drawLine(_photons * _gain, limits[0], _photons * _gain, limits[1]);
 		plot2.setColor(Color.black);
 		plot2.addLabel(0, 0, label + ((offset == 0) ? "" : ", expected = " + Utils.rounded(expected / _gain)));
-		PlotWindow win2 = Utils.display("PMF delta", plot2);
+		final PlotWindow win2 = Utils.display("PMF delta", plot2);
 
 		if (Utils.isNewWindow())
 		{
-			Point p2 = win1.getLocation();
+			final Point p2 = win1.getLocation();
 			p2.y += win1.getHeight();
 			win2.setLocation(p2);
 		}
@@ -1048,7 +1030,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double xd = x[0];
 		for (int i = 0; i < cdf1.length; i++)
 		{
-			double dist = Math.abs(cdf1[i] - cdf2[i]);
+			final double dist = Math.abs(cdf1[i] - cdf2[i]);
 			if (kolmogorovDistance < dist)
 			{
 				kolmogorovDistance = dist;
@@ -1058,7 +1040,7 @@ public class EMGainAnalysis implements PlugInFilter
 		cdf1 = Arrays.copyOfRange(cdf1, min, max);
 		cdf2 = Arrays.copyOfRange(cdf2, min, max);
 
-		Plot2 plot3 = new Plot2("CDF", "ADUs", "p");
+		final Plot2 plot3 = new Plot2("CDF", "ADUs", "p");
 		yMax = 1.05;
 		plot3.setLimits(x[0], x[x.length - 1], 0, yMax);
 		plot3.setColor(Color.red);
@@ -1072,11 +1054,11 @@ public class EMGainAnalysis implements PlugInFilter
 		plot3.setColor(Color.black);
 		plot3.addLabel(0, 0, label + ", Kolmogorov distance = " + Utils.rounded(kolmogorovDistance) + " @ " + xd);
 		plot3.addLegend("CDF\nApprox");
-		PlotWindow win3 = Utils.display("CDF", plot3);
+		final PlotWindow win3 = Utils.display("CDF", plot3);
 
 		if (Utils.isNewWindow())
 		{
-			Point p2 = win1.getLocation();
+			final Point p2 = win1.getLocation();
 			p2.x += win1.getWidth();
 			win3.setLocation(p2);
 		}
@@ -1119,7 +1101,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	private boolean showPMFDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Plot the probability mass function for EM-gain");

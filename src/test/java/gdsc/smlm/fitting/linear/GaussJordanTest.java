@@ -37,16 +37,16 @@ public class GaussJordanTest
 	@Test
 	public void canSolveLinearEquation()
 	{
-		GaussJordan solver = new GaussJordan();
+		final GaussJordan solver = new GaussJordan();
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Example taken from http://eigen.tuxfamily.org/dox/TutorialLinearAlgebra.html
-		float[][] a = new float[][] { new float[] { 1, 2, 3 }, new float[] { 4, 5, 6 }, new float[] { 7, 8, 10 } };
-		float[] b = new float[] { 3, 3, 4 };
-		float[] expecteds = new float[] { -2, 1, 1 };
+		final float[][] a = new float[][] { new float[] { 1, 2, 3 }, new float[] { 4, 5, 6 }, new float[] { 7, 8, 10 } };
+		final float[] b = new float[] { 3, 3, 4 };
+		final float[] expecteds = new float[] { -2, 1, 1 };
 
-		boolean result = solver.solve(a, b);
+		final boolean result = solver.solve(a, b);
 
 		Assert.assertTrue(result);
 		Assert.assertArrayEquals(expecteds, b, 1e-4f);

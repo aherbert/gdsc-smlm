@@ -35,22 +35,22 @@ public class NormaliserTest extends AbstractFilterTest
 	@Test
 	public void nonNormaliserCanCopyToOutDataWithBorder()
 	{
-		RandomGenerator rg = TestSettings.getRandomGenerator();
+		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
-		for (int width : primes)
-			for (int height : primes)
+		for (final int width : primes)
+			for (final int height : primes)
 			{
-				float[] data = createData(rg, width, height);
-				for (int boxSize : boxSizes)
+				final float[] data = createData(rg, width, height);
+				for (final int boxSize : boxSizes)
 				{
-					String msg = null; //String.format("%dx%d : border=%d", width, height, boxSize);
+					final String msg = null; //String.format("%dx%d : border=%d", width, height, boxSize);
 					//System.out.println(msg);
 
 					// Assume fixed normaliser works
-					FixedNormaliser n = new FixedNormaliser(1);
-					NonNormaliser nn = new NonNormaliser();
-					float[] e = new float[data.length];
-					float[] o = new float[data.length];
+					final FixedNormaliser n = new FixedNormaliser(1);
+					final NonNormaliser nn = new NonNormaliser();
+					final float[] e = new float[data.length];
+					final float[] o = new float[data.length];
 					n.normalise(data, e, width, height, boxSize);
 					nn.normalise(data, o, width, height, boxSize);
 					Assert.assertArrayEquals(msg, o, e, 0);

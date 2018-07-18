@@ -257,9 +257,7 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	public int compareTo(LocalisationModel o)
 	{
 		if (time == o.time)
-		{
 			return Double.compare(o.intensity, intensity);
-		}
 		return (time < o.time) ? -1 : 1;
 	}
 

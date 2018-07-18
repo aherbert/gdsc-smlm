@@ -40,7 +40,6 @@ public abstract class XStreamWrapper
 	{
 		xs = new XStream(new DomDriver());
 		if (xs != null)
-		{
 			try
 			{
 				XStream.setupDefaultSecurity(xs); // to be removed after 1.5
@@ -89,16 +88,14 @@ public abstract class XStreamWrapper
 				//for (Class<? extends DirectFilter> type : subTypes)
 				//	addAlias(type);
 			}
-			catch (XStreamException ex)
+			catch (final XStreamException ex)
 			{
 				ex.printStackTrace();
 			}
-			catch (Exception ex)
+			catch (final Exception ex)
 			{
 				ex.printStackTrace();
 			}
-
-		}
 	}
 
 	/**
@@ -126,20 +123,18 @@ public abstract class XStreamWrapper
 	public static String toXML(Object object)
 	{
 		if (xs != null)
-		{
 			try
 			{
 				return xs.toXML(object);
 			}
-			catch (XStreamException ex)
+			catch (final XStreamException ex)
 			{
 				ex.printStackTrace();
 			}
-			catch (Exception ex)
+			catch (final Exception ex)
 			{
 				ex.printStackTrace();
 			}
-		}
 		return "";
 	}
 
@@ -153,20 +148,18 @@ public abstract class XStreamWrapper
 	public static Object fromXML(String xml)
 	{
 		if (xs != null)
-		{
 			try
 			{
 				return xs.fromXML(xml);
 			}
-			catch (XStreamException ex)
+			catch (final XStreamException ex)
 			{
 				ex.printStackTrace();
 			}
-			catch (Exception ex)
+			catch (final Exception ex)
 			{
 				ex.printStackTrace();
 			}
-		}
 		return null;
 	}
 

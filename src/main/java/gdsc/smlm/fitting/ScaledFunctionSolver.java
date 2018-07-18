@@ -34,10 +34,10 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 {
 	/** The up scale. */
 	protected final double upScale;
-	
+
 	/** The down scale. */
 	protected final double downScale;
-	
+
 	/** The indices. */
 	protected final int[] indices;
 
@@ -66,10 +66,10 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 	public FitStatus fit(double[] y, double[] f, double[] a, double[] aDev)
 	{
 		// Do not break the view that the solver has on the data
-		double[] f2 = (f == null) ? null : new double[f.length];
-		double[] a2 = cloneAndScaleParameters(a, upScale);
-		double[] aDev2 = (aDev == null) ? null : new double[aDev.length];
-		FitStatus result = solver.fit(y, f2, a2, aDev2);
+		final double[] f2 = (f == null) ? null : new double[f.length];
+		final double[] a2 = cloneAndScaleParameters(a, upScale);
+		final double[] aDev2 = (aDev == null) ? null : new double[aDev.length];
+		final FitStatus result = solver.fit(y, f2, a2, aDev2);
 		scaleFunctionValue(f2, f, downScale);
 		scaleParameters(a2, a, downScale);
 		scaleDeviations(aDev2, aDev, downScale);
@@ -100,9 +100,9 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 	public boolean evaluate(double[] y, double[] f, double[] a)
 	{
 		// Do not break the view that the solver has on the data
-		double[] f2 = (f == null) ? null : new double[f.length];
-		double[] a2 = cloneAndScaleParameters(a, upScale);
-		boolean result = solver.evaluate(y, f2, a2);
+		final double[] f2 = (f == null) ? null : new double[f.length];
+		final double[] a2 = cloneAndScaleParameters(a, upScale);
+		final boolean result = solver.evaluate(y, f2, a2);
 		if (result)
 		{
 			scaleFunctionValue(f2, f, downScale);
@@ -115,9 +115,9 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
 		// Do not break the view that the solver has on the data
-		double[] a2 = cloneAndScaleParameters(a, upScale);
-		double[] aDev2 = new double[aDev.length]; // Assume aDev is not null
-		boolean result = solver.computeDeviations(y, a2, aDev2);
+		final double[] a2 = cloneAndScaleParameters(a, upScale);
+		final double[] aDev2 = new double[aDev.length]; // Assume aDev is not null
+		final boolean result = solver.computeDeviations(y, a2, aDev2);
 		if (result)
 			scaleDeviations(aDev2, aDev, downScale);
 		return result;
@@ -159,7 +159,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 
 	private double[] cloneAndScaleParameters(double[] a, double scale)
 	{
-		double[] out = a.clone();
+		final double[] out = a.clone();
 		scaleParameters(a, out, scale);
 		return out;
 	}

@@ -79,16 +79,16 @@ public class Trace extends Cluster
 
 			// Ensure in the correct time-order
 			sort();
-			TIntLinkedList on = new TIntLinkedList();
-			TIntLinkedList off = new TIntLinkedList();
+			final TIntLinkedList on = new TIntLinkedList();
+			final TIntLinkedList off = new TIntLinkedList();
 
 			nBlinks = 1;
 			int t1 = results.get(0).getFrame();
 			int onStart = t1;
 			for (int i = 0; i < results.size() - 1; i++)
 			{
-				int t2 = results.get(i + 1).getFrame();
-				int diff = t2 - t1;
+				final int t2 = results.get(i + 1).getFrame();
+				final int diff = t2 - t1;
 				if (diff > 1)
 				{
 					off.add(diff - 1);
@@ -137,7 +137,7 @@ public class Trace extends Cluster
 		if (times != null)
 		{
 			double av = 0;
-			for (int t : times)
+			for (final int t : times)
 				av += t;
 			return av / times.length;
 		}

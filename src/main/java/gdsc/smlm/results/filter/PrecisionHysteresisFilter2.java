@@ -92,7 +92,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 					Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 			useBackground = true;
 		}
-		catch (ConfigurationException e)
+		catch (final ConfigurationException e)
 		{
 			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
 					Gaussian2DPeakResultHelper.LSE_PRECISION);
@@ -108,13 +108,9 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	{
 		final double variance;
 		if (useBackground)
-		{
 			variance = calculator.getLSEVariance(result.getParameters());
-		}
 		else
-		{
 			variance = calculator.getLSEVariance(result.getParameters(), result.getNoise());
-		}
 		if (variance <= lowerVariance)
 			return PeakStatus.OK;
 		else if (variance <= upperVariance)
@@ -203,9 +199,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	{
 		checkIndex(index);
 		if (index < super.getNumberOfParameters())
-		{
 			return super.getParameterType(index);
-		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
@@ -228,7 +222,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 		// No adjustment of the mode parameters
 		if (index == 1 || index == 3)
 			return this;
-		double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
+		final double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
 				strictPrecision, range };
 		if (index == 0)
 			parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());

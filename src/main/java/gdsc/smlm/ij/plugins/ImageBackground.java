@@ -47,7 +47,7 @@ public class ImageBackground implements PlugInFilter
 	private static float bias = 500;
 	private static double sigma = 2;
 
-	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+	private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 	private ImagePlus imp;
 
 	/*
@@ -73,7 +73,7 @@ public class ImageBackground implements PlugInFilter
 
 	private int showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		final GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Creates a background and mask image from a sample input stack\nusing a median projection");
@@ -94,7 +94,7 @@ public class ImageBackground implements PlugInFilter
 		{
 			Parameters.isPositive("Bias", bias);
 		}
-		catch (IllegalArgumentException e)
+		catch (final IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
 			return DONE;
@@ -111,17 +111,17 @@ public class ImageBackground implements PlugInFilter
 	@Override
 	public void run(ImageProcessor ip)
 	{
-		ImageProcessor median = getProjection();
+		final ImageProcessor median = getProjection();
 		//Utils.display("Median", median);
 
-		ImageProcessor background = applyBlur(median);
+		final ImageProcessor background = applyBlur(median);
 		subtractBias(background);
 
 		Utils.display("Background", background);
 
 		// Q. Is there a better way to do the thresholding for foreground pixels.
 		// Ideally we want to outline cell shapes.
-		ImageProcessor mask = median.convertToByte(true);
+		final ImageProcessor mask = median.convertToByte(true);
 		mask.autoThreshold();
 
 		Utils.display("Mask", mask);
@@ -130,10 +130,10 @@ public class ImageBackground implements PlugInFilter
 	private ImageProcessor getProjection()
 	{
 		// Get median intensity projection
-		ZProjector p = new ZProjector(imp);
+		final ZProjector p = new ZProjector(imp);
 		p.setMethod(ZProjector.MEDIAN_METHOD);
 		p.doProjection();
-		ImageProcessor median = p.getProjection().getProcessor();
+		final ImageProcessor median = p.getProjection().getProcessor();
 		return median;
 	}
 
@@ -143,7 +143,7 @@ public class ImageBackground implements PlugInFilter
 		if (sigma > 0)
 		{
 			blur = median.duplicate();
-			GaussianBlur gb = new GaussianBlur();
+			final GaussianBlur gb = new GaussianBlur();
 			gb.blurGaussian(blur, sigma, sigma, 0.0002);
 		}
 		return blur;
@@ -151,7 +151,7 @@ public class ImageBackground implements PlugInFilter
 
 	private static void subtractBias(ImageProcessor background)
 	{
-		float[] data = (float[]) background.getPixels();
+		final float[] data = (float[]) background.getPixels();
 		for (int i = 0; i < data.length; i++)
 			data[i] = FastMath.max(0f, data[i] - bias);
 		background.resetMinAndMax();

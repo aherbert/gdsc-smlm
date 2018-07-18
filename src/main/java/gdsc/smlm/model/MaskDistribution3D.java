@@ -43,17 +43,17 @@ import org.apache.commons.math3.random.Well19937c;
  */
 public class MaskDistribution3D implements SpatialDistribution
 {
-	private RandomGenerator randomGenerator;
+	private final RandomGenerator randomGenerator;
 	private UniformDistribution uniformDistribution;
-	private int[] mask;
+	private final int[] mask;
 	private int[] indices;
 	private final int maxx, maxy, maxz, maxx_maxy;
 	private final double halfWidth, halfHeight;
-	private double minDepth, depth;
+	private final double minDepth, depth;
 	private int particle = 0;
 	private final double scaleX, scaleY;
 
-	private double sliceDepth;
+	private final double sliceDepth;
 	private MaskDistribution projection = null;
 
 	/**
@@ -151,7 +151,7 @@ public class MaskDistribution3D implements SpatialDistribution
 		indices = new int[mask.length];
 
 		int count = 0, index = 0;
-		for (int[] mask : masks)
+		for (final int[] mask : masks)
 		{
 			if (mask.length < maxx_maxy)
 				throw new IllegalArgumentException("Masks must be the same size");
@@ -188,7 +188,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	public double[] next()
 	{
 		final int randomPosition = randomGenerator.nextInt(indices.length);
-		int[] xyz = new int[3];
+		final int[] xyz = new int[3];
 		getXYZ(indices[randomPosition], xyz);
 		final double[] d = uniformDistribution.nextUnit();
 
@@ -202,9 +202,9 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	private int getIndex(double[] xyz)
 	{
-		int x = (int) (halfWidth + xyz[0] / scaleX);
-		int y = (int) (halfHeight + xyz[1] / scaleY);
-		int z = (int) ((xyz[2] - minDepth) / sliceDepth);
+		final int x = (int) (halfWidth + xyz[0] / scaleX);
+		final int y = (int) (halfHeight + xyz[1] / scaleY);
+		final int z = (int) ((xyz[2] - minDepth) / sliceDepth);
 		if (x < 0 || x >= maxx || y < 0 || y >= maxy || z < 0 || z >= maxz)
 			return -1;
 		return getIndex(x, y, z);
@@ -218,15 +218,13 @@ public class MaskDistribution3D implements SpatialDistribution
 	@Override
 	public boolean isWithin(double[] xyz)
 	{
-		int index = getIndex(xyz);
+		final int index = getIndex(xyz);
 		if (index < 0 || index >= mask.length || mask[index] == 0)
 			return false;
 		// Check if the search was initialised in a particle
 		if (particle == 0)
-		{
 			// No starting particle so just accept the position
 			return true;
-		}
 		// Must be in the same particle as the initial position
 		return mask[index] == particle;
 	}
@@ -248,15 +246,11 @@ public class MaskDistribution3D implements SpatialDistribution
 		// Create a projection of the masks
 		if (projection == null)
 		{
-			int[] mask2 = new int[maxx_maxy];
+			final int[] mask2 = new int[maxx_maxy];
 			for (int z = 0, index = 0; z < maxz; z++)
-			{
 				for (int j = 0; j < maxx_maxy; j++)
-				{
 					if (mask[index++] != 0)
 						mask2[j] = 1;
-				}
-			}
 			projection = new MaskDistribution(mask2, maxx, maxy, sliceDepth, scaleX, scaleY, randomGenerator);
 		}
 	}
@@ -307,26 +301,20 @@ public class MaskDistribution3D implements SpatialDistribution
 		// Create the offset table (for single array 3D neighbour comparisons)
 		offset = new int[DIR_X_OFFSET.length];
 		for (int d = offset.length; d-- > 0;)
-		{
 			offset[d] = getIndex(DIR_X_OFFSET[d], DIR_Y_OFFSET[d], DIR_Z_OFFSET[d]);
-		}
 
-		int[] pList = new int[mask.length];
+		final int[] pList = new int[mask.length];
 
 		// Store all the non-zero positions
-		boolean[] binaryMask = new boolean[mask.length];
+		final boolean[] binaryMask = new boolean[mask.length];
 		for (int i = 0; i < mask.length; i++)
 			binaryMask[i] = (mask[i] != 0);
 
 		// Find particles
 		int particles = 0;
 		for (int i = 0; i < binaryMask.length; i++)
-		{
 			if (binaryMask[i])
-			{
 				expandParticle(binaryMask, mask, pList, i, ++particles);
-			}
-		}
 
 		//// Debug
 		//ImageStack stack = new ImageStack(maxx, maxy, maxz);
@@ -371,7 +359,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	private int[] getXYZ(int index, int[] xyz)
 	{
 		xyz[2] = index / (maxx_maxy);
-		int mod = index % (maxx_maxy);
+		final int mod = index % (maxx_maxy);
 		xyz[1] = mod / maxx;
 		xyz[0] = mod % maxx;
 		return xyz;
@@ -386,14 +374,14 @@ public class MaskDistribution3D implements SpatialDistribution
 		int listI = 0; // index of current search element in the list
 		int listLen = 1; // number of elements in the list
 
-		int[] xyz = new int[3];
+		final int[] xyz = new int[3];
 
 		// we create a list of connected points and start the list at the particle start position
 		pList[listI] = index0;
 
 		do
 		{
-			int index1 = pList[listI];
+			final int index1 = pList[listI];
 			// Mark this position as part of the particle
 			mask[index1] = particle;
 
@@ -408,10 +396,9 @@ public class MaskDistribution3D implements SpatialDistribution
 
 			// Search the neighbours
 			for (int d = 26; d-- > 0;)
-			{
 				if (isInnerXYZ || (isInnerXY && isWithinZ(z1, d)) || isWithinXYZ(x1, y1, z1, d))
 				{
-					int index2 = index1 + offset[d];
+					final int index2 = index1 + offset[d];
 					if (binaryMask[index2])
 					{
 						binaryMask[index2] = false; // mark as processed
@@ -419,7 +406,6 @@ public class MaskDistribution3D implements SpatialDistribution
 						pList[listLen++] = index2;
 					}
 				}
-			}
 
 			listI++;
 

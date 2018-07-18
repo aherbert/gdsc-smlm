@@ -42,7 +42,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 public class TurboListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection
 {
 	/** The results. */
-	private TurboList<PeakResult> results;
+	private final TurboList<PeakResult> results;
 
 	/**
 	 * Instantiates a new array list peak results store.
@@ -130,13 +130,9 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
 	public boolean addStore(PeakResultStore results)
 	{
 		if (results instanceof TurboListPeakResultStore)
-		{
 			return this.results.addAll(((TurboListPeakResultStore) results).results);
-		}
 		else
-		{
 			return addArray(results.toArray());
-		}
 	}
 
 	/*
@@ -159,13 +155,9 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
 	public void remove(int fromIndex, int toIndex)
 	{
 		if (fromIndex > toIndex)
-		{
 			throw new IllegalArgumentException("fromIndex must be <= toIndex");
-		}
 		for (int i = toIndex; i >= fromIndex; i--)
-		{
 			results.remove(i);
-		}
 	}
 
 	/*
@@ -210,13 +202,9 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
 	public boolean removeStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return removeArray(results.toArray());
-		}
 	}
 
 	/*
@@ -250,13 +238,9 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
 	public boolean retainStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
-		{
 			return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
-		}
 		else
-		{
 			return retainArray(results.toArray());
-		}
 	}
 
 	/*
@@ -324,7 +308,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
 	{
 		if (deepCopy)
 		{
-			TurboListPeakResultStore copy = new TurboListPeakResultStore(size());
+			final TurboListPeakResultStore copy = new TurboListPeakResultStore(size());
 			for (int i = 0, size = size(); i < size; i++)
 				copy.add(results.getf(i).clone());
 			return copy;

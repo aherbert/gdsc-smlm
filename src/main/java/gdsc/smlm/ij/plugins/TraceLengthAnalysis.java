@@ -72,7 +72,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 	private TypeConverter<DistanceUnit> distanceConverter;
 	private TypeConverter<TimeUnit> timeConverter;
-	private SimpleLock lock = new SimpleLock();
+	private final SimpleLock lock = new SimpleLock();
 	private double _msdThreshold = -1;
 	private boolean _normalise = false;
 	private int _index;
@@ -116,7 +116,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			distanceConverter = results.getDistanceConverter(DistanceUnit.UM);
 			timeConverter = results.getTimeConverter(TimeUnit.SECOND);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			IJ.error(TITLE, "Cannot convert units to um or seconds: " + e.getMessage());
 			return;
@@ -126,17 +126,17 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		double precision = 0;
 		try
 		{
-			PrecisionResultProcedure p = new PrecisionResultProcedure(results);
+			final PrecisionResultProcedure p = new PrecisionResultProcedure(results);
 			p.getPrecision();
 
 			// Precision in nm using the median
 			precision = new Percentile().evaluate(p.precision, 50);
 			// Maths.sum(p.precision) / p.precision.length;
-			double rawPrecision = distanceConverter.convertBack(precision / 1e3); // Convert from nm to um to raw units
+			final double rawPrecision = distanceConverter.convertBack(precision / 1e3); // Convert from nm to um to raw units
 			// Get the localisation error (4s^2) in units^2
 			error = 4 * rawPrecision * rawPrecision;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			Utils.log(TITLE + " - Unable to compute precision: " + e.getMessage());
 		}
@@ -151,7 +151,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		d = dList.toArray();
 		length = lengthList.toArray();
 		id = idList.toArray();
-		int[] limits = Maths.limits(length);
+		final int[] limits = Maths.limits(length);
 		minX = limits[0] - 1;
 		maxX = limits[1] + 1;
 		h1 = new int[limits[1] + 1];
@@ -162,11 +162,11 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		y2 = new float[x1.length];
 
 		// Sort by MSD
-		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
+		final int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 		Sort.sortAscending(indices, d, false);
-		double[] d2 = d.clone();
-		int[] length2 = length.clone();
-		int[] id2 = id.clone();
+		final double[] d2 = d.clone();
+		final int[] length2 = length.clone();
+		final int[] id2 = id.clone();
 		for (int i = 0; i < indices.length; i++)
 		{
 			d[i] = d2[indices[i]];
@@ -178,17 +178,17 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addMessage(String.format("Split traces into fixed or moving using the track diffusion coefficient (D).\n" +
 				"Localistion error has been subtracted from jumps (%s nm).", Utils.rounded(precision)));
-		Statistics s = new Statistics(d);
-		double av = s.getMean();
-		String msg = String.format("Average D per track = %s um^2/s", Utils.rounded(av));
+		final Statistics s = new Statistics(d);
+		final double av = s.getMean();
+		final String msg = String.format("Average D per track = %s um^2/s", Utils.rounded(av));
 		gd.addMessage(msg);
 		// Histogram the diffusion coefficients
-		WindowOrganiser wo = new WindowOrganiser();
-		int id = Utils.showHistogram("Trace diffusion coefficient", new StoredData(d), "D (um^2/s)", 0, 1, 0, msg);
+		final WindowOrganiser wo = new WindowOrganiser();
+		final int id = Utils.showHistogram("Trace diffusion coefficient", new StoredData(d), "D (um^2/s)", 0, 1, 0, msg);
 		if (Utils.isNewWindow())
 			wo.add(id);
-		double min = Utils.xValues[0];
-		double max = Utils.xValues[Utils.xValues.length - 1];
+		final double min = Utils.xValues[0];
+		final double max = Utils.xValues[Utils.xValues.length - 1];
 		// see if we can build a nice slider range from the histogram limits
 		if (max - min < 5)
 			// Because sliders are used when the range is <5 and floating point
@@ -210,7 +210,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			return;
 
 		// Sort by ID
-		PeakResult[] list = results.toArray();
+		final PeakResult[] list = results.toArray();
 		Arrays.sort(list, new IdFramePeakResultComparator());
 
 		createResults(results, "Fixed", 0, _index, list);
@@ -219,7 +219,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 	private void createResults(MemoryPeakResults results, String suffix, int from, int to, PeakResult[] list)
 	{
-		MemoryPeakResults out = new MemoryPeakResults();
+		final MemoryPeakResults out = new MemoryPeakResults();
 		out.copySettings(results);
 		out.setName(results.getName() + " " + suffix);
 
@@ -228,7 +228,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 		for (int i = 0; i < list.length && from < to;)
 		{
-			int nextId = id[from++];
+			final int nextId = id[from++];
 			// Move forward
 			while (i < list.length && list[i].getId() < nextId)
 				i++;
@@ -242,7 +242,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 	private static boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Analyse the track length of traced data");
 		ResultsManager.addInput(gd, "Input", inputOption, InputSource.MEMORY_CLUSTERED);
 		gd.showDialog();
@@ -280,24 +280,24 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		// Histogram the distributions
 		computeHistogram(0, index, length, h1);
 		computeHistogram(index, length.length, length, h2);
-		int sum1 = (int) Maths.sum(h1);
-		int sum2 = (int) Maths.sum(h2);
+		final int sum1 = (int) Maths.sum(h1);
+		final int sum2 = (int) Maths.sum(h2);
 
-		float max1 = createHistogramValues(h1, (_normalise) ? sum1 : 1, y1);
-		float max2 = createHistogramValues(h2, (_normalise) ? sum2 : 2, y2);
+		final float max1 = createHistogramValues(h1, (_normalise) ? sum1 : 1, y1);
+		final float max2 = createHistogramValues(h2, (_normalise) ? sum2 : 2, y2);
 
-		String title = "Trace length distribution";
-		Plot plot = new Plot(title, "Length", "Frequency");
+		final String title = "Trace length distribution";
+		final Plot plot = new Plot(title, "Length", "Frequency");
 		plot.setLimits(minX, maxX, 0, Math.max(max1, max2) * 1.05);
 		plot.setColor(Color.red);
 		plot.addPoints(x1, y1, Plot.LINE);
 		plot.setColor(Color.blue);
 		plot.addPoints(x2, y2, Plot.LINE);
 		plot.setColor(Color.black);
-		double p = 100.0 * sum1 / (sum1 + sum2);
+		final double p = 100.0 * sum1 / (sum1 + sum2);
 		plot.addLabel(0, 0, String.format("Fixed (red) = %d (%s%%), Moving (blue) = %d (%s%%)", sum1, Utils.rounded(p),
 				sum2, Utils.rounded(100 - p)));
-		PlotWindow pw = Utils.display(title, plot, Utils.NO_TO_FRONT);
+		final PlotWindow pw = Utils.display(title, plot, Utils.NO_TO_FRONT);
 		if (wo != null)
 		{
 			// First call with the window organiser put at the front
@@ -311,9 +311,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	{
 		Arrays.fill(h, 0);
 		while (i < end)
-		{
 			h[length[i++]]++;
-		}
 	}
 
 	/**
@@ -328,9 +326,9 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	 */
 	public static float[] createHistogramAxis(int length, float offset)
 	{
-		float[] axis = new float[length * 4];
+		final float[] axis = new float[length * 4];
 		int index = 0;
-		float offset2 = offset + WIDTH;
+		final float offset2 = offset + WIDTH;
 		for (int i = 0; i < length; ++i)
 		{
 			axis[index++] = i + offset;
@@ -360,7 +358,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		float max = 0;
 		for (int i = 0; i < histogramY.length; ++i)
 		{
-			float v = (float) (histogramY[i] / norm);
+			final float v = (float) (histogramY[i] / norm);
 			axis[index++] = v;
 			axis[index++] = v;
 			if (max < v)
@@ -373,7 +371,6 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	private void update()
 	{
 		if (lock.acquire())
-		{
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
@@ -388,10 +385,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 									_msdThreshold != dThreshold ||
 									_normalise != normalise
 									)
-							//@formatter:on
-						{
-							draw(null);
-						}
+								draw(null);
 					}
 					finally
 					{
@@ -400,24 +394,23 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 					}
 				}
 			}).start();
-		}
 	}
 
 	private int lastid = -1;
 	private float lastx, lasty;
 	private int startFrame, lastFrame, n;
 	private double sumSquared;
-	private TDoubleArrayList dList = new TDoubleArrayList();
-	private TIntArrayList lengthList = new TIntArrayList();
-	private TIntArrayList idList = new TIntArrayList();
+	private final TDoubleArrayList dList = new TDoubleArrayList();
+	private final TIntArrayList lengthList = new TIntArrayList();
+	private final TIntArrayList idList = new TIntArrayList();
 
 	@Override
 	public void execute(PeakResult peakResult)
 	{
-		int id = peakResult.getId();
-		int frame = peakResult.getFrame();
-		float x = peakResult.getXPosition();
-		float y = peakResult.getYPosition();
+		final int id = peakResult.getId();
+		final int frame = peakResult.getFrame();
+		final float x = peakResult.getXPosition();
+		final float y = peakResult.getYPosition();
 		if (lastid != id)
 		{
 			store();
@@ -429,9 +422,9 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		else
 		{
 			// Compute the jump
-			int jump = frame - lastFrame;
+			final int jump = frame - lastFrame;
 			// Get the raw distance but subtract the expected localisation error
-			double d2 = Math.max(0, Maths.distance2(lastx, lasty, x, y) - error);
+			final double d2 = Math.max(0, Maths.distance2(lastx, lasty, x, y) - error);
 			// We expect the Mean Squared Distance (MSD) to scale linearly
 			// with time so just weight each jump by the time gap.
 			// However we apply a correction factor for diffusion with frames.
@@ -447,8 +440,8 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	{
 		if (lastid == 0 || n == 0)
 			return;
-		int length = lastFrame - startFrame;
-		double msd = sumSquared / n;
+		final int length = lastFrame - startFrame;
+		final double msd = sumSquared / n;
 		// 4D = MSD => D = MSD / 4
 		// Mean squared distance is in raw units squared.
 		// Convert twice since this is a squared distance then from frames to seconds.

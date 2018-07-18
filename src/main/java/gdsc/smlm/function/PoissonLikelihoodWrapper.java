@@ -63,7 +63,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	private static boolean initialiseFactorial(double[] data)
 	{
 		int max = 0;
-		for (double d : data)
+		for (final double d : data)
 		{
 			final int i = (int) d;
 			if (i != d || d < 0)
@@ -106,10 +106,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		// Pre-compute the sum over the data
 		double sum = 0;
 		if (integerData)
-		{
-			for (double d : k)
+			for (final double d : k)
 				sum += LogFactorial.logF((int) d);
-		}
 		else
 		{
 			// Pre-apply gain
@@ -143,13 +141,11 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
-			{
 				if (allowNegativeExpectedValues)
 					l = Double.MIN_VALUE;
 				else
 					// Since ln(0) -> -Infinity
 					return Double.POSITIVE_INFINITY;
-			}
 
 			final double k = data[i];
 			ll += l - k * Math.log(l);
@@ -177,7 +173,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		double ll = 0;
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
-		double[] dl_da = new double[nVariables];
+		final double[] dl_da = new double[nVariables];
 		for (int i = 0; i < n; i++)
 		{
 			// Function now computes expected poisson mean without gain
@@ -187,13 +183,11 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
-			{
 				if (allowNegativeExpectedValues)
 					l = Double.MIN_VALUE;
 				else
 					// Since ln(0) -> -Infinity
 					return Double.POSITIVE_INFINITY;
-			}
 			ll += l - k * Math.log(l);
 
 			// Continue to work out the gradient since this does not involve logs.
@@ -201,11 +195,9 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			// Function now computes expected poisson mean without gain
 			final double factor = (1 - k / l); // * alpha;
 			for (int j = 0; j < gradient.length; j++)
-			{
 				//gradient[j] += dl_da[j] - (dl_da[j] * k / l);
 				//gradient[j] += dl_da[j] * (1 - k / l);
 				gradient[j] += dl_da[j] * factor;
-			}
 		}
 		return ll + sumLogFactorialK;
 	}
@@ -223,13 +215,11 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
-		{
 			if (allowNegativeExpectedValues)
 				l = Double.MIN_VALUE;
 			else
 				// Since ln(0) -> -Infinity
 				return Double.POSITIVE_INFINITY;
-		}
 
 		final double k = data[i];
 		// Function now computes expected poisson mean without gain
@@ -246,29 +236,25 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	{
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
-		double[] dl_da = new double[nVariables];
+		final double[] dl_da = new double[nVariables];
 		// Function now computes expected poisson mean without gain
 		double l = f.eval(i, dl_da); // * alpha;
 
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
-		{
 			if (allowNegativeExpectedValues)
 				l = Double.MIN_VALUE;
 			else
 				// Since ln(0) -> -Infinity
 				return Double.POSITIVE_INFINITY;
-		}
 
 		final double k = data[i];
 		// Function now computes expected poisson mean without gain
 		final double factor = (1 - k / l); // * alpha;
 		for (int j = 0; j < gradient.length; j++)
-		{
 			//gradient[j] = dl_da[j] - (dl_da[j] * k / l);
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
-		}
 
 		// Function now computes expected poisson mean without gain
 		// The probability = p * alpha
@@ -297,9 +283,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	{
 		final boolean integerData = (int) k == k;
 		if (integerData)
-		{
 			LogFactorial.increaseTableMaxN((int) k);
-		}
 		return l - k * Math.log(l) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k));
 	}
 

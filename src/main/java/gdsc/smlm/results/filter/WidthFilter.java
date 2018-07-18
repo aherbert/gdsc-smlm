@@ -47,11 +47,11 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	/** The width. */
 	@XStreamAsAttribute
 	protected final double width;
-	
+
 	/** The upper sigma threshold. */
 	@XStreamOmitField
 	protected float upperSigmaThreshold;
-	
+
 	/** The width enabled. */
 	@XStreamOmitField
 	protected boolean widthEnabled;
@@ -77,7 +77,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
 
 		// Set the width limit
-		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		final double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
 		upperSigmaThreshold = Filter.getUpperLimit(s * width);
 	}
 
@@ -136,10 +136,8 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (widthEnabled)
-		{
 			if (peak.getXSDFactor() > upperSigmaThreshold)
 				return V_X_SD_FACTOR;
-		}
 		return 0;
 	}
 

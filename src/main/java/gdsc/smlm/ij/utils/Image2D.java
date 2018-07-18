@@ -59,7 +59,7 @@ public abstract class Image2D
 				throw new IllegalArgumentException("Negative dimensions");
 			return -1;
 		}
-		long size = (long) nr * nc;
+		final long size = (long) nr * nc;
 		if (size > MAX_SIZE_OF_32_BIT_ARRAY)
 		{
 			if (raiseException)
@@ -105,14 +105,10 @@ public abstract class Image2D
 		nr = image.getHeight();
 		createData(checkSize(nc, nr, true));
 		if (image.getBitDepth() == 32)
-		{
 			copyFrom((float[]) image.getPixels(), 0, nr * nc, 0);
-		}
 		else
-		{
 			for (int i = 0, size = nr * nc; i < size; i++)
 				setf(i, image.getf(i));
-		}
 	}
 
 	/**
@@ -254,7 +250,7 @@ public abstract class Image2D
 	 */
 	public ImageProcessor getImageProcessor()
 	{
-		float[] pixels = new float[getDataLength()];
+		final float[] pixels = new float[getDataLength()];
 		copyTo(0, pixels, 0, pixels.length);
 		return new FloatProcessor(nc, nr, pixels);
 	}
@@ -272,7 +268,7 @@ public abstract class Image2D
 	{
 		if (i < 0 || i >= getDataLength())
 			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + getDataLength());
-		int[] xyz = new int[2];
+		final int[] xyz = new int[2];
 		xyz[1] = i / nc;
 		xyz[0] = i % nc;
 		return xyz;
@@ -361,8 +357,8 @@ public abstract class Image2D
 	public Image2D crop(int x, int y, Image2D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
 		int base = y * nc + x;
@@ -395,9 +391,9 @@ public abstract class Image2D
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = w * h;
+		final int size = w * h;
 		int base = y * nc + x;
-		float[] region = new float[size];
+		final float[] region = new float[size];
 		for (int r = 0, i = 0; r < h; r++)
 		{
 			copyTo(base, region, i, w);
@@ -422,8 +418,8 @@ public abstract class Image2D
 	public void insert(int x, int y, Image2D image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
 		if (w < 1 || h < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr)
@@ -452,15 +448,15 @@ public abstract class Image2D
 	public void insert(int x, int y, ImageProcessor image) throws IllegalArgumentException
 	{
 		// Check the region range
-		int w = image.getWidth();
-		int h = image.getHeight();
+		final int w = image.getWidth();
+		final int h = image.getHeight();
 		if (w < 1 || h < 1)
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		boolean isFloat = image.getBitDepth() == 32;
+		final boolean isFloat = image.getBitDepth() == 32;
 		int base = y * nc + x;
-		float[] region = (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
+		final float[] region = (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
 		for (int r = 0, i = 0; r < h; r++)
 		{
 			copyFrom(region, i, w, base);
@@ -499,8 +495,8 @@ public abstract class Image2D
 			y = subtract(y, h);
 		}
 		// Compute 2D intersect with this object
-		int x2 = clip(nc, x, w);
-		int y2 = clip(nr, y, h);
+		final int x2 = clip(nc, x, w);
+		final int y2 = clip(nr, y, h);
 		x = clip(nc, x);
 		y = clip(nr, y);
 		return new int[] { x, y, x2 - x, y2 - y };
@@ -538,8 +534,8 @@ public abstract class Image2D
 			y = subtract(y, h);
 		}
 		// Compute 2D intersect with this object
-		int x2 = clip(nc, x, w);
-		int y2 = clip(nr, y, h);
+		final int x2 = clip(nc, x, w);
+		final int y2 = clip(nr, y, h);
 		x = clip(nc, x);
 		y = clip(nr, y);
 		w = checkSize(x2 - x);
@@ -575,7 +571,7 @@ public abstract class Image2D
 	private static int subtract(int value, int subtraction)
 	{
 		// Avoid underflow
-		long v = (long) value - subtraction;
+		final long v = (long) value - subtraction;
 		return (v < Integer.MIN_VALUE) ? Integer.MIN_VALUE : (int) v;
 	}
 
@@ -593,7 +589,7 @@ public abstract class Image2D
 	private static int clip(int upper, int value, int addition)
 	{
 		// Avoid overflow
-		long v = (long) value + addition;
+		final long v = (long) value + addition;
 		if (v < 0)
 			return 0;
 		if (v > upper)
@@ -634,7 +630,7 @@ public abstract class Image2D
 	 */
 	public int findMinIndex(int x, int y, int w, int h) throws IllegalArgumentException, IllegalStateException
 	{
-		int[] intersect = computeIntersectOrThrow(x, y, w, h);
+		final int[] intersect = computeIntersectOrThrow(x, y, w, h);
 		x = intersect[0];
 		y = intersect[1];
 		w = intersect[2];
@@ -674,7 +670,7 @@ public abstract class Image2D
 	 */
 	public int findMaxIndex(int x, int y, int w, int h) throws IllegalArgumentException, IllegalStateException
 	{
-		int[] intersect = computeIntersectOrThrow(x, y, w, h);
+		final int[] intersect = computeIntersectOrThrow(x, y, w, h);
 		x = intersect[0];
 		y = intersect[1];
 		w = intersect[2];
@@ -742,7 +738,7 @@ public abstract class Image2D
 	 */
 	public double computeSum(int x, int y, int w, int h)
 	{
-		int[] intersect = computeIntersect(x, y, w, h);
+		final int[] intersect = computeIntersect(x, y, w, h);
 		w = intersect[2];
 		h = intersect[3];
 		// Recheck bounds
@@ -817,7 +813,7 @@ public abstract class Image2D
 	 */
 	public double computeSum(double[] table, int x, int y, int w, int h)
 	{
-		int[] intersect = computeIntersect(x, y, w, h);
+		final int[] intersect = computeIntersect(x, y, w, h);
 		w = intersect[2];
 		h = intersect[3];
 		// Recheck bounds
@@ -837,13 +833,13 @@ public abstract class Image2D
 		// i = imax when i>imax
 		// j = jmax when j>jmax
 
-		int x_1 = intersect[0] - 1;
-		int y_1 = intersect[1] - 1;
+		final int x_1 = intersect[0] - 1;
+		final int y_1 = intersect[1] - 1;
 		// The intersect has already checked the bounds
 		//int x_w_1 = Math.min(x_1 + w, nc);
 		//int y_h_1 = Math.min(y_1 + h, nr);
-		int x_w_1 = x_1 + w;
-		int y_h_1 = y_1 + h;
+		final int x_w_1 = x_1 + w;
+		final int y_h_1 = y_1 + h;
 
 		//double sum = table[index(x_w_1, y_h_1)];
 		//if (y_1 >= 0)
@@ -859,11 +855,11 @@ public abstract class Image2D
 		//return sum;
 
 		// This has been ordered to use the smallest sums first (i.e. closer to x,y than x+w,y+h)
-		int xw_yh = index(x_w_1, y_h_1);
+		final int xw_yh = index(x_w_1, y_h_1);
 		double sum = 0;
 		if (y_1 >= 0)
 		{
-			int h_ = h * nc;
+			final int h_ = h * nc;
 			if (x_1 >= 0)
 				sum = table[xw_yh - w - h_] - table[xw_yh - w];
 			sum -= table[xw_yh - h_];
@@ -940,11 +936,11 @@ public abstract class Image2D
 		y_h_1--;
 
 		// This has been ordered to use the smallest sums first (i.e. closer to x,y than x+w,y+h)
-		int xw_yh = index(x_w_1, y_h_1);
+		final int xw_yh = index(x_w_1, y_h_1);
 		double sum = 0;
 		if (y_1 >= 0)
 		{
-			int h_ = h * nc;
+			final int h_ = h * nc;
 			if (x_1 >= 0)
 				sum = table[xw_yh - w - h_] - table[xw_yh - w];
 			sum -= table[xw_yh - h_];
@@ -981,7 +977,7 @@ public abstract class Image2D
 	 */
 	public void fill(int x, int y, int w, int h, double value)
 	{
-		int[] intersect = computeIntersect(x, y, w, h);
+		final int[] intersect = computeIntersect(x, y, w, h);
 		w = intersect[2];
 		h = intersect[3];
 		// Recheck bounds
@@ -1025,7 +1021,7 @@ public abstract class Image2D
 	 */
 	public void fillOutside(int x, int y, int w, int h, double value)
 	{
-		int[] intersect = computeIntersect(x, y, w, h);
+		final int[] intersect = computeIntersect(x, y, w, h);
 		w = intersect[2];
 		h = intersect[3];
 		// Recheck bounds
@@ -1037,13 +1033,13 @@ public abstract class Image2D
 		x = intersect[0];
 		y = intersect[1];
 
-		int y_p_h = y + h;
-		int fillYBefore = y * nc;
-		int fillYAfter = (nr - y_p_h) * nc;
+		final int y_p_h = y + h;
+		final int fillYBefore = y * nc;
+		final int fillYAfter = (nr - y_p_h) * nc;
 
-		int x_p_w = x + w;
-		int fillXBefore = x;
-		int fillXAfter = (nc - x_p_w);
+		final int x_p_w = x + w;
+		final int fillXBefore = x;
+		final int fillXAfter = (nc - x_p_w);
 
 		if (fillYBefore != 0)
 			fill(0, fillYBefore, value);

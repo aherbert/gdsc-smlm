@@ -129,14 +129,11 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 				final float dy = p.y;
 				final float dz = p.z;
 				for (int j = 0; j < n; j++)
-				{
 					vertices[k++] = new Point3f(objectVertices[j].x + dx, objectVertices[j].y + dy,
 							objectVertices[j].z + dz);
-				}
 			}
 		}
 		else
-		{
 			// Translate and scale
 			for (int i = 0, k = 0; i < points.length; i++)
 			{
@@ -149,22 +146,15 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 				final float sy = s.y;
 				final float sz = s.z;
 				for (int j = 0; j < n; j++)
-				{
 					vertices[k++] = new Point3f(objectVertices[j].x * sx + dx, objectVertices[j].y * sy + dy,
 							objectVertices[j].z * sz + dz);
-				}
 			}
-		}
 
 		final int m = objectFaces.length;
 		for (int i = 0, k = 0; i < points.length; i++)
-		{
 			for (int j = 0, offset = i * n; j < m; j++)
-			{
 				// Offset the face index by the count of vertices beforehand
 				faces[k++] = objectFaces[j] + offset;
-			}
-		}
 
 		colors = new Color3f[this.vertices.length];
 		for (int i = 0; i < nVertices; i++)
@@ -230,12 +220,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 		final Vector3f[] normals = new Vector3f[nVertices];
 
 		for (int i = 0, k = 0; i < points.length; i++)
-		{
 			for (int j = 0; j < objectNormals.length; j++)
-			{
 				normals[k++] = objectNormals[j];
-			}
-		}
 
 		return normals;
 	}
@@ -253,7 +239,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	public static int checkFacets(Point3f[] vertices, int[] faces)
 	{
 		int count = 0;
-		int nFaces = faces.length;
+		final int nFaces = faces.length;
 		final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
 		for (int i = 0; i < nFaces; i += 3)
 		{
@@ -273,13 +259,13 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			// projected point = (x+ta,y+tb,z+tc)
 
 			// Project 0,0,0 to the facet
-			double a = v1.x;
-			double b = v1.y;
-			double c = v1.z;
-			double d = vertices[f1].x;
-			double e = vertices[f1].y;
-			double f = vertices[f1].z;
-			double t = a * d + b * e + c * f;
+			final double a = v1.x;
+			final double b = v1.y;
+			final double c = v1.z;
+			final double d = vertices[f1].x;
+			final double e = vertices[f1].y;
+			final double f = vertices[f1].z;
+			final double t = a * d + b * e + c * f;
 			if (t < 0)
 			{
 				count++;
@@ -292,7 +278,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 
 	private static void swap(int[] faces, int i, int j)
 	{
-		int tmp = faces[i];
+		final int tmp = faces[i];
 		faces[i] = faces[j];
 		faces[j] = tmp;
 	}
@@ -308,8 +294,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	 */
 	public static Vector3f[] getNormals(Point3f[] vertices, int[] faces)
 	{
-		int nVertices = vertices.length;
-		int nFaces = faces.length;
+		final int nVertices = vertices.length;
+		final int nFaces = faces.length;
 
 		final Vector3f[] normals = new Vector3f[nVertices];
 		for (int i = 0; i < nVertices; i++)

@@ -88,7 +88,7 @@ public class BatchPeakFit implements PlugIn
 
 	private static String configFilename = "";
 
-	private XStream xs;
+	private final XStream xs;
 	private TextField configFilenameText;
 
 	/**
@@ -124,7 +124,7 @@ public class BatchPeakFit implements PlugIn
 	 */
 	private void runBatch(String configurationFilename)
 	{
-		BatchSettings settings = loadSettings(configurationFilename);
+		final BatchSettings settings = loadSettings(configurationFilename);
 		if (settings == null || settings.parameters.isEmpty())
 		{
 			IJ.log("No settings for the fitting engine");
@@ -132,26 +132,24 @@ public class BatchPeakFit implements PlugIn
 		}
 
 		if (!new File(settings.resultsDirectory).exists())
-		{
 			if (!new File(settings.resultsDirectory).mkdirs())
 			{
 				IJ.log("Unable to create the results directory: " + settings.resultsDirectory);
 				return;
 			}
-		}
 
-		Document doc = getDefaultSettingsXmlDocument();
+		final Document doc = getDefaultSettingsXmlDocument();
 		if (doc == null)
 			return;
 
 		// Create XML for each variation
-		ArrayList<String> xmlSettings = new ArrayList<>();
+		final ArrayList<String> xmlSettings = new ArrayList<>();
 		setParameters(settings.parameters, 0, doc, xmlSettings);
 
 		// Run all the variants on the input images
-		for (String imageFilename : settings.images)
+		for (final String imageFilename : settings.images)
 		{
-			ImagePlus imp = IJ.openImage(imageFilename);
+			final ImagePlus imp = IJ.openImage(imageFilename);
 			if (imp == null)
 			{
 				IJ.log("Unable to load image: " + imageFilename);
@@ -168,10 +166,10 @@ public class BatchPeakFit implements PlugIn
 		Document doc = null;
 		try
 		{
-			String configXml = xs.toXML(new FitEngineConfiguration());
+			final String configXml = xs.toXML(new FitEngineConfiguration());
 			doc = loadDocument(configXml);
 		}
-		catch (XStreamException ex)
+		catch (final XStreamException ex)
 		{
 			ex.printStackTrace();
 		}
@@ -207,43 +205,41 @@ public class BatchPeakFit implements PlugIn
 
 		if (i < parameters.size())
 		{
-			ParameterSettings param = parameters.get(i);
-			NodeList nodes = doc.getElementsByTagName(param.name);
+			final ParameterSettings param = parameters.get(i);
+			final NodeList nodes = doc.getElementsByTagName(param.name);
 			if (nodes.getLength() == 1)
 			{
 				// For each value, set the parameter and move to the next
-				String[] values = param.value.split(",");
-				for (String value : values)
+				final String[] values = param.value.split(",");
+				for (final String value : values)
 				{
-					Node node = nodes.item(0);
+					final Node node = nodes.item(0);
 					node.setTextContent(value);
 					setParameters(parameters, i + 1, doc, xmlSettings);
 				}
 			}
 			else
-			{
 				// Just move to the next parameter
 				setParameters(parameters, i + 1, doc, xmlSettings);
-			}
 		}
 		else
 		{
 			// Add the final XML to the parameters to run
-			TransformerFactory tf = TransformerFactory.newInstance();
+			final TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer transformer;
 			try
 			{
 				transformer = tf.newTransformer();
 				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-				StringWriter writer = new StringWriter();
+				final StringWriter writer = new StringWriter();
 				transformer.transform(new DOMSource(doc), new StreamResult(writer));
 				xmlSettings.add(writer.getBuffer().toString());
 			}
-			catch (TransformerConfigurationException e)
+			catch (final TransformerConfigurationException e)
 			{
 				e.printStackTrace();
 			}
-			catch (TransformerException e)
+			catch (final TransformerException e)
 			{
 				e.printStackTrace();
 			}
@@ -257,19 +253,19 @@ public class BatchPeakFit implements PlugIn
 		{
 			settings = (BatchSettings) xs.fromXML(fs);
 		}
-		catch (ClassCastException ex)
+		catch (final ClassCastException ex)
 		{
 			//ex.printStackTrace();
 		}
-		catch (FileNotFoundException ex)
+		catch (final FileNotFoundException ex)
 		{
 			ex.printStackTrace();
 		}
-		catch (XStreamException ex)
+		catch (final XStreamException ex)
 		{
 			ex.printStackTrace();
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -278,14 +274,14 @@ public class BatchPeakFit implements PlugIn
 
 	private static Document loadDocument(String xml)
 	{
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder;
 		try
 		{
 			docBuilder = docFactory.newDocumentBuilder();
 			return docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -294,13 +290,13 @@ public class BatchPeakFit implements PlugIn
 
 	private void processImage(BatchSettings settings, ImagePlus imp, ArrayList<String> xmlSettings)
 	{
-		String imageFilename = imp.getOriginalFileInfo().directory + imp.getOriginalFileInfo().fileName;
-		String basename = getBaseName(imp.getOriginalFileInfo().fileName);
-		String format = settings.resultsDirectory + File.separatorChar + basename + ".%05d";
+		final String imageFilename = imp.getOriginalFileInfo().directory + imp.getOriginalFileInfo().fileName;
+		final String basename = getBaseName(imp.getOriginalFileInfo().fileName);
+		final String format = settings.resultsDirectory + File.separatorChar + basename + ".%05d";
 
-		String statusSuffix = String.format(" / %d: %s", xmlSettings.size(), imp.getOriginalFileInfo().fileName);
+		final String statusSuffix = String.format(" / %d: %s", xmlSettings.size(), imp.getOriginalFileInfo().fileName);
 
-		Calibration calibration = settings.getCalibration();
+		final Calibration calibration = settings.getCalibration();
 		for (int i = 0; i < xmlSettings.size(); i++)
 		{
 			IJ.showStatus((i + 1) + statusSuffix);
@@ -311,7 +307,7 @@ public class BatchPeakFit implements PlugIn
 			{
 				fitConfig = (FitEngineConfiguration) xs.fromXML(xmlSettings.get(i));
 			}
-			catch (XStreamException e)
+			catch (final XStreamException e)
 			{
 				// Ignore
 			}
@@ -326,25 +322,25 @@ public class BatchPeakFit implements PlugIn
 			// Ensure the state is restored after XStream object reconstruction
 			fitConfig.getFitConfiguration().initialiseState();
 
-			String prefix = String.format(format, i);
+			final String prefix = String.format(format, i);
 
 			// Save the settings
-			String settingsFilename = saveRunSettings(prefix, imageFilename, fitConfig);
+			final String settingsFilename = saveRunSettings(prefix, imageFilename, fitConfig);
 
 			// Run the fit engine
 			if (settings.runPeakFit)
 			{
-				ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
+				final ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
 				try
 				{
-					PeakFit peakFit = new PeakFit(fitConfig, resultsSettings);
+					final PeakFit peakFit = new PeakFit(fitConfig, resultsSettings);
 					peakFit.setSilent(true);
 					peakFit.run(imp, false);
 
 					IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
 							peakFit.getSize(), Utils.timeToString(peakFit.getTime())));
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					// Ignore this as we assume this is from incorrect fit configuration
 				}
@@ -356,28 +352,28 @@ public class BatchPeakFit implements PlugIn
 
 	private static String getBaseName(String name)
 	{
-		int dot = name.lastIndexOf('.');
+		final int dot = name.lastIndexOf('.');
 		return (dot == -1) ? name : name.substring(0, dot);
 	}
 
 	private String saveRunSettings(String prefix, String imageFilename, FitEngineConfiguration fitConfig)
 	{
-		BatchRun batchRun = new BatchRun(imageFilename, fitConfig);
-		String settingsFilename = prefix + ".xml";
+		final BatchRun batchRun = new BatchRun(imageFilename, fitConfig);
+		final String settingsFilename = prefix + ".xml";
 		try (FileOutputStream fs = new FileOutputStream(settingsFilename))
 		{
 			xs.toXML(batchRun, fs);
 			return settingsFilename;
 		}
-		catch (FileNotFoundException e)
+		catch (final FileNotFoundException e)
 		{
 			e.printStackTrace();
 		}
-		catch (XStreamException e)
+		catch (final XStreamException e)
 		{
 			e.printStackTrace();
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -386,7 +382,7 @@ public class BatchPeakFit implements PlugIn
 
 	private static ResultsSettings createResultsSettings(FitEngineConfiguration fitConfig, String prefix)
 	{
-		ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
+		final ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
 		resultsSettings.setShowDeviations(fitConfig.getFitConfiguration().isComputeDeviations());
 		resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(prefix + ".xls");
 		resultsSettings.getResultsFileSettingsBuilder().setFileFormat(ResultsFileFormat.TEXT);
@@ -400,7 +396,7 @@ public class BatchPeakFit implements PlugIn
 	 */
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addFilenameField("Config_filename", configFilename);
@@ -414,37 +410,35 @@ public class BatchPeakFit implements PlugIn
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					Document doc = getDefaultSettingsXmlDocument();
+					final Document doc = getDefaultSettingsXmlDocument();
 					if (doc == null)
 						return;
 
 					try
 					{
 						// Look for nodes that are part of the fit configuration
-						XPathFactory factory = XPathFactory.newInstance();
-						XPath xpath = factory.newXPath();
-						XPathExpression expr = xpath.compile("//gdsc.smlm.engine.FitEngineConfiguration//*");
+						final XPathFactory factory = XPathFactory.newInstance();
+						final XPath xpath = factory.newXPath();
+						final XPathExpression expr = xpath.compile("//gdsc.smlm.engine.FitEngineConfiguration//*");
 
 						// For each node, add the name and value to the BatchParameters
-						BatchSettings batchSettings = new BatchSettings();
+						final BatchSettings batchSettings = new BatchSettings();
 						batchSettings.resultsDirectory = System.getProperty("java.io.tmpdir");
 						batchSettings.images.add("/path/to/image.tif");
 
-						Object result = expr.evaluate(doc, XPathConstants.NODESET);
-						NodeList nodes = (NodeList) result;
+						final Object result = expr.evaluate(doc, XPathConstants.NODESET);
+						final NodeList nodes = (NodeList) result;
 						for (int i = 0; i < nodes.getLength(); i++)
 						{
-							Node node = nodes.item(i);
-							if (node.getChildNodes().getLength() == 1) // Only nodes with a single text entry
-							{
+							final Node node = nodes.item(i);
+							if (node.getChildNodes().getLength() == 1)
 								batchSettings.parameters
 										.add(new ParameterSettings(node.getNodeName(), node.getTextContent()));
-							}
 						}
 
 						// Save the settings file
-						String[] path = Utils.decodePath(configFilenameText.getText());
-						OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
+						final String[] path = Utils.decodePath(configFilenameText.getText());
+						final OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
 						if (chooser.getFileName() != null)
 						{
 							String newFilename = chooser.getDirectory() + chooser.getFileName();
@@ -458,7 +452,7 @@ public class BatchPeakFit implements PlugIn
 							configFilenameText.setText(newFilename);
 						}
 					}
-					catch (Exception ex)
+					catch (final Exception ex)
 					{
 						ex.printStackTrace();
 					}
@@ -477,7 +471,7 @@ public class BatchPeakFit implements PlugIn
 
 	private static XStream createXStream()
 	{
-		XStream xs = new XStream(new DomDriver());
+		final XStream xs = new XStream(new DomDriver());
 		XStream.setupDefaultSecurity(xs); // to be removed after 1.5
 		xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
 		xs.alias("gdsc.fitting.batchSettings", BatchSettings.class);

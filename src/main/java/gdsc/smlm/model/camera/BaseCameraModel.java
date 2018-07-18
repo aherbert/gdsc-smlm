@@ -85,7 +85,7 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 	{
 		if (bounds == null || bounds.width <= 0 || bounds.height <= 0)
 			return new float[0];
-		float[] data = new float[bounds.width * bounds.height];
+		final float[] data = new float[bounds.width * bounds.height];
 		Arrays.fill(data, value);
 		return data;
 	}
@@ -100,7 +100,7 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 	 */
 	public static float[] toWeights(float[] variance)
 	{
-		float[] w = SimpleArrayUtils.ensureStrictlyPositive(variance);
+		final float[] w = SimpleArrayUtils.ensureStrictlyPositive(variance);
 		// If all the weights are zero then the first item will be zero
 		// and there are no weights
 		if (w[0] == 0)
