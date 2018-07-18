@@ -23,6 +23,7 @@ Options:
   --unused
   --deprecation
   --javadoc
+  --static
 
 ";
 
@@ -33,6 +34,7 @@ GetOptions(
     "unused" => \$unused,
     "deprecation" => \$deprecation,
     "javadoc" => \$javadoc,
+    "static" => \$static,
 );
 
 die $usage if $help;
@@ -42,6 +44,7 @@ push @warning, "unchecked" if ($unchecked);
 push @warning, "unused" if ($unused);
 push @warning, "deprecation" if ($deprecation);
 push @warning, "javadoc" if ($javadoc);
+push @warning, "static-method" if ($static);
 
 exit(0) unless @warning;
 

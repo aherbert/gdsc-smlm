@@ -6,16 +6,16 @@ IF EXIST %DIR%\NUL GOTO HAVEDIR
 :HAVEDIR
 
 @rem protoc --java_out=%DIR% tsf.proto
-@rem perl suppress.pl %DIR%\gdsc\smlm\tsf\TSFProtos.java --unchecked --unused --javadoc
+@rem perl suppress.pl %DIR%\gdsc\smlm\tsf\TSFProtos.java --unchecked --unused --javadoc --static
 
 protoc --java_out=%DIR% unit.proto psf.proto calibration.proto results.proto test.proto fit.proto template.proto gui.proto molecule.proto fisher.proto
-perl suppress.pl %DIR%\gdsc\smlm\data\config\CalibrationProtos.java --unchecked --unused --deprecation --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\FisherProtos.java --unchecked --unused --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\FitProtos.java --unchecked --unused --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\GUIProtos.java --unchecked --unused --deprecation --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\MoleculeProtos.java --unchecked --unused --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\PSFProtos.java --unchecked --unused --deprecation --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\ResultsProtos.java --unchecked --unused --deprecation --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\TemplateProtos.java --unchecked --unused --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\TestProtos.java --unchecked --unused --javadoc
-perl suppress.pl %DIR%\gdsc\smlm\data\config\UnitProtos.java --javadoc
+perl suppress.pl %DIR%\gdsc\smlm\data\config\CalibrationProtos.java --unchecked --unused --deprecation -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\FisherProtos.java --unchecked --unused -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\FitProtos.java --unchecked --unused -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\GUIProtos.java --unchecked --unused --deprecation -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\MoleculeProtos.java --unchecked --unused -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\PSFProtos.java --unchecked --unused --deprecation -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\ResultsProtos.java --unchecked --unused --deprecation -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\TemplateProtos.java --unchecked --unused -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\TestProtos.java --unchecked --unused -- --javadoc --static
+perl suppress.pl %DIR%\gdsc\smlm\data\config\UnitProtos.java --unused --javadoc
