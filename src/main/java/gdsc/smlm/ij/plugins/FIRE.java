@@ -258,10 +258,10 @@ public class FIRE implements PlugIn
 	private int roiImageWidth, roiImageHeight;
 
 	// Stored in initialisation
-	MemoryPeakResults results, results2;
-	Rectangle2D dataBounds;
-	String units;
-	double nmPerUnit = 1;
+	private MemoryPeakResults results, results2;
+	private Rectangle2D dataBounds;
+	private String units;
+	private double nmPerUnit = 1;
 
 	// Stored in setCorrectionParameters
 	private double correctionQValue, correctionMean, correctionSigma;
@@ -313,6 +313,18 @@ public class FIRE implements PlugIn
 		/** The original correlation curve, i.e. the raw curve before smoothing. */
 		final double[] originalCorrelationCurve;
 
+		/**
+		 * Instantiates a new fire result.
+		 *
+		 * @param fireNumber
+		 *            the fire number
+		 * @param correlation
+		 *            the correlation
+		 * @param frcCurve
+		 *            the frc curve
+		 * @param originalCorrelationCurve
+		 *            the original correlation curve
+		 */
 		FireResult(double fireNumber, double correlation, FRCCurve frcCurve, double[] originalCorrelationCurve)
 		{
 			this.fireNumber = fireNumber;
@@ -2198,7 +2210,7 @@ public class FIRE implements PlugIn
 	/**
 	 * Represent the Q-plot data
 	 */
-	public class QPlot
+	private class QPlot
 	{
 		final FRCCurve frcCurve;
 		final double nmPerPixel, qNorm;
@@ -2401,7 +2413,7 @@ public class FIRE implements PlugIn
 	/**
 	 * Represent the precision histogram.
 	 */
-	public class PrecisionHistogram
+	private class PrecisionHistogram
 	{
 		final float[] x, y;
 		final String title;

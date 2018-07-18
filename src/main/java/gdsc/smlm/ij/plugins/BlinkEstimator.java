@@ -248,6 +248,15 @@ public class BlinkEstimator implements PlugIn
 		Utils.display(title, plot);
 	}
 
+	/**
+	 * Compute blinking rate.
+	 *
+	 * @param results
+	 *            the results
+	 * @param verbose
+	 *            the verbose
+	 * @return the blinking rate
+	 */
 	double computeBlinkingRate(MemoryPeakResults results, boolean verbose)
 	{
 		parameters = null;

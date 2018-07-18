@@ -204,14 +204,14 @@ public class DrawClusters implements PlugIn
 			float[] xPoints = new float[nPoints];
 			float[] yPoints = new float[nPoints];
 			int j = 0;
-			if (isUseStackPosition)
+			if (frames != null)
 				frames[i] = new int[nPoints];
 			for (int k = 0; k < trace.size(); k++)
 			{
 				PeakResult result = trace.get(k);
 				xPoints[j] = (result.getXPosition() - bounds.x) * xScale;
 				yPoints[j] = (result.getYPosition() - bounds.y) * yScale;
-				if (isUseStackPosition)
+				if (frames != null)
 					frames[i][j] = result.getFrame();
 				j++;
 			}
@@ -262,7 +262,7 @@ public class DrawClusters implements PlugIn
 		Overlay o = new Overlay();
 		LUT lut = LUTHelper.createLUT(DrawClusters.lut);
 		final double scale = 256.0 / count;
-		if (isUseStackPosition)
+		if (frames != null)
 		{
 			// Add the tracks on the frames containing the results
 			final boolean isHyperStack = imp.isDisplayedHyperStack();
@@ -303,7 +303,7 @@ public class DrawClusters implements PlugIn
 		IJ.showStatus(msg);
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
@@ -351,7 +351,7 @@ public class DrawClusters implements PlugIn
 		return true;
 	}
 
-	private void addToOverlay(Overlay o, Roi roi, boolean isHyperStack, int frame)
+	private static void addToOverlay(Overlay o, Roi roi, boolean isHyperStack, int frame)
 	{
 		if (isHyperStack)
 			roi.setPosition(0, 0, frame);

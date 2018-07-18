@@ -266,7 +266,7 @@ public class SpotAnalysis extends PlugInFrame
 	//private final int fontWidth = 12;
 	//private final Font monoFont = new Font("Monospaced", 0, fontWidth);
 
-	final String OPT_LOCATION = "CT.location";
+	private final String OPT_LOCATION = "CT.location";
 
 	//private ImageJ ij;
 	private int runMode = 0;
@@ -410,7 +410,7 @@ public class SpotAnalysis extends PlugInFrame
 		inputChoice.select(oldChoice);
 	}
 
-	private boolean previousResult(String title)
+	private static boolean previousResult(String title)
 	{
 		for (String resultTitle : resultsTitles)
 		{
@@ -478,6 +478,7 @@ public class SpotAnalysis extends PlugInFrame
 	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
+		// Ignore
 	}
 
 	/*
@@ -625,7 +626,7 @@ public class SpotAnalysis extends PlugInFrame
 		createProfile(imp, bounds, psfWidth, blur);
 	}
 
-	private boolean resultsWithinBounds(Rectangle bounds)
+	private static boolean resultsWithinBounds(Rectangle bounds)
 	{
 		if (resultsWindowShowing())
 		{
@@ -654,7 +655,7 @@ public class SpotAnalysis extends PlugInFrame
 		return false;
 	}
 
-	private boolean resultsWindowShowing()
+	private static boolean resultsWindowShowing()
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
 			return false;
@@ -810,7 +811,7 @@ public class SpotAnalysis extends PlugInFrame
 		return profile;
 	}
 
-	private ImagePlus showSpot(String title, ImageStack spot)
+	private static ImagePlus showSpot(String title, ImageStack spot)
 	{
 		ImagePlus imp = Utils.display(title, spot);
 		if (Utils.isNewWindow() || imp.getWindow().getCanvas().getMagnification() == 1)
@@ -891,7 +892,9 @@ public class SpotAnalysis extends PlugInFrame
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore
 		}
+
 		LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
 		PolynomialSplineFunction f = loess.interpolate(newX, newY);
 
@@ -1075,7 +1078,7 @@ public class SpotAnalysis extends PlugInFrame
 		//clearSelectedFrames();
 	}
 
-	private void createResultsWindow()
+	private static void createResultsWindow()
 	{
 		if (!resultsWindowShowing())
 		{
@@ -1234,7 +1237,7 @@ public class SpotAnalysis extends PlugInFrame
 		}
 	}
 
-	private BufferedWriter openBufferedWriter(String filename, String header) throws IOException
+	private static BufferedWriter openBufferedWriter(String filename, String header) throws IOException
 	{
 		BufferedWriter tracesFile = new BufferedWriter(new FileWriter(filename));
 		if (header != null && header.length() > 0)
@@ -1244,7 +1247,7 @@ public class SpotAnalysis extends PlugInFrame
 		return tracesFile;
 	}
 
-	private void writeLine(BufferedWriter tracesFile, String line) throws IOException
+	private static void writeLine(BufferedWriter tracesFile, String line) throws IOException
 	{
 		tracesFile.write(line);
 		tracesFile.newLine();
@@ -1334,7 +1337,7 @@ public class SpotAnalysis extends PlugInFrame
 		mainPanel.setLayout(mainGrid);
 	}
 
-	private Panel createChoicePanel(Choice list, String label)
+	private static Panel createChoicePanel(Choice list, String label)
 	{
 		Panel panel = new Panel();
 		panel.setLayout(new BorderLayout());
@@ -1346,7 +1349,7 @@ public class SpotAnalysis extends PlugInFrame
 		return panel;
 	}
 
-	private Panel createTextPanel(TextField textField, String label, String value)
+	private static Panel createTextPanel(TextField textField, String label, String value)
 	{
 		Panel panel = new Panel();
 		panel.setLayout(new BorderLayout());
@@ -1359,7 +1362,7 @@ public class SpotAnalysis extends PlugInFrame
 		return panel;
 	}
 
-	private Panel createLabelPanel(Label field, String label, String value)
+	private static Panel createLabelPanel(Label field, String label, String value)
 	{
 		Panel panel = new Panel();
 		panel.setLayout(new BorderLayout());
@@ -1380,6 +1383,7 @@ public class SpotAnalysis extends PlugInFrame
 	@Override
 	public void imageOpened(ImagePlus imp)
 	{
+		// Ignore
 	}
 
 	/*
@@ -1390,6 +1394,7 @@ public class SpotAnalysis extends PlugInFrame
 	@Override
 	public void imageClosed(ImagePlus imp)
 	{
+		// Ignore
 	}
 
 	/*

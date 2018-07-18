@@ -51,7 +51,7 @@ public class Transparency_Demo implements PlugIn
 		createUniverse("Transparency_Demo No Backface Normal Flip + Backface Cull", true, true);
 	}
 
-	private void createUniverse(String title, boolean disableBackfaceNormalFlip, boolean backfaceCull)
+	private static void createUniverse(String title, boolean disableBackfaceNormalFlip, boolean backfaceCull)
 	{
 		Image3DUniverse univ = new Image3DUniverse();
 		univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
@@ -66,7 +66,7 @@ public class Transparency_Demo implements PlugIn
 		univ.sync(true);
 	}
 
-	private void addPoint(Image3DUniverse univ, boolean disableBackfaceNormalFlip, boolean backfaceCull, float x,
+	private static void addPoint(Image3DUniverse univ, boolean disableBackfaceNormalFlip, boolean backfaceCull, float x,
 			float y, float z, Color3f c)
 	{
 		List<Point3f> points = MeshMaker.createIcosahedron(0, 1f);

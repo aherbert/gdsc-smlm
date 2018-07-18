@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.DataException;
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
@@ -219,12 +220,12 @@ public class FilterResults implements PlugIn
 		return true;
 	}
 
-	private float getDrift(PeakResult result, float x, float y)
+	private static float getDrift(PeakResult result, float x, float y)
 	{
 		return FastMath.max(Math.abs(result.getOrigX() + 0.5f - x), Math.abs(result.getOrigY() + 0.5f - y));
 	}
 
-	private float getSnr(PeakResult result)
+	private static float getSnr(PeakResult result)
 	{
 		if (result.getNoise() <= 0)
 			return 0;
@@ -331,7 +332,7 @@ public class FilterResults implements PlugIn
 		MemoryPeakResults.addResults(newResults);
 	}
 
-	private ByteProcessor getMask(String maskTitle)
+	private static ByteProcessor getMask(String maskTitle)
 	{
 		ImagePlus imp = WindowManager.getImage(maskTitle);
 		if (imp != null)
@@ -391,7 +392,7 @@ public class FilterResults implements PlugIn
 		ArrayList<String> newImageList = new ArrayList<>();
 		newImageList.add("[None]");
 
-		for (int id : getIDList())
+		for (int id : Utils.getIDList())
 		{
 			ImagePlus imp = WindowManager.getImage(id);
 			if (imp == null)
@@ -402,11 +403,5 @@ public class FilterResults implements PlugIn
 		}
 
 		return newImageList.toArray(new String[0]);
-	}
-
-	public static int[] getIDList()
-	{
-		int[] list = WindowManager.getIDList();
-		return (list != null) ? list : new int[0];
 	}
 }

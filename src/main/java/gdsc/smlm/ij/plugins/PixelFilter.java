@@ -85,7 +85,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 			s = cachedS;
 			ss = cachedSS;
 		}
-		if (s == null)
+		if (s == null || ss == null)
 		{
 			s = new double[ip.getPixelCount()];
 			ss = new double[s.length];
@@ -215,7 +215,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 			IJ.log(String.format("Slice %d : Replaced %d pixels", pfr.getSliceNumber(), count));
 	}
 
-	private void calculateRollingSums(FloatProcessor ip, double[] s_, double[] ss)
+	private static void calculateRollingSums(FloatProcessor ip, double[] s_, double[] ss)
 	{
 		// Compute the rolling sum and sum of squares
 		// s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1)

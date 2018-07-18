@@ -795,14 +795,17 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 */
 	public static class PeakResultPoint extends BasePoint
 	{
+		/** The time. */
 		int t;
+		
+		/** The peak result. */
 		PeakResult peakResult;
 
 		/**
 		 * Instantiates a new peak result point.
 		 *
 		 * @param t
-		 *            the t
+		 *            the time
 		 * @param x
 		 *            the x
 		 * @param y

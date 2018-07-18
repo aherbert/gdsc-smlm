@@ -356,7 +356,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			imp.getWindow().getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
 	}
 
-	private float getStandardDeviation(MemoryPeakResults results2)
+	private static float getStandardDeviation(MemoryPeakResults results2)
 	{
 		// Standard deviation is only needed for the width filtering
 		if (sortOrderIndex != 8)
@@ -369,7 +369,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		return (float) Maths.max(1, fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
 	}
 
-	private void plotScore(float[] xValues, float[] yValues, double yMin, double yMax)
+	private static void plotScore(float[] xValues, float[] yValues, double yMin, double yMax)
 	{
 		if (plotScore)
 		{
@@ -439,7 +439,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		return new float[] { (negative) ? -score : score, score };
 	}
 
-	private float recoverScore(float score)
+	private static float recoverScore(float score)
 	{
 		// Reset the sign of the score
 		switch (sortOrderIndex)
@@ -504,7 +504,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -609,7 +609,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private boolean contains(ArrayList<float[]> spots, float xPosition, float yPosition)
+	private static boolean contains(ArrayList<float[]> spots, float xPosition, float yPosition)
 	{
 		for (float[] data : spots)
 			if (data[0] == xPosition && data[1] == yPosition)
@@ -620,29 +620,24 @@ public class SpotInspector implements PlugIn, MouseListener
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
-		// TODO Auto-generated method stub
-
+		// Ignore
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		// TODO Auto-generated method stub
-
+		// Ignore
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e)
 	{
-		// TODO Auto-generated method stub
-
+		// Ignore
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e)
 	{
-		// TODO Auto-generated method stub
-
+		// Ignore
 	}
-
 }

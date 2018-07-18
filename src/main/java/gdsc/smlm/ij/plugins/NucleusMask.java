@@ -76,7 +76,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		createMask();
 	}
 
-	double diameter, nmPerPixel, nmPerSlice;
+	private double diameter, nmPerPixel, nmPerSlice;
 
 	private boolean showDialog()
 	{

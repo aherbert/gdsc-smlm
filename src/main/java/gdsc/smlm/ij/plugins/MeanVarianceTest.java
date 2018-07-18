@@ -400,7 +400,7 @@ public class MeanVarianceTest implements PlugIn
 					gain /= (2 * cameraGain);
 				}
 
-				if (showTable)
+				if (sb != null)
 				{
 					sb.append(sample.title).append('\t');
 					sb.append(sample.exposure).append('\t');
@@ -414,7 +414,7 @@ public class MeanVarianceTest implements PlugIn
 				}
 				j++;
 			}
-			if (showTable)
+			if (results != null && sb != null)
 				results.append(sb.toString());
 		}
 		IJ.showProgress(1);
@@ -552,7 +552,7 @@ public class MeanVarianceTest implements PlugIn
 		IJ.showStatus("");
 	}
 
-	private TextWindow createResultsWindow()
+	private static TextWindow createResultsWindow()
 	{
 		Frame f = WindowManager.getFrame(TITLE);
 		if (f instanceof TextWindow)

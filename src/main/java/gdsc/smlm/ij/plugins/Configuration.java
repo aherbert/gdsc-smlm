@@ -465,13 +465,13 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 		}
 	}
 
-	private void disableEditing(TextField textField)
+	private static void disableEditing(TextField textField)
 	{
 		textField.setEditable(false);
 		textField.setBackground(SystemColor.control);
 	}
 
-	private void enableEditing(TextField textField)
+	private static void enableEditing(TextField textField)
 	{
 		textField.setEditable(true);
 		textField.setBackground(Color.white);

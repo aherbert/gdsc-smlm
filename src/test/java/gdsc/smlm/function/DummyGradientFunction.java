@@ -42,16 +42,19 @@ public class DummyGradientFunction implements Gradient1Function, Gradient2Functi
 	@Override
 	public void initialise0(double[] a)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void initialise1(double[] a)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void initialise2(double[] a)
 	{
+		// Ignore
 	}
 
 	@Override
@@ -69,20 +72,24 @@ public class DummyGradientFunction implements Gradient1Function, Gradient2Functi
 	@Override
 	public void forEach(ValueProcedure procedure)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void initialise(double[] a)
 	{
+		// Ignore
 	}
 }

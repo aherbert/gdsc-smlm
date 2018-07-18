@@ -137,7 +137,7 @@ public class ImageBackground implements PlugInFilter
 		return median;
 	}
 
-	private ImageProcessor applyBlur(ImageProcessor median)
+	private static ImageProcessor applyBlur(ImageProcessor median)
 	{
 		ImageProcessor blur = median;
 		if (sigma > 0)
@@ -149,7 +149,7 @@ public class ImageBackground implements PlugInFilter
 		return blur;
 	}
 
-	private void subtractBias(ImageProcessor background)
+	private static void subtractBias(ImageProcessor background)
 	{
 		float[] data = (float[]) background.getPixels();
 		for (int i = 0; i < data.length; i++)

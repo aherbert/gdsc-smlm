@@ -73,7 +73,7 @@ public class ConvertResults implements PlugIn
 		IJ.showStatus("Converted " + results.getName());
 	}
 
-	private boolean showInputDialog()
+	private static boolean showInputDialog()
 	{
 		int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
@@ -98,7 +98,7 @@ public class ConvertResults implements PlugIn
 		return true;
 	}
 
-	private boolean showDialog(MemoryPeakResults results)
+	private static boolean showDialog(MemoryPeakResults results)
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Convert the current units for the results");

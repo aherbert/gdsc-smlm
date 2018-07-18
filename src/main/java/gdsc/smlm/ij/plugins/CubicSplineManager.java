@@ -84,7 +84,10 @@ public class CubicSplineManager implements PlugIn
 	 */
 	public static class CubicSplinePSF
 	{
+		/** The image PSF. */
 		ImagePSF imagePSF;
+		
+		/** The spline data. */
 		CubicSplineData splineData;
 
 		/**
@@ -114,6 +117,17 @@ public class CubicSplineManager implements PlugIn
 				throw new IllegalArgumentException("The centre is not within the function");
 		}
 
+		/**
+		 * Creates the cubic spline function.
+		 *
+		 * @param maxy
+		 *            the maxy
+		 * @param maxx
+		 *            the maxx
+		 * @param scale
+		 *            the scale
+		 * @return the cubic spline function
+		 */
 		public CubicSplineFunction createCubicSplineFunction(int maxy, int maxx, int scale)
 		{
 			CubicSplineFunction f = new SingleCubicSplineFunction(splineData, maxx, maxy, imagePSF.getXCentre(),
@@ -121,6 +135,13 @@ public class CubicSplineManager implements PlugIn
 			return f;
 		}
 
+		/**
+		 * Gets the scale.
+		 *
+		 * @param nmPerPixel
+		 *            the nm per pixel
+		 * @return the scale
+		 */
 		public int getScale(double nmPerPixel)
 		{
 			return CubicSplineManager.getScale(imagePSF.getPixelSize(), nmPerPixel);
@@ -723,7 +744,7 @@ public class CubicSplineManager implements PlugIn
 		Utils.log("Deleted spline model: %s\n%s", name, resource);
 	}
 
-	private void loadFromDirectory()
+	private static void loadFromDirectory()
 	{
 		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 		egd.addMessage("Load spline models from a directory.");
@@ -749,7 +770,7 @@ public class CubicSplineManager implements PlugIn
 		}
 	}
 
-	private void loadFromFile()
+	private static void loadFromFile()
 	{
 		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 		egd.addMessage("Load a spline model from file.");
@@ -816,7 +837,7 @@ public class CubicSplineManager implements PlugIn
 		IJ.showStatus("");
 	}
 
-	private void printCubicSplines()
+	private static void printCubicSplines()
 	{
 		IJ.log(settings.toString());
 	}

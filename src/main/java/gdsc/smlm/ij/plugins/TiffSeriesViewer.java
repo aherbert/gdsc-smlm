@@ -365,6 +365,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	 */
 	public static class TiffSeriesVirtualStack extends VirtualStack
 	{
+		/** The image source. */
 		SeriesImageSource source;
 
 		/**

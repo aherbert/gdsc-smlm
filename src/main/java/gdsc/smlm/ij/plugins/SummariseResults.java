@@ -445,20 +445,24 @@ public class SummariseResults implements PlugIn, MouseListener
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e)
 	{
+		// Ignore
 	}
 }

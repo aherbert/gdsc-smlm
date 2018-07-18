@@ -190,6 +190,7 @@ import ij.text.TextWindow;
  */
 public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
+	/** The title */
 	static final String TITLE = "Create Data";
 	private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
@@ -296,7 +297,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private TIntHashSet movingMolecules;
 	private TIntIntHashMap idToCompound;
-	ArrayList<String> compoundNames;
+	private ArrayList<String> compoundNames;
 	private boolean maskListContainsStacks;
 
 	// Created by drawImage(...)
@@ -552,9 +553,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final int frames;
 		/**
-		 * The x,y,z position of the localisation in each frame
+		 * The x position of the localisation in each frame
 		 */
-		final double x, y, z;
+		final double x;
+		/**
+		 * The y position of the localisation in each frame
+		 */
+		final double y;
+		/**
+		 * The z position of the localisation in each frame
+		 */
+		final double z;
 		/**
 		 * The actual number of simulated photons in each frame of the benchmark image. Some frames may be empty (due to
 		 * signal filtering or Poisson sampling).
@@ -576,7 +585,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		private int molecules;
 
-		final double precisionN, precisionX, precisionXML;
+		/** The precision of the signal (N) in photons. */
+		final double precisionN;
+		
+		/** The precision of the (x,y) position in nm assuming least-squares fitting. */
+		final double precisionX;
+		
+		/** The precision of the (x,y) position in nm assuming Maximum Likelihood fitting. */
+		final double precisionXML;
 
 		/**
 		 * Instantiates a new benchmark parameters.
@@ -600,7 +616,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * @param gain
 		 *            the gain
 		 * @param qe
-		 *            the qe
+		 *            the quantum efficiency
 		 * @param readNoise
 		 *            the read noise
 		 * @param cameraType
@@ -614,15 +630,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * @param noise
 		 *            the noise
 		 * @param precisionN
-		 *            the precision N
+		 *            The precision of the signal (N) in photons.
 		 * @param precisionX
-		 *            the precision X
+		 *            The precision of the (x,y) position in nm assuming least-squares fitting.
 		 * @param precisionXML
-		 *            the precision XML
+		 *            The precision of the (x,y) position in nm assuming Maximum Likelihood fitting.
 		 * @param psf
-		 *            the psf
+		 *            the PSF
 		 * @param crlb
-		 *            the crlb
+		 *            the Cramér–Rao Lower Bounds
 		 */
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
 				double bias, double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
@@ -703,7 +719,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
+	/** The last benchmark parameters. */
 	static BenchmarkParameters benchmarkParameters = null;
+	
+	/** The last simulation parameters. */
 	static SimulationParameters simulationParameters = null;
 
 	private static String benchmarkFile = "";

@@ -31,13 +31,14 @@ import gdsc.smlm.results.filter.FilterScore;
  */
 public class SimpleFilterScore extends FilterScore
 {
+	/** The result. */
 	final FilterScoreResult r;
 
 	/**
 	 * Instantiates a new simple filter score.
 	 *
 	 * @param r
-	 *            the r
+	 *            the result
 	 * @param allSameType
 	 *            the all same type
 	 * @param criteriaPassed

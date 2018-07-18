@@ -254,7 +254,7 @@ public class SpotFit implements PlugIn
 			}
 		}
 
-		private boolean isRemoveEvent(MouseEvent e)
+		private static boolean isRemoveEvent(MouseEvent e)
 		{
 			return e.isAltDown() || e.isShiftDown() || e.isControlDown();
 		}
@@ -318,7 +318,7 @@ public class SpotFit implements PlugIn
 			return fitResult;
 		}
 
-		private FitConfiguration createFitConfiguration()
+		private static FitConfiguration createFitConfiguration()
 		{
 			FitConfiguration config = new FitConfiguration();
 			config.setFitSolver(FitSolver.LVM_LSE);
@@ -358,7 +358,7 @@ public class SpotFit implements PlugIn
 		/**
 		 * Create the result window (if it is not available)
 		 */
-		private void createResultsWindow()
+		private static void createResultsWindow()
 		{
 			if (resultsWindow == null || !resultsWindow.isShowing())
 			{
@@ -366,7 +366,7 @@ public class SpotFit implements PlugIn
 			}
 		}
 
-		private String createHeader()
+		private static String createHeader()
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append("Image\t");
@@ -515,6 +515,7 @@ public class SpotFit implements PlugIn
 					}
 					catch (NumberFormatException ex)
 					{
+						// Ignore
 					}
 				}
 			}

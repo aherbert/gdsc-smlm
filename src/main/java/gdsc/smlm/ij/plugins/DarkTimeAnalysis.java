@@ -120,7 +120,7 @@ public class DarkTimeAnalysis implements PlugIn
 		analyse(results);
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);

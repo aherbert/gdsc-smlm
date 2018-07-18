@@ -523,14 +523,15 @@ public class EMGainAnalysis implements PlugInFilter
 		Utils.display(TITLE, plot);
 	}
 
-	private double relativeError(double a, double b)
+	private static double relativeError(double a, double b)
 	{
 		//return gdsc.smlm.utils.DoubleEquality.relativeError(a, b);
 		final double d = a - b; // Math.abs(a - b);
 		return d / b;
 	}
 
-	private MultivariateFunction getFunction(final int[] limits, final double[] y, final int max, final int maxEval)
+	private static MultivariateFunction getFunction(final int[] limits, final double[] y, final int max,
+			final int maxEval)
 	{
 		MultivariateFunction fun = new MultivariateFunction()
 		{
@@ -624,7 +625,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 *            The multiplication factor (gain)
 	 * @return The PDF
 	 */
-	private double[] pdfEMGain(final int max, final double step, final double p, final double m)
+	private static double[] pdfEMGain(final int max, final double step, final double p, final double m)
 	{
 		if (max == 0)
 			return pdfEMGain(step, p, m);
@@ -736,7 +737,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 *            The constant offset (bias)
 	 * @return The PDF
 	 */
-	private double[] pdf(final int max, final double p, final double m, final double s, int c0)
+	private static double[] pdf(final int max, final double p, final double m, final double s, int c0)
 	{
 		double[] g = pdfEMGain(max, p, m);
 		double[] gg;
@@ -771,7 +772,7 @@ public class EMGainAnalysis implements PlugInFilter
 		return g0;
 	}
 
-	private int[] limits(int[] h)
+	private static int[] limits(int[] h)
 	{
 		int min = 0;
 		while (h[min] == 0)
@@ -782,7 +783,7 @@ public class EMGainAnalysis implements PlugInFilter
 		return new int[] { min, max };
 	}
 
-	private double[] getX(int[] limits)
+	private static double[] getX(int[] limits)
 	{
 		final int min = 0; //limits[0];
 		final int range = limits[1] - min + 1;
@@ -792,7 +793,7 @@ public class EMGainAnalysis implements PlugInFilter
 		return x;
 	}
 
-	private double[] getY(int[] h, int[] limits)
+	private static double[] getY(int[] h, int[] limits)
 	{
 		final int min = 0; // limits[0];
 		final int range = limits[1] - min + 1;
@@ -808,7 +809,7 @@ public class EMGainAnalysis implements PlugInFilter
 		return y;
 	}
 
-	private int getSize(int[] h)
+	private static int getSize(int[] h)
 	{
 		int size = 0;
 		for (int i = 0; i < h.length; i++)
@@ -816,7 +817,7 @@ public class EMGainAnalysis implements PlugInFilter
 		return size;
 	}
 
-	private double getMean(int[] h)
+	private static double getMean(int[] h)
 	{
 		int size = 0;
 		double sum = 0;

@@ -64,9 +64,18 @@ import ij.plugin.PlugIn;
 public class CropResults implements PlugIn
 {
 	private static final String TITLE = "Crop Results";
+
+	/** The text description of the options for the output cropped results name */
 	static final String[] NAME_OPTIONS = { "Name", "Suffix", "Sequence" };
+
+	/** The option to specify the entire name for the output cropped results name. */
 	static final int NAME_OPTION_NAME = 0;
+	/** The option to specify a suffix for the output cropped results name. */
 	static final int NAME_OPTION_SUFFIX = 1;
+	/**
+	 * The option to specify a sequence for the output cropped results name.
+	 * The output name will a suffix plus the current value of the name counter.
+	 */
 	static final int NAME_OPTION_SEQUENCE = 2;
 
 	private TurboList<String> titles;
@@ -225,7 +234,7 @@ public class CropResults implements PlugIn
 				}
 				catch (ConversionException e)
 				{
-
+					// No native units
 				}
 			}
 			min = c.convert(min);

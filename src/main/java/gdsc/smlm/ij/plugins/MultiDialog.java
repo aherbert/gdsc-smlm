@@ -164,11 +164,20 @@ public class MultiDialog extends Dialog
 		private String[] names;
 		private int size;
 
+		/**
+		 * Instantiates a new memory results items.
+		 */
 		public MemoryResultsItems()
 		{
 			this(new NullMemoryResultsFilter());
 		}
 
+		/**
+		 * Instantiates a new memory results items.
+		 *
+		 * @param filter
+		 *            the filter
+		 */
 		public MemoryResultsItems(MemoryResultsFilter filter)
 		{
 			Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
@@ -200,6 +209,14 @@ public class MultiDialog extends Dialog
 
 	private Items items;
 
+	/**
+	 * Instantiates a new multi dialog.
+	 *
+	 * @param title
+	 *            the title
+	 * @param items
+	 *            the items
+	 */
 	public MultiDialog(String title, Items items)
 	{
 		super(WindowManager.getCurrentImage() != null ? (Frame) WindowManager.getCurrentImage().getWindow()
@@ -211,21 +228,41 @@ public class MultiDialog extends Dialog
 		this.items = items;
 	}
 
+	/**
+	 * Adds the list of selected items.
+	 *
+	 * @param selected
+	 *            the selected
+	 */
 	public void addSelected(java.util.List<String> selected)
 	{
 		this.selected = selected;
 	}
 
+	/**
+	 * Checks if select all items in the list.
+	 *
+	 * @return true, if is select all
+	 */
 	public boolean isSelectAll()
 	{
 		return selectAll;
 	}
 
+	/**
+	 * Sets the select all flag.
+	 *
+	 * @param selectAll
+	 *            Set to true to select all items in the list
+	 */
 	public void setSelectAll(boolean selectAll)
 	{
 		this.selectAll = selectAll;
 	}
 
+	/**
+	 * Show the dialog.
+	 */
 	public void showDialog()
 	{
 		// Detect if running in a macro and just collect the input options
@@ -235,7 +272,7 @@ public class MultiDialog extends Dialog
 		}
 		else
 		{
-			add(buildPanels());
+			add(buildPanel());
 			this.addKeyListener(this);
 			if (IJ.isMacintosh())
 				setResizable(false);
@@ -246,7 +283,12 @@ public class MultiDialog extends Dialog
 		}
 	}
 
-	protected Panel buildPanels()
+	/**
+	 * Builds the main panel for the dialog
+	 *
+	 * @return the panel
+	 */
+	protected Panel buildPanel()
 	{
 		Panel p = new Panel();
 		BorderLayout layout = new BorderLayout();
@@ -257,6 +299,11 @@ public class MultiDialog extends Dialog
 		return p;
 	}
 
+	/**
+	 * Builds the results list component for the dialog.
+	 *
+	 * @return the component
+	 */
 	protected Component buildResultsList()
 	{
 		final int MAX_SIZE = 30;
@@ -281,6 +328,11 @@ public class MultiDialog extends Dialog
 		return list;
 	}
 
+	/**
+	 * Builds the button panel for the dialog.
+	 *
+	 * @return the panel
+	 */
 	protected Panel buildButtonPanel()
 	{
 		Panel buttons = new Panel();
@@ -304,7 +356,12 @@ public class MultiDialog extends Dialog
 		return buttons;
 	}
 
-	public boolean wasCanceled()
+	/**
+	 * Check if the dialog was cancelled.
+	 *
+	 * @return true, if cancelled
+	 */
+	public boolean wasCancelled()
 	{
 		return wasCanceled;
 	}
@@ -343,6 +400,7 @@ public class MultiDialog extends Dialog
 	@Override
 	public void keyTyped(KeyEvent paramKeyEvent)
 	{
+		// Ignore
 	}
 
 	@Override
@@ -391,8 +449,14 @@ public class MultiDialog extends Dialog
 	@Override
 	public void keyReleased(KeyEvent paramKeyEvent)
 	{
+		// Ignore
 	}
 
+	/**
+	 * Gets the selected results from the dialog.
+	 *
+	 * @return the selected results
+	 */
 	public ArrayList<String> getSelectedResults()
 	{
 		ArrayList<String> selected;
@@ -479,59 +543,74 @@ public class MultiDialog extends Dialog
 	//@formatter:off
 	@Override
 	public void windowActivated(WindowEvent e)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void windowOpened(WindowEvent e)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void windowClosed(WindowEvent e)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void mousePressed(MouseEvent paramMouseEvent)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent paramMouseEvent)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent paramMouseEvent)
-	{
+		{
+		// Ignore
 	}
 
 	@Override
 	public void mouseExited(MouseEvent paramMouseEvent)
-	{
+		{
+		// Ignore
 	}
 
 	//@formatter:on
 
-	int lastIndex;
-	int modifiers;
-	int lastEvent = -1;
+	/** The last index from {@link ItemEvent#getItem()} captured in {@link #itemStateChanged(ItemEvent)}. */
+	protected int lastIndex;
+
+	/** The modifiers captured in from {@link #mouseClicked(MouseEvent)}. */
+	protected int modifiers;
+
+	/** The last event from {@link ItemEvent#getStateChange()} captured in {@link #itemStateChanged(ItemEvent)}. */
+	protected int lastEvent = -1;
 
 	/*
 	 * (non-Javadoc)

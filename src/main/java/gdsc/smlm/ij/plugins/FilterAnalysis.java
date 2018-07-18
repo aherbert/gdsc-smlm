@@ -302,7 +302,7 @@ public class FilterAnalysis implements PlugIn
 		return resultsList;
 	}
 
-	private boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput)
+	private static boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput)
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -370,7 +370,7 @@ public class FilterAnalysis implements PlugIn
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd, boolean fileInput)
+	private static boolean readDialog(GenericDialog gd, boolean fileInput)
 	{
 		if (!fileInput)
 		{
@@ -455,7 +455,7 @@ public class FilterAnalysis implements PlugIn
 		return !gd.invalidNumber();
 	}
 
-	private List<FilterSet> createFilters()
+	private static List<FilterSet> createFilters()
 	{
 		IJ.showStatus("Creating filters ...");
 		List<FilterSet> filterSets = new LinkedList<>();
@@ -468,7 +468,7 @@ public class FilterAnalysis implements PlugIn
 		return filterSets;
 	}
 
-	private void addSNRFilters(List<FilterSet> filterSets)
+	private static void addSNRFilters(List<FilterSet> filterSets)
 	{
 		if (!snrFilter)
 			return;
@@ -484,7 +484,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	private void addPrecisionFilters(List<FilterSet> filterSets)
+	private static void addPrecisionFilters(List<FilterSet> filterSets)
 	{
 		if (!precisionFilter)
 			return;
@@ -496,7 +496,7 @@ public class FilterAnalysis implements PlugIn
 		filterSets.add(new FilterSet(filters));
 	}
 
-	private void addTraceFilters(List<FilterSet> filterSets)
+	private static void addTraceFilters(List<FilterSet> filterSets)
 	{
 		if (!traceFilter)
 			return;
@@ -512,7 +512,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	private void addSNRHysteresisFilters(List<FilterSet> filterSets)
+	private static void addSNRHysteresisFilters(List<FilterSet> filterSets)
 	{
 		if (!hysteresisSnrFilter)
 			return;
@@ -531,7 +531,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	private void addPrecisionHysteresisFilters(List<FilterSet> filterSets)
+	private static void addPrecisionHysteresisFilters(List<FilterSet> filterSets)
 	{
 		if (!hysteresisPrecisionFilter)
 			return;
@@ -585,7 +585,7 @@ public class FilterAnalysis implements PlugIn
 		calculateSensitivity(resultsList);
 	}
 
-	private int countFilters(List<FilterSet> filterSets)
+	private static int countFilters(List<FilterSet> filterSets)
 	{
 		int count = 0;
 		for (FilterSet filterSet : filterSets)
@@ -692,7 +692,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	private void addSensitivityScore(StringBuilder sb, double s, double s1, double s2, double dx1, double dx2)
+	private static void addSensitivityScore(StringBuilder sb, double s, double s1, double s2, double dx1, double dx2)
 	{
 		// Use absolute in case this is not a local maximum. We are mainly interested in how
 		// flat the curve is at this point in relation to parameter changes.
@@ -726,7 +726,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	private String createResultsHeader()
+	private static String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Name\t");
@@ -758,7 +758,7 @@ public class FilterAnalysis implements PlugIn
 		}
 	}
 
-	private String createSensitivityHeader()
+	private static String createSensitivityHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Filter\t");
@@ -898,7 +898,7 @@ public class FilterAnalysis implements PlugIn
 		return null;
 	}
 
-	private double getMaximum(double[] values)
+	private static double getMaximum(double[] values)
 	{
 		double max = values[0];
 		for (int i = 1; i < values.length; i++)

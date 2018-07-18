@@ -168,7 +168,7 @@ public class TraceExporter implements PlugIn
 
 		md.showDialog();
 
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return false;
 
 		selected = md.getSelectedResults();

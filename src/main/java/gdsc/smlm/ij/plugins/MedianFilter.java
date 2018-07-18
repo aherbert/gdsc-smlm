@@ -58,8 +58,8 @@ public class MedianFilter implements PlugInFilter
 	private static boolean subtract = false;
 	private static float bias = 500;
 
-	ImagePlus imp;
-	int counter, size;
+	private ImagePlus imp;
+	private int counter, size;
 
 	/*
 	 * (non-Javadoc)

@@ -58,7 +58,7 @@ public class DepthMask implements PlugIn
 		createMask();
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -82,7 +82,7 @@ public class DepthMask implements PlugIn
 		return true;
 	}
 
-	private void createMask()
+	private static void createMask()
 	{
 		ImagePlus impXY = WindowManager.getImage(titleXY);
 		ImagePlus impXZ = WindowManager.getImage(titleXZ);
@@ -164,7 +164,7 @@ public class DepthMask implements PlugIn
 		Utils.display(TITLE, stack);
 	}
 
-	private byte[] getMask(ImagePlus impXY)
+	private static byte[] getMask(ImagePlus impXY)
 	{
 		final byte[] mask = (byte[]) impXY.getProcessor().convertToByte(false).getPixels();
 		// Make binary

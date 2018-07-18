@@ -83,16 +83,39 @@ public class LoadLocalisations implements PlugIn
 		}
 	}
 
+	/**
+	 * The localisation.
+	 */
 	public static class Localisation
 	{
-		int t, id;
-		float x, y, z, intensity, sx = -1, sy = -1, precision = -1;
+		/** The time. */
+		int t;
+		/** The id. */
+		int id;
+		/** The x. */
+		float x;
+		/** The y. */
+		float y;
+		/** The z. */
+		float z;
+		/** The intensity. */
+		float intensity;
+		/** The x standard deviation. */
+		float sx = -1;
+		/** The y standard deviation. */
+		float sy = -1;
+		/** The precision. */
+		float precision = -1;
 	}
 
+	/**
+	 * A list of {@link Localisation} objects.
+	 */
 	public static class LocalisationList extends ArrayList<Localisation>
 	{
 		private static final long serialVersionUID = 6616011992365324247L;
 
+		/** The calibration. */
 		public final Calibration calibration;
 
 		/**
@@ -109,6 +132,13 @@ public class LoadLocalisations implements PlugIn
 			this.calibration = calibration;
 		}
 
+		/**
+		 * Convert to peak results.
+		 *
+		 * @param name
+		 *            the name
+		 * @return the memory peak results
+		 */
 		public MemoryPeakResults toPeakResults(String name)
 		{
 			CalibrationWriter calibrationWriter = new CalibrationWriter(this.calibration);
@@ -239,6 +269,13 @@ public class LoadLocalisations implements PlugIn
 		Utils.log(msg);
 	}
 
+	/**
+	 * Load localisations.
+	 *
+	 * @param settings
+	 *            the settings
+	 * @return the localisation list
+	 */
 	static LocalisationList loadLocalisations(LoadLocalisationsSettings.Builder settings)
 	{
 		if (!getFields(settings))

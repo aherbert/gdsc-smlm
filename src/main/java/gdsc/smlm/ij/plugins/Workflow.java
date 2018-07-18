@@ -28,6 +28,7 @@ import java.util.Arrays;
 
 import gdsc.smlm.utils.Pair;
 
+// TODO: Auto-generated Javadoc
 /**
  * Allow processing work in stages, repeating only the stages necessary to render new results given changes to settings.
  * This class is designed to be used to allow live display of results upon settings changes by running the analysis on
@@ -41,9 +42,8 @@ import gdsc.smlm.utils.Pair;
  */
 public class Workflow<S, R>
 {
-	/**
-	 * Default delay (in milliseconds) to use for dialog previews
-	 */
+	
+	/** Default delay (in milliseconds) to use for dialog previews. */
 	public static final long DELAY = 500;
 
 	private class Work
@@ -114,6 +114,9 @@ public class Workflow<S, R>
 		}
 	}
 
+	/**
+	 * A {@link Runnable} worker to some work in the workflow.
+	 */
 	public class RunnableWorker implements Runnable
 	{
 		private final WorkflowWorker<S, R> worker;
@@ -123,11 +126,20 @@ public class Workflow<S, R>
 		private WorkStack inbox;
 		private Object[] outbox;
 
+		/**
+		 * Instantiates a new runnable worker.
+		 *
+		 * @param worker
+		 *            the worker
+		 */
 		RunnableWorker(WorkflowWorker<S, R> worker)
 		{
 			this.worker = worker;
 		}
 
+		/* (non-Javadoc)
+		 * @see java.lang.Runnable#run()
+		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public void run()
@@ -345,12 +357,21 @@ public class Workflow<S, R>
 		return workers.size();
 	}
 
+	/**
+	 * Start.
+	 */
 	public synchronized void start()
 	{
 		shutdown(true);
 		threads = startWorkers(workers);
 	}
 
+	/**
+	 * Shutdown.
+	 *
+	 * @param now
+	 *            the now
+	 */
 	public synchronized void shutdown(boolean now)
 	{
 		if (threads != null)
@@ -360,11 +381,17 @@ public class Workflow<S, R>
 		}
 	}
 
+	/**
+	 * Checks if is running.
+	 *
+	 * @return true, if is running
+	 */
 	public boolean isRunning()
 	{
 		return threads != null;
 	}
 
+	@SuppressWarnings("static-method")
 	private ArrayList<Thread> startWorkers(ArrayList<RunnableWorker> workers)
 	{
 		ArrayList<Thread> threads = new ArrayList<>();
@@ -379,6 +406,7 @@ public class Workflow<S, R>
 		return threads;
 	}
 
+	@SuppressWarnings("static-method")
 	private void finishWorkers(ArrayList<RunnableWorker> workers, ArrayList<Thread> threads, boolean now)
 	{
 		// Finish work
@@ -419,6 +447,7 @@ public class Workflow<S, R>
 				}
 				catch (InterruptedException e)
 				{
+					// Ignore
 				}
 			}
 		}

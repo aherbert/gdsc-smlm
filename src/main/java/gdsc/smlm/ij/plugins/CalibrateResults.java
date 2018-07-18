@@ -68,7 +68,7 @@ public class CalibrateResults implements PlugIn
 		IJ.showStatus("Calibrated " + results.getName());
 	}
 
-	private boolean showInputDialog()
+	private static boolean showInputDialog()
 	{
 		int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
@@ -93,7 +93,7 @@ public class CalibrateResults implements PlugIn
 		return true;
 	}
 
-	private boolean showDialog(MemoryPeakResults results)
+	private static boolean showDialog(MemoryPeakResults results)
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -123,9 +123,10 @@ public class CalibrateResults implements PlugIn
 		if (!results.getName().equals(name))
 		{
 			// If the name is changed then remove and add back to memory
-			results = MemoryPeakResults.removeResults(results.getName());
-			if (results != null)
+			MemoryPeakResults existingResults = MemoryPeakResults.removeResults(results.getName());
+			if (existingResults != null)
 			{
+				results = existingResults;
 				results.setName(name);
 				MemoryPeakResults.addResults(results);
 			}

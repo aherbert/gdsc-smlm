@@ -89,7 +89,7 @@ import ij.text.TextWindow;
 
 public class TraceMolecules implements PlugIn
 {
-	public enum OptimiserPlot
+	private enum OptimiserPlot
 	{
 		//@formatter:off
 		NONE{ @Override
@@ -121,14 +121,14 @@ public class TraceMolecules implements PlugIn
 		}
 	}
 
-	public static TraceMode getTraceMode(int traceMode)
+	private static TraceMode getTraceMode(int traceMode)
 	{
 		if (traceMode < 0 || traceMode >= TraceMode.values().length)
 			return TraceMode.LATEST_FORERUNNER;
 		return TraceMode.values()[traceMode];
 	}
 
-	public static ClusteringAlgorithm getClusteringAlgorithm(int clusteringAlgorithm)
+	private static ClusteringAlgorithm getClusteringAlgorithm(int clusteringAlgorithm)
 	{
 		if (clusteringAlgorithm < 0 || clusteringAlgorithm >= ClusteringAlgorithm.values().length)
 			return ClusteringAlgorithm.PAIRWISE;
@@ -323,7 +323,7 @@ public class TraceMolecules implements PlugIn
 		//	fitTraces(results, traces);
 	}
 
-	private double getDistance(double distanceThreshold, CalibrationOrBuilder calibration)
+	private static double getDistance(double distanceThreshold, CalibrationOrBuilder calibration)
 	{
 		// Convert from NM to native units
 		Converter c = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
@@ -439,6 +439,17 @@ public class TraceMolecules implements PlugIn
 		});
 	}
 
+	/**
+	 * Convert the traces to results.
+	 *
+	 * @param sourceResults
+	 *            the source results
+	 * @param traces
+	 *            the traces
+	 * @param name
+	 *            the name
+	 * @return the memory peak results
+	 */
 	static MemoryPeakResults saveResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
 	{
 		MemoryPeakResults tracedResults = TraceManager.convertToPeakResults(sourceResults, traces);
@@ -447,7 +458,7 @@ public class TraceMolecules implements PlugIn
 		return tracedResults;
 	}
 
-	static MemoryPeakResults saveCentroidResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
+	private static MemoryPeakResults saveCentroidResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
 	{
 		MemoryPeakResults tracedResults = TraceManager.convertToCentroidPeakResults(sourceResults, traces);
 		tracedResults.setName(sourceResults.getName() + " " + name);
@@ -455,7 +466,7 @@ public class TraceMolecules implements PlugIn
 		return tracedResults;
 	}
 
-	private Trace[] getSingles(Trace[] traces)
+	private static Trace[] getSingles(Trace[] traces)
 	{
 		ArrayList<Trace> result = new ArrayList<>();
 		for (Trace t : traces)
@@ -464,7 +475,7 @@ public class TraceMolecules implements PlugIn
 		return result.toArray(new Trace[result.size()]);
 	}
 
-	private Trace[] getTraces(Trace[] traces)
+	private static Trace[] getTraces(Trace[] traces)
 	{
 		ArrayList<Trace> result = new ArrayList<>();
 		for (Trace t : traces)
@@ -670,7 +681,7 @@ public class TraceMolecules implements PlugIn
 		}
 	}
 
-	private String createHeader()
+	private static String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
 				"Dataset\tAlgorithm\tExposure time (ms)\tD-threshold (nm)\tT-threshold (s)\t(Frames)\tMolecules\tFiltered\tSingles\tClusters");
@@ -1191,7 +1202,7 @@ public class TraceMolecules implements PlugIn
 		return results;
 	}
 
-	private double getBlinkingRate(Trace[] traces)
+	private static double getBlinkingRate(Trace[] traces)
 	{
 		SummaryStatistics stats = new SummaryStatistics();
 		for (Trace trace : traces)
@@ -1200,7 +1211,7 @@ public class TraceMolecules implements PlugIn
 		return blinkingRate;
 	}
 
-	private double[] getIntervals(double min, double max, int optimiserSteps)
+	private static double[] getIntervals(double min, double max, int optimiserSteps)
 	{
 		if (max < min)
 		{
@@ -1239,7 +1250,7 @@ public class TraceMolecules implements PlugIn
 		return values;
 	}
 
-	private int[] convert(double[] intervals)
+	private static int[] convert(double[] intervals)
 	{
 		TIntHashSet set = new TIntHashSet(intervals.length);
 		for (double d : intervals)
@@ -1407,7 +1418,7 @@ public class TraceMolecules implements PlugIn
 		return true;
 	}
 
-	private double findZeroCrossing(double[] data, double[] axis)
+	private static double findZeroCrossing(double[] data, double[] axis)
 	{
 		if (data[0] < 0)
 			return -1;
@@ -1581,13 +1592,13 @@ public class TraceMolecules implements PlugIn
 		return fp;
 	}
 
-	private int[] createLookup(int[] values, int min, int scale)
+	private static int[] createLookup(int[] values, int min, int scale)
 	{
 		double[] newValues = toDouble(values);
 		return createLookup(newValues, min, scale);
 	}
 
-	private double[] toDouble(int[] values)
+	private static double[] toDouble(int[] values)
 	{
 		double[] newValues = new double[values.length];
 		for (int i = 0; i < values.length; i++)
@@ -1597,7 +1608,7 @@ public class TraceMolecules implements PlugIn
 		return newValues;
 	}
 
-	private int[] createLookup(double[] values, double min, int scale)
+	private static int[] createLookup(double[] values, double min, int scale)
 	{
 		// To allow the lowest result to be plotted, add space at the edge
 		// equal to the next interval
@@ -1675,7 +1686,7 @@ public class TraceMolecules implements PlugIn
 		return fp;
 	}
 
-	private double getRange(double max, double min, int orig, int w)
+	private static double getRange(double max, double min, int orig, int w)
 	{
 		double r = max - min;
 		if (r <= 0)
@@ -2138,7 +2149,7 @@ public class TraceMolecules implements PlugIn
 	}
 
 	@SuppressWarnings("unused")
-	private double getCombinedNoise(Trace trace)
+	private static double getCombinedNoise(Trace trace)
 	{
 		double noise = 0;
 		for (int i = 0; i < trace.size(); i++)

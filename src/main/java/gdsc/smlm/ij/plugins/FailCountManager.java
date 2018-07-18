@@ -510,7 +510,7 @@ public class FailCountManager implements PlugIn
 		return true;
 	}
 
-	private ParameterisedFitJob createJob(int startFrame, float[] data, Rectangle bounds)
+	private static ParameterisedFitJob createJob(int startFrame, float[] data, Rectangle bounds)
 	{
 		FitParameters fitParams = new FitParameters();
 		fitParams.fitTask = FitTask.PSF_FITTING;
@@ -519,7 +519,7 @@ public class FailCountManager implements PlugIn
 		return new ParameterisedFitJob(fitParams, startFrame, data, bounds);
 	}
 
-	private boolean escapePressed()
+	private static boolean escapePressed()
 	{
 		if (IJ.escapePressed())
 		{
@@ -887,7 +887,7 @@ public class FailCountManager implements PlugIn
 		stack.close(gd.wasCanceled());
 	}
 
-	private int getMaxConsecutiveFailCount(TurboList<FailCountData> failCountData)
+	private static int getMaxConsecutiveFailCount(TurboList<FailCountData> failCountData)
 	{
 		int max = 1;
 		for (int i = 0; i < failCountData.size(); i++)
@@ -897,7 +897,7 @@ public class FailCountManager implements PlugIn
 		return max;
 	}
 
-	private int getMaxFailCount(TurboList<FailCountData> failCountData)
+	private static int getMaxFailCount(TurboList<FailCountData> failCountData)
 	{
 		int max = 1;
 		for (int i = 0; i < failCountData.size(); i++)
@@ -908,7 +908,7 @@ public class FailCountManager implements PlugIn
 	}
 
 	@SuppressWarnings("unused")
-	private int getMaxPassCount(TurboList<FailCountData> failCountData)
+	private static int getMaxPassCount(TurboList<FailCountData> failCountData)
 	{
 		int max = 1;
 		for (int i = 0; i < failCountData.size(); i++)
@@ -1155,21 +1155,21 @@ public class FailCountManager implements PlugIn
 		IJ.showStatus("");
 	}
 
-	private void fill(TByteArrayList type, TurboList<FailCounter> counters, int b)
+	private static void fill(TByteArrayList type, TurboList<FailCounter> counters, int b)
 	{
 		int n = counters.size() - type.size();
 		Utils.log("Type %d = %d", b, n);
 		type.fill(type.size(), counters.size(), (byte) b);
 	}
 
-	private enum CounterStatus
+	private static enum CounterStatus
 	{
 		CONTINUE, ANALYSE, RETURN;
 	}
 
 	private static int maxCounters = 200000;
 
-	private CounterStatus checkCounters(TurboList<FailCounter> counters)
+	private static CounterStatus checkCounters(TurboList<FailCounter> counters)
 	{
 		if (counters.size() > maxCounters)
 		{
@@ -1193,7 +1193,7 @@ public class FailCountManager implements PlugIn
 		return CounterStatus.CONTINUE;
 	}
 
-	private void createTable()
+	private static void createTable()
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
 		{

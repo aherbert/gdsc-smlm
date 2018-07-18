@@ -1956,7 +1956,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		md.showDialog();
 
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return false;
 
 		selected = md.getSelectedResults();

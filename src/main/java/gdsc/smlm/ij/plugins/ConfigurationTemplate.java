@@ -798,37 +798,33 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * The template option.
 	 */
 	//@formatter:off
-	public enum TemplateOption implements NamedObject
+	public static enum TemplateOption implements NamedObject
 	{
 		/** Load standard templates */
-		LOAD_STANDARD_TEMPLATES("Load standard templates"),
+		LOAD_STANDARD_TEMPLATES{ @Override public String getName() { return "Load standard templates"; }},
 		/** Load custom templates */
-		LOAD_CUSTOM_TEMPLATES("Load custom templates"),
+		LOAD_CUSTOM_TEMPLATES{ @Override public String getName() { return "Load custom templates"; }},
 		/** Remove loaded templates */
-		REMOVE_LOADED_TEMPLATES("Remove loaded templates"),
+		REMOVE_LOADED_TEMPLATES{ @Override public String getName() { return "Remove loaded templates"; }},
 		/** View template */
-		VIEW_TEMPLATE("View template"),
+		VIEW_TEMPLATE{ @Override public String getName() { return "View template"; }},
 		/** View image example for template */
-		VIEW_TEMPLATE_IMAGE("View image example for template");
-
-		private String name;
-		TemplateOption(String name)
-		{
-			this.name = name;
-		}
-		@Override
-		public String getName()
-		{
-			return name;
-		}
+		VIEW_TEMPLATE_IMAGE{ @Override public String getName() { return "View image example for template"; }};
 
 		@Override
 		public String getShortName()
 		{
-			return name;
+			return getName();
 		}
 
-		static TemplateOption forNumber(int i)
+		/**
+		 * Get the template option for the number.
+		 *
+		 * @param i
+		 *            the number
+		 * @return the template option
+		 */
+		public static TemplateOption forNumber(int i)
 		{
 			TemplateOption[] values = TemplateOption.values();
 			if (i < 0 || i >= values.length)
@@ -917,7 +913,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		md.showDialog();
 
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return;
 
 		ArrayList<String> selected = md.getSelectedResults();
@@ -1027,7 +1023,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		md.showDialog();
 
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return;
 
 		ArrayList<String> selected = md.getSelectedResults();
@@ -1083,7 +1079,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		md.showDialog();
 
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return;
 
 		ArrayList<String> selected = md.getSelectedResults();

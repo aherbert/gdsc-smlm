@@ -99,6 +99,7 @@ import ij.text.TextWindow;
  */
 public class BenchmarkSpotFilter implements PlugIn
 {
+	/** The title. */
 	static final String TITLE = "Filter Spot Data";
 
 	private static FitConfiguration fitConfig;
@@ -137,9 +138,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double sAnalysisBorder = 2;
 	private static boolean hardBorder = true;
 	private static int matchingMethod = METHOD_MULTI;
-	/**
-	 * The last border used in analysis
-	 */
+
+	/** The last border used in analysis. */
 	static Rectangle lastAnalysisBorder;
 	private static double upperDistance = 1.5;
 	private static double lowerDistance = 0.5;
@@ -189,32 +189,99 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private WindowOrganiser windowOrganiser;
 
-	public static String tablePrefix, resultPrefix;
+	/**
+	 * The prefix for the results table header.
+	 * Contains all the standard header data about the input results data.
+	 */
+	public static String tablePrefix;
+
+	/**
+	 * The prefix for the results table entry.
+	 * Contains all the standard data about the input results data.
+	 */
+	public static String resultPrefix;
 
 	// Used by the Benchmark Spot Fit plugin
 	private static int filterResultsId = 0;
+
+	/** The filter result. */
 	static BenchmarkFilterResult filterResult = null;
 
+	/**
+	 * Store the benchmark filter result.
+	 */
 	public class BenchmarkFilterResult
 	{
+		/** The simulation id. */
 		public final int simulationId;
+
+		/** The id. */
 		public final int id = ++filterResultsId;
+
+		/** The filter results. */
 		public TIntObjectHashMap<FilterResult> filterResults;
+
+		/** The configuration for the spot filter. */
 		public FitEngineConfiguration config;
+
+		/** The spot filter. */
 		public MaximaSpotFilter spotFilter;
+
+		/** The Area-Under precision-recall Curve (AUC). */
 		public double auc;
-		double[] r, p, j, c;
+
+		/** The recall when all spots are ranked by spot intensity. */
+		double[] r;
+
+		/** The precision when all spots are ranked by spot intensity. */
+		double[] p;
+
+		/** The Jaccard when all spots are ranked by spot intensity. */
+		double[] j;
+
+		/** The correlation when all spots are ranked by spot intensity. */
+		double[] c;
+
+		/** The max index for the Jaccard score. */
 		int maxIndex;
+
+		/** The fraction index where the recall achieves the fraction of the maximum.. */
 		int fractionIndex;
+
+		/** The cumulutive histogram of the number of negatives preceding each positive. */
 		public double[][] cumul;
+
+		/** The statistics of the number of negatives preceding each positive. */
 		public StoredData stats;
+
+		/** The Area-Under precision-recall Curve (AUC) computed using the maximum precision for recall >= r. */
 		public double auc2;
+
+		/** The slope of the regression between the actual and candidate spot intensity for matches. */
 		public double slope;
+
+		/** The intensity of the actual spots that match. */
 		public double[] i1;
+
+		/** The intensity of the filter candidates that match. */
 		public double[] i2;
+
+		/** The intensity of all the spots. */
 		public double[] intensity;
+
+		/** The time. */
 		public long time;
 
+		/**
+		 * Instantiates a new benchmark filter result.
+		 *
+		 * @param filterResults
+		 *            the filter results
+		 * @param config
+		 *            the config
+		 * @param spotFilter
+		 *            the spot filter
+		 */
 		public BenchmarkFilterResult(TIntObjectHashMap<FilterResult> filterResults, FitEngineConfiguration config,
 				MaximaSpotFilter spotFilter)
 		{
@@ -302,17 +369,45 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
+	/**
+	 * The Class ScoredSpot.
+	 */
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
+		/** The match. */
 		final boolean match;
+
+		/** The scores. */
 		double[] scores;
+
+		/** The score. */
 		double score;
 		// Total intensity of spots we matched
 		private double intensity;
+
+		/** The background. */
 		final float background;
+
+		/** The spot. */
 		final Spot spot;
+
+		/** The fails. */
 		int fails;
 
+		/**
+		 * Instantiates a new scored spot.
+		 *
+		 * @param match
+		 *            the match
+		 * @param score
+		 *            the score
+		 * @param intensity
+		 *            the intensity
+		 * @param spot
+		 *            the spot
+		 * @param background
+		 *            the background
+		 */
 		public ScoredSpot(boolean match, double score, double intensity, Spot spot, float background)
 		{
 			this.match = match;
@@ -368,13 +463,20 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 		}
 
+		/**
+		 * Gets the score.
+		 *
+		 * @param i
+		 *            the i
+		 * @return the score
+		 */
 		public double getScore(int i)
 		{
 			return (scores != null && i < scores.length) ? scores[i] : 0;
 		}
 
 		/**
-		 * Get the score
+		 * Get the score.
 		 *
 		 * @return The score
 		 */
@@ -430,10 +532,20 @@ public class BenchmarkSpotFilter implements PlugIn
 	 */
 	public class FilterResult
 	{
+
+		/** The frame. */
 		final int frame;
+
+		/** The result. */
 		final FractionClassificationResult result;
+
+		/** The spots. */
 		final ScoredSpot[] spots;
+
+		/** The actual. */
 		final PSFSpot[] actual;
+
+		/** The actual assignment. */
 		final boolean[] actualAssignment;
 
 		/**
@@ -587,7 +699,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					}
 				}
 
-				if (offset != 0)
+				if (overlapAnalysis != null)
 				{
 					final double[] overlapParams = Arrays.copyOf(allParams, 1 + offset);
 					overlapAnalysis.add(overlapParams, false);
@@ -1355,7 +1467,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			windowOrganiser.add(pw);
 	}
 
-	private float[][] extractData(BatchResult[] batchResult, int index, double scale)
+	private static float[][] extractData(BatchResult[] batchResult, int index, double scale)
 	{
 		float[][] data = new float[2][batchResult.length];
 		for (int i = 0; i < batchResult.length; i++)
@@ -1440,7 +1552,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return null;
 	}
 
-	private double[][] getStats(ArrayList<BatchResult[]> batchResults)
+	private static double[][] getStats(ArrayList<BatchResult[]> batchResults)
 	{
 		if (selection < 2)
 			return null;
@@ -1464,7 +1576,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return stats;
 	}
 
-	private double[] extractData(BatchResult[] batchResult, int index, double[][] stats)
+	private static double[] extractData(BatchResult[] batchResult, int index, double[][] stats)
 	{
 		double[] data = new double[batchResult.length];
 		for (int i = 0; i < batchResult.length; i++)
@@ -1474,7 +1586,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return data;
 	}
 
-	private double getScore(BatchResult batchResult, int index, double[][] stats)
+	private static double getScore(BatchResult batchResult, int index, double[][] stats)
 	{
 		if (stats == null)
 			return batchResult.getScore(index);
@@ -1485,7 +1597,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return z;
 	}
 
-	private double[] getRange(final int limit, final double interval)
+	private static double[] getRange(final int limit, final double interval)
 	{
 		double[] param;
 		int c = (int) (limit / interval);
@@ -1947,7 +2059,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		if (filterResults == null)
 			throw new NullPointerException();
-		
+
 		filterResults.compact();
 
 		IJ.showStatus("Summarising results ...");
@@ -1998,7 +2110,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	 *            the filter result
 	 * @return the cumulative histogram
 	 */
-	private double[][] histogramFailures(BenchmarkFilterResult filterResult)
+	private static double[][] histogramFailures(BenchmarkFilterResult filterResult)
 	{
 		final StoredData data = new StoredData();
 		filterResult.filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
@@ -2048,7 +2160,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			windowOrganiser.add(pw);
 	}
 
-	private void put(BlockingQueue<Integer> jobs, int i)
+	private static void put(BlockingQueue<Integer> jobs, int i)
 	{
 		try
 		{
@@ -2300,12 +2412,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		return filterResult;
 	}
 
-	private boolean isShowOverlay()
+	private static boolean isShowOverlay()
 	{
 		return (showTP || showFP || showFN);
 	}
 
-	private void showOverlay(ImagePlus imp, BenchmarkFilterResult filterResult)
+	private static void showOverlay(ImagePlus imp, BenchmarkFilterResult filterResult)
 	{
 		final Overlay o = new Overlay();
 		//int tp = 0, fp = 0, fn = 0, nn = 0;
@@ -2466,7 +2578,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			windowOrganiser.add(pw3);
 	}
 
-	private double getFailures(double[][] cumul, double fraction)
+	private static double getFailures(double[][] cumul, double fraction)
 	{
 		int i = 0;
 		final double[] sum = cumul[1];
@@ -2475,7 +2587,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return i;
 	}
 
-	private void addResult(StringBuilder sb, FractionClassificationResult matchResult, double c)
+	private static void addResult(StringBuilder sb, FractionClassificationResult matchResult, double c)
 	{
 		addCount(sb, matchResult.getTP());
 		addCount(sb, matchResult.getFP());
@@ -2503,7 +2615,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append('\t');
 	}
 
-	private BufferedTextWindow getTable(boolean batchSummary)
+	private static BufferedTextWindow getTable(boolean batchSummary)
 	{
 		if (batchSummary)
 		{
@@ -2527,7 +2639,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
-	private String createHeader()
+	private static String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tCamera\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");

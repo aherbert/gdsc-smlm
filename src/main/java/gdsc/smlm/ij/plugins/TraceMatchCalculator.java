@@ -47,6 +47,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
 import ij.IJ;
+import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
@@ -125,7 +126,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
 	}
 
-	private boolean showDialog()
+	private static boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
@@ -167,6 +168,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		return true;
 	}
 
+	@SuppressWarnings("null")
 	private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2, MemoryPeakResults results3,
 			double dThreshold)
 	{
@@ -222,6 +224,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 					pairPainter.setTitle(results1.getSource().getOriginal().getName());
 
 					// Add the unmatched points
+					WindowManager.getIDList();
+					
 					for (Coordinate c : FN)
 						pairs.add(new PointPair(c, null));
 					for (Coordinate c : FP)
@@ -308,7 +312,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			addResult(inputOption1, inputOption3, dThreshold, result2);
 	}
 
-	private Pulse[] extractPulses(MemoryPeakResults results)
+	private static Pulse[] extractPulses(MemoryPeakResults results)
 	{
 		if (results == null)
 			return null;
@@ -325,7 +329,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		return pulses;
 	}
 
-	private String createResultsHeader()
+	private static String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Image 1\t");
@@ -346,7 +350,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		return sb.toString();
 	}
 
-	private void addResult(String i1, String i2, double dThrehsold, MatchResult result)
+	private static void addResult(String i1, String i2, double dThrehsold, MatchResult result)
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(i1).append('\t');
@@ -375,7 +379,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		}
 	}
 
-	private String createPairsHeader()
+	private static String createPairsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Start1\t");
@@ -393,7 +397,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		return sb.toString();
 	}
 
-	private void addPairResult(PointPair pair)
+	private static void addPairResult(PointPair pair)
 	{
 		StringBuilder sb = new StringBuilder();
 		Pulse p1 = (Pulse) pair.getPoint1();
@@ -403,7 +407,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		pairsWindow.append(sb.toString());
 	}
 
-	private void addPoint(StringBuilder sb, Pulse p)
+	private static void addPoint(StringBuilder sb, Pulse p)
 	{
 		if (p == null)
 		{
@@ -419,7 +423,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		}
 	}
 
-	private String createTriplesHeader()
+	private static String createTriplesHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Start1\t");
@@ -470,7 +474,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		return null;
 	}
 
-	private void addTripleResult(Triple triple)
+	private static void addTripleResult(Triple triple)
 	{
 		StringBuilder sb = new StringBuilder();
 		Pulse p1 = triple.p1;
@@ -482,7 +486,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		triplesWindow.append(sb.toString());
 	}
 
-	private void addResult(StringBuilder sb, Pulse p1, Pulse p2)
+	private static void addResult(StringBuilder sb, Pulse p1, Pulse p2)
 	{
 		addPoint(sb, p2);
 		PointPair pair = new PointPair(p1, p2);

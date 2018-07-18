@@ -202,7 +202,7 @@ public class ResultsManager implements PlugIn
 				MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 				md.addSelected(selected);
 				md.showDialog();
-				if (md.wasCanceled())
+				if (md.wasCancelled())
 					return;
 				selected = md.getSelectedResults();
 				if (selected.isEmpty())
@@ -1810,7 +1810,7 @@ public class ResultsManager implements PlugIn
 		MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 		md.addSelected(selected);
 		md.showDialog();
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return;
 		selected = md.getSelectedResults();
 		if (selected.isEmpty())

@@ -334,7 +334,7 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
-	private double guessScale(String unit, double units)
+	private static double guessScale(String unit, double units)
 	{
 		unit = unit.toLowerCase();
 		if (unit.equals("nm") || unit.startsWith("nanomet"))
@@ -373,7 +373,7 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
-	double plotRadius = -1;
+	private double plotRadius = -1;
 
 	private void drawBoundingBox()
 	{
@@ -922,7 +922,7 @@ public class PSFCreator implements PlugInFilter
 		return results;
 	}
 
-	private int findMaximumIndex(double[] data)
+	private static int findMaximumIndex(double[] data)
 	{
 		double max = data[0];
 		int pos = 0;
@@ -937,7 +937,7 @@ public class PSFCreator implements PlugInFilter
 		return pos;
 	}
 
-	private int findMinimumIndex(double[] data, int initialGuess)
+	private static int findMinimumIndex(double[] data, int initialGuess)
 	{
 		double min = data[initialGuess];
 		int pos = initialGuess;
@@ -1133,7 +1133,7 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
-	private double[] invert(final double[] data)
+	private static double[] invert(final double[] data)
 	{
 		double[] data2 = new double[data.length];
 		for (int i = 0; i < data.length; i++)
@@ -1173,7 +1173,7 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	@SuppressWarnings("unused")
-	private float getBackground(final double fraction, DoubleData all)
+	private static float getBackground(final double fraction, DoubleData all)
 	{
 		double[] allValues = all.values();
 		Arrays.sort(allValues);
@@ -1474,7 +1474,7 @@ public class PSFCreator implements PlugInFilter
 	 *            The magnification
 	 * @return The insert position
 	 */
-	private final double getInsert(final double coord, final int iCoord, final int magnification)
+	private static double getInsert(final double coord, final int iCoord, final int magnification)
 	{
 		// Note that a perfect alignment to the centre of a pixel would be 0.5,0.5.
 		// Insert should align the image into the middle:
@@ -1505,7 +1505,7 @@ public class PSFCreator implements PlugInFilter
 		IJ.showProgress(progress);
 	}
 
-	private void copyBits(ImageProcessor ip, FloatProcessor fp, int lowerX, int lowerY, double weight)
+	private static void copyBits(ImageProcessor ip, FloatProcessor fp, int lowerX, int lowerY, double weight)
 	{
 		if (weight > 0)
 		{
@@ -1891,7 +1891,7 @@ public class PSFCreator implements PlugInFilter
 		return bad;
 	}
 
-	private BasePoint[] getNonBadSpots(BasePoint[] roiPoints, boolean[] bad)
+	private static BasePoint[] getNonBadSpots(BasePoint[] roiPoints, boolean[] bad)
 	{
 		int ok = 0;
 		for (int i = 0, n = bad.length; i < n; i++)
@@ -2581,7 +2581,7 @@ public class PSFCreator implements PlugInFilter
 			psfImp.setSlice(z);
 	}
 
-	private double getFWHM(ImageStack psf, int maxz)
+	private static double getFWHM(ImageStack psf, int maxz)
 	{
 		// Extract the line profile through the stack
 		int size = psf.getWidth();
@@ -3224,7 +3224,7 @@ public class PSFCreator implements PlugInFilter
 		imp.getWindow().toFront();
 	}
 
-	private int count(boolean[] flags)
+	private static int count(boolean[] flags)
 	{
 		int c = 0;
 		for (int i = 0; i < flags.length; i++)
@@ -4585,7 +4585,7 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
-	private Roi createRoi(float x, float y, Color color)
+	private static Roi createRoi(float x, float y, Color color)
 	{
 		Roi roi = new PointRoi(x, y);
 		roi.setStrokeColor(color);
@@ -5080,7 +5080,7 @@ public class PSFCreator implements PlugInFilter
 			return com;
 		}
 
-		private double[] centreOfMass(float[] data, int w, int h)
+		private static double[] centreOfMass(float[] data, int w, int h)
 		{
 			double cx = 0;
 			double cy = 0;

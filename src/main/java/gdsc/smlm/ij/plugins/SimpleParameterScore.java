@@ -31,8 +31,19 @@ import gdsc.smlm.results.filter.FilterScore;
  */
 public class SimpleParameterScore extends FilterScore
 {
+	/** The result. */
 	final ParameterScoreResult r;
 
+	/**
+	 * Instantiates a new simple parameter score.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @param r
+	 *            the result
+	 * @param criteriaPassed
+	 *            the criteria passed
+	 */
 	public SimpleParameterScore(DirectFilter filter, ParameterScoreResult r, boolean criteriaPassed)
 	{
 		super(filter, r.score, r.criteria, true, criteriaPassed);

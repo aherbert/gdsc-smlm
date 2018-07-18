@@ -133,6 +133,7 @@ public class OPTICS implements PlugIn
 	public enum ImageMode
 	{
 		//@formatter:off
+		/** Cluster ID */
 		CLUSTER_ID {
 			@Override
 			public String getName() { return "Cluster Id"; }
@@ -143,6 +144,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isRequiresClusters() { return true; }
 		},
+		/** Cluster Depth */
 		CLUSTER_DEPTH {
 			@Override
 			public String getName() { return "Cluster Depth"; }
@@ -153,6 +155,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isRequiresClusters() { return true; }
 		},
+		/** Cluster Order */
 		CLUSTER_ORDER {
 			@Override
 			public String getName() { return "Cluster Order"; }
@@ -163,6 +166,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isRequiresClusters() { return true; }
 		},
+		/** Value */
 		VALUE {
 			@Override
 			public String getName() { return "Value"; }
@@ -171,6 +175,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public float getValue(float value, int clusterId, int order) { return value; }
 		},
+		/** Count */
 		COUNT {
 			@Override
 			public String getName() { return "Count"; }
@@ -179,6 +184,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public float getValue(float value, int clusterId, int order) { return 1f; }
 		},
+		/** Local Outlier Probability (LoOP) */
 		LOOP {
 			@Override
 			public String getName() { return "Local Outlier Probability (LoOP)"; }
@@ -187,6 +193,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isMapped() { return true; }
 		},
+		/** None */
 		NONE {
 			@Override
 			public String getName() { return "None"; }
@@ -251,6 +258,13 @@ public class OPTICS implements PlugIn
 			return false;
 		}
 
+		/**
+		 * Gets the image mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the image mode
+		 */
 		public static ImageMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -265,10 +279,12 @@ public class OPTICS implements PlugIn
 	public enum OpticsMode
 	{
 		//@formatter:off
+		/** FastOPTICS */
 		FAST_OPTICS {
 			@Override
 			public String getName() { return "FastOPTICS"; }
 		},
+		/** OPTICS */
 		OPTICS {
 			@Override
 			public String getName() { return "OPTICS"; }
@@ -288,6 +304,13 @@ public class OPTICS implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Gets the optics mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the optics mode
+		 */
 		public static OpticsMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -302,10 +325,12 @@ public class OPTICS implements PlugIn
 	public enum ClusteringMode
 	{
 		//@formatter:off
+		/** Xi */
 		XI {
 			@Override
 			public String getName() { return "Xi"; }
 		},
+		/** pseudo-DBSCAN */
 		DBSCAN {
 			@Override
 			public String getName() { return "pseudo-DBSCAN"; }
@@ -325,6 +350,13 @@ public class OPTICS implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Gets the clustering mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the clustering mode
+		 */
 		public static ClusteringMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -339,40 +371,47 @@ public class OPTICS implements PlugIn
 	public enum PlotMode
 	{
 		//@formatter:off
+		/** On */
 		ON {
 			@Override
 			public String getName() { return "On"; }
 		},
+		/** Highlighted */
 		HIGHLIGHTED {
 			@Override
 			public String getName() { return "Highlighted"; }
 			@Override
 			public boolean isHighlightProfile() { return true; }
 		},
+		/** Coloured by Id */
 		COLOURED_BY_ID {
 			@Override
 			public String getName() { return "Coloured by Id"; }
 			@Override
 			public boolean isColourProfileById() { return true; }
 		},
+		/** Coloured by depth */
 		COLOURED_BY_DEPTH {
 			@Override
 			public String getName() { return "Coloured by depth"; }
 			@Override
 			public boolean isColourProfileByDepth() { return true; }
 		},
+		/** Coloured by order */
 		COLOURED_BY_ORDER {
 			@Override
 			public String getName() { return "Coloured by order"; }
 			@Override
 			public boolean isColourProfileByOrder() { return true; }
 		},
+		/** With clusters */
 		WITH_CLUSTERS {
 			@Override
 			public String getName() { return "With clusters"; }
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
+		/** Highlighted with clusters */
 		HIGHLIGHTED_WITH_CLUSTERS {
 			@Override
 			public String getName() { return "Highlighted with clusters"; }
@@ -381,6 +420,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
+		/** Coloured by Id with clusters */
 		COLOURED_BY_ID_WITH_CLUSTERS {
 			@Override
 			public String getName() { return "Coloured by Id with clusters"; }
@@ -389,6 +429,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
+		/** Coloured by depth with clusters */
 		COLOURED_BY_DEPTH_WITH_CLUSTERS {
 			@Override
 			public String getName() { return "Coloured by depth with clusters"; }
@@ -397,6 +438,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
+		/** Coloured by order with clusters */
 		COLOURED_BY_ORDER_WITH_CLUSTERS {
 			@Override
 			public String getName() { return "Coloured by order with clusters"; }
@@ -405,6 +447,7 @@ public class OPTICS implements PlugIn
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
+		/** Off */
 		OFF {
 			@Override
 			public String getName() { return "Off"; }
@@ -480,6 +523,13 @@ public class OPTICS implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Gets the plot mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the plot mode
+		 */
 		public static PlotMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -494,16 +544,19 @@ public class OPTICS implements PlugIn
 	public enum OutlineMode
 	{
 		//@formatter:off
+		/** Coloured by cluster */
 		COLOURED_BY_CLUSTER {
 			@Override
 			public String getName() { return "Coloured by cluster"; }
 		},
+		/** Coloured by depth */
 		COLOURED_BY_DEPTH {
 			@Override
 			public String getName() { return "Coloured by depth"; }
 			@Override
 			public boolean isColourByDepth() { return true; }
 		},
+		/** Off */
 		OFF {
 			@Override
 			public String getName() { return "Off"; }
@@ -541,6 +594,13 @@ public class OPTICS implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Gets the outline mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the outline mode
+		 */
 		public static OutlineMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -555,22 +615,27 @@ public class OPTICS implements PlugIn
 	public enum SpanningTreeMode
 	{
 		//@formatter:off
+		/** Coloured by cluster */
 		COLOURED_BY_CLUSTER {
 			@Override
 			public String getName() { return "Coloured by cluster"; }
 		},
+		/** Coloured by depth */
 		COLOURED_BY_DEPTH {
 			@Override
 			public String getName() { return "Coloured by depth"; }
 		},
+		/** Coloured by order */
 		COLOURED_BY_ORDER {
 			@Override
 			public String getName() { return "Coloured by order"; }
 		},
+		/** Coloured by LoOP */
 		COLOURED_BY_LOOP {
 			@Override
 			public String getName() { return "Coloured by LoOP"; }
 		},
+		/** Off */
 		OFF {
 			@Override
 			public String getName() { return "Off"; }
@@ -600,6 +665,13 @@ public class OPTICS implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Gets the spanning tree mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the spanning tree mode
+		 */
 		public static SpanningTreeMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -614,22 +686,27 @@ public class OPTICS implements PlugIn
 	public enum TableSortMode
 	{
 		//@formatter:off
+		/** Sort by Id */
 		ID {
 			@Override
 			public String getName() { return "Id"; }
 		},
+		/** Sort by size */
 		SIZE {
 			@Override
 			public String getName() { return "Size"; }
 		},
+		/** Sort by level */
 		LEVEL {
 			@Override
 			public String getName() { return "Level"; }
 		},
+		/** Sort by area */
 		AREA {
 			@Override
 			public String getName() { return "Area"; }
 		},
+		/** Sort by density */
 		DENSITY {
 			@Override
 			public String getName() { return "Density"; }
@@ -649,6 +726,13 @@ public class OPTICS implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Gets the table sort mode from the ordinal.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the table sort mode
+		 */
 		public static TableSortMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -1236,8 +1320,7 @@ public class OPTICS implements PlugIn
 				}
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Pair<>(settings,
-					new Settings(results, opticsManager, new CachedClusteringResult(opticsResult)));
+			return new Pair<>(settings, new Settings(results, opticsManager, new CachedClusteringResult(opticsResult)));
 		}
 	}
 
@@ -1342,8 +1425,7 @@ public class OPTICS implements PlugIn
 
 				// We created a new clustering so create a new WorkerResult
 				clusteringResult = new CachedClusteringResult(opticsResult);
-				return new Pair<>(settings,
-						new Settings(results, opticsManager, clusteringResult));
+				return new Pair<>(settings, new Settings(results, opticsManager, clusteringResult));
 			}
 			return work;
 		}
@@ -1829,6 +1911,7 @@ public class OPTICS implements PlugIn
 		@Override
 		public void mouseClicked(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		double startX;
@@ -1896,13 +1979,13 @@ public class OPTICS implements PlugIn
 		@Override
 		public void mouseEntered(MouseEvent e)
 		{
-
+			// Ignore
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e)
 		{
-
+			// Ignore
 		}
 
 		@Override
@@ -2003,6 +2086,7 @@ public class OPTICS implements PlugIn
 	 */
 	public class ValueLUTMapper extends LUTHelper.NullLUTMapper
 	{
+		/** The values. */
 		float[] values;
 
 		/**
@@ -2134,8 +2218,7 @@ public class OPTICS implements PlugIn
 			if (!clusteringResult.isValid())
 			{
 				clearCache(true);
-				return new Pair<>(settings,
-						new Settings(results, opticsManager, clusteringResult, image));
+				return new Pair<>(settings, new Settings(results, opticsManager, clusteringResult, image));
 			}
 
 			ImageMode mode = ImageMode.get(settings.getImageMode());
@@ -2432,8 +2515,7 @@ public class OPTICS implements PlugIn
 				imp.setOverlay(overlay);
 			}
 
-			return new Pair<>(settings,
-					new Settings(results, opticsManager, clusteringResult, image));
+			return new Pair<>(settings, new Settings(results, opticsManager, clusteringResult, image));
 		}
 
 		private Roi createRoi(ConvexHull hull, boolean forcePolygon)
@@ -2598,22 +2680,25 @@ public class OPTICS implements PlugIn
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
-
+			// Ignore
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
@@ -3098,6 +3183,7 @@ public class OPTICS implements PlugIn
 		@Override
 		public void mouseClicked(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
@@ -3149,16 +3235,19 @@ public class OPTICS implements PlugIn
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e)
 		{
+			// Ignore
 		}
 
 		@Override
@@ -3468,7 +3557,7 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private boolean clusteringDistanceChange(double newD, double oldD)
+	private static boolean clusteringDistanceChange(double newD, double oldD)
 	{
 		// The input distance can never be below zero due to the use of abs.
 		// If the auto-distance changes then we want to rerun DBSCAN so remove this check.
@@ -3479,7 +3568,7 @@ public class OPTICS implements PlugIn
 		return newD != oldD;
 	}
 
-	private void scrambleClusters(ClusteringResult result)
+	private static void scrambleClusters(ClusteringResult result)
 	{
 		// Scramble to ensure adjacent clusters have different Ids.
 		// Same seed for consistency (e.g. in macros on the same data).
@@ -3558,8 +3647,7 @@ public class OPTICS implements PlugIn
 				scrambleClusters(dbscanResult);
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Pair<>(settings,
-					new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
+			return new Pair<>(settings, new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
 		}
 	}
 

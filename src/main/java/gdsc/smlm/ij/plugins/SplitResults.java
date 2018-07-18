@@ -107,7 +107,7 @@ public class SplitResults implements PlugIn
 		splitResults(results, imp.getProcessor());
 	}
 
-	private void splitResults(MemoryPeakResults results, ImageProcessor ip)
+	private static void splitResults(MemoryPeakResults results, ImageProcessor ip)
 	{
 		IJ.showStatus("Splitting " + TextUtils.pleural(results.size(), "result"));
 

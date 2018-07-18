@@ -83,9 +83,20 @@ public class DiffusionRateTest implements PlugIn
 	private static TextWindow msdTable = null;
 
 	// Used to allow other plugins to detect if a dataset is simulated
+	
+	/** The last simulated precision. */
 	static double lastSimulatedPrecision = 0;
+	
+	/** The last simulated dataset. */
 	static String[] lastSimulatedDataset = new String[2];
 
+	/**
+	 * Checks if the named dataset was the last simulated dataset.
+	 *
+	 * @param name
+	 *            the name
+	 * @return true, if is simulated
+	 */
 	static boolean isSimulated(String name)
 	{
 		for (String name2 : lastSimulatedDataset)

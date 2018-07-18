@@ -26,14 +26,31 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.results.filter.DirectFilter;
 
 /**
- * Store the score from analysis of the direct filter
+ * Store the score from analysis of the direct filter.
  */
 public class FilterScoreResult
 {
-	final double score, criteria;
+	/** The score. */
+	final double score;
+	/** The criteria. */
+	final double criteria;
+	/** The filter. */
 	final DirectFilter filter;
+	/** The text. */
 	final String text;
 
+	/**
+	 * Instantiates a new filter score result.
+	 *
+	 * @param score
+	 *            the score
+	 * @param criteria
+	 *            the criteria
+	 * @param filter
+	 *            the filter
+	 * @param text
+	 *            the text
+	 */
 	public FilterScoreResult(double score, double criteria, DirectFilter filter, String text)
 	{
 		this.score = score;

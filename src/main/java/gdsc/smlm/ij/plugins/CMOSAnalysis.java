@@ -145,7 +145,7 @@ public class CMOSAnalysis implements PlugIn
 
 				// Create image
 				final short[] pixels = new short[pixelOffset.length];
-				if (photons == 0)
+				if (poisson == null)
 				{
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
@@ -452,9 +452,8 @@ public class CMOSAnalysis implements PlugIn
 			computeError();
 	}
 
-	/** The total progress. */
-	int progress, stepProgress, totalProgress;
-	ProgressBar progressBar;
+	private int progress, stepProgress, totalProgress;
+	private ProgressBar progressBar;
 
 	/**
 	 * Show progress.
@@ -735,19 +734,19 @@ public class CMOSAnalysis implements PlugIn
 			@Override
 			public void incrementProgress(double fraction)
 			{
-
+				// Ignore
 			}
 
 			@Override
 			public void log(String format, Object... args)
 			{
-
+				// Ignore
 			}
 
 			@Override
 			public void status(String format, Object... args)
 			{
-
+				// Ignore
 			}
 
 			@Override
@@ -981,7 +980,7 @@ public class CMOSAnalysis implements PlugIn
 
 			Statistics s = new Statistics(data[2 * n]);
 
-			if (n != 0)
+			if (pixelOffset != null)
 			{
 				// Compute mean ADU
 				Statistics signal = new Statistics();
@@ -994,6 +993,7 @@ public class CMOSAnalysis implements PlugIn
 			}
 			else
 			{
+				// Set the offset assuming the first sub-directory is the bias image
 				pixelOffset = data[0];
 				pixelVariance = data[1];
 				statsOffset = s;
@@ -1019,6 +1019,12 @@ public class CMOSAnalysis implements PlugIn
 		}
 
 		executor.shutdown();
+
+		if (pixelOffset == null || pixelVariance == null)
+		{
+			statusLine.setText(TITLE + " error: no bias image");
+			return;
+		}
 
 		// Compute the gain
 		statusLine.setText("Computing gain");
@@ -1104,7 +1110,7 @@ public class CMOSAnalysis implements PlugIn
 		Utils.log("Analysis time = " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
 
-	private void showHistogram(String name, double[] values, int bins, Statistics stats, WindowOrganiser wo)
+	private static void showHistogram(String name, double[] values, int bins, Statistics stats, WindowOrganiser wo)
 	{
 		DoubleData data = new StoredData(values, false);
 		double minWidth = 0;
@@ -1123,7 +1129,7 @@ public class CMOSAnalysis implements PlugIn
 		Utils.plot.updateImage();
 	}
 
-	private <T> void put(BlockingQueue<T> jobs, T job)
+	private static <T> void put(BlockingQueue<T> jobs, T job)
 	{
 		try
 		{

@@ -179,7 +179,7 @@ public class PSFDrift implements PlugIn
 			sx = fitConfig.getInitialXSD();
 			sy = fitConfig.getInitialYSD();
 			a = psfSettings.getPixelSize() * scale;
-			xy = PSFDrift.getStartPoints(PSFDrift.this);
+			xy = PSFDrift.getStartPoints();
 			w = width;
 			w2 = w * w;
 			if (useSampling)
@@ -759,7 +759,7 @@ public class PSFDrift implements PlugIn
 		}
 	}
 
-	private int findCentre(double d, double[][] smoothx, int i)
+	private static int findCentre(double d, double[][] smoothx, int i)
 	{
 		while (i < smoothx[0].length)
 		{
@@ -770,7 +770,7 @@ public class PSFDrift implements PlugIn
 		return -1;
 	}
 
-	private void addMissingOffsets(int startSlice, int endSlice, int nSlices, TurboList<double[]> offset)
+	private static void addMissingOffsets(int startSlice, int endSlice, int nSlices, TurboList<double[]> offset)
 	{
 		// Add an offset for the remaining slices
 		if (positionsToAverage > 0)
@@ -894,7 +894,7 @@ public class PSFDrift implements PlugIn
 		return new double[][] { newX, newY };
 	}
 
-	private void addPoints(Plot plot, int shape, double[] x, double[] y, double lower, double upper)
+	private static void addPoints(Plot plot, int shape, double[] x, double[] y, double lower, double upper)
 	{
 		if (x.length == 0)
 			return;
@@ -910,7 +910,7 @@ public class PSFDrift implements PlugIn
 		addPoints(plot, shape, x, y, upper, x[x.length - 1], Color.red);
 	}
 
-	private void addPoints(Plot plot, int shape, double[] x, double[] y, double lower, double upper, Color color)
+	private static void addPoints(Plot plot, int shape, double[] x, double[] y, double lower, double upper, Color color)
 	{
 		double[] x2 = new double[x.length];
 		double[] y2 = new double[y.length];
@@ -971,7 +971,7 @@ public class PSFDrift implements PlugIn
 		return model;
 	}
 
-	private void put(BlockingQueue<Job> jobs, Job job)
+	private static void put(BlockingQueue<Job> jobs, Job job)
 	{
 		try
 		{
@@ -984,9 +984,11 @@ public class PSFDrift implements PlugIn
 	}
 
 	/**
+	 * Gets the starting points for the fitting
+	 *
 	 * @return The starting points for the fitting
 	 */
-	private double[][] getStartPoints()
+	private static double[][] getStartPoints()
 	{
 		double[][] xy = new double[getNumberOfStartPoints()][];
 		int ii = 0;
@@ -1016,7 +1018,7 @@ public class PSFDrift implements PlugIn
 		return xy;
 	}
 
-	private int getNumberOfStartPoints()
+	private static int getNumberOfStartPoints()
 	{
 		int n = (offsetFitting) ? 1 : 0;
 		if (startOffset > 0)
@@ -1024,7 +1026,7 @@ public class PSFDrift implements PlugIn
 		return (comFitting) ? n + 1 : n;
 	}
 
-	public static List<String> createImageList(boolean requireFwhm)
+	private static List<String> createImageList(boolean requireFwhm)
 	{
 		List<String> titles = new LinkedList<>();
 		int[] ids = WindowManager.getIDList();
@@ -1077,7 +1079,15 @@ public class PSFDrift implements PlugIn
 		return titles;
 	}
 
-	static ImagePSF getPSFSettings(ImagePlus imp)
+	/**
+	 * Gets the PSF settings from the Info property.
+	 *
+	 * @param imp
+	 *            the imp
+	 * @return the PSF settings
+	 * @see ImagePlus#getProperty(String)
+	 */
+	public static ImagePSF getPSFSettings(ImagePlus imp)
 	{
 		Object info = imp.getProperty("Info");
 		if (info != null)
@@ -1085,11 +1095,6 @@ public class PSFDrift implements PlugIn
 			return ImagePSFHelper.fromString(info.toString());
 		}
 		return null;
-	}
-
-	public static double[][] getStartPoints(PSFDrift psfDrift)
-	{
-		return psfDrift.getStartPoints();
 	}
 
 	private void showHWHM()

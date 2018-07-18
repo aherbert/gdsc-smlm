@@ -110,7 +110,7 @@ public class NeighbourAnalysis implements PlugIn
 		}
 	}
 
-	private String createSettingsComment()
+	private static String createSettingsComment()
 	{
 		return String.format("Neighbour tracing : distance-threshold = %f : time-threshold = %d", distanceThreshold,
 				timeThreshold);
@@ -143,7 +143,7 @@ public class NeighbourAnalysis implements PlugIn
 		return true;
 	}
 
-	private boolean readDialog(ExtendedGenericDialog gd)
+	private static boolean readDialog(ExtendedGenericDialog gd)
 	{
 		inputOption = ResultsManager.getInputSource(gd);
 		distanceThreshold = gd.getNextNumber();

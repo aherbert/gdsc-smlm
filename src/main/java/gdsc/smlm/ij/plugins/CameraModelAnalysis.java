@@ -548,7 +548,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		return lastHistogram;
 	}
 
-	private boolean newSimulationSettings(CameraModelAnalysisSettings s1, CameraModelAnalysisSettings s2)
+	private static boolean newSimulationSettings(CameraModelAnalysisSettings s1, CameraModelAnalysisSettings s2)
 	{
 		// Check those settings for the simulation
 		if (s1.getPhotons() != s2.getPhotons())

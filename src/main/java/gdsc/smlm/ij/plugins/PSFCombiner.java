@@ -93,7 +93,7 @@ public class PSFCombiner implements PlugIn
 
 		md.showDialog();
 
-		if (md.wasCanceled())
+		if (md.wasCancelled())
 			return;
 
 		ArrayList<String> selected = md.getSelectedResults();
@@ -132,6 +132,11 @@ public class PSFCombiner implements PlugIn
 		combineImages();
 	}
 
+	/**
+	 * Creates the image list. Images must be greyscale, square and a stack of a single channel.
+	 *
+	 * @return the list
+	 */
 	public static List<String> createImageList()
 	{
 		List<String> titles = new TurboList<>();

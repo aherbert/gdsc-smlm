@@ -102,9 +102,9 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	private static final int Y = 2;
 	private static final int XY = 3;
 	private static final String[] NAMES = { "Angle", "X SD", "Y SD" };
-	DescriptiveStatistics[] sampleNew = new DescriptiveStatistics[3];
-	DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
-	boolean[] ignore = new boolean[3];
+	private DescriptiveStatistics[] sampleNew = new DescriptiveStatistics[3];
+	private DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
+	private boolean[] ignore = new boolean[3];
 
 	/**
 	 * Instantiates a new PSF estimator.
@@ -741,7 +741,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		return true;
 	}
 
-	private void setParams(int i, double[] params, double[] params_dev, DescriptiveStatistics sample)
+	private static void setParams(int i, double[] params, double[] params_dev, DescriptiveStatistics sample)
 	{
 		if (sample.getN() > 0)
 		{
@@ -766,7 +766,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	/**
 	 * Create the result window (if it is not available)
 	 */
-	private void createResultsWindow()
+	private static void createResultsWindow()
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
 		{
@@ -774,7 +774,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 	}
 
-	private String createResultsHeader()
+	private static String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Iteration\t");
@@ -819,7 +819,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			log(format, args);
 	}
 
-	private void log(String format, Object... args)
+	private static void log(String format, Object... args)
 	{
 		IJ.log(String.format(format, args));
 	}

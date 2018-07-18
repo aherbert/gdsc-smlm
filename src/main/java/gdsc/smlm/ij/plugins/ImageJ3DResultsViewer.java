@@ -615,8 +615,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// Find all those currently selected (old selection)
 			int NO_ENTRY = -1;
-			TObjectIntHashMap<PeakResult> oldSelection = new TObjectIntHashMap<>(selected.size(), 0.5f,
-					NO_ENTRY);
+			TObjectIntHashMap<PeakResult> oldSelection = new TObjectIntHashMap<>(selected.size(), 0.5f, NO_ENTRY);
 			for (int i = 0; i < selected.size(); i++)
 			{
 				PeakResult r = selected.getf(i);
@@ -1170,11 +1169,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
 		if (t == null)
 		{
-			t = new Triplet<>(
-					new PeakResultTableModel(results, false,
-							// Note the settings do not matter until the table is set live
-							resultsTableSettings.build()),
-					new DefaultListSelectionModel(), null);
+			t = new Triplet<>(new PeakResultTableModel(results, false,
+					// Note the settings do not matter until the table is set live
+					resultsTableSettings.build()), new DefaultListSelectionModel(), null);
 			t.a.setCheckDuplicates(true);
 			resultsTables.put(data.digest, t);
 		}
@@ -1379,8 +1376,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static float[] createAlphaFromIntensity(MemoryPeakResults results, double minA,
-			double maxA)
+	private static float[] createAlphaFromIntensity(MemoryPeakResults results, double minA, double maxA)
 	{
 		RawResultProcedure p = new RawResultProcedure(results);
 		p.getI();
@@ -1484,6 +1480,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return transparency;
 	}
 
+	/**
+	 * Gets the points.
+	 *
+	 * @param results
+	 *            the results
+	 * @param settings
+	 *            the settings
+	 * @return the points
+	 */
 	static TurboList<Point3f> getPoints(MemoryPeakResults results, ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		final TurboList<Point3f> points = new TurboList<>(results.size());
@@ -1568,7 +1573,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private void sortPerspective(ResultsMetaData data)
+	private static void sortPerspective(ResultsMetaData data)
 	{
 		ImageJ3DResultsViewerSettingsOrBuilder settings = data.settings;
 		Vector3d direction = getViewDirection(data.settings);
@@ -1584,7 +1589,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		reorder(indices, data);
 	}
 
-	private double[] getDistance(TurboList<Point3f> points, Vector3d direction, Point3d eye)
+	private static double[] getDistance(TurboList<Point3f> points, Vector3d direction, Point3d eye)
 	{
 		//System.out.printf("Dir %s : Eye %s\n", v, eye);
 		double[] d = new double[points.size()];
@@ -1610,7 +1615,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return d;
 	}
 
-	private Vector3d getViewDirection(ImageJ3DResultsViewerSettingsOrBuilder settings)
+	private static Vector3d getViewDirection(ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		Vector3d dir = new Vector3d(settings.getSortDirectionX(), settings.getSortDirectionY(),
 				settings.getSortDirectionZ());
@@ -1620,7 +1625,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return dir;
 	}
 
-	private void reorder(int[] indices, ResultsMetaData data)
+	private static void reorder(int[] indices, ResultsMetaData data)
 	{
 		MemoryPeakResults results = data.results;
 		TurboList<Point3f> points = data.points;
@@ -1658,7 +1663,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private void sortOrthographic(ResultsMetaData data)
+	private static void sortOrthographic(ResultsMetaData data)
 	{
 		Vector3d v = getViewDirection(data.settings);
 		if (v == null)
@@ -1830,9 +1835,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 				catch (IllegalArgumentException e1)
 				{
+					// Ignore
 				}
 				catch (IllegalAccessException e1)
 				{
+					// Ignore
 				}
 			}
 		}
@@ -1860,7 +1867,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					}
 					catch (NumberFormatException e)
 					{
-
+						// Ignore
 					}
 				}
 			}
@@ -1884,7 +1891,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			range = limits[1] - limits[0];
 		}
 
-		if (range == 0)
+		if (range == 0 || limits == null || p == null)
 		{
 			return new Color3f[] { new Color3f(new Color(lut.getRGB(255))) };
 		}
@@ -1940,7 +1947,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * @param titleList
 	 *            the title list
 	 */
-	private void buildWindowList(String titlePrefix, List<Image3DUniverse> univList, List<String> titleList)
+	private static void buildWindowList(String titlePrefix, List<Image3DUniverse> univList, List<String> titleList)
 	{
 		for (Image3DUniverse univ : Image3DUniverse.universes)
 		{
@@ -2085,11 +2092,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			@Override
 			public void mousePressed(final MouseEvent e)
 			{
+				// Ignore
 			}
 
 			@Override
 			public void mouseReleased(final MouseEvent e)
 			{
+				// Ignore
 			}
 
 			private boolean consumeEvent(final MouseEvent e)
@@ -2123,10 +2132,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// It doesn't have anything of use for localisations anyway.
 				canvas.removeMouseListener(l[i]);
 				canvas.addMouseListener(mouseListener);
-				canvas.addMouseListener(new MouseListenerWrapper(l[i],
-						MouseListenerWrapper.MOUSE_CLICKED
-						//|MouseListenerWrapper.MOUSE_PRESSED|MouseListenerWrapper.MOUSE_RELEASED
-						));
+				canvas.addMouseListener(new MouseListenerWrapper(l[i], MouseListenerWrapper.MOUSE_CLICKED
+				//|MouseListenerWrapper.MOUSE_PRESSED|MouseListenerWrapper.MOUSE_RELEASED
+				));
 			}
 		}
 
@@ -2219,8 +2227,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 		});
 		table.setVisible(true);
-		resultsTables.put(data.digest,
-				new Triplet<>(t.a, t.b, table));
+		resultsTables.put(data.digest, new Triplet<>(t.a, t.b, table));
 
 		return table;
 	}
@@ -2558,6 +2565,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		@Override
 		public void finish()
 		{
+			// Ignore
 		}
 	}
 
@@ -3070,9 +3078,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 			Sort.sort(indices, d);
 
-			// Switch to fast mode when not debugging
-			//updateable.reorder(indices);
-			updateable.reorderFast(indices);
+			if (updateable != null)
+			{
+				// Switch to fast mode when not debugging
+				//updateable.reorder(indices);
+				updateable.reorderFast(indices);
+			}
 
 			// We reorder the data that is used to create colours and clicked point size.
 			// This is not needed for the ItemGeometryNode as it uses the indices directly.
@@ -3562,7 +3573,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		action.finish();
 	}
 
-	private ItemGeometryGroup createItemGroup(final ImageJ3DResultsViewerSettings.Builder settings,
+	private static ItemGeometryGroup createItemGroup(final ImageJ3DResultsViewerSettings.Builder settings,
 			final Point3f[] sphereSize, final TurboList<Point3f> points, float[] alpha, float transparency,
 			Color3f[] colors)
 	{
@@ -3870,6 +3881,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	@Override
 	public void transformationStarted(View view)
 	{
+		// Ignore
 	}
 
 	@Override
@@ -3883,11 +3895,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	@Override
 	public void transformationFinished(View view)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void contentAdded(Content c)
 	{
+		// Ignore
 	}
 
 	@Override
@@ -3904,21 +3918,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	@Override
 	public void contentChanged(Content c)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void contentSelected(Content c)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void canvasResized()
 	{
+		// Ignore
 	}
 
 	@Override
 	public void universeClosed()
 	{
-
+		// Ignore
 	}
 }

@@ -182,7 +182,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		}
 	}
 
-	public static void logDemoFilters(String title)
+	private static void logDemoFilters(String title)
 	{
 		comment(title + " example filters");
 		IJ.log("");

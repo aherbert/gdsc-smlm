@@ -78,25 +78,30 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private static final String[] POINT_OPTION = { "None", "X", "Circle", "Box", "Cross" };
 
+	/**
+	 * The camera type.
+	 */
 	//@formatter:off
 	public enum CameraType implements NamedObject
 	{
-		POISSON { @Override
-		public String getName() { return "Poisson"; } },
-		CCD { @Override
-		public String getName() { return "CCD"; }
-			  @Override
-			public boolean isFast() { return false; }
-			  @Override
-			public boolean isLowerFixedI() { return true; } },
-		CCD_APPROXIMATION { @Override
-		public String getName() { return "CCD Approximation"; }
-							@Override
-							public String getShortName() { return "CCD Approx"; }},
-		EM_CCD { @Override
-		public String getName() { return "EM-CCD"; }
-		         @Override
-				public boolean isFast() { return false; } };
+		/** A camera with pure Poisson shot noise */
+		POISSON { @Override public String getName() { return "Poisson"; } },
+		/** CCD camera has Poisson shot noise and Gaussian read noise */
+		CCD { @Override	public String getName() { return "CCD"; }
+			  @Override	public boolean isFast() { return false; }
+			  @Override	public boolean isLowerFixedI() { return true; } },
+		/** 
+		 * CCD approximation has Poisson shot noise and uses a Poisson distribution to simulate Gaussian noise (s).
+		 * The distribution is Approx(u,s) = Poisson(u) + Poisson(s) = Poisson(u+s)
+		 */
+		CCD_APPROXIMATION { @Override public String getName() { return "CCD Approximation"; }
+							@Override public String getShortName() { return "CCD Approx"; }},
+		/** 
+		 * EM-CCD camera has Poisson shot noise, a Gamma distribution model for EM-gain 
+		 * and Gaussian read noise 
+		 */
+		EM_CCD { @Override public String getName() { return "EM-CCD"; }
+		         @Override public boolean isFast() { return false; } };
 
 		@Override
 		public abstract String getName();
@@ -121,6 +126,13 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return getName();
 		}
 
+		/**
+		 * Get the camera type for the number.
+		 *
+		 * @param number
+		 *            the number
+		 * @return the camera type
+		 */
 		public static CameraType forNumber(int number)
 		{
 			CameraType[] values = CameraType.values();
@@ -237,7 +249,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	 * @param alpha
 	 *            the alpha
 	 */
-	private void save(FIKey key, double[] log10photons, double[] alpha)
+	private static void save(FIKey key, double[] log10photons, double[] alpha)
 	{
 		CameraType type = key.getType();
 		if (type.isFast())
@@ -950,7 +962,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return alpha;
 	}
 
-	private double[] getFisherInformation(double[] alpha, double[] photons)
+	private static double[] getFisherInformation(double[] alpha, double[] photons)
 	{
 		double[] I = new double[photons.length];
 		for (int i = 0; i < photons.length; i++)
@@ -960,7 +972,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return I;
 	}
 
-	private double[] getAlpha(BasePoissonFisherInformation fi, double[] photons)
+	private static double[] getAlpha(BasePoissonFisherInformation fi, double[] photons)
 	{
 		// Do not multi-thread as this is an interpolated/fast function
 		double[] rI = new double[photons.length];
@@ -971,7 +983,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return rI;
 	}
 
-	private BasePoissonFisherInformation getInterpolatedPoissonFisherInformation(CameraType type, double[] logU,
+	private static BasePoissonFisherInformation getInterpolatedPoissonFisherInformation(CameraType type, double[] logU,
 			double[] alpha1, BasePoissonFisherInformation f)
 	{
 		if (type.isFast())
@@ -983,7 +995,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperf);
 	}
 
-	private int getPointShape(int pointOption)
+	private static int getPointShape(int pointOption)
 	{
 		switch (pointOption)
 		{
@@ -999,7 +1011,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return -1;
 	}
 
-	private double[] limits(double[] limits, double[] f)
+	private static double[] limits(double[] limits, double[] f)
 	{
 		double min = limits[0];
 		double max = limits[1];
@@ -1022,7 +1034,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	private static String cachePlot = "";
 	private static int pointOption = 0;
 
-	private void plotFromCache()
+	private static void plotFromCache()
 	{
 		// Build a list of curve stored in the cache
 		String[] names = new String[cache.size()];

@@ -75,6 +75,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 {
 	private static final String TITLE = "Smart Spot Ranking";
 
+	/** The fit config. */
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	static
@@ -145,7 +146,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private static double fP, fN;
 	private static int nP, nN;
 
-	static int lastId = -1, lastFilterId = -1;
+	/** The last id. */
+	static int lastId = -1;
+	/** The last filter id. */
+	static int lastFilterId = -1;
 	private static double lastFractionPositives = -1;
 	private static double lastFractionNegativesAfterAllPositives = -1;
 	private static int lastNegativesAfterAllPositives = -1;
