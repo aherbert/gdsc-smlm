@@ -570,14 +570,11 @@ public class DensityImage implements PlugIn
 
 		// Build a list of all images with a region ROI
 		List<String> titles = new LinkedList<>();
-		if (WindowManager.getWindowCount() > 0)
+		for (int imageID : Utils.getIDList())
 		{
-			for (int imageID : WindowManager.getIDList())
-			{
-				ImagePlus imp = WindowManager.getImage(imageID);
-				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
-					titles.add(imp.getTitle());
-			}
+			ImagePlus imp = WindowManager.getImage(imageID);
+			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
+				titles.add(imp.getTitle());
 		}
 
 		gd.addMessage("Show an image using the localisation density");

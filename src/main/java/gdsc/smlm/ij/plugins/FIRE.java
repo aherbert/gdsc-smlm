@@ -652,14 +652,11 @@ public class FIRE implements PlugIn
 
 		// Build a list of all images with a region ROI
 		List<String> titles = new LinkedList<>();
-		if (WindowManager.getWindowCount() > 0)
+		for (int imageID : Utils.getIDList())
 		{
-			for (int imageID : WindowManager.getIDList())
-			{
-				ImagePlus imp = WindowManager.getImage(imageID);
-				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
-					titles.add(imp.getTitle());
-			}
+			ImagePlus imp = WindowManager.getImage(imageID);
+			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
+				titles.add(imp.getTitle());
 		}
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -2074,14 +2071,11 @@ public class FIRE implements PlugIn
 
 		// Build a list of all images with a region ROI
 		List<String> titles = new LinkedList<>();
-		if (WindowManager.getWindowCount() > 0)
+		for (int imageID : Utils.getIDList())
 		{
-			for (int imageID : WindowManager.getIDList())
-			{
-				ImagePlus imp = WindowManager.getImage(imageID);
-				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
-					titles.add(imp.getTitle());
-			}
+			ImagePlus imp = WindowManager.getImage(imageID);
+			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
+				titles.add(imp.getTitle());
 		}
 
 		gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation");

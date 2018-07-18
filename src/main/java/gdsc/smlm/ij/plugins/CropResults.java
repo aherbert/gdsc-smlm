@@ -31,6 +31,7 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.Utils;
 import gdsc.core.ij.roi.RoiTest;
 import gdsc.core.ij.roi.RoiTestFactory;
 import gdsc.core.utils.Maths;
@@ -95,14 +96,11 @@ public class CropResults implements PlugIn
 
 		// Build a list of all images with a region ROI
 		titles = new TurboList<>(WindowManager.getWindowCount());
-		if (WindowManager.getWindowCount() > 0)
+		for (int imageID : Utils.getIDList())
 		{
-			for (int imageID : WindowManager.getIDList())
-			{
-				ImagePlus imp = WindowManager.getImage(imageID);
-				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
-					titles.add(imp.getTitle());
-			}
+			ImagePlus imp = WindowManager.getImage(imageID);
+			if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
+				titles.add(imp.getTitle());
 		}
 		boolean roiMode = "roi".equals(arg);
 		if (roiMode && titles.isEmpty())
