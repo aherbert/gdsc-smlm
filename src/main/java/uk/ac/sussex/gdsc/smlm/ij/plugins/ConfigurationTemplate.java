@@ -352,7 +352,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/**
 	 * Adds the template using the configuration. This should be used to add templates that have not been produced using
-	 * benchmarking on a specific image. Those can be added to the /gdsc/smlm/templates/ resources directory.
+	 * benchmarking on a specific image. Those can be added to the /uk/ac/sussex/gdsc/smlm/templates/ resources directory.
 	 *
 	 * @param name
 	 *            the name
@@ -498,7 +498,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	static TemplateResource[] listTemplateResources()
 	{
 		// Load templates from package resources
-		final String templateDir = "/gdsc/smlm/templates/";
+		final String templateDir = "/uk/ac/sussex/gdsc/smlm/templates/";
 		final Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
 		try (InputStream templateListStream = resourceClass.getResourceAsStream(templateDir + "list.txt"))
 		{

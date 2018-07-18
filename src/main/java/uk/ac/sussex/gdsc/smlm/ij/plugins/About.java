@@ -113,7 +113,7 @@ public class About implements PlugIn, MacroExtension
 
 		if (arg.equals("config"))
 		{
-			final int result = installResource("/gdsc/smlm/plugins.config", "plugins", "smlm.config",
+			final int result = installResource("/uk/ac/sussex/gdsc/smlm/plugins.config", "plugins", "smlm.config",
 					"SMLM Tools Configuration",
 					"The configuration file is used to specify which plugins to display on the SMLM Tools window. Creating a custom file will need to be repeated when the available plugins change.",
 					ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
@@ -158,7 +158,7 @@ public class About implements PlugIn, MacroExtension
 		final String buildDate = Version.getBuildDate();
 
 		try (BufferedReader input = new BufferedReader(
-				new UnicodeReader(resourceClass.getResourceAsStream("/gdsc/smlm/README.txt"), null)))
+				new UnicodeReader(resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/README.txt"), null)))
 		{
 			// Read the contents of the README file
 			String line;

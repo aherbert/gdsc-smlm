@@ -54,8 +54,8 @@ import ij.plugin.frame.PlugInFrame;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 
 /**
- * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in gdsc/smlm/plugins.config. Also add these
- * commands to the plugins menu.
+ * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in 
+ * /uk/ac/sussex/gdsc/smlm/plugins.config. Also add these commands to the plugins menu.
  */
 public class SMLMTools extends PlugInFrame implements ActionListener
 {
@@ -79,7 +79,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 * Constructor.
 	 * <p>
 	 * Create a frame showing all the available plugins within the user [ImageJ]/plugins/smlm.config file or the default
-	 * gdsc/smlm/plugins.config file.
+	 * /uk/ac/sussex/gdsc/smlm/plugins.config file.
 	 */
 	public SMLMTools()
 	{
@@ -314,7 +314,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	{
 		// Get the embedded config in the jar file
 		final Class<SMLMTools> resourceClass = SMLMTools.class;
-		final InputStream readmeStream = resourceClass.getResourceAsStream("/gdsc/smlm/plugins.config");
+		final InputStream readmeStream = resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/plugins.config");
 		return readmeStream;
 	}
 
