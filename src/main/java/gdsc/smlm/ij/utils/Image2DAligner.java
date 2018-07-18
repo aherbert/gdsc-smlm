@@ -207,7 +207,7 @@ public class Image2DAligner implements Cloneable
 	 * @param image
 	 *            the image
 	 */
-	private void check2D(ImageProcessor image)
+	private static void check2D(ImageProcessor image)
 	{
 		if (image.getWidth() < 2 || image.getHeight() < 2)
 			throw new IllegalArgumentException("Require a 2D image");
@@ -365,7 +365,7 @@ public class Image2DAligner implements Cloneable
 	 *            the dht data
 	 * @return the DHT data
 	 */
-	private DHTData prepareDHT(DHTData dhtData)
+	private static DHTData prepareDHT(DHTData dhtData)
 	{
 		DoubleDHT2D dht = dhtData.dht;
 		double[] s_ = dhtData.s_;
@@ -507,7 +507,7 @@ public class Image2DAligner implements Cloneable
 	 * @param image
 	 *            the image
 	 */
-	private void check2D(Image2D image)
+	private static void check2D(Image2D image)
 	{
 		if (image.getWidth() < 2 || image.getHeight() < 2)
 			throw new IllegalArgumentException("Require a 2D image");

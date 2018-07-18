@@ -30,6 +30,10 @@ import ij.process.ImageProcessor;
  */
 public class DoubleImage2D extends Image2D
 {
+	/**
+	 * The data packed in yx order: y * nc + x .
+	 * @see #index(int, int)
+	 */
 	protected double[] data;
 
 	/**

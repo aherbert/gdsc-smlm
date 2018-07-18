@@ -41,6 +41,16 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
 
 	private double[] a;
 
+	/**
+	 * Instantiates a new PSF model gradient 1 function.
+	 *
+	 * @param psf
+	 *            the psf model
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
+	 */
 	public PSFModelGradient1Function(PSFModel psf, int width, int height)
 	{
 		if (psf == null)

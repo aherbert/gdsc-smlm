@@ -39,11 +39,25 @@ public class ObjectAnalyzer
 	private int maxObject;
 	private int minObjectSize = 0;
 
+	/**
+	 * Instantiates a new object analyzer using 4N connected neighbours.
+	 *
+	 * @param ip
+	 *            the image
+	 */
 	public ObjectAnalyzer(ImageProcessor ip)
 	{
 		this(ip, false);
 	}
 
+	/**
+	 * Instantiates a new object analyzer.
+	 *
+	 * @param ip
+	 *            the image
+	 * @param eightConnected
+	 *            Set to true to use 8N connected neighbours (the default is 4N)
+	 */
 	public ObjectAnalyzer(ImageProcessor ip, boolean eightConnected)
 	{
 		this.ip = ip;

@@ -31,22 +31,26 @@ public class NullPeakResults extends AbstractPeakResults implements ThreadSafePe
 	@Override
 	public void begin()
 	{
+		// Ignore
 	}
 
 	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanSignal,
 			float[] params, float[] paramsStdDev)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void add(PeakResult result)
 	{
+		// Ignore
 	}
 
 	@Override
 	public void addAll(PeakResult[] results)
 	{
+		// Ignore
 	}
 
 	@Override
@@ -58,6 +62,7 @@ public class NullPeakResults extends AbstractPeakResults implements ThreadSafePe
 	@Override
 	public void end()
 	{
+		// Ignore
 	}
 
 	@Override

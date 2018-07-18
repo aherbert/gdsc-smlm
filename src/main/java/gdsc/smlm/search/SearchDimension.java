@@ -32,10 +32,19 @@ import gdsc.core.utils.Maths;
  */
 public class SearchDimension implements Cloneable, Dimension
 {
+	/** The minimum of the range. */
 	public final double min;
+	
+	/** The maximum of the range. */
 	public final double max;
+	
+	/** The min increment to use around the centre. */
 	public final double minIncrement;
+
+	/** The number of increments to use around the centre. */
 	public final int nIncrement;
+	
+	/** Set to true if {@link #min} &lt; {@link #max}. */
 	public final boolean active;
 
 	private double centre;

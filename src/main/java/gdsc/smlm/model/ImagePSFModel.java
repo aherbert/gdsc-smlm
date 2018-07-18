@@ -48,6 +48,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class ImagePSFModel extends PSFModel
 {
+	/** The default noise fraction */
 	public static final double DEFAULT_NOISE_FRACTION = 5e-2;
 	private static final boolean COM_CHECK = false;
 
@@ -225,7 +226,7 @@ public class ImagePSFModel extends PSFModel
 	 *            the noise fraction
 	 */
 	@SuppressWarnings("unused")
-	private void subtractNoise(double[] image, double[] scratch, double noiseFraction)
+	private static void subtractNoise(double[] image, double[] scratch, double noiseFraction)
 	{
 		// Sort ascending and store the original indices
 		double sum = 0;
@@ -274,7 +275,7 @@ public class ImagePSFModel extends PSFModel
 	 * @param noiseFraction
 	 *            the noise fraction
 	 */
-	private void subtractNoise(double[] image, double noiseFraction)
+	private static void subtractNoise(double[] image, double noiseFraction)
 	{
 		double max = 0, sum = 0;
 		for (final double v : image)
@@ -308,7 +309,7 @@ public class ImagePSFModel extends PSFModel
 			image[i] *= scale;
 	}
 
-	private double[][] duplicate(float[][] image)
+	private static double[][] duplicate(float[][] image)
 	{
 		final int size = image[0].length;
 		double[][] duplicate = new double[image.length][size];
@@ -329,7 +330,7 @@ public class ImagePSFModel extends PSFModel
 	 * @param image
 	 *            the image
 	 */
-	private void normalise(double[][] image)
+	private static void normalise(double[][] image)
 	{
 		if (image == null || image.length == 0)
 			return;
@@ -351,7 +352,7 @@ public class ImagePSFModel extends PSFModel
 		}
 	}
 
-	private double sum(double[] data)
+	private static double sum(double[] data)
 	{
 		double sum = 0;
 		for (double f : data)
@@ -359,7 +360,7 @@ public class ImagePSFModel extends PSFModel
 		return sum;
 	}
 
-	private double[] calculateCumulativeImage(double[] s)
+	private static double[] calculateCumulativeImage(double[] s)
 	{
 		boolean normalised = true;
 		double[] c = new double[s.length + 1];
@@ -511,6 +512,27 @@ public class ImagePSFModel extends PSFModel
 		}
 	}
 
+	/**
+	 * Construct a PSF function on the provided data.
+	 *
+	 * @param data
+	 *            The data (can be null)
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param sum
+	 *            The integral
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param poissonNoise
+	 *            Add Poisson noise
+	 * @return The total sum added to the image (useful when poissonNoise is added)
+	 */
 	public double drawPSF(float[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -550,6 +572,27 @@ public class ImagePSFModel extends PSFModel
 		return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
 	}
 
+	/**
+	 * Construct a PSF function on the provided data.
+	 *
+	 * @param data
+	 *            The data (can be null)
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param sum
+	 *            The integral
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param poissonNoise
+	 *            Add Poisson noise
+	 * @return The total sum added to the image (useful when poissonNoise is added)
+	 */
 	public double drawPSF(double[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -1027,7 +1070,7 @@ public class ImagePSFModel extends PSFModel
 	 *            the p
 	 * @return the index (or -1)
 	 */
-	private int findIndex(double[] sum, double p)
+	private static int findIndex(double[] sum, double p)
 	{
 		/* perform binary search */
 		int upper = sum.length - 1;

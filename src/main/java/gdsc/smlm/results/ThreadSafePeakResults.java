@@ -28,4 +28,5 @@ package gdsc.smlm.results;
  */
 public interface ThreadSafePeakResults extends PeakResults
 {
+	// Marker interface
 }

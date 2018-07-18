@@ -51,6 +51,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void setOrigin(int x, int y)
 	{
+		// Ignore
 	}
 
 	/*
@@ -195,6 +196,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void removeBias(Rectangle bounds, float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -205,6 +207,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void removeGain(Rectangle bounds, float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -215,6 +218,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void removeBiasAndGain(Rectangle bounds, float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -225,6 +229,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void applyBias(Rectangle bounds, float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -235,6 +240,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void applyGain(Rectangle bounds, float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -245,6 +251,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void applyGainAndBias(Rectangle bounds, float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -255,6 +262,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void removeBias(float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -265,6 +273,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void removeGain(float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -275,6 +284,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void removeBiasAndGain(float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -285,6 +295,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void applyBias(float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -295,6 +306,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void applyGain(float[] data)
 	{
+		// Ignore
 	}
 
 	/*
@@ -305,6 +317,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public void applyGainAndBias(float[] data)
 	{
+		// Ignore
 	}
 
 	/*

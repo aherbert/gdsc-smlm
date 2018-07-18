@@ -35,11 +35,31 @@ import java.util.List;
  */
 public abstract class FluorophoreSequenceModel extends MoleculeModel implements Comparable<FluorophoreSequenceModel>
 {
+	/**
+	 * Instantiates a new fluorophore sequence model.
+	 *
+	 * @param id
+	 *            the id
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 */
 	public FluorophoreSequenceModel(int id, double x, double y, double z)
 	{
 		super(id, x, y, z);
 	}
 
+	/**
+	 * Instantiates a new fluorophore sequence model.
+	 *
+	 * @param id
+	 *            the id
+	 * @param xyz
+	 *            the xyz
+	 */
 	public FluorophoreSequenceModel(int id, double[] xyz)
 	{
 		super(id, xyz);
@@ -54,6 +74,12 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	private double[] burstSequence = new double[] { 0, 0 };
 
+	/**
+	 * Sets the burst sequence.
+	 *
+	 * @param sequence
+	 *            the new burst sequence
+	 */
 	protected void setBurstSequence(double[] sequence)
 	{
 		if (sequence != null && sequence.length > 1)
@@ -70,6 +96,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the number of blinks.
+	 *
 	 * @return The number of times the fluorophore blinked
 	 */
 	public int getNumberOfBlinks()
@@ -101,6 +129,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the burst sequence.
+	 *
 	 * @return Fluorescent bursts arranged as list of on/off times: {onT,offT}
 	 */
 	public List<double[]> getBurstSequence()
@@ -114,6 +144,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the sampled burst sequence.
+	 *
 	 * @return Fluorescent bursts arranged as list of on/off times in integer sampling intervals: {onT,offT}
 	 */
 	public List<int[]> getSampledBurstSequence()
@@ -127,7 +159,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
-	 * Order by time ascending
+	 * Order by time ascending.
 	 *
 	 * @param o
 	 *            The other fluorophore
@@ -141,6 +173,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the on times.
+	 *
 	 * @return The duration of the on times
 	 */
 	public double[] getOnTimes()
@@ -154,6 +188,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the off times.
+	 *
 	 * @return The duration of the off times
 	 */
 	public double[] getOffTimes()
@@ -170,6 +206,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the sampled on times.
+	 *
 	 * @return The duration of the on times if sampled at integer time intervals
 	 */
 	public int[] getSampledOnTimes()
@@ -198,17 +236,33 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 		return Arrays.copyOf(onTimes, n);
 	}
 
-	private int start(double t)
+	/**
+	 * Convert the start time to an integer
+	 *
+	 * @param t
+	 *            the time
+	 * @return the integer start time
+	 */
+	private static int start(double t)
 	{
 		return (int) t;
 	}
 
-	private int end(double t)
+	/**
+	 * Convert the end time to an integer
+	 *
+	 * @param t
+	 *            the time
+	 * @return the integer end time
+	 */
+	private static int end(double t)
 	{
 		return (int) (Math.ceil(t));
 	}
 
 	/**
+	 * Gets the sampled off times.
+	 *
 	 * @return The duration of the off times if sampled at integer time intervals
 	 */
 	public int[] getSampledOffTimes()
@@ -235,6 +289,8 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	}
 
 	/**
+	 * Gets the on frames.
+	 *
 	 * @return An array of frames when the molecule was on
 	 */
 	public int[] getOnFrames()

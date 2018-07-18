@@ -37,11 +37,25 @@ public class SphericalDistribution implements SpatialDistribution
 	private boolean useRejectionMethod = true;
 	private final double[] origin = new double[3];
 
+	/**
+	 * Instantiates a new spherical distribution.
+	 *
+	 * @param radius
+	 *            the radius
+	 */
 	public SphericalDistribution(double radius)
 	{
 		this(radius, null);
 	}
 
+	/**
+	 * Instantiates a new spherical distribution.
+	 *
+	 * @param radius
+	 *            the radius
+	 * @param randomGenerator
+	 *            the random generator
+	 */
 	public SphericalDistribution(double radius, RandomGenerator randomGenerator)
 	{
 		if (randomGenerator == null)

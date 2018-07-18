@@ -165,7 +165,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * @throws IllegalArgumentException
 	 *             If the data is not valid
 	 */
-	private void checkBounds(Rectangle bounds) throws IllegalArgumentException
+	private static void checkBounds(Rectangle bounds) throws IllegalArgumentException
 	{
 		if (bounds.x < 0)
 			throw new IllegalArgumentException("Bounds must have positive x origin");
@@ -245,7 +245,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * @param size
 	 *            the size
 	 */
-	private void checkArray(float[] array, int size)
+	private static void checkArray(float[] array, int size)
 	{
 		if (array == null || array.length != size)
 			throw new IllegalArgumentException("Input array must match the size of the input bounds");

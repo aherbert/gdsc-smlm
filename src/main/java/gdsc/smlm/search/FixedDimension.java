@@ -26,15 +26,26 @@ package gdsc.smlm.search;
 import gdsc.core.utils.Maths;
 
 /**
- * Specify the dimensions for a search
+ * Specify the dimensions for a search.
  */
 public class FixedDimension implements Cloneable, Dimension
 {
+	/** The minimum of the range. */
 	public final double min;
+	
+	/** The maximum of the range. */
 	public final double max;
+	
+	/** The current lower bound of the range (will be clipped to min/max). */
 	public final double lower;
+	
+	/** The current upper bound of the range (will be clipped to min/max). */
 	public final double upper;
+	
+	/** The min increment to use around the centre. */
 	public final double minIncrement;
+	
+	/** Set to true if {@link #min} &lt; {@link #max}. */
 	public final boolean active;
 
 	/**
@@ -125,6 +136,11 @@ public class FixedDimension implements Cloneable, Dimension
 	 * Creates a new fixed dimension, respecting the current min/max and the increment settings. If the current search
 	 * dimension is not active then an inactive dimension is returned centred between the lower and upper bounds.
 	 *
+	 * @param lower
+	 *            the lower
+	 * @param upper
+	 *            the upper
+	 * @return the fixed dimension
 	 * @see gdsc.smlm.search.Dimension#create(double, double)
 	 */
 	@Override
@@ -179,6 +195,7 @@ public class FixedDimension implements Cloneable, Dimension
 	/**
 	 * If the dimension is not active or min increment is zero no rounding is performed.
 	 *
+	 * @return true, if successful
 	 * @see gdsc.smlm.search.Dimension#canRound()
 	 */
 	@Override
@@ -188,7 +205,7 @@ public class FixedDimension implements Cloneable, Dimension
 	}
 
 	/**
-	 * Gets the centre of the range in the dimension
+	 * Gets the centre of the range in the dimension.
 	 *
 	 * @return the centre of the range in the dimension
 	 */
@@ -199,7 +216,7 @@ public class FixedDimension implements Cloneable, Dimension
 	}
 
 	/**
-	 * Gets the current lower bound of the range
+	 * Gets the current lower bound of the range.
 	 *
 	 * @return the current lower bound of the range
 	 */
@@ -210,7 +227,7 @@ public class FixedDimension implements Cloneable, Dimension
 	}
 
 	/**
-	 * Gets the current upper bound of the range
+	 * Gets the current upper bound of the range.
 	 *
 	 * @return the current upper bound of the range
 	 */

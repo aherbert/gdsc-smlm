@@ -31,6 +31,10 @@ import ij.process.ImageProcessor;
  */
 public class FloatImage3D extends Image3D
 {
+	/**
+	 * The data packed in zyx order: z * (nr * nc) + y * nc + x .
+	 * @see #index(int, int, int)
+	 */
 	protected float[] data;
 
 	/**

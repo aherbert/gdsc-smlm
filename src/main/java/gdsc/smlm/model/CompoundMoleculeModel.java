@@ -37,6 +37,7 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public class CompoundMoleculeModel extends MoleculeModel
 {
+	/** The constant to convert degrees to radians: <code>180.0 / Math.PI</code>. */
 	static final double DEGREES_TO_RADIANS = 180.0 / Math.PI;
 
 	/** Define the Z-axis */

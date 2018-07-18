@@ -296,6 +296,7 @@ public class PeakResultConversionHelper
 			}
 			catch (ConfigurationException e)
 			{
+				// Ignore
 			}
 		}
 		return list.toArray(new Converter[list.size()]);
@@ -328,6 +329,7 @@ public class PeakResultConversionHelper
 			}
 			catch (ConfigurationException e)
 			{
+				// Ignore
 			}
 		}
 		return list.toArray(new String[list.size()]);
@@ -380,6 +382,7 @@ public class PeakResultConversionHelper
 			}
 			catch (ConfigurationException e)
 			{
+				// Ignore
 			}
 		}
 		return list.toArray(new String[list.size()]);

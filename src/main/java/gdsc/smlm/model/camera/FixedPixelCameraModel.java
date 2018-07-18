@@ -32,7 +32,17 @@ import java.awt.Rectangle;
  */
 public abstract class FixedPixelCameraModel extends BaseCameraModel
 {
-	protected final float bias, gain, variance, var_g2;
+	/** The bias. */
+	protected final float bias;
+	
+	/** The gain. */
+	protected final float gain;
+	
+	/** The variance. */
+	protected final float variance;
+	
+	/** The variance divided by the squared gain (variance/gain^2). */
+	protected final float var_g2;
 
 	/**
 	 * Instantiates a new fixed pixel camera model.
@@ -125,6 +135,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	@Override
 	public void setOrigin(int x, int y)
 	{
+		// Ignore
 	}
 
 	/*

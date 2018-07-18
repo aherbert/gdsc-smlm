@@ -760,7 +760,7 @@ public class SearchSpace
 	 *            the dimensions
 	 * @return true, if successful
 	 */
-	private boolean reduceRange(SearchDimension[] dimensions)
+	private static boolean reduceRange(SearchDimension[] dimensions)
 	{
 		// First check if the range can be reduced.
 		// If not then return false as nothing can be changed.
@@ -1208,8 +1208,8 @@ public class SearchSpace
 	 *            the padding
 	 * @return the new dimensions
 	 */
-	private <T extends Comparable<T>> Dimension[] updateSearchSpace(Dimension[] dimensions, SearchResult<T> current,
-			SearchResult<T>[] scores, double padding)
+	private static <T extends Comparable<T>> Dimension[] updateSearchSpace(Dimension[] dimensions,
+			SearchResult<T> current, SearchResult<T>[] scores, double padding)
 	{
 		// Find the limits in the current scores
 		final double[] lower = current.getPoint().clone();
