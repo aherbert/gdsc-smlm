@@ -111,7 +111,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		defaultSmooth = c.getDataFilterParameterValue(0);
 	}
 
-	private int flags = DOES_16 | DOES_8G | DOES_32;
+	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig = null;
 	private Overlay o = null;
@@ -187,6 +187,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	{
 		this.o = imp.getOverlay();
 		this.imp = imp;
+
+		// The image is locked by the PlugInFilterRunner so unlock it to allow scroll.
+		// This should be OK as the image data is not modified and only the overlay is
+		// adjusted. If another plugin changes the image then the preview should update
+		// the overlay and it will be obvious to the user to turn this plugin off.
+		imp.unlock();
 
 		config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
@@ -416,6 +422,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				// Support cropped origin selection.
 				Rectangle sourceBounds = IJImageSource.getBounds(imp);
 				cameraModel = PeakFit.cropCameraModel(cameraModel, sourceBounds, null, true);
+				if (cameraModel == null)
+				{
+					gd.getPreviewCheckbox().setState(false);
+					return;
+				}
 			}
 			fitConfig.setCameraModel(cameraModel);
 		}
@@ -426,7 +437,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			if (config.getDataFilterType() == DataFilterType.JURY)
 			{
 				if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE))
+				{
+					gd.getPreviewCheckbox().setState(false);
 					return;
+				}
 			}
 
 			try
@@ -878,12 +892,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	@Override
 	public void imageOpened(ImagePlus imp)
 	{
-
+		// Ignore
 	}
 
 	@Override
 	public void imageClosed(ImagePlus imp)
 	{
+		// Ignore
 	}
 
 	@Override
