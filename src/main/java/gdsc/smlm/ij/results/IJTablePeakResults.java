@@ -102,6 +102,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private TextPanel tp;
 	private ImageROIPainter roiPainter;
 	private boolean addCounter = false;
+	
+	/** Set to true if the table is active. */
 	protected boolean tableActive = false;
 	private int nextRepaintSize = 0;
 	private double repaintInterval = 0.1;
@@ -111,17 +113,41 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private int size = 0;
 
+	/**
+	 * Instantiates a new IJ table peak results.
+	 *
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 */
 	public IJTablePeakResults(boolean showDeviations)
 	{
 		this.showDeviations = showDeviations;
 	}
 
+	/**
+	 * Instantiates a new IJ table peak results.
+	 *
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param source
+	 *            the source
+	 */
 	public IJTablePeakResults(boolean showDeviations, String source)
 	{
 		this.showDeviations = showDeviations;
 		this.source = source;
 	}
 
+	/**
+	 * Instantiates a new IJ table peak results.
+	 *
+	 * @param showDeviations
+	 *            Set to true to show deviations
+	 * @param source
+	 *            the source
+	 * @param clearAtStart
+	 *            Set to true to clear table contents in {@link #begin()}
+	 */
 	public IJTablePeakResults(boolean showDeviations, String source, boolean clearAtStart)
 	{
 		this.showDeviations = showDeviations;
@@ -166,9 +192,11 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 					}
 					catch (ConfigurationException e)
 					{
+						// Cannot compute precision
 					}
 					catch (ConversionException e)
 					{
+						// Cannot compute precision
 					}
 				}
 			}

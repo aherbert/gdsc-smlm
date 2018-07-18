@@ -740,7 +740,7 @@ public class PCPALMClusters implements PlugIn
 	 *            the noise data
 	 * @return true, if successful
 	 */
-	private boolean subtractNoise(HistogramData histogramData, HistogramData noiseData)
+	private static boolean subtractNoise(HistogramData histogramData, HistogramData noiseData)
 	{
 		float[] v1 = normalise(histogramData);
 		float[] v2 = normalise(noiseData);
@@ -760,7 +760,7 @@ public class PCPALMClusters implements PlugIn
 	 *            the data
 	 * @return the normalised data
 	 */
-	private float[] normalise(HistogramData data)
+	private static float[] normalise(HistogramData data)
 	{
 		float[] values = Arrays.copyOf(data.histogram[1], data.histogram[1].length);
 		final double normalisingFactor = 1.0 / (data.frames * data.area);

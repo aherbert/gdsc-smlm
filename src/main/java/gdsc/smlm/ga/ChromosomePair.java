@@ -31,15 +31,18 @@ package gdsc.smlm.ga;
  */
 public class ChromosomePair<T extends Comparable<T>>
 {
-	final Chromosome<T> c1, c2;
+	/** The first chromosome. */
+	final Chromosome<T> c1;
+	/** The second chromosome. */
+	final Chromosome<T> c2;
 
 	/**
 	 * Create a pair.
 	 *
 	 * @param c1
-	 *            Chromosome 1
+	 *            the first chromosome
 	 * @param c2
-	 *            Chromosome 1
+	 *            the second chromosome
 	 * @throws IllegalArgumentException
 	 *             if either chromosome is null
 	 */

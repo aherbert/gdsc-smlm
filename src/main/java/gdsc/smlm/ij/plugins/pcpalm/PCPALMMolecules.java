@@ -120,6 +120,7 @@ import ij.process.ShortProcessor;
  */
 public class PCPALMMolecules implements PlugIn
 {
+	/** The title */
 	static String TITLE = "PC-PALM Molecules";
 	private static String inputOption = "";
 	private static boolean chooseRoi = false;
@@ -137,6 +138,7 @@ public class PCPALMMolecules implements PlugIn
 	private static boolean simplexFitting = false;
 	private static boolean showHistograms = true;
 	private static boolean binaryImage = true;
+	/** The blinking rate. */
 	static double blinkingRate = 2;
 	private static double p = 0.6;
 	private static String[] BLINKING_DISTRIBUTION = new String[] { "Poisson", "Geometric", "None", "Binomial" };
@@ -173,14 +175,30 @@ public class PCPALMMolecules implements PlugIn
 	private long start;
 
 	// These package level variables are used by the PCPALMAnalysis plugin.
+
+	/** The results. */
 	static MemoryPeakResults results;
-	static double minx, miny, maxx, maxy;
+	/** The minx. */
+	static double minx;
+	/** The miny. */
+	static double miny;
+	/** The maxx. */
+	static double maxx;
+	/** The maxy. */
+	static double maxy;
+	/** The nm per pixel. */
 	static double nmPerPixel;
+	/** The molecules. */
 	static ArrayList<Molecule> molecules = null;
+	/** The sigma S. */
 	static double sigmaS = 20;
+	/** The peak density. */
 	static double densityPeaks;
+	/** The protein density. */
 	static double densityProtein;
+	/** The seconds. */
 	static double seconds;
+	/** The area. */
 	static double area;
 
 	/*
@@ -525,7 +543,7 @@ public class PCPALMMolecules implements PlugIn
 		start = System.currentTimeMillis();
 	}
 
-	private boolean showPCPALMDialog()
+	private static boolean showPCPALMDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -783,7 +801,7 @@ public class PCPALMMolecules implements PlugIn
 		return newMean;
 	}
 
-	private double[] fitGaussian(float[] x, float[] y)
+	private static double[] fitGaussian(float[] x, float[] y)
 	{
 		WeightedObservedPoints obs = new WeightedObservedPoints();
 		for (int i = 0; i < x.length; i++)
@@ -880,7 +898,7 @@ public class PCPALMMolecules implements PlugIn
 	 * @param shape
 	 *            the shape
 	 */
-	private void addToPlot(Plot2 plot, float[] x, double[] parameters, int shape)
+	private static void addToPlot(Plot2 plot, float[] x, double[] parameters, int shape)
 	{
 		SkewNormalFunction sn = new SkewNormalFunction(parameters);
 		float[] y = new float[x.length];
@@ -900,7 +918,7 @@ public class PCPALMMolecules implements PlugIn
 	 *            a list of the singles (not grouped into molecules)
 	 * @return a list of molecules
 	 */
-	private ArrayList<Molecule> extractMolecules(MemoryPeakResults results, double sigmaRaw,
+	private static ArrayList<Molecule> extractMolecules(MemoryPeakResults results, double sigmaRaw,
 			ArrayList<Molecule> singles)
 	{
 		return traceMolecules(results, sigmaRaw * 2.5, 1, singles);
@@ -919,7 +937,7 @@ public class PCPALMMolecules implements PlugIn
 	 *            a list of the singles (not grouped into molecules)
 	 * @return a list of molecules
 	 */
-	private ArrayList<Molecule> traceMolecules(MemoryPeakResults results, double distance, int time,
+	private static ArrayList<Molecule> traceMolecules(MemoryPeakResults results, double distance, int time,
 			ArrayList<Molecule> singles)
 	{
 		TraceManager tm = new TraceManager(results);
@@ -950,7 +968,7 @@ public class PCPALMMolecules implements PlugIn
 	 *
 	 * @return The peak density
 	 */
-	private double calculatePeakDensity()
+	private static double calculatePeakDensity()
 	{
 		//double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx;
 		//double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny;
@@ -968,7 +986,7 @@ public class PCPALMMolecules implements PlugIn
 	 *            The precision estimate
 	 * @return the array list
 	 */
-	private ArrayList<Molecule> filterMolecules(ArrayList<Molecule> molecules, double sigmaS)
+	private static ArrayList<Molecule> filterMolecules(ArrayList<Molecule> molecules, double sigmaS)
 	{
 		ArrayList<Molecule> newMolecules = new ArrayList<>(molecules.size());
 		final double limit = 3 * sigmaS;
@@ -996,7 +1014,7 @@ public class PCPALMMolecules implements PlugIn
 		molecules.addAll(singles);
 	}
 
-	private boolean showManualTracingDialog()
+	private static boolean showManualTracingDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -1523,7 +1541,7 @@ public class PCPALMMolecules implements PlugIn
 		}
 	}
 
-	private double[][] plot(DoubleData stats, String label, boolean integerBins)
+	private static double[][] plot(DoubleData stats, String label, boolean integerBins)
 	{
 		String title = TITLE + " " + label;
 		Plot2 plot;
@@ -1550,7 +1568,7 @@ public class PCPALMMolecules implements PlugIn
 		return hist;
 	}
 
-	private void performDistanceAnalysis(double[][] intraHist, int p99)
+	private static void performDistanceAnalysis(double[][] intraHist, int p99)
 	{
 		// We want to know the fraction of distances between molecules at the 99th percentile
 		// that are intra- rather than inter-molecule.
@@ -1600,7 +1618,7 @@ public class PCPALMMolecules implements PlugIn
 		}
 	}
 
-	private double distance2(double[] centre1, double[] centre2)
+	private static double distance2(double[] centre1, double[] centre2)
 	{
 		final double dx = centre1[0] - centre2[0];
 		final double dy = centre1[1] - centre2[1];
@@ -1623,7 +1641,7 @@ public class PCPALMMolecules implements PlugIn
 	 * @param fill
 	 *            the fill
 	 */
-	private void fillMask(int[] mask, final int maskSize, final int cx, final int cy, final int roiRadius,
+	private static void fillMask(int[] mask, final int maskSize, final int cx, final int cy, final int roiRadius,
 			final int fill)
 	{
 		int minx = cx - roiRadius;
@@ -1678,7 +1696,7 @@ public class PCPALMMolecules implements PlugIn
 
 	}
 
-	private int getBlinks(RandomDataGenerator dataGenerator, double averageBlinks)
+	private static int getBlinks(RandomDataGenerator dataGenerator, double averageBlinks)
 	{
 		switch (blinkingDistribution)
 		{
@@ -1695,7 +1713,7 @@ public class PCPALMMolecules implements PlugIn
 		}
 	}
 
-	private boolean showSimulationDialog()
+	private static boolean showSimulationDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -1751,7 +1769,7 @@ public class PCPALMMolecules implements PlugIn
 		return getPValue();
 	}
 
-	private boolean getPValue()
+	private static boolean getPValue()
 	{
 		if (blinkingDistribution == 3)
 		{
@@ -1804,7 +1822,7 @@ public class PCPALMMolecules implements PlugIn
 		seconds = (end - start + 1) * results.getCalibrationReader().getExposureTime() / 1000;
 	}
 
-	private boolean createImage(ArrayList<Molecule> molecules)
+	private static boolean createImage(ArrayList<Molecule> molecules)
 	{
 		if (molecules.isEmpty())
 			return false;
@@ -1966,6 +1984,27 @@ public class PCPALMMolecules implements PlugIn
 		return true;
 	}
 
+	/**
+	 * Draw an image of the molecules.
+	 *
+	 * @param molecules
+	 *            the molecules
+	 * @param minx
+	 *            the minx
+	 * @param miny
+	 *            the miny
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @param checkBounds
+	 *            Set to true to check the molecules is within the bounds
+	 * @param binary
+	 *            the binary
+	 * @return the image
+	 */
 	static ImageProcessor drawImage(ArrayList<Molecule> molecules, double minx, double miny, double maxx, double maxy,
 			double nmPerPixel, boolean checkBounds, boolean binary)
 	{
@@ -2030,6 +2069,17 @@ public class PCPALMMolecules implements PlugIn
 		}
 	}
 
+	/**
+	 * Display the image.
+	 *
+	 * @param title
+	 *            the title
+	 * @param ip
+	 *            the image processor
+	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @return the image
+	 */
 	static ImagePlus displayImage(String title, ImageProcessor ip, double nmPerPixel)
 	{
 		ImagePlus imp = Utils.display(title, ip);
@@ -2040,6 +2090,29 @@ public class PCPALMMolecules implements PlugIn
 		return imp;
 	}
 
+	/**
+	 * Display an image of the molecules.
+	 *
+	 * @param title
+	 *            the title
+	 * @param molecules
+	 *            the molecules
+	 * @param minx
+	 *            the minx
+	 * @param miny
+	 *            the miny
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @param checkBounds
+	 *            Set to true to check the molecules is within the bounds
+	 * @param binary
+	 *            the binary
+	 * @return the image
+	 */
 	static ImagePlus displayImage(String title, ArrayList<Molecule> molecules, double minx, double miny, double maxx,
 			double maxy, double nmPerPixel, boolean checkBounds, boolean binary)
 	{
@@ -2050,7 +2123,7 @@ public class PCPALMMolecules implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Optimiser
 	 */
-	public abstract class SkewNormalOptimiserFunction extends SkewNormalFunction
+	private abstract class SkewNormalOptimiserFunction extends SkewNormalFunction
 	{
 		public SkewNormalOptimiserFunction(double[] parameters)
 		{
@@ -2059,17 +2132,6 @@ public class PCPALMMolecules implements PlugIn
 
 		protected TDoubleArrayList x = null;
 		protected TDoubleArrayList y = null;
-
-		public void addPoint(double x, double y)
-		{
-			if (this.x == null)
-			{
-				this.x = new TDoubleArrayList();
-				this.y = new TDoubleArrayList();
-			}
-			this.x.add(x);
-			this.y.add(y);
-		}
 
 		public void addData(float[] x, float[] y)
 		{
@@ -2101,7 +2163,7 @@ public class PCPALMMolecules implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	public class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction
+	private class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction
 			implements MultivariateVectorFunction
 	{
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
@@ -2153,7 +2215,7 @@ public class PCPALMMolecules implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Simplex
 	 */
-	public class SkewNormalMultivariateFunction extends SkewNormalOptimiserFunction implements MultivariateFunction
+	private class SkewNormalMultivariateFunction extends SkewNormalOptimiserFunction implements MultivariateFunction
 	{
 		public SkewNormalMultivariateFunction(double[] parameters)
 		{

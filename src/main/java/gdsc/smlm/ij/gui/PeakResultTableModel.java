@@ -963,7 +963,7 @@ public class PeakResultTableModel extends AbstractTableModel
 		});
 	}
 
-	private TableCellRenderer createTableCellRenderer(DefaultTableCellRenderer renderer)
+	private static TableCellRenderer createTableCellRenderer(DefaultTableCellRenderer renderer)
 	{
 		renderer.setHorizontalAlignment(SwingConstants.TRAILING);
 		return renderer;

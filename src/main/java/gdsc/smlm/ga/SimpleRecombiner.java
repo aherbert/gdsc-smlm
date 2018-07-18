@@ -38,7 +38,9 @@ import gdsc.core.utils.SimpleArrayUtils;
  */
 public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implements Recombiner<T>
 {
+	/** The fraction of the sequence positions to mutate on average. */
 	final double fraction;
+	/** The mean number of additional children. */
 	final double meanChildren;
 
 	/**

@@ -31,14 +31,17 @@ package gdsc.smlm.ga;
  */
 public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>>
 {
+	/** The comparable object. */
 	final T t;
+	
+	/** The score. */
 	final double score;
 
 	/**
 	 * Instantiates a new fitness.
 	 *
 	 * @param t
-	 *            the t
+	 *            the comparable object
 	 * @param score
 	 *            the score
 	 */

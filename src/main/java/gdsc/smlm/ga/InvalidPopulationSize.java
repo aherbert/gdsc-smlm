@@ -28,8 +28,16 @@ package gdsc.smlm.ga;
  */
 public class InvalidPopulationSize extends RuntimeException
 {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -7425196200200953611L;
 
+	/**
+	 * Instantiates a new invalid population size.
+	 *
+	 * @param size
+	 *            the size
+	 * @param minSize
+	 *            the min size
+	 */
 	public InvalidPopulationSize(int size, int minSize)
 	{
 		super("Population size (" + size + ") must be at least " + minSize);

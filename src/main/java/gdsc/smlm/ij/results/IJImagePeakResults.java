@@ -51,6 +51,7 @@ import ij.process.ShortProcessor;
  */
 public class IJImagePeakResults extends IJAbstractPeakResults
 {
+	/** The image suffix appended to the results name. */
 	public static final String IMAGE_SUFFIX = "SuperRes";
 	/**
 	 * Display the signal of the peak in the image. The default is a count of 1.
@@ -115,17 +116,52 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/** The empty value. */
 	private double EMPTY = 0.0;
 
+	/** The title. */
 	protected final String title;
+
+	/**
+	 * The image width. This is in output image coordinates.
+	 * <p>
+	 * The bounding rectangle for displayed coordinates is not stored but could be inferred from the origin, the scale
+	 * and the output width/height.
+	 */
 	protected final int imageWidth;
+
+	/**
+	 * The image height. This is in output image coordinates.
+	 * <p>
+	 * The bounding rectangle for displayed coordinates is not stored but could be inferred from the origin, the scale
+	 * and the output width/height.
+	 */
 	protected final int imageHeight;
+
+	/**
+	 * The scale. This is used to transform input coordinates to output image coordinates. See {@link #mapX(float)} and
+	 * {@link #mapY(float)}.
+	 */
 	protected final float scale;
+	
+	/** The number of results. */
 	protected int size = 0;
+	
+	/** The image data. */
 	protected double[] data;
+	
+	/** The xlimit. This is {@link #imageWidth} -1 */
 	protected final float xlimit;
+	
+	/** The ylimit. This is {@link #imageHeight} -1 */
 	protected final float ylimit;
+	
+	/** The image. */
 	protected ImagePlus imp = null;
+	
+	/** Set to true is the image is active. */
 	protected boolean imageActive = false;
+	
+	/** The display flags controlling the rendering. */
 	protected int displayFlags = 0;
+	
 	private int rollingWindowSize = 0;
 	private boolean displayImage = true;
 	private boolean liveImage = true;
@@ -140,7 +176,20 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private double repaintInterval = 0.1;
 	private long repaintDelay = 1000;
 	private int currentFrame;
+
+	/**
+	 * The x origin.
+	 * This defines the minimum of the bounding rectangle for displayed coordinates.
+	 * <p>
+	 * The x coordinates can be transformed to output image coordinates using {@link #mapX(float)}.
+	 */
 	protected int ox;
+	/**
+	 * The y origin.
+	 * This defines the minimum of the bounding rectangle for displayed coordinates.
+	 * <p>
+	 * The y coordinates can be transformed to output image coordinates using {@link #mapY(float)}.
+	 */
 	protected int oy;
 
 	private String lutName = "fire";
@@ -191,7 +240,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		return scale;
 	}
 
-	private int ceil(float f)
+	private static int ceil(float f)
 	{
 		return (int) Math.ceil(f);
 	}
@@ -328,13 +377,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	protected void preBegin()
 	{
-		// Signal is OK to be equalised
 		if ((displayFlags & DISPLAY_SIGNAL) != 0)
 		{
+			// Signal is OK to be equalised
 		}
-		// Peak and localisation should not use equalisation
 		else
 		{
+			// Peak and localisation should not use equalisation
 			displayFlags &= ~DISPLAY_EQUALIZED;
 		}
 
@@ -1186,6 +1235,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		updateImage();
 	}
 
+	/**
+	 * Update the image. Calls {@link #drawImage()} if the image is live and the next repaint size has been achieved,
+	 * otherwise does nothing.
+	 */
 	protected void updateImage()
 	{
 		if (size < nextRepaintSize || !liveImage || !displayImage)
@@ -1247,6 +1300,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		drawImage();
 	}
 
+	/**
+	 * Draw the image to the {@link ImagePlus}.
+	 */
 	private void drawImage()
 	{
 		if (imageLock.acquire())
@@ -1416,7 +1472,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	}
 
 	/**
-	 * Over-ridden to ignore any passed in bounds. The bounds must be set when the image is created.
+	 * Over-ridden to IGNORE any passed in bounds. The bounds must be set when the image is created.
 	 *
 	 * @see gdsc.smlm.results.AbstractPeakResults#setBounds(java.awt.Rectangle)
 	 */

@@ -151,7 +151,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 		return true;
 	}
 
-	private double relativeAngle(double x, double y)
+	private static double relativeAngle(double x, double y)
 	{
 		final double angle = Math.atan2(Math.sin(x - y), Math.cos(x - y));
 		final double halfPi = Math.PI / 2;

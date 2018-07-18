@@ -33,6 +33,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
  */
 public class SimpleMutator<T extends Comparable<T>> extends Randomiser implements Mutator<T>
 {
+	/** The fraction of the sequence positions to mutate on average. */
 	final double fraction;
 
 	private boolean override = false;

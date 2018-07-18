@@ -33,10 +33,18 @@ import org.apache.commons.math3.util.FastMath;
  */
 public abstract class ToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {
-	final double relative, absolute;
-	final boolean checkFitness, checkSequence;
+	/** The relative tolerance threshold. */
+	final double relative;
+	/** The absolute tolerance threshold. */
+	final double  absolute;
+	/** Set to true to check the fitness */
+	final boolean checkFitness;
+	/** Set to true to check the sequence */
+	final boolean checkSequence;
+	/** The maximum iterations. */
 	final int maxIterations;
 
+	/** The iterations. */
 	private int iterations = 0;
 
 	/**
@@ -153,6 +161,15 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
 		return false;
 	}
 
+	/**
+	 * Check if the fitness has converged.
+	 *
+	 * @param previous
+	 *            the previous
+	 * @param current
+	 *            the current
+	 * @return true, if successful
+	 */
 	protected abstract boolean converged(T previous, T current);
 
 	/**

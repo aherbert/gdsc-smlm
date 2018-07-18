@@ -28,6 +28,9 @@ import java.awt.Rectangle;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 
+/**
+ * A factory for creating ImagePeakResults objects.
+ */
 public class ImagePeakResultsFactory
 {
 	/**

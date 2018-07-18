@@ -32,6 +32,14 @@ import gdsc.smlm.results.ThreadSafePeakResults;
  */
 public abstract class IJAbstractPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
+	/**
+	 * Sets the calibration.
+	 *
+	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @param gain
+	 *            the gain
+	 */
 	public void setCalibration(double nmPerPixel, double gain)
 	{
 		CalibrationWriter cw = getCalibrationWriterSafe();

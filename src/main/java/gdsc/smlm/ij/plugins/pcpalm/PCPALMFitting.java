@@ -87,6 +87,7 @@ import ij.text.TextWindow;
  */
 public class PCPALMFitting implements PlugIn
 {
+	/** The title */
 	static String TITLE = "PC-PALM Fitting";
 
 	private static String INPUT_FROM_FILE = "Load from file";
@@ -133,6 +134,8 @@ public class PCPALMFitting implements PlugIn
 	private boolean spatialDomain;
 
 	// Save the input for the analysis
+	
+	/** The previous correlation curve (gr). */
 	static double[][] previous_gr;
 	private static double previous_peakDensity;
 	private static boolean previous_spatialDomain;

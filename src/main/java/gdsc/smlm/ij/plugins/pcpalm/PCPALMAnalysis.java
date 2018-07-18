@@ -74,12 +74,15 @@ import ij.text.TextWindow;
  */
 public class PCPALMAnalysis implements PlugInFilter
 {
+	/** The title */
 	static String TITLE = "PC-PALM Analysis";
 
 	private static String resultsDirectory = "";
 	private static double correlationDistance = 800; // nm
 	private static double correlationInterval = 20; // nm
 	private static boolean binaryImage = false;
+	
+	/** The blinking rate. */
 	static double blinkingRate = -1;
 	private static double copiedBlinkingRate = -1;
 	private static double nmPerPixel = -1;
@@ -103,11 +106,12 @@ public class PCPALMAnalysis implements PlugInFilter
 	// Used for the results table
 	private static TextWindow resultsTable = null;
 
+	/** The results. */
 	static ArrayList<CorrelationResult> results = new ArrayList<>();
 
 	private boolean spatialDomain;
 
-	// Area of the region cropped from the PCPALM Molecules list
+	/** Area of the region cropped from the PCPALM Molecules list */
 	double croppedArea = 0;
 
 	/*
@@ -180,9 +184,9 @@ public class PCPALMAnalysis implements PlugInFilter
 	/**
 	 * Save all the results to a directory
 	 *
-	 * @return DONE
+	 * @return {@link PlugInFilter#DONE }
 	 */
-	private int saveResults()
+	private static int saveResults()
 	{
 		if (results.isEmpty())
 		{
@@ -221,9 +225,9 @@ public class PCPALMAnalysis implements PlugInFilter
 	/**
 	 * Load all the results from a directory. File must have the XML suffix
 	 *
-	 * @return DONE
+	 * @return {@link PlugInFilter#DONE }
 	 */
-	private int loadResults()
+	private static int loadResults()
 	{
 		if (getDirectory())
 		{
@@ -484,7 +488,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return newMolecules;
 	}
 
-	private MaskDistribution createMaskDistribution(ImageProcessor ip, double roix, double roiy)
+	private static MaskDistribution createMaskDistribution(ImageProcessor ip, double roix, double roiy)
 	{
 		// Calculate the scale of the mask
 		final int w = ip.getWidth();
@@ -750,13 +754,30 @@ public class PCPALMAnalysis implements PlugInFilter
 		log("---");
 	}
 
-	private ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow)
+	private static ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow)
 	{
 		float[] image = (float[]) im.toFloat(0, null).getPixels();
 		image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowFunction.TUKEY);
 		return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
 	}
 
+	/**
+	 * Plot the correlation.
+	 *
+	 * @param gr
+	 *            the correlation curve
+	 * @param offset
+	 *            the offset
+	 * @param plotTitle
+	 *            the plot title
+	 * @param yAxisTitle
+	 *            the y axis title
+	 * @param barChart
+	 *            the bar chart
+	 * @param showErrorBars
+	 *            the show error bars
+	 * @return the plot
+	 */
 	public static Plot2 plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
 			boolean barChart, boolean showErrorBars)
 	{
@@ -794,7 +815,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the pad
 	 * @return the padded image
 	 */
-	private ImageProcessor padImage(ImageProcessor im, int pad)
+	private static ImageProcessor padImage(ImageProcessor im, int pad)
 	{
 		// int newW = pad * 2 + im.getWidth();
 		// int newH = pad * 2 + im.getHeight();
@@ -817,7 +838,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the apply window flag
 	 * @return The weight image
 	 */
-	private ImageProcessor createWeightImage(ImageProcessor im, boolean applyWindow)
+	private static ImageProcessor createWeightImage(ImageProcessor im, boolean applyWindow)
 	{
 		float[] data = new float[im.getWidth() * im.getHeight()];
 		Arrays.fill(data, 1);
@@ -846,7 +867,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the density
 	 * @return { distances[], gr[], gr_se[] }
 	 */
-	private double[][] computeAutoCorrelationCurveFHT(ImageProcessor im, ImageProcessor w, int maxRadius,
+	private static double[][] computeAutoCorrelationCurveFHT(ImageProcessor im, ImageProcessor w, int maxRadius,
 			double nmPerPixel, double density)
 	{
 		log("Creating Hartley transforms");
@@ -931,7 +952,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the density
 	 * @return { distances[], gr[], gr_se[] }
 	 */
-	private double[][] computeAutoCorrelationCurveFFT(ImageProcessor im, ImageProcessor w, int maxRadius,
+	private static double[][] computeAutoCorrelationCurveFFT(ImageProcessor im, ImageProcessor w, int maxRadius,
 			double nmPerPixel, double density)
 	{
 		log("Performing FFT correlation");
@@ -971,7 +992,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            auto-correlation
 	 * @return { distances[], gr[], gr_se[] }
 	 */
-	private double[][] computeRadialAverage(int maxRadius, double nmPerPixel, FloatProcessor correlation)
+	private static double[][] computeRadialAverage(int maxRadius, double nmPerPixel, FloatProcessor correlation)
 	{
 		// Perform averaging of the correlation function using integer distance bins
 		log("  Computing distance vs correlation curve");
@@ -1032,7 +1053,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return new double[][] { x, y, sd };
 	}
 
-	private void displayCorrelation(FloatProcessor correlation, String title, Rectangle crop)
+	private static void displayCorrelation(FloatProcessor correlation, String title, Rectangle crop)
 	{
 		correlation.setRoi(crop);
 		ImageProcessor ip = correlation.crop();
@@ -1079,7 +1100,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the image
 	 * @return An FHT2 image in the frequency domain
 	 */
-	private FHT2 padToFHT2(ImageProcessor ip)
+	private static FHT2 padToFHT2(ImageProcessor ip)
 	{
 		FloatProcessor im2 = pad(ip);
 		if (im2 == null)
@@ -1096,7 +1117,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the image
 	 * @return padded image
 	 */
-	private FloatProcessor pad(ImageProcessor ip)
+	private static FloatProcessor pad(ImageProcessor ip)
 	{
 		// Pad to a power of 2
 		final int size = FastMath.max(ip.getWidth(), ip.getHeight());
@@ -1112,7 +1133,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return im2;
 	}
 
-	private int nextPowerOfTwo(final int size)
+	private static int nextPowerOfTwo(final int size)
 	{
 		return Maths.nextPow2(size);
 
@@ -1135,7 +1156,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            the image
 	 * @return the auto correlation.
 	 */
-	private FloatProcessor computeAutoCorrelationFFT(ImageProcessor ip)
+	private static FloatProcessor computeAutoCorrelationFFT(ImageProcessor ip)
 	{
 		FloatProcessor paddedIp = pad(ip);
 		if (paddedIp == null)
@@ -1249,7 +1270,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		resultsTable.append(sb.toString());
 	}
 
-	private void createResultsTable()
+	private static void createResultsTable()
 	{
 		if (resultsTable == null || !resultsTable.isVisible())
 		{

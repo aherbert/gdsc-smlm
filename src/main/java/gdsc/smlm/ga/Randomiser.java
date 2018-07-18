@@ -30,11 +30,14 @@ import org.apache.commons.math3.random.RandomDataGenerator;
  */
 public abstract class Randomiser
 {
+	/** The random data generator. */
 	final RandomDataGenerator random;
 
 	/**
+	 * Instantiates a new randomiser.
+	 *
 	 * @param random
-	 *            the random generator
+	 *            the random data generator
 	 * @throws IllegalArgumentException
 	 *             if the random generator is null
 	 */

@@ -24,15 +24,34 @@
 package gdsc.smlm.ij.plugins.pcpalm;
 
 /**
- * Used to store all the information required for the PC-PALM analysis
+ * Used to store all the information required for the PC-PALM analysis.
  */
 public class Molecule
 {
-	public double x, y, precision, photons;
+	/** The x. */
+	public double x;
+	/** The y. */
+	public double y;
+	/** The precision. */
+	public double precision;
+	/** The photons. */
+	public double photons;
 
-	// Used to construct a single linked list of molecules
+	/** Used to construct a single linked list of molecules. */
 	public Molecule next = null;
 
+	/**
+	 * Instantiates a new molecule.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param precision
+	 *            the precision
+	 * @param photons
+	 *            the photons
+	 */
 	public Molecule(double x, double y, double precision, double photons)
 	{
 		this.x = x;
@@ -41,6 +60,13 @@ public class Molecule
 		this.photons = photons;
 	}
 
+	/**
+	 * Get the distance.
+	 *
+	 * @param other
+	 *            the other
+	 * @return the distance
+	 */
 	public double distance(Molecule other)
 	{
 		final double dx = x - other.x;
@@ -48,6 +74,13 @@ public class Molecule
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
+	/**
+	 * Get the squared distance.
+	 *
+	 * @param other
+	 *            the other
+	 * @return the squared distance
+	 */
 	public double distance2(Molecule other)
 	{
 		final double dx = x - other.x;

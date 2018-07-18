@@ -38,10 +38,14 @@ import gdsc.core.logging.TrackProgress;
  */
 public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser implements SelectionStrategy<T>
 {
+	/** The fraction of the individuals to select (set between 0 and 1). */
 	final double fraction;
+	/** The maximum number of individuals to select */
 	final int max;
 
 	private List<? extends Chromosome<T>> individuals = null;
+	
+	/** The tracker. */
 	TrackProgress tracker = null;
 
 	/**
