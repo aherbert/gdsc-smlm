@@ -3,7 +3,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc", "static-method"})
+@SuppressWarnings({"unchecked", "unused", "deprecation", "javadoc", "static-method", "cast"})
 public final class GUIProtos {
   private GUIProtos() {}
   public static void registerAllExtensions(

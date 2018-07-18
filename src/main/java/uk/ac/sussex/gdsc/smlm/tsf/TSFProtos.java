@@ -3,7 +3,7 @@
 
 package uk.ac.sussex.gdsc.smlm.tsf;
 
-@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method"})
+@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method", "cast"})
 public final class TSFProtos {
   private TSFProtos() {}
   public static void registerAllExtensions(

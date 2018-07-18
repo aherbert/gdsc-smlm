@@ -24,6 +24,7 @@ Options:
   --deprecation
   --javadoc
   --static
+  --cast
 
 ";
 
@@ -35,6 +36,7 @@ GetOptions(
     "deprecation" => \$deprecation,
     "javadoc" => \$javadoc,
     "static" => \$static,
+    "cast" => \$cast,
 );
 
 die $usage if $help;
@@ -45,6 +47,7 @@ push @warning, "unused" if ($unused);
 push @warning, "deprecation" if ($deprecation);
 push @warning, "javadoc" if ($javadoc);
 push @warning, "static-method" if ($static);
+push @warning, "cast" if ($cast);
 
 exit(0) unless @warning;
 

@@ -3,7 +3,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-@SuppressWarnings({"unused", "javadoc"})
+@SuppressWarnings({"unused", "javadoc", "cast"})
 public final class UnitProtos {
   private UnitProtos() {}
   public static void registerAllExtensions(

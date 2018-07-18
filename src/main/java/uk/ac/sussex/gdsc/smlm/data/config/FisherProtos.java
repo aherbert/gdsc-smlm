@@ -3,7 +3,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method"})
+@SuppressWarnings({"unchecked", "unused", "javadoc", "static-method", "cast"})
 public final class FisherProtos {
   private FisherProtos() {}
   public static void registerAllExtensions(
