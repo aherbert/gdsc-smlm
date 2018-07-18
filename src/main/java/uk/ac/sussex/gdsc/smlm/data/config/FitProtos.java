@@ -64,7 +64,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor.
+     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor. 
      * </pre>
      *
      * <code>FAST_MLE = 4;</code>
@@ -73,7 +73,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation.
+     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation. 
      * </pre>
      *
      * <code>BACKTRACKING_FAST_MLE = 5;</code>
@@ -122,7 +122,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor.
+     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor. 
      * </pre>
      *
      * <code>FAST_MLE = 4;</code>
@@ -131,7 +131,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation.
+     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation. 
      * </pre>
      *
      * <code>BACKTRACKING_FAST_MLE = 5;</code>
@@ -139,11 +139,11 @@ public final class FitProtos {
     public static final int BACKTRACKING_FAST_MLE_VALUE = 5;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -174,19 +174,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         FitSolver> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<FitSolver>() {
-            @Override
-			public FitSolver findValueByNumber(int number) {
+            public FitSolver findValueByNumber(int number) {
               return FitSolver.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -199,11 +196,13 @@ public final class FitProtos {
 
     public static FitSolver valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -374,11 +373,11 @@ public final class FitProtos {
     public static final int BFGS_VALUE = 7;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -411,19 +410,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         SearchMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<SearchMethod>() {
-            @Override
-			public SearchMethod findValueByNumber(int number) {
+            public SearchMethod findValueByNumber(int number) {
               return SearchMethod.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -436,11 +432,13 @@ public final class FitProtos {
 
     public static SearchMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -465,7 +463,7 @@ public final class FitProtos {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * Do nothing to handle the incorrect orientation. The default solver action is taken.
+     * Do nothing to handle the incorrect orientation. The default solver action is taken. 
      * This may cause the search to take an invalid move or it may error.
      * </pre>
      *
@@ -482,7 +480,7 @@ public final class FitProtos {
     IGNORE(1),
     /**
      * <pre>
-     * Progressively ignore any search direction that is in the opposite direction to the
+     * Progressively ignore any search direction that is in the opposite direction to the 
      * first derivative gradient. Do this in order of the magnitude of the error.
      * </pre>
      *
@@ -494,7 +492,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Do nothing to handle the incorrect orientation. The default solver action is taken.
+     * Do nothing to handle the incorrect orientation. The default solver action is taken. 
      * This may cause the search to take an invalid move or it may error.
      * </pre>
      *
@@ -511,7 +509,7 @@ public final class FitProtos {
     public static final int IGNORE_VALUE = 1;
     /**
      * <pre>
-     * Progressively ignore any search direction that is in the opposite direction to the
+     * Progressively ignore any search direction that is in the opposite direction to the 
      * first derivative gradient. Do this in order of the magnitude of the error.
      * </pre>
      *
@@ -520,11 +518,11 @@ public final class FitProtos {
     public static final int PARTIAL_IGNORE_VALUE = 2;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -552,19 +550,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         LineSearchMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<LineSearchMethod>() {
-            @Override
-			public LineSearchMethod findValueByNumber(int number) {
+            public LineSearchMethod findValueByNumber(int number) {
               return LineSearchMethod.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -577,11 +572,13 @@ public final class FitProtos {
 
     public static LineSearchMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -605,8 +602,8 @@ public final class FitProtos {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * Not available. The results may have been loaded from a source where the precision was computed
-     * using another method, or the results may have no precision.
+     * Not available. The results may have been loaded from a source where the precision was computed 
+     * using another method, or the results may have no precision. 
      * </pre>
      *
      * <code>PRECISION_METHOD_NA = 0;</code>
@@ -615,7 +612,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-     * The background noise component (b2) is computed using the variance of the fit region.
+     * The background noise component (b2) is computed using the variance of the fit region. 
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
@@ -632,7 +629,7 @@ public final class FitProtos {
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
-     * for least squares or maximum likelihood estimators.
+     * for least squares or maximum likelihood estimators.     
      * </pre>
      *
      * <code>MORTENSEN_LOCAL_BACKGROUND = 2;</code>
@@ -640,14 +637,14 @@ public final class FitProtos {
     MORTENSEN_LOCAL_BACKGROUND(2),
     /**
      * <pre>
-     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of
-     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
+     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
      * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
-     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS
+     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
      * camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
      * Note that this formula is good when the number of photons is high. Due to the approximation
-     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the
-     * Fisher information is poor when the number of photons is low, leading to an approximation
+     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
+     * Fisher information is poor when the number of photons is low, leading to an approximation 
      * of the true CRLB of a Poisson-Gaussian distribution.
      * This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
      * for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
@@ -662,8 +659,8 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Not available. The results may have been loaded from a source where the precision was computed
-     * using another method, or the results may have no precision.
+     * Not available. The results may have been loaded from a source where the precision was computed 
+     * using another method, or the results may have no precision. 
      * </pre>
      *
      * <code>PRECISION_METHOD_NA = 0;</code>
@@ -672,7 +669,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-     * The background noise component (b2) is computed using the variance of the fit region.
+     * The background noise component (b2) is computed using the variance of the fit region. 
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
@@ -689,7 +686,7 @@ public final class FitProtos {
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
-     * for least squares or maximum likelihood estimators.
+     * for least squares or maximum likelihood estimators.     
      * </pre>
      *
      * <code>MORTENSEN_LOCAL_BACKGROUND = 2;</code>
@@ -697,14 +694,14 @@ public final class FitProtos {
     public static final int MORTENSEN_LOCAL_BACKGROUND_VALUE = 2;
     /**
      * <pre>
-     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of
-     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
+     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
      * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
-     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS
+     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
      * camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
      * Note that this formula is good when the number of photons is high. Due to the approximation
-     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the
-     * Fisher information is poor when the number of photons is low, leading to an approximation
+     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
+     * Fisher information is poor when the number of photons is low, leading to an approximation 
      * of the true CRLB of a Poisson-Gaussian distribution.
      * This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
      * for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
@@ -716,11 +713,11 @@ public final class FitProtos {
     public static final int POISSON_CRLB_VALUE = 3;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -749,19 +746,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         PrecisionMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<PrecisionMethod>() {
-            @Override
-			public PrecisionMethod findValueByNumber(int number) {
+            public PrecisionMethod findValueByNumber(int number) {
               return PrecisionMethod.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -774,11 +768,13 @@ public final class FitProtos {
 
     public static PrecisionMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -853,11 +849,11 @@ public final class FitProtos {
     public static final int JURY_VALUE = 2;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -885,19 +881,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         DataFilterType> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<DataFilterType>() {
-            @Override
-			public DataFilterType findValueByNumber(int number) {
+            public DataFilterType findValueByNumber(int number) {
               return DataFilterType.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -910,11 +903,13 @@ public final class FitProtos {
 
     public static DataFilterType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -1021,11 +1016,11 @@ public final class FitProtos {
     public static final int MEDIAN_VALUE = 4;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -1055,19 +1050,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         DataFilterMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<DataFilterMethod>() {
-            @Override
-			public DataFilterMethod findValueByNumber(int number) {
+            public DataFilterMethod findValueByNumber(int number) {
               return DataFilterMethod.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -1080,11 +1072,13 @@ public final class FitProtos {
 
     public static DataFilterMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -1239,11 +1233,11 @@ public final class FitProtos {
     public static final int QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES_VALUE = 7;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -1276,19 +1270,16 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         NoiseEstimatorMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<NoiseEstimatorMethod>() {
-            @Override
-			public NoiseEstimatorMethod findValueByNumber(int number) {
+            public NoiseEstimatorMethod findValueByNumber(int number) {
               return NoiseEstimatorMethod.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -1301,11 +1292,13 @@ public final class FitProtos {
 
     public static NoiseEstimatorMethod valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -1377,8 +1370,8 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The maximum/fixed iterations to use during fitting.
-     * If not using fixed iterations then fitting will fail if this limit is reached.
+     * The maximum/fixed iterations to use during fitting. 
+     * If not using fixed iterations then fitting will fail if this limit is reached. 
      * </pre>
      *
      * <code>int32 max_iterations = 6;</code>
@@ -1449,7 +1442,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to use the function gradient during line minimisation, i.e. find the
+     * Set to true to use the function gradient during line minimisation, i.e. find the 
      * parameters where the gradient is zero. The default is the to minimise the function value.
      * </pre>
      *
@@ -1459,7 +1452,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to model the camera noise in the configurable maximum likelihood estimator.
+     * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
      * </pre>
      *
      * <code>bool model_camera = 14;</code>
@@ -1586,14 +1579,15 @@ public final class FitProtos {
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 8: {
@@ -1612,7 +1606,7 @@ public final class FitProtos {
               break;
             }
             case 32: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               fitSolver_ = rawValue;
               break;
@@ -1653,7 +1647,7 @@ public final class FitProtos {
               break;
             }
             case 96: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               searchMethod_ = rawValue;
               break;
@@ -1685,52 +1679,53 @@ public final class FitProtos {
             }
             case 145: {
               if (!((mutable_bitField0_ & 0x00020000) == 0x00020000)) {
-                clampValues_ = new java.util.ArrayList<>();
+                clampValues_ = new java.util.ArrayList<java.lang.Double>();
                 mutable_bitField0_ |= 0x00020000;
               }
               clampValues_.add(input.readDouble());
               break;
             }
             case 146: {
-              final int length = input.readRawVarint32();
-              final int limit = input.pushLimit(length);
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00020000) == 0x00020000) && input.getBytesUntilLimit() > 0) {
-                clampValues_ = new java.util.ArrayList<>();
+                clampValues_ = new java.util.ArrayList<java.lang.Double>();
                 mutable_bitField0_ |= 0x00020000;
               }
-              while (input.getBytesUntilLimit() > 0)
-				clampValues_.add(input.readDouble());
+              while (input.getBytesUntilLimit() > 0) {
+                clampValues_.add(input.readDouble());
+              }
               input.popLimit(limit);
               break;
             }
             case 152: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               lineSearchMethod_ = rawValue;
               break;
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00020000) == 0x00020000))
-			clampValues_ = java.util.Collections.unmodifiableList(clampValues_);
+        if (((mutable_bitField0_ & 0x00020000) == 0x00020000)) {
+          clampValues_ = java.util.Collections.unmodifiableList(clampValues_);
+        }
         makeExtensionsImmutable();
       }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder.class);
     }
@@ -1745,8 +1740,7 @@ public final class FitProtos {
      *
      * <code>bool fixed_psf = 1;</code>
      */
-    @Override
-	public boolean getFixedPsf() {
+    public boolean getFixedPsf() {
       return fixedPsf_;
     }
 
@@ -1759,8 +1753,7 @@ public final class FitProtos {
      *
      * <code>bool disable_background_fitting = 2;</code>
      */
-    @Override
-	public boolean getDisableBackgroundFitting() {
+    public boolean getDisableBackgroundFitting() {
       return disableBackgroundFitting_;
     }
 
@@ -1773,8 +1766,7 @@ public final class FitProtos {
      *
      * <code>bool disable_signal_fitting = 3;</code>
      */
-    @Override
-	public boolean getDisableSignalFitting() {
+    public boolean getDisableSignalFitting() {
       return disableSignalFitting_;
     }
 
@@ -1787,8 +1779,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
-    @Override
-	public int getFitSolverValue() {
+    public int getFitSolverValue() {
       return fitSolver_;
     }
     /**
@@ -1798,9 +1789,8 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.UNRECOGNIZED : result;
     }
 
@@ -1813,8 +1803,7 @@ public final class FitProtos {
      *
      * <code>bool fixed_iterations = 5;</code>
      */
-    @Override
-	public boolean getFixedIterations() {
+    public boolean getFixedIterations() {
       return fixedIterations_;
     }
 
@@ -1822,14 +1811,13 @@ public final class FitProtos {
     private int maxIterations_;
     /**
      * <pre>
-     * The maximum/fixed iterations to use during fitting.
-     * If not using fixed iterations then fitting will fail if this limit is reached.
+     * The maximum/fixed iterations to use during fitting. 
+     * If not using fixed iterations then fitting will fail if this limit is reached. 
      * </pre>
      *
      * <code>int32 max_iterations = 6;</code>
      */
-    @Override
-	public int getMaxIterations() {
+    public int getMaxIterations() {
       return maxIterations_;
     }
 
@@ -1842,8 +1830,7 @@ public final class FitProtos {
      *
      * <code>double relative_threshold = 7;</code>
      */
-    @Override
-	public double getRelativeThreshold() {
+    public double getRelativeThreshold() {
       return relativeThreshold_;
     }
 
@@ -1856,8 +1843,7 @@ public final class FitProtos {
      *
      * <code>double absolute_threshold = 8;</code>
      */
-    @Override
-	public double getAbsoluteThreshold() {
+    public double getAbsoluteThreshold() {
       return absoluteThreshold_;
     }
 
@@ -1870,8 +1856,7 @@ public final class FitProtos {
      *
      * <code>double parameter_relative_threshold = 9;</code>
      */
-    @Override
-	public double getParameterRelativeThreshold() {
+    public double getParameterRelativeThreshold() {
       return parameterRelativeThreshold_;
     }
 
@@ -1884,8 +1869,7 @@ public final class FitProtos {
      *
      * <code>double parameter_absolute_threshold = 10;</code>
      */
-    @Override
-	public double getParameterAbsoluteThreshold() {
+    public double getParameterAbsoluteThreshold() {
       return parameterAbsoluteThreshold_;
     }
 
@@ -1898,8 +1882,7 @@ public final class FitProtos {
      *
      * <code>double lambda = 11;</code>
      */
-    @Override
-	public double getLambda() {
+    public double getLambda() {
       return lambda_;
     }
 
@@ -1912,8 +1895,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
-    @Override
-	public int getSearchMethodValue() {
+    public int getSearchMethodValue() {
       return searchMethod_;
     }
     /**
@@ -1923,9 +1905,8 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.UNRECOGNIZED : result;
     }
 
@@ -1933,14 +1914,13 @@ public final class FitProtos {
     private boolean gradientLineMinimisation_;
     /**
      * <pre>
-     * Set to true to use the function gradient during line minimisation, i.e. find the
+     * Set to true to use the function gradient during line minimisation, i.e. find the 
      * parameters where the gradient is zero. The default is the to minimise the function value.
      * </pre>
      *
      * <code>bool gradient_line_minimisation = 13;</code>
      */
-    @Override
-	public boolean getGradientLineMinimisation() {
+    public boolean getGradientLineMinimisation() {
       return gradientLineMinimisation_;
     }
 
@@ -1948,13 +1928,12 @@ public final class FitProtos {
     private boolean modelCamera_;
     /**
      * <pre>
-     * Set to true to model the camera noise in the configurable maximum likelihood estimator.
+     * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
      * </pre>
      *
      * <code>bool model_camera = 14;</code>
      */
-    @Override
-	public boolean getModelCamera() {
+    public boolean getModelCamera() {
       return modelCamera_;
     }
 
@@ -1967,8 +1946,7 @@ public final class FitProtos {
      *
      * <code>int32 max_function_evaluations = 15;</code>
      */
-    @Override
-	public int getMaxFunctionEvaluations() {
+    public int getMaxFunctionEvaluations() {
       return maxFunctionEvaluations_;
     }
 
@@ -1981,8 +1959,7 @@ public final class FitProtos {
      *
      * <code>bool use_clamping = 16;</code>
      */
-    @Override
-	public boolean getUseClamping() {
+    public boolean getUseClamping() {
       return useClamping_;
     }
 
@@ -1995,8 +1972,7 @@ public final class FitProtos {
      *
      * <code>bool use_dynamic_clamping = 17;</code>
      */
-    @Override
-	public boolean getUseDynamicClamping() {
+    public boolean getUseDynamicClamping() {
       return useDynamicClamping_;
     }
 
@@ -2009,8 +1985,7 @@ public final class FitProtos {
      *
      * <code>repeated double clamp_values = 18;</code>
      */
-    @Override
-	public java.util.List<java.lang.Double>
+    public java.util.List<java.lang.Double>
         getClampValuesList() {
       return clampValues_;
     }
@@ -2021,8 +1996,7 @@ public final class FitProtos {
      *
      * <code>repeated double clamp_values = 18;</code>
      */
-    @Override
-	public int getClampValuesCount() {
+    public int getClampValuesCount() {
       return clampValues_.size();
     }
     /**
@@ -2032,8 +2006,7 @@ public final class FitProtos {
      *
      * <code>repeated double clamp_values = 18;</code>
      */
-    @Override
-	public double getClampValues(int index) {
+    public double getClampValues(int index) {
       return clampValues_.get(index);
     }
     private int clampValuesMemoizedSerializedSize = -1;
@@ -2047,8 +2020,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
      */
-    @Override
-	public int getLineSearchMethodValue() {
+    public int getLineSearchMethodValue() {
       return lineSearchMethod_;
     }
     /**
@@ -2058,16 +2030,14 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -2075,111 +2045,145 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (fixedPsf_ != false)
-		output.writeBool(1, fixedPsf_);
-      if (disableBackgroundFitting_ != false)
-		output.writeBool(2, disableBackgroundFitting_);
-      if (disableSignalFitting_ != false)
-		output.writeBool(3, disableSignalFitting_);
-      if (fitSolver_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber())
-		output.writeEnum(4, fitSolver_);
-      if (fixedIterations_ != false)
-		output.writeBool(5, fixedIterations_);
-      if (maxIterations_ != 0)
-		output.writeInt32(6, maxIterations_);
-      if (relativeThreshold_ != 0D)
-		output.writeDouble(7, relativeThreshold_);
-      if (absoluteThreshold_ != 0D)
-		output.writeDouble(8, absoluteThreshold_);
-      if (parameterRelativeThreshold_ != 0D)
-		output.writeDouble(9, parameterRelativeThreshold_);
-      if (parameterAbsoluteThreshold_ != 0D)
-		output.writeDouble(10, parameterAbsoluteThreshold_);
-      if (lambda_ != 0D)
-		output.writeDouble(11, lambda_);
-      if (searchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber())
-		output.writeEnum(12, searchMethod_);
-      if (gradientLineMinimisation_ != false)
-		output.writeBool(13, gradientLineMinimisation_);
-      if (modelCamera_ != false)
-		output.writeBool(14, modelCamera_);
-      if (maxFunctionEvaluations_ != 0)
-		output.writeInt32(15, maxFunctionEvaluations_);
-      if (useClamping_ != false)
-		output.writeBool(16, useClamping_);
-      if (useDynamicClamping_ != false)
-		output.writeBool(17, useDynamicClamping_);
+      if (fixedPsf_ != false) {
+        output.writeBool(1, fixedPsf_);
+      }
+      if (disableBackgroundFitting_ != false) {
+        output.writeBool(2, disableBackgroundFitting_);
+      }
+      if (disableSignalFitting_ != false) {
+        output.writeBool(3, disableSignalFitting_);
+      }
+      if (fitSolver_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber()) {
+        output.writeEnum(4, fitSolver_);
+      }
+      if (fixedIterations_ != false) {
+        output.writeBool(5, fixedIterations_);
+      }
+      if (maxIterations_ != 0) {
+        output.writeInt32(6, maxIterations_);
+      }
+      if (relativeThreshold_ != 0D) {
+        output.writeDouble(7, relativeThreshold_);
+      }
+      if (absoluteThreshold_ != 0D) {
+        output.writeDouble(8, absoluteThreshold_);
+      }
+      if (parameterRelativeThreshold_ != 0D) {
+        output.writeDouble(9, parameterRelativeThreshold_);
+      }
+      if (parameterAbsoluteThreshold_ != 0D) {
+        output.writeDouble(10, parameterAbsoluteThreshold_);
+      }
+      if (lambda_ != 0D) {
+        output.writeDouble(11, lambda_);
+      }
+      if (searchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber()) {
+        output.writeEnum(12, searchMethod_);
+      }
+      if (gradientLineMinimisation_ != false) {
+        output.writeBool(13, gradientLineMinimisation_);
+      }
+      if (modelCamera_ != false) {
+        output.writeBool(14, modelCamera_);
+      }
+      if (maxFunctionEvaluations_ != 0) {
+        output.writeInt32(15, maxFunctionEvaluations_);
+      }
+      if (useClamping_ != false) {
+        output.writeBool(16, useClamping_);
+      }
+      if (useDynamicClamping_ != false) {
+        output.writeBool(17, useDynamicClamping_);
+      }
       if (getClampValuesList().size() > 0) {
         output.writeUInt32NoTag(146);
         output.writeUInt32NoTag(clampValuesMemoizedSerializedSize);
       }
-      for (int i = 0; i < clampValues_.size(); i++)
-		output.writeDoubleNoTag(clampValues_.get(i));
-      if (lineSearchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber())
-		output.writeEnum(19, lineSearchMethod_);
+      for (int i = 0; i < clampValues_.size(); i++) {
+        output.writeDoubleNoTag(clampValues_.get(i));
+      }
+      if (lineSearchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber()) {
+        output.writeEnum(19, lineSearchMethod_);
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (fixedPsf_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      if (fixedPsf_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, fixedPsf_);
-      if (disableBackgroundFitting_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (disableBackgroundFitting_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, disableBackgroundFitting_);
-      if (disableSignalFitting_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (disableSignalFitting_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, disableSignalFitting_);
-      if (fitSolver_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (fitSolver_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.LVM_LSE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, fitSolver_);
-      if (fixedIterations_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (fixedIterations_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, fixedIterations_);
-      if (maxIterations_ != 0)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (maxIterations_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, maxIterations_);
-      if (relativeThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (relativeThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, relativeThreshold_);
-      if (absoluteThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (absoluteThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(8, absoluteThreshold_);
-      if (parameterRelativeThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (parameterRelativeThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, parameterRelativeThreshold_);
-      if (parameterAbsoluteThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (parameterAbsoluteThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(10, parameterAbsoluteThreshold_);
-      if (lambda_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (lambda_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, lambda_);
-      if (searchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (searchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.POWELL_BOUNDED.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(12, searchMethod_);
-      if (gradientLineMinimisation_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (gradientLineMinimisation_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(13, gradientLineMinimisation_);
-      if (modelCamera_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (modelCamera_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(14, modelCamera_);
-      if (maxFunctionEvaluations_ != 0)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (maxFunctionEvaluations_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(15, maxFunctionEvaluations_);
-      if (useClamping_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (useClamping_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(16, useClamping_);
-      if (useDynamicClamping_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (useDynamicClamping_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(17, useDynamicClamping_);
+      }
       {
         int dataSize = 0;
         dataSize = 8 * getClampValuesList().size();
@@ -2191,9 +2195,10 @@ public final class FitProtos {
         }
         clampValuesMemoizedSerializedSize = dataSize;
       }
-      if (lineSearchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      if (lineSearchMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(19, lineSearchMethod_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -2201,11 +2206,13 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings) obj;
 
       boolean result = true;
       result = result && (getFixedPsf()
@@ -2258,8 +2265,9 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + FIXED_PSF_FIELD_NUMBER;
@@ -2390,16 +2398,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -2407,7 +2413,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -2423,13 +2429,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder.class);
       }
@@ -2449,8 +2454,7 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
         fixedPsf_ = false;
 
@@ -2493,30 +2497,27 @@ public final class FitProtos {
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings(this);
-        final int from_bitField0_ = bitField0_;
-        final int to_bitField0_ = 0;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         result.fixedPsf_ = fixedPsf_;
         result.disableBackgroundFitting_ = disableBackgroundFitting_;
         result.disableSignalFitting_ = disableSignalFitting_;
@@ -2545,43 +2546,36 @@ public final class FitProtos {
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -2589,40 +2583,57 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance()) return this;
-        if (other.getFixedPsf() != false)
-			setFixedPsf(other.getFixedPsf());
-        if (other.getDisableBackgroundFitting() != false)
-			setDisableBackgroundFitting(other.getDisableBackgroundFitting());
-        if (other.getDisableSignalFitting() != false)
-			setDisableSignalFitting(other.getDisableSignalFitting());
-        if (other.fitSolver_ != 0)
-			setFitSolverValue(other.getFitSolverValue());
-        if (other.getFixedIterations() != false)
-			setFixedIterations(other.getFixedIterations());
-        if (other.getMaxIterations() != 0)
-			setMaxIterations(other.getMaxIterations());
-        if (other.getRelativeThreshold() != 0D)
-			setRelativeThreshold(other.getRelativeThreshold());
-        if (other.getAbsoluteThreshold() != 0D)
-			setAbsoluteThreshold(other.getAbsoluteThreshold());
-        if (other.getParameterRelativeThreshold() != 0D)
-			setParameterRelativeThreshold(other.getParameterRelativeThreshold());
-        if (other.getParameterAbsoluteThreshold() != 0D)
-			setParameterAbsoluteThreshold(other.getParameterAbsoluteThreshold());
-        if (other.getLambda() != 0D)
-			setLambda(other.getLambda());
-        if (other.searchMethod_ != 0)
-			setSearchMethodValue(other.getSearchMethodValue());
-        if (other.getGradientLineMinimisation() != false)
-			setGradientLineMinimisation(other.getGradientLineMinimisation());
-        if (other.getModelCamera() != false)
-			setModelCamera(other.getModelCamera());
-        if (other.getMaxFunctionEvaluations() != 0)
-			setMaxFunctionEvaluations(other.getMaxFunctionEvaluations());
-        if (other.getUseClamping() != false)
-			setUseClamping(other.getUseClamping());
-        if (other.getUseDynamicClamping() != false)
-			setUseDynamicClamping(other.getUseDynamicClamping());
+        if (other.getFixedPsf() != false) {
+          setFixedPsf(other.getFixedPsf());
+        }
+        if (other.getDisableBackgroundFitting() != false) {
+          setDisableBackgroundFitting(other.getDisableBackgroundFitting());
+        }
+        if (other.getDisableSignalFitting() != false) {
+          setDisableSignalFitting(other.getDisableSignalFitting());
+        }
+        if (other.fitSolver_ != 0) {
+          setFitSolverValue(other.getFitSolverValue());
+        }
+        if (other.getFixedIterations() != false) {
+          setFixedIterations(other.getFixedIterations());
+        }
+        if (other.getMaxIterations() != 0) {
+          setMaxIterations(other.getMaxIterations());
+        }
+        if (other.getRelativeThreshold() != 0D) {
+          setRelativeThreshold(other.getRelativeThreshold());
+        }
+        if (other.getAbsoluteThreshold() != 0D) {
+          setAbsoluteThreshold(other.getAbsoluteThreshold());
+        }
+        if (other.getParameterRelativeThreshold() != 0D) {
+          setParameterRelativeThreshold(other.getParameterRelativeThreshold());
+        }
+        if (other.getParameterAbsoluteThreshold() != 0D) {
+          setParameterAbsoluteThreshold(other.getParameterAbsoluteThreshold());
+        }
+        if (other.getLambda() != 0D) {
+          setLambda(other.getLambda());
+        }
+        if (other.searchMethod_ != 0) {
+          setSearchMethodValue(other.getSearchMethodValue());
+        }
+        if (other.getGradientLineMinimisation() != false) {
+          setGradientLineMinimisation(other.getGradientLineMinimisation());
+        }
+        if (other.getModelCamera() != false) {
+          setModelCamera(other.getModelCamera());
+        }
+        if (other.getMaxFunctionEvaluations() != 0) {
+          setMaxFunctionEvaluations(other.getMaxFunctionEvaluations());
+        }
+        if (other.getUseClamping() != false) {
+          setUseClamping(other.getUseClamping());
+        }
+        if (other.getUseDynamicClamping() != false) {
+          setUseDynamicClamping(other.getUseDynamicClamping());
+        }
         if (!other.clampValues_.isEmpty()) {
           if (clampValues_.isEmpty()) {
             clampValues_ = other.clampValues_;
@@ -2633,31 +2644,31 @@ public final class FitProtos {
           }
           onChanged();
         }
-        if (other.lineSearchMethod_ != 0)
-			setLineSearchMethodValue(other.getLineSearchMethodValue());
+        if (other.lineSearchMethod_ != 0) {
+          setLineSearchMethodValue(other.getLineSearchMethodValue());
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -2671,8 +2682,7 @@ public final class FitProtos {
        *
        * <code>bool fixed_psf = 1;</code>
        */
-      @Override
-	public boolean getFixedPsf() {
+      public boolean getFixedPsf() {
         return fixedPsf_;
       }
       /**
@@ -2683,7 +2693,7 @@ public final class FitProtos {
        * <code>bool fixed_psf = 1;</code>
        */
       public Builder setFixedPsf(boolean value) {
-
+        
         fixedPsf_ = value;
         onChanged();
         return this;
@@ -2696,7 +2706,7 @@ public final class FitProtos {
        * <code>bool fixed_psf = 1;</code>
        */
       public Builder clearFixedPsf() {
-
+        
         fixedPsf_ = false;
         onChanged();
         return this;
@@ -2710,8 +2720,7 @@ public final class FitProtos {
        *
        * <code>bool disable_background_fitting = 2;</code>
        */
-      @Override
-	public boolean getDisableBackgroundFitting() {
+      public boolean getDisableBackgroundFitting() {
         return disableBackgroundFitting_;
       }
       /**
@@ -2722,7 +2731,7 @@ public final class FitProtos {
        * <code>bool disable_background_fitting = 2;</code>
        */
       public Builder setDisableBackgroundFitting(boolean value) {
-
+        
         disableBackgroundFitting_ = value;
         onChanged();
         return this;
@@ -2735,7 +2744,7 @@ public final class FitProtos {
        * <code>bool disable_background_fitting = 2;</code>
        */
       public Builder clearDisableBackgroundFitting() {
-
+        
         disableBackgroundFitting_ = false;
         onChanged();
         return this;
@@ -2749,8 +2758,7 @@ public final class FitProtos {
        *
        * <code>bool disable_signal_fitting = 3;</code>
        */
-      @Override
-	public boolean getDisableSignalFitting() {
+      public boolean getDisableSignalFitting() {
         return disableSignalFitting_;
       }
       /**
@@ -2761,7 +2769,7 @@ public final class FitProtos {
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public Builder setDisableSignalFitting(boolean value) {
-
+        
         disableSignalFitting_ = value;
         onChanged();
         return this;
@@ -2774,7 +2782,7 @@ public final class FitProtos {
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public Builder clearDisableSignalFitting() {
-
+        
         disableSignalFitting_ = false;
         onChanged();
         return this;
@@ -2788,8 +2796,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
-      @Override
-	public int getFitSolverValue() {
+      public int getFitSolverValue() {
         return fitSolver_;
       }
       /**
@@ -2811,9 +2818,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver.UNRECOGNIZED : result;
       }
       /**
@@ -2824,9 +2830,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder setFitSolver(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         fitSolver_ = value.getNumber();
         onChanged();
         return this;
@@ -2839,7 +2846,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder clearFitSolver() {
-
+        
         fitSolver_ = 0;
         onChanged();
         return this;
@@ -2853,8 +2860,7 @@ public final class FitProtos {
        *
        * <code>bool fixed_iterations = 5;</code>
        */
-      @Override
-	public boolean getFixedIterations() {
+      public boolean getFixedIterations() {
         return fixedIterations_;
       }
       /**
@@ -2865,7 +2871,7 @@ public final class FitProtos {
        * <code>bool fixed_iterations = 5;</code>
        */
       public Builder setFixedIterations(boolean value) {
-
+        
         fixedIterations_ = value;
         onChanged();
         return this;
@@ -2878,7 +2884,7 @@ public final class FitProtos {
        * <code>bool fixed_iterations = 5;</code>
        */
       public Builder clearFixedIterations() {
-
+        
         fixedIterations_ = false;
         onChanged();
         return this;
@@ -2887,40 +2893,39 @@ public final class FitProtos {
       private int maxIterations_ ;
       /**
        * <pre>
-       * The maximum/fixed iterations to use during fitting.
-       * If not using fixed iterations then fitting will fail if this limit is reached.
+       * The maximum/fixed iterations to use during fitting. 
+       * If not using fixed iterations then fitting will fail if this limit is reached. 
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
        */
-      @Override
-	public int getMaxIterations() {
+      public int getMaxIterations() {
         return maxIterations_;
       }
       /**
        * <pre>
-       * The maximum/fixed iterations to use during fitting.
-       * If not using fixed iterations then fitting will fail if this limit is reached.
+       * The maximum/fixed iterations to use during fitting. 
+       * If not using fixed iterations then fitting will fail if this limit is reached. 
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
        */
       public Builder setMaxIterations(int value) {
-
+        
         maxIterations_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The maximum/fixed iterations to use during fitting.
-       * If not using fixed iterations then fitting will fail if this limit is reached.
+       * The maximum/fixed iterations to use during fitting. 
+       * If not using fixed iterations then fitting will fail if this limit is reached. 
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
        */
       public Builder clearMaxIterations() {
-
+        
         maxIterations_ = 0;
         onChanged();
         return this;
@@ -2934,8 +2939,7 @@ public final class FitProtos {
        *
        * <code>double relative_threshold = 7;</code>
        */
-      @Override
-	public double getRelativeThreshold() {
+      public double getRelativeThreshold() {
         return relativeThreshold_;
       }
       /**
@@ -2946,7 +2950,7 @@ public final class FitProtos {
        * <code>double relative_threshold = 7;</code>
        */
       public Builder setRelativeThreshold(double value) {
-
+        
         relativeThreshold_ = value;
         onChanged();
         return this;
@@ -2959,7 +2963,7 @@ public final class FitProtos {
        * <code>double relative_threshold = 7;</code>
        */
       public Builder clearRelativeThreshold() {
-
+        
         relativeThreshold_ = 0D;
         onChanged();
         return this;
@@ -2973,8 +2977,7 @@ public final class FitProtos {
        *
        * <code>double absolute_threshold = 8;</code>
        */
-      @Override
-	public double getAbsoluteThreshold() {
+      public double getAbsoluteThreshold() {
         return absoluteThreshold_;
       }
       /**
@@ -2985,7 +2988,7 @@ public final class FitProtos {
        * <code>double absolute_threshold = 8;</code>
        */
       public Builder setAbsoluteThreshold(double value) {
-
+        
         absoluteThreshold_ = value;
         onChanged();
         return this;
@@ -2998,7 +3001,7 @@ public final class FitProtos {
        * <code>double absolute_threshold = 8;</code>
        */
       public Builder clearAbsoluteThreshold() {
-
+        
         absoluteThreshold_ = 0D;
         onChanged();
         return this;
@@ -3012,8 +3015,7 @@ public final class FitProtos {
        *
        * <code>double parameter_relative_threshold = 9;</code>
        */
-      @Override
-	public double getParameterRelativeThreshold() {
+      public double getParameterRelativeThreshold() {
         return parameterRelativeThreshold_;
       }
       /**
@@ -3024,7 +3026,7 @@ public final class FitProtos {
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public Builder setParameterRelativeThreshold(double value) {
-
+        
         parameterRelativeThreshold_ = value;
         onChanged();
         return this;
@@ -3037,7 +3039,7 @@ public final class FitProtos {
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public Builder clearParameterRelativeThreshold() {
-
+        
         parameterRelativeThreshold_ = 0D;
         onChanged();
         return this;
@@ -3051,8 +3053,7 @@ public final class FitProtos {
        *
        * <code>double parameter_absolute_threshold = 10;</code>
        */
-      @Override
-	public double getParameterAbsoluteThreshold() {
+      public double getParameterAbsoluteThreshold() {
         return parameterAbsoluteThreshold_;
       }
       /**
@@ -3063,7 +3064,7 @@ public final class FitProtos {
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public Builder setParameterAbsoluteThreshold(double value) {
-
+        
         parameterAbsoluteThreshold_ = value;
         onChanged();
         return this;
@@ -3076,7 +3077,7 @@ public final class FitProtos {
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public Builder clearParameterAbsoluteThreshold() {
-
+        
         parameterAbsoluteThreshold_ = 0D;
         onChanged();
         return this;
@@ -3090,8 +3091,7 @@ public final class FitProtos {
        *
        * <code>double lambda = 11;</code>
        */
-      @Override
-	public double getLambda() {
+      public double getLambda() {
         return lambda_;
       }
       /**
@@ -3102,7 +3102,7 @@ public final class FitProtos {
        * <code>double lambda = 11;</code>
        */
       public Builder setLambda(double value) {
-
+        
         lambda_ = value;
         onChanged();
         return this;
@@ -3115,7 +3115,7 @@ public final class FitProtos {
        * <code>double lambda = 11;</code>
        */
       public Builder clearLambda() {
-
+        
         lambda_ = 0D;
         onChanged();
         return this;
@@ -3129,8 +3129,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
-      @Override
-	public int getSearchMethodValue() {
+      public int getSearchMethodValue() {
         return searchMethod_;
       }
       /**
@@ -3152,9 +3151,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod.UNRECOGNIZED : result;
       }
       /**
@@ -3165,9 +3163,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder setSearchMethod(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         searchMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -3180,7 +3179,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder clearSearchMethod() {
-
+        
         searchMethod_ = 0;
         onChanged();
         return this;
@@ -3189,40 +3188,39 @@ public final class FitProtos {
       private boolean gradientLineMinimisation_ ;
       /**
        * <pre>
-       * Set to true to use the function gradient during line minimisation, i.e. find the
+       * Set to true to use the function gradient during line minimisation, i.e. find the 
        * parameters where the gradient is zero. The default is the to minimise the function value.
        * </pre>
        *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
-      @Override
-	public boolean getGradientLineMinimisation() {
+      public boolean getGradientLineMinimisation() {
         return gradientLineMinimisation_;
       }
       /**
        * <pre>
-       * Set to true to use the function gradient during line minimisation, i.e. find the
+       * Set to true to use the function gradient during line minimisation, i.e. find the 
        * parameters where the gradient is zero. The default is the to minimise the function value.
        * </pre>
        *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public Builder setGradientLineMinimisation(boolean value) {
-
+        
         gradientLineMinimisation_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to use the function gradient during line minimisation, i.e. find the
+       * Set to true to use the function gradient during line minimisation, i.e. find the 
        * parameters where the gradient is zero. The default is the to minimise the function value.
        * </pre>
        *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public Builder clearGradientLineMinimisation() {
-
+        
         gradientLineMinimisation_ = false;
         onChanged();
         return this;
@@ -3231,37 +3229,36 @@ public final class FitProtos {
       private boolean modelCamera_ ;
       /**
        * <pre>
-       * Set to true to model the camera noise in the configurable maximum likelihood estimator.
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
        * </pre>
        *
        * <code>bool model_camera = 14;</code>
        */
-      @Override
-	public boolean getModelCamera() {
+      public boolean getModelCamera() {
         return modelCamera_;
       }
       /**
        * <pre>
-       * Set to true to model the camera noise in the configurable maximum likelihood estimator.
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
        * </pre>
        *
        * <code>bool model_camera = 14;</code>
        */
       public Builder setModelCamera(boolean value) {
-
+        
         modelCamera_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to model the camera noise in the configurable maximum likelihood estimator.
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
        * </pre>
        *
        * <code>bool model_camera = 14;</code>
        */
       public Builder clearModelCamera() {
-
+        
         modelCamera_ = false;
         onChanged();
         return this;
@@ -3275,8 +3272,7 @@ public final class FitProtos {
        *
        * <code>int32 max_function_evaluations = 15;</code>
        */
-      @Override
-	public int getMaxFunctionEvaluations() {
+      public int getMaxFunctionEvaluations() {
         return maxFunctionEvaluations_;
       }
       /**
@@ -3287,7 +3283,7 @@ public final class FitProtos {
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public Builder setMaxFunctionEvaluations(int value) {
-
+        
         maxFunctionEvaluations_ = value;
         onChanged();
         return this;
@@ -3300,7 +3296,7 @@ public final class FitProtos {
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public Builder clearMaxFunctionEvaluations() {
-
+        
         maxFunctionEvaluations_ = 0;
         onChanged();
         return this;
@@ -3314,8 +3310,7 @@ public final class FitProtos {
        *
        * <code>bool use_clamping = 16;</code>
        */
-      @Override
-	public boolean getUseClamping() {
+      public boolean getUseClamping() {
         return useClamping_;
       }
       /**
@@ -3326,7 +3321,7 @@ public final class FitProtos {
        * <code>bool use_clamping = 16;</code>
        */
       public Builder setUseClamping(boolean value) {
-
+        
         useClamping_ = value;
         onChanged();
         return this;
@@ -3339,7 +3334,7 @@ public final class FitProtos {
        * <code>bool use_clamping = 16;</code>
        */
       public Builder clearUseClamping() {
-
+        
         useClamping_ = false;
         onChanged();
         return this;
@@ -3353,8 +3348,7 @@ public final class FitProtos {
        *
        * <code>bool use_dynamic_clamping = 17;</code>
        */
-      @Override
-	public boolean getUseDynamicClamping() {
+      public boolean getUseDynamicClamping() {
         return useDynamicClamping_;
       }
       /**
@@ -3365,7 +3359,7 @@ public final class FitProtos {
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public Builder setUseDynamicClamping(boolean value) {
-
+        
         useDynamicClamping_ = value;
         onChanged();
         return this;
@@ -3378,7 +3372,7 @@ public final class FitProtos {
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public Builder clearUseDynamicClamping() {
-
+        
         useDynamicClamping_ = false;
         onChanged();
         return this;
@@ -3387,7 +3381,7 @@ public final class FitProtos {
       private java.util.List<java.lang.Double> clampValues_ = java.util.Collections.emptyList();
       private void ensureClampValuesIsMutable() {
         if (!((bitField0_ & 0x00020000) == 0x00020000)) {
-          clampValues_ = new java.util.ArrayList<>(clampValues_);
+          clampValues_ = new java.util.ArrayList<java.lang.Double>(clampValues_);
           bitField0_ |= 0x00020000;
          }
       }
@@ -3398,8 +3392,7 @@ public final class FitProtos {
        *
        * <code>repeated double clamp_values = 18;</code>
        */
-      @Override
-	public java.util.List<java.lang.Double>
+      public java.util.List<java.lang.Double>
           getClampValuesList() {
         return java.util.Collections.unmodifiableList(clampValues_);
       }
@@ -3410,8 +3403,7 @@ public final class FitProtos {
        *
        * <code>repeated double clamp_values = 18;</code>
        */
-      @Override
-	public int getClampValuesCount() {
+      public int getClampValuesCount() {
         return clampValues_.size();
       }
       /**
@@ -3421,8 +3413,7 @@ public final class FitProtos {
        *
        * <code>repeated double clamp_values = 18;</code>
        */
-      @Override
-	public double getClampValues(int index) {
+      public double getClampValues(int index) {
         return clampValues_.get(index);
       }
       /**
@@ -3489,8 +3480,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
-      @Override
-	public int getLineSearchMethodValue() {
+      public int getLineSearchMethodValue() {
         return lineSearchMethod_;
       }
       /**
@@ -3512,9 +3502,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
       }
       /**
@@ -3525,9 +3514,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
       public Builder setLineSearchMethod(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         lineSearchMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -3540,19 +3530,17 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
       public Builder clearLineSearchMethod() {
-
+        
         lineSearchMethod_ = 0;
         onChanged();
         return this;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -3573,8 +3561,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FitSolverSettings>
         PARSER = new com.google.protobuf.AbstractParser<FitSolverSettings>() {
-      @Override
-	public FitSolverSettings parsePartialFrom(
+      public FitSolverSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -3591,8 +3578,7 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3767,18 +3753,19 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      final int mutable_bitField0_ = 0;
+      int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 9: {
@@ -3822,13 +3809,13 @@ public final class FitProtos {
               break;
             }
             case 82: {
-              final java.lang.String s = input.readStringRequireUtf8();
+              java.lang.String s = input.readStringRequireUtf8();
 
               smartFilterString_ = s;
               break;
             }
             case 88: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               precisionMethod_ = rawValue;
               break;
@@ -3845,9 +3832,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -3856,13 +3843,12 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder.class);
     }
@@ -3876,8 +3862,7 @@ public final class FitProtos {
      *
      * <code>double shift_factor = 1;</code>
      */
-    @Override
-	public double getShiftFactor() {
+    public double getShiftFactor() {
       return shiftFactor_;
     }
 
@@ -3890,8 +3875,7 @@ public final class FitProtos {
      *
      * <code>double signal_strength = 2;</code>
      */
-    @Override
-	public double getSignalStrength() {
+    public double getSignalStrength() {
       return signalStrength_;
     }
 
@@ -3904,8 +3888,7 @@ public final class FitProtos {
      *
      * <code>double min_photons = 3;</code>
      */
-    @Override
-	public double getMinPhotons() {
+    public double getMinPhotons() {
       return minPhotons_;
     }
 
@@ -3918,8 +3901,7 @@ public final class FitProtos {
      *
      * <code>double precision_threshold = 4;</code>
      */
-    @Override
-	public double getPrecisionThreshold() {
+    public double getPrecisionThreshold() {
       return precisionThreshold_;
     }
 
@@ -3932,8 +3914,7 @@ public final class FitProtos {
      *
      * <code>double min_width_factor = 6;</code>
      */
-    @Override
-	public double getMinWidthFactor() {
+    public double getMinWidthFactor() {
       return minWidthFactor_;
     }
 
@@ -3946,8 +3927,7 @@ public final class FitProtos {
      *
      * <code>double max_width_factor = 7;</code>
      */
-    @Override
-	public double getMaxWidthFactor() {
+    public double getMaxWidthFactor() {
       return maxWidthFactor_;
     }
 
@@ -3960,8 +3940,7 @@ public final class FitProtos {
      *
      * <code>bool disable_simple_filter = 8;</code>
      */
-    @Override
-	public boolean getDisableSimpleFilter() {
+    public boolean getDisableSimpleFilter() {
       return disableSimpleFilter_;
     }
 
@@ -3974,8 +3953,7 @@ public final class FitProtos {
      *
      * <code>bool smart_filter = 9;</code>
      */
-    @Override
-	public boolean getSmartFilter() {
+    public boolean getSmartFilter() {
       return smartFilter_;
     }
 
@@ -3988,15 +3966,14 @@ public final class FitProtos {
      *
      * <code>string smart_filter_string = 10;</code>
      */
-    @Override
-	public java.lang.String getSmartFilterString() {
-      final java.lang.Object ref = smartFilterString_;
-      if (ref instanceof java.lang.String)
-		return (java.lang.String) ref;
-	else {
-        final com.google.protobuf.ByteString bs =
+    public java.lang.String getSmartFilterString() {
+      java.lang.Object ref = smartFilterString_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        final java.lang.String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         smartFilterString_ = s;
         return s;
       }
@@ -4008,19 +3985,18 @@ public final class FitProtos {
      *
      * <code>string smart_filter_string = 10;</code>
      */
-    @Override
-	public com.google.protobuf.ByteString
+    public com.google.protobuf.ByteString
         getSmartFilterStringBytes() {
-      final java.lang.Object ref = smartFilterString_;
+      java.lang.Object ref = smartFilterString_;
       if (ref instanceof java.lang.String) {
-        final com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         smartFilterString_ = b;
         return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
       }
-	else
-		return (com.google.protobuf.ByteString) ref;
     }
 
     public static final int PRECISION_METHOD_FIELD_NUMBER = 11;
@@ -4032,8 +4008,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
      */
-    @Override
-	public int getPrecisionMethodValue() {
+    public int getPrecisionMethodValue() {
       return precisionMethod_;
     }
     /**
@@ -4043,9 +4018,8 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
     }
 
@@ -4058,8 +4032,7 @@ public final class FitProtos {
      *
      * <code>double min_z = 12;</code>
      */
-    @Override
-	public double getMinZ() {
+    public double getMinZ() {
       return minZ_;
     }
 
@@ -4072,15 +4045,13 @@ public final class FitProtos {
      *
      * <code>double max_z = 13;</code>
      */
-    @Override
-	public double getMaxZ() {
+    public double getMaxZ() {
       return maxZ_;
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -4088,76 +4059,98 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (shiftFactor_ != 0D)
-		output.writeDouble(1, shiftFactor_);
-      if (signalStrength_ != 0D)
-		output.writeDouble(2, signalStrength_);
-      if (minPhotons_ != 0D)
-		output.writeDouble(3, minPhotons_);
-      if (precisionThreshold_ != 0D)
-		output.writeDouble(4, precisionThreshold_);
-      if (minWidthFactor_ != 0D)
-		output.writeDouble(6, minWidthFactor_);
-      if (maxWidthFactor_ != 0D)
-		output.writeDouble(7, maxWidthFactor_);
-      if (disableSimpleFilter_ != false)
-		output.writeBool(8, disableSimpleFilter_);
-      if (smartFilter_ != false)
-		output.writeBool(9, smartFilter_);
-      if (!getSmartFilterStringBytes().isEmpty())
-		com.google.protobuf.GeneratedMessageV3.writeString(output, 10, smartFilterString_);
-      if (precisionMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber())
-		output.writeEnum(11, precisionMethod_);
-      if (minZ_ != 0D)
-		output.writeDouble(12, minZ_);
-      if (maxZ_ != 0D)
-		output.writeDouble(13, maxZ_);
+      if (shiftFactor_ != 0D) {
+        output.writeDouble(1, shiftFactor_);
+      }
+      if (signalStrength_ != 0D) {
+        output.writeDouble(2, signalStrength_);
+      }
+      if (minPhotons_ != 0D) {
+        output.writeDouble(3, minPhotons_);
+      }
+      if (precisionThreshold_ != 0D) {
+        output.writeDouble(4, precisionThreshold_);
+      }
+      if (minWidthFactor_ != 0D) {
+        output.writeDouble(6, minWidthFactor_);
+      }
+      if (maxWidthFactor_ != 0D) {
+        output.writeDouble(7, maxWidthFactor_);
+      }
+      if (disableSimpleFilter_ != false) {
+        output.writeBool(8, disableSimpleFilter_);
+      }
+      if (smartFilter_ != false) {
+        output.writeBool(9, smartFilter_);
+      }
+      if (!getSmartFilterStringBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, smartFilterString_);
+      }
+      if (precisionMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
+        output.writeEnum(11, precisionMethod_);
+      }
+      if (minZ_ != 0D) {
+        output.writeDouble(12, minZ_);
+      }
+      if (maxZ_ != 0D) {
+        output.writeDouble(13, maxZ_);
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (shiftFactor_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      if (shiftFactor_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, shiftFactor_);
-      if (signalStrength_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (signalStrength_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, signalStrength_);
-      if (minPhotons_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (minPhotons_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, minPhotons_);
-      if (precisionThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (precisionThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, precisionThreshold_);
-      if (minWidthFactor_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (minWidthFactor_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, minWidthFactor_);
-      if (maxWidthFactor_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (maxWidthFactor_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, maxWidthFactor_);
-      if (disableSimpleFilter_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (disableSimpleFilter_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, disableSimpleFilter_);
-      if (smartFilter_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (smartFilter_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, smartFilter_);
-      if (!getSmartFilterStringBytes().isEmpty())
-		size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, smartFilterString_);
-      if (precisionMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (!getSmartFilterStringBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, smartFilterString_);
+      }
+      if (precisionMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(11, precisionMethod_);
-      if (minZ_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (minZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, minZ_);
-      if (maxZ_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (maxZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(13, maxZ_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -4165,11 +4158,13 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings) obj;
 
       boolean result = true;
       result = result && (
@@ -4216,8 +4211,9 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SHIFT_FACTOR_FIELD_NUMBER;
@@ -4329,16 +4325,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -4346,7 +4340,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -4362,13 +4356,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder.class);
       }
@@ -4388,8 +4381,7 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
         shiftFactor_ = 0D;
 
@@ -4418,28 +4410,25 @@ public final class FitProtos {
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings(this);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings(this);
         result.shiftFactor_ = shiftFactor_;
         result.signalStrength_ = signalStrength_;
         result.minPhotons_ = minPhotons_;
@@ -4456,43 +4445,36 @@ public final class FitProtos {
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -4500,55 +4482,65 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance()) return this;
-        if (other.getShiftFactor() != 0D)
-			setShiftFactor(other.getShiftFactor());
-        if (other.getSignalStrength() != 0D)
-			setSignalStrength(other.getSignalStrength());
-        if (other.getMinPhotons() != 0D)
-			setMinPhotons(other.getMinPhotons());
-        if (other.getPrecisionThreshold() != 0D)
-			setPrecisionThreshold(other.getPrecisionThreshold());
-        if (other.getMinWidthFactor() != 0D)
-			setMinWidthFactor(other.getMinWidthFactor());
-        if (other.getMaxWidthFactor() != 0D)
-			setMaxWidthFactor(other.getMaxWidthFactor());
-        if (other.getDisableSimpleFilter() != false)
-			setDisableSimpleFilter(other.getDisableSimpleFilter());
-        if (other.getSmartFilter() != false)
-			setSmartFilter(other.getSmartFilter());
+        if (other.getShiftFactor() != 0D) {
+          setShiftFactor(other.getShiftFactor());
+        }
+        if (other.getSignalStrength() != 0D) {
+          setSignalStrength(other.getSignalStrength());
+        }
+        if (other.getMinPhotons() != 0D) {
+          setMinPhotons(other.getMinPhotons());
+        }
+        if (other.getPrecisionThreshold() != 0D) {
+          setPrecisionThreshold(other.getPrecisionThreshold());
+        }
+        if (other.getMinWidthFactor() != 0D) {
+          setMinWidthFactor(other.getMinWidthFactor());
+        }
+        if (other.getMaxWidthFactor() != 0D) {
+          setMaxWidthFactor(other.getMaxWidthFactor());
+        }
+        if (other.getDisableSimpleFilter() != false) {
+          setDisableSimpleFilter(other.getDisableSimpleFilter());
+        }
+        if (other.getSmartFilter() != false) {
+          setSmartFilter(other.getSmartFilter());
+        }
         if (!other.getSmartFilterString().isEmpty()) {
           smartFilterString_ = other.smartFilterString_;
           onChanged();
         }
-        if (other.precisionMethod_ != 0)
-			setPrecisionMethodValue(other.getPrecisionMethodValue());
-        if (other.getMinZ() != 0D)
-			setMinZ(other.getMinZ());
-        if (other.getMaxZ() != 0D)
-			setMaxZ(other.getMaxZ());
+        if (other.precisionMethod_ != 0) {
+          setPrecisionMethodValue(other.getPrecisionMethodValue());
+        }
+        if (other.getMinZ() != 0D) {
+          setMinZ(other.getMinZ());
+        }
+        if (other.getMaxZ() != 0D) {
+          setMaxZ(other.getMaxZ());
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -4561,8 +4553,7 @@ public final class FitProtos {
        *
        * <code>double shift_factor = 1;</code>
        */
-      @Override
-	public double getShiftFactor() {
+      public double getShiftFactor() {
         return shiftFactor_;
       }
       /**
@@ -4573,7 +4564,7 @@ public final class FitProtos {
        * <code>double shift_factor = 1;</code>
        */
       public Builder setShiftFactor(double value) {
-
+        
         shiftFactor_ = value;
         onChanged();
         return this;
@@ -4586,7 +4577,7 @@ public final class FitProtos {
        * <code>double shift_factor = 1;</code>
        */
       public Builder clearShiftFactor() {
-
+        
         shiftFactor_ = 0D;
         onChanged();
         return this;
@@ -4600,8 +4591,7 @@ public final class FitProtos {
        *
        * <code>double signal_strength = 2;</code>
        */
-      @Override
-	public double getSignalStrength() {
+      public double getSignalStrength() {
         return signalStrength_;
       }
       /**
@@ -4612,7 +4602,7 @@ public final class FitProtos {
        * <code>double signal_strength = 2;</code>
        */
       public Builder setSignalStrength(double value) {
-
+        
         signalStrength_ = value;
         onChanged();
         return this;
@@ -4625,7 +4615,7 @@ public final class FitProtos {
        * <code>double signal_strength = 2;</code>
        */
       public Builder clearSignalStrength() {
-
+        
         signalStrength_ = 0D;
         onChanged();
         return this;
@@ -4639,8 +4629,7 @@ public final class FitProtos {
        *
        * <code>double min_photons = 3;</code>
        */
-      @Override
-	public double getMinPhotons() {
+      public double getMinPhotons() {
         return minPhotons_;
       }
       /**
@@ -4651,7 +4640,7 @@ public final class FitProtos {
        * <code>double min_photons = 3;</code>
        */
       public Builder setMinPhotons(double value) {
-
+        
         minPhotons_ = value;
         onChanged();
         return this;
@@ -4664,7 +4653,7 @@ public final class FitProtos {
        * <code>double min_photons = 3;</code>
        */
       public Builder clearMinPhotons() {
-
+        
         minPhotons_ = 0D;
         onChanged();
         return this;
@@ -4678,8 +4667,7 @@ public final class FitProtos {
        *
        * <code>double precision_threshold = 4;</code>
        */
-      @Override
-	public double getPrecisionThreshold() {
+      public double getPrecisionThreshold() {
         return precisionThreshold_;
       }
       /**
@@ -4690,7 +4678,7 @@ public final class FitProtos {
        * <code>double precision_threshold = 4;</code>
        */
       public Builder setPrecisionThreshold(double value) {
-
+        
         precisionThreshold_ = value;
         onChanged();
         return this;
@@ -4703,7 +4691,7 @@ public final class FitProtos {
        * <code>double precision_threshold = 4;</code>
        */
       public Builder clearPrecisionThreshold() {
-
+        
         precisionThreshold_ = 0D;
         onChanged();
         return this;
@@ -4717,8 +4705,7 @@ public final class FitProtos {
        *
        * <code>double min_width_factor = 6;</code>
        */
-      @Override
-	public double getMinWidthFactor() {
+      public double getMinWidthFactor() {
         return minWidthFactor_;
       }
       /**
@@ -4729,7 +4716,7 @@ public final class FitProtos {
        * <code>double min_width_factor = 6;</code>
        */
       public Builder setMinWidthFactor(double value) {
-
+        
         minWidthFactor_ = value;
         onChanged();
         return this;
@@ -4742,7 +4729,7 @@ public final class FitProtos {
        * <code>double min_width_factor = 6;</code>
        */
       public Builder clearMinWidthFactor() {
-
+        
         minWidthFactor_ = 0D;
         onChanged();
         return this;
@@ -4756,8 +4743,7 @@ public final class FitProtos {
        *
        * <code>double max_width_factor = 7;</code>
        */
-      @Override
-	public double getMaxWidthFactor() {
+      public double getMaxWidthFactor() {
         return maxWidthFactor_;
       }
       /**
@@ -4768,7 +4754,7 @@ public final class FitProtos {
        * <code>double max_width_factor = 7;</code>
        */
       public Builder setMaxWidthFactor(double value) {
-
+        
         maxWidthFactor_ = value;
         onChanged();
         return this;
@@ -4781,7 +4767,7 @@ public final class FitProtos {
        * <code>double max_width_factor = 7;</code>
        */
       public Builder clearMaxWidthFactor() {
-
+        
         maxWidthFactor_ = 0D;
         onChanged();
         return this;
@@ -4795,8 +4781,7 @@ public final class FitProtos {
        *
        * <code>bool disable_simple_filter = 8;</code>
        */
-      @Override
-	public boolean getDisableSimpleFilter() {
+      public boolean getDisableSimpleFilter() {
         return disableSimpleFilter_;
       }
       /**
@@ -4807,7 +4792,7 @@ public final class FitProtos {
        * <code>bool disable_simple_filter = 8;</code>
        */
       public Builder setDisableSimpleFilter(boolean value) {
-
+        
         disableSimpleFilter_ = value;
         onChanged();
         return this;
@@ -4820,7 +4805,7 @@ public final class FitProtos {
        * <code>bool disable_simple_filter = 8;</code>
        */
       public Builder clearDisableSimpleFilter() {
-
+        
         disableSimpleFilter_ = false;
         onChanged();
         return this;
@@ -4834,8 +4819,7 @@ public final class FitProtos {
        *
        * <code>bool smart_filter = 9;</code>
        */
-      @Override
-	public boolean getSmartFilter() {
+      public boolean getSmartFilter() {
         return smartFilter_;
       }
       /**
@@ -4846,7 +4830,7 @@ public final class FitProtos {
        * <code>bool smart_filter = 9;</code>
        */
       public Builder setSmartFilter(boolean value) {
-
+        
         smartFilter_ = value;
         onChanged();
         return this;
@@ -4859,7 +4843,7 @@ public final class FitProtos {
        * <code>bool smart_filter = 9;</code>
        */
       public Builder clearSmartFilter() {
-
+        
         smartFilter_ = false;
         onChanged();
         return this;
@@ -4873,18 +4857,17 @@ public final class FitProtos {
        *
        * <code>string smart_filter_string = 10;</code>
        */
-      @Override
-	public java.lang.String getSmartFilterString() {
-        final java.lang.Object ref = smartFilterString_;
+      public java.lang.String getSmartFilterString() {
+        java.lang.Object ref = smartFilterString_;
         if (!(ref instanceof java.lang.String)) {
-          final com.google.protobuf.ByteString bs =
+          com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
-          final java.lang.String s = bs.toStringUtf8();
+          java.lang.String s = bs.toStringUtf8();
           smartFilterString_ = s;
           return s;
+        } else {
+          return (java.lang.String) ref;
         }
-		else
-			return (java.lang.String) ref;
       }
       /**
        * <pre>
@@ -4893,19 +4876,18 @@ public final class FitProtos {
        *
        * <code>string smart_filter_string = 10;</code>
        */
-      @Override
-	public com.google.protobuf.ByteString
+      public com.google.protobuf.ByteString
           getSmartFilterStringBytes() {
-        final java.lang.Object ref = smartFilterString_;
+        java.lang.Object ref = smartFilterString_;
         if (ref instanceof String) {
-          final com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           smartFilterString_ = b;
           return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
         }
-		else
-			return (com.google.protobuf.ByteString) ref;
       }
       /**
        * <pre>
@@ -4916,9 +4898,10 @@ public final class FitProtos {
        */
       public Builder setSmartFilterString(
           java.lang.String value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
         smartFilterString_ = value;
         onChanged();
         return this;
@@ -4931,7 +4914,7 @@ public final class FitProtos {
        * <code>string smart_filter_string = 10;</code>
        */
       public Builder clearSmartFilterString() {
-
+        
         smartFilterString_ = getDefaultInstance().getSmartFilterString();
         onChanged();
         return this;
@@ -4945,10 +4928,11 @@ public final class FitProtos {
        */
       public Builder setSmartFilterStringBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null)
-			throw new NullPointerException();
+        if (value == null) {
+    throw new NullPointerException();
+  }
   checkByteStringIsUtf8(value);
-
+        
         smartFilterString_ = value;
         onChanged();
         return this;
@@ -4962,8 +4946,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
-      @Override
-	public int getPrecisionMethodValue() {
+      public int getPrecisionMethodValue() {
         return precisionMethod_;
       }
       /**
@@ -4985,9 +4968,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
       }
       /**
@@ -4998,9 +4980,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
       public Builder setPrecisionMethod(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         precisionMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -5013,7 +4996,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
       public Builder clearPrecisionMethod() {
-
+        
         precisionMethod_ = 0;
         onChanged();
         return this;
@@ -5027,8 +5010,7 @@ public final class FitProtos {
        *
        * <code>double min_z = 12;</code>
        */
-      @Override
-	public double getMinZ() {
+      public double getMinZ() {
         return minZ_;
       }
       /**
@@ -5039,7 +5021,7 @@ public final class FitProtos {
        * <code>double min_z = 12;</code>
        */
       public Builder setMinZ(double value) {
-
+        
         minZ_ = value;
         onChanged();
         return this;
@@ -5052,7 +5034,7 @@ public final class FitProtos {
        * <code>double min_z = 12;</code>
        */
       public Builder clearMinZ() {
-
+        
         minZ_ = 0D;
         onChanged();
         return this;
@@ -5066,8 +5048,7 @@ public final class FitProtos {
        *
        * <code>double max_z = 13;</code>
        */
-      @Override
-	public double getMaxZ() {
+      public double getMaxZ() {
         return maxZ_;
       }
       /**
@@ -5078,7 +5059,7 @@ public final class FitProtos {
        * <code>double max_z = 13;</code>
        */
       public Builder setMaxZ(double value) {
-
+        
         maxZ_ = value;
         onChanged();
         return this;
@@ -5091,19 +5072,17 @@ public final class FitProtos {
        * <code>double max_z = 13;</code>
        */
       public Builder clearMaxZ() {
-
+        
         maxZ_ = 0D;
         onChanged();
         return this;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -5124,8 +5103,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FilterSettings>
         PARSER = new com.google.protobuf.AbstractParser<FilterSettings>() {
-      @Override
-	public FilterSettings parsePartialFrom(
+      public FilterSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -5142,8 +5120,7 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -5205,7 +5182,7 @@ public final class FitProtos {
   }
   /**
    * <pre>
-   * Define the settings for fitting. These settings are used to fit a PSF to an
+   * Define the settings for fitting. These settings are used to fit a PSF to an 
    * extracted region from the input data and validate the fit.
    * </pre>
    *
@@ -5232,24 +5209,26 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      final int mutable_bitField0_ = 0;
+      int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 10: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder subBuilder = null;
-              if (fitSolverSettings_ != null)
-				subBuilder = fitSolverSettings_.toBuilder();
+              if (fitSolverSettings_ != null) {
+                subBuilder = fitSolverSettings_.toBuilder();
+              }
               fitSolverSettings_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitSolverSettings_);
@@ -5260,8 +5239,9 @@ public final class FitProtos {
             }
             case 18: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder subBuilder = null;
-              if (filterSettings_ != null)
-				subBuilder = filterSettings_.toBuilder();
+              if (filterSettings_ != null) {
+                subBuilder = filterSettings_.toBuilder();
+              }
               filterSettings_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(filterSettings_);
@@ -5272,9 +5252,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -5283,13 +5263,12 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder.class);
     }
@@ -5303,8 +5282,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
-    @Override
-	public boolean hasFitSolverSettings() {
+    public boolean hasFitSolverSettings() {
       return fitSolverSettings_ != null;
     }
     /**
@@ -5314,8 +5292,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
       return fitSolverSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
     }
     /**
@@ -5325,8 +5302,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
       return getFitSolverSettings();
     }
 
@@ -5339,8 +5315,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
-    @Override
-	public boolean hasFilterSettings() {
+    public boolean hasFilterSettings() {
       return filterSettings_ != null;
     }
     /**
@@ -5350,8 +5325,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
       return filterSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
     }
     /**
@@ -5361,15 +5335,13 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
       return getFilterSettings();
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -5377,27 +5349,29 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (fitSolverSettings_ != null)
-		output.writeMessage(1, getFitSolverSettings());
-      if (filterSettings_ != null)
-		output.writeMessage(2, getFilterSettings());
+      if (fitSolverSettings_ != null) {
+        output.writeMessage(1, getFitSolverSettings());
+      }
+      if (filterSettings_ != null) {
+        output.writeMessage(2, getFilterSettings());
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (fitSolverSettings_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      if (fitSolverSettings_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getFitSolverSettings());
-      if (filterSettings_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (filterSettings_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getFilterSettings());
+      }
       memoizedSize = size;
       return size;
     }
@@ -5405,28 +5379,33 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings) obj;
 
       boolean result = true;
       result = result && (hasFitSolverSettings() == other.hasFitSolverSettings());
-      if (hasFitSolverSettings())
-		result = result && getFitSolverSettings()
+      if (hasFitSolverSettings()) {
+        result = result && getFitSolverSettings()
             .equals(other.getFitSolverSettings());
+      }
       result = result && (hasFilterSettings() == other.hasFilterSettings());
-      if (hasFilterSettings())
-		result = result && getFilterSettings()
+      if (hasFilterSettings()) {
+        result = result && getFilterSettings()
             .equals(other.getFilterSettings());
+      }
       return result;
     }
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasFitSolverSettings()) {
@@ -5512,16 +5491,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -5529,12 +5506,12 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
      * <pre>
-     * Define the settings for fitting. These settings are used to fit a PSF to an
+     * Define the settings for fitting. These settings are used to fit a PSF to an 
      * extracted region from the input data and validate the fit.
      * </pre>
      *
@@ -5546,13 +5523,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder.class);
       }
@@ -5572,95 +5548,86 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
-        if (fitSolverSettingsBuilder_ == null)
-			fitSolverSettings_ = null;
-		else {
+        if (fitSolverSettingsBuilder_ == null) {
+          fitSolverSettings_ = null;
+        } else {
           fitSolverSettings_ = null;
           fitSolverSettingsBuilder_ = null;
         }
-        if (filterSettingsBuilder_ == null)
-			filterSettings_ = null;
-		else {
+        if (filterSettingsBuilder_ == null) {
+          filterSettings_ = null;
+        } else {
           filterSettings_ = null;
           filterSettingsBuilder_ = null;
         }
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings(this);
-        if (fitSolverSettingsBuilder_ == null)
-			result.fitSolverSettings_ = fitSolverSettings_;
-		else
-			result.fitSolverSettings_ = fitSolverSettingsBuilder_.build();
-        if (filterSettingsBuilder_ == null)
-			result.filterSettings_ = filterSettings_;
-		else
-			result.filterSettings_ = filterSettingsBuilder_.build();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings(this);
+        if (fitSolverSettingsBuilder_ == null) {
+          result.fitSolverSettings_ = fitSolverSettings_;
+        } else {
+          result.fitSolverSettings_ = fitSolverSettingsBuilder_.build();
+        }
+        if (filterSettingsBuilder_ == null) {
+          result.filterSettings_ = filterSettings_;
+        } else {
+          result.filterSettings_ = filterSettingsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -5668,33 +5635,34 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance()) return this;
-        if (other.hasFitSolverSettings())
-			mergeFitSolverSettings(other.getFitSolverSettings());
-        if (other.hasFilterSettings())
-			mergeFilterSettings(other.getFilterSettings());
+        if (other.hasFitSolverSettings()) {
+          mergeFitSolverSettings(other.getFitSolverSettings());
+        }
+        if (other.hasFilterSettings()) {
+          mergeFilterSettings(other.getFilterSettings());
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -5709,8 +5677,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
-      @Override
-	public boolean hasFitSolverSettings() {
+      public boolean hasFitSolverSettings() {
         return fitSolverSettingsBuilder_ != null || fitSolverSettings_ != null;
       }
       /**
@@ -5720,12 +5687,12 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
-        if (fitSolverSettingsBuilder_ == null)
-			return fitSolverSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
-		else
-			return fitSolverSettingsBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
+        if (fitSolverSettingsBuilder_ == null) {
+          return fitSolverSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
+        } else {
+          return fitSolverSettingsBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
@@ -5736,13 +5703,14 @@ public final class FitProtos {
        */
       public Builder setFitSolverSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings value) {
         if (fitSolverSettingsBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           fitSolverSettings_ = value;
           onChanged();
+        } else {
+          fitSolverSettingsBuilder_.setMessage(value);
         }
-		else
-			fitSolverSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -5758,9 +5726,9 @@ public final class FitProtos {
         if (fitSolverSettingsBuilder_ == null) {
           fitSolverSettings_ = builderForValue.build();
           onChanged();
+        } else {
+          fitSolverSettingsBuilder_.setMessage(builderForValue.build());
         }
-		else
-			fitSolverSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -5773,15 +5741,16 @@ public final class FitProtos {
        */
       public Builder mergeFitSolverSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings value) {
         if (fitSolverSettingsBuilder_ == null) {
-          if (fitSolverSettings_ != null)
-			fitSolverSettings_ =
+          if (fitSolverSettings_ != null) {
+            fitSolverSettings_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.newBuilder(fitSolverSettings_).mergeFrom(value).buildPartial();
-		else
-			fitSolverSettings_ = value;
+          } else {
+            fitSolverSettings_ = value;
+          }
           onChanged();
+        } else {
+          fitSolverSettingsBuilder_.mergeFrom(value);
         }
-		else
-			fitSolverSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -5811,7 +5780,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder getFitSolverSettingsBuilder() {
-
+        
         onChanged();
         return getFitSolverSettingsFieldBuilder().getBuilder();
       }
@@ -5822,13 +5791,13 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
-        if (fitSolverSettingsBuilder_ != null)
-			return fitSolverSettingsBuilder_.getMessageOrBuilder();
-		else
-			return fitSolverSettings_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
+        if (fitSolverSettingsBuilder_ != null) {
+          return fitSolverSettingsBuilder_.getMessageOrBuilder();
+        } else {
+          return fitSolverSettings_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
+        }
       }
       /**
        * <pre>
@@ -5838,10 +5807,11 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder> 
           getFitSolverSettingsFieldBuilder() {
         if (fitSolverSettingsBuilder_ == null) {
-          fitSolverSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          fitSolverSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder>(
                   getFitSolverSettings(),
                   getParentForChildren(),
                   isClean());
@@ -5860,8 +5830,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
-      @Override
-	public boolean hasFilterSettings() {
+      public boolean hasFilterSettings() {
         return filterSettingsBuilder_ != null || filterSettings_ != null;
       }
       /**
@@ -5871,12 +5840,12 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
-        if (filterSettingsBuilder_ == null)
-			return filterSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
-		else
-			return filterSettingsBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
+        if (filterSettingsBuilder_ == null) {
+          return filterSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
+        } else {
+          return filterSettingsBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
@@ -5887,13 +5856,14 @@ public final class FitProtos {
        */
       public Builder setFilterSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings value) {
         if (filterSettingsBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           filterSettings_ = value;
           onChanged();
+        } else {
+          filterSettingsBuilder_.setMessage(value);
         }
-		else
-			filterSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -5909,9 +5879,9 @@ public final class FitProtos {
         if (filterSettingsBuilder_ == null) {
           filterSettings_ = builderForValue.build();
           onChanged();
+        } else {
+          filterSettingsBuilder_.setMessage(builderForValue.build());
         }
-		else
-			filterSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -5924,15 +5894,16 @@ public final class FitProtos {
        */
       public Builder mergeFilterSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings value) {
         if (filterSettingsBuilder_ == null) {
-          if (filterSettings_ != null)
-			filterSettings_ =
+          if (filterSettings_ != null) {
+            filterSettings_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.newBuilder(filterSettings_).mergeFrom(value).buildPartial();
-		else
-			filterSettings_ = value;
+          } else {
+            filterSettings_ = value;
+          }
           onChanged();
+        } else {
+          filterSettingsBuilder_.mergeFrom(value);
         }
-		else
-			filterSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -5962,7 +5933,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder getFilterSettingsBuilder() {
-
+        
         onChanged();
         return getFilterSettingsFieldBuilder().getBuilder();
       }
@@ -5973,13 +5944,13 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
-        if (filterSettingsBuilder_ != null)
-			return filterSettingsBuilder_.getMessageOrBuilder();
-		else
-			return filterSettings_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
+        if (filterSettingsBuilder_ != null) {
+          return filterSettingsBuilder_.getMessageOrBuilder();
+        } else {
+          return filterSettings_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
+        }
       }
       /**
        * <pre>
@@ -5989,10 +5960,11 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder> 
           getFilterSettingsFieldBuilder() {
         if (filterSettingsBuilder_ == null) {
-          filterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          filterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder>(
                   getFilterSettings(),
                   getParentForChildren(),
                   isClean());
@@ -6000,14 +5972,12 @@ public final class FitProtos {
         }
         return filterSettingsBuilder_;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -6028,8 +5998,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FitSettings>
         PARSER = new com.google.protobuf.AbstractParser<FitSettings>() {
-      @Override
-	public FitSettings parsePartialFrom(
+      public FitSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -6046,8 +6015,7 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6068,7 +6036,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to use the absolute value. The default is relative to the PSF width.
+     * Set to true to use the absolute value. The default is relative to the PSF width. 
      * </pre>
      *
      * <code>bool absolute = 2;</code>
@@ -6105,18 +6073,19 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      final int mutable_bitField0_ = 0;
+      int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 9: {
@@ -6131,9 +6100,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -6142,13 +6111,12 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder.class);
     }
@@ -6162,8 +6130,7 @@ public final class FitProtos {
      *
      * <code>double value = 1;</code>
      */
-    @Override
-	public double getValue() {
+    public double getValue() {
       return value_;
     }
 
@@ -6171,20 +6138,18 @@ public final class FitProtos {
     private boolean absolute_;
     /**
      * <pre>
-     * Set to true to use the absolute value. The default is relative to the PSF width.
+     * Set to true to use the absolute value. The default is relative to the PSF width. 
      * </pre>
      *
      * <code>bool absolute = 2;</code>
      */
-    @Override
-	public boolean getAbsolute() {
+    public boolean getAbsolute() {
       return absolute_;
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -6192,27 +6157,29 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (value_ != 0D)
-		output.writeDouble(1, value_);
-      if (absolute_ != false)
-		output.writeBool(2, absolute_);
+      if (value_ != 0D) {
+        output.writeDouble(1, value_);
+      }
+      if (absolute_ != false) {
+        output.writeBool(2, absolute_);
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (value_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      if (value_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, value_);
-      if (absolute_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (absolute_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, absolute_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -6220,11 +6187,13 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter) obj;
 
       boolean result = true;
       result = result && (
@@ -6238,8 +6207,9 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
@@ -6323,16 +6293,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -6340,7 +6308,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -6356,13 +6324,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder.class);
       }
@@ -6382,8 +6349,7 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
         value_ = 0D;
 
@@ -6392,71 +6358,61 @@ public final class FitProtos {
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter(this);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter(this);
         result.value_ = value_;
         result.absolute_ = absolute_;
         onBuilt();
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -6464,33 +6420,34 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance()) return this;
-        if (other.getValue() != 0D)
-			setValue(other.getValue());
-        if (other.getAbsolute() != false)
-			setAbsolute(other.getAbsolute());
+        if (other.getValue() != 0D) {
+          setValue(other.getValue());
+        }
+        if (other.getAbsolute() != false) {
+          setAbsolute(other.getAbsolute());
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -6503,8 +6460,7 @@ public final class FitProtos {
        *
        * <code>double value = 1;</code>
        */
-      @Override
-	public double getValue() {
+      public double getValue() {
         return value_;
       }
       /**
@@ -6515,7 +6471,7 @@ public final class FitProtos {
        * <code>double value = 1;</code>
        */
       public Builder setValue(double value) {
-
+        
         value_ = value;
         onChanged();
         return this;
@@ -6528,7 +6484,7 @@ public final class FitProtos {
        * <code>double value = 1;</code>
        */
       public Builder clearValue() {
-
+        
         value_ = 0D;
         onChanged();
         return this;
@@ -6537,49 +6493,46 @@ public final class FitProtos {
       private boolean absolute_ ;
       /**
        * <pre>
-       * Set to true to use the absolute value. The default is relative to the PSF width.
+       * Set to true to use the absolute value. The default is relative to the PSF width. 
        * </pre>
        *
        * <code>bool absolute = 2;</code>
        */
-      @Override
-	public boolean getAbsolute() {
+      public boolean getAbsolute() {
         return absolute_;
       }
       /**
        * <pre>
-       * Set to true to use the absolute value. The default is relative to the PSF width.
+       * Set to true to use the absolute value. The default is relative to the PSF width. 
        * </pre>
        *
        * <code>bool absolute = 2;</code>
        */
       public Builder setAbsolute(boolean value) {
-
+        
         absolute_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to use the absolute value. The default is relative to the PSF width.
+       * Set to true to use the absolute value. The default is relative to the PSF width. 
        * </pre>
        *
        * <code>bool absolute = 2;</code>
        */
       public Builder clearAbsolute() {
-
+        
         absolute_ = false;
         onChanged();
         return this;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -6600,8 +6553,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<RelativeParameter>
         PARSER = new com.google.protobuf.AbstractParser<RelativeParameter>() {
-      @Override
-	public RelativeParameter parsePartialFrom(
+      public RelativeParameter parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -6618,8 +6570,7 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6654,7 +6605,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter>
+    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter> 
         getParametersList();
     /**
      * <pre>
@@ -6682,7 +6633,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
         getParametersOrBuilderList();
     /**
      * <pre>
@@ -6729,25 +6680,26 @@ public final class FitProtos {
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 8: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               dataFilterMethod_ = rawValue;
               break;
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                parameters_ = new java.util.ArrayList<>();
+                parameters_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter>();
                 mutable_bitField0_ |= 0x00000002;
               }
               parameters_.add(
@@ -6756,26 +6708,26 @@ public final class FitProtos {
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002))
-			parameters_ = java.util.Collections.unmodifiableList(parameters_);
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          parameters_ = java.util.Collections.unmodifiableList(parameters_);
+        }
         makeExtensionsImmutable();
       }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder.class);
     }
@@ -6790,8 +6742,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    @Override
-	public int getDataFilterMethodValue() {
+    public int getDataFilterMethodValue() {
       return dataFilterMethod_;
     }
     /**
@@ -6801,9 +6752,8 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.UNRECOGNIZED : result;
     }
 
@@ -6817,8 +6767,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    @Override
-	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
+    public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
       return parameters_;
     }
     /**
@@ -6829,8 +6778,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    @Override
-	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+    public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
         getParametersOrBuilderList() {
       return parameters_;
     }
@@ -6842,8 +6790,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    @Override
-	public int getParametersCount() {
+    public int getParametersCount() {
       return parameters_.size();
     }
     /**
@@ -6854,8 +6801,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
       return parameters_.get(index);
     }
     /**
@@ -6866,16 +6812,14 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
         int index) {
       return parameters_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -6883,27 +6827,29 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (dataFilterMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber())
-		output.writeEnum(1, dataFilterMethod_);
-      for (int i = 0; i < parameters_.size(); i++)
-		output.writeMessage(2, parameters_.get(i));
+      if (dataFilterMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber()) {
+        output.writeEnum(1, dataFilterMethod_);
+      }
+      for (int i = 0; i < parameters_.size(); i++) {
+        output.writeMessage(2, parameters_.get(i));
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (dataFilterMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      if (dataFilterMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, dataFilterMethod_);
-      for (int i = 0; i < parameters_.size(); i++)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      for (int i = 0; i < parameters_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, parameters_.get(i));
+      }
       memoizedSize = size;
       return size;
     }
@@ -6911,11 +6857,13 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter) obj;
 
       boolean result = true;
       result = result && dataFilterMethod_ == other.dataFilterMethod_;
@@ -6926,8 +6874,9 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATA_FILTER_METHOD_FIELD_NUMBER;
@@ -7011,16 +6960,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -7028,7 +6975,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -7044,13 +6991,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder.class);
       }
@@ -7067,47 +7013,44 @@ public final class FitProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders)
-			getParametersFieldBuilder();
+                .alwaysUseFieldBuilders) {
+          getParametersFieldBuilder();
+        }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
         dataFilterMethod_ = 0;
 
         if (parametersBuilder_ == null) {
           parameters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          parametersBuilder_.clear();
         }
-		else
-			parametersBuilder_.clear();
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter(this);
-        final int from_bitField0_ = bitField0_;
-        final int to_bitField0_ = 0;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         result.dataFilterMethod_ = dataFilterMethod_;
         if (parametersBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002)) {
@@ -7115,51 +7058,44 @@ public final class FitProtos {
             bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.parameters_ = parameters_;
+        } else {
+          result.parameters_ = parametersBuilder_.build();
         }
-		else
-			result.parameters_ = parametersBuilder_.build();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -7167,8 +7103,9 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.getDefaultInstance()) return this;
-        if (other.dataFilterMethod_ != 0)
-			setDataFilterMethodValue(other.getDataFilterMethodValue());
+        if (other.dataFilterMethod_ != 0) {
+          setDataFilterMethodValue(other.getDataFilterMethodValue());
+        }
         if (parametersBuilder_ == null) {
           if (!other.parameters_.isEmpty()) {
             if (parameters_.isEmpty()) {
@@ -7180,42 +7117,43 @@ public final class FitProtos {
             }
             onChanged();
           }
-        }
-		else if (!other.parameters_.isEmpty())
-			if (parametersBuilder_.isEmpty()) {
+        } else {
+          if (!other.parameters_.isEmpty()) {
+            if (parametersBuilder_.isEmpty()) {
               parametersBuilder_.dispose();
               parametersBuilder_ = null;
               parameters_ = other.parameters_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              parametersBuilder_ =
+              parametersBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getParametersFieldBuilder() : null;
+            } else {
+              parametersBuilder_.addAllMessages(other.parameters_);
             }
-			else
-				parametersBuilder_.addAllMessages(other.parameters_);
+          }
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -7229,8 +7167,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
-      @Override
-	public int getDataFilterMethodValue() {
+      public int getDataFilterMethodValue() {
         return dataFilterMethod_;
       }
       /**
@@ -7252,9 +7189,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod.UNRECOGNIZED : result;
       }
       /**
@@ -7265,9 +7201,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
       public Builder setDataFilterMethod(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         dataFilterMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -7280,7 +7217,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
       public Builder clearDataFilterMethod() {
-
+        
         dataFilterMethod_ = 0;
         onChanged();
         return this;
@@ -7290,7 +7227,7 @@ public final class FitProtos {
         java.util.Collections.emptyList();
       private void ensureParametersIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          parameters_ = new java.util.ArrayList<>(parameters_);
+          parameters_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter>(parameters_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -7306,12 +7243,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      @Override
-	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
-        if (parametersBuilder_ == null)
-			return java.util.Collections.unmodifiableList(parameters_);
-		else
-			return parametersBuilder_.getMessageList();
+      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
+        if (parametersBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(parameters_);
+        } else {
+          return parametersBuilder_.getMessageList();
+        }
       }
       /**
        * <pre>
@@ -7321,12 +7258,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      @Override
-	public int getParametersCount() {
-        if (parametersBuilder_ == null)
-			return parameters_.size();
-		else
-			return parametersBuilder_.getCount();
+      public int getParametersCount() {
+        if (parametersBuilder_ == null) {
+          return parameters_.size();
+        } else {
+          return parametersBuilder_.getCount();
+        }
       }
       /**
        * <pre>
@@ -7336,12 +7273,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
-        if (parametersBuilder_ == null)
-			return parameters_.get(index);
-		else
-			return parametersBuilder_.getMessage(index);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
+        if (parametersBuilder_ == null) {
+          return parameters_.get(index);
+        } else {
+          return parametersBuilder_.getMessage(index);
+        }
       }
       /**
        * <pre>
@@ -7354,14 +7291,15 @@ public final class FitProtos {
       public Builder setParameters(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (parametersBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           ensureParametersIsMutable();
           parameters_.set(index, value);
           onChanged();
+        } else {
+          parametersBuilder_.setMessage(index, value);
         }
-		else
-			parametersBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -7378,9 +7316,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.set(index, builderForValue.build());
           onChanged();
+        } else {
+          parametersBuilder_.setMessage(index, builderForValue.build());
         }
-		else
-			parametersBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -7393,14 +7331,15 @@ public final class FitProtos {
        */
       public Builder addParameters(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (parametersBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           ensureParametersIsMutable();
           parameters_.add(value);
           onChanged();
+        } else {
+          parametersBuilder_.addMessage(value);
         }
-		else
-			parametersBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -7414,14 +7353,15 @@ public final class FitProtos {
       public Builder addParameters(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (parametersBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           ensureParametersIsMutable();
           parameters_.add(index, value);
           onChanged();
+        } else {
+          parametersBuilder_.addMessage(index, value);
         }
-		else
-			parametersBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -7438,9 +7378,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.add(builderForValue.build());
           onChanged();
+        } else {
+          parametersBuilder_.addMessage(builderForValue.build());
         }
-		else
-			parametersBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -7457,9 +7397,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.add(index, builderForValue.build());
           onChanged();
+        } else {
+          parametersBuilder_.addMessage(index, builderForValue.build());
         }
-		else
-			parametersBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -7477,9 +7417,9 @@ public final class FitProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, parameters_);
           onChanged();
+        } else {
+          parametersBuilder_.addAllMessages(values);
         }
-		else
-			parametersBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -7495,9 +7435,9 @@ public final class FitProtos {
           parameters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
+        } else {
+          parametersBuilder_.clear();
         }
-		else
-			parametersBuilder_.clear();
         return this;
       }
       /**
@@ -7513,9 +7453,9 @@ public final class FitProtos {
           ensureParametersIsMutable();
           parameters_.remove(index);
           onChanged();
+        } else {
+          parametersBuilder_.remove(index);
         }
-		else
-			parametersBuilder_.remove(index);
         return this;
       }
       /**
@@ -7538,13 +7478,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
           int index) {
-        if (parametersBuilder_ == null)
-			return parameters_.get(index);
-		else
-			return parametersBuilder_.getMessageOrBuilder(index);
+        if (parametersBuilder_ == null) {
+          return parameters_.get(index);  } else {
+          return parametersBuilder_.getMessageOrBuilder(index);
+        }
       }
       /**
        * <pre>
@@ -7554,13 +7493,13 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      @Override
-	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+      public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
            getParametersOrBuilderList() {
-        if (parametersBuilder_ != null)
-			return parametersBuilder_.getMessageOrBuilderList();
-		else
-			return java.util.Collections.unmodifiableList(parameters_);
+        if (parametersBuilder_ != null) {
+          return parametersBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(parameters_);
+        }
       }
       /**
        * <pre>
@@ -7595,15 +7534,16 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder>
+      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder> 
            getParametersBuilderList() {
         return getParametersFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
           getParametersFieldBuilder() {
         if (parametersBuilder_ == null) {
-          parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
+          parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
                   parameters_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -7612,14 +7552,12 @@ public final class FitProtos {
         }
         return parametersBuilder_;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -7640,8 +7578,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<DataFilter>
         PARSER = new com.google.protobuf.AbstractParser<DataFilter>() {
-      @Override
-	public DataFilter parsePartialFrom(
+      public DataFilter parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -7658,8 +7595,7 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -7693,7 +7629,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter>
+    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter> 
         getDataFiltersList();
     /**
      * <pre>
@@ -7718,7 +7654,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
+    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
         getDataFiltersOrBuilderList();
     /**
      * <pre>
@@ -7764,25 +7700,26 @@ public final class FitProtos {
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 8: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               dataFilterType_ = rawValue;
               break;
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                dataFilters_ = new java.util.ArrayList<>();
+                dataFilters_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter>();
                 mutable_bitField0_ |= 0x00000002;
               }
               dataFilters_.add(
@@ -7791,26 +7728,26 @@ public final class FitProtos {
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002))
-			dataFilters_ = java.util.Collections.unmodifiableList(dataFilters_);
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          dataFilters_ = java.util.Collections.unmodifiableList(dataFilters_);
+        }
         makeExtensionsImmutable();
       }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder.class);
     }
@@ -7825,8 +7762,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
      */
-    @Override
-	public int getDataFilterTypeValue() {
+    public int getDataFilterTypeValue() {
       return dataFilterType_;
     }
     /**
@@ -7836,9 +7772,8 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.UNRECOGNIZED : result;
     }
 
@@ -7851,8 +7786,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    @Override
-	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
+    public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
       return dataFilters_;
     }
     /**
@@ -7862,8 +7796,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    @Override
-	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
+    public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
         getDataFiltersOrBuilderList() {
       return dataFilters_;
     }
@@ -7874,8 +7807,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    @Override
-	public int getDataFiltersCount() {
+    public int getDataFiltersCount() {
       return dataFilters_.size();
     }
     /**
@@ -7885,8 +7817,7 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
       return dataFilters_.get(index);
     }
     /**
@@ -7896,16 +7827,14 @@ public final class FitProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
         int index) {
       return dataFilters_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -7913,27 +7842,29 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (dataFilterType_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber())
-		output.writeEnum(1, dataFilterType_);
-      for (int i = 0; i < dataFilters_.size(); i++)
-		output.writeMessage(2, dataFilters_.get(i));
+      if (dataFilterType_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber()) {
+        output.writeEnum(1, dataFilterType_);
+      }
+      for (int i = 0; i < dataFilters_.size(); i++) {
+        output.writeMessage(2, dataFilters_.get(i));
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (dataFilterType_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      if (dataFilterType_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, dataFilterType_);
-      for (int i = 0; i < dataFilters_.size(); i++)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      for (int i = 0; i < dataFilters_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, dataFilters_.get(i));
+      }
       memoizedSize = size;
       return size;
     }
@@ -7941,11 +7872,13 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings) obj;
 
       boolean result = true;
       result = result && dataFilterType_ == other.dataFilterType_;
@@ -7956,8 +7889,9 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATA_FILTER_TYPE_FIELD_NUMBER;
@@ -8041,16 +7975,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -8058,7 +7990,7 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -8074,13 +8006,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder.class);
       }
@@ -8097,47 +8028,44 @@ public final class FitProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders)
-			getDataFiltersFieldBuilder();
+                .alwaysUseFieldBuilders) {
+          getDataFiltersFieldBuilder();
+        }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
         dataFilterType_ = 0;
 
         if (dataFiltersBuilder_ == null) {
           dataFilters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          dataFiltersBuilder_.clear();
         }
-		else
-			dataFiltersBuilder_.clear();
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings(this);
-        final int from_bitField0_ = bitField0_;
-        final int to_bitField0_ = 0;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         result.dataFilterType_ = dataFilterType_;
         if (dataFiltersBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002)) {
@@ -8145,51 +8073,44 @@ public final class FitProtos {
             bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.dataFilters_ = dataFilters_;
+        } else {
+          result.dataFilters_ = dataFiltersBuilder_.build();
         }
-		else
-			result.dataFilters_ = dataFiltersBuilder_.build();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -8197,8 +8118,9 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance()) return this;
-        if (other.dataFilterType_ != 0)
-			setDataFilterTypeValue(other.getDataFilterTypeValue());
+        if (other.dataFilterType_ != 0) {
+          setDataFilterTypeValue(other.getDataFilterTypeValue());
+        }
         if (dataFiltersBuilder_ == null) {
           if (!other.dataFilters_.isEmpty()) {
             if (dataFilters_.isEmpty()) {
@@ -8210,42 +8132,43 @@ public final class FitProtos {
             }
             onChanged();
           }
-        }
-		else if (!other.dataFilters_.isEmpty())
-			if (dataFiltersBuilder_.isEmpty()) {
+        } else {
+          if (!other.dataFilters_.isEmpty()) {
+            if (dataFiltersBuilder_.isEmpty()) {
               dataFiltersBuilder_.dispose();
               dataFiltersBuilder_ = null;
               dataFilters_ = other.dataFilters_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              dataFiltersBuilder_ =
+              dataFiltersBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataFiltersFieldBuilder() : null;
+            } else {
+              dataFiltersBuilder_.addAllMessages(other.dataFilters_);
             }
-			else
-				dataFiltersBuilder_.addAllMessages(other.dataFilters_);
+          }
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -8259,8 +8182,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
-      @Override
-	public int getDataFilterTypeValue() {
+      public int getDataFilterTypeValue() {
         return dataFilterType_;
       }
       /**
@@ -8282,9 +8204,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType.UNRECOGNIZED : result;
       }
       /**
@@ -8295,9 +8216,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
       public Builder setDataFilterType(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         dataFilterType_ = value.getNumber();
         onChanged();
         return this;
@@ -8310,7 +8232,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
       public Builder clearDataFilterType() {
-
+        
         dataFilterType_ = 0;
         onChanged();
         return this;
@@ -8320,7 +8242,7 @@ public final class FitProtos {
         java.util.Collections.emptyList();
       private void ensureDataFiltersIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          dataFilters_ = new java.util.ArrayList<>(dataFilters_);
+          dataFilters_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter>(dataFilters_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -8335,12 +8257,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      @Override
-	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
-        if (dataFiltersBuilder_ == null)
-			return java.util.Collections.unmodifiableList(dataFilters_);
-		else
-			return dataFiltersBuilder_.getMessageList();
+      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
+        if (dataFiltersBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(dataFilters_);
+        } else {
+          return dataFiltersBuilder_.getMessageList();
+        }
       }
       /**
        * <pre>
@@ -8349,12 +8271,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      @Override
-	public int getDataFiltersCount() {
-        if (dataFiltersBuilder_ == null)
-			return dataFilters_.size();
-		else
-			return dataFiltersBuilder_.getCount();
+      public int getDataFiltersCount() {
+        if (dataFiltersBuilder_ == null) {
+          return dataFilters_.size();
+        } else {
+          return dataFiltersBuilder_.getCount();
+        }
       }
       /**
        * <pre>
@@ -8363,12 +8285,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
-        if (dataFiltersBuilder_ == null)
-			return dataFilters_.get(index);
-		else
-			return dataFiltersBuilder_.getMessage(index);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
+        if (dataFiltersBuilder_ == null) {
+          return dataFilters_.get(index);
+        } else {
+          return dataFiltersBuilder_.getMessage(index);
+        }
       }
       /**
        * <pre>
@@ -8380,14 +8302,15 @@ public final class FitProtos {
       public Builder setDataFilters(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter value) {
         if (dataFiltersBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           ensureDataFiltersIsMutable();
           dataFilters_.set(index, value);
           onChanged();
+        } else {
+          dataFiltersBuilder_.setMessage(index, value);
         }
-		else
-			dataFiltersBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -8403,9 +8326,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.set(index, builderForValue.build());
           onChanged();
+        } else {
+          dataFiltersBuilder_.setMessage(index, builderForValue.build());
         }
-		else
-			dataFiltersBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -8417,14 +8340,15 @@ public final class FitProtos {
        */
       public Builder addDataFilters(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter value) {
         if (dataFiltersBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           ensureDataFiltersIsMutable();
           dataFilters_.add(value);
           onChanged();
+        } else {
+          dataFiltersBuilder_.addMessage(value);
         }
-		else
-			dataFiltersBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -8437,14 +8361,15 @@ public final class FitProtos {
       public Builder addDataFilters(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter value) {
         if (dataFiltersBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           ensureDataFiltersIsMutable();
           dataFilters_.add(index, value);
           onChanged();
+        } else {
+          dataFiltersBuilder_.addMessage(index, value);
         }
-		else
-			dataFiltersBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -8460,9 +8385,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.add(builderForValue.build());
           onChanged();
+        } else {
+          dataFiltersBuilder_.addMessage(builderForValue.build());
         }
-		else
-			dataFiltersBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -8478,9 +8403,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.add(index, builderForValue.build());
           onChanged();
+        } else {
+          dataFiltersBuilder_.addMessage(index, builderForValue.build());
         }
-		else
-			dataFiltersBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -8497,9 +8422,9 @@ public final class FitProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, dataFilters_);
           onChanged();
+        } else {
+          dataFiltersBuilder_.addAllMessages(values);
         }
-		else
-			dataFiltersBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -8514,9 +8439,9 @@ public final class FitProtos {
           dataFilters_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
+        } else {
+          dataFiltersBuilder_.clear();
         }
-		else
-			dataFiltersBuilder_.clear();
         return this;
       }
       /**
@@ -8531,9 +8456,9 @@ public final class FitProtos {
           ensureDataFiltersIsMutable();
           dataFilters_.remove(index);
           onChanged();
+        } else {
+          dataFiltersBuilder_.remove(index);
         }
-		else
-			dataFiltersBuilder_.remove(index);
         return this;
       }
       /**
@@ -8554,13 +8479,12 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
           int index) {
-        if (dataFiltersBuilder_ == null)
-			return dataFilters_.get(index);
-		else
-			return dataFiltersBuilder_.getMessageOrBuilder(index);
+        if (dataFiltersBuilder_ == null) {
+          return dataFilters_.get(index);  } else {
+          return dataFiltersBuilder_.getMessageOrBuilder(index);
+        }
       }
       /**
        * <pre>
@@ -8569,13 +8493,13 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      @Override
-	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
+      public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
            getDataFiltersOrBuilderList() {
-        if (dataFiltersBuilder_ != null)
-			return dataFiltersBuilder_.getMessageOrBuilderList();
-		else
-			return java.util.Collections.unmodifiableList(dataFilters_);
+        if (dataFiltersBuilder_ != null) {
+          return dataFiltersBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(dataFilters_);
+        }
       }
       /**
        * <pre>
@@ -8607,15 +8531,16 @@ public final class FitProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder>
+      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder> 
            getDataFiltersBuilderList() {
         return getDataFiltersFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
           getDataFiltersFieldBuilder() {
         if (dataFiltersBuilder_ == null) {
-          dataFiltersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
+          dataFiltersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>(
                   dataFilters_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -8624,14 +8549,12 @@ public final class FitProtos {
         }
         return dataFiltersBuilder_;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -8652,8 +8575,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<DataFilterSettings>
         PARSER = new com.google.protobuf.AbstractParser<DataFilterSettings>() {
-      @Override
-	public DataFilterSettings parsePartialFrom(
+      public DataFilterSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -8670,8 +8592,7 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -8725,7 +8646,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The data filter settings
+     * The data filter settings 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -8733,7 +8654,7 @@ public final class FitProtos {
     boolean hasDataFilterSettings();
     /**
      * <pre>
-     * The data filter settings
+     * The data filter settings 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -8741,7 +8662,7 @@ public final class FitProtos {
     uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings();
     /**
      * <pre>
-     * The data filter settings
+     * The data filter settings 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -8775,7 +8696,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The border to ignore at the edge of the image
+     * The border to ignore at the edge of the image 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -8783,7 +8704,7 @@ public final class FitProtos {
     boolean hasBorder();
     /**
      * <pre>
-     * The border to ignore at the edge of the image
+     * The border to ignore at the edge of the image 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -8791,7 +8712,7 @@ public final class FitProtos {
     uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder();
     /**
      * <pre>
-     * The border to ignore at the edge of the image
+     * The border to ignore at the edge of the image 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -8800,7 +8721,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate
+     * The square radius to use for fitting around each candidate 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -8808,7 +8729,7 @@ public final class FitProtos {
     boolean hasFitting();
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate
+     * The square radius to use for fitting around each candidate 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -8816,7 +8737,7 @@ public final class FitProtos {
     uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting();
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate
+     * The square radius to use for fitting around each candidate 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -8887,7 +8808,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
+     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
      * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
      * </pre>
      *
@@ -8899,7 +8820,7 @@ public final class FitProtos {
    * <pre>
    * Define the settings for the fit engine. These settings are used to identify
    * candidates in the input data, extract regions for fitting, fit using various
-   * methods (single, multiple, doublet) and select the best fit.
+   * methods (single, multiple, doublet) and select the best fit. 
    * </pre>
    *
    * Protobuf type {@code uk.ac.sussex.gdsc.smlm.data.config.FitEngineSettings}
@@ -8931,24 +8852,26 @@ public final class FitProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      final int mutable_bitField0_ = 0;
+      int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          final int tag = input.readTag();
+          int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag))
-				done = true;
+              if (!input.skipField(tag)) {
+                done = true;
+              }
               break;
             }
             case 10: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder subBuilder = null;
-              if (fitSettings_ != null)
-				subBuilder = fitSettings_.toBuilder();
+              if (fitSettings_ != null) {
+                subBuilder = fitSettings_.toBuilder();
+              }
               fitSettings_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitSettings_);
@@ -8958,15 +8881,16 @@ public final class FitProtos {
               break;
             }
             case 16: {
-              final int rawValue = input.readEnum();
+              int rawValue = input.readEnum();
 
               noiseMethod_ = rawValue;
               break;
             }
             case 26: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder subBuilder = null;
-              if (dataFilterSettings_ != null)
-				subBuilder = dataFilterSettings_.toBuilder();
+              if (dataFilterSettings_ != null) {
+                subBuilder = dataFilterSettings_.toBuilder();
+              }
               dataFilterSettings_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(dataFilterSettings_);
@@ -8977,8 +8901,9 @@ public final class FitProtos {
             }
             case 34: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (search_ != null)
-				subBuilder = search_.toBuilder();
+              if (search_ != null) {
+                subBuilder = search_.toBuilder();
+              }
               search_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(search_);
@@ -8989,8 +8914,9 @@ public final class FitProtos {
             }
             case 42: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (border_ != null)
-				subBuilder = border_.toBuilder();
+              if (border_ != null) {
+                subBuilder = border_.toBuilder();
+              }
               border_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(border_);
@@ -9001,8 +8927,9 @@ public final class FitProtos {
             }
             case 50: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (fitting_ != null)
-				subBuilder = fitting_.toBuilder();
+              if (fitting_ != null) {
+                subBuilder = fitting_.toBuilder();
+              }
               fitting_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitting_);
@@ -9028,8 +8955,9 @@ public final class FitProtos {
             }
             case 82: {
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder subBuilder = null;
-              if (duplicateDistance_ != null)
-				subBuilder = duplicateDistance_.toBuilder();
+              if (duplicateDistance_ != null) {
+                subBuilder = duplicateDistance_.toBuilder();
+              }
               duplicateDistance_ = input.readMessage(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(duplicateDistance_);
@@ -9050,9 +8978,9 @@ public final class FitProtos {
             }
           }
         }
-      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (final java.io.IOException e) {
+      } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -9061,13 +8989,12 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_descriptor;
     }
 
-    @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable
+      return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder.class);
     }
@@ -9081,8 +9008,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
-    @Override
-	public boolean hasFitSettings() {
+    public boolean hasFitSettings() {
       return fitSettings_ != null;
     }
     /**
@@ -9092,8 +9018,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
       return fitSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
     }
     /**
@@ -9103,8 +9028,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
       return getFitSettings();
     }
 
@@ -9117,8 +9041,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
-    @Override
-	public int getNoiseMethodValue() {
+    public int getNoiseMethodValue() {
       return noiseMethod_;
     }
     /**
@@ -9128,9 +9051,8 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
       return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.UNRECOGNIZED : result;
     }
 
@@ -9138,35 +9060,32 @@ public final class FitProtos {
     private uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings dataFilterSettings_;
     /**
      * <pre>
-     * The data filter settings
+     * The data filter settings 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    @Override
-	public boolean hasDataFilterSettings() {
+    public boolean hasDataFilterSettings() {
       return dataFilterSettings_ != null;
     }
     /**
      * <pre>
-     * The data filter settings
+     * The data filter settings 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
       return dataFilterSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
     }
     /**
      * <pre>
-     * The data filter settings
+     * The data filter settings 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
       return getDataFilterSettings();
     }
 
@@ -9179,8 +9098,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    @Override
-	public boolean hasSearch() {
+    public boolean hasSearch() {
       return search_ != null;
     }
     /**
@@ -9190,8 +9108,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
       return search_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
     }
     /**
@@ -9201,8 +9118,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
       return getSearch();
     }
 
@@ -9210,35 +9126,32 @@ public final class FitProtos {
     private uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter border_;
     /**
      * <pre>
-     * The border to ignore at the edge of the image
+     * The border to ignore at the edge of the image 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    @Override
-	public boolean hasBorder() {
+    public boolean hasBorder() {
       return border_ != null;
     }
     /**
      * <pre>
-     * The border to ignore at the edge of the image
+     * The border to ignore at the edge of the image 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
       return border_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
     }
     /**
      * <pre>
-     * The border to ignore at the edge of the image
+     * The border to ignore at the edge of the image 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
       return getBorder();
     }
 
@@ -9246,35 +9159,32 @@ public final class FitProtos {
     private uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter fitting_;
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate
+     * The square radius to use for fitting around each candidate 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    @Override
-	public boolean hasFitting() {
+    public boolean hasFitting() {
       return fitting_ != null;
     }
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate
+     * The square radius to use for fitting around each candidate 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
       return fitting_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
     }
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate
+     * The square radius to use for fitting around each candidate 
      * </pre>
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
       return getFitting();
     }
 
@@ -9287,8 +9197,7 @@ public final class FitProtos {
      *
      * <code>bool include_neighbours = 7;</code>
      */
-    @Override
-	public boolean getIncludeNeighbours() {
+    public boolean getIncludeNeighbours() {
       return includeNeighbours_;
     }
 
@@ -9301,8 +9210,7 @@ public final class FitProtos {
      *
      * <code>double neighbour_height_threshold = 8;</code>
      */
-    @Override
-	public double getNeighbourHeightThreshold() {
+    public double getNeighbourHeightThreshold() {
       return neighbourHeightThreshold_;
     }
 
@@ -9315,8 +9223,7 @@ public final class FitProtos {
      *
      * <code>double residuals_threshold = 9;</code>
      */
-    @Override
-	public double getResidualsThreshold() {
+    public double getResidualsThreshold() {
       return residualsThreshold_;
     }
 
@@ -9329,8 +9236,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    @Override
-	public boolean hasDuplicateDistance() {
+    public boolean hasDuplicateDistance() {
       return duplicateDistance_ != null;
     }
     /**
@@ -9340,8 +9246,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
       return duplicateDistance_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
     }
     /**
@@ -9351,8 +9256,7 @@ public final class FitProtos {
      *
      * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
       return getDuplicateDistance();
     }
 
@@ -9366,8 +9270,7 @@ public final class FitProtos {
      *
      * <code>int32 failures_limit = 11;</code>
      */
-    @Override
-	public int getFailuresLimit() {
+    public int getFailuresLimit() {
       return failuresLimit_;
     }
 
@@ -9375,21 +9278,19 @@ public final class FitProtos {
     private double passRate_;
     /**
      * <pre>
-     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
+     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
      * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
      * </pre>
      *
      * <code>double pass_rate = 12;</code>
      */
-    @Override
-	public double getPassRate() {
+    public double getPassRate() {
       return passRate_;
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
-	public final boolean isInitialized() {
-      final byte isInitialized = memoizedIsInitialized;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -9397,77 +9298,99 @@ public final class FitProtos {
       return true;
     }
 
-    @Override
-	public void writeTo(com.google.protobuf.CodedOutputStream output)
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (fitSettings_ != null)
-		output.writeMessage(1, getFitSettings());
-      if (noiseMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber())
-		output.writeEnum(2, noiseMethod_);
-      if (dataFilterSettings_ != null)
-		output.writeMessage(3, getDataFilterSettings());
-      if (search_ != null)
-		output.writeMessage(4, getSearch());
-      if (border_ != null)
-		output.writeMessage(5, getBorder());
-      if (fitting_ != null)
-		output.writeMessage(6, getFitting());
-      if (includeNeighbours_ != false)
-		output.writeBool(7, includeNeighbours_);
-      if (neighbourHeightThreshold_ != 0D)
-		output.writeDouble(8, neighbourHeightThreshold_);
-      if (residualsThreshold_ != 0D)
-		output.writeDouble(9, residualsThreshold_);
-      if (duplicateDistance_ != null)
-		output.writeMessage(10, getDuplicateDistance());
-      if (failuresLimit_ != 0)
-		output.writeInt32(11, failuresLimit_);
-      if (passRate_ != 0D)
-		output.writeDouble(12, passRate_);
+      if (fitSettings_ != null) {
+        output.writeMessage(1, getFitSettings());
+      }
+      if (noiseMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber()) {
+        output.writeEnum(2, noiseMethod_);
+      }
+      if (dataFilterSettings_ != null) {
+        output.writeMessage(3, getDataFilterSettings());
+      }
+      if (search_ != null) {
+        output.writeMessage(4, getSearch());
+      }
+      if (border_ != null) {
+        output.writeMessage(5, getBorder());
+      }
+      if (fitting_ != null) {
+        output.writeMessage(6, getFitting());
+      }
+      if (includeNeighbours_ != false) {
+        output.writeBool(7, includeNeighbours_);
+      }
+      if (neighbourHeightThreshold_ != 0D) {
+        output.writeDouble(8, neighbourHeightThreshold_);
+      }
+      if (residualsThreshold_ != 0D) {
+        output.writeDouble(9, residualsThreshold_);
+      }
+      if (duplicateDistance_ != null) {
+        output.writeMessage(10, getDuplicateDistance());
+      }
+      if (failuresLimit_ != 0) {
+        output.writeInt32(11, failuresLimit_);
+      }
+      if (passRate_ != 0D) {
+        output.writeDouble(12, passRate_);
+      }
     }
 
-    @Override
-	public int getSerializedSize() {
+    public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (fitSettings_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      if (fitSettings_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getFitSettings());
-      if (noiseMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber())
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (noiseMethod_ != uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.ALL_PIXELS.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, noiseMethod_);
-      if (dataFilterSettings_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (dataFilterSettings_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getDataFilterSettings());
-      if (search_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (search_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getSearch());
-      if (border_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (border_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getBorder());
-      if (fitting_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (fitting_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getFitting());
-      if (includeNeighbours_ != false)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (includeNeighbours_ != false) {
+        size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, includeNeighbours_);
-      if (neighbourHeightThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (neighbourHeightThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(8, neighbourHeightThreshold_);
-      if (residualsThreshold_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (residualsThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, residualsThreshold_);
-      if (duplicateDistance_ != null)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (duplicateDistance_ != null) {
+        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, getDuplicateDistance());
-      if (failuresLimit_ != 0)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (failuresLimit_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(11, failuresLimit_);
-      if (passRate_ != 0D)
-		size += com.google.protobuf.CodedOutputStream
+      }
+      if (passRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(12, passRate_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -9475,34 +9398,41 @@ public final class FitProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this)
-		return true;
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings))
-		return super.equals(obj);
-      final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings) obj;
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings)) {
+        return super.equals(obj);
+      }
+      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings other = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings) obj;
 
       boolean result = true;
       result = result && (hasFitSettings() == other.hasFitSettings());
-      if (hasFitSettings())
-		result = result && getFitSettings()
+      if (hasFitSettings()) {
+        result = result && getFitSettings()
             .equals(other.getFitSettings());
+      }
       result = result && noiseMethod_ == other.noiseMethod_;
       result = result && (hasDataFilterSettings() == other.hasDataFilterSettings());
-      if (hasDataFilterSettings())
-		result = result && getDataFilterSettings()
+      if (hasDataFilterSettings()) {
+        result = result && getDataFilterSettings()
             .equals(other.getDataFilterSettings());
+      }
       result = result && (hasSearch() == other.hasSearch());
-      if (hasSearch())
-		result = result && getSearch()
+      if (hasSearch()) {
+        result = result && getSearch()
             .equals(other.getSearch());
+      }
       result = result && (hasBorder() == other.hasBorder());
-      if (hasBorder())
-		result = result && getBorder()
+      if (hasBorder()) {
+        result = result && getBorder()
             .equals(other.getBorder());
+      }
       result = result && (hasFitting() == other.hasFitting());
-      if (hasFitting())
-		result = result && getFitting()
+      if (hasFitting()) {
+        result = result && getFitting()
             .equals(other.getFitting());
+      }
       result = result && (getIncludeNeighbours()
           == other.getIncludeNeighbours());
       result = result && (
@@ -9514,9 +9444,10 @@ public final class FitProtos {
           == java.lang.Double.doubleToLongBits(
               other.getResidualsThreshold()));
       result = result && (hasDuplicateDistance() == other.hasDuplicateDistance());
-      if (hasDuplicateDistance())
-		result = result && getDuplicateDistance()
+      if (hasDuplicateDistance()) {
+        result = result && getDuplicateDistance()
             .equals(other.getDuplicateDistance());
+      }
       result = result && (getFailuresLimit()
           == other.getFailuresLimit());
       result = result && (
@@ -9528,8 +9459,9 @@ public final class FitProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0)
-		return memoizedHashCode;
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasFitSettings()) {
@@ -9647,16 +9579,14 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    @Override
-	public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
-	public Builder toBuilder() {
+    public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -9664,14 +9594,14 @@ public final class FitProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      final Builder builder = new Builder(parent);
+      Builder builder = new Builder(parent);
       return builder;
     }
     /**
      * <pre>
      * Define the settings for the fit engine. These settings are used to identify
      * candidates in the input data, extract regions for fitting, fit using various
-     * methods (single, multiple, doublet) and select the best fit.
+     * methods (single, multiple, doublet) and select the best fit. 
      * </pre>
      *
      * Protobuf type {@code uk.ac.sussex.gdsc.smlm.data.config.FitEngineSettings}
@@ -9682,13 +9612,12 @@ public final class FitProtos {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_descriptor;
       }
 
-      @Override
-	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings.class, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder.class);
       }
@@ -9708,38 +9637,37 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      @Override
-	public Builder clear() {
+      public Builder clear() {
         super.clear();
-        if (fitSettingsBuilder_ == null)
-			fitSettings_ = null;
-		else {
+        if (fitSettingsBuilder_ == null) {
+          fitSettings_ = null;
+        } else {
           fitSettings_ = null;
           fitSettingsBuilder_ = null;
         }
         noiseMethod_ = 0;
 
-        if (dataFilterSettingsBuilder_ == null)
-			dataFilterSettings_ = null;
-		else {
+        if (dataFilterSettingsBuilder_ == null) {
+          dataFilterSettings_ = null;
+        } else {
           dataFilterSettings_ = null;
           dataFilterSettingsBuilder_ = null;
         }
-        if (searchBuilder_ == null)
-			search_ = null;
-		else {
+        if (searchBuilder_ == null) {
+          search_ = null;
+        } else {
           search_ = null;
           searchBuilder_ = null;
         }
-        if (borderBuilder_ == null)
-			border_ = null;
-		else {
+        if (borderBuilder_ == null) {
+          border_ = null;
+        } else {
           border_ = null;
           borderBuilder_ = null;
         }
-        if (fittingBuilder_ == null)
-			fitting_ = null;
-		else {
+        if (fittingBuilder_ == null) {
+          fitting_ = null;
+        } else {
           fitting_ = null;
           fittingBuilder_ = null;
         }
@@ -9749,9 +9677,9 @@ public final class FitProtos {
 
         residualsThreshold_ = 0D;
 
-        if (duplicateDistanceBuilder_ == null)
-			duplicateDistance_ = null;
-		else {
+        if (duplicateDistanceBuilder_ == null) {
+          duplicateDistance_ = null;
+        } else {
           duplicateDistance_ = null;
           duplicateDistanceBuilder_ = null;
         }
@@ -9762,99 +9690,95 @@ public final class FitProtos {
         return this;
       }
 
-      @Override
-	public com.google.protobuf.Descriptors.Descriptor
+      public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
+        return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_descriptor;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance();
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings build() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings result = buildPartial();
-        if (!result.isInitialized())
-			throw newUninitializedMessageException(result);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings build() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
         return result;
       }
 
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings buildPartial() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings(this);
-        if (fitSettingsBuilder_ == null)
-			result.fitSettings_ = fitSettings_;
-		else
-			result.fitSettings_ = fitSettingsBuilder_.build();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings buildPartial() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings result = new uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings(this);
+        if (fitSettingsBuilder_ == null) {
+          result.fitSettings_ = fitSettings_;
+        } else {
+          result.fitSettings_ = fitSettingsBuilder_.build();
+        }
         result.noiseMethod_ = noiseMethod_;
-        if (dataFilterSettingsBuilder_ == null)
-			result.dataFilterSettings_ = dataFilterSettings_;
-		else
-			result.dataFilterSettings_ = dataFilterSettingsBuilder_.build();
-        if (searchBuilder_ == null)
-			result.search_ = search_;
-		else
-			result.search_ = searchBuilder_.build();
-        if (borderBuilder_ == null)
-			result.border_ = border_;
-		else
-			result.border_ = borderBuilder_.build();
-        if (fittingBuilder_ == null)
-			result.fitting_ = fitting_;
-		else
-			result.fitting_ = fittingBuilder_.build();
+        if (dataFilterSettingsBuilder_ == null) {
+          result.dataFilterSettings_ = dataFilterSettings_;
+        } else {
+          result.dataFilterSettings_ = dataFilterSettingsBuilder_.build();
+        }
+        if (searchBuilder_ == null) {
+          result.search_ = search_;
+        } else {
+          result.search_ = searchBuilder_.build();
+        }
+        if (borderBuilder_ == null) {
+          result.border_ = border_;
+        } else {
+          result.border_ = borderBuilder_.build();
+        }
+        if (fittingBuilder_ == null) {
+          result.fitting_ = fitting_;
+        } else {
+          result.fitting_ = fittingBuilder_.build();
+        }
         result.includeNeighbours_ = includeNeighbours_;
         result.neighbourHeightThreshold_ = neighbourHeightThreshold_;
         result.residualsThreshold_ = residualsThreshold_;
-        if (duplicateDistanceBuilder_ == null)
-			result.duplicateDistance_ = duplicateDistance_;
-		else
-			result.duplicateDistance_ = duplicateDistanceBuilder_.build();
+        if (duplicateDistanceBuilder_ == null) {
+          result.duplicateDistance_ = duplicateDistance_;
+        } else {
+          result.duplicateDistance_ = duplicateDistanceBuilder_.build();
+        }
         result.failuresLimit_ = failuresLimit_;
         result.passRate_ = passRate_;
         onBuilt();
         return result;
       }
 
-      @Override
-	public Builder clone() {
-        return super.clone();
+      public Builder clone() {
+        return (Builder) super.clone();
       }
-      @Override
-	public Builder setField(
+      public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
-      @Override
-	public Builder clearField(
+      public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
-      @Override
-	public Builder clearOneof(
+      public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
-      @Override
-	public Builder setRepeatedField(
+      public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
-      @Override
-	public Builder addRepeatedField(
+      public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
-      @Override
-	public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings)
-			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings)other);
-		else {
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings) {
+          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings)other);
+        } else {
           super.mergeFrom(other);
           return this;
         }
@@ -9862,53 +9786,64 @@ public final class FitProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance()) return this;
-        if (other.hasFitSettings())
-			mergeFitSettings(other.getFitSettings());
-        if (other.noiseMethod_ != 0)
-			setNoiseMethodValue(other.getNoiseMethodValue());
-        if (other.hasDataFilterSettings())
-			mergeDataFilterSettings(other.getDataFilterSettings());
-        if (other.hasSearch())
-			mergeSearch(other.getSearch());
-        if (other.hasBorder())
-			mergeBorder(other.getBorder());
-        if (other.hasFitting())
-			mergeFitting(other.getFitting());
-        if (other.getIncludeNeighbours() != false)
-			setIncludeNeighbours(other.getIncludeNeighbours());
-        if (other.getNeighbourHeightThreshold() != 0D)
-			setNeighbourHeightThreshold(other.getNeighbourHeightThreshold());
-        if (other.getResidualsThreshold() != 0D)
-			setResidualsThreshold(other.getResidualsThreshold());
-        if (other.hasDuplicateDistance())
-			mergeDuplicateDistance(other.getDuplicateDistance());
-        if (other.getFailuresLimit() != 0)
-			setFailuresLimit(other.getFailuresLimit());
-        if (other.getPassRate() != 0D)
-			setPassRate(other.getPassRate());
+        if (other.hasFitSettings()) {
+          mergeFitSettings(other.getFitSettings());
+        }
+        if (other.noiseMethod_ != 0) {
+          setNoiseMethodValue(other.getNoiseMethodValue());
+        }
+        if (other.hasDataFilterSettings()) {
+          mergeDataFilterSettings(other.getDataFilterSettings());
+        }
+        if (other.hasSearch()) {
+          mergeSearch(other.getSearch());
+        }
+        if (other.hasBorder()) {
+          mergeBorder(other.getBorder());
+        }
+        if (other.hasFitting()) {
+          mergeFitting(other.getFitting());
+        }
+        if (other.getIncludeNeighbours() != false) {
+          setIncludeNeighbours(other.getIncludeNeighbours());
+        }
+        if (other.getNeighbourHeightThreshold() != 0D) {
+          setNeighbourHeightThreshold(other.getNeighbourHeightThreshold());
+        }
+        if (other.getResidualsThreshold() != 0D) {
+          setResidualsThreshold(other.getResidualsThreshold());
+        }
+        if (other.hasDuplicateDistance()) {
+          mergeDuplicateDistance(other.getDuplicateDistance());
+        }
+        if (other.getFailuresLimit() != 0) {
+          setFailuresLimit(other.getFailuresLimit());
+        }
+        if (other.getPassRate() != 0D) {
+          setPassRate(other.getPassRate());
+        }
         onChanged();
         return this;
       }
 
-      @Override
-	public final boolean isInitialized() {
+      public final boolean isInitialized() {
         return true;
       }
 
-      @Override
-	public Builder mergeFrom(
+      public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null)
-			mergeFrom(parsedMessage);
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
         }
         return this;
       }
@@ -9923,8 +9858,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
-      @Override
-	public boolean hasFitSettings() {
+      public boolean hasFitSettings() {
         return fitSettingsBuilder_ != null || fitSettings_ != null;
       }
       /**
@@ -9934,12 +9868,12 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
-        if (fitSettingsBuilder_ == null)
-			return fitSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
-		else
-			return fitSettingsBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
+        if (fitSettingsBuilder_ == null) {
+          return fitSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
+        } else {
+          return fitSettingsBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
@@ -9950,13 +9884,14 @@ public final class FitProtos {
        */
       public Builder setFitSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings value) {
         if (fitSettingsBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           fitSettings_ = value;
           onChanged();
+        } else {
+          fitSettingsBuilder_.setMessage(value);
         }
-		else
-			fitSettingsBuilder_.setMessage(value);
 
         return this;
       }
@@ -9972,9 +9907,9 @@ public final class FitProtos {
         if (fitSettingsBuilder_ == null) {
           fitSettings_ = builderForValue.build();
           onChanged();
+        } else {
+          fitSettingsBuilder_.setMessage(builderForValue.build());
         }
-		else
-			fitSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -9987,15 +9922,16 @@ public final class FitProtos {
        */
       public Builder mergeFitSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings value) {
         if (fitSettingsBuilder_ == null) {
-          if (fitSettings_ != null)
-			fitSettings_ =
+          if (fitSettings_ != null) {
+            fitSettings_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.newBuilder(fitSettings_).mergeFrom(value).buildPartial();
-		else
-			fitSettings_ = value;
+          } else {
+            fitSettings_ = value;
+          }
           onChanged();
+        } else {
+          fitSettingsBuilder_.mergeFrom(value);
         }
-		else
-			fitSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10025,7 +9961,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder getFitSettingsBuilder() {
-
+        
         onChanged();
         return getFitSettingsFieldBuilder().getBuilder();
       }
@@ -10036,13 +9972,13 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
-        if (fitSettingsBuilder_ != null)
-			return fitSettingsBuilder_.getMessageOrBuilder();
-		else
-			return fitSettings_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
+        if (fitSettingsBuilder_ != null) {
+          return fitSettingsBuilder_.getMessageOrBuilder();
+        } else {
+          return fitSettings_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
+        }
       }
       /**
        * <pre>
@@ -10052,10 +9988,11 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder> 
           getFitSettingsFieldBuilder() {
         if (fitSettingsBuilder_ == null) {
-          fitSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          fitSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder>(
                   getFitSettings(),
                   getParentForChildren(),
                   isClean());
@@ -10072,8 +10009,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
-      @Override
-	public int getNoiseMethodValue() {
+      public int getNoiseMethodValue() {
         return noiseMethod_;
       }
       /**
@@ -10095,9 +10031,8 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
-        final uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
+        uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
         return result == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.UNRECOGNIZED : result;
       }
       /**
@@ -10108,9 +10043,10 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder setNoiseMethod(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod value) {
-        if (value == null)
-			throw new NullPointerException();
-
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
         noiseMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -10123,7 +10059,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder clearNoiseMethod() {
-
+        
         noiseMethod_ = 0;
         onChanged();
         return this;
@@ -10134,51 +10070,51 @@ public final class FitProtos {
           uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder> dataFilterSettingsBuilder_;
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      @Override
-	public boolean hasDataFilterSettings() {
+      public boolean hasDataFilterSettings() {
         return dataFilterSettingsBuilder_ != null || dataFilterSettings_ != null;
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
-        if (dataFilterSettingsBuilder_ == null)
-			return dataFilterSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
-		else
-			return dataFilterSettingsBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
+        if (dataFilterSettingsBuilder_ == null) {
+          return dataFilterSettings_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
+        } else {
+          return dataFilterSettingsBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public Builder setDataFilterSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings value) {
         if (dataFilterSettingsBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           dataFilterSettings_ = value;
           onChanged();
+        } else {
+          dataFilterSettingsBuilder_.setMessage(value);
         }
-		else
-			dataFilterSettingsBuilder_.setMessage(value);
 
         return this;
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -10188,36 +10124,37 @@ public final class FitProtos {
         if (dataFilterSettingsBuilder_ == null) {
           dataFilterSettings_ = builderForValue.build();
           onChanged();
+        } else {
+          dataFilterSettingsBuilder_.setMessage(builderForValue.build());
         }
-		else
-			dataFilterSettingsBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public Builder mergeDataFilterSettings(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings value) {
         if (dataFilterSettingsBuilder_ == null) {
-          if (dataFilterSettings_ != null)
-			dataFilterSettings_ =
+          if (dataFilterSettings_ != null) {
+            dataFilterSettings_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.newBuilder(dataFilterSettings_).mergeFrom(value).buildPartial();
-		else
-			dataFilterSettings_ = value;
+          } else {
+            dataFilterSettings_ = value;
+          }
           onChanged();
+        } else {
+          dataFilterSettingsBuilder_.mergeFrom(value);
         }
-		else
-			dataFilterSettingsBuilder_.mergeFrom(value);
 
         return this;
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -10235,43 +10172,44 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder getDataFilterSettingsBuilder() {
-
+        
         onChanged();
         return getDataFilterSettingsFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
-        if (dataFilterSettingsBuilder_ != null)
-			return dataFilterSettingsBuilder_.getMessageOrBuilder();
-		else
-			return dataFilterSettings_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
+        if (dataFilterSettingsBuilder_ != null) {
+          return dataFilterSettingsBuilder_.getMessageOrBuilder();
+        } else {
+          return dataFilterSettings_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
+        }
       }
       /**
        * <pre>
-       * The data filter settings
+       * The data filter settings 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder> 
           getDataFilterSettingsFieldBuilder() {
         if (dataFilterSettingsBuilder_ == null) {
-          dataFilterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          dataFilterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder>(
                   getDataFilterSettings(),
                   getParentForChildren(),
                   isClean());
@@ -10290,8 +10228,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      @Override
-	public boolean hasSearch() {
+      public boolean hasSearch() {
         return searchBuilder_ != null || search_ != null;
       }
       /**
@@ -10301,12 +10238,12 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
-        if (searchBuilder_ == null)
-			return search_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
-		else
-			return searchBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
+        if (searchBuilder_ == null) {
+          return search_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
+        } else {
+          return searchBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
@@ -10317,13 +10254,14 @@ public final class FitProtos {
        */
       public Builder setSearch(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (searchBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           search_ = value;
           onChanged();
+        } else {
+          searchBuilder_.setMessage(value);
         }
-		else
-			searchBuilder_.setMessage(value);
 
         return this;
       }
@@ -10339,9 +10277,9 @@ public final class FitProtos {
         if (searchBuilder_ == null) {
           search_ = builderForValue.build();
           onChanged();
+        } else {
+          searchBuilder_.setMessage(builderForValue.build());
         }
-		else
-			searchBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10354,15 +10292,16 @@ public final class FitProtos {
        */
       public Builder mergeSearch(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (searchBuilder_ == null) {
-          if (search_ != null)
-			search_ =
+          if (search_ != null) {
+            search_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(search_).mergeFrom(value).buildPartial();
-		else
-			search_ = value;
+          } else {
+            search_ = value;
+          }
           onChanged();
+        } else {
+          searchBuilder_.mergeFrom(value);
         }
-		else
-			searchBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10392,7 +10331,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getSearchBuilder() {
-
+        
         onChanged();
         return getSearchFieldBuilder().getBuilder();
       }
@@ -10403,13 +10342,13 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
-        if (searchBuilder_ != null)
-			return searchBuilder_.getMessageOrBuilder();
-		else
-			return search_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
+        if (searchBuilder_ != null) {
+          return searchBuilder_.getMessageOrBuilder();
+        } else {
+          return search_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
+        }
       }
       /**
        * <pre>
@@ -10419,10 +10358,11 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
           getSearchFieldBuilder() {
         if (searchBuilder_ == null) {
-          searchBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          searchBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
                   getSearch(),
                   getParentForChildren(),
                   isClean());
@@ -10436,51 +10376,51 @@ public final class FitProtos {
           uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> borderBuilder_;
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      @Override
-	public boolean hasBorder() {
+      public boolean hasBorder() {
         return borderBuilder_ != null || border_ != null;
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
-        if (borderBuilder_ == null)
-			return border_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
-		else
-			return borderBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
+        if (borderBuilder_ == null) {
+          return border_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
+        } else {
+          return borderBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder setBorder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (borderBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           border_ = value;
           onChanged();
+        } else {
+          borderBuilder_.setMessage(value);
         }
-		else
-			borderBuilder_.setMessage(value);
 
         return this;
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -10490,36 +10430,37 @@ public final class FitProtos {
         if (borderBuilder_ == null) {
           border_ = builderForValue.build();
           onChanged();
+        } else {
+          borderBuilder_.setMessage(builderForValue.build());
         }
-		else
-			borderBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder mergeBorder(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (borderBuilder_ == null) {
-          if (border_ != null)
-			border_ =
+          if (border_ != null) {
+            border_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(border_).mergeFrom(value).buildPartial();
-		else
-			border_ = value;
+          } else {
+            border_ = value;
+          }
           onChanged();
+        } else {
+          borderBuilder_.mergeFrom(value);
         }
-		else
-			borderBuilder_.mergeFrom(value);
 
         return this;
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -10537,43 +10478,44 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getBorderBuilder() {
-
+        
         onChanged();
         return getBorderFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
-        if (borderBuilder_ != null)
-			return borderBuilder_.getMessageOrBuilder();
-		else
-			return border_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
+        if (borderBuilder_ != null) {
+          return borderBuilder_.getMessageOrBuilder();
+        } else {
+          return border_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
+        }
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image
+       * The border to ignore at the edge of the image 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
           getBorderFieldBuilder() {
         if (borderBuilder_ == null) {
-          borderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          borderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
                   getBorder(),
                   getParentForChildren(),
                   isClean());
@@ -10587,51 +10529,51 @@ public final class FitProtos {
           uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> fittingBuilder_;
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      @Override
-	public boolean hasFitting() {
+      public boolean hasFitting() {
         return fittingBuilder_ != null || fitting_ != null;
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
-        if (fittingBuilder_ == null)
-			return fitting_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
-		else
-			return fittingBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
+        if (fittingBuilder_ == null) {
+          return fitting_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
+        } else {
+          return fittingBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder setFitting(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (fittingBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           fitting_ = value;
           onChanged();
+        } else {
+          fittingBuilder_.setMessage(value);
         }
-		else
-			fittingBuilder_.setMessage(value);
 
         return this;
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -10641,36 +10583,37 @@ public final class FitProtos {
         if (fittingBuilder_ == null) {
           fitting_ = builderForValue.build();
           onChanged();
+        } else {
+          fittingBuilder_.setMessage(builderForValue.build());
         }
-		else
-			fittingBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder mergeFitting(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (fittingBuilder_ == null) {
-          if (fitting_ != null)
-			fitting_ =
+          if (fitting_ != null) {
+            fitting_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(fitting_).mergeFrom(value).buildPartial();
-		else
-			fitting_ = value;
+          } else {
+            fitting_ = value;
+          }
           onChanged();
+        } else {
+          fittingBuilder_.mergeFrom(value);
         }
-		else
-			fittingBuilder_.mergeFrom(value);
 
         return this;
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -10688,43 +10631,44 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getFittingBuilder() {
-
+        
         onChanged();
         return getFittingFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
-        if (fittingBuilder_ != null)
-			return fittingBuilder_.getMessageOrBuilder();
-		else
-			return fitting_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
+        if (fittingBuilder_ != null) {
+          return fittingBuilder_.getMessageOrBuilder();
+        } else {
+          return fitting_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
+        }
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate
+       * The square radius to use for fitting around each candidate 
        * </pre>
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
           getFittingFieldBuilder() {
         if (fittingBuilder_ == null) {
-          fittingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          fittingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
                   getFitting(),
                   getParentForChildren(),
                   isClean());
@@ -10741,8 +10685,7 @@ public final class FitProtos {
        *
        * <code>bool include_neighbours = 7;</code>
        */
-      @Override
-	public boolean getIncludeNeighbours() {
+      public boolean getIncludeNeighbours() {
         return includeNeighbours_;
       }
       /**
@@ -10753,7 +10696,7 @@ public final class FitProtos {
        * <code>bool include_neighbours = 7;</code>
        */
       public Builder setIncludeNeighbours(boolean value) {
-
+        
         includeNeighbours_ = value;
         onChanged();
         return this;
@@ -10766,7 +10709,7 @@ public final class FitProtos {
        * <code>bool include_neighbours = 7;</code>
        */
       public Builder clearIncludeNeighbours() {
-
+        
         includeNeighbours_ = false;
         onChanged();
         return this;
@@ -10780,8 +10723,7 @@ public final class FitProtos {
        *
        * <code>double neighbour_height_threshold = 8;</code>
        */
-      @Override
-	public double getNeighbourHeightThreshold() {
+      public double getNeighbourHeightThreshold() {
         return neighbourHeightThreshold_;
       }
       /**
@@ -10792,7 +10734,7 @@ public final class FitProtos {
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public Builder setNeighbourHeightThreshold(double value) {
-
+        
         neighbourHeightThreshold_ = value;
         onChanged();
         return this;
@@ -10805,7 +10747,7 @@ public final class FitProtos {
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public Builder clearNeighbourHeightThreshold() {
-
+        
         neighbourHeightThreshold_ = 0D;
         onChanged();
         return this;
@@ -10819,8 +10761,7 @@ public final class FitProtos {
        *
        * <code>double residuals_threshold = 9;</code>
        */
-      @Override
-	public double getResidualsThreshold() {
+      public double getResidualsThreshold() {
         return residualsThreshold_;
       }
       /**
@@ -10831,7 +10772,7 @@ public final class FitProtos {
        * <code>double residuals_threshold = 9;</code>
        */
       public Builder setResidualsThreshold(double value) {
-
+        
         residualsThreshold_ = value;
         onChanged();
         return this;
@@ -10844,7 +10785,7 @@ public final class FitProtos {
        * <code>double residuals_threshold = 9;</code>
        */
       public Builder clearResidualsThreshold() {
-
+        
         residualsThreshold_ = 0D;
         onChanged();
         return this;
@@ -10860,8 +10801,7 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      @Override
-	public boolean hasDuplicateDistance() {
+      public boolean hasDuplicateDistance() {
         return duplicateDistanceBuilder_ != null || duplicateDistance_ != null;
       }
       /**
@@ -10871,12 +10811,12 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
-        if (duplicateDistanceBuilder_ == null)
-			return duplicateDistance_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
-		else
-			return duplicateDistanceBuilder_.getMessage();
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
+        if (duplicateDistanceBuilder_ == null) {
+          return duplicateDistance_ == null ? uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
+        } else {
+          return duplicateDistanceBuilder_.getMessage();
+        }
       }
       /**
        * <pre>
@@ -10887,13 +10827,14 @@ public final class FitProtos {
        */
       public Builder setDuplicateDistance(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (duplicateDistanceBuilder_ == null) {
-          if (value == null)
-			throw new NullPointerException();
+          if (value == null) {
+            throw new NullPointerException();
+          }
           duplicateDistance_ = value;
           onChanged();
+        } else {
+          duplicateDistanceBuilder_.setMessage(value);
         }
-		else
-			duplicateDistanceBuilder_.setMessage(value);
 
         return this;
       }
@@ -10909,9 +10850,9 @@ public final class FitProtos {
         if (duplicateDistanceBuilder_ == null) {
           duplicateDistance_ = builderForValue.build();
           onChanged();
+        } else {
+          duplicateDistanceBuilder_.setMessage(builderForValue.build());
         }
-		else
-			duplicateDistanceBuilder_.setMessage(builderForValue.build());
 
         return this;
       }
@@ -10924,15 +10865,16 @@ public final class FitProtos {
        */
       public Builder mergeDuplicateDistance(uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter value) {
         if (duplicateDistanceBuilder_ == null) {
-          if (duplicateDistance_ != null)
-			duplicateDistance_ =
+          if (duplicateDistance_ != null) {
+            duplicateDistance_ =
               uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.newBuilder(duplicateDistance_).mergeFrom(value).buildPartial();
-		else
-			duplicateDistance_ = value;
+          } else {
+            duplicateDistance_ = value;
+          }
           onChanged();
+        } else {
+          duplicateDistanceBuilder_.mergeFrom(value);
         }
-		else
-			duplicateDistanceBuilder_.mergeFrom(value);
 
         return this;
       }
@@ -10962,7 +10904,7 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getDuplicateDistanceBuilder() {
-
+        
         onChanged();
         return getDuplicateDistanceFieldBuilder().getBuilder();
       }
@@ -10973,13 +10915,13 @@ public final class FitProtos {
        *
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
-        if (duplicateDistanceBuilder_ != null)
-			return duplicateDistanceBuilder_.getMessageOrBuilder();
-		else
-			return duplicateDistance_ == null ?
-			      uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
+      public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
+        if (duplicateDistanceBuilder_ != null) {
+          return duplicateDistanceBuilder_.getMessageOrBuilder();
+        } else {
+          return duplicateDistance_ == null ?
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
+        }
       }
       /**
        * <pre>
@@ -10989,10 +10931,11 @@ public final class FitProtos {
        * <code>.uk.ac.sussex.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
+          uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
           getDuplicateDistanceFieldBuilder() {
         if (duplicateDistanceBuilder_ == null) {
-          duplicateDistanceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+          duplicateDistanceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
                   getDuplicateDistance(),
                   getParentForChildren(),
                   isClean());
@@ -11010,8 +10953,7 @@ public final class FitProtos {
        *
        * <code>int32 failures_limit = 11;</code>
        */
-      @Override
-	public int getFailuresLimit() {
+      public int getFailuresLimit() {
         return failuresLimit_;
       }
       /**
@@ -11023,7 +10965,7 @@ public final class FitProtos {
        * <code>int32 failures_limit = 11;</code>
        */
       public Builder setFailuresLimit(int value) {
-
+        
         failuresLimit_ = value;
         onChanged();
         return this;
@@ -11037,7 +10979,7 @@ public final class FitProtos {
        * <code>int32 failures_limit = 11;</code>
        */
       public Builder clearFailuresLimit() {
-
+        
         failuresLimit_ = 0;
         onChanged();
         return this;
@@ -11046,52 +10988,49 @@ public final class FitProtos {
       private double passRate_ ;
       /**
        * <pre>
-       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
        * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
        * </pre>
        *
        * <code>double pass_rate = 12;</code>
        */
-      @Override
-	public double getPassRate() {
+      public double getPassRate() {
         return passRate_;
       }
       /**
        * <pre>
-       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
        * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
        * </pre>
        *
        * <code>double pass_rate = 12;</code>
        */
       public Builder setPassRate(double value) {
-
+        
         passRate_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
        * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
        * </pre>
        *
        * <code>double pass_rate = 12;</code>
        */
       public Builder clearPassRate() {
-
+        
         passRate_ = 0D;
         onChanged();
         return this;
       }
-      @Override
-	public final Builder setUnknownFields(
+      public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      @Override
-	public final Builder mergeUnknownFields(
+      public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -11112,8 +11051,7 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FitEngineSettings>
         PARSER = new com.google.protobuf.AbstractParser<FitEngineSettings>() {
-      @Override
-	public FitEngineSettings parsePartialFrom(
+      public FitEngineSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -11130,48 +11068,47 @@ public final class FitProtos {
       return PARSER;
     }
 
-    @Override
-	public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
+    public uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
-  private static final
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable;
+      internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -11180,89 +11117,94 @@ public final class FitProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    final java.lang.String[] descriptorData = {
-      "\n\tfit.proto\022\025gdsc.smlm.data.config\"\215\005\n\021F" +
-      "itSolverSettings\022\021\n\tfixed_psf\030\001 \001(\010\022\"\n\032d" +
-      "isable_background_fitting\030\002 \001(\010\022\036\n\026disab" +
-      "le_signal_fitting\030\003 \001(\010\0224\n\nfit_solver\030\004 " +
-      "\001(\0162 .uk.ac.sussex.gdsc.smlm.data.config.FitSolver\022\030\n" +
-      "\020fixed_iterations\030\005 \001(\010\022\026\n\016max_iteration" +
-      "s\030\006 \001(\005\022\032\n\022relative_threshold\030\007 \001(\001\022\032\n\022a" +
-      "bsolute_threshold\030\010 \001(\001\022$\n\034parameter_rel" +
-      "ative_threshold\030\t \001(\001\022$\n\034parameter_absol" +
-      "ute_threshold\030\n \001(\001\022\016\n\006lambda\030\013 \001(\001\022:\n\rs",
-      "earch_method\030\014 \001(\0162#.gdsc.smlm.data.conf" +
-      "ig.SearchMethod\022\"\n\032gradient_line_minimis" +
-      "ation\030\r \001(\010\022\024\n\014model_camera\030\016 \001(\010\022 \n\030max" +
-      "_function_evaluations\030\017 \001(\005\022\024\n\014use_clamp" +
-      "ing\030\020 \001(\010\022\034\n\024use_dynamic_clamping\030\021 \001(\010\022" +
-      "\024\n\014clamp_values\030\022 \003(\001\022C\n\022line_search_met" +
-      "hod\030\023 \001(\0162\'.uk.ac.sussex.gdsc.smlm.data.config.LineSe" +
-      "archMethod\"\371\002\n\016FilterSettings\022\024\n\014shift_f" +
-      "actor\030\001 \001(\001\022\027\n\017signal_strength\030\002 \001(\001\022\023\n\013" +
-      "min_photons\030\003 \001(\001\022\033\n\023precision_threshold",
-      "\030\004 \001(\001\022\030\n\020min_width_factor\030\006 \001(\001\022\030\n\020max_" +
-      "width_factor\030\007 \001(\001\022\035\n\025disable_simple_fil" +
-      "ter\030\010 \001(\010\022\024\n\014smart_filter\030\t \001(\010\022\033\n\023smart" +
-      "_filter_string\030\n \001(\t\022@\n\020precision_method" +
-      "\030\013 \001(\0162&.uk.ac.sussex.gdsc.smlm.data.config.Precision" +
-      "Method\022\r\n\005min_z\030\014 \001(\001\022\r\n\005max_z\030\r \001(\001J\004\010\005" +
-      "\020\006R\032precision_using_background\"\224\001\n\013FitSe" +
-      "ttings\022E\n\023fit_solver_settings\030\001 \001(\0132(.gd" +
-      "sc.smlm.data.config.FitSolverSettings\022>\n" +
-      "\017filter_settings\030\002 \001(\0132%.uk.ac.sussex.gdsc.smlm.data.",
-      "config.FilterSettings\"4\n\021RelativeParamet" +
-      "er\022\r\n\005value\030\001 \001(\001\022\020\n\010absolute\030\002 \001(\010\"\217\001\n\n" +
-      "DataFilter\022C\n\022data_filter_method\030\001 \001(\0162\'" +
-      ".uk.ac.sussex.gdsc.smlm.data.config.DataFilterMethod\022" +
-      "<\n\nparameters\030\002 \003(\0132(.uk.ac.sussex.gdsc.smlm.data.con" +
-      "fig.RelativeParameter\"\216\001\n\022DataFilterSett" +
-      "ings\022?\n\020data_filter_type\030\001 \001(\0162%.gdsc.sm" +
-      "lm.data.config.DataFilterType\0227\n\014data_fi" +
-      "lters\030\002 \003(\0132!.uk.ac.sussex.gdsc.smlm.data.config.Data" +
-      "Filter\"\326\004\n\021FitEngineSettings\0228\n\014fit_sett",
-      "ings\030\001 \001(\0132\".uk.ac.sussex.gdsc.smlm.data.config.FitSe" +
-      "ttings\022A\n\014noise_method\030\002 \001(\0162+.uk.ac.sussex.gdsc.smlm" +
-      ".data.config.NoiseEstimatorMethod\022G\n\024dat" +
-      "a_filter_settings\030\003 \001(\0132).uk.ac.sussex.gdsc.smlm.data" +
-      ".config.DataFilterSettings\0228\n\006search\030\004 \001" +
-      "(\0132(.uk.ac.sussex.gdsc.smlm.data.config.RelativeParam" +
-      "eter\0228\n\006border\030\005 \001(\0132(.uk.ac.sussex.gdsc.smlm.data.co" +
-      "nfig.RelativeParameter\0229\n\007fitting\030\006 \001(\0132" +
-      "(.uk.ac.sussex.gdsc.smlm.data.config.RelativeParamete" +
-      "r\022\032\n\022include_neighbours\030\007 \001(\010\022\"\n\032neighbo",
-      "ur_height_threshold\030\010 \001(\001\022\033\n\023residuals_t" +
-      "hreshold\030\t \001(\001\022D\n\022duplicate_distance\030\n \001" +
-      "(\0132(.uk.ac.sussex.gdsc.smlm.data.config.RelativeParam" +
-      "eter\022\026\n\016failures_limit\030\013 \001(\005\022\021\n\tpass_rat" +
-      "e\030\014 \001(\001*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n\007LVM" +
-      "_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_ML" +
-      "E\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014Searc" +
-      "hMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWELL\020\001\022" +
-      "\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMAES" +
-      "\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CONJUGA",
-      "TE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020LineSearch" +
-      "Method\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022\n\016PARTIAL_" +
-      "IGNORE\020\002*k\n\017PrecisionMethod\022\027\n\023PRECISION" +
-      "_METHOD_NA\020\000\022\r\n\tMORTENSEN\020\001\022\036\n\032MORTENSEN" +
-      "_LOCAL_BACKGROUND\020\002\022\020\n\014POISSON_CRLB\020\003*6\n" +
-      "\016DataFilterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENC" +
-      "E\020\001\022\010\n\004JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEA" +
-      "N\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014" +
-      "\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstima" +
-      "torMethod\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXE",
-      "LS\020\001\022%\n!RESIDUALS_LEAST_MEDIAN_OF_SQUARE" +
-      "S\020\002\022&\n\"RESIDUALS_LEAST_TRIMMED_OF_SQUARE" +
-      "S\020\003\022#\n\037RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004" +
-      "\022+\n\'QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUA" +
-      "RES\020\005\022,\n(QUICK_RESIDUALS_LEAST_TRIMMED_O" +
-      "F_SQUARES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEA" +
-      "N_OF_SQUARES\020\007B\013B\tFitProtosb\006proto3"
+    java.lang.String[] descriptorData = {
+      "\n\tfit.proto\022\"uk.ac.sussex.gdsc.smlm.data" +
+      ".config\"\264\005\n\021FitSolverSettings\022\021\n\tfixed_p" +
+      "sf\030\001 \001(\010\022\"\n\032disable_background_fitting\030\002" +
+      " \001(\010\022\036\n\026disable_signal_fitting\030\003 \001(\010\022A\n\n" +
+      "fit_solver\030\004 \001(\0162-.uk.ac.sussex.gdsc.sml" +
+      "m.data.config.FitSolver\022\030\n\020fixed_iterati" +
+      "ons\030\005 \001(\010\022\026\n\016max_iterations\030\006 \001(\005\022\032\n\022rel" +
+      "ative_threshold\030\007 \001(\001\022\032\n\022absolute_thresh" +
+      "old\030\010 \001(\001\022$\n\034parameter_relative_threshol" +
+      "d\030\t \001(\001\022$\n\034parameter_absolute_threshold\030",
+      "\n \001(\001\022\016\n\006lambda\030\013 \001(\001\022G\n\rsearch_method\030\014" +
+      " \001(\01620.uk.ac.sussex.gdsc.smlm.data.confi" +
+      "g.SearchMethod\022\"\n\032gradient_line_minimisa" +
+      "tion\030\r \001(\010\022\024\n\014model_camera\030\016 \001(\010\022 \n\030max_" +
+      "function_evaluations\030\017 \001(\005\022\024\n\014use_clampi" +
+      "ng\030\020 \001(\010\022\034\n\024use_dynamic_clamping\030\021 \001(\010\022\024" +
+      "\n\014clamp_values\030\022 \003(\001\022P\n\022line_search_meth" +
+      "od\030\023 \001(\01624.uk.ac.sussex.gdsc.smlm.data.c" +
+      "onfig.LineSearchMethod\"\206\003\n\016FilterSetting" +
+      "s\022\024\n\014shift_factor\030\001 \001(\001\022\027\n\017signal_streng",
+      "th\030\002 \001(\001\022\023\n\013min_photons\030\003 \001(\001\022\033\n\023precisi" +
+      "on_threshold\030\004 \001(\001\022\030\n\020min_width_factor\030\006" +
+      " \001(\001\022\030\n\020max_width_factor\030\007 \001(\001\022\035\n\025disabl" +
+      "e_simple_filter\030\010 \001(\010\022\024\n\014smart_filter\030\t " +
+      "\001(\010\022\033\n\023smart_filter_string\030\n \001(\t\022M\n\020prec" +
+      "ision_method\030\013 \001(\01623.uk.ac.sussex.gdsc.s" +
+      "mlm.data.config.PrecisionMethod\022\r\n\005min_z" +
+      "\030\014 \001(\001\022\r\n\005max_z\030\r \001(\001J\004\010\005\020\006R\032precision_u" +
+      "sing_background\"\256\001\n\013FitSettings\022R\n\023fit_s" +
+      "olver_settings\030\001 \001(\01325.uk.ac.sussex.gdsc",
+      ".smlm.data.config.FitSolverSettings\022K\n\017f" +
+      "ilter_settings\030\002 \001(\01322.uk.ac.sussex.gdsc" +
+      ".smlm.data.config.FilterSettings\"4\n\021Rela" +
+      "tiveParameter\022\r\n\005value\030\001 \001(\001\022\020\n\010absolute" +
+      "\030\002 \001(\010\"\251\001\n\nDataFilter\022P\n\022data_filter_met" +
+      "hod\030\001 \001(\01624.uk.ac.sussex.gdsc.smlm.data." +
+      "config.DataFilterMethod\022I\n\nparameters\030\002 " +
+      "\003(\01325.uk.ac.sussex.gdsc.smlm.data.config" +
+      ".RelativeParameter\"\250\001\n\022DataFilterSetting" +
+      "s\022L\n\020data_filter_type\030\001 \001(\01622.uk.ac.suss",
+      "ex.gdsc.smlm.data.config.DataFilterType\022" +
+      "D\n\014data_filters\030\002 \003(\0132..uk.ac.sussex.gds" +
+      "c.smlm.data.config.DataFilter\"\261\005\n\021FitEng" +
+      "ineSettings\022E\n\014fit_settings\030\001 \001(\0132/.uk.a" +
+      "c.sussex.gdsc.smlm.data.config.FitSettin" +
+      "gs\022N\n\014noise_method\030\002 \001(\01628.uk.ac.sussex." +
+      "gdsc.smlm.data.config.NoiseEstimatorMeth" +
+      "od\022T\n\024data_filter_settings\030\003 \001(\01326.uk.ac" +
+      ".sussex.gdsc.smlm.data.config.DataFilter" +
+      "Settings\022E\n\006search\030\004 \001(\01325.uk.ac.sussex.",
+      "gdsc.smlm.data.config.RelativeParameter\022" +
+      "E\n\006border\030\005 \001(\01325.uk.ac.sussex.gdsc.smlm" +
+      ".data.config.RelativeParameter\022F\n\007fittin" +
+      "g\030\006 \001(\01325.uk.ac.sussex.gdsc.smlm.data.co" +
+      "nfig.RelativeParameter\022\032\n\022include_neighb" +
+      "ours\030\007 \001(\010\022\"\n\032neighbour_height_threshold" +
+      "\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001\022Q\n\022d" +
+      "uplicate_distance\030\n \001(\01325.uk.ac.sussex.g" +
+      "dsc.smlm.data.config.RelativeParameter\022\026" +
+      "\n\016failures_limit\030\013 \001(\005\022\021\n\tpass_rate\030\014 \001(",
+      "\001*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n\007LVM_MLE\020\001" +
+      "\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_MLE\020\004\022\031\n" +
+      "\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014SearchMetho" +
+      "d\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWELL\020\001\022\022\n\016POW" +
+      "ELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMAES\020\004\022\031\n\025" +
+      "CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CONJUGATE_GRA" +
+      "DIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020LineSearchMethod" +
+      "\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022\n\016PARTIAL_IGNORE" +
+      "\020\002*k\n\017PrecisionMethod\022\027\n\023PRECISION_METHO" +
+      "D_NA\020\000\022\r\n\tMORTENSEN\020\001\022\036\n\032MORTENSEN_LOCAL",
+      "_BACKGROUND\020\002\022\020\n\014POISSON_CRLB\020\003*6\n\016DataF" +
+      "ilterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n" +
+      "\004JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n" +
+      "\nBLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUS" +
+      "SIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMet" +
+      "hod\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%" +
+      "\n!RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n" +
+      "\"RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n" +
+      "\037RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QU" +
+      "ICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\005\022",
+      ",\n(QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUA" +
+      "RES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_OF_S" +
+      "QUARES\020\007B\013B\tFitProtosb\006proto3"
     };
-    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          @Override
-		public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;
@@ -11272,47 +11214,47 @@ public final class FitProtos {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSolverSettings_descriptor,
         new java.lang.String[] { "FixedPsf", "DisableBackgroundFitting", "DisableSignalFitting", "FitSolver", "FixedIterations", "MaxIterations", "RelativeThreshold", "AbsoluteThreshold", "ParameterRelativeThreshold", "ParameterAbsoluteThreshold", "Lambda", "SearchMethod", "GradientLineMinimisation", "ModelCamera", "MaxFunctionEvaluations", "UseClamping", "UseDynamicClamping", "ClampValues", "LineSearchMethod", });
-    internal_static_gdsc_smlm_data_config_FilterSettings_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_FilterSettings_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_FilterSettings_descriptor,
         new java.lang.String[] { "ShiftFactor", "SignalStrength", "MinPhotons", "PrecisionThreshold", "MinWidthFactor", "MaxWidthFactor", "DisableSimpleFilter", "SmartFilter", "SmartFilterString", "PrecisionMethod", "MinZ", "MaxZ", });
-    internal_static_gdsc_smlm_data_config_FitSettings_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_FitSettings_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitSettings_descriptor,
         new java.lang.String[] { "FitSolverSettings", "FilterSettings", });
-    internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_RelativeParameter_descriptor,
         new java.lang.String[] { "Value", "Absolute", });
-    internal_static_gdsc_smlm_data_config_DataFilter_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_DataFilter_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilter_descriptor,
         new java.lang.String[] { "DataFilterMethod", "Parameters", });
-    internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(5);
-    internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_DataFilterSettings_descriptor,
         new java.lang.String[] { "DataFilterType", "DataFilters", });
-    internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor =
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_descriptor =
       getDescriptor().getMessageTypes().get(6);
-    internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable = new
+    internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor,
+        internal_static_uk_ac_sussex_gdsc_smlm_data_config_FitEngineSettings_descriptor,
         new java.lang.String[] { "FitSettings", "NoiseMethod", "DataFilterSettings", "Search", "Border", "Fitting", "IncludeNeighbours", "NeighbourHeightThreshold", "ResidualsThreshold", "DuplicateDistance", "FailuresLimit", "PassRate", });
   }
 

@@ -19,7 +19,7 @@ syntax = "proto2";
 // License: BSD 2-Clause License
 package TSF;
 
-option java_package = "gdsc.smlm.tsf";
+option java_package = "uk.ac.sussex.gdsc.smlm.tsf";
 option java_outer_classname = "TSFProtos";
 
 enum FitMode {

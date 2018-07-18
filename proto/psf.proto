@@ -3,7 +3,7 @@ syntax = "proto3";
 // ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
 // Authors: Alex Herbert, 2017 
 // License: GPL V3
-package gdsc.smlm.data.config;
+package uk.ac.sussex.gdsc.smlm.data.config;
 
 option java_outer_classname = "PSFProtos";
 

@@ -93,11 +93,11 @@ public final class UnitProtos {
     public static final int NM_VALUE = 3;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -126,19 +126,16 @@ public final class UnitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         DistanceUnit> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<DistanceUnit>() {
-            @Override
-			public DistanceUnit findValueByNumber(int number) {
+            public DistanceUnit findValueByNumber(int number) {
               return DistanceUnit.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -151,11 +148,13 @@ public final class UnitProtos {
 
     public static DistanceUnit valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -230,11 +229,11 @@ public final class UnitProtos {
     public static final int COUNT_VALUE = 2;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -262,19 +261,16 @@ public final class UnitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         IntensityUnit> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<IntensityUnit>() {
-            @Override
-			public IntensityUnit findValueByNumber(int number) {
+            public IntensityUnit findValueByNumber(int number) {
               return IntensityUnit.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -287,11 +283,13 @@ public final class UnitProtos {
 
     public static IntensityUnit valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -366,11 +364,11 @@ public final class UnitProtos {
     public static final int DEGREE_VALUE = 2;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -398,19 +396,16 @@ public final class UnitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         AngleUnit> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<AngleUnit>() {
-            @Override
-			public AngleUnit findValueByNumber(int number) {
+            public AngleUnit findValueByNumber(int number) {
               return AngleUnit.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -423,11 +418,13 @@ public final class UnitProtos {
 
     public static AngleUnit valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -518,11 +515,11 @@ public final class UnitProtos {
     public static final int MILLISECOND_VALUE = 3;
 
 
-    @Override
-	public final int getNumber() {
-      if (this == UNRECOGNIZED)
-		throw new java.lang.IllegalArgumentException(
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
+      }
       return value;
     }
 
@@ -551,19 +548,16 @@ public final class UnitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         TimeUnit> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<TimeUnit>() {
-            @Override
-			public TimeUnit findValueByNumber(int number) {
+            public TimeUnit findValueByNumber(int number) {
               return TimeUnit.forNumber(number);
             }
           };
 
-    @Override
-	public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    @Override
-	public final com.google.protobuf.Descriptors.EnumDescriptor
+    public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -576,11 +570,13 @@ public final class UnitProtos {
 
     public static TimeUnit valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor())
-		throw new java.lang.IllegalArgumentException(
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
-      if (desc.getIndex() == -1)
-		return UNRECOGNIZED;
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
@@ -601,20 +597,20 @@ public final class UnitProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    final java.lang.String[] descriptorData = {
-      "\n\nunit.proto\022\025gdsc.smlm.data.config*?\n\014D" +
-      "istanceUnit\022\024\n\020DISTANCE_UNIT_NA\020\000\022\t\n\005PIX" +
-      "EL\020\001\022\006\n\002UM\020\002\022\006\n\002NM\020\003*=\n\rIntensityUnit\022\025\n" +
-      "\021INTENSITY_UNIT_NA\020\000\022\n\n\006PHOTON\020\001\022\t\n\005COUN" +
-      "T\020\002*6\n\tAngleUnit\022\021\n\rANGLE_UNIT_NA\020\000\022\n\n\006R" +
-      "ADIAN\020\001\022\n\n\006DEGREE\020\002*D\n\010TimeUnit\022\020\n\014TIME_" +
-      "UNIT_NA\020\000\022\t\n\005FRAME\020\001\022\n\n\006SECOND\020\002\022\017\n\013MILL" +
-      "ISECOND\020\003B\014B\nUnitProtosb\006proto3"
+    java.lang.String[] descriptorData = {
+      "\n\nunit.proto\022\"uk.ac.sussex.gdsc.smlm.dat" +
+      "a.config*?\n\014DistanceUnit\022\024\n\020DISTANCE_UNI" +
+      "T_NA\020\000\022\t\n\005PIXEL\020\001\022\006\n\002UM\020\002\022\006\n\002NM\020\003*=\n\rInt" +
+      "ensityUnit\022\025\n\021INTENSITY_UNIT_NA\020\000\022\n\n\006PHO" +
+      "TON\020\001\022\t\n\005COUNT\020\002*6\n\tAngleUnit\022\021\n\rANGLE_U" +
+      "NIT_NA\020\000\022\n\n\006RADIAN\020\001\022\n\n\006DEGREE\020\002*D\n\010Time" +
+      "Unit\022\020\n\014TIME_UNIT_NA\020\000\022\t\n\005FRAME\020\001\022\n\n\006SEC" +
+      "OND\020\002\022\017\n\013MILLISECOND\020\003B\014B\nUnitProtosb\006pr" +
+      "oto3"
     };
-    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          @Override
-		public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;
