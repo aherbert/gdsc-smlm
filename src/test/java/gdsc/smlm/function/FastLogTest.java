@@ -35,9 +35,9 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.function.ICSIFastLog.DataType;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestComplexity;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 
 @SuppressWarnings({ "unused", "javadoc" })
@@ -220,7 +220,7 @@ public class FastLogTest
 		final float e = (float) Math.log(v);
 		final float o = f.log(v);
 		final float error = FloatEquality.relativeError(e, o);
-		TestSettings.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
+		gdsc.test.TestLog.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
 			if (Double.isNaN(e) && Double.isNaN(o))
@@ -304,7 +304,7 @@ public class FastLogTest
 		final double e = Math.log(v);
 		final double o = f.log(v);
 		final double error = DoubleEquality.relativeError(e, o);
-		TestSettings.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
+		gdsc.test.TestLog.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
 			if (Double.isNaN(e) && Double.isNaN(o))

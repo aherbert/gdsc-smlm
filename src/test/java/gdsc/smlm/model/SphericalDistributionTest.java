@@ -33,6 +33,7 @@ import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -80,7 +81,7 @@ public class SphericalDistributionTest
 		dist.setUseRejectionMethod(true);
 		final long time2 = getRunTime(dist);
 		TestAssert.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d\n", time2, time1);
-		TestSettings.info("Rejection = %d, Transformation = %d\n", time2, time1);
+		TestLog.info("Rejection = %d, Transformation = %d\n", time2, time1);
 	}
 
 	private static long getRunTime(SphericalDistribution dist)

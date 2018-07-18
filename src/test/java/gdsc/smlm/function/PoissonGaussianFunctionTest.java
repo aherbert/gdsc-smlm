@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.Maths;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -126,7 +127,7 @@ public class PoissonGaussianFunctionTest
 		final long t1 = getTime(noise2, N, x, true);
 		final long t2 = getTime(noise2, N, x, false);
 
-		TestSettings.info("Picard %d : Pade %d (%fx)\n", t1, t2, t1 / (double) t2);
+		TestLog.info("Picard %d : Pade %d (%fx)\n", t1, t2, t1 / (double) t2);
 		TestAssert.assertTrue(t2 < t1, "Picard %d < Pade %d", t1, t2);
 	}
 
@@ -235,7 +236,7 @@ public class PoissonGaussianFunctionTest
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestLog.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}

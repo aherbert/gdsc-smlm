@@ -30,7 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestAssert;
-import gdsc.test.TestSettings;
+import gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunction2Test
@@ -171,7 +171,7 @@ public class PoissonGaussianFunction2Test
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestLog.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}

@@ -52,6 +52,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.test.TestAssert;
 import gdsc.test.TestCounter;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 /**
@@ -369,7 +370,7 @@ public class LVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1,
+		TestLog.logSpeedTestResult(time2 < time1,
 				"GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n", time1, nparams, type, time2,
 				(1.0 * time1) / time2);
 	}
@@ -616,7 +617,7 @@ public class LVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n",
+		TestLog.logSpeedTestResult(time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n",
 				type, precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
@@ -987,15 +988,15 @@ public class LVMGradientProcedureTest
 			//System.out.printf("%s [%d] p12m3  %f  %f\n", type, i, p123.value, s);
 
 			// The test for different or equal is not robust to different random seeds.
-			// TestAssert.fail has been changed for TestSettings.logFailure
+			// TestAssert.fail has been changed for TestLog.logFailure
 
 			if (type != Type.LSQ)
 			{
 				if (eq.almostEqualRelativeOrAbsolute(p123.value, s))
-					TestSettings.logFailure("p12b3 Same value @ %d (error=%s) : %s == %s\n", i,
+					TestLog.logFailure("p12b3 Same value @ %d (error=%s) : %s == %s\n", i,
 							DoubleEquality.relativeError(p123.value, s), p123.value, s);
 				if (eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-					TestSettings.logFailure("p12b3 Same gradient @ %d (error=%s) : %s vs %s\n", i,
+					TestLog.logFailure("p12b3 Same gradient @ %d (error=%s) : %s vs %s\n", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
 
@@ -1022,23 +1023,23 @@ public class LVMGradientProcedureTest
 							dj = j;
 						}
 					}
-					TestSettings.logFailure("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s\n", i, dj, error,
+					TestLog.logFailure("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s\n", i, dj, error,
 							Arrays.toString(alpha[dj]), Arrays.toString(m123[dj]));
 				}
 			}
 			else
 			{
 				if (!eq.almostEqualRelativeOrAbsolute(p123.value, s))
-					TestSettings.logFailure("p12b3 Not same value @ %d (error=%s) : %s == %s\n", i,
+					TestLog.logFailure("p12b3 Not same value @ %d (error=%s) : %s == %s\n", i,
 							DoubleEquality.relativeError(p123.value, s), p123.value, s);
 				if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-					TestSettings.logFailure("p12b3 Not same gradient @ %d (error=%s) : %s vs %s\n", i,
+					TestLog.logFailure("p12b3 Not same gradient @ %d (error=%s) : %s vs %s\n", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
 				for (int j = 0; j < alpha.length; j++)
 					//System.out.printf("%s !=\n%s\n\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
 					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
-						TestSettings.logFailure("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s\n", i, j,
+						TestLog.logFailure("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s\n", i, j,
 								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
 								Arrays.toString(m123[j]));
 			}

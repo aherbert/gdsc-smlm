@@ -27,8 +27,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 
 @SuppressWarnings({ "javadoc" })
 public class QuadraticAstigmatismZModelTest
@@ -79,7 +80,7 @@ public class QuadraticAstigmatismZModelTest
 			final double o2 = ds_dz2[1];
 
 			if (record)
-				TestSettings.info("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,
+				TestLog.info("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,
 						DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2));
 
 			//double error = DoubleEquality.relativeError(o, e);

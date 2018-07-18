@@ -33,8 +33,9 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
@@ -237,7 +238,7 @@ public class KernelFilterTest
 				}
 		}
 
-		TestSettings.info("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
+		TestLog.info("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
 		Assert.assertTrue(max < tolerance);
 	}
 
@@ -302,7 +303,7 @@ public class KernelFilterTest
 			ts.repeat();
 			if (TestSettings.allow(LogLevel.INFO))
 				ts.report(size);
-			TestSettings.logSpeedTestResult(ts.get(-3), ts.get(-1));
+			TestLog.logSpeedTestResult(ts.get(-3), ts.get(-1));
 		}
 	}
 

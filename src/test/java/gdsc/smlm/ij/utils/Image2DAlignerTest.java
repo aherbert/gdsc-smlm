@@ -29,7 +29,7 @@ import org.junit.Test;
 import gdsc.smlm.function.StandardFloatValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.test.TestSettings;
+import gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class Image2DAlignerTest
@@ -141,7 +141,7 @@ public class Image2DAlignerTest
 		else
 			result = a.align(target, refinements);
 		c = a.getCorrelation();
-		TestSettings.info("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
+		TestLog.info("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
 				java.util.Arrays.toString(result));
 
 		for (int i = 0; i < 2; i++)

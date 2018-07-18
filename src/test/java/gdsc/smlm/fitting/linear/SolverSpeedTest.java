@@ -37,6 +37,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.test.TestAssert;
 import gdsc.test.TestCounter;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -214,7 +215,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 > t1,
+		TestLog.logSpeedTestResult(t2 > t1,
 				"GaussJordanFloat = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", t1, t2, (1.0 * t1) / t2);
 	}
 
@@ -247,7 +248,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 < t1, "GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", t1,
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", t1,
 				t2, (1.0 * t1) / t2);
 	}
 
@@ -286,7 +287,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 > t1,
+		TestLog.logSpeedTestResult(t2 > t1,
 				"GaussJordanDouble = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", t1, t2, (1.0 * t1) / t2);
 	}
 
@@ -319,7 +320,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", t1,
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", t1,
 				t2, (1.0 * t1) / t2);
 	}
 
@@ -352,7 +353,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", t1,
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", t1,
 				t2, (1.0 * t1) / t2);
 	}
 
@@ -385,7 +386,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n",
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n",
 				t1, t2, (1.0 * t1) / t2);
 	}
 
@@ -418,7 +419,7 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestSettings.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solve = %d : %fx\n", t1, t2,
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solve = %d : %fx\n", t1, t2,
 				(1.0 * t1) / t2);
 	}
 

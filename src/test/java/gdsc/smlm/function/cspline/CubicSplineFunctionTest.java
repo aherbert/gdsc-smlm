@@ -50,9 +50,11 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.MessageProvider;
+import gdsc.test.TestComplexity;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 
 @SuppressWarnings({ "javadoc" })
@@ -105,8 +107,8 @@ public abstract class CubicSplineFunctionTest
 		scale = 2;
 		final QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(scale * gamma, scale * zDepth);
 		final int size = 40;
-		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ASTIGMATISM,
-				zModel);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
+				GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);
 		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.SIGNAL] = 1;
 		a[Gaussian2DFunction.X_POSITION] = size / scale;
@@ -190,7 +192,7 @@ public abstract class CubicSplineFunctionTest
 
 		final int[] gradientIndices = cf.gradientIndices();
 		if (TestSettings.allow(LogLevel.INFO))
-			TestSettings.info("Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
+			TestLog.info("Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
 
 		Assert.assertEquals("Incorrect number of peaks", cf.getN(), npeaks);
 
@@ -344,7 +346,7 @@ public abstract class CubicSplineFunctionTest
 											eq.almostEqualRelativeOrAbsolute(gradient, dyda));
 								}
 						}
-		TestSettings.info(new TestSettings.MessageProvider()
+		TestLog.info(new MessageProvider()
 		{
 			@Override
 			public String getMessage()
@@ -461,7 +463,7 @@ public abstract class CubicSplineFunctionTest
 									}
 								}
 						}
-		TestSettings.info(new TestSettings.MessageProvider()
+		TestLog.info(new MessageProvider()
 		{
 			@Override
 			public String getMessage()
@@ -495,8 +497,8 @@ public abstract class CubicSplineFunctionTest
 									for (final double cy2 : testcy2)
 										for (final double cz2 : testcz2)
 										{
-											final double[] a = createParameters(background, signal1, cx1, cy1, cz1, signal2,
-													cx2, cy2, cz2);
+											final double[] a = createParameters(background, signal1, cx1, cy1, cz1,
+													signal2, cx2, cy2, cz2);
 
 											final double[] e = p0.getValues(f1, a);
 											final double[] o1 = p1.getValues(f1, a);
@@ -578,8 +580,8 @@ public abstract class CubicSplineFunctionTest
 									for (final double cy2 : testcy2)
 										for (final double cz2 : testcz2)
 										{
-											final double[] a = createParameters(background, signal1, cx1, cy1, cz1, signal2,
-													cx2, cy2, cz2);
+											final double[] a = createParameters(background, signal1, cx1, cy1, cz1,
+													signal2, cx2, cy2, cz2);
 
 											//System.out.println(java.util.Arrays.toString(a));
 
@@ -619,7 +621,7 @@ public abstract class CubicSplineFunctionTest
 															eq.almostEqualRelativeOrAbsolute(gradient, dyda));
 												}
 										}
-		TestSettings.info(new TestSettings.MessageProvider()
+		TestLog.info(new MessageProvider()
 		{
 			@Override
 			public String getMessage()
@@ -700,8 +702,8 @@ public abstract class CubicSplineFunctionTest
 									for (final double cy2 : testcy2)
 										for (final double cz2 : testcz2)
 										{
-											final double[] a = createParameters(background, signal1, cx1, cy1, cz1, signal2,
-													cx2, cy2, cz2);
+											final double[] a = createParameters(background, signal1, cx1, cy1, cz1,
+													signal2, cx2, cy2, cz2);
 
 											//System.out.println(java.util.Arrays.toString(a));
 
@@ -750,7 +752,7 @@ public abstract class CubicSplineFunctionTest
 													}
 												}
 										}
-		TestSettings.info(new TestSettings.MessageProvider()
+		TestLog.info(new MessageProvider()
 		{
 			@Override
 			public String getMessage()

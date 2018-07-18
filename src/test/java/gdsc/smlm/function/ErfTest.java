@@ -31,9 +31,10 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
 @SuppressWarnings({ "javadoc" })
@@ -117,7 +118,7 @@ public class ErfTest
 				//System.out.printf("x=%f, e=%f, o=%f, error=%f\n", x, e, o, error);
 				Assert.assertTrue(error < expected);
 			}
-		TestSettings.info("erfx %s max error = %g\n", erf.name, max);
+		TestLog.info("erfx %s max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -209,7 +210,7 @@ public class ErfTest
 					}
 				}
 
-		TestSettings.info("erfxx %s max error = %g\n", erf.name, max);
+		TestLog.info("erfxx %s max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -248,7 +249,7 @@ public class ErfTest
 			Assert.assertTrue(error < expected);
 		}
 
-		TestSettings.info("erfxx %s unit max error = %g\n", erf.name, max);
+		TestLog.info("erfxx %s unit max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -319,8 +320,8 @@ public class ErfTest
 		Assert.assertTrue(erf.name + " Gaussian approx integral is incorrect",
 				DoubleEquality.relativeError(sum1, sum3) < 1e-3);
 
-		TestSettings.info("%s Erf approx pixel unit max error = %f\n", erf.name, max);
-		TestSettings.info("%s Gaussian approx pixel unit max error = %f\n", erf.name, max2);
+		TestLog.info("%s Erf approx pixel unit max error = %f\n", erf.name, max);
+		TestLog.info("%s Gaussian approx pixel unit max error = %f\n", erf.name, max2);
 	}
 
 	private static class ErfTimingTask extends BaseTimingTask
@@ -453,7 +454,7 @@ public class ErfTest
 
 			final int n = steps * steps;
 			o = norm * sum / n;
-			TestSettings.info("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
+			TestLog.info("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
 		}
 
 		TestAssert.assertEqualsRelative(e, o, 1e-2);

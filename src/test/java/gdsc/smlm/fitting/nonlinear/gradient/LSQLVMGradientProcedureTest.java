@@ -43,6 +43,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.test.TestAssert;
 import gdsc.test.TestCounter;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 /**
@@ -292,7 +293,7 @@ public class LSQLVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : %s %d = %d : %fx\n", time1,
+		TestLog.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : %s %d = %d : %fx\n", time1,
 				factory.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
 	}
 
@@ -431,7 +432,7 @@ public class LSQLVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(!doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx\n",
+		TestLog.logSpeedTestResult(!doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx\n",
 				factory1.getClass().getSimpleName(), time1, factory2.getClass().getSimpleName(), nparams, time2,
 				(1.0 * time1) / time2);
 	}
@@ -539,7 +540,7 @@ public class LSQLVMGradientProcedureTest
 				betaList.add(beta.clone());
 				for (int j = 0; j < nparams; j++)
 					if (Math.abs(beta[j]) < 1e-6)
-						TestSettings.info("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
+						TestLog.info("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
 				// Solve
 				if (!solver.solve(p.getAlphaMatrix(), beta))
 					throw new AssertionError();
@@ -585,7 +586,7 @@ public class LSQLVMGradientProcedureTest
 				}
 
 				for (int i = 0; i < nparams; i++)
-					TestSettings.info("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
+					TestLog.info("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
 							func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
 							abs[i].getMean(), abs[i].getStandardDeviation());
 			}

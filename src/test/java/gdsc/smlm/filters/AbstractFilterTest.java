@@ -30,9 +30,9 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Random;
+import gdsc.test.LogLevel;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 
 @SuppressWarnings({ "javadoc" })
 public class AbstractFilterTest

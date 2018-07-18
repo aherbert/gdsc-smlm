@@ -45,8 +45,9 @@ import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -336,7 +337,7 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		TestSettings.logSpeedTestResult(start2 < start1,
+		TestLog.logSpeedTestResult(start2 < start1,
 				"%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "", start1,
 				nparams, start2, (1.0 * start1) / start2);
 	}
@@ -378,7 +379,7 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		TestSettings.logSpeedTestResult(start2 < start1,
+		TestLog.logSpeedTestResult(start2 < start1,
 				"GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n", start1, start2,
 				(1.0 * start1) / start2);
 	}

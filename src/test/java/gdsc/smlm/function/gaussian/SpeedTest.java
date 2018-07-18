@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 /**
@@ -346,7 +347,7 @@ public class SpeedTest
 		}
 		start2 = System.nanoTime() - start2;
 
-		TestSettings.logSpeedTestResult(start2 > start1, "%s = %d : %s = %d : %fx\n", f1.getClass().getName(), start1,
+		TestLog.logSpeedTestResult(start2 > start1, "%s = %d : %s = %d : %fx\n", f1.getClass().getName(), start1,
 				f2.getClass().getName(), start2, (1.0 * start2) / start1);
 	}
 

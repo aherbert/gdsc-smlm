@@ -27,8 +27,9 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Test;
 
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
 @SuppressWarnings({ "javadoc" })
@@ -111,7 +112,7 @@ public class FastMathTest
 		{
 			final double t1 = ts.get(-1).getMean();
 			final double t2 = ts.get(-k).getMean();
-			TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-k).getTask().getName(), t2,
+			TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-k).getTask().getName(), t2,
 					ts.get(-1).getTask().getName(), t1, t2 / t1);
 		}
 	}

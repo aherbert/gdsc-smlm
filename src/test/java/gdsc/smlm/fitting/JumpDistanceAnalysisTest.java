@@ -42,6 +42,7 @@ import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -722,6 +723,6 @@ public class JumpDistanceAnalysisTest
 
 	void log(String format, Object... args)
 	{
-		TestSettings.info(format, args);
+		TestLog.info(format, args);
 	}
 }

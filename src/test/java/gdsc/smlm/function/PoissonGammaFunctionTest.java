@@ -33,10 +33,11 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.test.LogLevel;
 import gdsc.test.TestAssert;
+import gdsc.test.TestComplexity;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings({ "javadoc" })
@@ -165,7 +166,7 @@ public class PoissonGammaFunctionTest
 		}
 
 		//if (p2 < 0.98 || p2 > 1.02)
-		TestSettings.info("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
+		TestLog.info("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
 
 		return p2;
 	}
@@ -288,7 +289,7 @@ public class PoissonGammaFunctionTest
 		}
 
 		final double f = (double) fail / list.size();
-		TestSettings.info("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
+		TestLog.info("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
 		if (approx)
 			Assert.assertTrue(f < 0.2);
 		else

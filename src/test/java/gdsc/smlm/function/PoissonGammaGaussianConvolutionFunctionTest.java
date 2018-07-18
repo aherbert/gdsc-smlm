@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import gdsc.test.TestAssert;
-import gdsc.test.TestSettings;
+import gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianConvolutionFunctionTest
@@ -131,7 +131,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		}
 
 		if (p < 0.98 || p > 1.02)
-			TestSettings.debug("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
+			TestLog.debug("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
 
 		// Do a formal integration
 		double p2 = 0;
@@ -146,7 +146,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestLog.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}

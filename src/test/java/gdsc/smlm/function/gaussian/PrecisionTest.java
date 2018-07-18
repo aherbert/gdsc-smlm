@@ -27,6 +27,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 /**
@@ -423,14 +424,14 @@ public class PrecisionTest
 			for (;;)
 			{
 				maxx *= 2;
-				TestSettings.info("maxx = %d\n", maxx);
+				TestLog.info("maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
 						1e-3);
 			}
 		}
 		catch (final AssertionError e)
 		{
-			TestSettings.infoln(e.getMessage());
+			TestLog.infoln(e.getMessage());
 			//e.printStackTrace();
 			throw e;
 		}
@@ -487,13 +488,13 @@ public class PrecisionTest
 			for (;;)
 			{
 				maxx *= 2;
-				TestSettings.info("maxx = %d\n", maxx);
+				TestLog.info("maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
 			}
 		}
 		catch (final AssertionError e)
 		{
-			TestSettings.infoln(e.getMessage());
+			TestLog.infoln(e.getMessage());
 			//e.printStackTrace();
 			throw e;
 		}
@@ -611,7 +612,7 @@ public class PrecisionTest
 			c2 = f2.getClass();
 		}
 
-		TestSettings.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n",
+		TestLog.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n",
 				(noSum) ? "No sum " : "", c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 
@@ -751,7 +752,7 @@ public class PrecisionTest
 			c2 = f2.getClass();
 		}
 
-		TestSettings.logSpeedTestResult(time1 < time2, "%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
+		TestLog.logSpeedTestResult(time1 < time2, "%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
 				c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 

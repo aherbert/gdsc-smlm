@@ -33,8 +33,9 @@ import org.junit.Test;
 
 import gdsc.smlm.filters.FHTFilter.Operation;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -345,7 +346,7 @@ public class JTransformsTest
 
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
-		TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-2).getTask().getName(), t2,
+		TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-2).getTask().getName(), t2,
 				ts.get(-1).getTask().getName(), t1, t2 / t1);
 
 	}

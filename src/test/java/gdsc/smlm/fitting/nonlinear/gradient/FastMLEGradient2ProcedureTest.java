@@ -46,6 +46,7 @@ import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.test.TestAssert;
 import gdsc.test.TestCounter;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 /**
@@ -320,7 +321,7 @@ public class FastMLEGradient2ProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1,
+		TestLog.logSpeedTestResult(time2 < time1,
 				"GradientCalculator = %d : FastMLEGradient2Procedure %d = %d : %fx\n", time1, nparams, time2,
 				(1.0 * time1) / time2);
 	}
@@ -444,7 +445,7 @@ public class FastMLEGradient2ProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.info("Standard = %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
+		TestLog.info("Standard = %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1 * 1.5);
 	}
 

@@ -40,6 +40,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -485,7 +486,7 @@ public class IJImagePeakResultsTest
 		{
 			r[i].end();
 			image[i] = getImage(r[i]);
-			TestSettings.debug("[%d] = %s\n", i, Arrays.toString(image[i]));
+			TestLog.debug("[%d] = %s\n", i, Arrays.toString(image[i]));
 		}
 
 		// Test single value adds

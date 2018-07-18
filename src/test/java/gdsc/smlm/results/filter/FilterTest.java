@@ -29,8 +29,9 @@ import org.junit.Test;
 
 import gdsc.core.utils.XmlUtils;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 
@@ -220,7 +221,7 @@ public class FilterTest
 		{
 			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
 			final String xml = f1.toXML();
-			TestSettings.debugln(XmlUtils.prettyPrintXml(xml));
+			TestLog.debugln(XmlUtils.prettyPrintXml(xml));
 			final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
 			Assert.assertTrue(f1.getClass().equals(f2.getClass()));
 			Assert.assertEquals(f1, f2);

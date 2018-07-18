@@ -41,6 +41,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.plugins.ConfigurationTemplate.TemplateResource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 import ij.IJ;
 import ij.ImagePlus;
@@ -106,7 +107,7 @@ public class ConfigurationTemplateTest
 		{
 			if (set.contains(template.name))
 			{
-				TestSettings.info(test + " loaded: " + template);
+				TestLog.info(test + " loaded: " + template);
 				continue;
 			}
 			Assert.assertTrue(test + " could not load: " + template, false);

@@ -33,6 +33,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -430,11 +431,11 @@ public class BlockSumFilterTest extends AbstractFilterTest
 								boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n",
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n",
 					slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal,
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal,
 				fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -505,11 +506,11 @@ public class BlockSumFilterTest extends AbstractFilterTest
 								height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"Internal %s %.1f : %d => %s %d = %.2fx\n", slow.name, boxSize, boxSlowTotal, fast.name,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name,
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name,
 				slowTotal, fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 

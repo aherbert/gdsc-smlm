@@ -31,7 +31,7 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Test;
 
 import gdsc.test.TestAssert;
-import gdsc.test.TestSettings;
+import gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonPoissonFunctionTest
@@ -153,7 +153,7 @@ public class PoissonPoissonFunctionTest
 			}
 		}, min, max);
 
-		TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+		TestLog.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}

@@ -27,8 +27,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 
@@ -186,6 +187,6 @@ public class RampedSelectionStrategyTest
 
 		final TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
 		final TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);
-		TestSettings.logSpeedTestResult(slow, fast);
+		TestLog.logSpeedTestResult(slow, fast);
 	}
 }

@@ -38,8 +38,9 @@ import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
 @SuppressWarnings({ "javadoc" })
@@ -522,7 +523,7 @@ public class EJMLLinearSolverTest
 							final double[] beta = new double[np];
 							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
-							//TestSettings.debug("SS = %f\n", ss);
+							//TestLog.debug("SS = %f\n", ss);
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
@@ -553,7 +554,7 @@ public class EJMLLinearSolverTest
 		// about the fastest of Cholesky/CholeskyLDLT/Direct.
 		// Just check the PseudoInverse is slowest
 		for (int i = 1; i < size; i++)
-			TestSettings.logSpeedTestResult(ts.get(-(size)), ts.get(-i));
+			TestLog.logSpeedTestResult(ts.get(-(size)), ts.get(-i));
 
 		if (np > 2)
 		{
@@ -561,7 +562,7 @@ public class EJMLLinearSolverTest
 			int i = (np == 5) ? 2 : 1;
 			final int size_1 = size - 1;
 			for (; i < size_1; i++)
-				TestSettings.logSpeedTestResult(ts.get(-(size_1)), ts.get(-i));
+				TestLog.logSpeedTestResult(ts.get(-(size_1)), ts.get(-i));
 		}
 	}
 
@@ -825,7 +826,7 @@ public class EJMLLinearSolverTest
 							final double[] beta = new double[np];
 							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
-							//TestSettings.debug("SS = %f\n", ss);
+							//TestLog.debug("SS = %f\n", ss);
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
@@ -857,27 +858,27 @@ public class EJMLLinearSolverTest
 		if (np <= 5)
 		{
 			for (int i = 2; i <= size; i++)
-				TestSettings.logSpeedTestResult(ts.get(-1), ts.get(-i));
+				TestLog.logSpeedTestResult(ts.get(-1), ts.get(-i));
 
 			if (np < 5)
 				// n < 5 Direct is fastest
 				for (int i = 3; i <= size; i++)
-					TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));
+					TestLog.logSpeedTestResult(ts.get(-2), ts.get(-i));
 			else
 				// Cholesky should be fastest. It is marginal over CholeskyLDLT.
 				// and may not be faster than Direct at n=5 so that comparison is ignored.
 				for (int i = 4; i <= size; i++)
-					TestSettings.logSpeedTestResult(ts.get(-3), ts.get(-i));
+					TestLog.logSpeedTestResult(ts.get(-3), ts.get(-i));
 		}
 		else
 			// No Direct inversion possible.
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
-				TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));
+				TestLog.logSpeedTestResult(ts.get(-2), ts.get(-i));
 	}
 
 	void log(String format, Object... args)
 	{
-		TestSettings.info(format, args);
+		TestLog.info(format, args);
 	}
 }

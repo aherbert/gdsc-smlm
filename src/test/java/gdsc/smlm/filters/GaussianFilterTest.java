@@ -33,8 +33,9 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Random;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.LogLevel;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
@@ -272,7 +273,7 @@ public class GaussianFilterTest
 					max = d;
 			}
 
-			TestSettings.info("%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
+			TestLog.info("%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
 			Assert.assertTrue(max < tolerance);
 		}
 	}
@@ -339,7 +340,7 @@ public class GaussianFilterTest
 			{
 				final double t1 = ts.get(j).getMean();
 				final double t2 = ts.get(j + k).getMean();
-				TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
+				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
 						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
 	}
@@ -372,7 +373,7 @@ public class GaussianFilterTest
 			{
 				final double t1 = ts.get(j).getMean();
 				final double t2 = ts.get(j + k).getMean();
-				TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
+				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
 						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
 	}

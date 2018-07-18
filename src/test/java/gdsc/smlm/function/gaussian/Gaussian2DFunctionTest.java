@@ -33,9 +33,11 @@ import org.junit.Test;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
+import gdsc.test.LogLevel;
+import gdsc.test.MessageProvider;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class Gaussian2DFunctionTest
@@ -153,7 +155,7 @@ public abstract class Gaussian2DFunctionTest
 
 		final int[] gradientIndices = gf.gradientIndices();
 		if (TestSettings.allow(LogLevel.INFO))
-			TestSettings.info("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
+			TestLog.info("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
 
 		Assert.assertEquals("Incorrect number of peaks", gf.getNPeaks(), npeaks);
 
@@ -226,7 +228,7 @@ public abstract class Gaussian2DFunctionTest
 									if (record)
 									{
 										record = false;
-										TestSettings.info("%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
+										TestLog.info("%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
 												f.getClass().getSimpleName());
 									}
 
@@ -359,7 +361,7 @@ public abstract class Gaussian2DFunctionTest
 													eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]));
 										}
 								}
-		TestSettings.info(new TestSettings.MessageProvider()
+		TestLog.info(new MessageProvider()
 		{
 			@Override
 			public String getMessage()
@@ -420,7 +422,7 @@ public abstract class Gaussian2DFunctionTest
 															if (record)
 															{
 																record = false;
-																TestSettings.info("%s %d frozen to %s\n",
+																TestLog.info("%s %d frozen to %s\n",
 																		f2.getClass().getSimpleName(), 2,
 																		f.getClass().getSimpleName());
 															}
@@ -587,7 +589,7 @@ public abstract class Gaussian2DFunctionTest
 																					dyda[gradientIndex]));
 																}
 														}
-		TestSettings.info(new TestSettings.MessageProvider()
+		TestLog.info(new MessageProvider()
 		{
 			@Override
 			public String getMessage()

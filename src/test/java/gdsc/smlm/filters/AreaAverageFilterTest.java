@@ -29,6 +29,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
@@ -100,11 +101,11 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageInternal %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logSpeedTestResult(fastTotal < slowTotal,
 				"float areaAverageInternal %d => areaAverageUsingSumsInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -173,11 +174,11 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logSpeedTestResult(fastTotal < slowTotal,
 				"float areaAverageUsingAverages %d => stripedBlockAverage %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -246,11 +247,11 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageUsingAveragesInternal %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logSpeedTestResult(fastTotal < slowTotal,
 				"float areaAverageUsingAveragesInternal %d => stripedBlockAverageInternal %d = %.2fx\n", slowTotal,
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}

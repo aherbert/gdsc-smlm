@@ -26,6 +26,7 @@ package gdsc.smlm.fitting.nonlinear;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
 
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 /**
@@ -189,7 +190,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		}
 		catch (final AssertionError e)
 		{
-			TestSettings.logFailure(e);
+			TestLog.logFailure(e);
 		}
 	}
 
@@ -421,7 +422,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		}
 		catch (final AssertionError e)
 		{
-			TestSettings.logFailure(e);
+			TestLog.logFailure(e);
 		}
 	}
 

@@ -38,6 +38,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -263,7 +264,7 @@ public class PoissonLikelihoodWrapperTest
 										}
 								}
 		final double p = (100.0 * count) / total;
-		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
+		TestLog.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
 				count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
 	}
@@ -448,7 +449,7 @@ public class PoissonLikelihoodWrapperTest
 
 								}
 		final double p = (100.0 * count) / total;
-		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
+		TestLog.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
 				total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
 	}
@@ -515,7 +516,7 @@ public class PoissonLikelihoodWrapperTest
 			if (pp / p < changeTolerance)
 				break;
 		}
-		TestSettings.info("mu=%f, p=%f, max=%d\n", mu, p, x);
+		TestLog.info("mu=%f, p=%f, max=%d\n", mu, p, x);
 		TestAssert.assertEquals(1, p, 0.02, "mu=%f", mu);
 	}
 
@@ -543,7 +544,7 @@ public class PoissonLikelihoodWrapperTest
 			}
 		}, 0, max);
 
-		TestSettings.info("mu=%f, p=%f\n", mu, p);
+		TestLog.info("mu=%f, p=%f\n", mu, p);
 		TestAssert.assertEquals(1, p, 0.02, "mu=%f", mu);
 	}
 
@@ -639,7 +640,7 @@ public class PoissonLikelihoodWrapperTest
 				break;
 		}
 
-		TestSettings.info("mu=%f, limit=%d, p=%f\n", mu, limit, p);
+		TestLog.info("mu=%f, limit=%d, p=%f\n", mu, limit, p);
 		TestAssert.assertEquals(1, p, 0.02, "mu=%f", mu);
 
 		// Check the function can compute the same total

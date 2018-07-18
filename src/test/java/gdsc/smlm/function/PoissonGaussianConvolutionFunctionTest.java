@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -160,7 +161,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		}
 
 		if (p2 < 0.98 || p2 > 1.02)
-			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestLog.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}
@@ -257,7 +258,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		for (int i = 0; i < 5; i++)
 			t2 += run(f2, samples, photons);
 
-		TestSettings.logSpeedTestResult(t2 < t1, "cdf  %d -> pdf  %d = %f x\n", t1, t2, (double) t1 / t2);
+		TestLog.logSpeedTestResult(t2 < t1, "cdf  %d -> pdf  %d = %f x\n", t1, t2, (double) t1 / t2);
 	}
 
 	private static long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)

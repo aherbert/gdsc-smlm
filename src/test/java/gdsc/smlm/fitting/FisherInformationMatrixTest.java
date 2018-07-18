@@ -38,6 +38,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -91,7 +92,7 @@ public class FisherInformationMatrixTest
 			final double[] crlb = m.crlb();
 			final double[] crlb2 = m.crlbReciprocal();
 			// These increasingly do not match with increasing number of parameters.
-			TestSettings.info("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
+			TestLog.info("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
 			if (n > 1)
 				// Just do a sum so we have a test
 				Assert.assertNotEquals(Maths.sum(crlb), Maths.sum(crlb2), 0);
@@ -104,7 +105,7 @@ public class FisherInformationMatrixTest
 
 		// Invert for CRLB
 		final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
-		TestSettings.info("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
+		TestLog.info("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
 		Assert.assertNotNull("CRLB failed", crlb);
 		return crlb;
 	}
@@ -141,9 +142,9 @@ public class FisherInformationMatrixTest
 		final GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
 		double[][] I = c.fisherInformationMatrix(size, a, f);
 
-		//TestSettings.debug("n=%d, k=%d, I=\n", n, k);
+		//TestLog.debug("n=%d, k=%d, I=\n", n, k);
 		//for (int i = 0; i < I.length; i++)
-		//	TestSettings.debugln(Arrays.toString(I[i]));
+		//	TestLog.debugln(Arrays.toString(I[i]));
 
 		// Reduce to the desired size
 		I = Arrays.copyOf(I, n);
@@ -159,9 +160,9 @@ public class FisherInformationMatrixTest
 					I[i][j] = I[j][i] = 0;
 		}
 
-		//TestSettings.debug("n=%d, k=%d\n", n, k);
+		//TestLog.debug("n=%d, k=%d\n", n, k);
 		//for (int i = 0; i < n; i++)
-		//	TestSettings.debugln(Arrays.toString(I[i]));
+		//	TestLog.debugln(Arrays.toString(I[i]));
 
 		// Create matrix
 		return new FisherInformationMatrix(I, 1e-3);
@@ -176,7 +177,7 @@ public class FisherInformationMatrixTest
 
 	void log(String format, Object... args)
 	{
-		TestSettings.info(format, args);
+		TestLog.info(format, args);
 	}
 
 	@Test
@@ -188,15 +189,15 @@ public class FisherInformationMatrixTest
 		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		final FisherInformationMatrix m = createRandomMatrix(randomGenerator, n);
 		final DenseMatrix64F e = m.getMatrix();
-		TestSettings.infoln(e);
+		TestLog.infoln(e);
 
 		for (int run = 1; run < 10; run++)
 		{
 			final int[] indices = Random.sample(k, n, randomGenerator);
 			Arrays.sort(indices);
 			final DenseMatrix64F o = m.subset(indices).getMatrix();
-			TestSettings.infoln(Arrays.toString(indices));
-			TestSettings.infoln(o);
+			TestLog.infoln(Arrays.toString(indices));
+			TestLog.infoln(o);
 			for (int i = 0; i < indices.length; i++)
 				for (int j = 0; j < indices.length; j++)
 					Assert.assertEquals(e.get(indices[i], indices[j]), o.get(i, j), 0);
@@ -226,9 +227,9 @@ public class FisherInformationMatrixTest
 			indices[i] += perPeak;
 		final FisherInformationMatrix m2 = m.subset(indices);
 
-		//TestSettings.debugln(m.getMatrix());
-		//TestSettings.debugln(m1.getMatrix());
-		//TestSettings.debugln(m2.getMatrix());
+		//TestLog.debugln(m.getMatrix());
+		//TestLog.debugln(m1.getMatrix());
+		//TestLog.debugln(m2.getMatrix());
 
 		final double[] crlb = m.crlb();
 		final double[] crlb1 = m1.crlb();
@@ -236,10 +237,10 @@ public class FisherInformationMatrixTest
 		final double[] crlbB = Arrays.copyOf(crlb1, crlb.length);
 		System.arraycopy(crlb2, 1, crlbB, crlb1.length, perPeak);
 
-		//TestSettings.debugln(Arrays.toString(crlb));
-		//TestSettings.debugln(Arrays.toString(crlb1));
-		//TestSettings.debugln(Arrays.toString(crlb2));
-		//TestSettings.debugln(Arrays.toString(crlbB));
+		//TestLog.debugln(Arrays.toString(crlb));
+		//TestLog.debugln(Arrays.toString(crlb1));
+		//TestLog.debugln(Arrays.toString(crlb2));
+		//TestLog.debugln(Arrays.toString(crlbB));
 
 		// Removing the interaction between fit parameters lowers the bounds
 		for (int i = 0; i < crlb.length; i++)

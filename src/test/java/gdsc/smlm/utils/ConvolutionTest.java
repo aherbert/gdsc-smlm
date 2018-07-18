@@ -30,10 +30,10 @@ import org.junit.Test;
 
 import gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
+import gdsc.test.LogLevel;
 import gdsc.test.TestAssert;
+import gdsc.test.TestComplexity;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 

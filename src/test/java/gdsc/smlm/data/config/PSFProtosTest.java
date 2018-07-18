@@ -36,7 +36,7 @@ import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.utils.JSONUtils;
-import gdsc.test.TestSettings;
+import gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class PSFProtosTest
@@ -64,7 +64,7 @@ public class PSFProtosTest
 		final String e = psfBuilder.toString();
 		final PSFProtos.PSF psf = psfBuilder.build();
 		final String o = psf.toString();
-		TestSettings.debugln(o);
+		TestLog.debugln(o);
 		Assert.assertEquals(e, o);
 
 		psfBuilder.clear();
@@ -73,7 +73,7 @@ public class PSFProtosTest
 
 		// Short string
 		final String o2 = TextFormat.shortDebugString(psf);
-		TestSettings.debugln(o2);
+		TestLog.debugln(o2);
 
 		psfBuilder.clear();
 		TextFormat.merge(o2, psfBuilder);
@@ -82,9 +82,9 @@ public class PSFProtosTest
 		// JSON
 		final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 		String json = printer.print(psf);
-		TestSettings.debugln(json);
+		TestLog.debugln(json);
 		json = JSONUtils.simplify(json);
-		TestSettings.debugln(json);
+		TestLog.debugln(json);
 
 		psfBuilder.clear();
 		JsonFormat.parser().merge(json, psfBuilder);

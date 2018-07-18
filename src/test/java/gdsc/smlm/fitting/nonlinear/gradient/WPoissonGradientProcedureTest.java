@@ -35,6 +35,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -277,7 +278,7 @@ public class WPoissonGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
+		TestLog.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
@@ -351,7 +352,7 @@ public class WPoissonGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1,
+		TestLog.logSpeedTestResult(time2 < time1,
 				"WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
 				(1.0 * time1) / time2);
 	}

@@ -29,8 +29,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestAssert;
+import gdsc.test.TestComplexity;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings({ "javadoc" })
 public class BinomialFitterTest
@@ -276,6 +277,6 @@ public class BinomialFitterTest
 
 	void log(String format, Object... args)
 	{
-		TestSettings.info(format, args);
+		TestLog.info(format, args);
 	}
 }

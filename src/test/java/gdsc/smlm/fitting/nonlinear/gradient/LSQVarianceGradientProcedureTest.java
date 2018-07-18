@@ -40,6 +40,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings({ "javadoc" })
@@ -215,7 +216,7 @@ public class LSQVarianceGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1,
+		TestLog.logSpeedTestResult(time2 < time1,
 				"GradientCalculator = %d : LSQVarianceGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
 				(1.0 * time1) / time2);
 	}
@@ -345,7 +346,7 @@ public class LSQVarianceGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
+		TestLog.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 

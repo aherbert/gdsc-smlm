@@ -49,9 +49,10 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.test.LogLevel;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
 
 /**
  * Base class for testing the function solvers
@@ -393,12 +394,12 @@ public abstract class BaseFunctionSolverTest
 								{
 									betterPrecision[index]++;
 									args[args.length - 1] = "P*";
-									TestSettings.debug(msg, args);
+									TestLog.debug(msg, args);
 								}
 								else
 								{
 									args[args.length - 1] = "P";
-									TestSettings.debug(msg, args);
+									TestLog.debug(msg, args);
 								}
 								totalPrecision[index]++;
 							}
@@ -412,12 +413,12 @@ public abstract class BaseFunctionSolverTest
 							{
 								betterAccuracy[index]++;
 								args[args.length - 1] = "A*";
-								TestSettings.debug(msg, args);
+								TestLog.debug(msg, args);
 							}
 							else
 							{
 								args[args.length - 1] = "A";
-								TestSettings.debug(msg, args);
+								TestLog.debug(msg, args);
 							}
 							totalAccuracy[index]++;
 						}
@@ -429,12 +430,12 @@ public abstract class BaseFunctionSolverTest
 						{
 							betterPrecision[index]++;
 							args[args.length - 1] = "P*";
-							TestSettings.debug(msg, args);
+							TestLog.debug(msg, args);
 						}
 						else
 						{
 							args[args.length - 1] = "P";
-							TestSettings.debug(msg, args);
+							TestLog.debug(msg, args);
 						}
 						totalPrecision[index]++;
 					}
@@ -456,7 +457,7 @@ public abstract class BaseFunctionSolverTest
 	private static void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
 	{
 		final double p = (total == 0) ? 0 : 100.0 * better / total;
-		TestSettings.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
+		TestLog.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
 		// Do not test if we don't have many examples
 		if (total <= 10)
 			return;
@@ -652,11 +653,11 @@ public abstract class BaseFunctionSolverTest
 		double[] e = new double[a.length];
 		double[] o = new double[a.length];
 		solver1.fit(data, null, a, e);
-		//System.out.TestSettings.debug("a="+Arrays.toString(a));
+		//System.out.TestLog.debug("a="+Arrays.toString(a));
 		solver2.computeDeviations(data, a, o);
 
-		//System.out.TestSettings.debug("e2="+Arrays.toString(e));
-		//System.out.TestSettings.debug("o2="+Arrays.toString(o));
+		//System.out.TestLog.debug("e2="+Arrays.toString(e));
+		//System.out.TestLog.debug("o2="+Arrays.toString(o));
 		Assert.assertArrayEquals("Fit 2 peaks and deviations 2 peaks do not match", o, e, 0);
 
 		// Try again with y-fit values
@@ -664,7 +665,7 @@ public abstract class BaseFunctionSolverTest
 		final double[] o1 = new double[f2.size()];
 		final double[] o2 = new double[o1.length];
 		solver1.fit(data, o1, a, e);
-		//System.out.TestSettings.debug("a="+Arrays.toString(a));
+		//System.out.TestLog.debug("a="+Arrays.toString(a));
 		solver2.computeValue(data, o2, a);
 
 		Assert.assertArrayEquals("Fit 2 peaks with yFit and deviations 2 peaks do not match", o, e, 0);
@@ -689,8 +690,8 @@ public abstract class BaseFunctionSolverTest
 			final double[] a2 = p12.clone(); // To copy the second peak
 			System.arraycopy(a, 0, a2, 0, a.length); // Add the same fitted first peak
 			solver2.computeDeviations(data, a2, o);
-			//System.out.TestSettings.debug("e1p1=" + Arrays.toString(e));
-			//System.out.TestSettings.debug("o2=" + Arrays.toString(o));
+			//System.out.TestLog.debug("e1p1=" + Arrays.toString(e));
+			//System.out.TestLog.debug("o2=" + Arrays.toString(o));
 
 			// Deviation should be lower with only 1 peak.
 			// Due to matrix inversion this may not be the case for all parameters so count.

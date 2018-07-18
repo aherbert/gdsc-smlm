@@ -46,6 +46,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.TestAssert;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 
@@ -298,7 +299,7 @@ public class SCMOSLikelihoodWrapperTest
 										}
 								}
 		final double p = (100.0 * count) / total;
-		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
+		TestLog.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
 				count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
 	}
@@ -482,7 +483,7 @@ public class SCMOSLikelihoodWrapperTest
 
 								}
 		final double p = (100.0 * count) / total;
-		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
+		TestLog.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
 				total, p);
 		TestAssert.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
 	}
@@ -547,12 +548,12 @@ public class SCMOSLikelihoodWrapperTest
 				double v;
 				v = SCMOSLikelihoodWrapper.likelihood(mu, VAR, G, O, x);
 				//v = pgf.probability(x, mu);
-				//TestSettings.debug("x=%f, v=%f\n", x, v);
+				//TestLog.debug("x=%f, v=%f\n", x, v);
 				return v;
 			}
 		}, min, max);
 
-		//TestSettings.debug("mu=%f, p=%f\n", mu, p);
+		//TestLog.debug("mu=%f, p=%f\n", mu, p);
 		if (test)
 			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
 	}
@@ -653,7 +654,7 @@ public class SCMOSLikelihoodWrapperTest
 			{
 				maxp = pp;
 				maxi = i;
-				//TestSettings.debug("mu=%f, e=%f, k=%f, pp=%f\n", mu, mu * G + O, k[i], pp);
+				//TestLog.debug("mu=%f, e=%f, k=%f, pp=%f\n", mu, mu * G + O, k[i], pp);
 			}
 			p += pp * step;
 		}
@@ -669,7 +670,7 @@ public class SCMOSLikelihoodWrapperTest
 		final double mode1 = Math.floor(lambda);
 		final double mode2 = Math.ceil(lambda) - 1;
 		final double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
-		//TestSettings.debug("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
+		//TestLog.debug("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
 		TestAssert.assertEqualsRelative("k-max", kmax, k[maxi], 1e-3);
 
 		if (test)
@@ -780,7 +781,7 @@ public class SCMOSLikelihoodWrapperTest
 
 	private static void canComputePValue(BaseNonLinearFunction nlf)
 	{
-		TestSettings.infoln(nlf.name);
+		TestLog.infoln(nlf.name);
 
 		final int n = maxx * maxx;
 
@@ -808,7 +809,7 @@ public class SCMOSLikelihoodWrapperTest
 			op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
 			oll2 -= Math.log(op[j]);
 		}
-		TestSettings.info("oll=%f, oll2=%f\n", oll, oll2);
+		TestLog.info("oll=%f, oll2=%f\n", oll, oll2);
 		TestAssert.assertEqualsRelative("Observed Log-likelihood", oll2, oll, 1e-10);
 
 		final TDoubleArrayList list = new TDoubleArrayList();
@@ -830,7 +831,7 @@ public class SCMOSLikelihoodWrapperTest
 			}
 			final double llr2 = -2 * Math.log(product.doubleValue());
 			final double q = f.computeQValue(ll);
-			TestSettings.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
+			TestLog.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
 					product.round(new MathContext(4)).toString(), q);
 
 			// Only value if the product could be computed. Low ratios cause it to becomes
@@ -864,7 +865,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		// Allow a tolerance as the random data may alter the p-value computation.
 		// Should allow it to be less than 2 increment either side of the answer.
-		TestSettings.info("min fit = %g => %g\n", mina, fita);
+		TestLog.info("min fit = %g => %g\n", mina, fita);
 		Assert.assertEquals("min", 1, fita, 0.199);
 	}
 }

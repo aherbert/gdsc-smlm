@@ -26,10 +26,11 @@ package gdsc.smlm.function;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.LogLevel;
 import gdsc.test.TestAssert;
+import gdsc.test.TestComplexity;
+import gdsc.test.TestLog;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFisherInformationTest
@@ -237,7 +238,7 @@ public class PoissonGammaGaussianFisherInformationTest
 				final double I = f.getPoissonGammaGaussianI(u);
 				final double upper = PoissonFisherInformation.getPoissonI(u);
 				final double alpha = I / upper;
-				TestSettings.debug("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
+				TestLog.debug("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
 				TestAssert.assertTrue(I < upper, "Fisher information (%s) is not below upper limit: %s", I, upper);
 				Assert.assertTrue("Alpha is not above zero", alpha > 0);
 			}

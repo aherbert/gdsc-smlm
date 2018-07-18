@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.TestAssert;
-import gdsc.test.TestSettings;
+import gdsc.test.TestLog;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings({ "unused", "javadoc" })
@@ -136,8 +136,8 @@ public class InterpolatedPoissonFunctionTest
 			for (int i = 0; i < photons.length; i++)
 			{
 				int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
-    			//TestSettings.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
-    			//TestSettings.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
+    			//TestLog.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
+    			//TestLog.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
 			}
 	}
 
@@ -172,7 +172,7 @@ public class InterpolatedPoissonFunctionTest
 		for (int x = min; x <= max; x++)
 		{
 			final double pp = f.likelihood(x, o);
-			//TestSettings.debug("x=%d, p=%f\n", x, pp);
+			//TestLog.debug("x=%d, p=%f\n", x, pp);
 			p += pp;
 			values.add(pp);
 			if (maxp < pp)
@@ -194,7 +194,7 @@ public class InterpolatedPoissonFunctionTest
 			{
 				min = x;
 				final double pp = f.likelihood(x, o);
-				//TestSettings.debug("x=%d, p=%f\n", x, pp);
+				//TestLog.debug("x=%d, p=%f\n", x, pp);
 				p += pp;
 				values.add(pp);
 				if (maxp < pp)
@@ -211,7 +211,7 @@ public class InterpolatedPoissonFunctionTest
 		{
 			max = x;
 			final double pp = f.likelihood(x, o);
-			//TestSettings.debug("x=%d, p=%f\n", x, pp);
+			//TestLog.debug("x=%d, p=%f\n", x, pp);
 			p += pp;
 			values.add(pp);
 			if (maxp < pp)
@@ -237,7 +237,7 @@ public class InterpolatedPoissonFunctionTest
 		minx += min;
 		maxx += min;
 
-		TestSettings.info("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
+		TestLog.info("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
 		TestAssert.assertEquals(1, p, 0.02, "g=%f, mu=%f", gain, mu);
 		return new int[] { minx, maxx };
 	}
@@ -272,7 +272,7 @@ public class InterpolatedPoissonFunctionTest
 				}
 			}, min, max);
 
-			TestSettings.info("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
+			TestLog.info("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
 			//Assert.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
 		}
 		catch (final TooManyEvaluationsException e)
@@ -281,10 +281,10 @@ public class InterpolatedPoissonFunctionTest
 			//for (double x = 0; x <= max; x += inc)
 			//{
 			//	final double pp = f.likelihood(x, o);
-			//	//TestSettings.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, pp);
+			//	//TestLog.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, pp);
 			//	p += pp;
 			//}
-			//TestSettings.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
+			//TestLog.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
 			Assert.fail(e.getMessage());
 		}
 	}
@@ -333,14 +333,14 @@ public class InterpolatedPoissonFunctionTest
 			final double g = (up - lp) / diff;
 			final double error = DoubleEquality.relativeError(g, eg);
 			final double ox = x / gain;
-			//TestSettings.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
+			//TestLog.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
 			//		error);
 
 			// Ignore tiny gradients. These occur due to floating point error when the gradient
 			// should be zero, e.g. mu*gain=x, i.e. the max of the distribution PMF
 			if (Math.abs(eg) < 1e-10)
 			{
-				TestSettings.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
+				TestLog.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
 						error);
 				continue;
 			}
