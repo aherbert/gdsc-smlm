@@ -2152,11 +2152,13 @@ public class JumpDistanceAnalysis
 	 * be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
+	 * {@code 
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
+	 * }
 	 * </pre>
 	 *
-	 * Note this is only valid for n>=1
+	 * Note this is only valid for {@code n>=1}.
 	 *
 	 * @param n
 	 *            the n
@@ -2183,10 +2185,11 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Simulations using multiple simulation steps within each frame were used to compute the MSD at different frame
 	 * separation intervals. These curves were compared to the expected MSD for the simulated diffusion coefficient to
-	 * produce a correction factor curve. This was fitted for n>=1 and n<1. The observed MSD can be converted to the
-	 * corrected MSD by applying a factor:
+	 * produce a correction factor curve. This was fitted for {@code n>=1} and {@code n<1}. 
+	 * The observed MSD can be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
+	 * {@code 
 	 * n>=1:
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
@@ -2194,9 +2197,10 @@ public class JumpDistanceAnalysis
 	 * n<1:
 	 * observed = actual * (n - n*n / 3)
 	 * actual = observed / (n - n*n / 3)
+	 * }
 	 * </pre>
 	 *
-	 * Note this is valid for n>=0
+	 * Note this is valid for {@code n>=0}.
 	 *
 	 * @param n
 	 *            the n
@@ -2221,10 +2225,10 @@ public class JumpDistanceAnalysis
 	 * of frames should be reduced by 1/3.
 	 *
 	 * <pre>
-	 * corrected frames = n - 1/3
+	 * {@code correctedFrames = n - 1/3}
 	 * </pre>
 	 *
-	 * Note this is only valid for n>=1
+	 * Note this is only valid for {@code n>=1}.
 	 *
 	 * @param n
 	 *            the n
@@ -2245,11 +2249,13 @@ public class JumpDistanceAnalysis
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
+	 * {@code 
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
+	 * }
 	 * </pre>
 	 *
-	 * Note this is only valid for n>=1
+	 * Note this is only valid for {@code n>=1}.
 	 *
 	 * @param msd
 	 *            The observed MSD
@@ -2272,11 +2278,13 @@ public class JumpDistanceAnalysis
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
+	 * {@code 
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
+	 * }
 	 * </pre>
 	 *
-	 * Note this is only valid for n>=1
+	 * Note this is only valid for {@code n>=1}.
 	 *
 	 * @param msd
 	 *            The actual MSD

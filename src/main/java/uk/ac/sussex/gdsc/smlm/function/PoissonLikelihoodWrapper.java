@@ -27,30 +27,31 @@ import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:<br/>
- * f(x) = l(x) - k * ln(l(x)) + log(k!)<br/>
- * Where:<br/>
- * l(x) is the function (expected) value<br/>
- * k is the observed value
- * <p>
+ * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:
+ * <pre>f(x) = l(x) - k * ln(l(x)) + log(k!)</pre>
+ * Where:
+ * <ul>
+ * <li>l(x) is the function (expected) value
+ * <li>k is the observed value
+ * </ul>
  * The negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or for a chosen
  * observed value.
  * <p>
  * To allow a likelihood to be computed when the function predicts negative count data, the function prediction is set
- * to Double.MIN_VALUE. This can be disabled.
+ * to {@link Double#MIN_VALUE}. This can be disabled.
  * <p>
  * The class can handle non-integer observed data. In this case the PMF is approximated as:
  *
- * <pre>
- * PMF(l,k) = C * e^-l * l^x / gamma(k+1)
+ * <pre>PMF(l,k) = C * e^-l * l^x / gamma(k+1)</pre>
  * with:
- * l = the function (expected) value
- * gamma = the gamma function
- * C = a normalising constant.
- * </pre>
+ * <ul>
+ * <li>l = the function (expected) value
+ * <li>gamma = the gamma function
+ * <li>C = a normalising constant
+ * </ul>
  *
  * The normalising constant is used to ensure the PMF sums to 1. However it is omitted in this implementation for speed.
- * The PMF sums to approximately 1 for l>=4.
+ * The PMF sums to approximately 1 for {@code l>=4}.
  */
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 {

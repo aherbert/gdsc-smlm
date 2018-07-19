@@ -650,9 +650,12 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 	/**
 	 * Gets the approximate Poisson-Gaussian Fisher information.
-	 * Approximate the Poisson as a Gaussian with u=t and var=t.
-	 * Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2).
+	 * <p>
+	 * Approximate the Poisson as a Gaussian with {@code u=t} and {@code var=t}.
+	 * Gaussian-Gaussian convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> = sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>).
 	 * Fisher information of Gaussian mean is 1/variance.
+	 * <p>
+	 * The returned value is: {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and {@code s} the Gaussian standard deviation.
 	 *
 	 * @param t
 	 *            the poisson mean
@@ -667,9 +670,12 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
 	/**
 	 * Gets the approximate Poisson-Gaussian Fisher information.
-	 * Approximate the Poisson as a Gaussian with u=t and var=t.
-	 * Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2).
+	 * <p>
+	 * Approximate the Poisson as a Gaussian with {@code u=t} and {@code var=t}.
+	 * Gaussian-Gaussian convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> = sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>).
 	 * Fisher information of Gaussian mean is 1/variance.
+	 * <p>
+	 * The returned value is: {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and {@code s} the Gaussian standard deviation.
 	 *
 	 * @param t
 	 *            the poisson mean

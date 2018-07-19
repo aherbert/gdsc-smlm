@@ -298,7 +298,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	}
 
 	/**
-	 * Find the index such that sum[index-1] <= key < sum[index].
+	 * Find the index such that {@code sum[index-1] <= key < sum[index]}.
 	 *
 	 * @param sum
 	 *            the sum
@@ -315,7 +315,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 	}
 
 	/**
-	 * Find the index such that sum[index-1] <= key < sum[index].
+	 * Find the index such that {@code sum[index-1] <= key < sum[index]}.
 	 *
 	 * @param sum
 	 *            the sum

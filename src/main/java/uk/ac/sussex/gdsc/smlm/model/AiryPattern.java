@@ -75,7 +75,7 @@ public class AiryPattern
 	/**
 	 * Calculate the total power of the AiryPattern at distance x from the centre
 	 * <p>
-	 * Appears to be numerically unstable at x<<1.
+	 * Appears to be numerically unstable at {@code x<<1}.
 	 *
 	 * @param x
 	 *            the x

@@ -70,10 +70,10 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Non-linear conjugate gradient optimizer. <br/>
+ * Non-linear conjugate gradient optimizer. <br>
  * This class supports both the Fletcher-Reeves and the Polak-Ribière
  * update formulas for the conjugate search directions.
- * It also supports optional preconditioning. <br/>
+ * It also supports optional preconditioning. <br>
  * The class is based on the
  * org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer but
  * updated to support bounds checking on the current point within the optimisation space.
@@ -141,7 +141,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 	/**
 	 * The initial step is a factor with respect to the search direction
-	 * (which itself is roughly related to the gradient of the function). <br/>
+	 * (which itself is roughly related to the gradient of the function). <br>
 	 * It is used to find an interval that brackets the optimum in line
 	 * search.
 	 *

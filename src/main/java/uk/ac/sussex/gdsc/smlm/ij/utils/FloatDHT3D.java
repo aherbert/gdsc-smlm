@@ -684,10 +684,10 @@ public class FloatDHT3D extends FloatImage3D
 	 * Swap octants so the power spectrum origin is at the centre of the image.
 	 *
 	 * <pre>
-	 * 1 +++ <=> 7 ---
-	 * 2 -++ <=> 8 +--
-	 * 3 --+ <=> 5 ++-
-	 * 4 +-+ <=> 6 -+-
+	 * 1 +++ &lt;=&gt; 7 ---
+	 * 2 -++ &lt;=&gt; 8 +--
+	 * 3 --+ &lt;=&gt; 5 ++-
+	 * 4 +-+ &lt;=&gt; 6 -+-
 	 * </pre>
 	 *
 	 * Requires even dimensions.
@@ -705,10 +705,10 @@ public class FloatDHT3D extends FloatImage3D
 	 * Swap octants of the specified image stack so the power spectrum origin is at the centre of the image.
 	 *
 	 * <pre>
-	 * 1 +++ <=> 7 ---
-	 * 2 -++ <=> 8 +--
-	 * 3 --+ <=> 5 ++-
-	 * 4 +-+ <=> 6 -+-
+	 * 1 +++ &lt;=&gt; 7 ---
+	 * 2 -++ &lt;=&gt; 8 +--
+	 * 3 --+ &lt;=&gt; 5 ++-
+	 * 4 +-+ &lt;=&gt; 6 -+-
 	 * </pre>
 	 *
 	 * Requires even dimensions.
@@ -804,10 +804,10 @@ public class FloatDHT3D extends FloatImage3D
 	 * Swap octants of the specified image stack so the power spectrum origin is at the centre of the image.
 	 *
 	 * <pre>
-	 * 1 +++ <=> 7 ---
-	 * 2 -++ <=> 8 +--
-	 * 3 --+ <=> 5 ++-
-	 * 4 +-+ <=> 6 -+-
+	 * 1 +++ &lt;=&gt; 7 ---
+	 * 2 -++ &lt;=&gt; 8 +--
+	 * 3 --+ &lt;=&gt; 5 ++-
+	 * 4 +-+ &lt;=&gt; 6 -+-
 	 * </pre>
 	 *
 	 * Requires even dimensions in a 32-bit float stack.

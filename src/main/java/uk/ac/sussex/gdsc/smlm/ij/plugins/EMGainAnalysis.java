@@ -70,7 +70,7 @@ import uk.ac.sussex.gdsc.smlm.utils.Convolution;
  * Analysis a white light image from an EM-CCD camera, construct a histogram of pixel intensity and fit the histogram to
  * obtain the bias, EM-gain, read noise and photons per pixel.
  * <p>
- * See Ulbrich & Isacoff (2007) Subunit counting in membrane-bound proteins. Nature Methods 4, 319-321 (Supplementary
+ * See Ulbrich &amp; Isacoff (2007) Subunit counting in membrane-bound proteins. Nature Methods 4, 319-321 (Supplementary
  * Information).
  */
 public class EMGainAnalysis implements PlugInFilter

@@ -37,7 +37,7 @@ public class FunctionHelper
 	 * Gets the mean value using a fraction of the cumulative value, when values are sorted in descending order. All
 	 * values must be positive. The input values are modified by sorting.
 	 * <p>
-	 * If fraction is <=0 then the max value is returned. If fraction is >=1 then the mean of the data is returned.
+	 * If {@code fraction <= 0} then the max value is returned. If {@code fraction >=1} then the mean of the data is returned.
 	 *
 	 * @param values
 	 *            the values
@@ -82,7 +82,7 @@ public class FunctionHelper
 	 * All
 	 * values must be positive. The input values are modified by sorting.
 	 * <p>
-	 * If fraction is <=0 then zero is returned. If fraction is >=1 then data.length is returned.
+	 * If {@code fraction <= 0} then zero is returned. If {@code fraction >= 1} then data.length is returned.
 	 *
 	 * @param values
 	 *            the values

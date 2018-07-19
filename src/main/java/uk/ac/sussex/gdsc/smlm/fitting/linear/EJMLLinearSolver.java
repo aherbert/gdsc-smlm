@@ -248,7 +248,7 @@ public class EJMLLinearSolver
 	 *            the significant digits for equality
 	 * @param maxAbsoluteError
 	 *            the max absolute error for equality
-	 * @deprecated The significant digits are used to set the max relative error as 1e^-(n-1), e.g. 3sd => 1e-2
+	 * @deprecated The significant digits are used to set the max relative error as 1e<sup>-(n-1)</sup>, e.g. 3sd =&gt; 1e<sup>-2</sup>.
 	 */
 	@Deprecated
 	public EJMLLinearSolver(int significantDigits, double maxAbsoluteError)

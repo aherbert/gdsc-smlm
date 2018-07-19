@@ -29,20 +29,20 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a per-pixel Poisson distribution
  * with Gaussian noise (i.e. the noise from a sCMOS camera). This uses the MLE-sCMOS formula from Huang, et al
- * (2013), Supplementary Notes Eq 3.3:<br/>
- * P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi) = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br/>
- * Where:<br/>
- * i = the pixel index <br/>
- * vari = the variance of the pixel <br/>
- * gi = the gain of the pixel <br/>
- * oi = the offset of the pixel <br/>
- * ui = the function value (expected number of photons) <br/>
+ * (2013), Supplementary Notes Eq 3.3:<br>
+ * P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi) = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br>
+ * Where:<br>
+ * i = the pixel index <br>
+ * vari = the variance of the pixel <br>
+ * gi = the gain of the pixel <br>
+ * oi = the offset of the pixel <br>
+ * ui = the function value (expected number of photons) <br>
  * Di = the observed value at the pixel
- * x = the observed random variable (observed number of photons adjusted by a pixel dependent constant) <br/>
+ * x = the observed random variable (observed number of photons adjusted by a pixel dependent constant) <br>
  * <p>
- * The negative log-likelihood function is: <br/>
- * -LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br/>
- * = (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1)) <br/>
+ * The negative log-likelihood function is: <br>
+ * -LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
+ * = (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1)) <br>
  * <p>
  * The negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or for a chosen
  * observed value.

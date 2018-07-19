@@ -34,8 +34,8 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools;
  * a link to the macros directory to allow the toolset to be loaded:
  *
  * <pre>
- * ${smlm_home}/plugins -> ${smlm_home}/target/classes
- * ${smlm_home}/macros -> ${smlm_home}/target/classes/macros
+ * ${smlm_home}/plugins -&gt; ${smlm_home}/target/classes
+ * ${smlm_home}/macros -&gt; ${smlm_home}/target/classes/macros
  * </pre>
  *
  * Set the project to run ij.ImageJ as the main class and use the smlm directory as the ImageJ path:

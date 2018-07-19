@@ -28,15 +28,17 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Implements the probability density function for a Poisson-Gamma Mixture.
  * <p>
- * The implementation uses the Poisson-Gamma mixture described from Ulbrich & Isacoff (2007). Nature Methods 4, 319-321,
- * SI equation 3:<br/>
- * Gp,m(0) = e^-p<br/>
- * Gp,m(c|c>0) = sqrt(p/(c*m)) * e^(-c/m -p) * I1(2*sqrt(c*p/m))<br/>
- * Where:<br/>
- * c = the observed value at the pixel <br/>
- * p = the function value (expected number of photons) <br/>
- * m = the gain of the pixel <br/>
- * I1 = Modified Bessel function of the first kind <br/>
+ * The implementation uses the Poisson-Gamma mixture described from Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321,
+ * SI equation 3:<br>
+ * <blockquote>
+ * {@code Gp,m(0) = e^-p}<br>
+ * {@code Gp,m(c|c>0) = sqrt(p/(c*m)) * e^(-c/m -p) * I1(2*sqrt(c*p/m))}<br>
+ * </blockquote>
+ * Where:<br>
+ * c = the observed value at the pixel <br>
+ * p = the function value (expected number of photons) <br>
+ * m = the gain of the pixel <br>
+ * I1 = Modified Bessel function of the first kind <br>
  * <p>
  * The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a
  * Poisson process of emitted light, converted to electrons on the camera chip, amplified by a gain and then read with
@@ -83,7 +85,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	/**
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param c
 	 *            The count to evaluate
@@ -107,11 +109,12 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double x = 2 * Math.sqrt(p * c_m);
 			final double _c_m_p = -c_m - p;
 			if (x > 709 || _c_m_p < -709)
+			{
 				//return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
 				return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
-			else
-				//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
-				return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+			}
+			//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+			return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 		}
 		else if (c == 0.0)
 			return FastMath.exp(-p) * (1 + p / m);
@@ -127,7 +130,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * <p>
 	 * If c==0 then the true probability is obtained by adding Math.exp(-p).
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param c
 	 *            The count to evaluate
@@ -149,11 +152,12 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double x = 2 * Math.sqrt(p * c_m);
 			final double _c_m_p = -c_m - p;
 			if (x > 709 || _c_m_p < -709)
+			{
 				//return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
 				return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
-			else
-				//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
-				return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+			}
+			//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+			return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 		}
 		else if (c == 0.0)
 			// No Dirac delta function
@@ -166,7 +170,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain for no observed
 	 * Poisson counts. This is the Dirac delta function at c=0.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param p
 	 *            The average number of photons per pixel input to the EM-camera (must be positive)
@@ -182,7 +186,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain for no observed
 	 * Poisson counts. This is the Dirac delta function at c=0.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param p
 	 *            The average number of photons per pixel input to the EM-camera (must be positive)
@@ -201,10 +205,10 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	/**
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 * <p>
-	 * Note: This implementation will underestimate the cumulative probability (sum<1) when the mean is close to 1 and
-	 * the gain is low (<10).
+	 * Note: This implementation will underestimate the cumulative probability ({@code sum<1}) when the mean is close to
+	 * 1 and the gain is low ({@code <10}).
 	 *
 	 * @param c
 	 *            The count to evaluate
@@ -238,25 +242,23 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				dG_dp[0] = exp_transform / m - G;
 				return G;
 			}
-			else
-			{
-				// G(c) = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
-				// dG(c)/dp = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . n * p^(n-1) c^(n-1) / m^n } - e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
-				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=1 to inf { 1/((n-1)!(n-1)!) . p^(n-1) c^(n-1) / m^(n-1) } - G(c)
-				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=0 to inf { 1/(n!^2) . (pc/m)^n } - G(c)
 
-				// Bessel I0 = sum n=0 to inf { 1/(n!^2) . ((x/2)^2)^n }
-				// x = 2 * sqrt(cp/m)
+			// G(c) = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
+			// dG(c)/dp = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . n * p^(n-1) c^(n-1) / m^n } - e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
+			// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=1 to inf { 1/((n-1)!(n-1)!) . p^(n-1) c^(n-1) / m^(n-1) } - G(c)
+			// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=0 to inf { 1/(n!^2) . (pc/m)^n } - G(c)
 
-				// dG(c)/dp = e^-p . e^-c/m . 1/m . I0(2*sqrt(cp/m)) - G(c)
-				// dG(c)/dp = e^(-c/m -p) . I0(2*sqrt(cp/m))/m - G(c)
+			// Bessel I0 = sum n=0 to inf { 1/(n!^2) . ((x/2)^2)^n }
+			// x = 2 * sqrt(cp/m)
 
-				final double exp_c_m_p = FastMath.exp(_c_m_p);
-				//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
-				final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
-				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
-				return G;
-			}
+			// dG(c)/dp = e^-p . e^-c/m . 1/m . I0(2*sqrt(cp/m)) - G(c)
+			// dG(c)/dp = e^(-c/m -p) . I0(2*sqrt(cp/m))/m - G(c)
+
+			final double exp_c_m_p = FastMath.exp(_c_m_p);
+			//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
+			final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
+			dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
+			return G;
 		}
 		else if (c == 0.0)
 		{
@@ -282,7 +284,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * <p>
 	 * If c==0 then the true probability is obtained by adding Math.exp(-p).
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param c
 	 *            The count to evaluate
@@ -313,13 +315,10 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				dG_dp[0] = exp_transform / m - G;
 				return G;
 			}
-			else
-			{
-				final double exp_c_m_p = FastMath.exp(_c_m_p);
-				final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
-				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
-				return G;
-			}
+			final double exp_c_m_p = FastMath.exp(_c_m_p);
+			final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
+			dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
+			return G;
 		}
 		else if (c == 0.0)
 		{
@@ -339,7 +338,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	/**
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 * <p>
 	 * This is a special version which computes only part of the gradient.
 	 * The partial gradient is equal to the actual gradient plus the value of the function.
@@ -370,14 +369,11 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				dG_dp[0] = exp_transform / m;
 				return G;
 			}
-			else
-			{
-				final double exp_c_m_p = FastMath.exp(_c_m_p);
-				//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
-				final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
-				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m;
-				return G;
-			}
+			final double exp_c_m_p = FastMath.exp(_c_m_p);
+			//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
+			final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
+			dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m;
+			return G;
 		}
 		else if (c == 0.0)
 		{
@@ -396,7 +392,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	/**
 	 * Calculate the an unscaled probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 * <p>
 	 * This is unscaled as the factor exp^p has been removed. This stabilises computation for large p.
 	 * <p>
@@ -430,13 +426,10 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				dG_dp[0] = exp_transform / m;
 				return G;
 			}
-			else
-			{
-				final double exp_c_m = FastMath.exp(-c_m);
-				final double G = (x / (2 * c)) * exp_c_m * Bessel.I1(x);
-				dG_dp[0] = exp_c_m * Bessel.I0(x) / m;
-				return G;
-			}
+			final double exp_c_m = FastMath.exp(-c_m);
+			final double G = (x / (2 * c)) * exp_c_m * Bessel.I1(x);
+			dG_dp[0] = exp_c_m * Bessel.I0(x) / m;
+			return G;
 		}
 		else if (c == 0.0)
 		{
@@ -454,7 +447,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	/**
 	 * Calculate the log probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * See 
+. Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param c
 	 *            The count to evaluate
@@ -474,8 +468,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double x = 2 * Math.sqrt(cp_m);
 			if (x > 709)
 				return 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x);
-			else
-				return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.I1(x));
+			return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.I1(x));
 		}
 		else if (c == 0.0)
 			// log (FastMath.exp(-p) * (1 + p / m))

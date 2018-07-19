@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
  * set of data points (x, y).
  * <p>
  * This calculator computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
- * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
+ * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
 public class MLEGradientCalculator extends GradientCalculator
@@ -535,7 +535,7 @@ public class MLEGradientCalculator extends GradientCalculator
 		//final double e = (xi_fi) - 1;
 
 		// Compute:
-		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+		// Laurence &amp; Chromy (2010) Nature Methods 7, 338-339, SI
 		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
@@ -601,7 +601,7 @@ public class MLEGradientCalculator extends GradientCalculator
 		final double e = 1 - (xi_fi);
 
 		// Compute:
-		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+		// Laurence &amp; Chromy (2010) Nature Methods 7, 338-339, SI
 		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
@@ -698,7 +698,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double e = 1 - (xi / fi);
 
 				// Compute:
-				// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI, Equation 6
+				// Laurence &amp; Chromy (2010) Nature Methods 7, 338-339, SI, Equation 6
 				// df_da - the gradient vector of the function's partial first derivatives with respect to the parameters
 
 				for (int k = 0; k < nparams; k++)

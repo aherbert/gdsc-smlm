@@ -444,9 +444,9 @@ public class BlinkEstimator implements PlugIn
 	/**
 	 * Fit the dark time to counts of molecules curve. Only use the first n fitted points.
 	 * <p>
-	 * Calculates:<br/>
-	 * N = The number of photoblinking molecules in the sample<br/>
-	 * nBlink = The average number of blinks per flourophore<br/>
+	 * Calculates:<br>
+	 * N = The number of photoblinking molecules in the sample<br>
+	 * nBlink = The average number of blinks per flourophore<br>
 	 * tOff = The off-time
 	 *
 	 * @param td
@@ -630,11 +630,11 @@ public class BlinkEstimator implements PlugIn
 	 * <p>
 	 * where
 	 * <p>
-	 * N(td) = The number of calculated molecules at different dark times (td)<br/>
-	 * N = The number of photoblinking molecules in the sample<br/>
-	 * nBlink = The average number of blinks per flourophore<br/>
-	 * td = The dark time<br/>
-	 * tOff = The off-time<br/>
+	 * N(td) = The number of calculated molecules at different dark times (td)<br>
+	 * N = The number of photoblinking molecules in the sample<br>
+	 * nBlink = The average number of blinks per flourophore<br>
+	 * td = The dark time<br>
+	 * tOff = The off-time<br>
 	 */
 	public class BlinkingFunction extends LoggingOptimiserFunction
 			implements MultivariateVectorFunction //, DifferentiableMultivariateVectorFunction

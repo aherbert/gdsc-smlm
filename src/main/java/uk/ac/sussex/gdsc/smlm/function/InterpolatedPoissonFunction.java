@@ -159,8 +159,8 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * When evaluating using non-integer values the gradient for 0 < o/gain < 1 is incorrect. In this region there is no
-	 * definition for the factorial required for the derivative (o/gain - 1)!.
+	 * When evaluating using non-integer values the gradient for {@code 0 < o/gain < 1} is incorrect. In this region there is no
+	 * definition for the factorial required for the derivative {@code (o/gain - 1)!}.
 	 *
 	 * @see uk.ac.sussex.gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
 	 */

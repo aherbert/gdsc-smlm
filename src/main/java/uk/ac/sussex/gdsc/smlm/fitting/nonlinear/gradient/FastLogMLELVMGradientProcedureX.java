@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * set of data points (x, y).
  * <p>
  * This procedure computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
- * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
+ * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
 public class FastLogMLELVMGradientProcedureX extends FastLogMLELVMGradientProcedure

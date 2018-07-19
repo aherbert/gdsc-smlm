@@ -224,7 +224,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	}
 
 	/**
-	 * Returns a string representation of the underlying List<Point3f>.
+	 * Returns a string representation of the underlying {@code List<Point3f>}.
 	 */
 	@Override
 	public String toString()

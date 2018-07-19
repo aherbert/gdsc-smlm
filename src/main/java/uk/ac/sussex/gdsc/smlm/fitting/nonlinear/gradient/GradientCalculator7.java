@@ -430,7 +430,7 @@ public class GradientCalculator7 extends GradientCalculator
 		final double e = 1 - (xi_fi);
 
 		// Compute:
-		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+		// Laurence &amp; Chromy (2010) Nature Methods 7, 338-339, SI
 		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters

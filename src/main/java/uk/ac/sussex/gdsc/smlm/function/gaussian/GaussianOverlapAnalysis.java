@@ -317,7 +317,7 @@ public class GaussianOverlapAnalysis
 	}
 
 	/**
-	 * Get the probability of a standard Gaussian within the given range x, i.e. P(-x < X <= x)
+	 * Get the probability of a standard Gaussian within the given range x, i.e. {@code P(-x < X <= x)}.
 	 *
 	 * @param x
 	 *            (must be positive)

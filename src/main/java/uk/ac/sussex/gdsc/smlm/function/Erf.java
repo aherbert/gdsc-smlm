@@ -42,7 +42,7 @@ public class Erf
 	 * Returns the error function.
 	 *
 	 * <p>
-	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt
+	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt
 	 * </p>
 	 *
 	 * <p>
@@ -106,7 +106,7 @@ public class Erf
 	 * Returns the error function.
 	 *
 	 * <p>
-	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt
+	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt
 	 * </p>
 	 *
 	 * <p>
@@ -178,7 +178,7 @@ public class Erf
 	 * Returns the error function.
 	 *
 	 * <p>
-	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt
+	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt
 	 * </p>
 	 *
 	 * <p>

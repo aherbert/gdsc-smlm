@@ -262,7 +262,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * @param numericalAperture
 	 *            Microscope numerical aperture (NA)
 	 * @param scaleFactor
-	 *            Scale factor to account for deviation of the optical system and out-of-focus objects (should be >=1)
+	 *            Scale factor to account for deviation of the optical system and out-of-focus objects (should be {@code >=1}s)
 	 * @return the SD in nm
 	 */
 	public static double calculateStdDev(double wavelength, double numericalAperture, double scaleFactor)

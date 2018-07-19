@@ -986,7 +986,7 @@ public class Gaussian2DFitter
 
 	/**
 	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the signal to zero and
-	 * background to zero (or negative if the background estimate is < 0).
+	 * background to zero (or negative if the background estimate is {@code < 0}).
 	 *
 	 * @param maxx
 	 *            The x range of the data

@@ -178,9 +178,9 @@ public class FFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog2(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog2(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog2(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog2(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog2(Float.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *
@@ -220,9 +220,9 @@ public class FFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog(Float.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *
@@ -286,9 +286,9 @@ public class FFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog2(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog2(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog2(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog2(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog2(Float.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *
@@ -353,9 +353,9 @@ public class FFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog(Float.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *

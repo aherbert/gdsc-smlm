@@ -37,12 +37,12 @@ import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
  * <p>
  * For each observed value the log-likelihood is computed from the Poisson-Gamma-Gaussian distribution (a Poisson
  * convolved with a Gamma distribution convolved with a Gaussian). The Poisson-Gamma distribution is derived
- * analytically in the paper Maximilian H Ulbrich & Ehud Y Isacoff, Nature Methods - 4, 319 - 321 (2007) to explain the
+ * analytically in the paper Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321 to explain the
  * probability distribution of ADUs given a fixed photon level per pixel and set gain in an EM-CCD camera (The Poisson
  * distribution models the photon count and the Gamma distribution models the EM-gain). This is then numerically
  * convolved with a Gaussian distribution to model the read noise of the camera.
  * <p>
- * The distribution of Ulbrich & Isacoff has no analytical solution to the convolution with a Gaussian. However the
+ * The distribution of Ulbrich &amp; Isacoff has no analytical solution to the convolution with a Gaussian. However the
  * convolution with a Gaussian has the most effect when the counts are low. The Poisson-Gamma-Gaussian can be
  * approximated using the Poisson-Gamma and a partial convolution with a Gaussian at low counts. This method is provided
  * as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7,

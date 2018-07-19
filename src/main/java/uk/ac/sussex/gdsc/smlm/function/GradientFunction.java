@@ -38,8 +38,8 @@ public interface GradientFunction
 	public void initialise(final double[] a);
 
 	/**
-	 * The function will evaluate the gradient for up to n parameters where n <= a.length. This method
-	 * returns the indices that are evaluated.
+	 * The function will evaluate the gradient for up to {@code n} parameters where {@code n <= a.length}. 
+	 * This method returns the indices that are evaluated.
 	 *
 	 * @return The gradient indices
 	 */

@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
  * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
  * Nature Methods 7, 373-375 (supplementary note).
  * <p>
- * Ref: Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
+ * Ref: Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
  * Applied Physics Letters 90, 1–3 (2007).
  */
 public class HoltzerAstigmatismZModel implements AstigmatismZModel

@@ -253,9 +253,10 @@ public class ICSIFastLog extends FastLog
 		if (e == 0)
 			return (m == 0)
 					// Special case for +0
-					? Float.NEGATIVE_INFINITY : (data[m >>> q]);
-		else
-			return (e + data[m >>> q]);
+					? Float.NEGATIVE_INFINITY
+					: (data[m >>> q]);
+
+		return (e + data[m >>> q]);
 	}
 
 	/**
@@ -263,10 +264,11 @@ public class ICSIFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog2(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog2(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is incorrect (fastLog2(Float.MIN_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog2(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog2(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog2(Float.MAX_VALUE)}).
+	 * <li>If the argument is positive zero or negative zero, then the result is incorrect
+	 * ({@code fastLog2(Float.MIN_VALUE)}).
 	 * </ul>
 	 *
 	 * @param x
@@ -302,8 +304,8 @@ public class ICSIFastLog extends FastLog
 
 		if (e == 0)
 			return (m == 0) ? Float.NEGATIVE_INFINITY : (data[m >>> q]) * LN2F;
-		else
-			return (e + data[m >>> q]) * LN2F;
+
+		return (e + data[m >>> q]) * LN2F;
 	}
 
 	/**
@@ -311,10 +313,11 @@ public class ICSIFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is incorrect (fastLog(Float.MIN_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is positive zero or negative zero, then the result is incorrect
+	 * ({@code fastLog(Float.MIN_VALUE)}).
 	 * </ul>
 	 *
 	 * @param x
@@ -368,9 +371,10 @@ public class ICSIFastLog extends FastLog
 		if (e == 0)
 			return (m == 0L)
 					// Special case for +0
-					? Float.NEGATIVE_INFINITY : (ddata[(int) (m >>> qd)]);
-		else
-			return (e + ddata[(int) (m >>> qd)]);
+					? Float.NEGATIVE_INFINITY
+					: (ddata[(int) (m >>> qd)]);
+
+		return (e + ddata[(int) (m >>> qd)]);
 	}
 
 	/**
@@ -378,10 +382,11 @@ public class ICSIFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog2(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog2(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is incorrect (fastLog2(Float.MIN_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog2(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog2(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog2(Float.MAX_VALUE)}).
+	 * <li>If the argument is positive zero or negative zero, then the result is incorrect
+	 * ({@code fastLog2(Float.MIN_VALUE)}).
 	 * </ul>
 	 *
 	 * @param x
@@ -416,8 +421,8 @@ public class ICSIFastLog extends FastLog
 
 		if (e == 0)
 			return (m == 0L) ? Float.NEGATIVE_INFINITY : (ddata[(int) (m >>> qd)]) * LN2F;
-		else
-			return (e + ddata[(int) (m >>> qd)]) * LN2F;
+
+		return (e + ddata[(int) (m >>> qd)]) * LN2F;
 	}
 
 	/**
@@ -425,10 +430,11 @@ public class ICSIFastLog extends FastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is incorrect (fastLog(Float.MIN_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is positive zero or negative zero, then the result is incorrect
+	 * ({@code fastLog(Float.MIN_VALUE)}).
 	 * </ul>
 	 *
 	 * @param x

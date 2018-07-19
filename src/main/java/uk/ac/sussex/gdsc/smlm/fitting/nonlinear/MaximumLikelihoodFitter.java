@@ -63,13 +63,13 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonLikelihoodWrapper;
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  * <p>
- * By default the probability mass function for observed value k is modelled as a Poisson process:<br/>
- * pmf = e^-k.(l^k / k!) <br/>
- * where: <br/>
- * k = Observed number of occurrences <br/>
+ * By default the probability mass function for observed value k is modelled as a Poisson process:<br>
+ * pmf = e^-k.(l^k / k!) <br>
+ * where: <br>
+ * k = Observed number of occurrences <br>
  * l = Expected number of occurrences (the mean)
  * <p>
- * MLE = Max [ sum (ln(e^-k.(l^k / k!)) ] <br/>
+ * MLE = Max [ sum (ln(e^-k.(l^k / k!)) ] <br>
  * = Max [ sum (k.ln(l) - l) ]
  * <p>
  * The expected number of occurrences can be modelled using any parameterised function, for example the Gaussian 2D

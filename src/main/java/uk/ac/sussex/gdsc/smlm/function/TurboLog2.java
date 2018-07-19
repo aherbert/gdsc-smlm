@@ -33,8 +33,9 @@ package uk.ac.sussex.gdsc.smlm.function;
  * <p>
  * The algorithm has been changed to detects when the unbiased exponent is zero and maintains the precision.
  * <p>
- * Using look-up table the relative error ((fastLog(x)-Math.log(x))/Math.log(x)) is large (e>>1) when the input value x
- * is close to 1. So the algorithm detects values close to 1 and uses Math.log instead.
+ * Using look-up table the relative error {@code ((fastLog(x)-Math.log(x))/Math.log(x))} is large ({@code e>>1}) when
+ * the input value {@code x} is close to 1. So the algorithm detects values close to 1 and uses {@code Math.log(double)}
+ * instead.
  * <p>
  * This is a copy of TurboLog but implements rounding on the mantissa. This allows this class to achieve the same error
  * as TurboLog(n) using (n-1), i.e. half the table size.
@@ -209,9 +210,9 @@ public class TurboLog2 extends TurboLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Float.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code >fastLog(Float.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *
@@ -287,9 +288,9 @@ public class TurboLog2 extends TurboLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Double.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code >fastLog(Double.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *
@@ -367,9 +368,9 @@ public class TurboLog2 extends TurboLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
-	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect ({@code >fastLog(Double.MAX_VALUE)}).
+	 * <li>If the argument is negative, then the result is incorrect ({@code fastLog(-x)}).
+	 * <li>If the argument is positive infinity, then the result is incorrect ({@code >fastLog(Double.MAX_VALUE)}).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 *

@@ -30,7 +30,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
  * set of data points (x, y).
  * <p>
  * This calculator computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
- * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
+ * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
 public class MLEGradientCalculator5 extends MLEGradientCalculator

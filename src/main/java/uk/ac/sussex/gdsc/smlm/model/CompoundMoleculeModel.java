@@ -427,10 +427,10 @@ public class CompoundMoleculeModel extends MoleculeModel
 	}
 
 	/**
-	 * Get the current coordinates of the nth molecule in the compound molecule
+	 * Get the current coordinates of the n<sup>th</sup> molecule in the compound molecule
 	 *
 	 * @param n
-	 *            The requested molecule (0 <= n < {@link #getSize()})
+	 *            The requested molecule (n &lt; {@link #getSize()})
 	 * @return The xyz coordinates
 	 * @see #getSize()
 	 * @throws IndexOutOfBoundsException
@@ -446,10 +446,10 @@ public class CompoundMoleculeModel extends MoleculeModel
 	}
 
 	/**
-	 * Get the current coordinates of the nth molecule in the compound molecule relative to the centre-of-mass
+	 * Get the current coordinates of the n<sup>th</sup> molecule molecule in the compound molecule relative to the centre-of-mass
 	 *
 	 * @param n
-	 *            The requested molecule (0 <= n < {@link #getSize()})
+	 *            The requested molecule (n &lt; {@link #getSize()})
 	 * @return The xyz coordinates
 	 * @see #getSize()
 	 * @throws IndexOutOfBoundsException
@@ -462,12 +462,12 @@ public class CompoundMoleculeModel extends MoleculeModel
 	}
 
 	/**
-	 * Get the nth molecule in the compound molecule
+	 * Get the n<sup>th</sup> molecule molecule in the compound molecule
 	 * <p>
 	 * Note that the molecule coordinates are relative the centre-of-mass of the compound
 	 *
 	 * @param n
-	 *            The requested molecule (0 <= n < {@link #getSize()})
+	 *            The requested molecule (n &lt; {@link #getSize()})
 	 * @return The molecule
 	 * @see #getSize()
 	 * @throws IndexOutOfBoundsException

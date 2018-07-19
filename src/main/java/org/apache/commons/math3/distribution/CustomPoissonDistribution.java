@@ -400,6 +400,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 * {@inheritDoc}
 	 * <p>
 	 * <strong>Algorithm Description</strong>:
+	 * </p>
 	 * <ul>
 	 * <li>For small means, uses simulation of a Poisson process
 	 * using Uniform deviates, as described
@@ -413,7 +414,6 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 * </blockquote>
 	 * </li>
 	 * </ul>
-	 * </p>
 	 *
 	 * @return a random value.
 	 * @since 2.2

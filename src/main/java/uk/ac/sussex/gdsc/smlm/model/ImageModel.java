@@ -286,7 +286,7 @@ public abstract class ImageModel
 	 * Replace the CompoundMoleculeModel objects in the list with new compounds containing the generated
 	 * FluorophoreSequenceModel objects. If no fluorophores can be generated for a compound then it is removed. Since
 	 * the fluorophores are part of a compound their coordinates are relative to the compound centre of mass.
-	 * <p
+	 * <p>
 	 * Note that the activation energy is sampled at the spatial position without movement. This is therefore an
 	 * approximation of the energy the molecule would receive if it were moving.
 	 *

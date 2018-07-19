@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
- * specify which of the following parameters the function will evaluate:<br/>
+ * specify which of the following parameters the function will evaluate:<br>
  * background, signal, z-depth, position0, position1, sd0, sd1
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
@@ -307,7 +307,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	 * Returns the error function.
 	 *
 	 * <p>
-	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt
+	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt
 	 * </p>
 	 *
 	 * <p>

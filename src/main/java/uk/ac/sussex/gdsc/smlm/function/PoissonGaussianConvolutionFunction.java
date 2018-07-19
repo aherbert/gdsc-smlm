@@ -32,13 +32,13 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
  * zero. If no mean (zero or below) is provided for the Poisson distribution then the probability density function
  * matches that of the Gaussian.
  * <p>
- * The implementation uses full convolution described from Huang, et al (2013), Supplementary Notes Eq 1.1:<br/>
- * P(D) = A Sum_q e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)<br/>
- * Where:<br/>
+ * The implementation uses full convolution described from Huang, et al (2013), Supplementary Notes Eq 1.1:<br>
+ * P(D) = A Sum_q e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)<br>
+ * Where:<br>
  * A = normalisation constant
- * var = the variance of the pixel <br/>
- * g = the gain of the pixel <br/>
- * u = the function value (expected number of photons) <br/>
+ * var = the variance of the pixel <br>
+ * g = the gain of the pixel <br>
+ * u = the function value (expected number of photons) <br>
  * D = the observed value at the pixel
  * <p>
  * The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a

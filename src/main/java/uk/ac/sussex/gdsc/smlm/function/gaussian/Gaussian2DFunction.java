@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
- * specify which of the following parameters the function will evaluate:<br/>
+ * specify which of the following parameters the function will evaluate:<br>
  * background, signal, position0, position1, sd0, sd1, angle. A parameter is provided for position2 (z-depth) to support
  * 3D function using astimatism.
  * <p>
@@ -350,7 +350,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	}
 
 	/**
-	 * Build the index array that maps the gradient index back to the original parameter index so that:<br/>
+	 * Build the index array that maps the gradient index back to the original parameter index so that:<br>
 	 * a[indices[i]] += dy_da[i]
 	 *
 	 * @param nPeaks

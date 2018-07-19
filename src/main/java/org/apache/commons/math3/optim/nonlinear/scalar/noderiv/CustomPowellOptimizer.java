@@ -131,7 +131,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	/**
 	 * This constructor allows to specify a user-defined convergence checker,
 	 * in addition to the parameters that control the default convergence
-	 * checking procedure. <br/>
+	 * checking procedure. <br>
 	 * The internal line search tolerances are set to the square-root of their
 	 * corresponding value in the multivariate optimizer.
 	 *
@@ -195,7 +195,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	}
 
 	/**
-	 * The parameters control the default convergence checking procedure. <br/>
+	 * The parameters control the default convergence checking procedure. <br>
 	 * The internal line search tolerances are set to the square-root of their
 	 * corresponding value in the multivariate optimizer.
 	 *

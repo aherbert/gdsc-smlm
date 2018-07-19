@@ -36,7 +36,7 @@ public interface NonLinearFunction extends GradientFunction
 	 *            Predictor
 	 * @param dyda
 	 *            Partial gradient of function with respect to each coefficient identified by {@link #gradientIndices()}
-	 *            . Note: dyda.length must be >= to gradientIndices().length
+	 *            . Note: dyda.length must be &gt;= to gradientIndices().length
 	 * @return The predicted value y
 	 */
 	double eval(final int x, final double[] dyda);
@@ -59,7 +59,7 @@ public interface NonLinearFunction extends GradientFunction
 	 *            Predictor
 	 * @param dyda
 	 *            Partial gradient of function with respect to each coefficient identified by {@link #gradientIndices()}
-	 *            . Note: dyda.length must be >= to gradientIndices().length
+	 *            . Note: dyda.length must be &gt;= to gradientIndices().length
 	 * @param w
 	 *            The output weight. Equivalent to the expected variance of the predicted value. This should not be zero
 	 *            to avoid divide by zero error.

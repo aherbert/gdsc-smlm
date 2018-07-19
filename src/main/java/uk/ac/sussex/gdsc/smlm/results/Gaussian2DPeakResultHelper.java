@@ -1252,7 +1252,7 @@ public class Gaussian2DPeakResultHelper
 	 *
 	 * @param x
 	 *            the x
-	 * @return the cumulative normal distribution CDF(X<x)
+	 * @return the cumulative normal distribution {@code CDF(X<x)}
 	 */
 	public static double cumulative(double x)
 	{
@@ -1272,7 +1272,7 @@ public class Gaussian2DPeakResultHelper
 	 *
 	 * @param r
 	 *            the r
-	 * @return the cumulative 2D normal distribution F(r)
+	 * @return the cumulative 2D normal distribution {@code F(r)}
 	 */
 	public static double cumulative2D(double r)
 	{
@@ -1293,7 +1293,7 @@ public class Gaussian2DPeakResultHelper
 	 * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
 	 *
 	 * @param p
-	 *            the cumulative 2D normal distribution F(r)
+	 *            the cumulative 2D normal distribution {@code F(r)}
 	 * @return Mahalanobis distance r from the Gaussian
 	 * @throws IllegalArgumentException
 	 *             If p is not in the range 0-1
@@ -1378,7 +1378,7 @@ public class Gaussian2DPeakResultHelper
 
 	/**
 	 * Gets the average signal value using the range r standard deviations of the centre defined by the given the
-	 * cumulative 2D normal distribution F(r).
+	 * cumulative 2D normal distribution {@code F(r)}.
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
 	 * elliptical area of the same range. The expected range is computed using {@link #inverseCumulative2D(double)}
@@ -1393,7 +1393,7 @@ public class Gaussian2DPeakResultHelper
 	 * @param sy
 	 *            the Gaussian standard deviation in the Y dimension
 	 * @param p
-	 *            the cumulative 2D normal distribution F(r)
+	 *            the cumulative 2D normal distribution {@code F(r)}
 	 * @return the mean
 	 * @throws IllegalArgumentException
 	 *             If p is not in the range 0-1
@@ -1407,7 +1407,7 @@ public class Gaussian2DPeakResultHelper
 
 	/**
 	 * Gets the average signal value using the range r standard deviations of the centre that covers half of the total
-	 * 2D Gaussian (cumulative 2D normal distribution F(r)=0.5).
+	 * 2D Gaussian (cumulative 2D normal distribution {@code F(r)=0.5}).
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
 	 * elliptical area of the same range. The expected range is computed using {@link #inverseCumulative2D(double)}

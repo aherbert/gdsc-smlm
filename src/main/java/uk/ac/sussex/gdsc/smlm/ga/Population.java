@@ -85,7 +85,6 @@ public class Population<T extends Comparable<T>>
 	 * The population will grow until the desired population size by recombination of individual pairs chosen from the
 	 * population by the selection strategy. Child sequences will be subject to mutation. The fitness of all the
 	 * individuals in the new population is evaluated and convergence checked for the fittest individual. If the initial
-	 * population is small (<2 or <Chromosome<T>.length()) then mutation will be used to expand it before recombination.
 	 * <p>
 	 * The process of grow, evaluate, select is repeated until convergence.
 	 * <p>

@@ -557,7 +557,7 @@ public class FRC
 	 * Control the method for generating the Fourier circle.
 	 * <p>
 	 * The correlation is computed using intervals around the circle circumference of the Fourier transform. The radial
-	 * sum does not use interpolation but instead assigns all pixels at radius r to the interval n<=r<n+1 for all n
+	 * sum does not use interpolation but instead assigns all pixels at radius r to the interval {@code n<=r<n+1} for all n
 	 * from 0 to the max radius.
 	 * <p>
 	 * Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and

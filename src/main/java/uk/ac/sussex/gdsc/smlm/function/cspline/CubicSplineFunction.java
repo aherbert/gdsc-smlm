@@ -133,7 +133,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/**
 	 * Internal class to control visiting the correct cubic spline node for each [x][y] index in the
-	 * target range [0 <= x < maxx], [0 <= y < maxy].
+	 * target range {@code [0 <= x < maxx]}, {@code [0 <= y < maxy]}.
 	 */
 	protected abstract class TargetSpline
 	{

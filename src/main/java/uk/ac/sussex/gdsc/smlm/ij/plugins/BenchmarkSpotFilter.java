@@ -254,7 +254,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		/** The statistics of the number of negatives preceding each positive. */
 		public StoredData stats;
 
-		/** The Area-Under precision-recall Curve (AUC) computed using the maximum precision for recall >= r. */
+		/** The Area-Under precision-recall Curve (AUC) computed using the maximum precision for {@code recall >= r}. */
 		public double auc2;
 
 		/** The slope of the regression between the actual and candidate spot intensity for matches. */
