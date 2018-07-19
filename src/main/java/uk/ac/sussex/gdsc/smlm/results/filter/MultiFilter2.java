@@ -103,8 +103,7 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
 	{
 		if (useBackground)
 			return calculator.getLSEVariance(peak.getParameters());
-		else
-			return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
+		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
 	}
 
 	/*

@@ -142,27 +142,25 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		if (e <= 0)
 			// If no Poisson mean then just use the Gaussian
 			return FastMath.exp((-o * o / var_by_2) + logNormalisationGaussian);
-		else
-		{
-			// Note:
-			// This is a convolution of two continuous probability distributions.
-			// It does not compute a good estimate when the variance is small since the
-			// single point approximation to the gaussian is not valid. This is not
-			// relevant for a EM-CCD since the variance is likely to be above 10 counts.
-			// It also underestimates the cumulative distribution (sum < 1) when the Poisson
-			// mean is close to 1 or the gain is small (<4) due to underestimation in the
-			// Poisson-Gamma distribution.
 
-			// Use a range to cover the Gaussian convolution
-			final double max = o + range;
-			if (max < 0)
-				return 0;
-			double min = o - range;
-			if (min < 0)
-				min = 0;
+		// Note:
+		// This is a convolution of two continuous probability distributions.
+		// It does not compute a good estimate when the variance is small since the
+		// single point approximation to the gaussian is not valid. This is not
+		// relevant for a EM-CCD since the variance is likely to be above 10 counts.
+		// It also underestimates the cumulative distribution (sum < 1) when the Poisson
+		// mean is close to 1 or the gain is small (<4) due to underestimation in the
+		// Poisson-Gamma distribution.
 
-			return computeP(o, e, max, min);
-		}
+		// Use a range to cover the Gaussian convolution
+		final double max = o + range;
+		if (max < 0)
+			return 0;
+		double min = o - range;
+		if (min < 0)
+			min = 0;
+
+		return computeP(o, e, max, min);
 	}
 
 	private double computeP(final double o, final double e, double max, double min)
@@ -237,16 +235,14 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		if (e <= 0)
 			// If no Poisson mean then just use the Gaussian
 			return (-o * o / var_by_2) + logNormalisationGaussian;
-		else
-		{
-			final double max = o + range;
-			if (max < 0)
-				return Double.NEGATIVE_INFINITY;
-			double min = o - range;
-			if (min < 0)
-				min = 0;
 
-			return Math.log(computeP(o, e, max, min));
-		}
+		final double max = o + range;
+		if (max < 0)
+			return Double.NEGATIVE_INFINITY;
+		double min = o - range;
+		if (min < 0)
+			min = 0;
+
+		return Math.log(computeP(o, e, max, min));
 	}
 }

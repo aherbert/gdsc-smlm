@@ -52,6 +52,7 @@ public class GradientCalculatorFactory
 	public static GradientCalculator newCalculator(int nparams, boolean mle)
 	{
 		if (mle)
+		{
 			switch (nparams)
 			{
 				case 4:
@@ -80,34 +81,35 @@ public class GradientCalculatorFactory
 				default:
 					return new MLEGradientCalculator(nparams);
 			}
-		else
-			switch (nparams)
-			{
-				case 4:
-					// fixed width single Gaussian
-					// circular single Gaussian, no background
-					return new GradientCalculator4();
+		}
 
-				case 5:
-					// circular single Gaussian
-					// free circular single Gaussian, no background
-					return new GradientCalculator5();
+		switch (nparams)
+		{
+			case 4:
+				// fixed width single Gaussian
+				// circular single Gaussian, no background
+				return new GradientCalculator4();
 
-				case 6:
-					// free circular single Gaussian
-					// elliptical single Gaussian, no background
-					return new GradientCalculator6();
+			case 5:
+				// circular single Gaussian
+				// free circular single Gaussian, no background
+				return new GradientCalculator5();
 
-				case 7:
-					// elliptical single Gaussian
-					return new GradientCalculator7();
+			case 6:
+				// free circular single Gaussian
+				// elliptical single Gaussian, no background
+				return new GradientCalculator6();
 
-				case 3:
-					// fixed width single Gaussian, no background
-					return new GradientCalculator3();
+			case 7:
+				// elliptical single Gaussian
+				return new GradientCalculator7();
 
-				default:
-					return new GradientCalculator(nparams);
-			}
+			case 3:
+				// fixed width single Gaussian, no background
+				return new GradientCalculator3();
+
+			default:
+				return new GradientCalculator(nparams);
+		}
 	}
 }

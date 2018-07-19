@@ -178,11 +178,8 @@ public class AggregatedImageSource extends ImageSource
 			imageSource.sequentialReadStatus = SequentialReadStatus.RUNNING;
 			return true;
 		}
-		else
-		{
-			imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
-			return false;
-		}
+		imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
+		return false;
 	}
 
 	/**

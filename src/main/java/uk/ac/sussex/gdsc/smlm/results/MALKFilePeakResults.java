@@ -332,14 +332,15 @@ public class MALKFilePeakResults extends FilePeakResults
 			String line;
 			// Skip the header
 			while ((line = input.readLine()) != null)
+			{
 				if (line.charAt(0) != '#')
 				{
 					// This is the first record
 					results.add(new Result(line));
 					break;
 				}
-				else
-					header.append(line).append("\n");
+				header.append(line).append("\n");
+			}
 
 			while ((line = input.readLine()) != null)
 				results.add(new Result(line));

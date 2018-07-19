@@ -298,7 +298,6 @@ public class Workflow<S, R>
 	{
 		if (previous <= 0 || previous > workers.size())
 			return addToChain(worker);
-		else
 			return addToChain(worker, workers.get(previous - 1));
 	}
 
@@ -313,12 +312,9 @@ public class Workflow<S, R>
 	{
 		if (workers.isEmpty())
 			return addToChain(worker, null);
-		else
-		{
-			// Chain together
-			final RunnableWorker previous = workers.get(workers.size() - 1);
-			return addToChain(worker, previous);
-		}
+		// Chain together
+		final RunnableWorker previous = workers.get(workers.size() - 1);
+		return addToChain(worker, previous);
 
 	}
 

@@ -99,28 +99,26 @@ public class FilterScore implements Comparable<FilterScore>
 				return compareParameters(that);
 			return 0;
 		}
-		else
-		{
-			// Must pass criteria first
-			if (that.criteriaPassed)
-				return 1;
+		
+		// Must pass criteria first
+		if (that.criteriaPassed)
+			return 1;
 
-			// Sort by how close we are to passing the criteria
-			if (this.criteria > that.criteria)
-				return -1;
-			if (this.criteria < that.criteria)
-				return 1;
-			if (this.score > that.score)
-				return -1;
-			if (this.score < that.score)
-				return 1;
-			// If the same type then compare the parameters
-			if (allSameType)
-				return compareParameters(that);
-			else if (this.filter.getType().equals(that.filter.getType()))
-				return compareParameters(that);
-			return 0;
-		}
+		// Sort by how close we are to passing the criteria
+		if (this.criteria > that.criteria)
+			return -1;
+		if (this.criteria < that.criteria)
+			return 1;
+		if (this.score > that.score)
+			return -1;
+		if (this.score < that.score)
+			return 1;
+		// If the same type then compare the parameters
+		if (allSameType)
+			return compareParameters(that);
+		else if (this.filter.getType().equals(that.filter.getType()))
+			return compareParameters(that);
+		return 0;
 	}
 
 	/**

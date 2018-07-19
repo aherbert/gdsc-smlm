@@ -574,26 +574,25 @@ public class PCPALMAnalysis implements PlugInFilter
 						Utils.rounded(maxy - miny, 3));
 				return;
 			}
-			else
-				for (int i = molecules.size(); i-- > 0;)
+
+			for (int i = molecules.size(); i-- > 0;)
+			{
+				final Molecule m = molecules.get(i);
+				// Optionally ignore molecules that are near the edge of the boundary
+				if (useBorder && (m.x < boundaryMinx || m.x > boundaryMaxx || m.y < boundaryMiny || m.y > boundaryMaxy))
+					continue;
+				N++;
+
+				for (int j = molecules.size(); j-- > 0;)
 				{
-					final Molecule m = molecules.get(i);
-					// Optionally ignore molecules that are near the edge of the boundary
-					if (useBorder &&
-							(m.x < boundaryMinx || m.x > boundaryMaxx || m.y < boundaryMiny || m.y > boundaryMaxy))
+					if (i == j)
 						continue;
-					N++;
 
-					for (int j = molecules.size(); j-- > 0;)
-					{
-						if (i == j)
-							continue;
-
-						final double d = m.distance2(molecules.get(j));
-						if (d < maxDistance2)
-							H[(int) (Math.sqrt(d) / correlationInterval)]++;
-					}
+					final double d = m.distance2(molecules.get(j));
+					if (d < maxDistance2)
+						H[(int) (Math.sqrt(d) / correlationInterval)]++;
 				}
+			}
 
 			double[] r = new double[nBins + 1];
 			for (int i = 0; i <= nBins; i++)
@@ -620,8 +619,9 @@ public class PCPALMAnalysis implements PlugInFilter
 
 			final double[][] gr = new double[][] { r, pcf, null };
 
-			final CorrelationResult result = new CorrelationResult(results.size() + 1, PCPALMMolecules.results.getSource(),
-					boundaryMinx, boundaryMiny, boundaryMaxx, boundaryMaxy, N, correlationInterval, 0, false, gr, true);
+			final CorrelationResult result = new CorrelationResult(results.size() + 1,
+					PCPALMMolecules.results.getSource(), boundaryMinx, boundaryMiny, boundaryMaxx, boundaryMaxy, N,
+					correlationInterval, 0, false, gr, true);
 			results.add(result);
 
 			noPlots = WindowManager.getFrame(spatialPlotTitle) == null;
@@ -1197,8 +1197,8 @@ public class PCPALMAnalysis implements PlugInFilter
 		// Convert density from pixel^-2 to um^-2
 		peakDensity *= 1e6 / (nmPerPixel * nmPerPixel);
 
-		final CorrelationResult result = new CorrelationResult(id, PCPALMMolecules.results.getSource(), minx, miny, maxx,
-				maxy, uniquePoints, nmPerPixel, peakDensity, binaryImage, gr, false);
+		final CorrelationResult result = new CorrelationResult(id, PCPALMMolecules.results.getSource(), minx, miny,
+				maxx, maxy, uniquePoints, nmPerPixel, peakDensity, binaryImage, gr, false);
 		results.add(result);
 
 		createResultsTable();

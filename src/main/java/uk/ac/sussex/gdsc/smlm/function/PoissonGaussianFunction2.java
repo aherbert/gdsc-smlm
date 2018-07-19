@@ -150,15 +150,13 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 		if (e <= 0)
 			// If no Poisson mean then just use the Gaussian
 			return FastMath.exp(-0.5 * o * o / sigmasquared) * probabilityNormalisationNoPoisson;
-		else
-		{
-			//e *= alpha;
-			double saddlepoint = (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
-					: PoissonGaussianFunction.pade(o, e, sigmasquared);
-			saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
-			final double logP = PoissonGaussianFunction.sp_approx(o, e, sigmasquared, saddlepoint);
-			return FastMath.exp(logP) * probabilityNormalisation;
-		}
+
+		//e *= alpha;
+		double saddlepoint = (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
+				: PoissonGaussianFunction.pade(o, e, sigmasquared);
+		saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
+		final double logP = PoissonGaussianFunction.sp_approx(o, e, sigmasquared, saddlepoint);
+		return FastMath.exp(logP) * probabilityNormalisation;
 	}
 
 	/*
@@ -174,14 +172,12 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 		if (e <= 0)
 			// If no Poisson mean then just use the Gaussian
 			return (-0.5 * o * o / sigmasquared) + logNormalisationNoPoisson;
-		else
-		{
-			//e *= alpha;
-			double saddlepoint = (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
-					: PoissonGaussianFunction.pade(o, e, sigmasquared);
-			saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
-			final double logP = PoissonGaussianFunction.sp_approx(o, e, sigmasquared, saddlepoint);
-			return logP + logNormalisation;
-		}
+
+		//e *= alpha;
+		double saddlepoint = (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
+				: PoissonGaussianFunction.pade(o, e, sigmasquared);
+		saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
+		final double logP = PoissonGaussianFunction.sp_approx(o, e, sigmasquared, saddlepoint);
+		return logP + logNormalisation;
 	}
 }

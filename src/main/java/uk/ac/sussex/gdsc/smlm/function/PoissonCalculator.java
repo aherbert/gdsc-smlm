@@ -421,8 +421,7 @@ public class PoissonCalculator
 		// ll = (x==0) ? -u : x * Math.log(u) - u - logFactorial(x)
 		if (x > 0)
 			return fastLogLikelihoodX(u, x);
-		else
-			return -u;
+		return -u;
 	}
 
 	/**
@@ -517,8 +516,7 @@ public class PoissonCalculator
 		// ll = (x==0) ? -u : x * Math.log(u) - u - logFactorial(x)
 		if (x > 0)
 			return fastLogLikelihoodX(u, x, fastLog);
-		else
-			return -u;
+		return -u;
 	}
 
 	/**
@@ -941,8 +939,7 @@ public class PoissonCalculator
 	{
 		if (x > 0.0)
 			return -2.0 * x * Math.log(u / x) - u + x;
-		else
-			return -2.0 * u;
+		return -2.0 * u;
 	}
 
 	/**
@@ -961,7 +958,6 @@ public class PoissonCalculator
 	{
 		if (x > 0.0)
 			return -2.0 * x * fastLog.log(u / x) - u + x;
-		else
-			return -2.0 * u;
+		return -2.0 * u;
 	}
 }

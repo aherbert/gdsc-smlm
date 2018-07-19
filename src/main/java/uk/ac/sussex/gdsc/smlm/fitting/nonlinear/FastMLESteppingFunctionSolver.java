@@ -217,8 +217,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 				x[i] = (y[i] > 0) ? y[i] + w[i] : w[i];
 			return x;
 		}
-		else
-			return ensurePositive(y);
+		return ensurePositive(y);
 	}
 
 	/**

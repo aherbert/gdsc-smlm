@@ -239,7 +239,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			for (int i = 0; i < gradient.length; i++)
 				slope += gradient[i] * searchDirection[gradientIndices[i]];
 			if (slope <= 0.0)
-			 // The search direction for the NR step is the (first derivative / -second derivative).
+				// The search direction for the NR step is the (first derivative / -second derivative).
 				// If there are sign errors in the second derivative (it should be the same sign as the
 				// first derivative) then the step will be in the 'wrong' direction.
 				// Handle this with different options:
@@ -262,7 +262,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 						}
 						if (slope == 0)
 							return setInsignificantStep(xOld, fOld);
-							//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
 						break;
 
 					case PARTIAL_IGNORE:
@@ -288,7 +288,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 						if (slope == 0)
 							// All components have been removed so handle no slope
 							return setInsignificantStep(xOld, fOld);
-							//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
 						break;
 
 					default:
@@ -327,58 +327,55 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 					// Sufficient function decrease
 					//System.out.printf("f=%f > %f\n", f, fOld + ALF * alam * slope);
 					return x;
+
+				// Check for bad function evaluation
+				if (!Maths.isFinite(f))
+				{
+					// Reset backtracking
+					backtracking = 0;
+
+					alam *= 0.1;
+					continue;
+				}
+
+				// Backtrack
+				double tmplam;
+				if (backtracking++ == 0)
+				{
+					// First backtrack iteration
+					tmplam = -slope / (2.0 * (f - fOld - slope));
+					// Ensure the lambda is reduced, i.e. we take a step smaller than last time
+					if (tmplam > 0.9 * alam)
+						tmplam = 0.9 * alam;
+				}
 				else
 				{
-					// Check for bad function evaluation
-					if (!Maths.isFinite(f))
-					{
-						// Reset backtracking
-						backtracking = 0;
-
-						alam *= 0.1;
-						continue;
-					}
-
-					// Backtrack
-					double tmplam;
-					if (backtracking++ == 0)
-					{
-						// First backtrack iteration
-						tmplam = -slope / (2.0 * (f - fOld - slope));
-						// Ensure the lambda is reduced, i.e. we take a step smaller than last time
-						if (tmplam > 0.9 * alam)
-							tmplam = 0.9 * alam;
-					}
+					// Subsequent backtracks
+					final double rhs1 = f - fOld - alam * slope;
+					final double rhs2 = f2 - fOld - alam2 * slope;
+					final double a = (rhs1 / (alam * alam) - rhs2 / (alam2 * alam2)) / (alam - alam2);
+					final double b = (-alam2 * rhs1 / (alam * alam) + alam * rhs2 / (alam2 * alam2)) / (alam - alam2);
+					if (a == 0.0)
+						tmplam = -slope / (2.0 * b);
 					else
 					{
-						// Subsequent backtracks
-						final double rhs1 = f - fOld - alam * slope;
-						final double rhs2 = f2 - fOld - alam2 * slope;
-						final double a = (rhs1 / (alam * alam) - rhs2 / (alam2 * alam2)) / (alam - alam2);
-						final double b = (-alam2 * rhs1 / (alam * alam) + alam * rhs2 / (alam2 * alam2)) /
-								(alam - alam2);
-						if (a == 0.0)
-							tmplam = -slope / (2.0 * b);
-						else
-						{
-							final double disc = b * b - 3.0 * a * slope;
-							if (disc < 0.0)
-								tmplam = 0.5 * alam;
-							else if (b <= 0.0)
-								tmplam = (-b + Math.sqrt(disc)) / (3.0 * a);
-							else
-								tmplam = -slope / (b + Math.sqrt(disc));
-						}
-						// Ensure the lambda is <= 0.5 lambda1, i.e. we take a step smaller than last time
-						if (tmplam > 0.5 * alam)
+						final double disc = b * b - 3.0 * a * slope;
+						if (disc < 0.0)
 							tmplam = 0.5 * alam;
+						else if (b <= 0.0)
+							tmplam = (-b + Math.sqrt(disc)) / (3.0 * a);
+						else
+							tmplam = -slope / (b + Math.sqrt(disc));
 					}
-
-					alam2 = alam;
-					f2 = f;
-					// Ensure the lambda is >= 0.1 lambda1, i.e. we take reasonable step
-					alam = max(tmplam, 0.1 * alam);
+					// Ensure the lambda is <= 0.5 lambda1, i.e. we take a step smaller than last time
+					if (tmplam > 0.5 * alam)
+						tmplam = 0.5 * alam;
 				}
+
+				alam2 = alam;
+				f2 = f;
+				// Ensure the lambda is >= 0.1 lambda1, i.e. we take reasonable step
+				alam = max(tmplam, 0.1 * alam);
 			}
 		}
 

@@ -324,37 +324,35 @@ public class GaussianFunctionFactory
 
 			return new SingleNSNBFixedGaussian2DFunction(maxx, maxy);
 		}
-		else
+		
+		if ((flags & FIT_BACKGROUND) != 0)
 		{
-			if ((flags & FIT_BACKGROUND) != 0)
-			{
-				if ((flags & FIT_ANGLE) != 0)
-					return new EllipticalGaussian2DFunction(nPeaks, maxx, maxy);
-				if ((flags & FIT_Y_WIDTH) != 0)
-					return new FreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
-				if ((flags & FIT_X_WIDTH) != 0)
-					return new CircularGaussian2DFunction(nPeaks, maxx, maxy);
-
-				// Fixed function
-				if ((flags & FIT_SIGNAL) != 0)
-					return new FixedGaussian2DFunction(nPeaks, maxx, maxy);
-
-				return new NSFixedGaussian2DFunction(nPeaks, maxx, maxy);
-			}
-
 			if ((flags & FIT_ANGLE) != 0)
-				return new NBEllipticalGaussian2DFunction(nPeaks, maxx, maxy);
+				return new EllipticalGaussian2DFunction(nPeaks, maxx, maxy);
 			if ((flags & FIT_Y_WIDTH) != 0)
-				return new NBFreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
+				return new FreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
 			if ((flags & FIT_X_WIDTH) != 0)
-				return new NBCircularGaussian2DFunction(nPeaks, maxx, maxy);
+				return new CircularGaussian2DFunction(nPeaks, maxx, maxy);
 
 			// Fixed function
 			if ((flags & FIT_SIGNAL) != 0)
-				return new NBFixedGaussian2DFunction(nPeaks, maxx, maxy);
+				return new FixedGaussian2DFunction(nPeaks, maxx, maxy);
 
-			return new NSNBFixedGaussian2DFunction(nPeaks, maxx, maxy);
+			return new NSFixedGaussian2DFunction(nPeaks, maxx, maxy);
 		}
+
+		if ((flags & FIT_ANGLE) != 0)
+			return new NBEllipticalGaussian2DFunction(nPeaks, maxx, maxy);
+		if ((flags & FIT_Y_WIDTH) != 0)
+			return new NBFreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
+		if ((flags & FIT_X_WIDTH) != 0)
+			return new NBCircularGaussian2DFunction(nPeaks, maxx, maxy);
+
+		// Fixed function
+		if ((flags & FIT_SIGNAL) != 0)
+			return new NBFixedGaussian2DFunction(nPeaks, maxx, maxy);
+
+		return new NSNBFixedGaussian2DFunction(nPeaks, maxx, maxy);
 	}
 
 	/**

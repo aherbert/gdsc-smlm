@@ -152,68 +152,65 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			}
 			return FastMath.exp((-0.5 * o * o / var) + logNormalisationGaussian);
 		}
-		else
+		// Use same nomenclature as Huang et al
+
+		final double u = e; // expected photoelectrons
+		final double D = o; // Camera counts
+		// g == gain
+		// var = readout variance
+
+		// This is the probability of a Poisson convolved with a Gaussian.
+		// Evaluate the Poisson only in the range where the Gaussian is significant.
+		// I.e. when the Gaussian probability is zero then the Poisson is not relevant.
+		// Use +/- 5 SD
+		// x = D - q*g => q = (D-x) / g
+		int qmax = (int) Math.ceil((D + 5 * s) / g);
+		if (qmax < 0)
+			return 0;
+		int qmin = (int) Math.floor((D - 5 * s) / g);
+		if (qmin < 0)
 		{
-			// Use same nomenclature as Huang et al
-
-			final double u = e; // expected photoelectrons
-			final double D = o; // Camera counts
-			// g == gain
-			// var = readout variance
-
-			// This is the probability of a Poisson convolved with a Gaussian.
-			// Evaluate the Poisson only in the range where the Gaussian is significant.
-			// I.e. when the Gaussian probability is zero then the Poisson is not relevant.
-			// Use +/- 5 SD
-			// x = D - q*g => q = (D-x) / g
-			int qmax = (int) Math.ceil((D + 5 * s) / g);
-			if (qmax < 0)
-				return 0;
-			int qmin = (int) Math.floor((D - 5 * s) / g);
-			if (qmin < 0)
-			{
-				qmin = 0;
-				// Collision check to avoid double computing
-				if (qmax == 0)
-					qmax++;
-			}
-
-			// Note: If D is camera counts then it will likely be limited to a 16-bit range
-			// Assuming the gain is at least 1 then the max q is:
-			// 65536 + 5 * s => This is an acceptable table size to pre-compute the log
-			// factorial if s is reasonable.
-
-			logFactorial.ensureRange(qmin, qmax);
-
-			final double logu = Math.log(u);
-			double p = 0;
-
-			// Optionally use the error function for a full convolution between
-			// the Poisson PMF and Gaussian PDF
-			if (computePMF)
-				for (int q = qmin; q <= qmax; q++)
-				{
-					final double x = getX(D, q);
-					p +=
-							// Poisson PMF
-							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
-									// Gaussian CDF
-									(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
-				}
-			else
-				for (int q = qmin; q <= qmax; q++)
-					p += FastMath.exp(
-							// Poisson
-							q * logu - u - LogFactorial.logF(q)
-							// Gaussian
-									- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
-
-			// Determine normalisation
-			// Note: This is needed when using this as a discrete probability distribution,
-			// e.g. input observed count is integer
-
-			return p;
+			qmin = 0;
+			// Collision check to avoid double computing
+			if (qmax == 0)
+				qmax++;
 		}
+
+		// Note: If D is camera counts then it will likely be limited to a 16-bit range
+		// Assuming the gain is at least 1 then the max q is:
+		// 65536 + 5 * s => This is an acceptable table size to pre-compute the log
+		// factorial if s is reasonable.
+
+		logFactorial.ensureRange(qmin, qmax);
+
+		final double logu = Math.log(u);
+		double p = 0;
+
+		// Optionally use the error function for a full convolution between
+		// the Poisson PMF and Gaussian PDF
+		if (computePMF)
+			for (int q = qmin; q <= qmax; q++)
+			{
+				final double x = getX(D, q);
+				p +=
+						// Poisson PMF
+						FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
+								// Gaussian CDF
+								(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+			}
+		else
+			for (int q = qmin; q <= qmax; q++)
+				p += FastMath.exp(
+						// Poisson
+						q * logu - u - LogFactorial.logF(q)
+						// Gaussian
+								- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+
+		// Determine normalisation
+		// Note: This is needed when using this as a discrete probability distribution,
+		// e.g. input observed count is integer
+
+		return p;
 	}
 
 	private double getX(final double D, int q)
@@ -263,43 +260,40 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			}
 			return (-0.5 * o * o / var) + logNormalisationGaussian;
 		}
-		else
+		final double u = e; // expected photoelectrons
+		final double D = o; // Camera counts
+		int qmax = (int) Math.ceil((D + 5 * s) / g);
+		if (qmax < 0)
+			return Double.NEGATIVE_INFINITY;
+		int qmin = (int) Math.floor((D - 5 * s) / g);
+		if (qmin < 0)
 		{
-			final double u = e; // expected photoelectrons
-			final double D = o; // Camera counts
-			int qmax = (int) Math.ceil((D + 5 * s) / g);
-			if (qmax < 0)
-				return Double.NEGATIVE_INFINITY;
-			int qmin = (int) Math.floor((D - 5 * s) / g);
-			if (qmin < 0)
-			{
-				qmin = 0;
-				// Collision check to avoid double computing
-				if (qmax == 0)
-					qmax++;
-			}
-			logFactorial.ensureRange(qmin, qmax);
-			final double logu = Math.log(u);
-			double p = 0;
-			if (computePMF)
-				for (int q = qmin; q <= qmax; q++)
-				{
-					final double x = getX(D, q);
-					p +=
-							// Poisson PMF
-							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
-									// Gaussian CDF
-									(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
-				}
-			else
-				for (int q = qmin; q <= qmax; q++)
-					p += FastMath.exp(
-							// Poisson
-							q * logu - u - LogFactorial.logF(q)
-							// Gaussian
-									- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
-			return Math.log(p);
+			qmin = 0;
+			// Collision check to avoid double computing
+			if (qmax == 0)
+				qmax++;
 		}
+		logFactorial.ensureRange(qmin, qmax);
+		final double logu = Math.log(u);
+		double p = 0;
+		if (computePMF)
+			for (int q = qmin; q <= qmax; q++)
+			{
+				final double x = getX(D, q);
+				p +=
+						// Poisson PMF
+						FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
+								// Gaussian CDF
+								(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+			}
+		else
+			for (int q = qmin; q <= qmax; q++)
+				p += FastMath.exp(
+						// Poisson
+						q * logu - u - LogFactorial.logF(q)
+						// Gaussian
+								- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+		return Math.log(p);
 	}
 
 	/**

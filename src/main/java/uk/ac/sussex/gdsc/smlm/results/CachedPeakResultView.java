@@ -64,13 +64,10 @@ public class CachedPeakResultView implements PeakResultView
 			frameMap = new TIntObjectHashMap<>();
 			return findResults(frameMap, frame, new FramePeakResultPredicate(frame));
 		}
-		else
-		{
-			PeakResult[] results = frameMap.get(frame);
-			if (results == null)
-				results = findResults(frameMap, frame, new FramePeakResultPredicate(frame));
-			return results;
-		}
+		PeakResult[] results = frameMap.get(frame);
+		if (results == null)
+			results = findResults(frameMap, frame, new FramePeakResultPredicate(frame));
+		return results;
 	}
 
 	/**
@@ -88,13 +85,10 @@ public class CachedPeakResultView implements PeakResultView
 			idMap = new TIntObjectHashMap<>();
 			return findResults(idMap, id, new IdPeakResultPredicate(id));
 		}
-		else
-		{
-			PeakResult[] results = idMap.get(id);
-			if (results == null)
-				results = findResults(idMap, id, new IdPeakResultPredicate(id));
-			return results;
-		}
+		PeakResult[] results = idMap.get(id);
+		if (results == null)
+			results = findResults(idMap, id, new IdPeakResultPredicate(id));
+		return results;
 	}
 
 	private PeakResult[] findResults(TIntObjectHashMap<PeakResult[]> map, int key, PeakResultPredicate filter)

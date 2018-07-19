@@ -478,8 +478,7 @@ public class FastLogTest
 			final double sd = ss - (s * s) / n;
 			if (sd > 0.0)
 				return Math.sqrt(sd / (n - 1));
-			else
-				return 0.0;
+			return 0.0;
 		}
 
 		String summary()

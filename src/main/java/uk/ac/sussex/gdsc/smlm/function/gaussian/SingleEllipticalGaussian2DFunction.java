@@ -243,22 +243,20 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 
 			return y;
 		}
-		else
-		{
-			final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-			dy_da[1] = n * exp;
-			final double y = height * exp;
 
-			dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
-			dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
+		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		dy_da[1] = n * exp;
+		final double y = height * exp;
 
-			dy_da[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-			dy_da[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+		dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
+		dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
 
-			dy_da[6] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+		dy_da[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+		dy_da[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
-			return y;
-		}
+		dy_da[6] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+
+		return y;
 	}
 
 	/**
@@ -280,8 +278,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 
 		if (zeroAngle)
 			return background + height * FastMath.exp(aa * dx * dx + cc * dy * dy);
-		else
-			return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override

@@ -795,8 +795,8 @@ public class PeakResultsReader
 				public void execute(PeakResult peakResult)
 				{
 					final float[] p = peakResult.getParameters();
-					final float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(p[PeakResult.INTENSITY], p[isx],
-							p[isy]);
+					final float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(p[PeakResult.INTENSITY],
+							p[isx], p[isy]);
 					peakResult.setMeanIntensity(u);
 				}
 			});
@@ -838,8 +838,7 @@ public class PeakResultsReader
 				BinaryFilePeakResults.readHeader(input);
 
 				@SuppressWarnings("resource")
-				final
-				FileChannel channel = fis.getChannel();
+				final FileChannel channel = fis.getChannel();
 
 				// Format: [i]i[i]iifdf + n*f [+ n*f]
 				// where [] are optional and n is the number of fields
@@ -1063,8 +1062,7 @@ public class PeakResultsReader
 			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
 				@SuppressWarnings("resource")
-				final
-				FileChannel channel = fis.getChannel();
+				final FileChannel channel = fis.getChannel();
 
 				String line;
 				int errors = 0;
@@ -1225,6 +1223,7 @@ public class PeakResultsReader
 			float[] params = new float[7];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1250,33 +1249,29 @@ public class PeakResultsReader
 					if (readId || readEndFrame)
 						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null,
 								endPeak, id);
-					else
-						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-				}
-			else
-			{
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				final float signal = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-					params[i] = Float.parseFloat(fields[j++]);
-				params[LEGACY_FORMAT_SIGNAL] = signal;
-				params = mapGaussian2DFormatParams(params);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-							id);
-				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
+				}
 			}
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			final float signal = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+				params[i] = Float.parseFloat(fields[j++]);
+			params[LEGACY_FORMAT_SIGNAL] = signal;
+			params = mapGaussian2DFormatParams(params);
+			if (readId || readEndFrame)
+				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
+						id);
+			return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1305,6 +1300,7 @@ public class PeakResultsReader
 			float[] paramsStdDev = new float[7];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1334,39 +1330,35 @@ public class PeakResultsReader
 					if (readId || readEndFrame)
 						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params,
 								paramsStdDev, endPeak, id);
-					else
-						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-				}
-			else
-			{
-				// JUnit test shows this is faster than the scanner
-
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				final float signal = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-				{
-					params[i] = Float.parseFloat(fields[j++]);
-					paramsStdDev[i] = Float.parseFloat(fields[j++]);
-				}
-				params[LEGACY_FORMAT_SIGNAL] = signal;
-				params = mapGaussian2DFormatParams(params);
-				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-							endPeak, id);
-				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
+				}
 			}
+			// JUnit test shows this is faster than the scanner
+
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			final float signal = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+			{
+				params[i] = Float.parseFloat(fields[j++]);
+				paramsStdDev[i] = Float.parseFloat(fields[j++]);
+			}
+			params[LEGACY_FORMAT_SIGNAL] = signal;
+			params = mapGaussian2DFormatParams(params);
+			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+			if (readId || readEndFrame)
+				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
+						endPeak, id);
+			return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1394,6 +1386,7 @@ public class PeakResultsReader
 			float[] params = new float[7];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1416,31 +1409,27 @@ public class PeakResultsReader
 					if (readId || readEndFrame)
 						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null,
 								endPeak, id);
-					else
-						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-				}
-			else
-			{
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-					params[i] = Float.parseFloat(fields[j++]);
-				params = mapGaussian2DFormatParams(params);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-							id);
-				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
+				}
 			}
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+				params[i] = Float.parseFloat(fields[j++]);
+			params = mapGaussian2DFormatParams(params);
+			if (readId || readEndFrame)
+				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
+						id);
+			return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1469,6 +1458,7 @@ public class PeakResultsReader
 			float[] paramsStdDev = new float[7];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1495,37 +1485,33 @@ public class PeakResultsReader
 					if (readId || readEndFrame)
 						return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params,
 								paramsStdDev, endPeak, id);
-					else
-						return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-				}
-			else
-			{
-				// JUnit test shows this is faster than the scanner
-
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-				{
-					params[i] = Float.parseFloat(fields[j++]);
-					paramsStdDev[i] = Float.parseFloat(fields[j++]);
-				}
-				params = mapGaussian2DFormatParams(params);
-				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-							endPeak, id);
-				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
+				}
 			}
+			// JUnit test shows this is faster than the scanner
+
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+			{
+				params[i] = Float.parseFloat(fields[j++]);
+				paramsStdDev[i] = Float.parseFloat(fields[j++]);
+			}
+			params = mapGaussian2DFormatParams(params);
+			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+			if (readId || readEndFrame)
+				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
+						endPeak, id);
+			return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1553,6 +1539,7 @@ public class PeakResultsReader
 			final float[] params = new float[nFields];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1571,38 +1558,37 @@ public class PeakResultsReader
 					final float noise = scanner.nextFloat();
 					for (int i = 0; i < params.length; i++)
 						params[i] = scanner.nextFloat();
-					PeakResult r;
 					// The format appends a * to computed precision. We ignore these.
 					if (readPrecision && !line.endsWith("*"))
-						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
+					{
+						return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					else
-						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
-					return r;
+					}
+					return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
 				}
-			else
-			{
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-					params[i] = Float.parseFloat(fields[j++]);
-				// The format appends a * to computed precision. We ignore these.
-				if (readPrecision && !line.endsWith("*"))
-					return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
-							// Read precision here because it is the final field
-							Float.parseFloat(fields[j]));
-				return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
 			}
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+				params[i] = Float.parseFloat(fields[j++]);
+			// The format appends a * to computed precision. We ignore these.
+			if (readPrecision && !line.endsWith("*"))
+			{
+				return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
+						// Read precision here because it is the final field
+						Float.parseFloat(fields[j]));
+			}
+			return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1631,6 +1617,7 @@ public class PeakResultsReader
 			final float[] paramsStdDev = new float[nFields];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1652,44 +1639,42 @@ public class PeakResultsReader
 						params[i] = scanner.nextFloat();
 						paramsStdDev[i] = scanner.nextFloat();
 					}
-					PeakResult r;
 					if (readPrecision && !line.endsWith("*"))
-						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak,
-								id,
+					{
+						return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
+								endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					else
-						r = createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak,
-								id);
-					return r;
-				}
-			else
-			{
-				// JUnit test shows this is faster than the scanner
-
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-				{
-					params[i] = Float.parseFloat(fields[j++]);
-					paramsStdDev[i] = Float.parseFloat(fields[j++]);
-				}
-				if (readPrecision && !line.endsWith("*"))
+					}
 					return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak,
-							id,
-							// Read precision here because it is the final field
-							Float.parseFloat(fields[j]));
-				return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id);
+							id);
+				}
 			}
+			// JUnit test shows this is faster than the scanner
+
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+			{
+				params[i] = Float.parseFloat(fields[j++]);
+				paramsStdDev[i] = Float.parseFloat(fields[j++]);
+			}
+			if (readPrecision && !line.endsWith("*"))
+			{
+				return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id,
+						// Read precision here because it is the final field
+						Float.parseFloat(fields[j]));
+			}
+			return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1717,6 +1702,7 @@ public class PeakResultsReader
 			final float[] params = new float[nFields];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1736,43 +1722,41 @@ public class PeakResultsReader
 					final float meanIntensity = scanner.nextFloat();
 					for (int i = 0; i < params.length; i++)
 						params[i] = scanner.nextFloat();
-					PeakResult r;
 					// The format appends a * to computed precision. We ignore these.
 					if (readPrecision && !line.endsWith("*"))
-						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
+					{
+						return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
 								endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					else
-						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
-								endPeak, id);
-					return r;
-				}
-			else
-			{
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				final float meanIntensity = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-					params[i] = Float.parseFloat(fields[j++]);
-				// The format appends a * to computed precision. We ignore these.
-				if (readPrecision && !line.endsWith("*"))
+					}
 					return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
-							endPeak, id,
-							// Read precision here because it is the final field
-							Float.parseFloat(fields[j]));
-				return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak,
-						id);
+							endPeak, id);
+				}
 			}
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			final float meanIntensity = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+				params[i] = Float.parseFloat(fields[j++]);
+			// The format appends a * to computed precision. We ignore these.
+			if (readPrecision && !line.endsWith("*"))
+			{
+				return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak,
+						id,
+						// Read precision here because it is the final field
+						Float.parseFloat(fields[j]));
+			}
+			return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak, id);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1801,6 +1785,7 @@ public class PeakResultsReader
 			final float[] paramsStdDev = new float[nFields];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1823,46 +1808,45 @@ public class PeakResultsReader
 						params[i] = scanner.nextFloat();
 						paramsStdDev[i] = scanner.nextFloat();
 					}
-					PeakResult r;
 					if (readPrecision && !line.endsWith("*"))
-						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
+					{
+						return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
 								paramsStdDev, endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					else
-						r = createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-								paramsStdDev, endPeak, id);
-					return r;
-				}
-			else
-			{
-				// JUnit test shows this is faster than the scanner
-
-				// Code using split and parse
-				final String[] fields = tabPattern.split(line);
-				int j = 0;
-				final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-				final int peak = Integer.parseInt(fields[j++]);
-				final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-				final int origX = Integer.parseInt(fields[j++]);
-				final int origY = Integer.parseInt(fields[j++]);
-				final float origValue = Float.parseFloat(fields[j++]);
-				final double error = Double.parseDouble(fields[j++]);
-				final float noise = Float.parseFloat(fields[j++]);
-				final float meanIntensity = Float.parseFloat(fields[j++]);
-				for (int i = 0; i < params.length; i++)
-				{
-					params[i] = Float.parseFloat(fields[j++]);
-					paramsStdDev[i] = Float.parseFloat(fields[j++]);
-				}
-				if (readPrecision && !line.endsWith("*"))
+					}
 					return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-							paramsStdDev, endPeak, id,
-							// Read precision here because it is the final field
-							Float.parseFloat(fields[j]));
-				return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
-						endPeak, id);
+							paramsStdDev, endPeak, id);
+				}
 			}
+			// JUnit test shows this is faster than the scanner
+
+			// Code using split and parse
+			final String[] fields = tabPattern.split(line);
+			int j = 0;
+			final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+			final int peak = Integer.parseInt(fields[j++]);
+			final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+			final int origX = Integer.parseInt(fields[j++]);
+			final int origY = Integer.parseInt(fields[j++]);
+			final float origValue = Float.parseFloat(fields[j++]);
+			final double error = Double.parseDouble(fields[j++]);
+			final float noise = Float.parseFloat(fields[j++]);
+			final float meanIntensity = Float.parseFloat(fields[j++]);
+			for (int i = 0; i < params.length; i++)
+			{
+				params[i] = Float.parseFloat(fields[j++]);
+				paramsStdDev[i] = Float.parseFloat(fields[j++]);
+			}
+			if (readPrecision && !line.endsWith("*"))
+			{
+				return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
+						endPeak, id,
+						// Read precision here because it is the final field
+						Float.parseFloat(fields[j]));
+			}
+			return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
+					endPeak, id);
 		}
 		catch (final InputMismatchException e)
 		{
@@ -1970,8 +1954,7 @@ public class PeakResultsReader
 				}
 
 				@SuppressWarnings("resource")
-				final
-				FileChannel channel = fis.getChannel();
+				final FileChannel channel = fis.getChannel();
 
 				int c = 0;
 				while ((line = input.readLine()) != null)
@@ -2122,11 +2105,9 @@ public class PeakResultsReader
 				final double error = scanner.nextDouble();
 				final float noise = scanner.nextFloat();
 				@SuppressWarnings("unused")
-				final
-				float signal = scanner.nextFloat(); // Ignored but must be read
+				final float signal = scanner.nextFloat(); // Ignored but must be read
 				@SuppressWarnings("unused")
-				final
-				float snr = scanner.nextFloat(); // Ignored but must be read
+				final float snr = scanner.nextFloat(); // Ignored but must be read
 				float[] params = new float[7];
 				float[] paramsStdDev = null;
 				if (deviations)
@@ -2152,8 +2133,7 @@ public class PeakResultsReader
 				if (readId || readEndFrame)
 					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
 							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
+				return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
 		}
 		catch (final InputMismatchException e)
@@ -2215,8 +2195,7 @@ public class PeakResultsReader
 				final double error = scanner.nextDouble();
 				final float noise = scanner.nextFloat();
 				@SuppressWarnings("unused")
-				final
-				float snr = scanner.nextFloat(); // Ignored but must be read
+				final float snr = scanner.nextFloat(); // Ignored but must be read
 				float[] params = new float[7];
 				float[] paramsStdDev = null;
 				if (deviations)
@@ -2238,8 +2217,7 @@ public class PeakResultsReader
 				if (readId || readEndFrame)
 					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
 							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
+				return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
 		}
 		catch (final InputMismatchException e)
@@ -2300,8 +2278,7 @@ public class PeakResultsReader
 				final double error = scanner.nextDouble();
 				final float noise = scanner.nextFloat();
 				@SuppressWarnings("unused")
-				final
-				float snr = scanner.nextFloat(); // Ignored but must be read
+				final float snr = scanner.nextFloat(); // Ignored but must be read
 				final float[] params = new float[nFields];
 				float[] paramsStdDev;
 				if (deviations)
@@ -2322,8 +2299,7 @@ public class PeakResultsReader
 				if (readId || readEndFrame)
 					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
 							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
+				return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 			}
 		}
 		catch (final InputMismatchException e)
@@ -2347,8 +2323,7 @@ public class PeakResultsReader
 			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
 				@SuppressWarnings("resource")
-				final
-				FileChannel channel = fis.getChannel();
+				final FileChannel channel = fis.getChannel();
 
 				String line;
 				int errors = 0;
@@ -2466,8 +2441,7 @@ public class PeakResultsReader
 			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
 				@SuppressWarnings("resource")
-				final
-				FileChannel channel = fis.getChannel();
+				final FileChannel channel = fis.getChannel();
 
 				String line;
 				int errors = 0;
@@ -2688,8 +2662,7 @@ public class PeakResultsReader
 			try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null)))
 			{
 				@SuppressWarnings("resource")
-				final
-				FileChannel channel = fis.getChannel();
+				final FileChannel channel = fis.getChannel();
 
 				String line;
 				int errors = 0;
@@ -2776,6 +2749,7 @@ public class PeakResultsReader
 			final float[] params = new float[PeakResult.STANDARD_PARAMETERS];
 
 			if (isUseScanner())
+			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -2788,18 +2762,16 @@ public class PeakResultsReader
 
 					return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
 				}
-			else
-			{
-				// Code using split and parse
-				final String[] fields = whitespacePattern.split(line);
-
-				params[PeakResult.X] = Float.parseFloat(fields[0]);
-				params[PeakResult.Y] = Float.parseFloat(fields[1]);
-				final int peak = Integer.parseInt(fields[2]);
-				params[PeakResult.INTENSITY] = Float.parseFloat(fields[3]);
-
-				return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
 			}
+			// Code using split and parse
+			final String[] fields = whitespacePattern.split(line);
+
+			params[PeakResult.X] = Float.parseFloat(fields[0]);
+			params[PeakResult.Y] = Float.parseFloat(fields[1]);
+			final int peak = Integer.parseInt(fields[2]);
+			params[PeakResult.INTENSITY] = Float.parseFloat(fields[3]);
+
+			return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
 		}
 		catch (final InputMismatchException e)
 		{

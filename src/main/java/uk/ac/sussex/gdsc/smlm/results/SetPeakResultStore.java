@@ -114,8 +114,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	{
 		if (results instanceof PeakResultStoreCollection)
 			return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
-		else
-			return addArray(results.toArray());
+		return addArray(results.toArray());
 	}
 
 	/*
@@ -161,8 +160,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	{
 		if (results instanceof PeakResultStoreCollection)
 			return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
-		else
-			return removeArray(results.toArray());
+		return removeArray(results.toArray());
 	}
 
 	/*
@@ -197,8 +195,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	{
 		if (results instanceof PeakResultStoreCollection)
 			return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
-		else
-			return retainArray(results.toArray());
+		return retainArray(results.toArray());
 	}
 
 	/*
@@ -282,7 +279,8 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#forEach(uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure)
+	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#forEach(uk.ac.sussex.gdsc.smlm.results.procedures.
+	 * PeakResultProcedure)
 	 */
 	@Override
 	public void forEach(PeakResultProcedure procedure)
@@ -294,7 +292,8 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#subset(uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate)
+	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#subset(uk.ac.sussex.gdsc.smlm.results.procedures.
+	 * PeakResultPredicate)
 	 */
 	@Override
 	public PeakResult[] subset(PeakResultPredicate filter)

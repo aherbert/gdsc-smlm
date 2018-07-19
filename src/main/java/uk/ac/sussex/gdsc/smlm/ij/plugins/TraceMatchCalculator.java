@@ -509,14 +509,11 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			Collections.sort(sorted);
 			return sorted;
 		}
-		else
-		{
-			final List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
-			for (final Triple t : triples)
-				sorted.add(new ScoreComparableTriple(t));
-			Collections.sort(sorted);
-			return sorted;
-		}
+		final List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
+		for (final Triple t : triples)
+			sorted.add(new ScoreComparableTriple(t));
+		Collections.sort(sorted);
+		return sorted;
 	}
 
 	private class TimeComparablePointPair extends PointPair implements Comparable<TimeComparablePointPair>

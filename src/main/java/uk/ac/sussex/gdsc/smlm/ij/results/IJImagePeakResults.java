@@ -412,28 +412,26 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			pixels = new short[data.length];
 			return new ShortProcessor(imageWidth, imageHeight, (short[]) pixels, null);
 		}
-		else
+		
+		pixels = new float[data.length];
+
+		// Special float processor that maps all values to 1-255 in the LUT.
+		// Zero is mapped to 0 in the LUT.
+		if ((displayFlags & DISPLAY_MAPPED) != 0)
 		{
-			pixels = new float[data.length];
-
-			// Special float processor that maps all values to 1-255 in the LUT.
-			// Zero is mapped to 0 in the LUT.
-			if ((displayFlags & DISPLAY_MAPPED) != 0)
-			{
-				final MappedFloatProcessor fp = new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
-				fp.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
-				return fp;
-			}
-			// -Infinity is mapped to 0 in the LUT.
-			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
-			{
-				final InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight,
-						(float[]) pixels, null);
-				return fp;
-			}
-
-			return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
+			final MappedFloatProcessor fp = new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
+			fp.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
+			return fp;
 		}
+		// -Infinity is mapped to 0 in the LUT.
+		if ((displayFlags & DISPLAY_NEGATIVES) != 0)
+		{
+			final InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight,
+					(float[]) pixels, null);
+			return fp;
+		}
+
+		return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
 	}
 
 	private ImageStack createNewImageStack(int w, int h)

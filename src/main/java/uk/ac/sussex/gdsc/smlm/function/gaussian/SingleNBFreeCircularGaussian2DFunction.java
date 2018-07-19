@@ -106,20 +106,18 @@ public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGa
 			dy_da[4] = y * (ny + cy * dy2);
 			return y;
 		}
-		else
-		{
-			final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-			dy_da[0] = n * exp;
-			final double y = height * exp;
+		
+		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		dy_da[0] = n * exp;
+		final double y = height * exp;
 
-			dy_da[1] = y * (-2.0 * aa * dx - bb * dy);
-			dy_da[2] = y * (-2.0 * cc * dy - bb * dx);
+		dy_da[1] = y * (-2.0 * aa * dx - bb * dy);
+		dy_da[2] = y * (-2.0 * cc * dy - bb * dx);
 
-			dy_da[3] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-			dy_da[4] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+		dy_da[3] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+		dy_da[4] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
-			return y;
-		}
+		return y;
 	}
 
 	@Override

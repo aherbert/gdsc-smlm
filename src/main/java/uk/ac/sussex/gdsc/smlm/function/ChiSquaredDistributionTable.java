@@ -35,7 +35,8 @@ import org.apache.commons.math3.special.Gamma;
  * Chi-squared distribution with degrees of freedom equal to the difference in dimensionality of the two models
  * (alternative and null).
  *
- * @see <a href="https://en.wikipedia.org/wiki/Likelihood-ratio_test#Distribution:_Wilks%E2%80%99_theorem">Wilks Theorum</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Likelihood-ratio_test#Distribution:_Wilks%E2%80%99_theorem">Wilks
+ *      Theorum</a>
  */
 public class ChiSquaredDistributionTable
 {
@@ -203,8 +204,7 @@ public class ChiSquaredDistributionTable
 	{
 		if (chiSquared <= 0)
 			return 1;
-		else
-			return Gamma.regularizedGammaQ(degreesOfFreedom / 2.0, chiSquared / 2.0);
+		return Gamma.regularizedGammaQ(degreesOfFreedom / 2.0, chiSquared / 2.0);
 	}
 
 	/**
@@ -223,7 +223,6 @@ public class ChiSquaredDistributionTable
 	{
 		if (chiSquared <= 0)
 			return 0;
-		else
-			return Gamma.regularizedGammaP(degreesOfFreedom / 2.0, chiSquared / 2.0);
+		return Gamma.regularizedGammaP(degreesOfFreedom / 2.0, chiSquared / 2.0);
 	}
 }

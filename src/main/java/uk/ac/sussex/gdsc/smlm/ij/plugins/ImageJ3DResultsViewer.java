@@ -1837,32 +1837,30 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		if (range == 0 || limits == null || p == null)
 			return new Color3f[] { new Color3f(new Color(lut.getRGB(255))) };
-		else
+		
+		// Create 256 Colors
+		final float scale = 255f / range;
+		final Color3f[] colors = new Color3f[256];
+		for (int i = 0; i < 256; i++)
 		{
-			// Create 256 Colors
-			final float scale = 255f / range;
-			final Color3f[] colors = new Color3f[256];
-			for (int i = 0; i < 256; i++)
-			{
-				final Color c = new Color(lut.getRGB(i));
-				colors[i] = new Color3f(c);
-			}
-
-			final float minimum = limits[0];
-			final Color3f[] allColors = new Color3f[results.size()];
-			for (int i = 0, size = results.size(); i < size; i++)
-			{
-				float value = p.z[i];
-				value = value - minimum;
-				if (value < 0f)
-					value = 0f;
-				int ivalue = (int) ((value * scale) + 0.5f);
-				if (ivalue > 255)
-					ivalue = 255;
-				allColors[i] = colors[ivalue];
-			}
-			return allColors;
+			final Color c = new Color(lut.getRGB(i));
+			colors[i] = new Color3f(c);
 		}
+
+		final float minimum = limits[0];
+		final Color3f[] allColors = new Color3f[results.size()];
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			float value = p.z[i];
+			value = value - minimum;
+			if (value < 0f)
+				value = 0f;
+			int ivalue = (int) ((value * scale) + 0.5f);
+			if (ivalue > 255)
+				ivalue = 255;
+			allColors[i] = colors[ivalue];
+		}
+		return allColors;
 	}
 
 	private static void changeColour(ItemShape itemShape, MemoryPeakResults results,

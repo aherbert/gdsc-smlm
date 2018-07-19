@@ -610,17 +610,14 @@ public class BinomialFitter
 				//System.out.printf("%f => %f\n", parameters[0], ll);
 				return ll;
 			}
-			else
+			// Calculate the sum of squares
+			double ss = 0;
+			for (int i = startIndex; i < p.length; i++)
 			{
-				// Calculate the sum of squares
-				double ss = 0;
-				for (int i = startIndex; i < p.length; i++)
-				{
-					final double dx = p[i] - p2[i];
-					ss += dx * dx;
-				}
-				return ss;
+				final double dx = p[i] - p2[i];
+				ss += dx * dx;
 			}
+			return ss;
 		}
 	}
 

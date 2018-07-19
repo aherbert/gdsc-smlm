@@ -558,8 +558,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				tryAgain = true;
 				break;
 			}
-			else
-				debug("  NOTE: Angle is significant: %g !~ %g (p=%g)", sampleNew[ANGLE].getMean(), testAngle, p);
+			debug("  NOTE: Angle is significant: %g !~ %g (p=%g)", sampleNew[ANGLE].getMean(), testAngle, p);
 		}
 		return tryAgain;
 	}

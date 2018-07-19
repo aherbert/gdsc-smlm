@@ -71,9 +71,8 @@ public class JSONUtils
 						i = end + 1;
 						continue;
 					}
-					else
-						// Cannot remove the quotes so advance to copy all the chars
-						end++;
+					// Cannot remove the quotes so advance to copy all the chars
+					end++;
 				}
 				else
 					// No terminating double quote so this is the end of the string

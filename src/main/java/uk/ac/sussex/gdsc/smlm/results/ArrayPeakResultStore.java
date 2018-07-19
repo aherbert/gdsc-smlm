@@ -193,8 +193,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 			final ArrayPeakResultStore store = (ArrayPeakResultStore) results;
 			return addArray(store.results, store.size);
 		}
-		else
-			return addArray(results.toArray());
+		return addArray(results.toArray());
 	}
 
 	/*
@@ -324,8 +323,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (results instanceof ArrayPeakResultStore)
 			return removeArray(((ArrayPeakResultStore) results).results);
-		else
-			return removeArray(results.toArray());
+		return removeArray(results.toArray());
 	}
 
 	private boolean batchRemove(PeakResult[] results2, boolean complement)
@@ -399,8 +397,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (results instanceof ArrayPeakResultStore)
 			return retainArray(((ArrayPeakResultStore) results).results);
-		else
-			return retainArray(results.toArray());
+		return retainArray(results.toArray());
 	}
 
 	/**
@@ -533,7 +530,8 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#forEach(uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure)
+	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#forEach(uk.ac.sussex.gdsc.smlm.results.procedures.
+	 * PeakResultProcedure)
 	 */
 	@Override
 	public void forEach(PeakResultProcedure procedure)
@@ -545,7 +543,8 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#subset(uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate)
+	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#subset(uk.ac.sussex.gdsc.smlm.results.procedures.
+	 * PeakResultPredicate)
 	 */
 	@Override
 	public PeakResult[] subset(PeakResultPredicate filter)

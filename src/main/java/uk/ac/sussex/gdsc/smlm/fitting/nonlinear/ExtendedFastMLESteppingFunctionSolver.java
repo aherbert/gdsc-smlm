@@ -162,12 +162,9 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 			jacobian = new double[f2.size()];
 			return jacobianGradientProcedure = new FastMLEJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2);
 		}
-		else
-		{
-			if (w != null)
-				f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
-			return FastMLEGradient2ProcedureFactory.create(y, f2);
-		}
+		if (w != null)
+			f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
+		return FastMLEGradient2ProcedureFactory.create(y, f2);
 	}
 
 	/**

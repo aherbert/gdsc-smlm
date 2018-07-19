@@ -607,8 +607,7 @@ public class TraceMolecules implements PlugIn
 			IJ.log(sb.toString());
 			return;
 		}
-		else
-			summaryTable.append(sb.toString());
+		summaryTable.append(sb.toString());
 
 		if (settings.getShowHistograms())
 		{
@@ -988,8 +987,8 @@ public class TraceMolecules implements PlugIn
 		settings.setDistanceThreshold(best[0]);
 
 		// The optimiser works using frames so convert back to the correct units
-		final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
-				exposureTime);
+		final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME,
+				settings.getTimeUnit(), exposureTime);
 		settings.setTimeThreshold(convert.convert(best[1]));
 
 		IJ.log(String.format("Optimal fractional difference @ D-threshold=%g, T-threshold=%f (%d frames)",
@@ -1283,8 +1282,8 @@ public class TraceMolecules implements PlugIn
 		double minD = Double.MAX_VALUE;
 		final double maxTimeThresholdInFrames = settings.getMaxTimeThreshold();
 		// The optimiser works using frames so convert back to the correct units
-		final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
-				exposureTime);
+		final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME,
+				settings.getTimeUnit(), exposureTime);
 
 		for (final double[] point : zeroCrossingPoints)
 		{
@@ -1457,7 +1456,8 @@ public class TraceMolecules implements PlugIn
 		// Create a calibration to map the pixel position back to distance/time
 		cal = new Calibration();
 		final double xRange = getRange(settings.getMaxTimeThreshold(), settings.getMinTimeThreshold(), origX, w);
-		final double yRange = getRange(settings.getMaxDistanceThreshold(), settings.getMinDistanceThreshold(), origY, h);
+		final double yRange = getRange(settings.getMaxDistanceThreshold(), settings.getMinDistanceThreshold(), origY,
+				h);
 		cal.pixelWidth = xRange / w;
 		cal.pixelHeight = yRange / h;
 		cal.xOrigin = origX - settings.getMinTimeThreshold() / cal.pixelWidth;

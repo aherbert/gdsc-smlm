@@ -737,7 +737,6 @@ public class BenchmarkSpotFilter implements PlugIn
 				}
 				return list2;
 			}
-			else
 				return new PSFSpot[0];
 		}
 	}
@@ -2542,16 +2541,13 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 			return batchSummaryTable;
 		}
-		else
+		if (summaryTable == null || !summaryTable.isVisible())
 		{
-			if (summaryTable == null || !summaryTable.isVisible())
-			{
-				final TextWindow table = new TextWindow(TITLE, createHeader(), "", 1000, 300);
-				table.setVisible(true);
-				summaryTable = new BufferedTextWindow(table);
-			}
-			return summaryTable;
+			final TextWindow table = new TextWindow(TITLE, createHeader(), "", 1000, 300);
+			table.setVisible(true);
+			summaryTable = new BufferedTextWindow(table);
 		}
+		return summaryTable;
 	}
 
 	private static String createHeader()

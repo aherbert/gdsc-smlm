@@ -937,7 +937,8 @@ public class PCPALMMolecules implements PlugIn
 
 		// These plugins are not really supported so just leave them to throw an exception if
 		// the data cannot be handled
-		final TypeConverter<IntensityUnit> ic = results.getCalibrationReader().getIntensityConverter(IntensityUnit.PHOTON);
+		final TypeConverter<IntensityUnit> ic = results.getCalibrationReader()
+				.getIntensityConverter(IntensityUnit.PHOTON);
 		final TypeConverter<DistanceUnit> dc = results.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
 
 		for (final Trace t : traces)
@@ -1076,7 +1077,8 @@ public class PCPALMMolecules implements PlugIn
 		// Allow a border of 3 x sigma for +/- precision
 		//if (blinkingRate > 1)
 		width -= 3 * sigmaS;
-		final RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		final RandomGenerator randomGenerator = new Well19937c(
+				System.currentTimeMillis() + System.identityHashCode(this));
 		final RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
 		final UniformDistribution dist = new UniformDistribution(null, new double[] { width, width, 0 },
 				randomGenerator.nextInt());
@@ -1203,8 +1205,8 @@ public class PCPALMMolecules implements PlugIn
 				if (clusterSimulation == 3)
 				{
 					// We have the mask. Now pick points at random from the mask.
-					final MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale,
-							maskScale, randomGenerator);
+					final MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0,
+							maskScale, maskScale, randomGenerator);
 
 					// Allocate each molecule position to a parent circle so defining clusters.
 					final int[][] clusters = new int[clusterCentres.size()][];
@@ -1539,8 +1541,8 @@ public class PCPALMMolecules implements PlugIn
 		for (final Molecule m : molecules)
 			// Precision was used to store the molecule ID
 			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
-		final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE,
-				new IJTrackProgress());
+		final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
+				ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE, new IJTrackProgress());
 		IJ.showStatus("Clustering to check inter-molecule distances");
 		engine.setTrackJoins(true);
 		final ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
@@ -1904,8 +1906,8 @@ public class PCPALMMolecules implements PlugIn
 		else
 			// The resolution does not matter
 			lowResNmPerPixel = 100;
-		final ImagePlus imp = displayImage(namePrefix + " (low res)", molecules, minx, miny, maxx, maxy, lowResNmPerPixel,
-				false, binaryImage);
+		final ImagePlus imp = displayImage(namePrefix + " (low res)", molecules, minx, miny, maxx, maxy,
+				lowResNmPerPixel, false, binaryImage);
 
 		// Add an ROI to allow the user to select regions. PC-PALM recommends 2x2 to 4x4 um^2
 		final int size = (int) (roiSizeInUm * 1000.0 / lowResNmPerPixel);
@@ -1978,28 +1980,26 @@ public class PCPALMMolecules implements PlugIn
 			ip.setMinAndMax(0, 1);
 			return ip;
 		}
-		else
+
+		final short[] data = new short[width * height];
+		for (final Molecule m : molecules)
 		{
-			final short[] data = new short[width * height];
-			for (final Molecule m : molecules)
-			{
-				if (checkBounds)
-					if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)
-						continue;
+			if (checkBounds)
+				if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)
+					continue;
 
-				// Shift to the origin. This makes the image more memory efficient.
-				final int x = (int) Math.round((m.x - minx) / nmPerPixel);
-				final int y = (int) Math.round((m.y - miny) / nmPerPixel);
-				final int index = y * width + x;
+			// Shift to the origin. This makes the image more memory efficient.
+			final int x = (int) Math.round((m.x - minx) / nmPerPixel);
+			final int y = (int) Math.round((m.y - miny) / nmPerPixel);
+			final int index = y * width + x;
 
-				// Construct a count image
-				data[index]++;
-			}
-
-			final ShortProcessor ip = new ShortProcessor(width, height, data, null);
-			ip.setMinAndMax(0, Maths.max(data));
-			return ip;
+			// Construct a count image
+			data[index]++;
 		}
+
+		final ShortProcessor ip = new ShortProcessor(width, height, data, null);
+		ip.setMinAndMax(0, Maths.max(data));
+		return ip;
 	}
 
 	/**
@@ -2120,8 +2120,8 @@ public class PCPALMMolecules implements PlugIn
 				final double value = evaluate(x, variables);
 				for (int j = 0; j < variables.length; j++)
 				{
-					final double value2 = evaluate(x, variables[0] + d[0][j], variables[1] + d[1][j], variables[2] + d[2][j],
-							variables[3] + d[3][j]);
+					final double value2 = evaluate(x, variables[0] + d[0][j], variables[1] + d[1][j],
+							variables[2] + d[2][j], variables[3] + d[3][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
 			}

@@ -256,22 +256,20 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 			return y;
 		}
-		else
-		{
-			final double bb = factors[BB];
 
-			final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-			dy_da[dydapos] = factors[N] * exp;
-			final double y = factors[HEIGHT] * exp;
+		final double bb = factors[BB];
 
-			dy_da[dydapos + 1] = y * (-2.0 * aa * dx - bb * dy);
-			dy_da[dydapos + 2] = y * (-2.0 * cc * dy - bb * dx);
+		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		dy_da[dydapos] = factors[N] * exp;
+		final double y = factors[HEIGHT] * exp;
 
-			dy_da[dydapos + 3] = y * (factors[NX] + factors[AX] * dx2 + factors[BX] * dxy + factors[CX] * dy2);
-			dy_da[dydapos + 4] = y * (factors[NY] + factors[AY] * dx2 + factors[BY] * dxy + factors[CY] * dy2);
+		dy_da[dydapos + 1] = y * (-2.0 * aa * dx - bb * dy);
+		dy_da[dydapos + 2] = y * (-2.0 * cc * dy - bb * dx);
 
-			return y;
-		}
+		dy_da[dydapos + 3] = y * (factors[NX] + factors[AX] * dx2 + factors[BX] * dxy + factors[CX] * dy2);
+		dy_da[dydapos + 4] = y * (factors[NY] + factors[AY] * dx2 + factors[BY] * dxy + factors[CY] * dy2);
+
+		return y;
 	}
 
 	/**
@@ -322,9 +320,8 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		if (zeroAngle)
 			return factors[HEIGHT] * FastMath.exp(factors[AA] * dx * dx + factors[CC] * dy * dy);
-		else
-			return factors[HEIGHT] *
-					FastMath.exp(factors[AA] * dx * dx + factors[BB] * dx * dy + factors[CC] * dy * dy);
+
+		return factors[HEIGHT] * FastMath.exp(factors[AA] * dx * dx + factors[BB] * dx * dy + factors[CC] * dy * dy);
 	}
 
 	@Override

@@ -91,14 +91,11 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 				return results.getCalibrationReader().getPrecisionMethod();
 			return PrecisionMethod.PRECISION_METHOD_NA;
 		}
-		else
-		{
-			// We use the LSE precision even if the results are fit using MLE.
-			// This is just a rough indicator of the result precision so it doesn't matter
-			// that much anyway.
-			getLSEPrecision();
-			return PrecisionMethod.MORTENSEN;
-		}
+		// We use the LSE precision even if the results are fit using MLE.
+		// This is just a rough indicator of the result precision so it doesn't matter
+		// that much anyway.
+		getLSEPrecision();
+		return PrecisionMethod.MORTENSEN;
 	}
 
 	/**

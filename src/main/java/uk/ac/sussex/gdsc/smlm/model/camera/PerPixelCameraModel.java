@@ -610,8 +610,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 					pixels2[offset1++] = pixels[offset2++];
 			return pixels2;
 		}
-		else
-			return (copy) ? pixels.clone() : pixels;
+		return (copy) ? pixels.clone() : pixels;
 	}
 
 	/**
@@ -635,12 +634,9 @@ public class PerPixelCameraModel extends BaseCameraModel
 					sum += pixels[offset2++];
 			return sum / (bounds.height * bounds.width);
 		}
-		else
-		{
-			for (int i = pixels.length; i-- > 0;)
-				sum += pixels[i];
-			return sum / pixels.length;
-		}
+		for (int i = pixels.length; i-- > 0;)
+			sum += pixels[i];
+		return sum / pixels.length;
 	}
 
 	/**

@@ -302,35 +302,33 @@ public class FailCountManager implements PlugIn
 				//return remaining * remaining;
 				return remaining;
 			}
-			else
-			{
-				// Penalise running too long.
-				// Overrun will be above 0.
-				final float overrun = ((float) (n - target)) / target;
 
-				// This has a score from 0 to Infinity.
-				//return overrun * overrun;
-				return overrun;
+			// Penalise running too long.
+			// Overrun will be above 0.
+			final float overrun = ((float) (n - target)) / target;
 
-				// This has a score from 0 to Infinity but does not heavily penalise large overrun
-				//if (overrun < 1)
-				//	 // So the gradient is 1 at x=1, f(x)=0.5*x^2, f'(x)=x
-				//	return overrun * overrun / 2.0;
-				//else
-				//	return overrun;
+			// This has a score from 0 to Infinity.
+			//return overrun * overrun;
+			return overrun;
 
-				// This has a score from 0 to 1. This equally weights under/overrun.
-				// However very long overrun is not penalised due to the exponential.
-				//  0	0
-				//	0.5	0.3934693403
-				//	1	0.6321205588
-				//	2	0.8646647168
-				//	3	0.9502129316
-				//	4	0.9816843611
-				//	5	0.993262053
-				//	10	0.9999546001
-				//return 1.0 - FastMath.exp(-overrun);
-			}
+			// This has a score from 0 to Infinity but does not heavily penalise large overrun
+			//if (overrun < 1)
+			//	 // So the gradient is 1 at x=1, f(x)=0.5*x^2, f'(x)=x
+			//	return overrun * overrun / 2.0;
+			//else
+			//	return overrun;
+
+			// This has a score from 0 to 1. This equally weights under/overrun.
+			// However very long overrun is not penalised due to the exponential.
+			//  0	0
+			//	0.5	0.3934693403
+			//	1	0.6321205588
+			//	2	0.8646647168
+			//	3	0.9502129316
+			//	4	0.9816843611
+			//	5	0.993262053
+			//	10	0.9999546001
+			//return 1.0 - FastMath.exp(-overrun);
 		}
 	}
 

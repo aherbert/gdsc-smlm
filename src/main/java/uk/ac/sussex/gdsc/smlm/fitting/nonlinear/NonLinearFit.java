@@ -430,16 +430,13 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			setDeviations(aDev, m);
 			return true;
 		}
-		else
+		final double[] covar = calculator.variance(n, null, func);
+		if (covar != null)
 		{
-			final double[] covar = calculator.variance(n, null, func);
-			if (covar != null)
-			{
-				setDeviations(aDev, covar);
-				return true;
-			}
-			return false;
+			setDeviations(aDev, covar);
+			return true;
 		}
+		return false;
 	}
 
 	/**
