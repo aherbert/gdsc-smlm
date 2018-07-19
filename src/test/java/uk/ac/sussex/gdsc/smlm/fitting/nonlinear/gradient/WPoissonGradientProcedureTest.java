@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class WPoissonGradientProcedureTest
@@ -217,7 +218,7 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -293,7 +294,7 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterThanWLSEGradientProcedure(final int nparams)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

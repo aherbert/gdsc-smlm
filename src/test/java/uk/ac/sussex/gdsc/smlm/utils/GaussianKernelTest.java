@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.test.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianKernelTest

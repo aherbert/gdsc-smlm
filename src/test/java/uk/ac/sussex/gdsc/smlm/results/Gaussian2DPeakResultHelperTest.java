@@ -40,9 +40,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class Gaussian2DPeakResultHelperTest
@@ -74,7 +75,7 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void lowerIntegrationPointsApproximateMaximumLikelihoodVariance()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final double[] sum = new double[maxPoints + 1];
 		int count = 0;
@@ -103,7 +104,7 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void runSpeedTest()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// Test with realistic parameters
 

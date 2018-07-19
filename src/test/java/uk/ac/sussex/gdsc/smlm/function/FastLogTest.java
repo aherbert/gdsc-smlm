@@ -39,6 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
@@ -322,7 +323,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatError()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final float[] d = generateRandomFloats(1000000);
@@ -370,7 +371,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatErrorRange()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final TurboList<TestFastLog> test = new TurboList<>();
 		final int n = 13;
@@ -537,7 +538,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleError()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final RandomGenerator r = TestSettings.getRandomGenerator();
@@ -576,7 +577,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleErrorLog1P()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final RandomGenerator r = TestSettings.getRandomGenerator();
@@ -606,7 +607,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleErrorRange()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 
@@ -765,7 +766,7 @@ public class FastLogTest
 	public void canTestFloatSpeed()
 	{
 		// No assertions, this is just a report
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final float[] x = new float[1000000];
@@ -852,7 +853,7 @@ public class FastLogTest
 	public void canTestDoubleSpeed()
 	{
 		// No assertions, this is just a report
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final double[] x = new double[1000000];
@@ -901,7 +902,7 @@ public class FastLogTest
 	public void canTestDoubleSpeedLog1P()
 	{
 		// No assertions, this is just a report
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final double[] x = new double[1000000];
@@ -929,7 +930,7 @@ public class FastLogTest
 	public void canTestFloatVsDoubleSpeed()
 	{
 		// No assertions, this is just a report
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final double[] x = new double[1000000];

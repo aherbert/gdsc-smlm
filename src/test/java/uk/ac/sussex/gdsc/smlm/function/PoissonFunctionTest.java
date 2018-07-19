@@ -28,8 +28,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class PoissonFunctionTest

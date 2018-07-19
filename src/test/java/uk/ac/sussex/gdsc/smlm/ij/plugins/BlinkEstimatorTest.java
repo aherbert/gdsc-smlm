@@ -54,6 +54,7 @@ import uk.ac.sussex.gdsc.smlm.model.UniformIllumination;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class BlinkEstimatorTest
@@ -203,7 +204,7 @@ public class BlinkEstimatorTest
 	private TIntHashSet estimateBlinking(RandomGenerator rg, double nBlinks, double tOn, double tOff, int particles,
 			double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
 	{
-		TestSettings.assumeMaximumComplexity();
+		TestAssume.assumeMaximumComplexity();
 		if (rg == null)
 			rg = TestSettings.getRandomGenerator();
 

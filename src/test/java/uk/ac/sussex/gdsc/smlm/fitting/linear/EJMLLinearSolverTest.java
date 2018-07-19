@@ -42,6 +42,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
@@ -483,7 +484,7 @@ public class EJMLLinearSolverTest
 
 	private void runSolverSpeedTest(int flags)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		final int n = f0.size();
@@ -787,7 +788,7 @@ public class EJMLLinearSolverTest
 
 	private void runInversionSpeedTest(int flags)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		final int n = f0.size();

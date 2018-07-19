@@ -48,6 +48,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -303,7 +304,7 @@ public class GradientCalculatorSpeedTest
 
 	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
@@ -345,7 +346,7 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 10000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

@@ -41,9 +41,10 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunc
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
@@ -218,7 +219,7 @@ public class JumpDistanceAnalysisTest
 
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
-		TestSettings.assumeMaximumComplexity();
+		TestAssume.assumeMaximumComplexity();
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);

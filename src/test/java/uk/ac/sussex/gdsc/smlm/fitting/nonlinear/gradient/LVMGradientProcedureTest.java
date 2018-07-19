@@ -50,10 +50,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -309,7 +310,7 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams, final Type type)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -545,7 +546,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final Type type,
 			final boolean precomputed)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

@@ -56,6 +56,7 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class CubicSplineFunctionTest
@@ -878,7 +879,7 @@ public abstract class CubicSplineFunctionTest
 	private void speedTest(int n, int order)
 	{
 		// No assertions, this is just a report
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final CubicSplineFunction cf = (n == 2) ? f2 : f1;
 		Assume.assumeNotNull(cf);

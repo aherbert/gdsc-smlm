@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonLikelihoodWrapperTest
@@ -90,7 +90,7 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitFixedComputesGradientPerDatum()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_FIXED);
 	}
 
@@ -109,35 +109,35 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitEllipticalComputesGradientPerDatum()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
 	@Test
 	public void fitNBFixedComputesGradientPerDatum()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void fitNBCircleComputesGradientPerDatum()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
 	@Test
 	public void fitNBFreeCircleComputesGradientPerDatum()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fitNBEllipticalComputesGradientPerDatum()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
@@ -272,7 +272,7 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitFixedComputesGradient()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_FIXED);
 	}
 
@@ -291,7 +291,7 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitEllipticalComputesGradient()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		// The elliptical function gradient evaluation is worse
 		final DoubleEquality tmp = eq;
 		eq = eqPerDatum;
@@ -302,28 +302,28 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitNBFixedComputesGradient()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void fitNBCircleComputesGradient()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
 	@Test
 	public void fitNBFreeCircleComputesGradient()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fitNBEllipticalComputesGradient()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		// The elliptical function gradient evaluation is worse
 		final DoubleEquality tmp = eq;
 		eq = eqPerDatum;

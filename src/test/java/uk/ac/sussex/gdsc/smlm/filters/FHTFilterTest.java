@@ -34,9 +34,9 @@ import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public class FHTFilterTest

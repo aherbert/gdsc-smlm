@@ -29,8 +29,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedMeanFilterTest extends WeightedFilterTest

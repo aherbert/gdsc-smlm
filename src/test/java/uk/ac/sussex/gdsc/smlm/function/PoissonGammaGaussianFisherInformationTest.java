@@ -27,10 +27,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFisherInformationTest
@@ -38,7 +38,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canFindMaximumAndUpperLimit()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final double[] M = { 20, 500 };
 
@@ -130,7 +130,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	public void canComputeAlpha()
 	{
 		// This is a report as nothing is asserted
-		TestSettings.assume(LogLevel.INFO, TestComplexity.VERY_HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.VERY_HIGH);
 
 		// Compute the alpha using a range of gain and standard deviation
 
@@ -175,21 +175,21 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canComputeFisherInformationWithLowMean()
 	{
-		TestSettings.assumeLowComplexity();
+		TestAssume.assumeLowComplexity();
 		computeFisherInformationWithMean(1e-100);
 	}
 
 	@Test
 	public void canComputeFisherInformationWithVeryLowMean()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		computeFisherInformationWithMean(1e-300);
 	}
 
 	@Test
 	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
-		TestSettings.assumeHighComplexity();
+		TestAssume.assumeHighComplexity();
 
 		// Lowest value where the reciprocal is not infinity.
 		double u = Double.longBitsToDouble(0x4000000000001L);

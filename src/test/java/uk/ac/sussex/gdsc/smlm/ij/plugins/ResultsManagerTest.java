@@ -49,6 +49,7 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Test the ResultsManager functionality to load results from file when the file has options.
@@ -60,35 +61,35 @@ public class ResultsManagerTest
 	public void writeTSFMatchesRead()
 	{
 		// This is redundant
-		TestSettings.assumeLowComplexity();
+		TestAssume.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithChannels()
 	{
-		//TestSettings.assumeLowComplexity();
+		//TestAssume.assumeLowComplexity();
 		writeTSFMatchesRead(2, 1, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithSlices()
 	{
-		//TestSettings.assumeLowComplexity();
+		//TestAssume.assumeLowComplexity();
 		writeTSFMatchesRead(1, 2, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithPositions()
 	{
-		//TestSettings.assumeLowComplexity();
+		//TestAssume.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 2, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithTypes()
 	{
-		//TestSettings.assumeLowComplexity();
+		//TestAssume.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 1, 2);
 	}
 
@@ -96,7 +97,7 @@ public class ResultsManagerTest
 	public void writeTSFMatchesReadWithCombinations()
 	{
 		// This takes longer
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		writeTSFMatchesRead(2, 2, 2, 2);
 	}
 

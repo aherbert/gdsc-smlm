@@ -44,10 +44,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -264,7 +265,7 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -383,7 +384,7 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureLinearIsFasterThanGradientProcedure(final int nparams)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

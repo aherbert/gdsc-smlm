@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomGammaDistributionTest
@@ -130,7 +131,7 @@ public class CustomGammaDistributionTest
 	@Test
 	public void customDistributionIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask());

@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Contains tests for the Gaussian functions in single or double precision
@@ -567,7 +567,7 @@ public class PrecisionTest
 	private void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
 			boolean doubleFaster)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -708,7 +708,7 @@ public class PrecisionTest
 
 	private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum, boolean doubleFaster)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);

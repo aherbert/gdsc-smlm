@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class RampedSelectionStrategyTest
@@ -103,21 +104,21 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void speedTest50()
 	{
-		TestSettings.assumeLowComplexity();
+		TestAssume.assumeLowComplexity();
 		speedTest(50, false, 10);
 	}
 
 	@Test
 	public void speedTest200()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		speedTest(200, true, 5);
 	}
 
 	@Test
 	public void speedTest1000()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		speedTest(1000, true, 2);
 	}
 
@@ -125,7 +126,7 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void speedTest5000()
 	{
-		TestSettings.assumeHighComplexity();
+		TestAssume.assumeHighComplexity();
 		speedTest(5000, true, 1);
 	}
 

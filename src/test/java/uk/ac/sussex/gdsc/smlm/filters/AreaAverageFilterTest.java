@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AreaAverageFilterTest extends AbstractFilterTest
@@ -41,7 +42,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 
@@ -113,7 +114,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageIsFasterThanAreaAverage()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 		final AverageFilter filter2 = new AverageFilter();
@@ -186,7 +187,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 		final AverageFilter filter2 = new AverageFilter();

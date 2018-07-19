@@ -39,6 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianFilterTest
@@ -315,7 +316,7 @@ public class GaussianFilterTest
 	@Test
 	public void floatFilterIsFasterThanDoubleFilter()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
@@ -348,7 +349,7 @@ public class GaussianFilterTest
 	@Test
 	public void floatFilterInternalIsFasterThanDoubleFilterInternal()
 	{
-		TestSettings.assumeHighComplexity();
+		TestAssume.assumeHighComplexity();
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 

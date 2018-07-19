@@ -29,8 +29,8 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianConvolutionFunctionTest

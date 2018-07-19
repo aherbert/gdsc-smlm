@@ -33,6 +33,7 @@ import org.junit.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -294,7 +295,7 @@ public class SpeedTest
 
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 10000;
 		ArrayList<double[]> paramsList2;

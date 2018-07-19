@@ -43,6 +43,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class JTransformsTest
@@ -295,7 +296,7 @@ public class JTransformsTest
 	@Test
 	public void jTransforms2DDHTIsFasterThanFHT2()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		// Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 

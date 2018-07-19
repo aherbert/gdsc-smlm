@@ -45,10 +45,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.MessageProvider;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
@@ -453,7 +454,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterThanEquivalentGaussian2DFunction()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
 		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
@@ -1076,7 +1077,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterUsingForEach()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
@@ -1142,7 +1143,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void computeIntegralIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final TurboList<double[]> p = new TurboList<>();
 		for (final double background : testbackground)
@@ -1207,7 +1208,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void computeIntegralIsFasterWith2Peaks()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		Assume.assumeNotNull(f2);
 
 		final TurboList<double[]> p = new TurboList<>();

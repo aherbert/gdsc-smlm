@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public class PSFModelGradient1FunctionTest

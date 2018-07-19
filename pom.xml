@@ -127,6 +127,27 @@ Software for single molecule localisation microscopy (SMLM)
 					</execution>
 				</executions>
 			</plugin>
+				<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.junit.platform</groupId>
+						<artifactId>junit-platform-surefire-provider</artifactId>
+						<version>1.2.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+						<version>5.2.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.vintage</groupId>
+						<artifactId>junit-vintage-engine</artifactId>
+						<version>5.2.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -183,7 +204,7 @@ Software for single molecule localisation microscopy (SMLM)
 			</resource>
 		</resources>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>ossrh</id>
@@ -251,12 +272,6 @@ Software for single molecule localisation microscopy (SMLM)
 			<version>1.2.0</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.ac.sussex.gdsc</groupId>
-			<artifactId>gdsc-test</artifactId>
-			<version>1.0.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
 			<version>1.4.10</version>
@@ -307,16 +322,28 @@ Software for single molecule localisation microscopy (SMLM)
 			<groupId>net.sf.trove4j</groupId>
 			<artifactId>trove4j</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/sc.fiji/3D_Viewer -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
 			<!-- For testing <version>4.0.3-SNAPSHOT</version> -->
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.sussex.gdsc</groupId>
+			<artifactId>gdsc-test</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>

@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Test that a stepping solver can fit a function.
@@ -265,7 +266,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	{
 		// The JFastMLE method was built using a misinterpretation of the Newton
 		// method in Numerical Recipes, 2nd Ed. This test is just here to prove that.
-		TestSettings.assumeMaximumComplexity();
+		TestAssume.assumeMaximumComplexity();
 
 		// The JFastMLE method does not work
 		fitSingleGaussian(NO_BOUND, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
@@ -594,7 +595,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 			SteppingFunctionSolverType type2, boolean bounded, SteppingFunctionSolverClamp clamp,
 			SteppingFunctionSolverType type, NoiseModel noiseModel)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		final SteppingFunctionSolver solver = getSolver(clamp, type);
 		final SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getName(bounded, clamp, type),

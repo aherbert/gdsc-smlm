@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
-import uk.ac.sussex.gdsc.test.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianPSFModelTest

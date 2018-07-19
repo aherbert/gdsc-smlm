@@ -30,9 +30,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
 
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianConvolutionFunctionTest
@@ -196,7 +197,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	@Test
 	public void pdfFasterThanPMF()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		// Realistic CCD parameters for speed test
 		final double s = 7.16;

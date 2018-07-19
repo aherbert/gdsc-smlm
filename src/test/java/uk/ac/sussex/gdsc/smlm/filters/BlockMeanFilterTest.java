@@ -34,6 +34,7 @@ import org.junit.internal.ArrayComparisonFailure;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class BlockMeanFilterTest extends AbstractFilterTest
@@ -374,7 +375,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 
 	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -449,7 +450,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 
 	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

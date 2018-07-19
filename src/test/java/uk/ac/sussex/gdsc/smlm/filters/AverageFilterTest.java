@@ -34,6 +34,7 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
@@ -230,7 +231,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
 		// These test a deprecated filter
-		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -306,7 +307,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
 		// These test a deprecated filter
-		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

@@ -30,9 +30,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunctionTest
@@ -109,7 +109,7 @@ public class PoissonGaussianFunctionTest
 	@Test
 	public void padeIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final double[] noise2 = new double[noise.length];
 		for (int i = 0; i < noise.length; i++)

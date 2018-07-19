@@ -47,9 +47,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultsReaderTest
@@ -63,7 +64,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, false, false);
 	}
 
@@ -76,28 +77,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithDeviationsMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, true, false, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithEndFrameMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, true, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithIdMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, true, false, false);
 	}
 
 	@Test
 	public void writeTextWithPrecisionMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, true, false);
 	}
 
@@ -112,7 +113,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, false);
 	}
 
@@ -125,28 +126,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithDeviationsMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, true, false, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, true, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithIdMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, true, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithPrecisionMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, false);
 	}
 
@@ -161,7 +162,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, false, true);
 	}
 
@@ -174,28 +175,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithDeviationsWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, true, false, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithEndFrameWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, true, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithIdWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, true, false, true);
 	}
 
 	@Test
 	public void writeTextWithPrecisionWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, true, true);
 	}
 
@@ -210,7 +211,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, true);
 	}
 
@@ -223,28 +224,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithDeviationsWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, true, false, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, true, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithIdWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, true, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithPrecisionWithSortMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, true);
 	}
 
@@ -290,7 +291,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTSFMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, false, false);
 	}
 
@@ -303,28 +304,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTSFWithDeviationsMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, false, false, false);
 	}
 
 	@Test
 	public void writeTSFWithEndFrameMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, true, false, false, false);
 	}
 
 	@Test
 	public void writeTSFWithIdMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, true, false, false);
 	}
 
 	@Test
 	public void writeTSFWithPrecisionMatchesRead()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, true, false);
 	}
 
@@ -339,42 +340,42 @@ public class PeakResultsReaderTest
 	@Test
 	public void readWithScannerMatchesNonScanner()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviations()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(true, false, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithEndFrame()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, true, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithId()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, true, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithPrecision()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, true, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithCombinations()
 	{
-		TestSettings.assumeLowComplexity(); // Scanner is not a default so do not always test
+		TestAssume.assumeLowComplexity(); // Scanner is not a default so do not always test
 		readWithScannerMatchesNonScannerWithCombinations(false);
 	}
 
@@ -383,42 +384,42 @@ public class PeakResultsReaderTest
 	@Test
 	public void readWithScannerMatchesNonScannerWithSort()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithSort()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(true, false, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithEndFrameWithSort()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, true, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithIdWithSort()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, true, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithPrecisionWithSort()
 	{
-		TestSettings.assumeMediumComplexity(); // The combinations test overlaps this
+		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, true, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithCombinationsWithSort()
 	{
-		TestSettings.assumeLowComplexity(); // Scanner is not a default so do not always test
+		TestAssume.assumeLowComplexity(); // Scanner is not a default so do not always test
 		readWithScannerMatchesNonScannerWithCombinations(true);
 	}
 
@@ -655,7 +656,7 @@ public class PeakResultsReaderTest
 			boolean showPrecision, ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2,
 			int loops)
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final MemoryPeakResults out = createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);

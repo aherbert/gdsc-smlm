@@ -32,10 +32,11 @@ import org.junit.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class ErfTest
@@ -147,7 +148,7 @@ public class ErfTest
 
 	private static void erfxIndistinguishableFrom1(BaseErf erf)
 	{
-		TestSettings.assume(LogLevel.INFO);
+		TestAssume.assume(LogLevel.INFO);
 
 		// Find switch using a binary search
 		double lower = 1;
@@ -360,7 +361,7 @@ public class ErfTest
 	@Test
 	public void erfApproxIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final int range = 5;
 		final int steps = 10000;
@@ -593,7 +594,7 @@ public class ErfTest
 	@Test
 	public void powerApproxIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final int range = 5000;
 		final int steps = 100000;

@@ -28,10 +28,11 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class BinomialFitterTest
@@ -51,7 +52,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitBinomialWithKnownNUsingLeastSquaresEstimator()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = false;
 		final boolean maximumLikelihood = false;
@@ -82,7 +83,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = false;
 		final boolean maximumLikelihood = false;
@@ -94,7 +95,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitBinomialWithUnknownNUsingMaximumLikelihood()
 	{
-		TestSettings.assume(optionalTestComplexity);
+		TestAssume.assume(optionalTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = false;
 		final boolean maximumLikelihood = true;
@@ -110,7 +111,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithKnownNUsingLeastSquaresEstimator()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = true;
 		final boolean maximumLikelihood = false;
@@ -122,7 +123,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithKnownNUsingMaximumLikelihood()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = true;
 		final boolean maximumLikelihood = true;
@@ -134,7 +135,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = true;
 		final boolean maximumLikelihood = false;
@@ -146,7 +147,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = true;
 		final boolean maximumLikelihood = false;
@@ -158,7 +159,7 @@ public class BinomialFitterTest
 	@Test
 	public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = false;
 		for (final int n : N)
@@ -169,7 +170,7 @@ public class BinomialFitterTest
 	@Test
 	public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
-		TestSettings.assume(nonEssentialTestComplexity);
+		TestAssume.assume(nonEssentialTestComplexity);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final boolean zeroTruncated = true;
 		for (final int n : N)

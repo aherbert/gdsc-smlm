@@ -40,6 +40,7 @@ import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class FRCTest
@@ -168,7 +169,7 @@ public class FRCTest
 	@Test
 	public void computeSineIsFaster()
 	{
-		TestSettings.assumeHighComplexity();
+		TestAssume.assumeHighComplexity();
 
 		final int steps = 100000;
 		final double delta = 2 * Math.PI / steps;
@@ -227,7 +228,7 @@ public class FRCTest
 	@Test
 	public void computeMirroredIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		// Sample lines through an image to create a structure.
 		final int N = 2048;

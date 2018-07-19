@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 /**
  * Test that a bounded fitter can return the same results with and without bounds.
@@ -329,7 +330,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 	private void fitSingleGaussianBetterLVM(boolean bounded2, int clamping2, boolean mle2, boolean bounded,
 			int clamping, boolean mle)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 		final NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
 		final NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),

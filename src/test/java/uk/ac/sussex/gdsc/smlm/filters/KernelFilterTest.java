@@ -39,6 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class KernelFilterTest
@@ -285,7 +286,7 @@ public class KernelFilterTest
 
 	private void floatFilterIsFasterThanIJFilter(int k)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		final float[][] data = new float[10][];

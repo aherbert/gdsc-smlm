@@ -33,9 +33,10 @@ import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class ConvolutionTest
@@ -131,7 +132,7 @@ public class ConvolutionTest
 	@Test
 	public void doSpeedTest()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
@@ -177,7 +178,7 @@ public class ConvolutionTest
 	@Test
 	public void doDoubleSpeedTest()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
@@ -224,7 +225,7 @@ public class ConvolutionTest
 	@Test
 	public void doSingleVsDoubleSpeedTest()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -276,7 +277,7 @@ public class ConvolutionTest
 	@Test
 	public void doSingleVsDoubleFFTSpeedTest()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -566,7 +567,7 @@ public class ConvolutionTest
 	@Test
 	public void doScaledSpeedTest()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int scale = 4; scale <= 8; scale *= 2)

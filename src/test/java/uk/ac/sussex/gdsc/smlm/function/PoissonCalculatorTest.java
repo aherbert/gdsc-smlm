@@ -46,11 +46,12 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest
@@ -549,7 +550,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfLogFactorialApproximation()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -580,7 +581,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLogLikelihood()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -611,7 +612,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_FastLogLikelihood()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -643,7 +644,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_LogLikelihoodRatio()
 	{
-		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -837,7 +838,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void instanceMethodIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final int n = 1000;
 		final int m = 10;

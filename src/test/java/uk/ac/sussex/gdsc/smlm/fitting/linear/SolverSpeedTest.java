@@ -35,10 +35,11 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class SolverSpeedTest
@@ -189,7 +190,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsNotFasterThanGaussJordanFloat()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -222,7 +223,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanFloat()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -261,7 +262,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsNotFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -294,7 +295,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -327,7 +328,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveCholeskyIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -360,7 +361,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveCholeskyLDLTIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -393,7 +394,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);

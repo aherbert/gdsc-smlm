@@ -31,8 +31,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
 
 @SuppressWarnings({ "javadoc" })
 public class AbstractFilterTest

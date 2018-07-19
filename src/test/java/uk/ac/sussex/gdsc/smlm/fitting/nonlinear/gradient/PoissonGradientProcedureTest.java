@@ -42,9 +42,10 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGradientProcedureTest
@@ -165,7 +166,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 1000;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -289,7 +290,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestSettings.assumeSpeedTest();
+		TestAssume.assumeSpeedTest();
 
 		final int iter = 100;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);

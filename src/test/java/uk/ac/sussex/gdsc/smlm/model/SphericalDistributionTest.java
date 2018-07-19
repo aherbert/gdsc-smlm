@@ -32,9 +32,10 @@ import org.junit.Test;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.test.TestAssert;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit4.TestAssume;
 
 @SuppressWarnings({ "javadoc" })
 public class SphericalDistributionTest
@@ -64,7 +65,7 @@ public class SphericalDistributionTest
 	@Test
 	public void rejectionMethodIsFasterThanTransformationMethod()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestAssume.assumeMediumComplexity();
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final double radius = 10 + rg.nextDouble() * 10;
