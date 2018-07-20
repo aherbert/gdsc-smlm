@@ -24,7 +24,7 @@
 
 /**
  * Provides utility classes including 1D convolution, XML utilities, JSON utilities,
- * and 2D image pixel data conversion
+ * and 2D image pixel data conversion.
  *
  * @since 1.0.0
  */

@@ -23,7 +23,7 @@
  */
 
 /**
- * Contains data objects.
+ * Provides data objects.
  *
  * @since 1.0.0
  */
