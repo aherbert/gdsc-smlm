@@ -32,6 +32,7 @@ import ij.gui.PointRoi;
 import ij.text.TextPanel;
 import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 /**
  * Attaches to a text panel and listens for mouse events. Upon double click it obtains the coordinates from a provider

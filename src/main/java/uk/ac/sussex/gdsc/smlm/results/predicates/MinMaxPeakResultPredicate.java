@@ -27,7 +27,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
 
 /**
- * Accept results with a value within a min/max range
+ * Accept results with a value within a min/max range.
  */
 public class MinMaxPeakResultPredicate implements PeakResultPredicate
 {

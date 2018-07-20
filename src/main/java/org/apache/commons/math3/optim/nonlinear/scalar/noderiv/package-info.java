@@ -21,37 +21,12 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package uk.ac.sussex.gdsc.smlm.results.predicates;
-
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Test a result using the frame.
+ * Extend the functionality of the <a href="http://commons.apache.org/proper/commons-math/">
+ * Apache Commons Math</a> {@code org.apache.commons.math3.optim.nonlinear.scalar.noderiv} package.
+ *
+ * @see <a href="http://commons.apache.org/proper/commons-math/">Apache Commons Math</a>
+ * @since 1.0.0
  */
-public class FramePeakResultPredicate implements PeakResultPredicate
-{
-	/** The frame. */
-	private final int frame;
-
-	/**
-	 * Instantiates a new frame peak result predicate.
-	 *
-	 * @param frame
-	 *            the frame
-	 */
-	public FramePeakResultPredicate(int frame)
-	{
-		this.frame = frame;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getFrame() == frame;
-	}
-}
+package org.apache.commons.math3.optim.nonlinear.scalar.noderiv;

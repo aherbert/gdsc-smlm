@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Always fail a result
+ * Always fail a result.
  */
 public class FailPeakResultPredicate implements PeakResultPredicate
 {

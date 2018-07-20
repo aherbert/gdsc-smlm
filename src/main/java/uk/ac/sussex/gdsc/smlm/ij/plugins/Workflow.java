@@ -28,7 +28,6 @@ import java.util.Arrays;
 
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
-// TODO: Auto-generated Javadoc
 /**
  * Allow processing work in stages, repeating only the stages necessary to render new results given changes to settings.
  * This class is designed to be used to allow live display of results upon settings changes by running the analysis on

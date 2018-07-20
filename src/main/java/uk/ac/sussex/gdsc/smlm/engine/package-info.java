@@ -21,37 +21,18 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package uk.ac.sussex.gdsc.smlm.results.predicates;
-
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Test a result using the frame.
+ * Provides the engine to perform filtering and fitting of Single Molecule
+ * Localisation Microscopy (SMLM) data.
+ * <p>
+ * Data is processed as 2D frames from an image source. The engine distributes the
+ * input image frames to workers for analysis. Each worker filters the frames to
+ * identify candidate localisations and then fits the candidates using a Gaussian 2D function.
+ * The fits are assessed using criteria such as localisation precision, Signal-to-Noise Ratio (SNR),
+ * drift, and spot width. Fitting may not process all candidates due to the use of smart 
+ * stopping criteria based on the acceptance rate.
+ *
+ * @since 1.0.0
  */
-public class FramePeakResultPredicate implements PeakResultPredicate
-{
-	/** The frame. */
-	private final int frame;
-
-	/**
-	 * Instantiates a new frame peak result predicate.
-	 *
-	 * @param frame
-	 *            the frame
-	 */
-	public FramePeakResultPredicate(int frame)
-	{
-		this.frame = frame;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getFrame() == frame;
-	}
-}
+package uk.ac.sussex.gdsc.smlm.engine;

@@ -45,12 +45,12 @@ import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.match.Pulse;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.utils.CoordinateProvider;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageROIPainter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.

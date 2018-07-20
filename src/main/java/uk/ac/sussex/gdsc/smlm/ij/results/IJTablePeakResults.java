@@ -44,12 +44,12 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import uk.ac.sussex.gdsc.smlm.ij.utils.CoordinateProvider;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageROIPainter;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultConversionHelper;
+import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 /**
  * Saves the fit results to an ImageJ results table.

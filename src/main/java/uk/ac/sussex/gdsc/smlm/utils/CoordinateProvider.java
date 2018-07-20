@@ -21,7 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package uk.ac.sussex.gdsc.smlm.ij.utils;
+package uk.ac.sussex.gdsc.smlm.utils;
 
 /**
  * Provide methods to retrieve the coordinates from a text line

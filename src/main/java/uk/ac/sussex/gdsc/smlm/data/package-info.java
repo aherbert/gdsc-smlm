@@ -21,7 +21,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 /**
- * Contains data objects
+ * Contains data objects.
+ *
+ * @since 1.0.0
  */
 package uk.ac.sussex.gdsc.smlm.data;

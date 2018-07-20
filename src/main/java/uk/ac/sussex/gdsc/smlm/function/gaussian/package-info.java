@@ -21,37 +21,20 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package uk.ac.sussex.gdsc.smlm.results.predicates;
-
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Test a result using the frame.
+ * Provides classes for computation of 2D Gaussian function.
+ * <p>
+ * The 2D Gaussian function is used as a model of the Point Spread Function (PSF) of a
+ * microscope and can be fit to Single Molecule Localisation Microscopy data.
+ * <p>
+ * The functions in this package can compute the Gaussian function over a 2D range
+ * that represents for example the pixels in an image. This package evaluates the function
+ * as a single point for each (X,Y) position. That is the function integral over the
+ * 1x1 area surrounding point (X,Y) is approximated using the function value at (X,Y).
+ * <p>
+ * The functions can support rotated elliptical 2D Gaussians.
+ *
+ * @since 1.0.0
  */
-public class FramePeakResultPredicate implements PeakResultPredicate
-{
-	/** The frame. */
-	private final int frame;
-
-	/**
-	 * Instantiates a new frame peak result predicate.
-	 *
-	 * @param frame
-	 *            the frame
-	 */
-	public FramePeakResultPredicate(int frame)
-	{
-		this.frame = frame;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getFrame() == frame;
-	}
-}
+package uk.ac.sussex.gdsc.smlm.function.gaussian;

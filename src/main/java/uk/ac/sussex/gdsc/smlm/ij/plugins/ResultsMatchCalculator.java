@@ -46,12 +46,12 @@ import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.utils.CoordinateProvider;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageROIPainter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 /**
  * Compares the coordinates in two sets of results and computes the match statistics.

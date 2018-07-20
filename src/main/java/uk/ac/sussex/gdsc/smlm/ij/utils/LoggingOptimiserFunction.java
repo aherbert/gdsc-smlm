@@ -27,7 +27,7 @@ import ij.IJ;
 import uk.ac.sussex.gdsc.smlm.function.OptimiserFunction;
 
 /**
- * Allow progress tracking of the Apache Commons Math 3 Optimiser in ImageJ
+ * Allow progress tracking of the Apache Commons Math 3 Optimiser in ImageJ.
  */
 public abstract class LoggingOptimiserFunction extends OptimiserFunction
 {

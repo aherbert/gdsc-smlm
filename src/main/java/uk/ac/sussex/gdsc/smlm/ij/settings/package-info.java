@@ -21,37 +21,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package uk.ac.sussex.gdsc.smlm.results.predicates;
-
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Test a result using the frame.
+ * Provides classes to save and load settings. 
+ *
+ * @since 1.0.0
  */
-public class FramePeakResultPredicate implements PeakResultPredicate
-{
-	/** The frame. */
-	private final int frame;
-
-	/**
-	 * Instantiates a new frame peak result predicate.
-	 *
-	 * @param frame
-	 *            the frame
-	 */
-	public FramePeakResultPredicate(int frame)
-	{
-		this.frame = frame;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getFrame() == frame;
-	}
-}
+package uk.ac.sussex.gdsc.smlm.ij.settings;

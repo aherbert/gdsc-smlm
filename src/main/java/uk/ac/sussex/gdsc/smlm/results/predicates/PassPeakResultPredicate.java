@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Always pass a result
+ * Always pass a result.
  */
 public class PassPeakResultPredicate implements PeakResultPredicate
 {

@@ -24,5 +24,7 @@
 
 /**
  * Contains code for a simple genetic algorithm to evolve a fixed parameter space
+ *
+ * @since 1.0.0
  */
 package uk.ac.sussex.gdsc.smlm.ga;

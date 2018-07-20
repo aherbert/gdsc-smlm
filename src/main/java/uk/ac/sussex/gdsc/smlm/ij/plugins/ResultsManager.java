@@ -93,41 +93,38 @@ import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 
-// TODO: Auto-generated Javadoc
 /**
  * Opens peaks results and displays/converts them.
  */
 public class ResultsManager implements PlugIn
 {
-
 	/**
-	 * The Enum InputSource.
+	 * The input source.
 	 */
 	public enum InputSource
 	{
-
-		/** The file. */
 		//@formatter:off
+		/** File input. */
 		FILE{ @Override
 		public String getName() { return "File"; }},
 
-		/** The memory. */
+		/** Memory input. */
 		MEMORY{ @Override
 		public String getName() { return "Memory"; }},
 
-		/** The memory multi frame. */
+		/** Memory input with at least one result spanning frames (linked using ID). */
 		MEMORY_MULTI_FRAME{ @Override
 		public String getName() { return "Memory (Multi-Frame)"; }},
 
-		/** The memory single frame. */
+		/** Memory input with no results spanning frames (linked using ID). */
 		MEMORY_SINGLE_FRAME{ @Override
 		public String getName() { return "Memory (Single-Frame)"; }},
 
-		/** The memory clustered. */
+		/** Memory input with clustered results (ID above zero). */
 		MEMORY_CLUSTERED{ @Override
 		public String getName() { return "Memory (Clustered)"; }},
 
-		/** The none. */
+		/** No input. */
 		NONE{ @Override
 		public String getName() { return "None"; }};
 		//@formatter:on

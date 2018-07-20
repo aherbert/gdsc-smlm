@@ -21,9 +21,11 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 /**
- * This package contains classes to model a pixel camera, for example the camera of a microscope
+ * This package contains classes to model a pixel camera, for example the camera of a microscope.
  *
  * @author Alex Herbert
+ * @since 1.0.0
  */
 package uk.ac.sussex.gdsc.smlm.model.camera;

@@ -21,37 +21,17 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package uk.ac.sussex.gdsc.smlm.results.predicates;
-
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Test a result using the frame.
+ * Provides generated code using <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol
+ * Buffers</a>
+ * to read the <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File (TSF) format</a>.
+ * <p>
+ * The goal of the TSF format is to provide an efficient data format for super-resolution microscopy data that generate
+ * images by locating the position of single fluorescent emitters.
+ *
+ * @since 1.0.0
+ * @see <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a>
+ * @see <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File (TSF) format</a>
  */
-public class FramePeakResultPredicate implements PeakResultPredicate
-{
-	/** The frame. */
-	private final int frame;
-
-	/**
-	 * Instantiates a new frame peak result predicate.
-	 *
-	 * @param frame
-	 *            the frame
-	 */
-	public FramePeakResultPredicate(int frame)
-	{
-		this.frame = frame;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getFrame() == frame;
-	}
-}
+package uk.ac.sussex.gdsc.smlm.tsf;

@@ -23,7 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
-// TODO: Auto-generated Javadoc
 /**
  * Define the type of fit that was performed.
  */

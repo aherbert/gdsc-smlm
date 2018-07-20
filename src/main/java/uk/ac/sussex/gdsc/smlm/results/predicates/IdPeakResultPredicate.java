@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Test a result using the id
+ * Test a result using the id.
  */
 public class IdPeakResultPredicate implements PeakResultPredicate
 {
