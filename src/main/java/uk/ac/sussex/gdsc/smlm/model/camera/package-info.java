@@ -23,7 +23,7 @@
  */
 
 /**
- * This package contains classes to model a pixel camera, for example the camera of a microscope.
+ * Provides classes to model a pixel camera, for example the camera of a microscope.
  *
  * @author Alex Herbert
  * @since 1.0.0
