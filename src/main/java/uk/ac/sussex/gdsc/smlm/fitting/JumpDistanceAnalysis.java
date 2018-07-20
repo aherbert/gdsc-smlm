@@ -2152,7 +2152,7 @@ public class JumpDistanceAnalysis
 	 * be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
-	 * {@code 
+	 * {@code
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * }
@@ -2185,11 +2185,11 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Simulations using multiple simulation steps within each frame were used to compute the MSD at different frame
 	 * separation intervals. These curves were compared to the expected MSD for the simulated diffusion coefficient to
-	 * produce a correction factor curve. This was fitted for {@code n>=1} and {@code n<1}. 
+	 * produce a correction factor curve. This was fitted for {@code n>=1} and {@code n<1}.
 	 * The observed MSD can be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
-	 * {@code 
+	 * {@code
 	 * n>=1:
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
@@ -2249,7 +2249,7 @@ public class JumpDistanceAnalysis
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
-	 * {@code 
+	 * {@code
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * }
@@ -2278,7 +2278,7 @@ public class JumpDistanceAnalysis
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 *
 	 * <pre>
-	 * {@code 
+	 * {@code
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * }

@@ -1223,7 +1223,6 @@ public class PeakResultsReader
 			float[] params = new float[7];
 
 			if (isUseScanner())
-			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1251,7 +1250,6 @@ public class PeakResultsReader
 								endPeak, id);
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 				}
-			}
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
 			int j = 0;
@@ -1300,8 +1298,7 @@ public class PeakResultsReader
 			float[] paramsStdDev = new float[7];
 
 			if (isUseScanner())
-			{
-				// Code using a Scanner
+			 // Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
 					scanner.useDelimiter(tabPattern);
@@ -1332,8 +1329,6 @@ public class PeakResultsReader
 								paramsStdDev, endPeak, id);
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 				}
-			}
-			// JUnit test shows this is faster than the scanner
 
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
@@ -1386,7 +1381,6 @@ public class PeakResultsReader
 			float[] params = new float[7];
 
 			if (isUseScanner())
-			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1411,7 +1405,6 @@ public class PeakResultsReader
 								endPeak, id);
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
 				}
-			}
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
 			int j = 0;
@@ -1458,8 +1451,7 @@ public class PeakResultsReader
 			float[] paramsStdDev = new float[7];
 
 			if (isUseScanner())
-			{
-				// Code using a Scanner
+			 // Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
 					scanner.useDelimiter(tabPattern);
@@ -1487,8 +1479,6 @@ public class PeakResultsReader
 								paramsStdDev, endPeak, id);
 					return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
 				}
-			}
-			// JUnit test shows this is faster than the scanner
 
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
@@ -1539,7 +1529,6 @@ public class PeakResultsReader
 			final float[] params = new float[nFields];
 
 			if (isUseScanner())
-			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1560,14 +1549,11 @@ public class PeakResultsReader
 						params[i] = scanner.nextFloat();
 					// The format appends a * to computed precision. We ignore these.
 					if (readPrecision && !line.endsWith("*"))
-					{
 						return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					}
 					return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
 				}
-			}
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
 			int j = 0;
@@ -1583,11 +1569,9 @@ public class PeakResultsReader
 				params[i] = Float.parseFloat(fields[j++]);
 			// The format appends a * to computed precision. We ignore these.
 			if (readPrecision && !line.endsWith("*"))
-			{
 				return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
 						// Read precision here because it is the final field
 						Float.parseFloat(fields[j]));
-			}
 			return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id);
 		}
 		catch (final InputMismatchException e)
@@ -1617,8 +1601,7 @@ public class PeakResultsReader
 			final float[] paramsStdDev = new float[nFields];
 
 			if (isUseScanner())
-			{
-				// Code using a Scanner
+			 // Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
 					scanner.useDelimiter(tabPattern);
@@ -1640,17 +1623,13 @@ public class PeakResultsReader
 						paramsStdDev[i] = scanner.nextFloat();
 					}
 					if (readPrecision && !line.endsWith("*"))
-					{
 						return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
 								endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					}
 					return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak,
 							id);
 				}
-			}
-			// JUnit test shows this is faster than the scanner
 
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
@@ -1669,11 +1648,9 @@ public class PeakResultsReader
 				paramsStdDev[i] = Float.parseFloat(fields[j++]);
 			}
 			if (readPrecision && !line.endsWith("*"))
-			{
 				return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id,
 						// Read precision here because it is the final field
 						Float.parseFloat(fields[j]));
-			}
 			return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev, endPeak, id);
 		}
 		catch (final InputMismatchException e)
@@ -1702,7 +1679,6 @@ public class PeakResultsReader
 			final float[] params = new float[nFields];
 
 			if (isUseScanner())
-			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -1724,16 +1700,13 @@ public class PeakResultsReader
 						params[i] = scanner.nextFloat();
 					// The format appends a * to computed precision. We ignore these.
 					if (readPrecision && !line.endsWith("*"))
-					{
 						return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
 								endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					}
 					return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
 							endPeak, id);
 				}
-			}
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
 			int j = 0;
@@ -1750,12 +1723,10 @@ public class PeakResultsReader
 				params[i] = Float.parseFloat(fields[j++]);
 			// The format appends a * to computed precision. We ignore these.
 			if (readPrecision && !line.endsWith("*"))
-			{
 				return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak,
 						id,
 						// Read precision here because it is the final field
 						Float.parseFloat(fields[j]));
-			}
 			return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null, endPeak, id);
 		}
 		catch (final InputMismatchException e)
@@ -1785,8 +1756,7 @@ public class PeakResultsReader
 			final float[] paramsStdDev = new float[nFields];
 
 			if (isUseScanner())
-			{
-				// Code using a Scanner
+			 // Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
 					scanner.useDelimiter(tabPattern);
@@ -1809,17 +1779,13 @@ public class PeakResultsReader
 						paramsStdDev[i] = scanner.nextFloat();
 					}
 					if (readPrecision && !line.endsWith("*"))
-					{
 						return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
 								paramsStdDev, endPeak, id,
 								// Read precision here because it is the final field
 								scanner.nextFloat());
-					}
 					return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
 							paramsStdDev, endPeak, id);
 				}
-			}
-			// JUnit test shows this is faster than the scanner
 
 			// Code using split and parse
 			final String[] fields = tabPattern.split(line);
@@ -1839,12 +1805,10 @@ public class PeakResultsReader
 				paramsStdDev[i] = Float.parseFloat(fields[j++]);
 			}
 			if (readPrecision && !line.endsWith("*"))
-			{
 				return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
 						endPeak, id,
 						// Read precision here because it is the final field
 						Float.parseFloat(fields[j]));
-			}
 			return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
 					endPeak, id);
 		}
@@ -2749,7 +2713,6 @@ public class PeakResultsReader
 			final float[] params = new float[PeakResult.STANDARD_PARAMETERS];
 
 			if (isUseScanner())
-			{
 				// Code using a Scanner
 				try (Scanner scanner = new Scanner(line))
 				{
@@ -2762,7 +2725,6 @@ public class PeakResultsReader
 
 					return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
 				}
-			}
 			// Code using split and parse
 			final String[] fields = whitespacePattern.split(line);
 

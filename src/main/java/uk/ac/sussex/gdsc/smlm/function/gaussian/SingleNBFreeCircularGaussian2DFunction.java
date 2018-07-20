@@ -106,7 +106,7 @@ public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGa
 			dy_da[4] = y * (ny + cy * dy2);
 			return y;
 		}
-		
+
 		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
 		dy_da[0] = n * exp;
 		final double y = height * exp;

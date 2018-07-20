@@ -54,7 +54,7 @@ import ij.plugin.frame.PlugInFrame;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 
 /**
- * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in 
+ * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in
  * /uk/ac/sussex/gdsc/smlm/plugins.config. Also add these commands to the plugins menu.
  */
 public class SMLMTools extends PlugInFrame implements ActionListener

@@ -41,12 +41,9 @@ public class PoissonFunctionTest
 	public void cumulativeProbabilityIsOne()
 	{
 		for (int j = 0; j < gain.length; j++)
-			for (int i = 0; i < photons.length; i++)
-			{
-				int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
-				//System.out.printf("minRange[%d][%d] = %d;\n", j, i, result[0]);
-				//System.out.printf("maxRange[%d][%d] = %d;\n", j, i, result[1]);
-			}
+			for (int i = 0; i < photons.length; i++) int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
+			//System.out.printf("minRange[%d][%d] = %d;\n", j, i, result[0]);
+			//System.out.printf("maxRange[%d][%d] = %d;\n", j, i, result[1]);
 	}
 
 	private static int[] cumulativeProbabilityIsOne(final double gain, final double mu)

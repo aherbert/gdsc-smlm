@@ -99,7 +99,7 @@ public class FilterScore implements Comparable<FilterScore>
 				return compareParameters(that);
 			return 0;
 		}
-		
+
 		// Must pass criteria first
 		if (that.criteriaPassed)
 			return 1;

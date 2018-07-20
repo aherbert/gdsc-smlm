@@ -109,10 +109,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double x = 2 * Math.sqrt(p * c_m);
 			final double _c_m_p = -c_m - p;
 			if (x > 709 || _c_m_p < -709)
-			{
 				//return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
 				return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
-			}
 			//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 			return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 		}
@@ -152,10 +150,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double x = 2 * Math.sqrt(p * c_m);
 			final double _c_m_p = -c_m - p;
 			if (x > 709 || _c_m_p < -709)
-			{
 				//return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
 				return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
-			}
 			//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 			return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 		}
@@ -447,7 +443,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	/**
 	 * Calculate the log probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
-	 * See 
+	 * See
 . Nature Methods 4, 319-321, SI equation 3.
 	 *
 	 * @param c

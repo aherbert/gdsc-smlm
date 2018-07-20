@@ -412,7 +412,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			pixels = new short[data.length];
 			return new ShortProcessor(imageWidth, imageHeight, (short[]) pixels, null);
 		}
-		
+
 		pixels = new float[data.length];
 
 		// Special float processor that maps all values to 1-255 in the LUT.

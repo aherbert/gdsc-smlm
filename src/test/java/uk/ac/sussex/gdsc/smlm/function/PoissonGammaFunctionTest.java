@@ -147,7 +147,7 @@ public class PoissonGammaFunctionTest
 		if (pdf)
 		{
 			// Do a formal integration
-			if (debug) 
+			if (debug)
 				if (p < 0.98 || p > 1.02)
 					System.out.printf("g=%f, mu=%f, p=%f\n", gain, mu, p);
 			final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,

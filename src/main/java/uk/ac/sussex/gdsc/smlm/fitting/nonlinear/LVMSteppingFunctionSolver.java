@@ -262,7 +262,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 			lambda *= 0.1;
 			return true;
 		}
-		
+
 		// Increase Lambda
 		lambda *= 10.0;
 		return false;

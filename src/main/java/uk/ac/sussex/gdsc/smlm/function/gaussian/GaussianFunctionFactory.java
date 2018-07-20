@@ -324,7 +324,7 @@ public class GaussianFunctionFactory
 
 			return new SingleNSNBFixedGaussian2DFunction(maxx, maxy);
 		}
-		
+
 		if ((flags & FIT_BACKGROUND) != 0)
 		{
 			if ((flags & FIT_ANGLE) != 0)

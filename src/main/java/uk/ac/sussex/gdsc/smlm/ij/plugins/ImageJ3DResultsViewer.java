@@ -1837,7 +1837,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		if (range == 0 || limits == null || p == null)
 			return new Color3f[] { new Color3f(new Color(lut.getRGB(255))) };
-		
+
 		// Create 256 Colors
 		final float scale = 255f / range;
 		final Color3f[] colors = new Color3f[256];

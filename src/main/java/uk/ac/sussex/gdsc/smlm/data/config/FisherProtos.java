@@ -69,19 +69,18 @@ public final class FisherProtos {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
-      int mutable_bitField0_ = 0;
+      final int mutable_bitField0_ = 0;
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 9: {
@@ -96,9 +95,9 @@ public final class FisherProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
@@ -110,7 +109,8 @@ public final class FisherProtos {
       return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -126,7 +126,8 @@ public final class FisherProtos {
      *
      * <code>double log_10_mean = 1;</code>
      */
-    public double getLog10Mean() {
+    @Override
+	public double getLog10Mean() {
       return log10Mean_;
     }
 
@@ -140,13 +141,15 @@ public final class FisherProtos {
      *
      * <code>double alpha = 2;</code>
      */
-    public double getAlpha() {
+    @Override
+	public double getAlpha() {
       return alpha_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+    @Override
+	public final boolean isInitialized() {
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -154,29 +157,27 @@ public final class FisherProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (log10Mean_ != 0D) {
-        output.writeDouble(1, log10Mean_);
-      }
-      if (alpha_ != 0D) {
-        output.writeDouble(2, alpha_);
-      }
+      if (log10Mean_ != 0D)
+		output.writeDouble(1, log10Mean_);
+      if (alpha_ != 0D)
+		output.writeDouble(2, alpha_);
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (log10Mean_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (log10Mean_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, log10Mean_);
-      }
-      if (alpha_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (alpha_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, alpha_);
-      }
       memoizedSize = size;
       return size;
     }
@@ -184,13 +185,11 @@ public final class FisherProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample)) {
-        return super.equals(obj);
-      }
-      uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample other = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample))
+		return super.equals(obj);
+      final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample other = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample) obj;
 
       boolean result = true;
       result = result && (
@@ -206,9 +205,8 @@ public final class FisherProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + LOG_10_MEAN_FIELD_NUMBER;
@@ -292,14 +290,16 @@ public final class FisherProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -307,7 +307,7 @@ public final class FisherProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -327,7 +327,8 @@ public final class FisherProtos {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -349,7 +350,8 @@ public final class FisherProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         log10Mean_ = 0D;
 
@@ -358,61 +360,71 @@ public final class FisherProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_descriptor;
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.getDefaultInstance();
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample build() {
-        uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample build() {
+        final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample buildPartial() {
-        uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample result = new uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample(this);
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample buildPartial() {
+        final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample result = new uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample(this);
         result.log10Mean_ = log10Mean_;
         result.alpha_ = alpha_;
         onBuilt();
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample) {
-          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample)other);
-        } else {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample)
+			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -420,34 +432,33 @@ public final class FisherProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.getDefaultInstance()) return this;
-        if (other.getLog10Mean() != 0D) {
-          setLog10Mean(other.getLog10Mean());
-        }
-        if (other.getAlpha() != 0D) {
-          setAlpha(other.getAlpha());
-        }
+        if (other.getLog10Mean() != 0D)
+			setLog10Mean(other.getLog10Mean());
+        if (other.getAlpha() != 0D)
+			setAlpha(other.getAlpha());
         onChanged();
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -460,7 +471,8 @@ public final class FisherProtos {
        *
        * <code>double log_10_mean = 1;</code>
        */
-      public double getLog10Mean() {
+      @Override
+	public double getLog10Mean() {
         return log10Mean_;
       }
       /**
@@ -471,7 +483,7 @@ public final class FisherProtos {
        * <code>double log_10_mean = 1;</code>
        */
       public Builder setLog10Mean(double value) {
-        
+
         log10Mean_ = value;
         onChanged();
         return this;
@@ -484,7 +496,7 @@ public final class FisherProtos {
        * <code>double log_10_mean = 1;</code>
        */
       public Builder clearLog10Mean() {
-        
+
         log10Mean_ = 0D;
         onChanged();
         return this;
@@ -499,7 +511,8 @@ public final class FisherProtos {
        *
        * <code>double alpha = 2;</code>
        */
-      public double getAlpha() {
+      @Override
+	public double getAlpha() {
         return alpha_;
       }
       /**
@@ -511,7 +524,7 @@ public final class FisherProtos {
        * <code>double alpha = 2;</code>
        */
       public Builder setAlpha(double value) {
-        
+
         alpha_ = value;
         onChanged();
         return this;
@@ -525,17 +538,19 @@ public final class FisherProtos {
        * <code>double alpha = 2;</code>
        */
       public Builder clearAlpha() {
-        
+
         alpha_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -556,7 +571,8 @@ public final class FisherProtos {
 
     private static final com.google.protobuf.Parser<AlphaSample>
         PARSER = new com.google.protobuf.AbstractParser<AlphaSample>() {
-      public AlphaSample parsePartialFrom(
+      @Override
+	public AlphaSample parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -573,7 +589,8 @@ public final class FisherProtos {
       return PARSER;
     }
 
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -618,7 +635,7 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample> 
+    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample>
         getAlphaSampleList();
     /**
      * <pre>
@@ -646,7 +663,7 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
         getAlphaSampleOrBuilderList();
     /**
      * <pre>
@@ -695,15 +712,14 @@ public final class FisherProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 8: {
@@ -723,7 +739,7 @@ public final class FisherProtos {
             }
             case 34: {
               if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                alphaSample_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample>();
+                alphaSample_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000008;
               }
               alphaSample_.add(
@@ -732,15 +748,14 @@ public final class FisherProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-          alphaSample_ = java.util.Collections.unmodifiableList(alphaSample_);
-        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008))
+			alphaSample_ = java.util.Collections.unmodifiableList(alphaSample_);
         makeExtensionsImmutable();
       }
     }
@@ -749,7 +764,8 @@ public final class FisherProtos {
       return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -766,7 +782,8 @@ public final class FisherProtos {
      *
      * <code>int32 type = 1;</code>
      */
-    public int getType() {
+    @Override
+	public int getType() {
       return type_;
     }
 
@@ -779,7 +796,8 @@ public final class FisherProtos {
      *
      * <code>double gain = 2;</code>
      */
-    public double getGain() {
+    @Override
+	public double getGain() {
       return gain_;
     }
 
@@ -792,7 +810,8 @@ public final class FisherProtos {
      *
      * <code>double noise = 3;</code>
      */
-    public double getNoise() {
+    @Override
+	public double getNoise() {
       return noise_;
     }
 
@@ -806,7 +825,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
+    @Override
+	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
       return alphaSample_;
     }
     /**
@@ -817,7 +837,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+    @Override
+	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
         getAlphaSampleOrBuilderList() {
       return alphaSample_;
     }
@@ -829,7 +850,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public int getAlphaSampleCount() {
+    @Override
+	public int getAlphaSampleCount() {
       return alphaSample_.size();
     }
     /**
@@ -840,7 +862,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
       return alphaSample_.get(index);
     }
     /**
@@ -851,14 +874,16 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
      */
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
         int index) {
       return alphaSample_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+    @Override
+	public final boolean isInitialized() {
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -866,43 +891,37 @@ public final class FisherProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (type_ != 0) {
-        output.writeInt32(1, type_);
-      }
-      if (gain_ != 0D) {
-        output.writeDouble(2, gain_);
-      }
-      if (noise_ != 0D) {
-        output.writeDouble(3, noise_);
-      }
-      for (int i = 0; i < alphaSample_.size(); i++) {
-        output.writeMessage(4, alphaSample_.get(i));
-      }
+      if (type_ != 0)
+		output.writeInt32(1, type_);
+      if (gain_ != 0D)
+		output.writeDouble(2, gain_);
+      if (noise_ != 0D)
+		output.writeDouble(3, noise_);
+      for (int i = 0; i < alphaSample_.size(); i++)
+		output.writeMessage(4, alphaSample_.get(i));
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (type_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
+      if (type_ != 0)
+		size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, type_);
-      }
-      if (gain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (gain_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, gain_);
-      }
-      if (noise_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
+      if (noise_ != 0D)
+		size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, noise_);
-      }
-      for (int i = 0; i < alphaSample_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
+      for (int i = 0; i < alphaSample_.size(); i++)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, alphaSample_.get(i));
-      }
       memoizedSize = size;
       return size;
     }
@@ -910,13 +929,11 @@ public final class FisherProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData)) {
-        return super.equals(obj);
-      }
-      uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData other = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData))
+		return super.equals(obj);
+      final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData other = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData) obj;
 
       boolean result = true;
       result = result && (getType()
@@ -936,9 +953,8 @@ public final class FisherProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + TYPE_FIELD_NUMBER;
@@ -1028,14 +1044,16 @@ public final class FisherProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -1043,7 +1061,7 @@ public final class FisherProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -1062,7 +1080,8 @@ public final class FisherProtos {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1081,11 +1100,11 @@ public final class FisherProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getAlphaSampleFieldBuilder();
-        }
+                .alwaysUseFieldBuilders)
+			getAlphaSampleFieldBuilder();
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         type_ = 0;
 
@@ -1096,33 +1115,36 @@ public final class FisherProtos {
         if (alphaSampleBuilder_ == null) {
           alphaSample_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000008);
-        } else {
-          alphaSampleBuilder_.clear();
         }
+		else
+			alphaSampleBuilder_.clear();
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.getDefaultInstance();
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData build() {
-        uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData build() {
+        final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData buildPartial() {
-        uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData result = new uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData buildPartial() {
+        final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData result = new uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData(this);
+        final int from_bitField0_ = bitField0_;
+        final int to_bitField0_ = 0;
         result.type_ = type_;
         result.gain_ = gain_;
         result.noise_ = noise_;
@@ -1132,44 +1154,51 @@ public final class FisherProtos {
             bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.alphaSample_ = alphaSample_;
-        } else {
-          result.alphaSample_ = alphaSampleBuilder_.build();
         }
+		else
+			result.alphaSample_ = alphaSampleBuilder_.build();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData) {
-          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData)other);
-        } else {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData)
+			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -1177,15 +1206,12 @@ public final class FisherProtos {
 
       public Builder mergeFrom(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData other) {
         if (other == uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.getDefaultInstance()) return this;
-        if (other.getType() != 0) {
-          setType(other.getType());
-        }
-        if (other.getGain() != 0D) {
-          setGain(other.getGain());
-        }
-        if (other.getNoise() != 0D) {
-          setNoise(other.getNoise());
-        }
+        if (other.getType() != 0)
+			setType(other.getType());
+        if (other.getGain() != 0D)
+			setGain(other.getGain());
+        if (other.getNoise() != 0D)
+			setNoise(other.getNoise());
         if (alphaSampleBuilder_ == null) {
           if (!other.alphaSample_.isEmpty()) {
             if (alphaSample_.isEmpty()) {
@@ -1197,43 +1223,42 @@ public final class FisherProtos {
             }
             onChanged();
           }
-        } else {
-          if (!other.alphaSample_.isEmpty()) {
-            if (alphaSampleBuilder_.isEmpty()) {
+        }
+		else if (!other.alphaSample_.isEmpty())
+			if (alphaSampleBuilder_.isEmpty()) {
               alphaSampleBuilder_.dispose();
               alphaSampleBuilder_ = null;
               alphaSample_ = other.alphaSample_;
               bitField0_ = (bitField0_ & ~0x00000008);
-              alphaSampleBuilder_ = 
+              alphaSampleBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAlphaSampleFieldBuilder() : null;
-            } else {
-              alphaSampleBuilder_.addAllMessages(other.alphaSample_);
             }
-          }
-        }
+			else
+				alphaSampleBuilder_.addAllMessages(other.alphaSample_);
         onChanged();
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -1247,7 +1272,8 @@ public final class FisherProtos {
        *
        * <code>int32 type = 1;</code>
        */
-      public int getType() {
+      @Override
+	public int getType() {
         return type_;
       }
       /**
@@ -1258,7 +1284,7 @@ public final class FisherProtos {
        * <code>int32 type = 1;</code>
        */
       public Builder setType(int value) {
-        
+
         type_ = value;
         onChanged();
         return this;
@@ -1271,7 +1297,7 @@ public final class FisherProtos {
        * <code>int32 type = 1;</code>
        */
       public Builder clearType() {
-        
+
         type_ = 0;
         onChanged();
         return this;
@@ -1285,7 +1311,8 @@ public final class FisherProtos {
        *
        * <code>double gain = 2;</code>
        */
-      public double getGain() {
+      @Override
+	public double getGain() {
         return gain_;
       }
       /**
@@ -1296,7 +1323,7 @@ public final class FisherProtos {
        * <code>double gain = 2;</code>
        */
       public Builder setGain(double value) {
-        
+
         gain_ = value;
         onChanged();
         return this;
@@ -1309,7 +1336,7 @@ public final class FisherProtos {
        * <code>double gain = 2;</code>
        */
       public Builder clearGain() {
-        
+
         gain_ = 0D;
         onChanged();
         return this;
@@ -1323,7 +1350,8 @@ public final class FisherProtos {
        *
        * <code>double noise = 3;</code>
        */
-      public double getNoise() {
+      @Override
+	public double getNoise() {
         return noise_;
       }
       /**
@@ -1334,7 +1362,7 @@ public final class FisherProtos {
        * <code>double noise = 3;</code>
        */
       public Builder setNoise(double value) {
-        
+
         noise_ = value;
         onChanged();
         return this;
@@ -1347,7 +1375,7 @@ public final class FisherProtos {
        * <code>double noise = 3;</code>
        */
       public Builder clearNoise() {
-        
+
         noise_ = 0D;
         onChanged();
         return this;
@@ -1357,7 +1385,7 @@ public final class FisherProtos {
         java.util.Collections.emptyList();
       private void ensureAlphaSampleIsMutable() {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          alphaSample_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample>(alphaSample_);
+          alphaSample_ = new java.util.ArrayList<>(alphaSample_);
           bitField0_ |= 0x00000008;
          }
       }
@@ -1373,12 +1401,12 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
-        if (alphaSampleBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(alphaSample_);
-        } else {
-          return alphaSampleBuilder_.getMessageList();
-        }
+      @Override
+	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample> getAlphaSampleList() {
+        if (alphaSampleBuilder_ == null)
+			return java.util.Collections.unmodifiableList(alphaSample_);
+		else
+			return alphaSampleBuilder_.getMessageList();
       }
       /**
        * <pre>
@@ -1388,12 +1416,12 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public int getAlphaSampleCount() {
-        if (alphaSampleBuilder_ == null) {
-          return alphaSample_.size();
-        } else {
-          return alphaSampleBuilder_.getCount();
-        }
+      @Override
+	public int getAlphaSampleCount() {
+        if (alphaSampleBuilder_ == null)
+			return alphaSample_.size();
+		else
+			return alphaSampleBuilder_.getCount();
       }
       /**
        * <pre>
@@ -1403,12 +1431,12 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
-        if (alphaSampleBuilder_ == null) {
-          return alphaSample_.get(index);
-        } else {
-          return alphaSampleBuilder_.getMessage(index);
-        }
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample getAlphaSample(int index) {
+        if (alphaSampleBuilder_ == null)
+			return alphaSample_.get(index);
+		else
+			return alphaSampleBuilder_.getMessage(index);
       }
       /**
        * <pre>
@@ -1421,15 +1449,14 @@ public final class FisherProtos {
       public Builder setAlphaSample(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample value) {
         if (alphaSampleBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureAlphaSampleIsMutable();
           alphaSample_.set(index, value);
           onChanged();
-        } else {
-          alphaSampleBuilder_.setMessage(index, value);
         }
+		else
+			alphaSampleBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -1446,9 +1473,9 @@ public final class FisherProtos {
           ensureAlphaSampleIsMutable();
           alphaSample_.set(index, builderForValue.build());
           onChanged();
-        } else {
-          alphaSampleBuilder_.setMessage(index, builderForValue.build());
         }
+		else
+			alphaSampleBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -1461,15 +1488,14 @@ public final class FisherProtos {
        */
       public Builder addAlphaSample(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample value) {
         if (alphaSampleBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureAlphaSampleIsMutable();
           alphaSample_.add(value);
           onChanged();
-        } else {
-          alphaSampleBuilder_.addMessage(value);
         }
+		else
+			alphaSampleBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -1483,15 +1509,14 @@ public final class FisherProtos {
       public Builder addAlphaSample(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample value) {
         if (alphaSampleBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureAlphaSampleIsMutable();
           alphaSample_.add(index, value);
           onChanged();
-        } else {
-          alphaSampleBuilder_.addMessage(index, value);
         }
+		else
+			alphaSampleBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -1508,9 +1533,9 @@ public final class FisherProtos {
           ensureAlphaSampleIsMutable();
           alphaSample_.add(builderForValue.build());
           onChanged();
-        } else {
-          alphaSampleBuilder_.addMessage(builderForValue.build());
         }
+		else
+			alphaSampleBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -1527,9 +1552,9 @@ public final class FisherProtos {
           ensureAlphaSampleIsMutable();
           alphaSample_.add(index, builderForValue.build());
           onChanged();
-        } else {
-          alphaSampleBuilder_.addMessage(index, builderForValue.build());
         }
+		else
+			alphaSampleBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -1547,9 +1572,9 @@ public final class FisherProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, alphaSample_);
           onChanged();
-        } else {
-          alphaSampleBuilder_.addAllMessages(values);
         }
+		else
+			alphaSampleBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -1565,9 +1590,9 @@ public final class FisherProtos {
           alphaSample_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
-        } else {
-          alphaSampleBuilder_.clear();
         }
+		else
+			alphaSampleBuilder_.clear();
         return this;
       }
       /**
@@ -1583,9 +1608,9 @@ public final class FisherProtos {
           ensureAlphaSampleIsMutable();
           alphaSample_.remove(index);
           onChanged();
-        } else {
-          alphaSampleBuilder_.remove(index);
         }
+		else
+			alphaSampleBuilder_.remove(index);
         return this;
       }
       /**
@@ -1608,12 +1633,13 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder getAlphaSampleOrBuilder(
           int index) {
-        if (alphaSampleBuilder_ == null) {
-          return alphaSample_.get(index);  } else {
-          return alphaSampleBuilder_.getMessageOrBuilder(index);
-        }
+        if (alphaSampleBuilder_ == null)
+			return alphaSample_.get(index);
+		else
+			return alphaSampleBuilder_.getMessageOrBuilder(index);
       }
       /**
        * <pre>
@@ -1623,13 +1649,13 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+      @Override
+	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
            getAlphaSampleOrBuilderList() {
-        if (alphaSampleBuilder_ != null) {
-          return alphaSampleBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(alphaSample_);
-        }
+        if (alphaSampleBuilder_ != null)
+			return alphaSampleBuilder_.getMessageOrBuilderList();
+		else
+			return java.util.Collections.unmodifiableList(alphaSample_);
       }
       /**
        * <pre>
@@ -1664,16 +1690,15 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.AlphaSample alpha_sample = 4;</code>
        */
-      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder> 
+      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder>
            getAlphaSampleBuilderList() {
         return getAlphaSampleFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder> 
+          uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>
           getAlphaSampleFieldBuilder() {
         if (alphaSampleBuilder_ == null) {
-          alphaSampleBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample.Builder, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSampleOrBuilder>(
+          alphaSampleBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   alphaSample_,
                   ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
@@ -1682,12 +1707,14 @@ public final class FisherProtos {
         }
         return alphaSampleBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1708,7 +1735,8 @@ public final class FisherProtos {
 
     private static final com.google.protobuf.Parser<PoissonFisherInformationData>
         PARSER = new com.google.protobuf.AbstractParser<PoissonFisherInformationData>() {
-      public PoissonFisherInformationData parsePartialFrom(
+      @Override
+	public PoissonFisherInformationData parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1725,7 +1753,8 @@ public final class FisherProtos {
       return PARSER;
     }
 
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1742,7 +1771,7 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> 
+    java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData>
         getDataList();
     /**
      * <pre>
@@ -1767,7 +1796,7 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+    java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
         getDataOrBuilderList();
     /**
      * <pre>
@@ -1812,20 +1841,19 @@ public final class FisherProtos {
       try {
         boolean done = false;
         while (!done) {
-          int tag = input.readTag();
+          final int tag = input.readTag();
           switch (tag) {
             case 0:
               done = true;
               break;
             default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
+              if (!input.skipField(tag))
+				done = true;
               break;
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                data_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData>();
+                data_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               data_.add(
@@ -1834,15 +1862,14 @@ public final class FisherProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
+      } catch (final java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          data_ = java.util.Collections.unmodifiableList(data_);
-        }
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001))
+			data_ = java.util.Collections.unmodifiableList(data_);
         makeExtensionsImmutable();
       }
     }
@@ -1851,7 +1878,8 @@ public final class FisherProtos {
       return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1867,7 +1895,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
+    @Override
+	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
       return data_;
     }
     /**
@@ -1877,7 +1906,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+    @Override
+	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
         getDataOrBuilderList() {
       return data_;
     }
@@ -1888,7 +1918,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public int getDataCount() {
+    @Override
+	public int getDataCount() {
       return data_.size();
     }
     /**
@@ -1898,7 +1929,8 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
       return data_.get(index);
     }
     /**
@@ -1908,14 +1940,16 @@ public final class FisherProtos {
      *
      * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
      */
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
         int index) {
       return data_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
+    @Override
+	public final boolean isInitialized() {
+      final byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
@@ -1923,22 +1957,22 @@ public final class FisherProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < data_.size(); i++) {
-        output.writeMessage(1, data_.get(i));
-      }
+      for (int i = 0; i < data_.size(); i++)
+		output.writeMessage(1, data_.get(i));
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < data_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
+      for (int i = 0; i < data_.size(); i++)
+		size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, data_.get(i));
-      }
       memoizedSize = size;
       return size;
     }
@@ -1946,13 +1980,11 @@ public final class FisherProtos {
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache)) {
-        return super.equals(obj);
-      }
-      uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache other = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache) obj;
+      if (obj == this)
+		return true;
+      if (!(obj instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache))
+		return super.equals(obj);
+      final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache other = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache) obj;
 
       boolean result = true;
       result = result && getDataList()
@@ -1962,9 +1994,8 @@ public final class FisherProtos {
 
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
+      if (memoizedHashCode != 0)
+		return memoizedHashCode;
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (getDataCount() > 0) {
@@ -2046,14 +2077,16 @@ public final class FisherProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -2061,7 +2094,7 @@ public final class FisherProtos {
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
+      final Builder builder = new Builder(parent);
       return builder;
     }
     /**
@@ -2080,7 +2113,8 @@ public final class FisherProtos {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2099,84 +2133,94 @@ public final class FisherProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getDataFieldBuilder();
-        }
+                .alwaysUseFieldBuilders)
+			getDataFieldBuilder();
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         if (dataBuilder_ == null) {
           data_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          dataBuilder_.clear();
         }
+		else
+			dataBuilder_.clear();
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
         return uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache.getDefaultInstance();
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache build() {
-        uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache build() {
+        final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache result = buildPartial();
+        if (!result.isInitialized())
+			throw newUninitializedMessageException(result);
         return result;
       }
 
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache buildPartial() {
-        uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache result = new uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache(this);
-        int from_bitField0_ = bitField0_;
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache buildPartial() {
+        final uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache result = new uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache(this);
+        final int from_bitField0_ = bitField0_;
         if (dataBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001)) {
             data_ = java.util.Collections.unmodifiableList(data_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.data_ = data_;
-        } else {
-          result.data_ = dataBuilder_.build();
         }
+		else
+			result.data_ = dataBuilder_.build();
         onBuilt();
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache) {
-          return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache)other);
-        } else {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache)
+			return mergeFrom((uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache)other);
+		else {
           super.mergeFrom(other);
           return this;
         }
@@ -2195,43 +2239,42 @@ public final class FisherProtos {
             }
             onChanged();
           }
-        } else {
-          if (!other.data_.isEmpty()) {
-            if (dataBuilder_.isEmpty()) {
+        }
+		else if (!other.data_.isEmpty())
+			if (dataBuilder_.isEmpty()) {
               dataBuilder_.dispose();
               dataBuilder_ = null;
               data_ = other.data_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              dataBuilder_ = 
+              dataBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataFieldBuilder() : null;
-            } else {
-              dataBuilder_.addAllMessages(other.data_);
             }
-          }
-        }
+			else
+				dataBuilder_.addAllMessages(other.data_);
         onChanged();
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (final com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+          if (parsedMessage != null)
+			mergeFrom(parsedMessage);
         }
         return this;
       }
@@ -2241,7 +2284,7 @@ public final class FisherProtos {
         java.util.Collections.emptyList();
       private void ensureDataIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          data_ = new java.util.ArrayList<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData>(data_);
+          data_ = new java.util.ArrayList<>(data_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -2256,12 +2299,12 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
-        if (dataBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(data_);
-        } else {
-          return dataBuilder_.getMessageList();
-        }
+      @Override
+	public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData> getDataList() {
+        if (dataBuilder_ == null)
+			return java.util.Collections.unmodifiableList(data_);
+		else
+			return dataBuilder_.getMessageList();
       }
       /**
        * <pre>
@@ -2270,12 +2313,12 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public int getDataCount() {
-        if (dataBuilder_ == null) {
-          return data_.size();
-        } else {
-          return dataBuilder_.getCount();
-        }
+      @Override
+	public int getDataCount() {
+        if (dataBuilder_ == null)
+			return data_.size();
+		else
+			return dataBuilder_.getCount();
       }
       /**
        * <pre>
@@ -2284,12 +2327,12 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
-        if (dataBuilder_ == null) {
-          return data_.get(index);
-        } else {
-          return dataBuilder_.getMessage(index);
-        }
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData getData(int index) {
+        if (dataBuilder_ == null)
+			return data_.get(index);
+		else
+			return dataBuilder_.getMessage(index);
       }
       /**
        * <pre>
@@ -2301,15 +2344,14 @@ public final class FisherProtos {
       public Builder setData(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData value) {
         if (dataBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDataIsMutable();
           data_.set(index, value);
           onChanged();
-        } else {
-          dataBuilder_.setMessage(index, value);
         }
+		else
+			dataBuilder_.setMessage(index, value);
         return this;
       }
       /**
@@ -2325,9 +2367,9 @@ public final class FisherProtos {
           ensureDataIsMutable();
           data_.set(index, builderForValue.build());
           onChanged();
-        } else {
-          dataBuilder_.setMessage(index, builderForValue.build());
         }
+		else
+			dataBuilder_.setMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -2339,15 +2381,14 @@ public final class FisherProtos {
        */
       public Builder addData(uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData value) {
         if (dataBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDataIsMutable();
           data_.add(value);
           onChanged();
-        } else {
-          dataBuilder_.addMessage(value);
         }
+		else
+			dataBuilder_.addMessage(value);
         return this;
       }
       /**
@@ -2360,15 +2401,14 @@ public final class FisherProtos {
       public Builder addData(
           int index, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData value) {
         if (dataBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
+          if (value == null)
+			throw new NullPointerException();
           ensureDataIsMutable();
           data_.add(index, value);
           onChanged();
-        } else {
-          dataBuilder_.addMessage(index, value);
         }
+		else
+			dataBuilder_.addMessage(index, value);
         return this;
       }
       /**
@@ -2384,9 +2424,9 @@ public final class FisherProtos {
           ensureDataIsMutable();
           data_.add(builderForValue.build());
           onChanged();
-        } else {
-          dataBuilder_.addMessage(builderForValue.build());
         }
+		else
+			dataBuilder_.addMessage(builderForValue.build());
         return this;
       }
       /**
@@ -2402,9 +2442,9 @@ public final class FisherProtos {
           ensureDataIsMutable();
           data_.add(index, builderForValue.build());
           onChanged();
-        } else {
-          dataBuilder_.addMessage(index, builderForValue.build());
         }
+		else
+			dataBuilder_.addMessage(index, builderForValue.build());
         return this;
       }
       /**
@@ -2421,9 +2461,9 @@ public final class FisherProtos {
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
               values, data_);
           onChanged();
-        } else {
-          dataBuilder_.addAllMessages(values);
         }
+		else
+			dataBuilder_.addAllMessages(values);
         return this;
       }
       /**
@@ -2438,9 +2478,9 @@ public final class FisherProtos {
           data_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
-        } else {
-          dataBuilder_.clear();
         }
+		else
+			dataBuilder_.clear();
         return this;
       }
       /**
@@ -2455,9 +2495,9 @@ public final class FisherProtos {
           ensureDataIsMutable();
           data_.remove(index);
           onChanged();
-        } else {
-          dataBuilder_.remove(index);
         }
+		else
+			dataBuilder_.remove(index);
         return this;
       }
       /**
@@ -2478,12 +2518,13 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
+      @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder getDataOrBuilder(
           int index) {
-        if (dataBuilder_ == null) {
-          return data_.get(index);  } else {
-          return dataBuilder_.getMessageOrBuilder(index);
-        }
+        if (dataBuilder_ == null)
+			return data_.get(index);
+		else
+			return dataBuilder_.getMessageOrBuilder(index);
       }
       /**
        * <pre>
@@ -2492,13 +2533,13 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+      @Override
+	public java.util.List<? extends uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
            getDataOrBuilderList() {
-        if (dataBuilder_ != null) {
-          return dataBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(data_);
-        }
+        if (dataBuilder_ != null)
+			return dataBuilder_.getMessageOrBuilderList();
+		else
+			return java.util.Collections.unmodifiableList(data_);
       }
       /**
        * <pre>
@@ -2530,16 +2571,15 @@ public final class FisherProtos {
        *
        * <code>repeated .uk.ac.sussex.gdsc.smlm.data.config.PoissonFisherInformationData data = 1;</code>
        */
-      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder> 
+      public java.util.List<uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder>
            getDataBuilderList() {
         return getDataFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder> 
+          uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>
           getDataFieldBuilder() {
         if (dataBuilder_ == null) {
-          dataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData.Builder, uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationDataOrBuilder>(
+          dataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   data_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -2548,12 +2588,14 @@ public final class FisherProtos {
         }
         return dataBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -2574,7 +2616,8 @@ public final class FisherProtos {
 
     private static final com.google.protobuf.Parser<PoissonFisherInformationCache>
         PARSER = new com.google.protobuf.AbstractParser<PoissonFisherInformationCache>() {
-      public PoissonFisherInformationCache parsePartialFrom(
+      @Override
+	public PoissonFisherInformationCache parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2591,7 +2634,8 @@ public final class FisherProtos {
       return PARSER;
     }
 
-    public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
+    @Override
+	public uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2599,17 +2643,17 @@ public final class FisherProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_uk_ac_sussex_gdsc_smlm_data_config_AlphaSample_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationData_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_uk_ac_sussex_gdsc_smlm_data_config_PoissonFisherInformationCache_fieldAccessorTable;
 
@@ -2620,7 +2664,7 @@ public final class FisherProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    final java.lang.String[] descriptorData = {
       "\n\014fisher.proto\022\"uk.ac.sussex.gdsc.smlm.d" +
       "ata.config\"1\n\013AlphaSample\022\023\n\013log_10_mean" +
       "\030\001 \001(\001\022\r\n\005alpha\030\002 \001(\001\"\220\001\n\034PoissonFisherI" +
@@ -2632,9 +2676,10 @@ public final class FisherProtos {
       ".data.config.PoissonFisherInformationDat" +
       "aB\016B\014FisherProtosb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+    final com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

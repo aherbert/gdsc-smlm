@@ -4515,7 +4515,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		if (newFilterScore.compareTo(currentOptimum) <= 0)
 			return newFilterScore;
-		
+
 		// Update the algorithm and time
 		currentOptimum.paramAlgorithm = algorithm;
 		currentOptimum.paramTime = analysisStopWatch.getTime();

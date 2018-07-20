@@ -108,7 +108,7 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 
 			return y;
 		}
-		
+
 		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
 		dy_da[0] = n * exp;
 		final double y = height * exp;

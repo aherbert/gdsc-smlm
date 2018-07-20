@@ -52,7 +52,6 @@ public class GradientCalculatorFactory
 	public static GradientCalculator newCalculator(int nparams, boolean mle)
 	{
 		if (mle)
-		{
 			switch (nparams)
 			{
 				case 4:
@@ -81,7 +80,6 @@ public class GradientCalculatorFactory
 				default:
 					return new MLEGradientCalculator(nparams);
 			}
-		}
 
 		switch (nparams)
 		{

@@ -574,7 +574,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	// Set the debug flag
 	private final static boolean debug = System.getProperty("uk.ac.sussex.gdsc.smlm.debug") != null;
-	
+
 	private void analyse()
 	{
 		final CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
