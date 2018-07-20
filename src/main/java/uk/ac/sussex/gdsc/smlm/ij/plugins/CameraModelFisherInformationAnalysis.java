@@ -573,7 +573,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	}
 
 	// Set the debug flag
-	private final static boolean debug = System.getProperty("uk.ac.sussex.gdsc.smlm.debug") != null;
+	private final static boolean debug = System.getProperty("gdsc.smlm.debug") != null;
 
 	private void analyse()
 	{

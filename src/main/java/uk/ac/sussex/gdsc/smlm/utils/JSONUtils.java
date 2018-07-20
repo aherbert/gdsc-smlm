@@ -28,6 +28,9 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public class JSONUtils
 {
+	//** Allowed characters */
+	private static final char[] ALLOWED = { '-', '_' };
+
 	/**
 	 * Simplify the JSON string. Removes redundant double quotes around fields, e.g. if they have only letters or
 	 * digits.
@@ -95,9 +98,17 @@ public class JSONUtils
 
 	private static boolean canSimplify(char[] chars, int start, int end)
 	{
-		for (int j = start; j < end; j++)
-			if (!Character.isLetterOrDigit(chars[j]))
+		OUTER: for (int j = start; j < end; j++)
+		{
+			if (Character.isWhitespace(chars[j]))
 				return false;
+			if (Character.isLetterOrDigit(chars[j]))
+				continue;
+			for (int i = 0; i < ALLOWED.length; i++)
+				if (chars[j] == ALLOWED[i])
+					continue OUTER;
+			return false;
+		}
 		return true;
 	}
 }

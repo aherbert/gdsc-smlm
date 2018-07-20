@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.utils.JSONUtils;
+import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 
 @SuppressWarnings({ "javadoc" })
@@ -44,9 +45,10 @@ public class PSFProtosTest
 	@Test
 	public void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException
 	{
+		final LogLevel logLevel = LogLevel.DEBUG;
 		final PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();
 		final PSFParameter.Builder psfParamBuilder = PSFProtos.PSFParameter.newBuilder();
-		psfBuilder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+		psfBuilder.setPsfType(PSFType.CUSTOM);
 		psfParamBuilder.setName("X\"SD");
 		psfParamBuilder.setUnit(PSFParameterUnit.DISTANCE);
 		psfParamBuilder.setValue(1.1);
@@ -60,11 +62,19 @@ public class PSFProtosTest
 		psfParamBuilder.clearValue();
 		psfBuilder.addParameters(psfParamBuilder);
 
+		// Test weird characters
+		psfParamBuilder.setName("other-char");
+		psfBuilder.addParameters(psfParamBuilder);
+		psfParamBuilder.setName("other{char");
+		psfBuilder.addParameters(psfParamBuilder);
+		psfParamBuilder.setName("other_char");
+		psfBuilder.addParameters(psfParamBuilder);
+
 		// Standard string
 		final String e = psfBuilder.toString();
 		final PSFProtos.PSF psf = psfBuilder.build();
 		final String o = psf.toString();
-		TestLog.debugln(o);
+		TestLog.logln(logLevel, o);
 		Assert.assertEquals(e, o);
 
 		psfBuilder.clear();
@@ -73,7 +83,7 @@ public class PSFProtosTest
 
 		// Short string
 		final String o2 = TextFormat.shortDebugString(psf);
-		TestLog.debugln(o2);
+		TestLog.logln(logLevel, o2);
 
 		psfBuilder.clear();
 		TextFormat.merge(o2, psfBuilder);
@@ -82,9 +92,9 @@ public class PSFProtosTest
 		// JSON
 		final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 		String json = printer.print(psf);
-		TestLog.debugln(json);
+		TestLog.logln(logLevel, json);
 		json = JSONUtils.simplify(json);
-		TestLog.debugln(json);
+		TestLog.logln(logLevel, json);
 
 		psfBuilder.clear();
 		JsonFormat.parser().merge(json, psfBuilder);

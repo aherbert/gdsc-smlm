@@ -28,95 +28,95 @@ package uk.ac.sussex.gdsc.smlm.ij.settings;
  */
 public class Constants
 {
-    /** uk.ac.sussex.gdsc.smlm.settingsFilename */
-    public static final String settingsFilename = "uk.ac.sussex.gdsc.smlm.settingsFilename";
-    /** uk.ac.sussex.gdsc.smlm.settingsDirectory */
-    public static final String settingsDirectory = "uk.ac.sussex.gdsc.smlm.settingsDirectory";
+	/** gdsc.smlm.settingsFilename */
+	public static final String settingsFilename = "gdsc.smlm.settingsFilename";
+	/** gdsc.smlm.settingsDirectory */
+	public static final String settingsDirectory = "gdsc.smlm.settingsDirectory";
 
-    // -=-=-=-
-    // Used in the GaussianFit class
-    // -=-=-=-
+	// -=-=-=-
+	// Used in the GaussianFit class
+	// -=-=-=-
 
-    /** uk.ac.sussex.gdsc.smlm.smooth */
-    public static final String smooth = "uk.ac.sussex.gdsc.smlm.smooth";
-    /** uk.ac.sussex.gdsc.smlm.boxSize */
-    public static final String boxSize = "uk.ac.sussex.gdsc.smlm.boxSize";
-    /** uk.ac.sussex.gdsc.smlm.boxSize2 */
-    public static final String boxSize2 = "uk.ac.sussex.gdsc.smlm.boxSize2";
-    /** uk.ac.sussex.gdsc.smlm.background */
-    public static final String background = "uk.ac.sussex.gdsc.smlm.background";
-    /** uk.ac.sussex.gdsc.smlm.peakHeight */
-    public static final String peakHeight = "uk.ac.sussex.gdsc.smlm.peakHeight";
-    /** uk.ac.sussex.gdsc.smlm.fractionAboveBackground */
-    public static final String fractionAboveBackground = "uk.ac.sussex.gdsc.smlm.fractionAboveBackground";
-    /** uk.ac.sussex.gdsc.smlm.peakWidth */
-    public static final String peakWidth = "uk.ac.sussex.gdsc.smlm.peakWidth";
-    /** uk.ac.sussex.gdsc.smlm.topN */
-    public static final String topN = "uk.ac.sussex.gdsc.smlm.topN";
-    /** uk.ac.sussex.gdsc.smlm.blockFindAlgorithm */
-    public static final String blockFindAlgorithm = "uk.ac.sussex.gdsc.smlm.blockFindAlgorithm";
-    /** uk.ac.sussex.gdsc.smlm.neighbourCheck */
-    public static final String neighbourCheck = "uk.ac.sussex.gdsc.smlm.neighbourCheck";
-    /** uk.ac.sussex.gdsc.smlm.border */
-    public static final String border = "uk.ac.sussex.gdsc.smlm.border";
-    /** uk.ac.sussex.gdsc.smlm.fitFunction */
-    public static final String fitFunction = "uk.ac.sussex.gdsc.smlm.fitFunction";
-    /** uk.ac.sussex.gdsc.smlm.fitBackground */
-    public static final String fitBackground = "uk.ac.sussex.gdsc.smlm.fitBackground";
-    /** uk.ac.sussex.gdsc.smlm.fitCriteria */
-    public static final String fitCriteria = "uk.ac.sussex.gdsc.smlm.fitCriteria";
-    /** uk.ac.sussex.gdsc.smlm.logProgress */
-    public static final String logProgress = "uk.ac.sussex.gdsc.smlm.logProgress";
-    /** uk.ac.sussex.gdsc.smlm.maxIterations */
-    public static final String maxIterations = "uk.ac.sussex.gdsc.smlm.maxIterations";
-    /** uk.ac.sussex.gdsc.smlm.relativeThreshold */
-    public static final String relativeThreshold = "uk.ac.sussex.gdsc.smlm.relativeThreshold";
-    /** uk.ac.sussex.gdsc.smlm.absoluteThreshold */
-    public static final String absoluteThreshold = "uk.ac.sussex.gdsc.smlm.absoluteThreshold";
-    /** uk.ac.sussex.gdsc.smlm.singleFit */
-    public static final String singleFit = "uk.ac.sussex.gdsc.smlm.singleFit";
-    /** uk.ac.sussex.gdsc.smlm.singleRegionSize */
-    public static final String singleRegionSize = "uk.ac.sussex.gdsc.smlm.singleRegionSize";
-    /** uk.ac.sussex.gdsc.smlm.initialPeakStdDev0 */
-    public static final String initialPeakStdDev0 = "uk.ac.sussex.gdsc.smlm.initialPeakStdDev0";
-    /** uk.ac.sussex.gdsc.smlm.showDeviations */
-    public static final String showDeviations = "uk.ac.sussex.gdsc.smlm.showDeviations";
-    /** uk.ac.sussex.gdsc.smlm.filterResults */
-    public static final String filterResults = "uk.ac.sussex.gdsc.smlm.filterResults";
-    /** uk.ac.sussex.gdsc.smlm.showFit */
-    public static final String showFit = "uk.ac.sussex.gdsc.smlm.showFit";
-    // -=-=-=-
+	/** gdsc.smlm.smooth */
+	public static final String smooth = "gdsc.smlm.smooth";
+	/** gdsc.smlm.boxSize */
+	public static final String boxSize = "gdsc.smlm.boxSize";
+	/** gdsc.smlm.boxSize2 */
+	public static final String boxSize2 = "gdsc.smlm.boxSize2";
+	/** gdsc.smlm.background */
+	public static final String background = "gdsc.smlm.background";
+	/** gdsc.smlm.peakHeight */
+	public static final String peakHeight = "gdsc.smlm.peakHeight";
+	/** gdsc.smlm.fractionAboveBackground */
+	public static final String fractionAboveBackground = "gdsc.smlm.fractionAboveBackground";
+	/** gdsc.smlm.peakWidth */
+	public static final String peakWidth = "gdsc.smlm.peakWidth";
+	/** gdsc.smlm.topN */
+	public static final String topN = "gdsc.smlm.topN";
+	/** gdsc.smlm.blockFindAlgorithm */
+	public static final String blockFindAlgorithm = "gdsc.smlm.blockFindAlgorithm";
+	/** gdsc.smlm.neighbourCheck */
+	public static final String neighbourCheck = "gdsc.smlm.neighbourCheck";
+	/** gdsc.smlm.border */
+	public static final String border = "gdsc.smlm.border";
+	/** gdsc.smlm.fitFunction */
+	public static final String fitFunction = "gdsc.smlm.fitFunction";
+	/** gdsc.smlm.fitBackground */
+	public static final String fitBackground = "gdsc.smlm.fitBackground";
+	/** gdsc.smlm.fitCriteria */
+	public static final String fitCriteria = "gdsc.smlm.fitCriteria";
+	/** gdsc.smlm.logProgress */
+	public static final String logProgress = "gdsc.smlm.logProgress";
+	/** gdsc.smlm.maxIterations */
+	public static final String maxIterations = "gdsc.smlm.maxIterations";
+	/** gdsc.smlm.relativeThreshold */
+	public static final String relativeThreshold = "gdsc.smlm.relativeThreshold";
+	/** gdsc.smlm.absoluteThreshold */
+	public static final String absoluteThreshold = "gdsc.smlm.absoluteThreshold";
+	/** gdsc.smlm.singleFit */
+	public static final String singleFit = "gdsc.smlm.singleFit";
+	/** gdsc.smlm.singleRegionSize */
+	public static final String singleRegionSize = "gdsc.smlm.singleRegionSize";
+	/** gdsc.smlm.initialPeakStdDev0 */
+	public static final String initialPeakStdDev0 = "gdsc.smlm.initialPeakStdDev0";
+	/** gdsc.smlm.showDeviations */
+	public static final String showDeviations = "gdsc.smlm.showDeviations";
+	/** gdsc.smlm.filterResults */
+	public static final String filterResults = "gdsc.smlm.filterResults";
+	/** gdsc.smlm.showFit */
+	public static final String showFit = "gdsc.smlm.showFit";
+	// -=-=-=-
 
-    /** uk.ac.sussex.gdsc.smlm.algorithm */
-    public static final String algorithm = "uk.ac.sussex.gdsc.smlm.algorithm";
+	/** gdsc.smlm.algorithm */
+	public static final String algorithm = "gdsc.smlm.algorithm";
 
-    /** uk.ac.sussex.gdsc.smlm.inputFilename */
-    public static final String inputFilename = "uk.ac.sussex.gdsc.smlm.inputFilename";
+	/** gdsc.smlm.inputFilename */
+	public static final String inputFilename = "gdsc.smlm.inputFilename";
 
-    /** uk.ac.sussex.gdsc.smlm.nmPerPixel */
-    public static final String inputNmPerPixel = "uk.ac.sussex.gdsc.smlm.nmPerPixel";
-    /** uk.ac.sussex.gdsc.smlm.gain */
-    public static final String inputGain = "uk.ac.sussex.gdsc.smlm.gain";
-    /** uk.ac.sussex.gdsc.smlm.exposureTime */
-    public static final String inputExposureTime = "uk.ac.sussex.gdsc.smlm.exposureTime";
-    /** uk.ac.sussex.gdsc.smlm.noise */
-    public static final String inputNoise = "uk.ac.sussex.gdsc.smlm.noise";
+	/** gdsc.smlm.nmPerPixel */
+	public static final String inputNmPerPixel = "gdsc.smlm.nmPerPixel";
+	/** gdsc.smlm.gain */
+	public static final String inputGain = "gdsc.smlm.gain";
+	/** gdsc.smlm.exposureTime */
+	public static final String inputExposureTime = "gdsc.smlm.exposureTime";
+	/** gdsc.smlm.noise */
+	public static final String inputNoise = "gdsc.smlm.noise";
 
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesMode */
-    public static final String tiffSeriesMode = "uk.ac.sussex.gdsc.smlm.tiffSeriesMode";
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesDirectory */
-    public static final String tiffSeriesDirectory = "uk.ac.sussex.gdsc.smlm.tiffSeriesDirectory";
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesFile */
-    public static final String tiffSeriesFile = "uk.ac.sussex.gdsc.smlm.tiffSeriesFile";
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesLogProgress */
-    public static final String tiffSeriesLogProgress = "uk.ac.sussex.gdsc.smlm.tiffSeriesLogProgress";
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesOutputMode */
-    public static final String tiffSeriesOutputMode = "uk.ac.sussex.gdsc.smlm.tiffSeriesOutputMode";
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesOutputNImages */
-    public static final String tiffSeriesOutputNImages = "uk.ac.sussex.gdsc.smlm.tiffSeriesOutputNImages";
-    /** uk.ac.sussex.gdsc.smlm.tiffSeriesOutputDirectory */
-    public static final String tiffSeriesOutputDirectory = "uk.ac.sussex.gdsc.smlm.tiffSeriesOutputDirectory";
+	/** gdsc.smlm.tiffSeriesMode */
+	public static final String tiffSeriesMode = "gdsc.smlm.tiffSeriesMode";
+	/** gdsc.smlm.tiffSeriesDirectory */
+	public static final String tiffSeriesDirectory = "gdsc.smlm.tiffSeriesDirectory";
+	/** gdsc.smlm.tiffSeriesFile */
+	public static final String tiffSeriesFile = "gdsc.smlm.tiffSeriesFile";
+	/** gdsc.smlm.tiffSeriesLogProgress */
+	public static final String tiffSeriesLogProgress = "gdsc.smlm.tiffSeriesLogProgress";
+	/** gdsc.smlm.tiffSeriesOutputMode */
+	public static final String tiffSeriesOutputMode = "gdsc.smlm.tiffSeriesOutputMode";
+	/** gdsc.smlm.tiffSeriesOutputNImages */
+	public static final String tiffSeriesOutputNImages = "gdsc.smlm.tiffSeriesOutputNImages";
+	/** gdsc.smlm.tiffSeriesOutputDirectory */
+	public static final String tiffSeriesOutputDirectory = "gdsc.smlm.tiffSeriesOutputDirectory";
 
-    /** uk.ac.sussex.gdsc.smlm.sCMOSAnalysisDirectory */
-    public static final String sCMOSAnalysisDirectory = "uk.ac.sussex.gdsc.smlm.sCMOSAnalysisDirectory";
+	/** gdsc.smlm.sCMOSAnalysisDirectory */
+	public static final String sCMOSAnalysisDirectory = "gdsc.smlm.sCMOSAnalysisDirectory";
 }

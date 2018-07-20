@@ -104,9 +104,9 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 public class SettingsManager
 {
 	private static final String DEFAULT_FILENAME = System.getProperty("user.home") +
-			System.getProperty("file.separator") + "uk.ac.sussex.gdsc.smlm.settings.xml";
+			System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
 	private static final String DEFAULT_DIRECTORY = System.getProperty("user.home") +
-			System.getProperty("file.separator") + ".uk.ac.sussex.gdsc.smlm";
+			System.getProperty("file.separator") + ".gdsc.smlm";
 
 	/** Use this to suppress warnings. */
 	public static final int FLAG_SILENT = 0x00000001;

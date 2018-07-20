@@ -552,9 +552,13 @@ public class PeakResultsReader
 		{
 			getHeader();
 			configuration = getField("Configuration");
-			if (configuration != null && configuration.length() > 0)
-				// Format the XML back
+			if (configuration != null && configuration.length() > 0 && configuration.charAt(0) == '<')
+			{
+				// Format the XML back.
+				// This is only relevant for configuration serialised as XML.
+				// The GDSC SMLM configuration is now a JSON string.
 				configuration = uk.ac.sussex.gdsc.core.utils.XmlUtils.formatXml(configuration);
+			}
 		}
 		return configuration;
 	}

@@ -107,7 +107,9 @@ public class ShowResultsHeader implements PlugIn
 		if (data == null)
 			return false;
 		String text = (data instanceof String) ? (String) data : XmlUtils.toXML(data);
-		if (text.startsWith("<"))
+		if (text.startsWith("{"))
+			text = uk.ac.sussex.gdsc.smlm.utils.JSONUtils.simplify(text);
+		else if (text.startsWith("<"))
 			text = uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(text);
 		Utils.log("%s: %s", title, text);
 		return true;
