@@ -1,3 +1,4 @@
+package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 /*-
  * #%L
@@ -28,9 +29,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
-import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.plugin.PlugIn;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 
 /**
  * A simple class used to test plugin functionality
