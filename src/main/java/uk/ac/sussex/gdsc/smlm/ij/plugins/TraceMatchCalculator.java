@@ -34,10 +34,10 @@ import org.apache.commons.math3.util.FastMath;
 
 import ij.IJ;
 import ij.WindowManager;
-import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.MatchResult;

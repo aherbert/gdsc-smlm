@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import org.jtransforms.dht.FloatDHT_2D;
 import org.jtransforms.utils.CommonUtils;
 
-import ij.process.FHT2;
+import uk.ac.sussex.gdsc.core.ij.process.FHT2;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;

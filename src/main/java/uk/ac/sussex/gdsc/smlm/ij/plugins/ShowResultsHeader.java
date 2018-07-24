@@ -27,9 +27,9 @@ import com.google.protobuf.Message;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
 import uk.ac.sussex.gdsc.smlm.utils.XmlUtils;

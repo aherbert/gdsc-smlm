@@ -43,9 +43,9 @@ import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
@@ -594,7 +594,7 @@ public class FilterAnalysis implements PlugIn
 			final PlotWindow plotWindow = Utils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}
-		new WindowOrganiser().tileWindows(list);
+		WindowOrganiser.tileWindows(list);
 	}
 
 	private void calculateSensitivity(List<MemoryPeakResults> resultsList)

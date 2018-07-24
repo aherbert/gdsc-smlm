@@ -42,17 +42,17 @@ import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.FastMath;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.ij.IJLogger;
 import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -488,7 +488,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (idCount > 0)
 		{
 			idList = Arrays.copyOf(idList, idCount);
-			new WindowOrganiser().tileWindows(idList);
+			WindowOrganiser.tileWindows(idList);
 		}
 	}
 

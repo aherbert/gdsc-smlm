@@ -35,9 +35,9 @@ import org.apache.commons.math3.random.Well19937c;
 
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;

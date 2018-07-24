@@ -36,13 +36,13 @@ import org.apache.commons.math3.stat.inference.TestUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.Roi;
-import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -710,7 +710,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				requireRetile = requireRetile || Utils.isNewWindow();
 			}
 			if (requireRetile && count > 0)
-				new WindowOrganiser().tileWindows(Arrays.copyOf(idList, count));
+				WindowOrganiser.tileWindows(Arrays.copyOf(idList, count));
 		}
 
 		if (size() < 2)

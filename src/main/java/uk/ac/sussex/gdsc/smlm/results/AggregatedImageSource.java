@@ -53,6 +53,8 @@ public class AggregatedImageSource extends ImageSource
 	 *            The image source to aggregate (must not be null)
 	 * @param aggregate
 	 *            The number of frames to aggregate (must be above 1)
+	 * @throws IllegalArgumentException
+	 *             If the image is null or {@code aggregate} is not above 1.
 	 */
 	public AggregatedImageSource(ImageSource imageSource, int aggregate)
 	{
@@ -60,7 +62,7 @@ public class AggregatedImageSource extends ImageSource
 		if (imageSource == null)
 			throw new IllegalArgumentException("Image source must not be null");
 		if (aggregate < 2)
-			throw new IllegalArgumentException("The number of frames to aggregate ({0}) must be above 1");
+			throw new IllegalArgumentException("The number of frames to aggregate (" + aggregate + ") must be above 1");
 		setName("Aggregated (" + aggregate + ") " + imageSource.getName());
 		this.imageSource = imageSource;
 		this.aggregate = aggregate;

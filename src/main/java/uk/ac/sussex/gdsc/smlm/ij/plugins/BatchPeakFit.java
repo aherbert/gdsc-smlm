@@ -59,10 +59,10 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.ExtendedGenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;

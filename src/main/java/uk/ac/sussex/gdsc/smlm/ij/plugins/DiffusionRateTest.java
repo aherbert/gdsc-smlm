@@ -45,11 +45,11 @@ import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.RollingArray;
@@ -498,7 +498,7 @@ public class DiffusionRateTest implements PlugIn
 		//plotJumpDistances(TITLE + " total", totalJumpDistances3D, 3, totalSteps);
 
 		if (idCount > 0)
-			new WindowOrganiser().tileWindows(idList);
+			WindowOrganiser.tileWindows(idList);
 
 		if (useConfinement)
 			Utils.log("3D asymptote distance = %s nm (expected %.2f)",
@@ -1267,7 +1267,7 @@ public class DiffusionRateTest implements PlugIn
 		}
 
 		if (idCount > 0)
-			new WindowOrganiser().tileWindows(idList);
+			WindowOrganiser.tileWindows(idList);
 	}
 
 	private static boolean showSimpleDialog()

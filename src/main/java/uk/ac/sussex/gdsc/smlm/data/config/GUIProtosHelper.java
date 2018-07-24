@@ -25,9 +25,9 @@ package uk.ac.sussex.gdsc.smlm.data.config;
 
 import java.io.File;
 
-import ij.process.LUTHelper.LutColour;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.optics.SampleMode;
+import uk.ac.sussex.gdsc.core.ij.process.LUTHelper.LutColour;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;

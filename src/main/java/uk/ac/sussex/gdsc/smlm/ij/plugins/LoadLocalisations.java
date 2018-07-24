@@ -31,12 +31,12 @@ import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;

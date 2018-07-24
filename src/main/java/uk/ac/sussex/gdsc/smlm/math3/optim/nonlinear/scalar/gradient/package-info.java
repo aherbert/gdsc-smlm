@@ -24,9 +24,9 @@
 
 /**
  * Extend the functionality of the <a href="http://commons.apache.org/proper/commons-math/">
- * Apache Commons Math</a> {@code org.apache.commons.math3.optim.nonlinear.scalar.gradient} package.
+ * Apache Commons Math</a> {@link org.apache.commons.math3.optim.nonlinear.scalar.gradient} package.
  *
  * @see <a href="http://commons.apache.org/proper/commons-math/">Apache Commons Math</a>
  * @since 1.0.0
  */
-package org.apache.commons.math3.optim.nonlinear.scalar.gradient;
+package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient;

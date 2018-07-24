@@ -36,7 +36,6 @@ import org.scijava.vecmath.Point3f;
 
 import customnode.CustomMesh;
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GUI;
 import ij.plugin.PlugIn;
 import ij3d.ContentInstant;
@@ -44,6 +43,7 @@ import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.CustomContent;

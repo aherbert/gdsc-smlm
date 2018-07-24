@@ -59,7 +59,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
@@ -78,6 +77,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.

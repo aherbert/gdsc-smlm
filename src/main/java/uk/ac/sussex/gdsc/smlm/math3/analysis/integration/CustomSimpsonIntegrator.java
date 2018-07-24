@@ -21,8 +21,9 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package org.apache.commons.math3.analysis.integration;
+package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
@@ -127,7 +128,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 
 		// Simpson's rule requires at least two trapezoid stages.
 		// So we set the first sum using two trapezoid stages.
-		final TrapezoidIntegrator qtrap = new TrapezoidIntegrator();
+		final TrapezoidIntegratorCopy qtrap = new TrapezoidIntegratorCopy();
 
 		//		if (getMinimalIterationCount() == 1)
 		//		{
@@ -167,6 +168,24 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 			olds = s;
 			oldt = t;
 		}
+	}
+
+	@Override
+	public double getMax()
+	{
+		return super.getMax();
+	}
+
+	@Override
+	public double getMin()
+	{
+		return super.getMin();
+	}
+
+	@Override
+	public double computeObjectiveValue(double point) throws TooManyEvaluationsException
+	{
+		return super.computeObjectiveValue(point);
 	}
 
 	/**

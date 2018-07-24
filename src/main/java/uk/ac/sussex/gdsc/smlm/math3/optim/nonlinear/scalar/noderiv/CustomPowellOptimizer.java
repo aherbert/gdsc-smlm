@@ -37,7 +37,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.math3.optim.nonlinear.scalar.noderiv;
+package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv;
 
 import java.util.Arrays;
 
@@ -50,7 +50,6 @@ import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.BracketFinder;
@@ -62,6 +61,7 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 
 /**
  * Powell's algorithm.

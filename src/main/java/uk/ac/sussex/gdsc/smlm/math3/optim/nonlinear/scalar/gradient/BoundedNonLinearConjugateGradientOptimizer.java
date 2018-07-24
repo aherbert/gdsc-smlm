@@ -39,7 +39,7 @@
  * limitations under the License.
  */
 
-package org.apache.commons.math3.optim.nonlinear.scalar.gradient;
+package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
@@ -61,6 +61,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.Preconditioner;
 import org.apache.commons.math3.optim.univariate.BracketFinder;
 import org.apache.commons.math3.optim.univariate.BrentOptimizer;
 import org.apache.commons.math3.optim.univariate.SearchInterval;

@@ -37,8 +37,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.math3.distribution;
+package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
+import org.apache.commons.math3.distribution.AbstractIntegerDistribution;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -294,7 +297,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 		else if (x == 0)
 			ret = -mean;
 		else
-			ret = -SaddlePointExpansion.getStirlingError(x) - SaddlePointExpansion.getDeviancePart(x, mean) -
+			ret = -SaddlePointExpansionCopy.getStirlingError(x) - SaddlePointExpansionCopy.getDeviancePart(x, mean) -
 					0.5 * FastMath.log(MathUtils.TWO_PI) - 0.5 * FastMath.log(x);
 		return ret;
 	}

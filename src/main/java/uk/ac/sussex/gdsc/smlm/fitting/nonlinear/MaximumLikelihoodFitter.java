@@ -40,12 +40,8 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
@@ -58,6 +54,10 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
 import uk.ac.sussex.gdsc.smlm.function.PoissonLikelihoodWrapper;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 
 /**
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a

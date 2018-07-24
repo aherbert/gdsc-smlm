@@ -29,9 +29,9 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.util.FastMath;
 import org.jtransforms.fft.FloatFFT_2D;
 
-import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import uk.ac.sussex.gdsc.core.ij.process.FHT2;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.RadialStatistics;

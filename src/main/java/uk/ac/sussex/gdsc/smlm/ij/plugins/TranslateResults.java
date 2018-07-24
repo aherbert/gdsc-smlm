@@ -24,10 +24,10 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;

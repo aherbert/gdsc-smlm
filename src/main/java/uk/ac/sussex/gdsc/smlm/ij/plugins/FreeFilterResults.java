@@ -28,9 +28,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;

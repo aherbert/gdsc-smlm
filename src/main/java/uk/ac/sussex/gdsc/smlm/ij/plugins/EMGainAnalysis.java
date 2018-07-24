@@ -29,7 +29,6 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -39,7 +38,6 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
@@ -64,6 +62,8 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFunction2;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 
 /**

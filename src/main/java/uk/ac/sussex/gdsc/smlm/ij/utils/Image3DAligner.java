@@ -30,12 +30,10 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
 import ij.ImageStack;
 import ij.process.ImageProcessor;
@@ -47,6 +45,8 @@ import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
 /**
  * Perform 3D image alignment using normalised cross-correlation.

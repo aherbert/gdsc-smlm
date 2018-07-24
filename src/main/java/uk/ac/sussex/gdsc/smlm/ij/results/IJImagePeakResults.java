@@ -29,18 +29,18 @@ import java.util.Arrays;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.InfinityMappedImageStack;
-import ij.MappedImageStack;
 import ij.WindowManager;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import ij.process.InfinityMappedFloatProcessor;
-import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
+import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
+import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.process.InfinityMappedFloatProcessor;
+import uk.ac.sussex.gdsc.core.ij.process.MappedFloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.SimpleLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -1191,7 +1191,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	}
 
 	/**
-	 * Update the image. Calls {@link #drawImage()} if the image is live and the next repaint size has been achieved,
+	 * Update the image if the image is live and the next repaint size has been achieved,
 	 * otherwise does nothing.
 	 */
 	protected void updateImage()

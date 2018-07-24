@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
@@ -62,14 +62,14 @@ public class ImageConverterTest
 	{
 		final Rectangle bounds = null;
 		final float[] fe = fdata;
-		Assert.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null), 0);
+		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
 		// Check the double format
 		final double[] de = SimpleArrayUtils.toDouble(fe);
-		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
+		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
 	}
 
 	@Test
@@ -77,14 +77,14 @@ public class ImageConverterTest
 	{
 		final Rectangle bounds = new Rectangle(0, 0, w, h);
 		final float[] fe = fdata;
-		Assert.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null), 0);
+		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
 		// Check the double format
 		final double[] de = SimpleArrayUtils.toDouble(fe);
-		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
-		Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
+		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
+		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
 	}
 
 	@Test
@@ -99,14 +99,14 @@ public class ImageConverterTest
 			final FloatProcessor ip = new FloatProcessor(w, h, fdata.clone());
 			ip.setRoi(bounds);
 			final float[] fe = (float[]) (ip.crop().getPixels());
-			Assert.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null), 0);
-			Assert.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null), 0);
-			Assert.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null), 0);
+			Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
+			Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
+			Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
 			// Check the double format
 			final double[] de = SimpleArrayUtils.toDouble(fe);
-			Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
-			Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
-			Assert.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
+			Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
+			Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
+			Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
 		}
 	}
 }

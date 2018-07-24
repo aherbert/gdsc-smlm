@@ -39,13 +39,13 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.Molecule;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;

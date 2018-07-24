@@ -72,7 +72,6 @@ import ij.ImageStack;
 import ij.Macro;
 import ij.Prefs;
 import ij.gui.DialogListener;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
@@ -81,11 +80,12 @@ import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -2763,7 +2763,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final PlotWindow plotWindow = Utils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}
-		new WindowOrganiser().tileWindows(list);
+		WindowOrganiser.tileWindows(list);
 	}
 
 	private void calculateSensitivity()

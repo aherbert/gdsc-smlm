@@ -40,12 +40,12 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
-import ij.gui.ExtendedGenericDialog;
-import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -1052,7 +1052,7 @@ public class BenchmarkFit implements PlugIn
 			if (count > 0 && requireRetile)
 			{
 				idList = Arrays.copyOf(idList, count);
-				new WindowOrganiser().tileWindows(idList);
+				WindowOrganiser.tileWindows(idList);
 			}
 		}
 

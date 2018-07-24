@@ -22,8 +22,11 @@
  * #L%
  */
 
-package org.apache.commons.math3.optim;
+package uk.ac.sussex.gdsc.smlm.math3.optim;
 
+import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.OptimizationData;
+import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
 /**

@@ -40,7 +40,7 @@ public class InterlacedImageSource extends ImageSource
 	/**
 	 * Create a new interlaced image source using the given image source
 	 * <p>
-	 * Note: The input source cannot be aggregated as the data to interlace is assumed to be contiguous from frame 1
+	 * Note: The input source cannot be aggregated as the data to interlace is assumed to be contiguous from frame 1.
 	 *
 	 * @param imageSource
 	 *            The image source of interlaced data (must not be null or an AggregatedImageSource)
@@ -50,8 +50,10 @@ public class InterlacedImageSource extends ImageSource
 	 *            The number of continuous frames containing data
 	 * @param skip
 	 *            The number of continuous frames to ignore before the next data
+	 * @throws IllegalArgumentException
+	 *             If the image is null or aggregated, or the interlace arguments are invalid
 	 */
-	public InterlacedImageSource(ImageSource imageSource, int start, int size, int skip)
+	public InterlacedImageSource(ImageSource imageSource, int start, int size, int skip) throws IllegalArgumentException
 	{
 		super("");
 		if (imageSource == null)

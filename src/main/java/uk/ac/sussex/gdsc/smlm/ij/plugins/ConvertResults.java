@@ -24,10 +24,10 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;

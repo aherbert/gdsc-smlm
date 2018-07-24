@@ -81,8 +81,8 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 	 * @param checkSequence
 	 *            Set to true to check the position
 	 * @param maxIterations
-	 *            Set above zero to check the iterations (number of time {@link #converged(double[], double[])} is
-	 *            called)
+	 *            Set above zero to check the iterations (number of times {@link #converged(SearchResult, SearchResult)}
+	 *            is called)
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid
 	 */
@@ -156,7 +156,8 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker#converged(uk.ac.sussex.gdsc.smlm.search.ScoreResult, uk.ac.sussex.gdsc.smlm.search.ScoreResult)
+	 * @see uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker#converged(uk.ac.sussex.gdsc.smlm.search.ScoreResult,
+	 * uk.ac.sussex.gdsc.smlm.search.ScoreResult)
 	 */
 	@Override
 	public boolean converged(SearchResult<T> previous, SearchResult<T> current)

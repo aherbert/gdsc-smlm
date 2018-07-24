@@ -286,8 +286,10 @@ public abstract class ImageSource
 	 * @param bounds
 	 *            The bounding limits of the frame to extract
 	 * @return the next frame (or null if at the end)
+	 * @throws IllegalArgumentException
+	 *             if the bounds do not fit in the image
 	 */
-	public float[] next(Rectangle bounds)
+	public float[] next(Rectangle bounds) throws IllegalArgumentException
 	{
 		if (!checkBounds(bounds))
 			bounds = null;
@@ -372,8 +374,10 @@ public abstract class ImageSource
 	 * @param bounds
 	 *            The bounding limits of the frame to extract
 	 * @return the frame (or null)
+	 * @throws IllegalArgumentException
+	 *             if the bounds do not fit in the image
 	 */
-	public float[] get(int frame, Rectangle bounds)
+	public float[] get(int frame, Rectangle bounds) throws IllegalArgumentException
 	{
 		if (!checkBounds(bounds))
 			bounds = null;
@@ -547,10 +551,10 @@ public abstract class ImageSource
 	 *            the bounds
 	 * @return True if the bounds are not null and are within the image, false if null or the bounds fit the image
 	 *         exactly
-	 * @throws RuntimeException
+	 * @throws IllegalArgumentException
 	 *             if the bounds do not fit in the image
 	 */
-	public boolean checkBounds(Rectangle bounds)
+	public boolean checkBounds(Rectangle bounds) throws IllegalArgumentException
 	{
 		return checkBounds(getWidth(), getHeight(), bounds);
 	}
@@ -566,17 +570,17 @@ public abstract class ImageSource
 	 *            the bounds
 	 * @return True if the bounds are not null and are within the image, false if null or the bounds fit the image
 	 *         exactly
-	 * @throws RuntimeException
+	 * @throws IllegalArgumentException
 	 *             if the bounds do not fit in the image
 	 */
-	public static boolean checkBounds(int width, int height, Rectangle bounds)
+	public static boolean checkBounds(int width, int height, Rectangle bounds) throws IllegalArgumentException
 	{
 		if (bounds != null)
 		{
 			final int maxx = bounds.x + bounds.width;
 			final int maxy = bounds.y + bounds.height;
 			if (bounds.x < 0 || maxx > width || bounds.y < 0 || maxy > height)
-				throw new RuntimeException("The bounds do not fit within the image");
+				throw new IllegalArgumentException("The bounds do not fit within the image");
 			return bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height;
 		}
 		return false;

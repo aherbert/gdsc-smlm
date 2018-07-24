@@ -30,14 +30,14 @@ import java.awt.event.MouseListener;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;

@@ -28,12 +28,12 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.util.FastMath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;

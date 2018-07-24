@@ -44,8 +44,6 @@ import javax.swing.JFileChooser;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.gui.ExtendedGenericDialog;
-import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.YesNoCancelDialog;
 import ij.io.OpenDialog;
@@ -54,6 +52,8 @@ import ij.plugin.frame.Recorder;
 import ij.util.Java2;
 import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;

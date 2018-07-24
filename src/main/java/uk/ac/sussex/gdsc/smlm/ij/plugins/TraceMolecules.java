@@ -43,13 +43,11 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.process.FloatProcessor;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
@@ -60,6 +58,8 @@ import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
@@ -630,7 +630,7 @@ public class TraceMolecules implements PlugIn
 			if (count > 0 && requireRetile)
 			{
 				idList = Arrays.copyOf(idList, count);
-				new WindowOrganiser().tileWindows(idList);
+				WindowOrganiser.tileWindows(idList);
 			}
 		}
 

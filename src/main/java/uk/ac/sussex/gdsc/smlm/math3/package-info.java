@@ -22,31 +22,11 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.math3.optim;
-
-import org.apache.commons.math3.optim.OptimizationData;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.SimplePointChecker;
-
 /**
- * Check if the position has converged
+ * Extend the functionality of the <a href="http://commons.apache.org/proper/commons-math/">
+ * Apache Commons Math</a> {@link org.apache.commons.math3} package.
+ *
+ * @see <a href="http://commons.apache.org/proper/commons-math/">Apache Commons Math</a>
+ * @since 1.0.0
  */
-public class PositionChecker extends SimplePointChecker<PointValuePair> implements OptimizationData
-{
-	/**
-	 * Build an instance with specified thresholds.
-	 *
-	 * In order to perform only relative checks, the absolute tolerance
-	 * must be set to a negative value. In order to perform only absolute
-	 * checks, the relative tolerance must be set to a negative value.
-	 *
-	 * @param relative
-	 *            relative tolerance threshold
-	 * @param absolute
-	 *            absolute tolerance threshold
-	 */
-	public PositionChecker(double relative, double absolute)
-	{
-		super(relative, absolute);
-	}
-}
+package uk.ac.sussex.gdsc.smlm.math3;

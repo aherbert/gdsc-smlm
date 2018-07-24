@@ -24,9 +24,9 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
