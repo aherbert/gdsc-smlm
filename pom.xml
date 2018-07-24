@@ -187,6 +187,7 @@ Software for single molecule localisation microscopy (SMLM)
 					<excludes>
 						<exclude>**/*.json</exclude>
 						<exclude>**/*Protos.java</exclude>
+						<exclude>**/math3/**/*Copy.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
