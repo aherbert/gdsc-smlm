@@ -875,7 +875,7 @@ public class EJMLLinearSolverTest
 			// No Direct inversion possible.
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
-				TestLog.logSpeedTestResult(ts.get(-i), ts.get(-2));
+				TestLog.logSpeedTestResult(ts.get(-i), ts.get(-1));
 	}
 
 	void log(String format, Object... args)
