@@ -24,12 +24,13 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -38,7 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaFunctionTest
@@ -75,11 +76,11 @@ public class PoissonGammaFunctionTest
 		final double p2 = cumulativeProbability(gain, mu, pdf);
 
 		if (pdf)
-			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+			ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
 		else // This is not actually a PMF but is a PDF so requires integration.
 		// This only works when the mean is above 2 if the gain is low
 		if (mu > 2 || gain > 20)
-			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+			ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
 	}
 
 	private static double cumulativeProbability(final double gain, final double mu, boolean pdf)
@@ -114,7 +115,7 @@ public class PoissonGammaFunctionTest
 				p += pp;
 			}
 			//if (p > 1.01)
-			//	Assert.fail("P > 1: " + p);
+			//	Assertions.fail("P > 1: " + p);
 		}
 
 		// We have most of the likelihood density.
@@ -185,14 +186,14 @@ public class PoissonGammaFunctionTest
 		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		final String msg = String.format("g=%f, mu=%f", gain, mu);
+		final Supplier<String> msg = () -> String.format("g=%f, mu=%f", gain, mu);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-6);
+			ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-6, msg);
 		}
 	}
 
@@ -247,12 +248,12 @@ public class PoissonGammaFunctionTest
 		{
 			final double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
 			final double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
-			Assert.assertEquals(p1, p2, 0);
+			Assertions.assertEquals(p1, p2);
 
 			// Check partial gradient matches
 			double p3 = PoissonGammaFunction.poissonGammaPartial(x, o, gain, dp_dt2);
-			Assert.assertEquals(p1, p3, 0);
-			Assert.assertEquals(dp_dt[0] + p1, dp_dt2[0], Math.abs(dp_dt[0] + p1) * 1e-8);
+			Assertions.assertEquals(p1, p3);
+			ExtraAssertions.assertEqualsRelative(dp_dt[0] + p1, dp_dt2[0], 1e-8);
 
 			// Check no dirac gradient matches
 			p3 = PoissonGammaFunction.poissonGammaN(x, o, gain, dp_dt2);
@@ -262,13 +263,13 @@ public class PoissonGammaFunctionTest
 				// Add the dirac contribution
 				p3 += dirac;
 				dp_dt2[0] -= dirac;
-				Assert.assertEquals(p1, p3, p1 * 1e-8);
-				Assert.assertEquals(dp_dt[0], dp_dt2[0], Math.abs(dp_dt[0]) * 1e-8);
+				ExtraAssertions.assertEqualsRelative(p1, p3, 1e-8);
+				ExtraAssertions.assertEqualsRelative(dp_dt[0], dp_dt2[0], 1e-8);
 			}
 			else
 			{
-				Assert.assertEquals(p1, p3, 0);
-				Assert.assertEquals(dp_dt[0], dp_dt2[0], Math.abs(dp_dt[0]) * 1e-8);
+				Assertions.assertEquals(p1, p3);
+				ExtraAssertions.assertEqualsRelative(dp_dt[0], dp_dt2[0], 1e-8);
 			}
 
 			final double up = PoissonGammaFunction.poissonGamma(x, uo, gain);
@@ -291,9 +292,9 @@ public class PoissonGammaFunctionTest
 		final double f = (double) fail / list.size();
 		TestLog.info("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
 		if (approx)
-			Assert.assertTrue(f < 0.2);
+			Assertions.assertTrue(f < 0.2);
 		else
-			Assert.assertTrue(f < 0.01);
+			Assertions.assertTrue(f < 0.01);
 	}
 
 	@Test
@@ -320,7 +321,7 @@ public class PoissonGammaFunctionTest
 			// Test the function can be separated into the dirac and the rest
 			final double dirac = PoissonGammaFunction.dirac(x);
 			final double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
-			TestAssert.assertEqualsRelative(e, dirac + p0, 1e-10);
+			ExtraAssertions.assertEqualsRelative(e, dirac + p0, 1e-10);
 
 			// For reporting
 			if (report)

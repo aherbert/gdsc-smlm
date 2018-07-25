@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
@@ -65,11 +65,11 @@ public class PSFProtosTest
 		final PSFProtos.PSF psf = psfBuilder.build();
 		final String o = psf.toString();
 		TestLog.debugln(o);
-		Assert.assertEquals(e, o);
+		Assertions.assertEquals(e, o);
 
 		psfBuilder.clear();
 		TextFormat.merge(o, psfBuilder);
-		Assert.assertTrue("Merge string", psf.equals(psfBuilder.build()));
+		Assertions.assertTrue(psf.equals(psfBuilder.build()), "Merge string");
 
 		// Short string
 		final String o2 = TextFormat.shortDebugString(psf);
@@ -77,7 +77,7 @@ public class PSFProtosTest
 
 		psfBuilder.clear();
 		TextFormat.merge(o2, psfBuilder);
-		Assert.assertTrue("Merge short string", psf.equals(psfBuilder.build()));
+		Assertions.assertTrue(psf.equals(psfBuilder.build()), "Merge short string");
 
 		// JSON
 		final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
@@ -88,6 +88,6 @@ public class PSFProtosTest
 
 		psfBuilder.clear();
 		JsonFormat.parser().merge(json, psfBuilder);
-		Assert.assertTrue("Merge JSON", psf.equals(psfBuilder.build()));
+		Assertions.assertTrue(psf.equals(psfBuilder.build()), "Merge JSON");
 	}
 }

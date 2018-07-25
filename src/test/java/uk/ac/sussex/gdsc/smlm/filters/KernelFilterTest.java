@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class KernelFilterTest
@@ -179,7 +179,7 @@ public class KernelFilterTest
 				fp.flipHorizontal();
 				fp.flipVertical();
 				KernelFilter.rotate180(kernel);
-				Assert.assertArrayEquals((float[]) fp.getPixels(), kernel, 0);
+				Assertions.assertArrayEquals((float[]) fp.getPixels(), kernel);
 			}
 	}
 
@@ -240,7 +240,7 @@ public class KernelFilterTest
 		}
 
 		TestLog.info("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
-		Assert.assertTrue(max < tolerance);
+		Assertions.assertTrue(max < tolerance);
 	}
 
 	private class MyTimingTask extends BaseTimingTask
@@ -286,7 +286,7 @@ public class KernelFilterTest
 
 	private void floatFilterIsFasterThanIJFilter(int k)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		final float[][] data = new float[10][];

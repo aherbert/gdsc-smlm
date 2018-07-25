@@ -27,15 +27,15 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class SphericalDistributionTest
@@ -65,7 +65,7 @@ public class SphericalDistributionTest
 	@Test
 	public void rejectionMethodIsFasterThanTransformationMethod()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final double radius = 10 + rg.nextDouble() * 10;
@@ -81,7 +81,7 @@ public class SphericalDistributionTest
 		final long time1 = getRunTime(dist);
 		dist.setUseRejectionMethod(true);
 		final long time2 = getRunTime(dist);
-		TestAssert.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d\n", time2, time1);
+		ExtraAssertions.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d\n", time2, time1);
 		TestLog.info("Rejection = %d, Transformation = %d\n", time2, time1);
 	}
 

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedFilterTest
@@ -91,7 +91,7 @@ public abstract class WeightedFilterTest
 							final float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
 							try
 							{
-								TestAssert.assertArrayEqualsRelative(e, o, 1e-4f);
+								ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-4f);
 							}
 							catch (final AssertionError ex)
 							{
@@ -197,7 +197,7 @@ public abstract class WeightedFilterTest
 		final double error = DoubleEquality.relativeError(u1, u2);
 		//System.out.printf("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)\n", filter.name, title,
 		//		width, height, boxSize, internal, u1, u2, error);
-		TestAssert.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,
+		ExtraAssertions.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,
 				width, height, boxSize, internal, u1, u2, error);
 		return u2;
 	}

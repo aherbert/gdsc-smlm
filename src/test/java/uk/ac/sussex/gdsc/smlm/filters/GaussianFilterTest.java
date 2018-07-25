@@ -27,8 +27,8 @@ import java.awt.Rectangle;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianFilterTest
@@ -275,7 +275,7 @@ public class GaussianFilterTest
 			}
 
 			TestLog.info("%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
-			Assert.assertTrue(max < tolerance);
+			Assertions.assertTrue(max < tolerance);
 		}
 	}
 
@@ -316,7 +316,7 @@ public class GaussianFilterTest
 	@Test
 	public void floatFilterIsFasterThanDoubleFilter()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
@@ -349,7 +349,7 @@ public class GaussianFilterTest
 	@Test
 	public void floatFilterInternalIsFasterThanDoubleFilterInternal()
 	{
-		TestAssume.assumeHighComplexity();
+		ExtraAssumptions.assumeHighComplexity();
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 

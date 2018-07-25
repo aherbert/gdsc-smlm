@@ -23,10 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class ParameterBoundsTest
@@ -54,12 +55,12 @@ public class ParameterBoundsTest
 		final double[] a2 = new double[1];
 		final double[] step = new double[] { s };
 		b.applyBounds(a1, step, a2);
-		Assert.assertArrayEquals("Step 1", a2, new double[] { 1 * s }, 0);
+		Assertions.assertArrayEquals(a2, new double[] { 1 * s }, "Step 1");
 		b.applyBounds(a2, step, a1);
-		Assert.assertArrayEquals("Step 2", a1, new double[] { 2 * s }, 0);
+		Assertions.assertArrayEquals(a1, new double[] { 2 * s }, "Step 2");
 		b.applyBounds(a1, step, a2);
 		// Should be bounded
-		Assert.assertArrayEquals("Step 3", a2, new double[] { 2 * s }, 0);
+		Assertions.assertArrayEquals(a2, new double[] { 2 * s }, "Step 3");
 	}
 
 	@Test
@@ -71,10 +72,10 @@ public class ParameterBoundsTest
 		final double[] a1 = new double[1];
 		final double[] a2 = new double[1];
 		b.applyBounds(a1, new double[] { 10 }, a2);
-		Assert.assertArrayEquals("Step 10", a2, new double[] { s }, 0);
+		Assertions.assertArrayEquals(a2, new double[] { s }, "Step 10");
 
 		b.applyBounds(a1, new double[] { -10 }, a2);
-		Assert.assertArrayEquals("Step -10", a2, new double[] { -s }, 0);
+		Assertions.assertArrayEquals(a2, new double[] { -s }, "Step -10");
 	}
 
 	@Test
@@ -96,7 +97,7 @@ public class ParameterBoundsTest
 		for (int i = 1; i <= 10; i++)
 		{
 			b.applyBounds(a1, step, a2);
-			Assert.assertArrayEquals("Step " + i, a2, new double[] { i * s }, 0);
+			ExtraAssertions.assertArrayEquals(a2, new double[] { i * s }, "Step %d", i);
 			tmp = a1;
 			a1 = a2;
 			a2 = tmp;

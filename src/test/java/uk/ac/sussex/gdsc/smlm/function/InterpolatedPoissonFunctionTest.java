@@ -26,15 +26,15 @@ package uk.ac.sussex.gdsc.smlm.function;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
-@SuppressWarnings({ "unused", "javadoc" })
+@SuppressWarnings({ "javadoc" })
 public class InterpolatedPoissonFunctionTest
 {
 	static double[] gain = { 1, 2, 4, 8, 16 };
@@ -182,7 +182,7 @@ public class InterpolatedPoissonFunctionTest
 			}
 		}
 		if (p > 1.01)
-			Assert.fail("P > 1: " + p);
+			Assertions.fail("P > 1: " + p);
 
 		// We have most of the probability density.
 		// Now keep evaluating up and down until no difference
@@ -238,7 +238,7 @@ public class InterpolatedPoissonFunctionTest
 		maxx += min;
 
 		TestLog.info("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
-		TestAssert.assertEquals(1, p, 0.02, "g=%f, mu=%f", gain, mu);
+		ExtraAssertions.assertEquals(1, p, 0.02, "g=%f, mu=%f", gain, mu);
 		return new int[] { minx, maxx };
 	}
 
@@ -273,7 +273,7 @@ public class InterpolatedPoissonFunctionTest
 			}, min, max);
 
 			TestLog.info("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
-			//Assert.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
+			//Assertions.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
 		}
 		catch (final TooManyEvaluationsException e)
 		{
@@ -285,7 +285,7 @@ public class InterpolatedPoissonFunctionTest
 			//	p += pp;
 			//}
 			//TestLog.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -324,7 +324,7 @@ public class InterpolatedPoissonFunctionTest
 		{
 			final double p1 = f.likelihood(x, o);
 			final double p2 = f.likelihood(x, o, dp_dt);
-			Assert.assertEquals(p1, p2, 0);
+			Assertions.assertEquals(p1, p2);
 
 			final double up = f.likelihood(x, uo);
 			final double lp = f.likelihood(x, lo);
@@ -348,10 +348,10 @@ public class InterpolatedPoissonFunctionTest
 			if (nonInteger && ox < 1)
 			{
 				// Gradients are wrong
-				//Assert.assertTrue(error < 0.5);
+				//Assertions.assertTrue(error < 0.5);
 			}
 			else
-				Assert.assertTrue(error < 1e-3);
+				Assertions.assertTrue(error < 1e-3);
 		}
 	}
 }

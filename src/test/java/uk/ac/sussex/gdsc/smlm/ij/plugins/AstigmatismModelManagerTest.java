@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class AstigmatismModelManagerTest
@@ -89,7 +89,7 @@ public class AstigmatismModelManagerTest
 			final double e = sc.convert(m1.getSx(z));
 			final double o = m2.getSx(zc.convert(z));
 			//System.out.printf("%f vs %f\n", e, o);
-			Assert.assertEquals(e, o, e * 1e-8);
+			ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
 		}
 	}
 }

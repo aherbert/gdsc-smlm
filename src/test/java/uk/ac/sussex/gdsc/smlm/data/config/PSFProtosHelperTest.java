@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -71,6 +71,6 @@ public class PSFProtosHelperTest
 		//System.out.println(psf);
 
 		final AstigmatismModel model2 = PSFProtosHelper.createModel(psf, zDistanceUnit, sDistanceUnit, nmPerPixel);
-		Assert.assertEquals(model1, model2);
+		Assertions.assertEquals(model1, model2);
 	}
 }

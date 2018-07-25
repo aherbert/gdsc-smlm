@@ -24,14 +24,14 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class FastMathTest
@@ -88,7 +88,7 @@ public class FastMathTest
 	@Test
 	public void cbrtIsFaster()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		// Q. What is a suitable range for this test?
 		final int range = 5;

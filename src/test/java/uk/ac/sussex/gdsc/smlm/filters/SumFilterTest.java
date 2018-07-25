@@ -26,14 +26,14 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class SumFilterTest extends AbstractFilterTest
@@ -59,7 +59,7 @@ public class SumFilterTest extends AbstractFilterTest
 	 */
 	private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
 	{
-		TestAssert.assertArrayEqualsRelative(data1, data2, 1e-4, format, args);
+		ExtraAssertions.assertArrayEqualsRelative(data1, data2, 1e-4, format, args);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class SumFilterTest extends AbstractFilterTest
 	 */
 	private static void intArrayEquals(int[] data1, int[] data2, int boxSize, String format, Object... args)
 	{
-		TestAssert.assertArrayEquals(data1, data2, format, args);
+		ExtraAssertions.assertArrayEquals(data1, data2, format, args);
 	}
 
 	private static float[] floatCreateData(RandomGenerator rg, int width, int height)
@@ -202,7 +202,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -255,7 +255,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -272,7 +272,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -325,7 +325,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -342,7 +342,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -395,7 +395,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -435,7 +435,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -485,7 +485,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockSumNxNInternal [%dx%d] %d => blockSum3x3Internal %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -497,7 +497,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -547,7 +547,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -559,7 +559,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -609,7 +609,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockSum3x3Internal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -621,7 +621,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -672,7 +672,7 @@ public class SumFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"float stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -707,7 +707,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -758,7 +758,7 @@ public class SumFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"float rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -770,7 +770,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -821,7 +821,7 @@ public class SumFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"float stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -833,7 +833,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -886,14 +886,14 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			if (debug)
 				System.out.printf(
 						"float rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 						boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			//			if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
+			//			if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -953,7 +953,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1005,7 +1005,7 @@ public class SumFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("float blockSumNxN [%dx%d] @ %d : %d => blockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1022,7 +1022,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1074,7 +1074,7 @@ public class SumFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("float blockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1091,7 +1091,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1144,7 +1144,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1161,7 +1161,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1213,7 +1213,7 @@ public class SumFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("float blockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1230,7 +1230,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1283,7 +1283,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1323,7 +1323,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1373,7 +1373,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockSumNxN [%dx%d] %d => blockSum3x3 %d = %.2fx\n", width, height, time,
 							fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => blockSum3x3 %d = %.2fx\n",
@@ -1407,7 +1407,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1457,7 +1457,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float stripedBlockSumNxN [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		stripedBlockTime, time), stripedBlockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -1492,7 +1492,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1542,7 +1542,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float rollingBlockSumNxN [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -1554,7 +1554,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1604,7 +1604,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width, height,
 							time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -1616,7 +1616,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1666,7 +1666,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockSum3x3 [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width, height,
 							time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -1678,7 +1678,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1728,7 +1728,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float stripedBlockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -1836,7 +1836,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1889,7 +1889,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"int blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1906,7 +1906,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -1959,7 +1959,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"int blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -1976,7 +1976,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2029,7 +2029,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"int stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -2069,7 +2069,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2119,7 +2119,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int blockSumNxNInternal [%dx%d] %d => blockSum3x3Internal %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2131,7 +2131,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2181,7 +2181,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int blockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2193,7 +2193,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2243,7 +2243,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int blockSum3x3Internal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2255,7 +2255,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2306,7 +2306,7 @@ public class SumFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"int stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2341,7 +2341,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2392,7 +2392,7 @@ public class SumFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"int rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2404,7 +2404,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2455,7 +2455,7 @@ public class SumFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"int stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2467,7 +2467,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2520,14 +2520,14 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"int rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			if (debug)
 				System.out.printf(
 						"int rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 						boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			//			if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
+			//			if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -2587,7 +2587,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2639,7 +2639,7 @@ public class SumFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("int blockSumNxN [%dx%d] @ %d : %d => blockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -2655,7 +2655,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2707,7 +2707,7 @@ public class SumFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("int blockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxN %d = %.2fx\n", width,
 								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -2723,7 +2723,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2776,7 +2776,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"int stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -2793,7 +2793,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2845,7 +2845,7 @@ public class SumFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("int blockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxN %d = %.2fx\n", width,
 								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -2861,7 +2861,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -2914,7 +2914,7 @@ public class SumFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"int rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -2954,7 +2954,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intBlockSum3x3IsFasterThanBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -3004,7 +3004,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int blockSumNxN [%dx%d] %d => blockSum3x3 %d = %.2fx\n", width, height, time,
 							fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => blockSum3x3 %d = %.2fx\n",
@@ -3038,7 +3038,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -3088,7 +3088,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int stripedBlockSumNxN [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		stripedBlockTime, time), stripedBlockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -3123,7 +3123,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -3173,7 +3173,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int rollingBlockSumNxN [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,
@@ -3185,7 +3185,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -3235,7 +3235,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int blockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width, height,
 							time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal, "int blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n",
@@ -3246,7 +3246,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -3296,7 +3296,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int blockSum3x3 [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width, height,
 							time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal, "int blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n",
@@ -3307,7 +3307,7 @@ public class SumFilterTest extends AbstractFilterTest
 	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
@@ -3357,7 +3357,7 @@ public class SumFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("int stripedBlockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestLog.logSpeedTestResult(fastTotal < slowTotal,

@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
@@ -63,10 +63,10 @@ public class CubicSplineCalculatorTest
 
 		final CubicSplineCalculator calc = new CubicSplineCalculator();
 		double[] o = calc.compute(value);
-		Assert.assertArrayEquals(e, o, 1e-6);
+		Assertions.assertArrayEquals(e, o, 1e-6);
 
 		o = calc.compute(b);
-		Assert.assertArrayEquals(e, o, 1e-6);
+		Assertions.assertArrayEquals(e, o, 1e-6);
 	}
 
 	@Test
@@ -99,10 +99,10 @@ public class CubicSplineCalculatorTest
 
 		final CubicSplineCalculator calc = new CubicSplineCalculator();
 		double[] o = calc.compute(value);
-		Assert.assertArrayEquals(e, o, 1e-6);
+		Assertions.assertArrayEquals(e, o, 1e-6);
 
 		o = calc.compute(b);
-		Assert.assertArrayEquals(e, o, 1e-6);
+		Assertions.assertArrayEquals(e, o, 1e-6);
 	}
 
 	double[][][] createData(int x, int y, int z, RandomGenerator r)

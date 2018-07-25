@@ -26,17 +26,17 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import java.util.Arrays;
 
 import org.jtransforms.fft.FloatFFT_2D;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import ij.process.FHT2;
 import ij.process.FloatProcessor;
+import uk.ac.sussex.gdsc.core.ij.process.FHT2;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class FloatDHT2DTest
@@ -123,7 +123,7 @@ public class FloatDHT2DTest
 		swap[3] = 1;
 		swap[4] = 2;
 		for (int i = 0; i < in.length; i++)
-			Assert.assertEquals(in[i], swap[(int) out[i]], 0);
+			Assertions.assertEquals(in[i], swap[(int) out[i]]);
 	}
 
 	@Test
@@ -143,13 +143,13 @@ public class FloatDHT2DTest
 		final FloatDHT2D convolved2 = dht.multiply(copy);
 		final FloatDHT2D deconvolved2 = convolved.divide(copy);
 
-		Assert.assertArrayEquals(convolved.getData(), convolved2.getData(), 0);
-		Assert.assertArrayEquals(deconvolved.getData(), deconvolved2.getData(), 0);
+		Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
+		Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
 
 		float[] e = dht.getData();
 		float[] o = deconvolved.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
+			Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
 
 		deconvolved.inverseTransform();
 
@@ -158,7 +158,7 @@ public class FloatDHT2DTest
 		o = deconvolved.getData();
 
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-7f, 1e-7f));
+			Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-7f, 1e-7f));
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class FloatDHT2DTest
 
 				final FloatDHT2D correlation = dht2.conjugateMultiply(dht);
 				final FloatDHT2D correlation2 = dht2.conjugateMultiply(copy);
-				Assert.assertArrayEquals(correlation.getData(), correlation2.getData(), 0);
+				Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
 				correlation.inverseTransform();
 				correlation.swapQuadrants();
@@ -196,8 +196,8 @@ public class FloatDHT2DTest
 				final int ox = xy[0] - icentre;
 				final int oy = xy[1] - icentre;
 				//System.out.printf("Shift [%d,%d], centre [%d,%d]\n", x, y, xy[0], xy[1]);
-				Assert.assertEquals(x, ox);
-				Assert.assertEquals(y, oy);
+				Assertions.assertEquals(x, ox);
+				Assertions.assertEquals(y, oy);
 			}
 	}
 
@@ -219,7 +219,7 @@ public class FloatDHT2DTest
 		final float[] e = dht.getData();
 		final float[] o = dht2.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
+			Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
 
 		// Test verses full forward transform
 		final FloatFFT_2D fft = new FloatFFT_2D(dht.nr, dht.nc);
@@ -230,8 +230,8 @@ public class FloatDHT2DTest
 		final float[] oi = result[1].getData();
 		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
 		{
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
+			Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
+			Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
 		}
 	}
 
@@ -252,8 +252,8 @@ public class FloatDHT2DTest
 		fht.transform();
 		fht2.transform();
 
-		Assert.assertArrayEquals(fht.getData(), dht.getData(), 1e-6f);
-		Assert.assertArrayEquals(fht2.getData(), dht2.getData(), 1e-6f);
+		Assertions.assertArrayEquals(fht.getData(), dht.getData(), 1e-6f);
+		Assertions.assertArrayEquals(fht2.getData(), dht2.getData(), 1e-6f);
 
 		check("multiply", dht.multiply(dht2), fht.multiply(fht2), 1e-6f, 1e-6f);
 		check("conjugateMultiply", dht.conjugateMultiply(dht2), fht.conjugateMultiply(fht2), 1e-6f, 1e-6f);
@@ -266,7 +266,7 @@ public class FloatDHT2DTest
 		final float[] o = dht.getData();
 		for (int i = 0; i < e.length; i++)
 			if (!FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs))
-				TestAssert.fail("%s [%d] %g vs %g = %g", operation, i, e[i], o[i],
+				ExtraAssertions.fail("%s [%d] %g vs %g = %g", operation, i, e[i], o[i],
 						FloatEquality.relativeError(e[i], o[i]));
 	}
 }

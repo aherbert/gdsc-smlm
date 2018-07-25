@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
@@ -43,13 +43,13 @@ public class FunctionHelperTest
 	{
 		final int n = 10;
 		final double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
-		Assert.assertEquals(10, FunctionHelper.getMeanValue(values.clone(), 0), 0);
+		Assertions.assertEquals(10, FunctionHelper.getMeanValue(values.clone(), 0));
 		final double total = sum(values, n);
-		Assert.assertEquals(total / n, FunctionHelper.getMeanValue(values.clone(), 1), 0);
+		Assertions.assertEquals(total / n, FunctionHelper.getMeanValue(values.clone(), 1));
 		for (int i = 1; i < n; i++)
 		{
 			final double sum = sum(values, i);
-			Assert.assertEquals(sum / i, FunctionHelper.getMeanValue(values.clone(), sum / total), 0);
+			Assertions.assertEquals(sum / i, FunctionHelper.getMeanValue(values.clone(), sum / total));
 		}
 	}
 
@@ -67,20 +67,20 @@ public class FunctionHelperTest
 	{
 		final int n = 10;
 		final double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
-		Assert.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), 0), 0);
+		Assertions.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), 0));
 		for (int i = 1; i < n; i++)
 		{
 			final double f = (double) i / n;
-			Assert.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), f), 0);
-			Assert.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), f - 0.5), 0);
+			Assertions.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), f));
+			Assertions.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), f - 0.5));
 		}
 
 		Arrays.fill(values, 5, n, 2);
 		// sum = 5*1 + 5*2 = 15
-		Assert.assertEquals(2, FunctionHelper.getMeanValue(values.clone(), 5.0 / 15), 0);
-		Assert.assertEquals(2, FunctionHelper.getMeanValue(values.clone(), 10.0 / 15), 0);
-		Assert.assertEquals(11.0 / 6, FunctionHelper.getMeanValue(values.clone(), 11.0 / 15), 0);
-		Assert.assertEquals(11.5 / 6.5, FunctionHelper.getMeanValue(values.clone(), 11.5 / 15), 0);
+		Assertions.assertEquals(2, FunctionHelper.getMeanValue(values.clone(), 5.0 / 15));
+		Assertions.assertEquals(2, FunctionHelper.getMeanValue(values.clone(), 10.0 / 15));
+		Assertions.assertEquals(11.0 / 6, FunctionHelper.getMeanValue(values.clone(), 11.0 / 15));
+		Assertions.assertEquals(11.5 / 6.5, FunctionHelper.getMeanValue(values.clone(), 11.5 / 15));
 	}
 
 	@Test
@@ -88,13 +88,13 @@ public class FunctionHelperTest
 	{
 		final int n = 10;
 		final double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
-		Assert.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0), 0);
-		Assert.assertEquals(n, FunctionHelper.getXValue(values.clone(), 1), 0);
+		Assertions.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0));
+		Assertions.assertEquals(n, FunctionHelper.getXValue(values.clone(), 1));
 		final double total = sum(values, n);
 		for (int i = 1; i < n; i++)
 		{
 			final double sum = sum(values, i);
-			Assert.assertEquals(i, FunctionHelper.getXValue(values.clone(), sum / total), 0);
+			Assertions.assertEquals(i, FunctionHelper.getXValue(values.clone(), sum / total));
 		}
 	}
 
@@ -103,21 +103,21 @@ public class FunctionHelperTest
 	{
 		final int n = 10;
 		final double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
-		Assert.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0), 0);
-		Assert.assertEquals(n, FunctionHelper.getXValue(values.clone(), 1), 0);
+		Assertions.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0));
+		Assertions.assertEquals(n, FunctionHelper.getXValue(values.clone(), 1));
 		for (int i = 1; i < n; i++)
 		{
 			final double f = (double) i / n;
-			Assert.assertEquals(i, FunctionHelper.getXValue(values.clone(), f), 0);
-			Assert.assertEquals(i - 0.5, FunctionHelper.getXValue(values.clone(), f - 0.05), 1e-8);
+			Assertions.assertEquals(i, FunctionHelper.getXValue(values.clone(), f));
+			Assertions.assertEquals(i - 0.5, FunctionHelper.getXValue(values.clone(), f - 0.05), 1e-8);
 		}
 
 		Arrays.fill(values, 5, n, 2);
 		// sum = 5*1 + 5*2 = 15
-		Assert.assertEquals(2.5, FunctionHelper.getXValue(values.clone(), 5.0 / 15), 0);
-		Assert.assertEquals(5, FunctionHelper.getXValue(values.clone(), 10.0 / 15), 0);
-		Assert.assertEquals(6, FunctionHelper.getXValue(values.clone(), 11.0 / 15), 0);
-		Assert.assertEquals(6.5, FunctionHelper.getXValue(values.clone(), 11.5 / 15), 0);
+		Assertions.assertEquals(2.5, FunctionHelper.getXValue(values.clone(), 5.0 / 15));
+		Assertions.assertEquals(5, FunctionHelper.getXValue(values.clone(), 10.0 / 15));
+		Assertions.assertEquals(6, FunctionHelper.getXValue(values.clone(), 11.0 / 15));
+		Assertions.assertEquals(6.5, FunctionHelper.getXValue(values.clone(), 11.5 / 15));
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class FunctionHelperTest
 								DoubleEquality.relativeError(e, o));
 					// Only test the highest
 					if (i == n_1)
-						Assert.assertEquals(e, o, e * 0.025);
+						Assertions.assertEquals(e, o, e * 0.025);
 				}
 			}
 		}

@@ -28,9 +28,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
@@ -54,7 +54,7 @@ import uk.ac.sussex.gdsc.smlm.model.UniformIllumination;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class BlinkEstimatorTest
@@ -163,7 +163,7 @@ public class BlinkEstimatorTest
 	public void findOptimalFittedPoints()
 	{
 		// Skip this as it is slow
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		final int particles = 1000;
@@ -204,7 +204,7 @@ public class BlinkEstimatorTest
 	private TIntHashSet estimateBlinking(RandomGenerator rg, double nBlinks, double tOn, double tOff, int particles,
 			double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
 	{
-		TestAssume.assumeMaximumComplexity();
+		ExtraAssumptions.assumeMaximumComplexity();
 		if (rg == null)
 			rg = TestSettings.getRandomGenerator();
 
@@ -328,7 +328,7 @@ public class BlinkEstimatorTest
 		be.timeAtLowerBound = timeAtLowerBound;
 		be.showPlots = false;
 
-		//Assert.assertTrue("Max dark time must exceed the dark time of the data (otherwise no plateau)",
+		//Assertions.assertTrue("Max dark time must exceed the dark time of the data (otherwise no plateau)",
 		//		be.maxDarkTime > statsSampledTOff.getStatistics().getMax());
 
 		final int nMolecules = fluorophores.size();
@@ -372,11 +372,11 @@ public class BlinkEstimatorTest
 		System.out.printf("-=-=--=-\n");
 
 		if (doAssert)
-			Assert.assertFalse(ok.isEmpty());
+			Assertions.assertFalse(ok.isEmpty());
 
-		//Assert.assertEquals("Invalid N-blinks", nBlinks, be.getNBlinks(), nBlinks * relativeError);
-		//Assert.assertEquals("Invalid N-molecules", fluorophores.size(), be.getNMolecules(), fluorophores.size() *	relativeError);
-		//Assert.assertEquals("Invalid t-off", tOff * msPerFrame, be.getTOff(), tOff * msPerFrame * relativeError);
+		//Assertions.assertEquals("Invalid N-blinks", nBlinks, be.getNBlinks(), nBlinks * relativeError);
+		//Assertions.assertEquals("Invalid N-molecules", fluorophores.size(), be.getNMolecules(), fluorophores.size() *	relativeError);
+		//Assertions.assertEquals("Invalid t-off", tOff * msPerFrame, be.getTOff(), tOff * msPerFrame * relativeError);
 		return ok;
 	}
 

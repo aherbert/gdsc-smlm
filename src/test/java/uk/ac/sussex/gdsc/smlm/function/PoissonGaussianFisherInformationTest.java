@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 
@@ -34,7 +34,7 @@ public class PoissonGaussianFisherInformationTest
 	@Test
 	public void canComputeFisherInformation()
 	{
-		//org.junit.Assume.assumeTrue(false);
+		//org.junit.Assumptions.assumeTrue(false);
 
 		//double u;
 		////u = Math.pow(10, -300);
@@ -83,14 +83,14 @@ public class PoissonGaussianFisherInformationTest
 			lower *= 0.99;
 		if (u >= 10)
 			upper *= 1.01;
-		Assert.assertTrue("Not less than Poisson information", I <= upper);
-		Assert.assertTrue("Not greater than Poisson-Gaussian approximation information", I >= lower);
+		Assertions.assertTrue(I <= upper, "Not less than Poisson information");
+		Assertions.assertTrue(I >= lower, "Not greater than Poisson-Gaussian approximation information");
 	}
 
 	@Test
 	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
-		//org.junit.Assume.assumeTrue(false);
+		//org.junit.Assumptions.assumeTrue(false);
 
 		// Lowest value where the reciprocal is not infinity.
 		double u = Double.longBitsToDouble(0x4000000000001L);
@@ -102,7 +102,7 @@ public class PoissonGaussianFisherInformationTest
 			// This is the full 52-bit mantissa of a double with zero for the unbiased exponent,
 			// i.e. the largest sub-normal number.
 			long upper = (1L << 52) - 1;
-			Assert.assertTrue(1.0 / Double.longBitsToDouble(upper) != Double.POSITIVE_INFINITY);
+			Assertions.assertTrue(1.0 / Double.longBitsToDouble(upper) != Double.POSITIVE_INFINITY);
 			long lower = 1;
 			while (lower + 1 < upper)
 			{
@@ -121,8 +121,8 @@ public class PoissonGaussianFisherInformationTest
 			System.out.printf("upper = 0x%s = %s\n", Long.toHexString(upper), u);
 		}
 
-		Assert.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
-		Assert.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
+		Assertions.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
+		Assertions.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -134,11 +134,11 @@ public class PoissonGaussianFisherInformationTest
 			final double upper = PoissonFisherInformation.getPoissonI(u);
 			final double alpha = I / upper;
 			TestLog.info("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, I2, lower, upper, alpha);
-			Assert.assertTrue(I > lower);
-			Assert.assertTrue(I < upper);
+			Assertions.assertTrue(I > lower);
+			Assertions.assertTrue(I < upper);
 
 			// Test convergence
-			Assert.assertEquals(I, I2, 1e-50);
+			Assertions.assertEquals(I, I2, 1e-50);
 		}
 	}
 }

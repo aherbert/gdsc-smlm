@@ -23,13 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class HoltzerAstigmatismZModelTest
@@ -72,9 +73,9 @@ public class HoltzerAstigmatismZModelTest
 			final double s1 = HoltzerAstigmatismZModel.getS1(s, z, one_d2, Ax, Bx, ds_dz);
 			final double s2 = HoltzerAstigmatismZModel.getS2(s, z, one_d2, Ax, Bx, ds_dz2);
 
-			Assert.assertEquals(s0, s1, 0);
-			Assert.assertEquals(s0, s2, 0);
-			Assert.assertEquals(ds_dz[0], ds_dz2[0], 0);
+			Assertions.assertEquals(s0, s1);
+			Assertions.assertEquals(s0, s2);
+			Assertions.assertEquals(ds_dz[0], ds_dz2[0]);
 
 			final double uz = z + h_;
 			final double lz = z - h_;
@@ -94,12 +95,12 @@ public class HoltzerAstigmatismZModelTest
 
 			//double error = DoubleEquality.relativeError(o, e);
 			if (Math.abs(z) > 0.02)
-				Assert.assertTrue(e1 + " sign != " + o1, (e1 * o1) >= 0);
-			Assert.assertTrue(e1 + " != " + o1, eq.almostEqualRelativeOrAbsolute(e1, o1));
+				ExtraAssertions.assertTrue((e1 * o1) >= 0, "%s sign != %s", e1, o1);
+			ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e1, o1), "%s != %s", e1, o1);
 
 			if (Math.abs(z) > 0.02)
-				Assert.assertTrue(e2 + " sign != " + o2, (e2 * o2) >= 0);
-			Assert.assertTrue(e2 + " != " + o2, eq.almostEqualRelativeOrAbsolute(e2, o2));
+				ExtraAssertions.assertTrue((e2 * o2) >= 0, "%s sign != %s", e2, o2);
+			ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e2, o2), "%s != %s", e2, o2);
 		}
 	}
 }

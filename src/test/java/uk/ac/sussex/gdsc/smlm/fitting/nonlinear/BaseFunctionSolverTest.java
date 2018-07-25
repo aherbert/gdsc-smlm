@@ -25,12 +25,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.distribution.CustomGammaDistribution;
-import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.stat.inference.TTest;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -48,16 +46,18 @@ import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 /**
  * Base class for testing the function solvers
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public abstract class BaseFunctionSolverTest
 {
 	// Basic Gaussian
@@ -273,10 +273,10 @@ public abstract class BaseFunctionSolverTest
 							for (int i = 0; i < expected.length; i++)
 							{
 								if (fp[i] < lower[i])
-									TestAssert.fail("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i], lower[i],
+									ExtraAssertions.fail("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i], lower[i],
 											Arrays.toString(fp), Arrays.toString(expected));
 								if (fp[i] > upper[i])
-									TestAssert.fail("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i], upper[i],
+									ExtraAssertions.fail("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i], upper[i],
 											Arrays.toString(fp), Arrays.toString(expected));
 								if (report)
 									fp[i] = expected[i] - fp[i];
@@ -472,7 +472,7 @@ public abstract class BaseFunctionSolverTest
 		// The test may be unrealistic as the initial params are close to the actual answer.
 
 		//if (p<50)
-		//TestAssert.fail(("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
+		//ExtraAssertions.fail(("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
 	}
 
 	static double distance(double[] o, double[] e)
@@ -519,7 +519,7 @@ public abstract class BaseFunctionSolverTest
 		params = params.clone();
 		final FitStatus status = solver.fit(data, null, params, null);
 		if (status != FitStatus.OK)
-			TestAssert.fail("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
+			ExtraAssertions.fail("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
 					Arrays.toString(params), Arrays.toString(expected));
 		return params;
 	}
@@ -658,7 +658,7 @@ public abstract class BaseFunctionSolverTest
 
 		//System.out.TestLog.debug("e2="+Arrays.toString(e));
 		//System.out.TestLog.debug("o2="+Arrays.toString(o));
-		Assert.assertArrayEquals("Fit 2 peaks and deviations 2 peaks do not match", o, e, 0);
+		Assertions.assertArrayEquals(o, e, "Fit 2 peaks and deviations 2 peaks do not match");
 
 		// Try again with y-fit values
 		a = p12.clone();
@@ -668,19 +668,19 @@ public abstract class BaseFunctionSolverTest
 		//System.out.TestLog.debug("a="+Arrays.toString(a));
 		solver2.computeValue(data, o2, a);
 
-		Assert.assertArrayEquals("Fit 2 peaks with yFit and deviations 2 peaks do not match", o, e, 0);
+		Assertions.assertArrayEquals(o, e, "Fit 2 peaks with yFit and deviations 2 peaks do not match");
 
 		final StandardValueProcedure p = new StandardValueProcedure();
 		double[] ev = p.getValues(f2, a);
-		Assert.assertArrayEquals("Fit 2 peaks yFit", ev, o1, 1e-8);
-		Assert.assertArrayEquals("computeValue 2 peaks yFit", ev, o2, 1e-8);
+		Assertions.assertArrayEquals(ev, o1, 1e-8, "Fit 2 peaks yFit");
+		Assertions.assertArrayEquals(ev, o2, 1e-8, "computeValue 2 peaks yFit");
 
 		if (solver1 instanceof SteppingFunctionSolver)
 		{
 			// fit with 1 peak + 1 precomputed using the known params.
 			// compare to 2 peak deviation computation.
-			final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
-					null);
+			final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size,
+					flags, null);
 			final Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
 			solver1.setGradientFunction(pf1);
 			a = p1.clone();
@@ -709,7 +709,7 @@ public abstract class BaseFunctionSolverTest
 						Gaussian2DFunction.getName(i), e[i], o[i]));
 			}
 			if (fail > ok)
-				Assert.fail(sb.toString());
+				Assertions.fail(sb.toString());
 
 			// Try again with y-fit values
 			a = p1.clone();
@@ -719,13 +719,12 @@ public abstract class BaseFunctionSolverTest
 			solver1.fit(data, o1, a, o);
 			solver2.computeValue(data, o2, a2);
 
-			Assert.assertArrayEquals(
-					"Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + 1 precomputed do not match", o, e,
-					1e-8);
+			Assertions.assertArrayEquals(o, e, 1e-8,
+					"Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + 1 precomputed do not match");
 
 			ev = p.getValues(pf1, a);
-			Assert.assertArrayEquals("Fit 1 peak + 1 precomputed yFit", ev, o1, 1e-8);
-			Assert.assertArrayEquals("computeValue 1 peak + 1 precomputed yFit", ev, o2, 1e-8);
+			Assertions.assertArrayEquals(ev, o1, 1e-8, "Fit 1 peak + 1 precomputed yFit");
+			Assertions.assertArrayEquals(ev, o2, 1e-8, "computeValue 1 peak + 1 precomputed yFit");
 		}
 	}
 
@@ -766,7 +765,7 @@ public abstract class BaseFunctionSolverTest
 
 		double v1 = solver1.getValue();
 		double v2 = solver2.getValue();
-		Assert.assertEquals("Fit 2 peaks and computeValue", v1, v2, Math.abs(v1) * 1e-10);
+		ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10, "Fit 2 peaks and computeValue");
 
 		final double[] o1 = new double[f2.size()];
 		final double[] o2 = new double[o1.length];
@@ -776,19 +775,19 @@ public abstract class BaseFunctionSolverTest
 
 		v1 = solver1.getValue();
 		v2 = solver2.getValue();
-		Assert.assertEquals("Fit 2 peaks and computeValue with yFit", v1, v2, Math.abs(v1) * 1e-10);
+		ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10, "Fit 2 peaks and computeValue with yFit");
 
 		final StandardValueProcedure p = new StandardValueProcedure();
 		double[] e = p.getValues(f2, a);
-		Assert.assertArrayEquals("Fit 2 peaks yFit", e, o1, 1e-8);
-		Assert.assertArrayEquals("computeValue 2 peaks yFit", e, o2, 1e-8);
+		Assertions.assertArrayEquals(e, o1, 1e-8, "Fit 2 peaks yFit");
+		Assertions.assertArrayEquals(e, o2, 1e-8, "computeValue 2 peaks yFit");
 
 		if (solver1 instanceof SteppingFunctionSolver)
 		{
 			// fit with 1 peak + 1 precomputed using the known params.
 			// compare to 2 peak computation.
-			final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
-					null);
+			final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size,
+					flags, null);
 			final Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
 			solver1.setGradientFunction(pf1);
 			solver2.setGradientFunction(pf1);
@@ -799,7 +798,7 @@ public abstract class BaseFunctionSolverTest
 
 			v1 = solver1.getValue();
 			v2 = solver2.getValue();
-			Assert.assertEquals("Fit 1 peak + 1 precomputed and computeValue", v1, v2, Math.abs(v1) * 1e-10);
+			ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10, "Fit 1 peak + 1 precomputed and computeValue");
 
 			Arrays.fill(o1, 0);
 			Arrays.fill(o2, 0);
@@ -809,11 +808,12 @@ public abstract class BaseFunctionSolverTest
 
 			v1 = solver1.getValue();
 			v2 = solver2.getValue();
-			Assert.assertEquals("Fit 1 peak + 1 precomputed and computeValue with yFit", v1, v2, Math.abs(v1) * 1e-10);
+			ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10,
+					"Fit 1 peak + 1 precomputed and computeValue with yFit");
 
 			e = p.getValues(pf1, a);
-			Assert.assertArrayEquals("Fit 1 peak + 1 precomputed yFit", e, o1, 1e-8);
-			Assert.assertArrayEquals("computeValue 1 peak + 1 precomputed yFit", e, o2, 1e-8);
+			Assertions.assertArrayEquals(e, o1, 1e-8, "Fit 1 peak + 1 precomputed yFit");
+			Assertions.assertArrayEquals(e, o2, 1e-8, "computeValue 1 peak + 1 precomputed yFit");
 		}
 	}
 }

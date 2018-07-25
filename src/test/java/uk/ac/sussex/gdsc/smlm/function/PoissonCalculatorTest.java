@@ -34,8 +34,9 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -50,8 +51,8 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest
@@ -72,10 +73,10 @@ public class PoissonCalculatorTest
 				double e = pd.probability(x);
 				double o = PoissonCalculator.likelihood(u, x);
 				if (e > 1e-100)
-					TestAssert.assertEqualsRelative(e, o, 1e-10);
+					ExtraAssertions.assertEqualsRelative(e, o, 1e-10);
 				e = pd.logProbability(x);
 				o = PoissonCalculator.logLikelihood(u, x);
-				TestAssert.assertEqualsRelative(e, o, 1e-10);
+				ExtraAssertions.assertEqualsRelative(e, o, 1e-10);
 			}
 		}
 	}
@@ -91,10 +92,10 @@ public class PoissonCalculatorTest
 				double e = pd.probability(x);
 				double o = PoissonCalculator.fastLikelihood(u, x);
 				if (e > 1e-100)
-					TestAssert.assertEqualsRelative(e, o, 1e-4);
+					ExtraAssertions.assertEqualsRelative(e, o, 1e-4);
 				e = pd.logProbability(x);
 				o = PoissonCalculator.fastLogLikelihood(u, x);
-				TestAssert.assertEqualsRelative(e, o, 1e-4);
+				ExtraAssertions.assertEqualsRelative(e, o, 1e-4);
 			}
 		}
 	}
@@ -111,10 +112,10 @@ public class PoissonCalculatorTest
 				double e = pd.probability(x);
 				double o = PoissonCalculator.fastLikelihood(u, x, fastLog);
 				if (e > 1e-100)
-					TestAssert.assertEqualsRelative(e, o, 1e-4);
+					ExtraAssertions.assertEqualsRelative(e, o, 1e-4);
 				e = pd.logProbability(x);
 				o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
-				TestAssert.assertEqualsRelative(e, o, 1e-4);
+				ExtraAssertions.assertEqualsRelative(e, o, 1e-4);
 			}
 		}
 	}
@@ -153,10 +154,12 @@ public class PoissonCalculatorTest
 		cumulativeProbabilityIsOneWithRealDataForCountAbove4(1);
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void fastLog_fastLikelihoodCumulativeProbabilityIsNotOneWithRealDataForCountAbove4()
 	{
-		cumulativeProbabilityIsOneWithRealDataForCountAbove4(2);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			cumulativeProbabilityIsOneWithRealDataForCountAbove4(2);
+		});
 	}
 
 	private static void cumulativeProbabilityIsOneWithRealDataForCountAbove4(int function)
@@ -217,7 +220,7 @@ public class PoissonCalculatorTest
 
 		TestLog.info("mu=%f, p=%f\n", f.mu, p);
 		if (test)
-			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
+			ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
 	}
 
 	private static abstract class BaseNonLinearFunction implements NonLinearFunction
@@ -317,7 +320,7 @@ public class PoissonCalculatorTest
 		double llr = -2 * (ll - mll);
 		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x);
 		TestLog.info("llr=%f, llr2=%f\n", llr, llr2);
-		TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, llr * 1e-10);
+		ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood ratio");
 
 		final double[] op = new double[x.length];
 		for (int i = 0; i < n; i++)
@@ -369,8 +372,8 @@ public class PoissonCalculatorTest
 			// too small to store in a double.
 			if (product.doubleValue() > 0)
 			{
-				TestAssert.assertEqualsRelative("Log-likelihood", ll, ll2, Math.abs(ll2) * 1e-10);
-				TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, Math.abs(llr) * 1e-10);
+				ExtraAssertions.assertEqualsRelative(ll, ll2, 1e-10, "Log-likelihood");
+				ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood ratio");
 			}
 		}
 
@@ -400,7 +403,7 @@ public class PoissonCalculatorTest
 		// Allow a tolerance as the random data may alter the p-value computation.
 		// Should allow it to be less than 2 increment either side of the answer.
 		TestLog.info("max fit = %g => %g\n", maxa, fita);
-		Assert.assertEquals("max", 1, fita, 0.199);
+		Assertions.assertEquals(1, fita, 0.199, "max");
 	}
 
 	@Test
@@ -447,7 +450,7 @@ public class PoissonCalculatorTest
 		final double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
 		TestLog.info("llr=%f, llr2=%f\n", llr, llr2);
 		// Approximately equal
-		TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, 5e-3);
+		ExtraAssertions.assertEqualsRelative(llr, llr2, 5e-3, "Log-likelihood ratio");
 	}
 
 	@Test
@@ -544,13 +547,15 @@ public class PoissonCalculatorTest
 
 		//System.out.printf("llr=%f (%g), llr2=%f (%g)\n", llra, PoissonCalculator.computePValue(llra, 1), llrb,
 		//		PoissonCalculator.computePValue(llrb, 1));
-		TestAssert.assertNotEqualsRelative("Log-likelihood ratio", llra, llrb, 1e-10);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			ExtraAssertions.assertEqualsRelative(llra, llrb, 1e-10, "Log-likelihood ratio");
+		});
 	}
 
 	@Test
 	public void showRelativeErrorOfLogFactorialApproximation()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -581,7 +586,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLogLikelihood()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -612,7 +617,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_FastLogLikelihood()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -644,7 +649,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_LogLikelihoodRatio()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -693,13 +698,12 @@ public class PoissonCalculatorTest
 			final PoissonCalculator pc = new PoissonCalculator(x);
 			e = PoissonCalculator.maximumLogLikelihood(x);
 			o = pc.getMaximumLogLikelihood();
-			TestLog.info("[%s] Instance MaxLL = %g vs %g (error = %g)\n", X, e, o,
-					DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("Instance Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			TestLog.info("[%s] Instance MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Instance Max LL not equal: x=" + X);
 
 			o = PoissonCalculator.fastMaximumLogLikelihood(x);
 			TestLog.info("[%s] Fast MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("Fast Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Fast Max LL not equal: x=" + X);
 
 			// Generate data around the value
 			for (int i = 0; i < n; i++)
@@ -707,20 +711,18 @@ public class PoissonCalculatorTest
 
 			e = PoissonCalculator.logLikelihood(u, x);
 			o = pc.logLikelihood(u);
-			TestLog.info("[%s] Instance LL = %g vs %g (error = %g)\n", X, e, o,
-					DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("Instance LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			TestLog.info("[%s] Instance LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Instance LL not equal: x=" + X);
 
 			o = PoissonCalculator.fastLogLikelihood(u, x);
 			TestLog.info("[%s] Fast LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("Fast LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Fast LL not equal: x=" + X);
 
 			e = PoissonCalculator.logLikelihoodRatio(u, x);
 			o = pc.getLogLikelihoodRatio(o);
 
-			TestLog.info("[%s] Instance LLR = %g vs %g (error = %g)\n", X, e, o,
-					DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("Instance LLR not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			TestLog.info("[%s] Instance LLR = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Instance LLR not equal: x=" + X);
 		}
 	}
 
@@ -838,7 +840,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void instanceMethodIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final int n = 1000;
 		final int m = 10;
@@ -880,7 +882,7 @@ public class PoissonCalculatorTest
 			ts.report(size);
 
 		final int index = ts.getSize() - 1;
-		Assert.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());
+		Assertions.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());
 	}
 
 	private static double[] add(double[] a, double[] b)

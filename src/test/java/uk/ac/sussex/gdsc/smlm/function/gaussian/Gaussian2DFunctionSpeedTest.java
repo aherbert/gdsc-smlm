@@ -27,20 +27,20 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
  * from a Gaussian 2D Function
  */
 @SuppressWarnings({ "javadoc" })
-public class SpeedTest
+public class Gaussian2DFunctionSpeedTest
 {
 	private final int Single = 1;
 	private final int Multi = 2;
@@ -283,19 +283,20 @@ public class SpeedTest
 				final double y1 = f1.eval(x[j], dyda1);
 				final double y2 = f2.eval(x[j], dyda2);
 
-				Assert.assertTrue("Not same y[" + j + "] @ " + i + " " + y1 + " != " + y2,
-						eq.almostEqualRelativeOrAbsolute(y1, y2));
+				ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(y1, y2), "Not same y[%d] @ %d : %g != %g",
+						j, i, y1, y2);
 
 				for (int ii = 0; ii < nparams; ii++)
-					Assert.assertTrue("Not same dyda[" + j + "] @ " + gradientIndices[g1[ii]] + ": " + dyda1[g1[ii]] +
-							" != " + dyda2[g2[ii]], eq.almostEqualRelativeOrAbsolute(dyda1[g1[ii]], dyda2[g2[ii]]));
+					ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(dyda1[g1[ii]], dyda2[g2[ii]]),
+							"Not same dyda[%d] @ %d : %g != %g", j, gradientIndices[g1[ii]], dyda1[g1[ii]],
+							dyda2[g2[ii]]);
 			}
 		}
 	}
 
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 10000;
 		ArrayList<double[]> paramsList2;

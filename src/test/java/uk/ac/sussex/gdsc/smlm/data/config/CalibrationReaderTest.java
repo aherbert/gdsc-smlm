@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.AngleCalibration;
@@ -56,14 +56,14 @@ public class CalibrationReaderTest
 		final CalibrationReader reader = new CalibrationReader(c);
 
 		final TypeConverter<DistanceUnit> distanceConverter = reader.getDistanceConverter(DistanceUnit.NM);
-		Assert.assertEquals(distanceConverter.from(), DistanceUnit.PIXEL);
-		Assert.assertEquals(distanceConverter.to(), DistanceUnit.NM);
+		Assertions.assertEquals(distanceConverter.from(), DistanceUnit.PIXEL);
+		Assertions.assertEquals(distanceConverter.to(), DistanceUnit.NM);
 
 		final TypeConverter<DistanceUnit> distanceConverter2 = CalibrationHelper.getDistanceConverter(c, DistanceUnit.NM);
-		Assert.assertEquals(distanceConverter2.from(), DistanceUnit.PIXEL);
-		Assert.assertEquals(distanceConverter2.to(), DistanceUnit.NM);
+		Assertions.assertEquals(distanceConverter2.from(), DistanceUnit.PIXEL);
+		Assertions.assertEquals(distanceConverter2.to(), DistanceUnit.NM);
 
-		Assert.assertEquals(distanceConverter.getFunction(), distanceConverter2.getFunction());
+		Assertions.assertEquals(distanceConverter.getFunction(), distanceConverter2.getFunction());
 	}
 
 	@Test
@@ -80,15 +80,15 @@ public class CalibrationReaderTest
 		final CalibrationReader reader = new CalibrationReader(c);
 
 		final TypeConverter<IntensityUnit> intensityConverter = reader.getIntensityConverter(IntensityUnit.COUNT);
-		Assert.assertEquals(intensityConverter.from(), IntensityUnit.PHOTON);
-		Assert.assertEquals(intensityConverter.to(), IntensityUnit.COUNT);
+		Assertions.assertEquals(intensityConverter.from(), IntensityUnit.PHOTON);
+		Assertions.assertEquals(intensityConverter.to(), IntensityUnit.COUNT);
 
 		final TypeConverter<IntensityUnit> intensityConverter2 = CalibrationHelper.getIntensityConverter(c,
 				IntensityUnit.COUNT);
-		Assert.assertEquals(intensityConverter2.from(), IntensityUnit.PHOTON);
-		Assert.assertEquals(intensityConverter2.to(), IntensityUnit.COUNT);
+		Assertions.assertEquals(intensityConverter2.from(), IntensityUnit.PHOTON);
+		Assertions.assertEquals(intensityConverter2.to(), IntensityUnit.COUNT);
 
-		Assert.assertEquals(intensityConverter.getFunction(), intensityConverter2.getFunction());
+		Assertions.assertEquals(intensityConverter.getFunction(), intensityConverter2.getFunction());
 	}
 
 	@Test
@@ -104,13 +104,13 @@ public class CalibrationReaderTest
 		final CalibrationReader reader = new CalibrationReader(c);
 
 		final TypeConverter<AngleUnit> angleConverter = reader.getAngleConverter(AngleUnit.DEGREE);
-		Assert.assertEquals(angleConverter.from(), AngleUnit.RADIAN);
-		Assert.assertEquals(angleConverter.to(), AngleUnit.DEGREE);
+		Assertions.assertEquals(angleConverter.from(), AngleUnit.RADIAN);
+		Assertions.assertEquals(angleConverter.to(), AngleUnit.DEGREE);
 
 		final TypeConverter<AngleUnit> angleConverter2 = CalibrationHelper.getAngleConverter(c, AngleUnit.DEGREE);
-		Assert.assertEquals(angleConverter2.from(), AngleUnit.RADIAN);
-		Assert.assertEquals(angleConverter2.to(), AngleUnit.DEGREE);
+		Assertions.assertEquals(angleConverter2.from(), AngleUnit.RADIAN);
+		Assertions.assertEquals(angleConverter2.to(), AngleUnit.DEGREE);
 
-		Assert.assertEquals(angleConverter.getFunction(), angleConverter2.getFunction());
+		Assertions.assertEquals(angleConverter.getFunction(), angleConverter2.getFunction());
 	}
 }

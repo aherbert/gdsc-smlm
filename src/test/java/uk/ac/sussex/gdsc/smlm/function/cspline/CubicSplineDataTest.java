@@ -28,8 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -76,6 +76,6 @@ public class CubicSplineDataTest
 
 		for (int zz = 0; zz < z; zz++)
 			for (int i = 0; i < size; i++)
-				Assert.assertArrayEquals(f1.splines[zz][i].getA(), f2.splines[zz][i].getA(), 0);
+				Assertions.assertArrayEquals(f1.splines[zz][i].getA(), f2.splines[zz][i].getA());
 	}
 }

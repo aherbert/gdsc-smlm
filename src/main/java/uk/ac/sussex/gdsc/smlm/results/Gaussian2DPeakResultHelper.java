@@ -564,7 +564,8 @@ public class Gaussian2DPeakResultHelper
 	public static Gaussian2DPeakResultCalculator create(PSF psf, CalibrationReader calibrationReader, int flags)
 			throws ConfigurationException, ConversionException
 	{
-		final BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibrationReader);
+		final BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf,
+				calibrationReader);
 
 		// Try the desired methods
 		if (BitFlags.anySet(flags, AMPLITUDE))
@@ -1302,6 +1303,8 @@ public class Gaussian2DPeakResultHelper
 	{
 		if (p < 0 || p > 1)
 			throw new IllegalArgumentException("P must be in the range 0 - 1");
+		if (p == 0)
+			return 0; // Avoid returning -0 (the result of Math.sqrt(-0))
 		return Math.sqrt(-2 * Math.log(1.0 - p));
 	}
 

@@ -24,11 +24,14 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 /**
  * Contains tests for the Gaussian functions in single or double precision
@@ -409,52 +412,60 @@ public class PrecisionTest
 		functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), 1e-4);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
+	@Test
 	public void circularFunctionPrecisionIsNot5sf()
 	{
-		functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), 1e-5);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), 1e-5);
+		});
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
+	@Test
 	public void circularFunctionsPrecisionIsNot3sfAtLargeXY()
 	{
 		int maxx = this.maxx;
 		try
 		{
-			for (;;)
+			maxx *= 2;
+			while (maxx * maxx < Integer.MAX_VALUE)
 			{
-				maxx *= 2;
 				TestLog.info("maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
 						1e-3);
+				maxx *= 2;
 			}
 		}
 		catch (final AssertionError e)
 		{
 			TestLog.infoln(e.getMessage());
 			//e.printStackTrace();
-			throw e;
+			return;
 		}
+		Assertions.fail("Expected different value");
 	}
 
+	@SpeedTag
 	@Test
 	public void circularDoublePrecisionIsFasterWithGradients()
 	{
 		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false, true);
 	}
 
+	@SpeedTag
 	@Test
 	public void circularDoublePrecisionIsFaster()
 	{
 		isFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false, true);
 	}
 
+	@SpeedTag
 	@Test
 	public void circularDoublePrecisionIsFasterWithGradientsNoSum()
 	{
 		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true, true);
 	}
 
+	@SpeedTag
 	@Test
 	public void circularDoublePrecisionIsFasterNoSum()
 	{
@@ -473,58 +484,67 @@ public class PrecisionTest
 		functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-4);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void fixedFunctionPrecisionIsNot5sf()
+	@Test
+	public void fixedFunctionPrecisionIsNot6sf()
 	{
-		functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-5);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-6);
+		});
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
+	@Test
 	public void fixedFunctionsPrecisionIsNot3sfAtLargeXY()
 	{
 		int maxx = this.maxx;
 		try
 		{
-			for (;;)
+			maxx *= 2;
+			while (maxx * maxx < Integer.MAX_VALUE)
 			{
-				maxx *= 2;
 				TestLog.info("maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
+				maxx *= 2;
 			}
 		}
 		catch (final AssertionError e)
 		{
 			TestLog.infoln(e.getMessage());
 			//e.printStackTrace();
-			throw e;
+			return;
 		}
+		Assertions.fail("Expected different value");
 	}
 
+	@SpeedTag
 	@Test
 	public void fixedDoublePrecisionIsFasterWithGradients()
 	{
 		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false, true);
 	}
 
+	@SpeedTag
 	@Test
 	public void fixedDoublePrecisionIsFaster()
 	{
 		isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false, true);
 	}
 
+	@SpeedTag
 	@Test
 	public void fixedDoublePrecisionIsFasterWithGradientsNoSum()
 	{
 		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true, true);
 	}
 
+	@SpeedTag
 	@Test
 	public void fixedDoublePrecisionIsFasterNoSum()
 	{
 		isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true, true);
 	}
 
-	private static void functionsComputeSameValue(int maxx, SinglePrecision f1, DoublePrecision f2, final double precision)
+	private static void functionsComputeSameValue(int maxx, SinglePrecision f1, DoublePrecision f2,
+			final double precision)
 	{
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -542,32 +562,32 @@ public class PrecisionTest
 		final double[] tg1 = new double[n];
 		final double[] tg2 = new double[n];
 
-		for (int i = 0; i < maxx; i++)
+		for (int i = 0, limit = maxx * maxx; i < limit; i++)
 		{
 			final float v1 = f1.eval(i);
 			t1 += v1;
 			final double v2 = f2.eval(i);
 			t2 += v2;
-			Assert.assertEquals("Different values", v2, v1, precision);
+			ExtraAssertions.assertEqualsRelative(v2, v1, precision, "Different values");
 			final float vv1 = f1.eval(i, g1);
 			final double vv2 = f2.eval(i, g2);
-			Assert.assertEquals("Different f1 values", v1, vv1, precision);
-			Assert.assertEquals("Different f2 values", v2, vv2, precision);
+			Assertions.assertEquals(v1, vv1, "Different f1 values");
+			Assertions.assertEquals(v2, vv2, "Different f2 values");
 			for (int j = 0; j < n; j++)
 			{
 				tg1[j] += g1[j];
 				tg2[j] += g2[j];
 			}
-			Assert.assertArrayEquals("Different gradients", g2, toDouble(g1), precision);
+			ExtraAssertions.assertArrayEqualsRelative(g2, toDouble(g1), precision, "Different gradients");
 		}
-		Assert.assertArrayEquals("Different total gradients", tg2, tg1, precision);
-		Assert.assertEquals("Different totals", t2, t1, precision);
+		ExtraAssertions.assertArrayEqualsRelative(tg2, tg1, precision, "Different total gradients");
+		ExtraAssertions.assertEqualsRelative(t2, t1, precision, "Different totals");
 	}
 
 	private void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
 			boolean doubleFaster)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -612,8 +632,8 @@ public class PrecisionTest
 			c2 = f2.getClass();
 		}
 
-		TestLog.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n",
-				(noSum) ? "No sum " : "", c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
+		TestLog.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
+				c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 
 	@SuppressWarnings("unused")
@@ -624,9 +644,11 @@ public class PrecisionTest
 		final float[] g = new float[n];
 		final double[] tg = new double[n];
 
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i, g);
 
 		final long time = System.nanoTime();
@@ -634,7 +656,7 @@ public class PrecisionTest
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			sum = 0;
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 			{
 				sum += f.eval(i, g);
 				for (int k = 0; k < n; k++)
@@ -649,14 +671,16 @@ public class PrecisionTest
 		f.initialise(p);
 		final float[] g = new float[params1.length];
 
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i, g);
 
 		final long time = System.nanoTime();
 		for (int j = 0; j < MAX_ITER; j++)
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i, g);
 		return System.nanoTime() - time;
 	}
@@ -669,9 +693,11 @@ public class PrecisionTest
 		final double[] g = new double[n];
 		final double[] tg = new double[n];
 
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i, g);
 
 		final long time = System.nanoTime();
@@ -679,7 +705,7 @@ public class PrecisionTest
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			sum = 0;
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 			{
 				sum += f.eval(i, g);
 				for (int k = 0; k < n; k++)
@@ -694,21 +720,23 @@ public class PrecisionTest
 		f.initialise(p);
 		final double[] g = new double[params1.length];
 
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i, g);
 
 		final long time = System.nanoTime();
 		for (int j = 0; j < MAX_ITER; j++)
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i, g);
 		return System.nanoTime() - time;
 	}
 
 	private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum, boolean doubleFaster)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -759,11 +787,13 @@ public class PrecisionTest
 	@SuppressWarnings("unused")
 	private long runSingle(int maxx, SinglePrecision f, float[] p)
 	{
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
 		{
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i);
 		}
 
@@ -773,7 +803,7 @@ public class PrecisionTest
 		{
 			sum = 0;
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				sum += f.eval(i);
 		}
 		return System.nanoTime() - time;
@@ -781,11 +811,13 @@ public class PrecisionTest
 
 	private long runSingleNoSum(int maxx, SinglePrecision f, float[] p)
 	{
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
 		{
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i);
 		}
 
@@ -793,7 +825,7 @@ public class PrecisionTest
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i);
 		}
 		return System.nanoTime() - time;
@@ -802,11 +834,13 @@ public class PrecisionTest
 	@SuppressWarnings("unused")
 	private long runDouble(int maxx, DoublePrecision f, double[] p)
 	{
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
 		{
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i);
 		}
 
@@ -816,7 +850,7 @@ public class PrecisionTest
 		{
 			sum = 0;
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				sum += f.eval(i);
 		}
 		return System.nanoTime() - time;
@@ -824,11 +858,13 @@ public class PrecisionTest
 
 	private long runDoubleNoSum(int maxx, DoublePrecision f, double[] p)
 	{
+		final int limit = maxx * maxx;
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
 		{
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i);
 		}
 
@@ -836,7 +872,7 @@ public class PrecisionTest
 		for (int j = 0; j < MAX_ITER; j++)
 		{
 			f.initialise(p);
-			for (int i = 0; i < maxx; i++)
+			for (int i = 0; i < limit; i++)
 				f.eval(i);
 		}
 		return System.nanoTime() - time;

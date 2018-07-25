@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class AbstractFilterTest
@@ -194,7 +194,7 @@ public class AbstractFilterTest
 				if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index]))
 				{
 					final String message = String.format(format, args);
-					TestAssert.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+					ExtraAssertions.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
 							FloatEquality.relativeError(data1[index], data2[index]));
 				}
 		}
@@ -212,7 +212,7 @@ public class AbstractFilterTest
 				if (data1[index] != data2[index])
 				{
 					final String message = String.format(format, args);
-					TestAssert.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+					ExtraAssertions.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
 							FloatEquality.relativeError(data1[index], data2[index]));
 				}
 		}

@@ -28,13 +28,13 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class BlockMeanFilterTest extends AbstractFilterTest
@@ -375,7 +375,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 
 	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -450,7 +450,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 
 	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

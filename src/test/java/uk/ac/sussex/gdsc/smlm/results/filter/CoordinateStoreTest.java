@@ -23,8 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class CoordinateStoreTest
@@ -36,19 +38,19 @@ public class CoordinateStoreTest
 	{
 		CoordinateStore s;
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, -1, -1);
-		Assert.assertTrue(s instanceof NullCoordinateStore);
+		Assertions.assertTrue(s instanceof NullCoordinateStore);
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, 0, -1);
-		Assert.assertTrue(s instanceof GridCoordinateStore);
+		Assertions.assertTrue(s instanceof GridCoordinateStore);
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, 0.2, -1);
-		Assert.assertTrue(s instanceof GridCoordinateStore);
+		Assertions.assertTrue(s instanceof GridCoordinateStore);
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, 0.5, -1);
-		Assert.assertTrue(s instanceof GridCoordinateStore1);
+		Assertions.assertTrue(s instanceof GridCoordinateStore1);
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, -1);
-		Assert.assertTrue(s instanceof GridCoordinateStore1);
+		Assertions.assertTrue(s instanceof GridCoordinateStore1);
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, 1.5, -1);
-		Assert.assertTrue(s instanceof GridCoordinateStore);
+		Assertions.assertTrue(s instanceof GridCoordinateStore);
 		s = CoordinateStoreFactory.create(1, 2, 10, 11, 2, -1);
-		Assert.assertTrue(s instanceof GridCoordinateStore);
+		Assertions.assertTrue(s instanceof GridCoordinateStore);
 	}
 
 	@Test
@@ -61,19 +63,21 @@ public class CoordinateStoreTest
 
 		for (int i = 0; i < resolution.length; i++)
 		{
+			final int ii = i;
 			final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], -1);
 			for (int j = 0; j < datax.length; j++)
 				s.add(datax[j], datay[j], dataz[j]);
 
 			for (int j = 0; j < datax.length; j++)
 			{
-				final String msg = resolution[i] + " [" + j + "]";
+				final int jj = j;
+				final Supplier<String> msg = () -> resolution[ii] + " [" + jj + "]";
 				//@formatter:off
-				Assert.assertTrue(msg, s.contains(datax[j], datay[j], dataz[j]));
-				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]));
-				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]));
+				Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]), msg);
+				Assertions.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]), msg);
+				Assertions.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]), msg);
+				Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]), msg);
+				Assertions.assertFalse(s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
 				//@formatter:on
 			}
 		}
@@ -90,41 +94,42 @@ public class CoordinateStoreTest
 		final double x = 3.1, y = 4.3, z = 1.1;
 		final double[] resolution = { 0.3, 0.5, 1.5 };
 
-		double zResolution;
 		CoordinateStore s;
-		String msg;
+		Supplier<String> msg;
 
 		for (int i = 0; i < resolution.length; i++)
 		{
+			final int ii = i;
+
 			// No 3D
-			zResolution = -1;
-			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution);
+			final double zResolution_1 = -1;
+			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution_1);
 			s.add(x, y, z);
 
-			msg = resolution[i] + "," + zResolution;
-			Assert.assertTrue(msg, s.contains(x, y, z));
+			msg = () -> resolution[ii] + "," + zResolution_1;
+			Assertions.assertTrue(s.contains(x, y, z), msg);
 
 			// 3D exact match
-			zResolution = 0;
-			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution);
+			final double zResolution0 = 0;
+			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution0);
 			s.add(x, y, z);
 
-			msg = resolution[i] + "," + zResolution;
-			Assert.assertTrue(msg, s.contains(x, y, z));
-			Assert.assertFalse(msg, s.contains(x, y, z + 0.01));
-			Assert.assertFalse(msg, s.contains(x, y, z - 0.01));
+			msg = () -> resolution[ii] + "," + zResolution0;
+			Assertions.assertTrue(s.contains(x, y, z), msg);
+			Assertions.assertFalse(s.contains(x, y, z + 0.01), msg);
+			Assertions.assertFalse(s.contains(x, y, z - 0.01), msg);
 
 			// 3D match within z-resolution
-			zResolution = 1;
-			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution);
+			final double zResolution1 = 1;
+			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution1);
 			s.add(x, y, z);
 
-			msg = resolution[i] + "," + zResolution;
-			Assert.assertTrue(msg, s.contains(x, y, z));
-			Assert.assertTrue(msg, s.contains(x, y, z + zResolution));
-			Assert.assertTrue(msg, s.contains(x, y, z - zResolution));
-			Assert.assertFalse(msg, s.contains(x, y, z + zResolution * 1.01));
-			Assert.assertFalse(msg, s.contains(x, y, z - zResolution * 1.01));
+			msg = () -> resolution[ii] + "," + zResolution1;
+			Assertions.assertTrue(s.contains(x, y, z), msg);
+			Assertions.assertTrue(s.contains(x, y, z + zResolution1), msg);
+			Assertions.assertTrue(s.contains(x, y, z - zResolution1), msg);
+			Assertions.assertFalse(s.contains(x, y, z + zResolution1 * 1.01), msg);
+			Assertions.assertFalse(s.contains(x, y, z - zResolution1 * 1.01), msg);
 		}
 	}
 
@@ -142,12 +147,12 @@ public class CoordinateStoreTest
 			for (int j = 0; j < datax.length; j++)
 			{
 				s.addToQueue(datax[j], datay[j], dataz[j]);
-				Assert.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
+				Assertions.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
 				for (int k = 0; k < j; k++)
-					Assert.assertTrue(s.contains(datax[k], datay[k], dataz[j]));
+					Assertions.assertTrue(s.contains(datax[k], datay[k], dataz[j]));
 				s.flush();
 				for (int k = 0; k <= j; k++)
-					Assert.assertTrue(s.contains(datax[k], datay[k], dataz[j]));
+					Assertions.assertTrue(s.contains(datax[k], datay[k], dataz[j]));
 			}
 		}
 	}
@@ -168,57 +173,61 @@ public class CoordinateStoreTest
 			for (int j = 0; j < datax.length; j++)
 			{
 				s.add(datax[j], datay[j], dataz[j]);
-				Assert.assertTrue(s.contains(datax[j], datay[j], dataz[j]));
+				Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]));
 			}
 
 			s.clear();
 
 			for (int j = 0; j < datax.length; j++)
-				Assert.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
+				Assertions.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
 
 			// Queue then flush then clear
 			for (int j = 0; j < datax.length; j++)
 			{
 				s.addToQueue(datax[j], datay[j], dataz[j]);
-				Assert.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
+				Assertions.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
 			}
 			s.flush();
 			for (int j = 0; j < datax.length; j++)
-				Assert.assertTrue(s.contains(datax[j], datay[j], dataz[j]));
+				Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]));
 
 			s.clear();
 
 			for (int j = 0; j < datax.length; j++)
-				Assert.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
+				Assertions.assertFalse(s.contains(datax[j], datay[j], dataz[j]));
 		}
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGrid1XLow()
 	{
-		final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
-		s.add(s.getMinX() - 1, s.getMinY(), 0);
+		Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+			final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+			s.add(s.getMinX() - 1, s.getMinY(), 0);
+		});
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGridXHigh()
 	{
-		final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
-		s.add(s.getMinX() + s.getWidth() + 1, s.getMinY(), 0);
+		Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+			final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+			s.add(s.getMinX() + s.getWidth() + 1, s.getMinY(), 0);
+		});
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGrid1YLow()
 	{
-		final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
-		s.add(s.getMinX(), s.getMinY() - 1, 0);
+		Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+			final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+			s.add(s.getMinX(), s.getMinY() - 1, 0);
+		});
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGridYHigh()
 	{
-		final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
-		s.add(s.getMinX(), s.getMinY() + s.getHeight() + 1, 0);
+		Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+			final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+			s.add(s.getMinX(), s.getMinY() + s.getHeight() + 1, 0);
+		});
 	}
 
 	@Test
@@ -235,10 +244,10 @@ public class CoordinateStoreTest
 	public void containsOutsideGridIsFalse()
 	{
 		final GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
-		Assert.assertFalse(addAndFind(s, s.getMinX() - 1, s.getMinY(), 0));
-		Assert.assertFalse(addAndFind(s, s.getMinX() + s.getWidth() + 1, s.getMinY(), 0));
-		Assert.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() - 1, 0));
-		Assert.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() + s.getHeight() + 1, 0));
+		Assertions.assertFalse(addAndFind(s, s.getMinX() - 1, s.getMinY(), 0));
+		Assertions.assertFalse(addAndFind(s, s.getMinX() + s.getWidth() + 1, s.getMinY(), 0));
+		Assertions.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() - 1, 0));
+		Assertions.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() + s.getHeight() + 1, 0));
 	}
 
 	private static boolean addAndFind(GridCoordinateStore s, double x, double y, double z)
@@ -255,10 +264,10 @@ public class CoordinateStoreTest
 		s.safeAdd(11, 0, 0);
 		s.safeAdd(-1, 0, 0);
 		s.safeAdd(0, 11, 0);
-		Assert.assertNull(s.find(-1, 0, 0));
-		Assert.assertNull(s.find(11, 0, 0));
-		Assert.assertNull(s.find(-1, 0, 0));
-		Assert.assertNull(s.find(0, 11, 0));
+		Assertions.assertNull(s.find(-1, 0, 0));
+		Assertions.assertNull(s.find(11, 0, 0));
+		Assertions.assertNull(s.find(-1, 0, 0));
+		Assertions.assertNull(s.find(0, 11, 0));
 	}
 
 	@Test
@@ -272,6 +281,7 @@ public class CoordinateStoreTest
 		final GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 0, 0.0);
 		for (int i = 0; i < resolution.length; i++)
 		{
+			final int ii = i;
 			s.changeXYResolution(resolution[i]);
 
 			for (int j = 0; j < datax.length; j++)
@@ -279,13 +289,14 @@ public class CoordinateStoreTest
 
 			for (int j = 0; j < datax.length; j++)
 			{
-				final String msg = resolution[i] + " [" + j + "]";
+				final int jj = j;
+				final Supplier<String> msg = () -> resolution[ii] + " [" + jj + "]";
 				//@formatter:off
-				Assert.assertTrue(msg, s.contains(datax[j], datay[j], dataz[j]));
-				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]));
-				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]));
+				Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]), msg);
+				Assertions.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]), msg);
+				Assertions.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]), msg);
+				Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]), msg);
+				Assertions.assertFalse(s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
 				//@formatter:on
 			}
 		}
@@ -302,6 +313,7 @@ public class CoordinateStoreTest
 		final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
 		for (int i = 0; i < resolution.length; i++)
 		{
+			final int ii = i;
 			s.changeXYResolution(resolution[i]);
 
 			for (int j = 0; j < datax.length; j++)
@@ -309,22 +321,25 @@ public class CoordinateStoreTest
 
 			for (int j = 0; j < datax.length; j++)
 			{
-				final String msg = resolution[i] + " [" + j + "]";
+				final int jj = j;
+				final Supplier<String> msg = () -> resolution[ii] + " [" + jj + "]";
 				//@formatter:off
-				Assert.assertTrue(msg, s.contains(datax[j], datay[j], dataz[j]));
-				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]));
-				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]));
+				Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]), msg);
+				Assertions.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]), msg);
+				Assertions.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]), msg);
+				Assertions.assertFalse(	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]), msg);
+				Assertions.assertFalse(	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
 				//@formatter:on
 			}
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void cannotChangeToBadXYResolutionOnFixedStore()
 	{
-		final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
-		s.changeXYResolution(1.1);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
+			s.changeXYResolution(1.1);
+		});
 	}
 }

@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.utils;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import pl.edu.icm.jlargearrays.ConcurrencyUtils;
@@ -35,8 +35,8 @@ import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class ConvolutionTest
@@ -67,12 +67,12 @@ public class ConvolutionTest
 				final double[] r2 = Convolution.convolveFFT(data, kernel);
 				final double[] r2b = Convolution.convolveFFT(kernel, data);
 
-				Assert.assertEquals(r1.length, r1b.length);
-				Assert.assertEquals(r1.length, r2.length);
-				Assert.assertEquals(r1.length, r2b.length);
+				Assertions.assertEquals(r1.length, r1b.length);
+				Assertions.assertEquals(r1.length, r2.length);
+				Assertions.assertEquals(r1.length, r2b.length);
 
-				TestAssert.assertArrayEqualsRelative("Spatial convolution doesn't match", r1, r1b, 1e-6);
-				TestAssert.assertArrayEqualsRelative("FFT convolution doesn't match", r2, r2b, 1e-6);
+				ExtraAssertions.assertArrayEqualsRelative(r1, r1b, 1e-6, "Spatial convolution doesn't match");
+				ExtraAssertions.assertArrayEqualsRelative(r2, r2b, 1e-6, "FFT convolution doesn't match");
 
 				s *= 2;
 			}
@@ -111,15 +111,15 @@ public class ConvolutionTest
 						r1 = Convolution.convolve(kernel, data1, data2);
 					}
 
-					Assert.assertEquals(r1.length, 2);
-					Assert.assertEquals(e1.length, r1[0].length);
-					Assert.assertEquals(e2.length, r1[1].length);
+					Assertions.assertEquals(r1.length, 2);
+					Assertions.assertEquals(e1.length, r1[0].length);
+					Assertions.assertEquals(e2.length, r1[1].length);
 
 					for (int k = 0; k < e1.length; k++)
 					{
 						// Exact match
-						Assert.assertEquals(e1[k], r1[0][k], 0);
-						Assert.assertEquals(e2[k], r1[1][k], 0);
+						Assertions.assertEquals(e1[k], r1[0][k]);
+						Assertions.assertEquals(e2[k], r1[1][k]);
 					}
 				}
 
@@ -132,7 +132,7 @@ public class ConvolutionTest
 	@Test
 	public void doSpeedTest()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
@@ -178,7 +178,7 @@ public class ConvolutionTest
 	@Test
 	public void doDoubleSpeedTest()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
@@ -225,7 +225,7 @@ public class ConvolutionTest
 	@Test
 	public void doSingleVsDoubleSpeedTest()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -277,7 +277,7 @@ public class ConvolutionTest
 	@Test
 	public void doSingleVsDoubleFFTSpeedTest()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -388,8 +388,8 @@ public class ConvolutionTest
 						}
 					});
 
-					Assert.assertArrayEquals(e, o, 0);
-					Assert.assertArrayEquals(e, o2, 0);
+					Assertions.assertArrayEquals(e, o);
+					Assertions.assertArrayEquals(e, o2);
 				}
 
 				s *= 2;
@@ -433,10 +433,10 @@ public class ConvolutionTest
 						}
 					});
 
-					Assert.assertArrayEquals(e1, o[0], 0);
-					Assert.assertArrayEquals(e1, o2[0], 0);
-					Assert.assertArrayEquals(e2, o[1], 0);
-					Assert.assertArrayEquals(e2, o2[1], 0);
+					Assertions.assertArrayEquals(e1, o[0]);
+					Assertions.assertArrayEquals(e1, o2[0]);
+					Assertions.assertArrayEquals(e2, o[1]);
+					Assertions.assertArrayEquals(e2, o2[1]);
 				}
 
 				s *= 2;
@@ -498,9 +498,9 @@ public class ConvolutionTest
 
 					int k = 0;
 					for (; k < limit; k++)
-						Assert.assertEquals(e[k], o[k], 0);
+						Assertions.assertEquals(e[k], o[k]);
 					while (k < o.length)
-						Assert.assertEquals(0, o[k++], 0);
+						Assertions.assertEquals(0, o[k++]);
 				}
 
 				s *= 2;
@@ -547,13 +547,13 @@ public class ConvolutionTest
 					int k = 0;
 					for (; k < limit; k++)
 					{
-						Assert.assertEquals(e[0][k], o[0][k], 0);
-						Assert.assertEquals(e[0][k], o[1][k], 0);
+						Assertions.assertEquals(e[0][k], o[0][k]);
+						Assertions.assertEquals(e[0][k], o[1][k]);
 					}
 					while (k < o.length)
 					{
-						Assert.assertEquals(0, o[0][k], 0);
-						Assert.assertEquals(0, o[1][k], 0);
+						Assertions.assertEquals(0, o[0][k]);
+						Assertions.assertEquals(0, o[1][k]);
 						k++;
 					}
 				}
@@ -567,7 +567,7 @@ public class ConvolutionTest
 	@Test
 	public void doScaledSpeedTest()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int scale = 4; scale <= 8; scale *= 2)

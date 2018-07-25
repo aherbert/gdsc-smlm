@@ -23,17 +23,19 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.function.Supplier;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianConvolutionFunctionTest
@@ -78,10 +80,11 @@ public class PoissonGaussianConvolutionFunctionTest
 					probabilityMatchesLogProbability(g, p, s, true);
 	}
 
-	private static void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, boolean computePMF)
+	private static void cumulativeProbabilityIsOne(final double gain, final double mu, final double s,
+			boolean computePMF)
 	{
 		final double p2 = cumulativeProbability(gain, mu, s, computePMF);
-		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
+		ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 	}
 
 	private static double cumulativeProbability(final double gain, final double mu, final double s, boolean computePMF)
@@ -118,7 +121,7 @@ public class PoissonGaussianConvolutionFunctionTest
 				p += pp;
 			}
 			//if (p > 1.01)
-			//	Assert.fail("P > 1: " + p);
+			//	Assertions.fail("P > 1: " + p);
 		}
 
 		// We have most of the likelihood density.
@@ -167,7 +170,8 @@ public class PoissonGaussianConvolutionFunctionTest
 		return p2;
 	}
 
-	private static void probabilityMatchesLogProbability(final double gain, double mu, final double s, boolean computePMF)
+	private static void probabilityMatchesLogProbability(final double gain, double mu, final double s,
+			boolean computePMF)
 	{
 		// Note: The input s parameter is pre-gain.
 		final PoissonGaussianConvolutionFunction f = PoissonGaussianConvolutionFunction
@@ -183,32 +187,32 @@ public class PoissonGaussianConvolutionFunctionTest
 		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		final String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
+		final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
+			ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
 		}
 	}
 
 	@Test
 	public void pdfFasterThanPMF()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		// Realistic CCD parameters for speed test
 		final double s = 7.16;
 		final double g = 3.1;
 
-		final PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
-				s);
+		final PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction
+				.createWithStandardDeviation(1 / g, s);
 		f1.setComputePMF(true);
 
-		final PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
-				s);
+		final PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction
+				.createWithStandardDeviation(1 / g, s);
 		f2.setComputePMF(false);
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();

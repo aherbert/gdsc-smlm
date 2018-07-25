@@ -24,14 +24,15 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonPoissonFunctionTest
@@ -81,7 +82,7 @@ public class PoissonPoissonFunctionTest
 		final double p2 = cumulativeProbability(gain, mu, s);
 		// Only true with continuous distribution if the combined Poisson mean is above 4
 		if (mu + s / gain > 4)
-			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
+			ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private static double cumulativeProbability(final double gain, final double mu, final double s)
@@ -116,7 +117,7 @@ public class PoissonPoissonFunctionTest
 				p += pp;
 			}
 			//if (p > 1.01)
-			//	Assert.fail("P > 1: " + p);
+			//	Assertions.fail("P > 1: " + p);
 		}
 
 		// We have most of the likelihood density.
@@ -143,7 +144,8 @@ public class PoissonPoissonFunctionTest
 
 		// Do a formal integration
 		double p2 = 0;
-		final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 3,
+				SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
 			@Override
@@ -172,14 +174,14 @@ public class PoissonPoissonFunctionTest
 		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		final String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
+			ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
 		}
 	}
 }

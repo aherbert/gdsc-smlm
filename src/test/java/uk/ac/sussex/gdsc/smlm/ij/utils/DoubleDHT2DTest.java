@@ -26,17 +26,17 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import java.util.Arrays;
 
 import org.jtransforms.fft.DoubleFFT_2D;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import ij.process.FHT2;
 import ij.process.FloatProcessor;
+import uk.ac.sussex.gdsc.core.ij.process.FHT2;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class DoubleDHT2DTest
@@ -123,7 +123,7 @@ public class DoubleDHT2DTest
 		swap[3] = 1;
 		swap[4] = 2;
 		for (int i = 0; i < in.length; i++)
-			Assert.assertEquals(in[i], swap[(int) out[i]], 0);
+			Assertions.assertEquals(in[i], swap[(int) out[i]]);
 	}
 
 	@Test
@@ -143,13 +143,13 @@ public class DoubleDHT2DTest
 		final DoubleDHT2D convolved2 = dht.multiply(copy);
 		final DoubleDHT2D deconvolved2 = convolved.divide(copy);
 
-		Assert.assertArrayEquals(convolved.getData(), convolved2.getData(), 0);
-		Assert.assertArrayEquals(deconvolved.getData(), deconvolved2.getData(), 0);
+		Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
+		Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
 
 		double[] e = dht.getData();
 		double[] o = deconvolved.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
 
 		deconvolved.inverseTransform();
 
@@ -158,7 +158,7 @@ public class DoubleDHT2DTest
 		o = deconvolved.getData();
 
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class DoubleDHT2DTest
 
 				final DoubleDHT2D correlation = dht2.conjugateMultiply(dht);
 				final DoubleDHT2D correlation2 = dht2.conjugateMultiply(copy);
-				Assert.assertArrayEquals(correlation.getData(), correlation2.getData(), 0);
+				Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
 				correlation.inverseTransform();
 				correlation.swapQuadrants();
@@ -196,8 +196,8 @@ public class DoubleDHT2DTest
 				final int ox = xy[0] - icentre;
 				final int oy = xy[1] - icentre;
 				//System.out.printf("Shift [%d,%d], centre [%d,%d]\n", x, y, xy[0], xy[1]);
-				Assert.assertEquals(x, ox);
-				Assert.assertEquals(y, oy);
+				Assertions.assertEquals(x, ox);
+				Assertions.assertEquals(y, oy);
 			}
 	}
 
@@ -219,7 +219,7 @@ public class DoubleDHT2DTest
 		final double[] e = dht.getData();
 		final double[] o = dht2.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
 
 		// Test verses full forward transform
 		final DoubleFFT_2D fft = new DoubleFFT_2D(dht.nr, dht.nc);
@@ -230,8 +230,8 @@ public class DoubleDHT2DTest
 		final double[] oi = result[1].getData();
 		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
 		{
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
 		}
 	}
 
@@ -264,7 +264,7 @@ public class DoubleDHT2DTest
 	{
 		for (int i = 0; i < e.length; i++)
 			if (!DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs))
-				TestAssert.fail("%s [%d] %g vs %g = %g", msg, i, e[i], o[i], DoubleEquality.relativeError(e[i], o[i]));
+				ExtraAssertions.fail("%s [%d] %g vs %g = %g", msg, i, e[i], o[i], DoubleEquality.relativeError(e[i], o[i]));
 	}
 
 	private static void check(String operation, DoubleDHT2D dht, FHT2 fht, double rel, double abs)

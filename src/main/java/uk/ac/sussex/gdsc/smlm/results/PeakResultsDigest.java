@@ -235,7 +235,7 @@ public class PeakResultsDigest
 		return executorService.submit(new Callable<PeakResultsDigest>()
 		{
 			@Override
-			public PeakResultsDigest call() throws Exception
+			public PeakResultsDigest call()
 			{
 				return new PeakResultsDigest(peakResults);
 			}

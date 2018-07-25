@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -48,8 +48,8 @@ public class GaussJordanTest
 
 		final boolean result = solver.solve(a, b);
 
-		Assert.assertTrue(result);
-		Assert.assertArrayEquals(expecteds, b, 1e-4f);
+		Assertions.assertTrue(result);
+		Assertions.assertArrayEquals(expecteds, b, 1e-4f);
 
 		if (TestSettings.allow(LogLevel.INFO))
 		{

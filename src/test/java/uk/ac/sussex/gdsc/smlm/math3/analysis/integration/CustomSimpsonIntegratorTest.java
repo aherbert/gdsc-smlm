@@ -21,14 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package org.apache.commons.math3.analysis.integration;
+package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomSimpsonIntegratorTest
@@ -147,12 +147,12 @@ public class CustomSimpsonIntegratorTest
 
 		TestLog.info("%s c=%d  %g-%g  e=%g  ee=%g  o=%g\n", f.getClass().getSimpleName(), c, a, b, e, ee, o);
 
-		final double delta = Math.abs(e) * 1e-6;
-		Assert.assertEquals(e, ee, delta);
-		Assert.assertEquals(e, o, delta);
+		final double delta = 1e-6;
+		ExtraAssertions.assertEqualsRelative(e, ee, delta);
+		ExtraAssertions.assertEqualsRelative(e, o, delta);
 
-		// These should be the same
-		Assert.assertEquals(ee, o, delta * 1e-6);
+		// These should be the same within numeric tolerance
+		ExtraAssertions.assertEqualsRelative(ee, o, 1e-12);
 	}
 
 	private static double simpson(UnivariateFunction f, double a, double b, int c)

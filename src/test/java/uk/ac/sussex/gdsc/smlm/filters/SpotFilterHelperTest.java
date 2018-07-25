@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -77,9 +77,9 @@ public class SpotFilterHelperTest
 				{
 					final int[] e = countNeighbours(spots, width, height, box);
 					final int[] count = h.countNeighbours(spots, box);
-					Assert.assertArrayEquals(e, count);
+					Assertions.assertArrayEquals(e, count);
 					final int[] count2 = h.countNeighbours(spots, width, height, box);
-					Assert.assertArrayEquals(e, count2);
+					Assertions.assertArrayEquals(e, count2);
 				}
 			}
 		}

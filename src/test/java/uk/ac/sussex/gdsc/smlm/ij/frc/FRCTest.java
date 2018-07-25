@@ -28,8 +28,8 @@ import java.awt.Rectangle;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class FRCTest
@@ -57,7 +57,7 @@ public class FRCTest
 			final double e = Math.sin(a);
 			final double o = FRC.getSine(a, cosA);
 			//System.out.printf("%f  %f ?= %f\n", a, e, o);
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(o, e, 1e-6, 1e-10));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(o, e, 1e-6, 1e-10));
 		}
 	}
 
@@ -107,9 +107,9 @@ public class FRCTest
 
 		FRC.compute(numeratorE, absFFT1E, absFFT2E, dataA1, dataB1, dataA2, dataB2);
 
-		Assert.assertTrue("numeratorE", FRC.checkSymmetry(numeratorE, size));
-		Assert.assertTrue("absFFT1E", FRC.checkSymmetry(absFFT1E, size));
-		Assert.assertTrue("absFFT2E", FRC.checkSymmetry(absFFT2E, size));
+		Assertions.assertTrue(FRC.checkSymmetry(numeratorE, size), "numeratorE");
+		Assertions.assertTrue(FRC.checkSymmetry(absFFT1E, size), "absFFT1E");
+		Assertions.assertTrue(FRC.checkSymmetry(absFFT2E, size), "absFFT2E");
 
 		final float[] numeratorA = new float[dataA1.length];
 		final float[] absFFT1A = new float[dataA1.length];
@@ -122,9 +122,9 @@ public class FRCTest
 		//		System.out.printf("[%d,%d = %d] %f ?= %f\n", x, y, i, numeratorE[i], numeratorA[i]);
 		//	}
 
-		Assert.assertArrayEquals("numerator", numeratorE, numeratorA, 0);
-		Assert.assertArrayEquals("absFFT1", absFFT1E, absFFT1A, 0);
-		Assert.assertArrayEquals("absFFT2", absFFT2E, absFFT2A, 0);
+		Assertions.assertArrayEquals(numeratorE, numeratorA, "numerator");
+		Assertions.assertArrayEquals(absFFT1E, absFFT1A, "absFFT1");
+		Assertions.assertArrayEquals(absFFT2E, absFFT2A, "absFFT2");
 
 		FRC.computeMirroredFast(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
 
@@ -132,9 +132,9 @@ public class FRCTest
 		for (int y = 1; y < size; y++)
 			for (int x = 1, i = y * size + 1; x < size; x++, i++)
 			{
-				Assert.assertEquals("numerator", numeratorE[i], numeratorA[i], 0);
-				Assert.assertEquals("absFFT1", absFFT1E[i], absFFT1A[i], 0);
-				Assert.assertEquals("absFFT2", absFFT2E[i], absFFT2A[i], 0);
+				Assertions.assertEquals(numeratorE[i], numeratorA[i], "numerator");
+				Assertions.assertEquals(absFFT1E[i], absFFT1A[i], "absFFT1");
+				Assertions.assertEquals(absFFT2E[i], absFFT2A[i], "absFFT2");
 			}
 	}
 
@@ -169,7 +169,7 @@ public class FRCTest
 	@Test
 	public void computeSineIsFaster()
 	{
-		TestAssume.assumeHighComplexity();
+		ExtraAssumptions.assumeHighComplexity();
 
 		final int steps = 100000;
 		final double delta = 2 * Math.PI / steps;
@@ -221,14 +221,14 @@ public class FRCTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
+		Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
 	}
 
 	@Test
 	public void computeMirroredIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		// Sample lines through an image to create a structure.
 		final int N = 2048;
@@ -305,7 +305,7 @@ public class FRCTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
+		Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
 	}
 }

@@ -30,8 +30,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -82,17 +82,17 @@ public class SeriesImageSourceTest
 			source.setBufferLimit(0); // To force standard reading functionality
 		source.setReadHint(ReadHint.SEQUENTIAL);
 		source.open();
-		Assert.assertEquals(w, source.getWidth());
-		Assert.assertEquals(h, source.getHeight());
-		Assert.assertEquals(d * n, source.getFrames());
+		Assertions.assertEquals(w, source.getWidth());
+		Assertions.assertEquals(h, source.getHeight());
+		Assertions.assertEquals(d * n, source.getFrames());
 		for (int i = 0; i < stacks.length; i++)
 			for (int j = 0; j < d; j++)
 			{
 				final float[] e = (float[]) stacks[i].getPixels(j + 1);
 				final float[] o = source.next();
-				Assert.assertArrayEquals(e, o, 0);
+				Assertions.assertArrayEquals(e, o);
 			}
-		Assert.assertNull(source.next());
+		Assertions.assertNull(source.next());
 		source.close();
 	}
 
@@ -130,9 +130,9 @@ public class SeriesImageSourceTest
 			source.setBufferLimit(0); // To force standard reading functionality
 		source.setReadHint(ReadHint.NONSEQUENTIAL);
 		source.open();
-		Assert.assertEquals(w, source.getWidth());
-		Assert.assertEquals(h, source.getHeight());
-		Assert.assertEquals(d * n, source.getFrames());
+		Assertions.assertEquals(w, source.getWidth());
+		Assertions.assertEquals(h, source.getHeight());
+		Assertions.assertEquals(d * n, source.getFrames());
 		final float[][] pixels = new float[n * d][];
 		for (int i = 0, k = 0; i < stacks.length; i++)
 			for (int j = 0; j < d; j++)
@@ -147,7 +147,7 @@ public class SeriesImageSourceTest
 				//System.out.printf("[%d] frame = %d\n", i, frame);
 				final float[] e = pixels[frame];
 				final float[] o = source.get(frame + 1); // 1-base index on the frame
-				Assert.assertArrayEquals(e, o, 0);
+				Assertions.assertArrayEquals(e, o);
 			}
 		}
 	}

@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -41,7 +41,7 @@ public class PrecomputedFunctionTest
 		final double[] v = new PseudoRandomGenerator(size, r).getSequence();
 		final ValueFunction f = new PrecomputedValueFunction(v);
 		final double[] vo = evaluateValueFunction(f);
-		Assert.assertArrayEquals("values", v, vo, 0);
+		Assertions.assertArrayEquals(v, vo, "values");
 	}
 
 	private static double[] evaluateValueFunction(ValueFunction f)
@@ -74,9 +74,8 @@ public class PrecomputedFunctionTest
 		final Gradient1Function f = new PrecomputedGradient1Function(v, g1);
 		final double[][] g1o = new double[size][];
 		final double[] vo = evaluateGradient1Function(f, g1o);
-		Assert.assertArrayEquals("values", v, vo, 0);
-		for (int i = 0; i < vo.length; i++)
-			Assert.assertArrayEquals("g2", g1[i], g1o[i], 0);
+		Assertions.assertArrayEquals(v, vo, "values");
+		Assertions.assertArrayEquals(g1, g1o, "g1");
 	}
 
 	private static double[] evaluateGradient1Function(Gradient1Function f, final double[][] g1)
@@ -116,12 +115,9 @@ public class PrecomputedFunctionTest
 		final double[][] g1o = new double[size][];
 		final double[][] g2o = new double[size][];
 		final double[] vo = evaluateGradient2Function(f, g1o, g2o);
-		Assert.assertArrayEquals("values", v, vo, 0);
-		for (int i = 0; i < vo.length; i++)
-		{
-			Assert.assertArrayEquals("g1", g1[i], g1o[i], 0);
-			Assert.assertArrayEquals("g2", g1[i], g1o[i], 0);
-		}
+		Assertions.assertArrayEquals(v, vo, "values");
+		Assertions.assertArrayEquals(g1, g1o, "g1");
+		Assertions.assertArrayEquals(g2, g2o, "g2");
 	}
 
 	private static double[] evaluateGradient2Function(Gradient2Function f, final double[][] g1, final double[][] g2)

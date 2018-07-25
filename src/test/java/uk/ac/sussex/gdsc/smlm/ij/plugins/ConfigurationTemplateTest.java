@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -78,7 +78,7 @@ public class ConfigurationTemplateTest
 		//System.out.println(tmpFile.getPath());
 		final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
 		builder.setFitEngineSettings(config.getFitEngineSettings());
-		Assert.assertTrue(SettingsManager.toJSON(builder.build(), tmpFile, SettingsManager.FLAG_JSON_WHITESPACE));
+		Assertions.assertTrue(SettingsManager.toJSON(builder.build(), tmpFile, SettingsManager.FLAG_JSON_WHITESPACE));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class ConfigurationTemplateTest
 		final HashSet<String> set = new HashSet<>(Arrays.asList(after));
 		set.removeAll(Arrays.asList(before));
 
-		Assert.assertEquals("Loaded incorrect number", templates.length, set.size());
+		Assertions.assertEquals(templates.length, set.size(), "Loaded incorrect number");
 
 		// Check all have been loaded
 		for (final TemplateResource template : templates)
@@ -110,7 +110,7 @@ public class ConfigurationTemplateTest
 				TestLog.info(test + " loaded: " + template);
 				continue;
 			}
-			Assert.assertTrue(test + " could not load: " + template, false);
+			Assertions.fail(test + " could not load: " + template);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class ConfigurationTemplateTest
 			ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), null);
 		}
 
-		Assert.assertArrayEquals(names, ConfigurationTemplate.getTemplateNames());
+		Assertions.assertArrayEquals(names, ConfigurationTemplate.getTemplateNames());
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class ConfigurationTemplateTest
 	{
 		ConfigurationTemplate.clearTemplates();
 
-		Assert.assertEquals(0, ConfigurationTemplate.getTemplateNamesWithImage().length);
+		Assertions.assertEquals(0, ConfigurationTemplate.getTemplateNamesWithImage().length);
 
 		// Create a dummy image
 		final int size = 20;
@@ -152,14 +152,14 @@ public class ConfigurationTemplateTest
 		final File file = new File(Utils.replaceExtension(tmpFile.getPath(), ".xml"));
 		ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), file);
 
-		Assert.assertEquals(1, ConfigurationTemplate.getTemplateNamesWithImage().length);
+		Assertions.assertEquals(1, ConfigurationTemplate.getTemplateNamesWithImage().length);
 
 		final ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(name);
 
-		Assert.assertNotNull(imp2);
+		Assertions.assertNotNull(imp2);
 		final float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
 
-		Assert.assertArrayEquals(pixels, data, 0);
+		Assertions.assertArrayEquals(pixels, data);
 	}
 
 	@Test
@@ -176,7 +176,7 @@ public class ConfigurationTemplateTest
 
 		final ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(names[0]);
 
-		Assert.assertNotNull(imp2);
+		Assertions.assertNotNull(imp2);
 		final float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
 
 		// Check data is not zero
@@ -187,6 +187,6 @@ public class ConfigurationTemplateTest
 					if (data[i] != data[j])
 						return;
 
-		Assert.fail("Data is invalid");
+		Assertions.fail("Data is invalid");
 	}
 }

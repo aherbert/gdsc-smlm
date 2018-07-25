@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -159,6 +159,6 @@ public class Image3DAlignerTest
 				java.util.Arrays.toString(result));
 
 		for (int i = 0; i < 3; i++)
-			Assert.assertEquals(e[i], result[i], tolerance);
+			Assertions.assertEquals(e[i], result[i], tolerance);
 	}
 }

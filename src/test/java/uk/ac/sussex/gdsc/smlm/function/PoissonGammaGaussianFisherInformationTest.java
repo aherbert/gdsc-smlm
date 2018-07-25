@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFisherInformationTest
@@ -38,7 +38,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canFindMaximumAndUpperLimit()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final double[] M = { 20, 500 };
 
@@ -120,17 +120,17 @@ public class PoissonGammaGaussianFisherInformationTest
 		final double I = f.getPoissonGammaGaussianI(u);
 		final double upper = PoissonFisherInformation.getPoissonI(u);
 		//System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, I / upper);
-		Assert.assertTrue("Not less than Poisson information", I <= upper);
+		Assertions.assertTrue(I <= upper, "Not less than Poisson information");
 		// This is true at higher mean
 		if (u > 10)
-			Assert.assertTrue("Not above half the Poisson information", I >= 0.4999 * upper);
+			Assertions.assertTrue(I >= 0.4999 * upper, "Not above half the Poisson information");
 	}
 
 	@Test
 	public void canComputeAlpha()
 	{
 		// This is a report as nothing is asserted
-		TestAssume.assume(LogLevel.INFO, TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.VERY_HIGH);
 
 		// Compute the alpha using a range of gain and standard deviation
 
@@ -175,21 +175,21 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canComputeFisherInformationWithLowMean()
 	{
-		TestAssume.assumeLowComplexity();
+		ExtraAssumptions.assumeLowComplexity();
 		computeFisherInformationWithMean(1e-100);
 	}
 
 	@Test
 	public void canComputeFisherInformationWithVeryLowMean()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 		computeFisherInformationWithMean(1e-300);
 	}
 
 	@Test
 	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
-		TestAssume.assumeHighComplexity();
+		ExtraAssumptions.assumeHighComplexity();
 
 		// Lowest value where the reciprocal is not infinity.
 		double u = Double.longBitsToDouble(0x4000000000001L);
@@ -201,7 +201,7 @@ public class PoissonGammaGaussianFisherInformationTest
 			// This is the full 52-bit mantissa of a double with zero for the unbiased exponent,
 			// i.e. the largest sub-normal number.
 			long upper = (1L << 52) - 1;
-			Assert.assertTrue(1.0 / Double.longBitsToDouble(upper) != Double.POSITIVE_INFINITY);
+			Assertions.assertTrue(1.0 / Double.longBitsToDouble(upper) != Double.POSITIVE_INFINITY);
 			long lower = 1;
 			while (lower + 1 < upper)
 			{
@@ -220,8 +220,8 @@ public class PoissonGammaGaussianFisherInformationTest
 			System.out.printf("upper = 0x%s = %s\n", Long.toHexString(upper), u);
 		}
 
-		Assert.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
-		Assert.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
+		Assertions.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
+		Assertions.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
 
 		computeFisherInformationWithMean(u);
 	}
@@ -239,8 +239,8 @@ public class PoissonGammaGaussianFisherInformationTest
 				final double upper = PoissonFisherInformation.getPoissonI(u);
 				final double alpha = I / upper;
 				TestLog.debug("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
-				TestAssert.assertTrue(I < upper, "Fisher information (%s) is not below upper limit: %s", I, upper);
-				Assert.assertTrue("Alpha is not above zero", alpha > 0);
+				ExtraAssertions.assertTrue(I < upper, "Fisher information (%s) is not below upper limit: %s", I, upper);
+				Assertions.assertTrue(alpha > 0, "Alpha is not above zero");
 			}
 	}
 }

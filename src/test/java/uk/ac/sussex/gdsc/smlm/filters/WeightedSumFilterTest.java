@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedSumFilterTest extends WeightedFilterTest
@@ -108,7 +108,7 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
 		filter.setWeights(w, width, height);
 		final float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
-		TestAssert.assertArrayEqualsRelative(e, o, 1e-6, "%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
+		ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6, "%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
 				height, boxSize - offset, internal);
 	}
 }

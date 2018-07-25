@@ -23,14 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.function.Supplier;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianConvolutionFunctionTest
@@ -62,7 +64,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		final double p2 = cumulativeProbability(gain, mu, s);
 		// This only works when the mean is above 2 if the gain is low
 		if (mu > 2 || gain > 20)
-			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
+			ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private static double cumulativeProbability(final double gain, final double mu, double s)
@@ -101,7 +103,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 				p += pp;
 			}
 			//if (p > 1.01)
-			//	Assert.fail("P > 1: " + p);
+			//	Assertions.fail("P > 1: " + p);
 		}
 
 		// We have most of the likelihood density.
@@ -166,14 +168,14 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		final String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
+			ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
 		}
 	}
 }

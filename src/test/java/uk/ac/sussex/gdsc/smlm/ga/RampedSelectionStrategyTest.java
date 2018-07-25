@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class RampedSelectionStrategyTest
@@ -46,7 +46,7 @@ public class RampedSelectionStrategyTest
 		{
 			final long key = sum[i];
 			final int j = RampedSelectionStrategy.search(sum, key);
-			Assert.assertEquals(i + 1, j);
+			Assertions.assertEquals(i + 1, j);
 		}
 	}
 
@@ -59,7 +59,7 @@ public class RampedSelectionStrategyTest
 		{
 			final long key = sum[i];
 			final int j = RampedSelectionStrategy.binarySearch(sum, key);
-			Assert.assertEquals(i + 1, j);
+			Assertions.assertEquals(i + 1, j);
 		}
 	}
 
@@ -72,7 +72,7 @@ public class RampedSelectionStrategyTest
 		{
 			final long key = sum[i] - 1;
 			final int j = RampedSelectionStrategy.search(sum, key);
-			Assert.assertEquals(i, j);
+			Assertions.assertEquals(i, j);
 		}
 	}
 
@@ -85,7 +85,7 @@ public class RampedSelectionStrategyTest
 		{
 			final long key = sum[i] - 1;
 			final int j = RampedSelectionStrategy.binarySearch(sum, key);
-			Assert.assertEquals(i, j);
+			Assertions.assertEquals(i, j);
 		}
 	}
 
@@ -97,28 +97,28 @@ public class RampedSelectionStrategyTest
 		{
 			final int i = RampedSelectionStrategy.search(sum, key);
 			final int j = RampedSelectionStrategy.binarySearch(sum, key);
-			Assert.assertEquals(i, j);
+			Assertions.assertEquals(i, j);
 		}
 	}
 
 	@Test
 	public void speedTest50()
 	{
-		TestAssume.assumeLowComplexity();
+		ExtraAssumptions.assumeLowComplexity();
 		speedTest(50, false, 10);
 	}
 
 	@Test
 	public void speedTest200()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 		speedTest(200, true, 5);
 	}
 
 	@Test
 	public void speedTest1000()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 		speedTest(1000, true, 2);
 	}
 
@@ -126,7 +126,7 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void speedTest5000()
 	{
-		TestAssume.assumeHighComplexity();
+		ExtraAssumptions.assumeHighComplexity();
 		speedTest(5000, true, 1);
 	}
 

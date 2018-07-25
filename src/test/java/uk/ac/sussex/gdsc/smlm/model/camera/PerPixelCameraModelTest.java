@@ -27,8 +27,8 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
@@ -66,14 +66,14 @@ public class PerPixelCameraModelTest
 	{
 		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
 		final Rectangle bounds = new Rectangle(0, 0, w, h);
-		Assert.assertArrayEquals(bias, model.getBias(bounds), 0);
-		Assert.assertArrayEquals(gain, model.getGain(bounds), 0);
-		Assert.assertArrayEquals(variance, model.getVariance(bounds), 0);
-		Assert.assertArrayEquals(var_g2, model.getNormalisedVariance(bounds), 0);
-		Assert.assertArrayEquals(bias, model.getBias(), 0);
-		Assert.assertArrayEquals(gain, model.getGain(), 0);
-		Assert.assertArrayEquals(variance, model.getVariance(), 0);
-		Assert.assertArrayEquals(var_g2, model.getNormalisedVariance(), 0);
+		Assertions.assertArrayEquals(bias, model.getBias(bounds));
+		Assertions.assertArrayEquals(gain, model.getGain(bounds));
+		Assertions.assertArrayEquals(variance, model.getVariance(bounds));
+		Assertions.assertArrayEquals(var_g2, model.getNormalisedVariance(bounds));
+		Assertions.assertArrayEquals(bias, model.getBias());
+		Assertions.assertArrayEquals(gain, model.getGain());
+		Assertions.assertArrayEquals(variance, model.getVariance());
+		Assertions.assertArrayEquals(var_g2, model.getNormalisedVariance());
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class PerPixelCameraModelTest
 		final FloatProcessor ip = new FloatProcessor(w, h, data.clone());
 		ip.setRoi(bounds);
 		final float[] e = (float[]) (ip.crop().getPixels());
-		Assert.assertArrayEquals(e, o, 0);
+		Assertions.assertArrayEquals(e, o);
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class PerPixelCameraModelTest
 		{
 			final Rectangle bounds = getBounds(rand, ie);
 			final CameraModel model2 = model.crop(bounds, false);
-			Assert.assertEquals(model2.getBounds(), bounds);
+			Assertions.assertEquals(model2.getBounds(), bounds);
 			check(bias, bounds, model2.getBias(bounds));
 			check(gain, bounds, model2.getGain(bounds));
 			check(variance, bounds, model2.getVariance(bounds));
@@ -166,7 +166,7 @@ public class PerPixelCameraModelTest
 		for (int i = 0; i < e.length; i++)
 			e[i] -= bias[i];
 		model.removeBias(bounds, o);
-		Assert.assertArrayEquals(e, o, 0);
+		Assertions.assertArrayEquals(e, o);
 
 		ip.setPixels(gain);
 		final float[] gain = (float[]) (ip.crop().getPixels());
@@ -174,11 +174,11 @@ public class PerPixelCameraModelTest
 		for (int i = 0; i < e.length; i++)
 			e[i] /= gain[i];
 		model.removeGain(bounds, o);
-		Assert.assertArrayEquals(e, o, 0);
+		Assertions.assertArrayEquals(e, o);
 
 		o = o2;
 		model.removeBiasAndGain(bounds, o);
-		Assert.assertArrayEquals(e, o, 0);
+		Assertions.assertArrayEquals(e, o);
 	}
 
 	@Test
@@ -219,7 +219,7 @@ public class PerPixelCameraModelTest
 		final float[] e = var;
 		for (int i = 0; i < e.length; i++)
 			e[i] = (float) (1.0 / e[i]);
-		Assert.assertArrayEquals(e, w, 0);
+		Assertions.assertArrayEquals(e, w);
 	}
 
 	@Test
@@ -230,7 +230,7 @@ public class PerPixelCameraModelTest
 		final float[] w = model.getWeights(model.getBounds());
 		final float[] e = var;
 		Arrays.fill(e, 1f);
-		Assert.assertArrayEquals(e, w, 0);
+		Assertions.assertArrayEquals(e, w);
 	}
 
 	@Test
@@ -244,7 +244,7 @@ public class PerPixelCameraModelTest
 		final float[] e = var;
 		for (int i = 0; i < e.length; i++)
 			e[i] = (e[i] == 0) ? (float) (1.0 / min) : (float) (1.0 / e[i]);
-		Assert.assertArrayEquals(e, w, 0);
+		Assertions.assertArrayEquals(e, w);
 	}
 
 	@Test
@@ -272,7 +272,7 @@ public class PerPixelCameraModelTest
 			final float[] v = (normalised) ? model.getNormalisedVariance(bounds) : model.getVariance(bounds);
 			final double e = Maths.sum(v) / v.length;
 			final double o = (normalised) ? model.getMeanNormalisedVariance(bounds) : model.getMeanVariance(bounds);
-			Assert.assertEquals(e, o, 0);
+			Assertions.assertEquals(e, o);
 		}
 	}
 
@@ -291,10 +291,10 @@ public class PerPixelCameraModelTest
 		for (int y = 0, y1 = oy, i = 0; y < h; y++, y1++)
 			for (int x = 0, x1 = ox; x < w; x++, x1++, i++)
 			{
-				Assert.assertEquals(bias[i], model.getBias(x1, y1), 0);
-				Assert.assertEquals(gain[i], model.getGain(x1, y1), 0);
-				Assert.assertEquals(variance[i], model.getVariance(x1, y1), 0);
-				Assert.assertEquals(var_g2[i], model.getNormalisedVariance(x1, y1), 0);
+				Assertions.assertEquals(bias[i], model.getBias(x1, y1));
+				Assertions.assertEquals(gain[i], model.getGain(x1, y1));
+				Assertions.assertEquals(variance[i], model.getVariance(x1, y1));
+				Assertions.assertEquals(var_g2[i], model.getNormalisedVariance(x1, y1));
 			}
 	}
 }

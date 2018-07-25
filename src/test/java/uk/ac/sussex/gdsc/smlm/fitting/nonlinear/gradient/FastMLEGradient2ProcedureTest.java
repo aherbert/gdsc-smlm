@@ -29,8 +29,8 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Precision;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
@@ -47,8 +47,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussia
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -75,11 +75,14 @@ public class FastMLEGradient2ProcedureTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		final double[] y = new double[0];
-		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
+		Assertions.assertEquals(
+				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
 				FastMLEGradient2Procedure4.class);
-		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
+		Assertions.assertEquals(
+				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
 				FastMLEGradient2Procedure5.class);
-		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
+		Assertions.assertEquals(
+				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
 				FastMLEGradient2Procedure6.class);
 	}
 
@@ -117,7 +120,8 @@ public class FastMLEGradient2ProcedureTest
 		createFakeData(nparams, iter, paramsList, yList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
+		final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams,
+				true);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -125,7 +129,7 @@ public class FastMLEGradient2ProcedureTest
 			final double s = p.computeLogLikelihood(paramsList.get(i));
 			final double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Virtually the same ...
-			TestAssert.assertEqualsRelative(s, s2, 1e-5, "[%d] Result: Not same @ %d", nparams, i);
+			ExtraAssertions.assertEqualsRelative(s, s2, 1e-5, "[%d] Result: Not same @ %d", nparams, i);
 		}
 	}
 
@@ -148,6 +152,8 @@ public class FastMLEGradient2ProcedureTest
 
 		for (int i = 0; i < iter; i++)
 		{
+			final int ii = i;
+
 			a2[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
 			a2[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 			a2[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(3, 5);
@@ -208,17 +214,17 @@ public class FastMLEGradient2ProcedureTest
 			final double[] d12 = p1b2.d1;
 			final double[] d22 = p1b2.d2;
 
-			Assert.assertArrayEquals(" Result: Not same @ " + i, p12.u, p1b2.u, 1e-10);
-			Assert.assertArrayEquals(" D1: Not same @ " + i, d11, d12, 1e-10);
-			Assert.assertArrayEquals(" D2: Not same @ " + i, d21, d22, 1e-10);
+			Assertions.assertArrayEquals(p12.u, p1b2.u, 1e-10, () -> " Result: Not same @ " + ii);
+			Assertions.assertArrayEquals(d11, d12, 1e-10, () -> " D1: Not same @ " + ii);
+			Assertions.assertArrayEquals(d21, d22, 1e-10, () -> " D2: Not same @ " + ii);
 
 			final double[] v1 = p12.computeValue(a2);
 			final double[] v2 = p1b2.computeValue(a1);
-			Assert.assertArrayEquals(" Value: Not same @ " + i, v1, v2, 1e-10);
+			Assertions.assertArrayEquals(v1, v2, 1e-10, () -> " Value: Not same @ " + ii);
 
 			final double[] d1 = Arrays.copyOf(p12.computeFirstDerivative(a2), f1.getNumberOfGradients());
 			final double[] d2 = p1b2.computeFirstDerivative(a1);
-			Assert.assertArrayEquals(" 1st derivative: Not same @ " + i, d1, d2, 1e-10);
+			Assertions.assertArrayEquals(d1, d2, 1e-10, () -> " 1st derivative: Not same @ " + ii);
 		}
 	}
 
@@ -265,7 +271,7 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -276,7 +282,8 @@ public class FastMLEGradient2ProcedureTest
 		createFakeData(nparams, iter, paramsList, yList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
+		final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams,
+				true);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.logLikelihood(yList.get(i), paramsList.get(i), func);
@@ -314,7 +321,8 @@ public class FastMLEGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+					final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
+							func);
 					for (int j = loops; j-- > 0;)
 						p.computeLogLikelihood(paramsList.get(k++ % iter));
 				}
@@ -322,9 +330,8 @@ public class FastMLEGradient2ProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestLog.logSpeedTestResult(time2 < time1,
-				"GradientCalculator = %d : FastMLEGradient2Procedure %d = %d : %fx\n", time1, nparams, time2,
-				(1.0 * time1) / time2);
+		TestLog.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : FastMLEGradient2Procedure %d = %d : %fx\n",
+				time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
 	@Test
@@ -355,22 +362,22 @@ public class FastMLEGradient2ProcedureTest
 
 			final double ll1 = p1.computeLogLikelihood(a);
 			final double ll2 = p2.computeLogLikelihood(a);
-			TestAssert.assertEquals(ll1, ll2, 0, "[%d] LL: Not same @ %d", nparams, i);
+			ExtraAssertions.assertEquals(ll1, ll2, "[%d] LL: Not same @ %d", nparams, i);
 
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeFirstDerivative(a);
 			p2.computeFirstDerivative(a);
-			TestAssert.assertArrayEquals(p1.u, p2.u, 0, "[%d]  first derivative value: Not same @ %d", nparams, i);
-			TestAssert.assertArrayEquals(p1.d1, p2.d1, 0, "[%d]  first derivative: Not same @ %d", nparams, i);
+			ExtraAssertions.assertArrayEquals(p1.u, p2.u, "[%d]  first derivative value: Not same @ %d", nparams, i);
+			ExtraAssertions.assertArrayEquals(p1.d1, p2.d1, "[%d]  first derivative: Not same @ %d", nparams, i);
 
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeSecondDerivative(a);
 			p2.computeSecondDerivative(a);
-			TestAssert.assertArrayEquals(p1.u, p2.u, 0, "[%d]  update value: Not same @ %d", nparams, i);
-			TestAssert.assertArrayEquals(p1.d1, p2.d1, 0, "[%d]  update: Not same d1 @ %d", nparams, i);
-			TestAssert.assertArrayEquals(p1.d2, p2.d2, 0, "[%d]  update: Not same d2 @ %d", nparams, i);
+			ExtraAssertions.assertArrayEquals(p1.u, p2.u, "[%d]  update value: Not same @ %d", nparams, i);
+			ExtraAssertions.assertArrayEquals(p1.d1, p2.d1, "[%d]  update: Not same d1 @ %d", nparams, i);
+			ExtraAssertions.assertArrayEquals(p1.d2, p2.d2, "[%d]  update: Not same d2 @ %d", nparams, i);
 		}
 	}
 
@@ -384,7 +391,7 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureLinearIsFasterThanGradientProcedure(final int nparams)
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -408,8 +415,9 @@ public class FastMLEGradient2ProcedureTest
 			p2.computeSecondDerivative(paramsList.get(i));
 
 			// Check they are the same
-			Assert.assertArrayEquals("D1 " + i, p1.d1, p2.d1, 0);
-			Assert.assertArrayEquals("D2 " + i, p1.d2, p2.d2, 0);
+			final int ii = i;
+			Assertions.assertArrayEquals(p1.d1, p2.d1, () -> "D1 " + ii);
+			Assertions.assertArrayEquals(p1.d2, p2.d2, () -> "D2 " + ii);
 		}
 
 		// Realistic loops for an optimisation
@@ -438,7 +446,8 @@ public class FastMLEGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					final FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+					final FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
+							func);
 					for (int j = loops; j-- > 0;)
 						p2.computeSecondDerivative(paramsList.get(k++ % iter));
 				}
@@ -447,7 +456,7 @@ public class FastMLEGradient2ProcedureTest
 		final long time2 = t2.getTime();
 
 		TestLog.info("Standard = %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
-		Assert.assertTrue(time2 < time1 * 1.5);
+		Assertions.assertTrue(time2 < time1 * 1.5);
 	}
 
 	@Test
@@ -523,13 +532,13 @@ public class FastMLEGradient2ProcedureTest
 				failCounter.run(j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
 				}, () -> {
-					TestAssert.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
+					ExtraAssertions.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
 							DoubleEquality.relativeError(gradient1, d1[j_]));
 				});
 				failCounter.run(nparams + j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
 				}, () -> {
-					TestAssert.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
+					ExtraAssertions.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
 							DoubleEquality.relativeError(gradient2, d2[j_]));
 				});
 			}

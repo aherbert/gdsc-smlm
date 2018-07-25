@@ -157,10 +157,8 @@ public class PeakResultListModelFrame extends JFrame
 	 *
 	 * @param args
 	 *            the arguments
-	 * @throws InterruptedException
-	 *             the interrupted exception
 	 */
-	public static void main(String[] args) throws InterruptedException
+	public static void main(String[] args)
 	{
 		final RandomGenerator r = new Well19937c();
 		final int n = 10;

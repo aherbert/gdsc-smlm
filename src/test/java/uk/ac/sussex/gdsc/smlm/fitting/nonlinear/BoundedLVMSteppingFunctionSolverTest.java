@@ -24,8 +24,9 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -88,7 +89,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 
 	private void fitSingleGaussianLVMWithoutBias(boolean applyBounds, int clamping)
 	{
-		org.junit.Assume.assumeTrue(runTests);
+		Assumptions.assumeTrue(runTests);
 
 		final double bias = 100;
 
@@ -142,10 +143,10 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 								final double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
 
 								// The result should be the same without a bias
-								Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
-										solver2.getEvaluations());
+								Assertions.assertEquals(solver.getEvaluations(), solver2.getEvaluations(),
+										() -> name + " Iterations");
 								fp2[0] -= bias;
-								Assert.assertArrayEquals(name + " Solution", fp, fp2, 1e-6);
+								Assertions.assertArrayEquals(fp, fp2, 1e-6, () -> name + " Solution");
 							}
 			}
 		}
@@ -218,7 +219,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 
 	private void fitSingleGaussianLVM(int bounded, int clamping, boolean mle)
 	{
-		org.junit.Assume.assumeTrue(runTests);
+		Assumptions.assumeTrue(runTests);
 		canFitSingleGaussian(getSolver(clamping, mle), bounded == 2);
 	}
 
@@ -335,7 +336,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	private void fitSingleGaussianBetterLVM(boolean bounded2, int clamping2, boolean mle2, boolean bounded,
 			int clamping, boolean mle)
 	{
-		org.junit.Assume.assumeTrue(runTests);
+		Assumptions.assumeTrue(runTests);
 
 		final SteppingFunctionSolver solver = getSolver(clamping, mle);
 		final SteppingFunctionSolver solver2 = getSolver(clamping2, mle2);

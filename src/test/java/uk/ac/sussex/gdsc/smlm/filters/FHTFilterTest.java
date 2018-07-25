@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class FHTFilterTest
@@ -103,8 +103,8 @@ public class FHTFilterTest
 			final int x = max % 16;
 			final int y = max / 16;
 
-			Assert.assertEquals(ex, x + ox);
-			Assert.assertEquals(ey, y + oy);
+			Assertions.assertEquals(ex, x + ox);
+			Assertions.assertEquals(ey, y + oy);
 		}
 
 		// Test verses a spatial domain filter in the middle of the image
@@ -121,7 +121,7 @@ public class FHTFilterTest
 				sum += input1[i] * i2[i];
 			//double exp = e[size / 2 * size + size / 2];
 			//System.out.printf("Sum = %f vs [%d] %f\n", sum, size / 2 * size + size / 2, exp);
-			Assert.assertEquals(sum, sum, 1e-3);
+			Assertions.assertEquals(sum, sum, 1e-3);
 		}
 
 		// Test the FHT filter
@@ -134,7 +134,7 @@ public class FHTFilterTest
 
 		// This tests everything and can fail easily depending on the random generator
 		// due to edge artifacts.
-		//TestAssert.assertArrayEqualsRelative(e, input1, error);
+		//ExtraAssertions.assertArrayEqualsRelative(e, input1, error);
 
 		// This tests the centre to ignore edge differences
 		final int min = size / 4;
@@ -156,7 +156,7 @@ public class FHTFilterTest
 				final int xx = x;
 				final int i = y * size + x;
 				failCounter.run(() -> {
-					TestAssert.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", xx, yy);
+					ExtraAssertions.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", xx, yy);
 				});
 			}
 		}
@@ -190,7 +190,7 @@ public class FHTFilterTest
 			final float[] e = ImageWindow.applyWindowSeparable(in, size, size, wx, wx);
 			final float[] o = in.clone();
 			f.applyBorder(o, size, size, i);
-			Assert.assertArrayEquals(e, o, 0);
+			Assertions.assertArrayEquals(e, o);
 		}
 	}
 }

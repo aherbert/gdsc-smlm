@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -44,8 +44,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGradientProcedureTest
@@ -65,11 +65,11 @@ public class PoissonGradientProcedureTest
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(6)).getClass(),
+		Assertions.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(6)).getClass(),
 				PoissonGradientProcedure6.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(5)).getClass(),
+		Assertions.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(5)).getClass(),
 				PoissonGradientProcedure5.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(4)).getClass(),
+		Assertions.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(4)).getClass(),
 				PoissonGradientProcedure4.class);
 	}
 
@@ -113,12 +113,12 @@ public class PoissonGradientProcedureTest
 			final double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
 			// Not exactly the same ...
 			final double[] al = p.getLinear();
-			TestAssert.assertArrayEqualsRelative(al, new DenseMatrix64F(m).data, 1e-10,
+			ExtraAssertions.assertArrayEqualsRelative(al, new DenseMatrix64F(m).data, 1e-10,
 					"[%d] Observations: Not same alphaLinear @ %d", nparams, i);
 
 			final double[][] am = p.getMatrix();
 			for (int j = 0; j < nparams; j++)
-				TestAssert.assertArrayEqualsRelative(am[j], m[j], 1e-10,
+				ExtraAssertions.assertArrayEqualsRelative(am[j], m[j], 1e-10,
 						"[%d] Observations: Not same alphaMatrix @ %d,%d", nparams, i, j);
 		}
 	}
@@ -166,7 +166,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 1000;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -220,9 +220,8 @@ public class PoissonGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestLog.logSpeedTestResult(time2 < time1,
-				"GradientCalculator = %d : PoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
-				(1.0 * time1) / time2);
+		TestLog.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : PoissonGradientProcedure %d = %d : %fx\n",
+				time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
 	@Test
@@ -263,12 +262,12 @@ public class PoissonGradientProcedureTest
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Exactly the same ...
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getLinear(), p2.getLinear(), 0);
+			ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(),
+					"%s Observations: Not same alpha linear @ %d", name, i);
 
 			final double[][] am1 = p1.getMatrix();
 			final double[][] am2 = p2.getMatrix();
-			for (int j = 0; j < nparams; j++)
-				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am1[j], am2[j], 0);
+			ExtraAssertions.assertArrayEquals(am1, am2, "%s Observations: Not same alpha matrix @ %d", name, i);
 		}
 	}
 
@@ -290,7 +289,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -314,7 +313,7 @@ public class PoissonGradientProcedureTest
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Check they are the same
-			Assert.assertArrayEquals("M " + i, p1.getLinear(), p2.getLinear(), 0);
+			ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), "M %d", i);
 		}
 
 		// Realistic loops for an optimisation
@@ -353,7 +352,7 @@ public class PoissonGradientProcedureTest
 
 		TestLog.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
-		//Assert.assertTrue(time2 < time1);
+		//Assertions.assertTrue(time2 < time1);
 	}
 
 	@Test
@@ -393,18 +392,18 @@ public class PoissonGradientProcedureTest
 			final FisherInformationMatrix m2 = new FisherInformationMatrix(p2.getLinear(), n);
 			final double[] crlb1 = m1.crlb();
 			final double[] crlb2 = m2.crlb();
-			Assert.assertNotNull(crlb1);
-			Assert.assertNotNull(crlb2);
+			Assertions.assertNotNull(crlb1);
+			Assertions.assertNotNull(crlb2);
 			//System.out.printf("%s : %s\n", Arrays.toString(crlb1), Arrays.toString(crlb2));
 			for (int j = 0; j < n; j++)
-				Assert.assertTrue(crlb1[j] < crlb2[j]);
+				Assertions.assertTrue(crlb1[j] < crlb2[j]);
 		}
 	}
 
 	@Test
 	public void varianceMatchesFormula()
 	{
-		//Assume.assumeTrue(false);
+		//Assumptions.assumeTrue(false);
 
 		final double[] N_ = new double[] { 20, 50, 100, 500 };
 		final double[] b2_ = new double[] { 0, 1, 2, 4 };
@@ -412,8 +411,8 @@ public class PoissonGradientProcedureTest
 		final double[] x_ = new double[] { 4.8, 5, 5.5 };
 		final double a = 100;
 		final int size = 10;
-		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ERF_CIRCLE,
-				null);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
+				GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
 		final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f);
 		final int ix = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
 		final int iy = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
@@ -438,15 +437,14 @@ public class PoissonGradientProcedureTest
 							final FisherInformationMatrix m1 = new FisherInformationMatrix(p.getLinear(), p.n);
 							final double[] crlb = m1.crlb();
 							if (crlb == null)
-								Assert.fail("No variance");
+								Assertions.fail("No variance");
 							@SuppressWarnings("null")
-							final
-							double o1 = Math.sqrt(crlb[ix]) * a;
+							final double o1 = Math.sqrt(crlb[ix]) * a;
 							final double o2 = Math.sqrt(crlb[iy]) * a;
 							final double e = Gaussian2DPeakResultHelper.getMLPrecisionX(a, ss, N, b2, false);
 							//System.out.printf("e = %f  :  o  =   %f   %f\n", e, o1, o2);
-							Assert.assertEquals(e, o1, e * 5e-2);
-							Assert.assertEquals(e, o2, e * 5e-2);
+							Assertions.assertEquals(e, o1, e * 5e-2);
+							Assertions.assertEquals(e, o2, e * 5e-2);
 						}
 					}
 				}

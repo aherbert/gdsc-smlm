@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
@@ -42,8 +42,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class Gaussian2DPeakResultHelperTest
@@ -75,7 +75,7 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void lowerIntegrationPointsApproximateMaximumLikelihoodVariance()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final double[] sum = new double[maxPoints + 1];
 		int count = 0;
@@ -92,7 +92,7 @@ public class Gaussian2DPeakResultHelperTest
 							final double error = DoubleEquality.relativeError(e, o);
 							sum[points] += error;
 							if (error > 1e-2)
-								TestAssert.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s, N, b2,
+								ExtraAssertions.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s, N, b2,
 										points, e, o, error);
 						}
 					}
@@ -104,7 +104,7 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void runSpeedTest()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// Test with realistic parameters
 
@@ -200,39 +200,39 @@ public class Gaussian2DPeakResultHelperTest
 						final double o2 = calc.getPixelAmplitude(paramsf);
 
 						//System.out.printf("e=%f, o1=%f, o2=%f\n", e, o1, o2);
-						Assert.assertEquals(e, o2, 1e-3);
+						Assertions.assertEquals(e, o2, 1e-3);
 						r.addData(e, o1);
 					}
 
 		//System.out.printf("Regression: pixel amplitude vs amplitude = %f, slope=%f, n=%d\n", r.getR(), r.getSlope(),
 		//		r.getN());
 		// The simple amplitude over estimates the actual pixel amplitude
-		Assert.assertTrue(r.getSlope() > 1);
+		Assertions.assertTrue(r.getSlope() > 1);
 	}
 
 	@Test
 	public void canComputeCumulative()
 	{
-		Assert.assertEquals(0, Gaussian2DPeakResultHelper.cumulative(0), 0);
-		Assert.assertEquals(0.6827, Gaussian2DPeakResultHelper.cumulative(1), 1e-3);
-		Assert.assertEquals(0.9545, Gaussian2DPeakResultHelper.cumulative(2), 1e-3);
-		Assert.assertEquals(0.9974, Gaussian2DPeakResultHelper.cumulative(3), 1e-3);
-		Assert.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative(Double.POSITIVE_INFINITY));
+		Assertions.assertEquals(0, Gaussian2DPeakResultHelper.cumulative(0));
+		Assertions.assertEquals(0.6827, Gaussian2DPeakResultHelper.cumulative(1), 1e-3);
+		Assertions.assertEquals(0.9545, Gaussian2DPeakResultHelper.cumulative(2), 1e-3);
+		Assertions.assertEquals(0.9974, Gaussian2DPeakResultHelper.cumulative(3), 1e-3);
+		Assertions.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative(Double.POSITIVE_INFINITY));
 	}
 
 	@Test
 	public void canComputeCumulative2DAndInverse()
 	{
-		Assert.assertEquals(0, Gaussian2DPeakResultHelper.cumulative2D(0), 0);
-		Assert.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative2D(Double.POSITIVE_INFINITY));
-		Assert.assertEquals(0, Gaussian2DPeakResultHelper.inverseCumulative2D(0), 0);
-		Assert.assertTrue(Double.POSITIVE_INFINITY == Gaussian2DPeakResultHelper.inverseCumulative2D(1));
+		Assertions.assertEquals(0, Gaussian2DPeakResultHelper.cumulative2D(0));
+		Assertions.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative2D(Double.POSITIVE_INFINITY));
+		Assertions.assertEquals(0, Gaussian2DPeakResultHelper.inverseCumulative2D(0));
+		Assertions.assertTrue(Double.POSITIVE_INFINITY == Gaussian2DPeakResultHelper.inverseCumulative2D(1));
 		for (int i = 1; i <= 10; i++)
 		{
 			final double r = i / 10.0;
 			final double p = Gaussian2DPeakResultHelper.cumulative2D(r);
 			final double r2 = Gaussian2DPeakResultHelper.inverseCumulative2D(p);
-			Assert.assertEquals(r, r2, r * 1e-8);
+			ExtraAssertions.assertEqualsRelative(r, r2, 1e-8);
 		}
 	}
 
@@ -260,7 +260,7 @@ public class Gaussian2DPeakResultHelperTest
 
 	private static void assertEquals(double e, double o)
 	{
-		TestAssert.assertEqualsRelative(e, o, 1e-10);
+		ExtraAssertions.assertEqualsRelative(e, o, 1e-10);
 	}
 
 	@Test

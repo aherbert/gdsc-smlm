@@ -27,11 +27,12 @@ import java.util.Iterator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.CombinatoricsUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 /**
  * Test the PulseActivationAnalysis unmixing functions
@@ -82,9 +83,9 @@ public class PulseActivationAnalysisTest
 				}
 			}
 		}
-		catch (final AssertionError e)
+		catch (final AssertionFailedError e)
 		{
-			TestAssert.wrapAssertionError(e, "channels=%d, crosstalk=%d", n, m);
+			ExtraAssertions.wrapAssertionFailedError(e, "channels=%d, crosstalk=%d", n, m);
 		}
 	}
 
@@ -108,8 +109,8 @@ public class PulseActivationAnalysisTest
 		final double[] d = PulseActivationAnalysis.unmix(D1, D2, C21, C12);
 
 		//System.out.printf("d1 %f = %f, d2 %f = %f (C=%f,%f)\n", d1, d[0], d2, d[1], C21, C12);
-		Assert.assertEquals("d1", d1, d[0], delta(d1));
-		Assert.assertEquals("d2", d2, d[1], delta(d2));
+		Assertions.assertEquals( d1, d[0], delta(d1),"d1");
+		Assertions.assertEquals( d2, d[1], delta(d2), "d2");
 	}
 
 	private static double delta(double d)
@@ -164,9 +165,9 @@ public class PulseActivationAnalysisTest
 				}
 			}
 		}
-		catch (final AssertionError e)
+		catch (final AssertionFailedError e)
 		{
-			TestAssert.wrapAssertionError(e, "channels=%d, crosstalk=%d", n, m);
+			ExtraAssertions.wrapAssertionFailedError(e, "channels=%d, crosstalk=%d", n, m);
 		}
 	}
 
@@ -185,8 +186,8 @@ public class PulseActivationAnalysisTest
 		final double[] d = PulseActivationAnalysis.unmix(D1, D2, D3, C21, C31, C12, C32, C13, C23);
 
 		//System.out.printf("d1 %f = %f, d2 %f = %f, d3 %f = %f (C=%f,%f,%f,%f,%f)\n", d1, d[0], d2, d[1], d3, d[2], C21, C31, C12, C32, C13, C23);
-		Assert.assertEquals("d1", d1, d[0], delta(d1));
-		Assert.assertEquals("d2", d2, d[1], delta(d2));
-		Assert.assertEquals("d3", d3, d[2], delta(d3));
+		Assertions.assertEquals( d1, d[0], delta(d1),"d1");
+		Assertions.assertEquals( d2, d[1], delta(d2),"d2");
+		Assertions.assertEquals( d3, d[2], delta(d3),"d3");
 	}
 }

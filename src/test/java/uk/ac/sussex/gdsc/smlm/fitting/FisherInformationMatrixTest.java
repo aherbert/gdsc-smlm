@@ -28,8 +28,9 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
@@ -40,6 +41,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class FisherInformationMatrixTest
@@ -95,7 +97,9 @@ public class FisherInformationMatrixTest
 			TestLog.info("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
 			if (n > 1)
 				// Just do a sum so we have a test
-				Assert.assertNotEquals(Maths.sum(crlb), Maths.sum(crlb2), 0);
+				Assertions.assertThrows(AssertionFailedError.class, () -> {
+					Assertions.assertEquals(Maths.sum(crlb), Maths.sum(crlb2));
+				});
 		}
 	}
 
@@ -106,7 +110,7 @@ public class FisherInformationMatrixTest
 		// Invert for CRLB
 		final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
 		TestLog.info("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
-		Assert.assertNotNull("CRLB failed", crlb);
+		ExtraAssertions.assertNotNull(crlb, "CRLB failed: n=%d, k=%d", n, k);
 		return crlb;
 	}
 
@@ -200,7 +204,7 @@ public class FisherInformationMatrixTest
 			TestLog.infoln(o);
 			for (int i = 0; i < indices.length; i++)
 				for (int j = 0; j < indices.length; j++)
-					Assert.assertEquals(e.get(indices[i], indices[j]), o.get(i, j), 0);
+					Assertions.assertEquals(e.get(indices[i], indices[j]), o.get(i, j));
 		}
 	}
 
@@ -244,6 +248,6 @@ public class FisherInformationMatrixTest
 
 		// Removing the interaction between fit parameters lowers the bounds
 		for (int i = 0; i < crlb.length; i++)
-			Assert.assertTrue(crlbB[i] < crlb[i]);
+			Assertions.assertTrue(crlbB[i] < crlb[i]);
 	}
 }

@@ -29,8 +29,8 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -41,11 +41,12 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -75,23 +76,23 @@ public class LSQLVMGradientProcedureTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		final double[] y = new double[0];
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
 				LSQLVMGradientProcedureMatrix6.class);
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
 				LSQLVMGradientProcedureMatrix5.class);
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
 				LSQLVMGradientProcedureMatrix4.class);
 
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
 				LSQLVMGradientProcedureLinear6.class);
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
 				LSQLVMGradientProcedureLinear5.class);
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
 				LSQLVMGradientProcedureLinear4.class);
 	}
@@ -178,16 +179,15 @@ public class LSQLVMGradientProcedureTest
 			final double s = p.value;
 			final double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 			// Exactly the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 0);
-			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p.beta, beta, 0);
+			ExtraAssertions.assertEquals(s, s2, "%s Result: Not same @ %d", name, i);
+			ExtraAssertions.assertArrayEquals(p.beta, beta, "%s Observations: Not same beta @ %d", name, i);
 
 			final double[] al = p.getAlphaLinear();
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al, new DenseMatrix64F(alpha).data,
-					0);
+			ExtraAssertions.assertArrayEquals(al, new DenseMatrix64F(alpha).data,
+					"%s Observations: Not same alpha linear @ %d", name, i);
 
 			final double[][] am = p.getAlphaMatrix();
-			for (int j = 0; j < nparams; j++)
-				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], alpha[j], 0);
+			ExtraAssertions.assertArrayEquals(am, alpha, "%s Observations: Not same alpha matrix @ %d", name, i);
 		}
 	}
 
@@ -235,7 +235,7 @@ public class LSQLVMGradientProcedureTest
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams,
 			final BaseLSQLVMGradientProcedureFactory factory)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -329,16 +329,16 @@ public class LSQLVMGradientProcedureTest
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, p1.value, p2.value, 0);
-			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p1.beta, p2.beta, 0);
+			ExtraAssertions.assertEquals(p1.value, p2.value, "%s Result: Not same @ %d", name, i);
 
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getAlphaLinear(),
-					p2.getAlphaLinear(), 0);
+			ExtraAssertions.assertArrayEquals(p1.beta, p2.beta, "%s Observations: Not same beta @ %d", name, i);
+
+			ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(),
+					"%s Observations: Not same alpha linear @ %d", name, i);
 
 			final double[][] am1 = p1.getAlphaMatrix();
 			final double[][] am2 = p2.getAlphaMatrix();
-			for (int j = 0; j < nparams; j++)
-				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am1[j], am2[j], 0);
+			ExtraAssertions.assertArrayEquals(am1, am2, "%s Observations: Not same alpha matrix @ %d", name, i);
 		}
 	}
 
@@ -371,7 +371,7 @@ public class LSQLVMGradientProcedureTest
 			final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
 			boolean doAssert)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -386,17 +386,17 @@ public class LSQLVMGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			final BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
-			p.gradient(paramsList.get(i));
-			p.gradient(paramsList.get(i));
+			final BaseLSQLVMGradientProcedure p1 = factory1.createProcedure(yList.get(i), func);
+			p1.gradient(paramsList.get(i));
+			p1.gradient(paramsList.get(i));
 
 			final BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
 			// Check they are the same
-			Assert.assertArrayEquals("A " + i, p.getAlphaLinear(), p2.getAlphaLinear(), 0);
-			Assert.assertArrayEquals("B " + i, p.beta, p2.beta, 0);
+			ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), "A %d", i);
+			ExtraAssertions.assertArrayEquals(p1.beta, p2.beta, "B %d", i);
 		}
 
 		// Realistic loops for an optimisation
@@ -498,7 +498,7 @@ public class LSQLVMGradientProcedureTest
 				failCounter.run(j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
 				}, () -> {
-					TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+					ExtraAssertions.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
 							DoubleEquality.relativeError(beta[jj], gradient));
 				});
 			}
@@ -513,6 +513,9 @@ public class LSQLVMGradientProcedureTest
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+
+		final LogLevel logLevel = LogLevel.INFO;
+		final boolean debug = TestSettings.allow(logLevel);
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -554,10 +557,13 @@ public class LSQLVMGradientProcedureTest
 			{
 				final Statistics[] rel = new Statistics[nparams];
 				final Statistics[] abs = new Statistics[nparams];
-				for (int i = 0; i < nparams; i++)
+				if (debug)
 				{
-					rel[i] = new Statistics();
-					abs[i] = new Statistics();
+					for (int i = 0; i < nparams; i++)
+					{
+						rel[i] = new Statistics();
+						abs[i] = new Statistics();
+					}
 				}
 
 				for (int i = 0; i < paramsList.size(); i++)
@@ -572,24 +578,28 @@ public class LSQLVMGradientProcedureTest
 					final double[] beta2 = betaList.get(i);
 					final double[] x2 = xList.get(i);
 
-					Assert.assertArrayEquals("Beta", beta2, beta, 1e-10);
-					Assert.assertArrayEquals("Alpha", alpha2, p.getAlphaLinear(), 1e-10);
+					Assertions.assertArrayEquals(beta2, beta, 1e-10, "Beta");
+					Assertions.assertArrayEquals(alpha2, p.getAlphaLinear(), 1e-10, "Alpha");
 
 					// Solve
 					solver.solve(p.getAlphaMatrix(), beta);
-					Assert.assertArrayEquals("X", x2, beta, 1e-10);
+					Assertions.assertArrayEquals(x2, beta, 1e-10, "X");
 
-					for (int j = 0; j < nparams; j++)
+					if (debug)
 					{
-						rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
-						abs[j].add(Math.abs(x2[j] - beta[j]));
+						for (int j = 0; j < nparams; j++)
+						{
+							rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
+							abs[j].add(Math.abs(x2[j] - beta[j]));
+						}
 					}
 				}
 
-				for (int i = 0; i < nparams; i++)
-					TestLog.info("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
-							func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
-							abs[i].getMean(), abs[i].getStandardDeviation());
+				if (debug)
+					for (int i = 0; i < nparams; i++)
+						TestLog.log(logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
+								func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
+								abs[i].getMean(), abs[i].getStandardDeviation());
 			}
 		}
 		finally

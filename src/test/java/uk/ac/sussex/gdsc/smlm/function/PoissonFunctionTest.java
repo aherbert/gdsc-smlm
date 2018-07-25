@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.distribution.CustomPoissonDistribution;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class PoissonFunctionTest
@@ -81,7 +81,7 @@ public class PoissonFunctionTest
 			}
 		}
 		if (p > 1.01)
-			Assert.fail("P > 1: " + p);
+			Assertions.fail("P > 1: " + p);
 
 		// We have most of the probability density.
 		// Now keep evaluating up and down until no difference
@@ -174,7 +174,7 @@ public class PoissonFunctionTest
 			final double v1 = Math.log(f.likelihood(x, o));
 			final double v2 = f.logLikelihood(x, o);
 
-			TestAssert.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
+			ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
 		}
 	}
 
@@ -202,7 +202,7 @@ public class PoissonFunctionTest
 			final double v1 = f.likelihood(x, o);
 			final double v2 = pd.probability(x);
 
-			TestAssert.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
+			ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
 		}
 	}
 }

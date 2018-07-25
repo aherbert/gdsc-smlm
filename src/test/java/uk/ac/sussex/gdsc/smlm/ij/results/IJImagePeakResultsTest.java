@@ -27,8 +27,8 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -44,6 +44,7 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 /**
  * Test the IJImagePeakResults functionality.
@@ -77,7 +78,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -95,7 +96,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -123,7 +124,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = new float[1];
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	private static void add(FloatProcessor fp, IJImagePeakResults r, int x, int y, float value)
@@ -144,7 +145,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -160,7 +161,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -176,7 +177,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -192,7 +193,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -208,7 +209,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -224,7 +225,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -240,7 +241,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -256,7 +257,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -272,7 +273,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -290,7 +291,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -308,7 +309,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -326,7 +327,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -344,7 +345,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -359,7 +360,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -374,7 +375,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -389,7 +390,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -404,7 +405,7 @@ public class IJImagePeakResultsTest
 		r.end();
 		final float[] expecteds = getImage(fp);
 		final float[] actuals = getImage(r);
-		Assert.assertArrayEquals(expecteds, actuals, 0);
+		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
 	@Test
@@ -494,7 +495,7 @@ public class IJImagePeakResultsTest
 		for (int i = 1; i < 4; i++)
 		{
 			final float[] actuals = image[i];
-			Assert.assertArrayEquals("Image" + i, expecteds, actuals, 0);
+			ExtraAssertions.assertArrayEquals( expecteds, actuals, "Single add image %d", i);
 		}
 
 		// Test multi value adds
@@ -502,11 +503,11 @@ public class IJImagePeakResultsTest
 		for (int i = 5; i < image.length; i++)
 		{
 			final float[] actuals = image[i];
-			Assert.assertArrayEquals("Image" + i, expecteds, actuals, 0);
+			ExtraAssertions.assertArrayEquals( expecteds, actuals, "Multi add image %d", i);
 		}
 
 		// Test they are roughly the same (differences occur due to floating point summation
-		Assert.assertArrayEquals("Single != Multi", expecteds, image[0], 1e-5f);
+		Assertions.assertArrayEquals( expecteds, image[0], 1e-5f, "Single != Multi");
 	}
 
 	private static void begin(IJImagePeakResults r)

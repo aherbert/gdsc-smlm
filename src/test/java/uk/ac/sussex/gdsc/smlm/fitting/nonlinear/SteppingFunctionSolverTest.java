@@ -24,11 +24,13 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 /**
  * Test that a stepping solver can fit a function.
@@ -261,15 +263,17 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, BTFastMLE, NoiseModel.EMCCD);
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void cannotFitSingleGaussianEMCCD_x_x__JFastMLE()
 	{
 		// The JFastMLE method was built using a misinterpretation of the Newton
 		// method in Numerical Recipes, 2nd Ed. This test is just here to prove that.
-		TestAssume.assumeMaximumComplexity();
+		ExtraAssumptions.assumeMaximumComplexity();
 
 		// The JFastMLE method does not work
-		fitSingleGaussian(NO_BOUND, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			fitSingleGaussian(NO_BOUND, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
+		});
 	}
 
 	//	@Test
@@ -460,7 +464,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	private void fitSingleGaussian(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type,
 			NoiseModel noiseModel)
 	{
-		//org.junit.Assume.assumeTrue(false);
+		//org.junit.Assumptions.assumeTrue(false);
 		final SteppingFunctionSolver solver = getSolver(clamp, type);
 		canFitSingleGaussian(solver, bounded, noiseModel);
 	}
@@ -595,7 +599,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 			SteppingFunctionSolverType type2, boolean bounded, SteppingFunctionSolverClamp clamp,
 			SteppingFunctionSolverType type, NoiseModel noiseModel)
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 		final SteppingFunctionSolver solver = getSolver(clamp, type);
 		final SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getName(bounded, clamp, type),
@@ -689,8 +693,10 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	private void canFitAndComputeDeviations(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
-		final SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
-		final SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		final SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type,
+				noToleranceChecker);
+		final SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type,
+				noToleranceChecker);
 		fitAndComputeDeviationsMatch(rg, solver1, solver2, noiseModel, useWeights);
 	}
 
@@ -781,8 +787,10 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	private void canFitAndComputeValue(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
-		final SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
-		final SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		final SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type,
+				noToleranceChecker);
+		final SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type,
+				noToleranceChecker);
 		fitAndComputeValueMatch(rg, solver1, solver2, noiseModel, useWeights);
 	}
 }

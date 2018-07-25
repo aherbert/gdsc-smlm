@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -56,8 +56,8 @@ public class OffsetFunctionTest
 			final double e = v0[i] + b1[i] + b2[i];
 			final double o1 = v1[i] + b2[i];
 			final double o2 = v2[i];
-			Assert.assertEquals("o1", e, o1, 0);
-			Assert.assertEquals("o2", e, o2, 1e-6);
+			Assertions.assertEquals(e, o1, "o1");
+			Assertions.assertEquals(e, o2, 1e-6, "o2");
 		}
 	}
 
@@ -103,11 +103,11 @@ public class OffsetFunctionTest
 			final double e = v0[i] + b1[i] + b2[i];
 			final double o1 = v1[i] + b2[i];
 			final double o2 = v2[i];
-			Assert.assertEquals("o1", e, o1, 0);
-			Assert.assertEquals("o2", e, o2, 1e-6);
+			Assertions.assertEquals(e, o1, "o1");
+			Assertions.assertEquals(e, o2, 1e-6, "o2");
 		}
-		Assert.assertArrayEquals("d1", d0, d1, 0);
-		Assert.assertArrayEquals("d2", d0, d2, 0);
+		Assertions.assertArrayEquals(d0, d1, "d1");
+		Assertions.assertArrayEquals(d0, d2, "d2");
 	}
 
 	private static double[] evaluateGradient1Function(Gradient1Function f, double[] p, final double[] dyda)
@@ -157,13 +157,13 @@ public class OffsetFunctionTest
 			final double e = v0[i] + b1[i] + b2[i];
 			final double o1 = v1[i] + b2[i];
 			final double o2 = v2[i];
-			Assert.assertEquals("o1", e, o1, 0);
-			Assert.assertEquals("o2", e, o2, 1e-6);
+			Assertions.assertEquals(e, o1, "o1");
+			Assertions.assertEquals(e, o2, 1e-6, "o2");
 		}
-		Assert.assertArrayEquals("d1", d0, d1, 0);
-		Assert.assertArrayEquals("d2", d0, d2, 0);
-		Assert.assertArrayEquals("d21", d20, d21, 0);
-		Assert.assertArrayEquals("d22", d20, d22, 0);
+		Assertions.assertArrayEquals(d0, d1, "d1");
+		Assertions.assertArrayEquals(d0, d2, "d2");
+		Assertions.assertArrayEquals(d20, d21, "d21");
+		Assertions.assertArrayEquals(d20, d22, "d22");
 	}
 
 	private static double[] evaluateGradient2Function(Gradient2Function f, double[] p, final double[] dyda,
@@ -204,8 +204,8 @@ public class OffsetFunctionTest
 			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
-			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((OffsetValueFunction) vf).getValueFunction() == f);
+			Assertions.assertArrayEquals(e, o);
+			Assertions.assertTrue(((OffsetValueFunction) vf).getValueFunction() == f);
 		}
 	}
 
@@ -224,8 +224,8 @@ public class OffsetFunctionTest
 			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
-			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((OffsetGradient1Function) vf).getGradient1Function() == f);
+			Assertions.assertArrayEquals(e, o);
+			Assertions.assertTrue(((OffsetGradient1Function) vf).getGradient1Function() == f);
 		}
 	}
 
@@ -244,8 +244,8 @@ public class OffsetFunctionTest
 			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
-			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((OffsetGradient2Function) vf).getGradient2Function() == f);
+			Assertions.assertArrayEquals(e, o);
+			Assertions.assertTrue(((OffsetGradient2Function) vf).getGradient2Function() == f);
 		}
 	}
 
@@ -264,8 +264,8 @@ public class OffsetFunctionTest
 			final double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
-			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((OffsetExtendedGradient2Function) vf).getExtendedGradient2Function() == f);
+			Assertions.assertArrayEquals(e, o);
+			Assertions.assertTrue(((OffsetExtendedGradient2Function) vf).getExtendedGradient2Function() == f);
 		}
 	}
 }

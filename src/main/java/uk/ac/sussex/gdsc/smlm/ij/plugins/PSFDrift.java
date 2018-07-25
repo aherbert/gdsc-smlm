@@ -671,8 +671,7 @@ public class PSFDrift implements PlugIn
 		final double[][] smoothy = displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, loess, start, end);
 		displayPlot("Recall", "Recall", zPosition, recall, null, null, start, end);
 
-		final WindowOrganiser wo = new WindowOrganiser();
-		wo.tileWindows(idList);
+		WindowOrganiser.tileWindows(idList);
 
 		// Ask the user if they would like to store them in the image
 		final GenericDialog gd = new GenericDialog(TITLE);

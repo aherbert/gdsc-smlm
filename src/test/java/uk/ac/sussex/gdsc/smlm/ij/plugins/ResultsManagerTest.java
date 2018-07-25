@@ -30,8 +30,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import ij.Macro;
@@ -49,7 +49,7 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 /**
  * Test the ResultsManager functionality to load results from file when the file has options.
@@ -61,35 +61,35 @@ public class ResultsManagerTest
 	public void writeTSFMatchesRead()
 	{
 		// This is redundant
-		TestAssume.assumeLowComplexity();
+		ExtraAssumptions.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithChannels()
 	{
-		//TestAssume.assumeLowComplexity();
+		//ExtraAssumptions.assumeLowComplexity();
 		writeTSFMatchesRead(2, 1, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithSlices()
 	{
-		//TestAssume.assumeLowComplexity();
+		//ExtraAssumptions.assumeLowComplexity();
 		writeTSFMatchesRead(1, 2, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithPositions()
 	{
-		//TestAssume.assumeLowComplexity();
+		//ExtraAssumptions.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 2, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithTypes()
 	{
-		//TestAssume.assumeLowComplexity();
+		//ExtraAssumptions.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 1, 2);
 	}
 
@@ -97,7 +97,7 @@ public class ResultsManagerTest
 	public void writeTSFMatchesReadWithCombinations()
 	{
 		// This takes longer
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 		writeTSFMatchesRead(2, 2, 2, 2);
 	}
 
@@ -114,15 +114,14 @@ public class ResultsManagerTest
 		{
 			closeOutput(out);
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 
 		// Write the offsets used in the TSF format
 		try
 		{
 			@SuppressWarnings("resource")
-			final
-			DataOutputStream dos = new DataOutputStream(out);
+			final DataOutputStream dos = new DataOutputStream(out);
 			dos.writeInt(0);
 			dos.writeLong(0);
 		}
@@ -130,7 +129,7 @@ public class ResultsManagerTest
 		{
 			closeOutput(out);
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 
 		// Generate random spots
@@ -167,7 +166,7 @@ public class ResultsManagerTest
 			{
 				closeOutput(out);
 				e.printStackTrace();
-				Assert.fail(e.getMessage());
+				Assertions.fail(e.getMessage());
 			}
 		}
 
@@ -185,7 +184,7 @@ public class ResultsManagerTest
 		{
 			closeOutput(out);
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 
 		// Record the SpotList message
@@ -217,7 +216,7 @@ public class ResultsManagerTest
 		catch (final IOException e)
 		{
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 		finally
 		{
@@ -233,7 +232,7 @@ public class ResultsManagerTest
 		catch (final Exception e)
 		{
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 
 		// Read each combination
@@ -254,8 +253,8 @@ public class ResultsManagerTest
 						Macro.setOptions(sb.toString());
 
 						ResultsManager.setInputFilename(filename);
-						final MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false, null,
-								null);
+						final MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false,
+								null, null);
 						checkEqual(spots, channel, slice, position, type, in);
 					}
 	}
@@ -287,39 +286,38 @@ public class ResultsManagerTest
 	private static void checkEqual(Spot[] spots, int channel, int slice, int position, int type,
 			MemoryPeakResults actualResults) throws ArrayComparisonFailure
 	{
-		Assert.assertNotNull("Input results are null", actualResults);
+		Assertions.assertNotNull( actualResults,"Input results are null");
 
 		final MemoryPeakResults expectedResults = extract(spots, channel, slice, position, type);
 
-		Assert.assertEquals("Size differ", expectedResults.size(), actualResults.size());
-
-		final float delta = 0;
+		Assertions.assertEquals( expectedResults.size(), actualResults.size(), "Size differ");
 
 		final PeakResult[] expected = expectedResults.toArray();
 		final PeakResult[] actual = actualResults.toArray();
 		for (int i = 0; i < actualResults.size(); i++)
 		{
+			final int ii = i;
 			final PeakResult p1 = expected[i];
 			final PeakResult p2 = actual[i];
 
-			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
+			Assertions.assertEquals( p1.getFrame(), p2.getFrame(), ()-> "Peak mismatch @ " + ii);
 
-			Assert.assertEquals("Orig X mismatch @ " + i, p1.getOrigX(), p2.getOrigX());
-			Assert.assertEquals("Orig Y mismatch @ " + i, p1.getOrigY(), p2.getOrigY());
-			Assert.assertEquals("Orig value mismatch @ " + i, p1.getOrigValue(), p2.getOrigValue(), delta);
-			Assert.assertEquals("Error mismatch @ " + i, p1.getError(), p2.getError(), 1e-6);
-			Assert.assertEquals("Noise mismatch @ " + i, p1.getNoise(), p2.getNoise(), delta);
-			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
+			Assertions.assertEquals( p1.getOrigX(), p2.getOrigX(), ()-> "Orig X mismatch @ " + ii);
+			Assertions.assertEquals( p1.getOrigY(), p2.getOrigY(), ()-> "Orig Y mismatch @ " + ii);
+			Assertions.assertEquals( p1.getOrigValue(), p2.getOrigValue(), ()->"Orig value mismatch @ " + ii);
+			Assertions.assertEquals( p1.getError(), p2.getError(), 1e-6, ()->"Error mismatch @ " + ii);
+			Assertions.assertEquals( p1.getNoise(), p2.getNoise(), () -> "Noise mismatch @ " + ii);
+			Assertions.assertNotNull( p2.getParameters(), ()-> "Params is null @ " + ii);
 
-			Assert.assertEquals("Background mismatch @ " + i, p1.getBackground(), p2.getBackground(), delta);
-			Assert.assertEquals("Signal mismatch @ " + i, p1.getIntensity(), p2.getIntensity(), delta);
-			Assert.assertEquals("XPosition mismatch @ " + i, p1.getXPosition(), p2.getXPosition(), delta);
-			Assert.assertEquals("YPosition mismatch @ " + i, p1.getYPosition(), p2.getYPosition(), delta);
-			Assert.assertEquals("ZPosition mismatch @ " + i, p1.getZPosition(), p2.getZPosition(), delta);
+			Assertions.assertEquals( p1.getBackground(), p2.getBackground(), ()-> "Background mismatch @ " + ii);
+			Assertions.assertEquals( p1.getIntensity(), p2.getIntensity(), ()-> "Signal mismatch @ " + ii);
+			Assertions.assertEquals( p1.getXPosition(), p2.getXPosition(), ()-> "XPosition mismatch @ " + ii);
+			Assertions.assertEquals( p1.getYPosition(), p2.getYPosition(), ()-> "YPosition mismatch @ " + ii);
+			Assertions.assertEquals( p1.getZPosition(), p2.getZPosition(), ()-> "ZPosition mismatch @ " + ii);
 			for (int j = PeakResult.STANDARD_PARAMETERS, size = p1.getNumberOfParameters(); j < size; j++)
-				Assert.assertEquals("Parameter mismatch @ " + i, p1.getParameter(j), p2.getParameter(j), 1e-6);
+				Assertions.assertEquals( p1.getParameter(j), p2.getParameter(j), 1e-6, ()->"Parameter mismatch @ " + ii);
 
-			Assert.assertEquals("ID mismatch @ " + i, p1.getId(), p2.getId());
+			Assertions.assertEquals( p1.getId(), p2.getId(), ()-> "ID mismatch @ " + ii);
 		}
 	}
 
@@ -360,7 +358,7 @@ public class ResultsManagerTest
 		}
 		catch (final IOException e)
 		{
-			Assert.fail("Cannot create temp files for IO testing");
+			Assertions.fail("Cannot create temp files for IO testing");
 		}
 		return null; // Allow compilation but the assert will stop the code
 	}

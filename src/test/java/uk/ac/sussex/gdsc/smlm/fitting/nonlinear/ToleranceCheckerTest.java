@@ -23,8 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
 
@@ -37,10 +38,12 @@ public class ToleranceCheckerTest
 	double NONE = ToleranceChecker.IGNORE_TOLERANCE;
 	int IGNORE = ToleranceChecker.IGNORE_MAX_ITERATIONS;
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void throwsIfCannotConverge()
 	{
-		canConverge(false, NONE, NONE, NONE, NONE, IGNORE, 0);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			canConverge(false, NONE, NONE, NONE, NONE, IGNORE, 0);
+		});
 	}
 
 	@Test
@@ -67,28 +70,36 @@ public class ToleranceCheckerTest
 		canConverge(true, NONE, 1e-2, NONE, NONE, IGNORE, ToleranceChecker.STATUS_VALUE);
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void cannotConvergeOnMaximumRelativeValueIfMinimising()
 	{
-		canConverge(false, -1, 1e-2, NONE, NONE, NONE, IGNORE, 0);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			canConverge(false, -1, 1e-2, NONE, NONE, NONE, IGNORE, 0);
+		});
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void cannotConvergeOnMaximumAbsoluteValueIfMinimising()
 	{
-		canConverge(false, -1, NONE, 1e-2, NONE, NONE, IGNORE, 0);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			canConverge(false, -1, NONE, 1e-2, NONE, NONE, IGNORE, 0);
+		});
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void cannotConvergeOnMinimumRelativeValueIfMaximising()
 	{
-		canConverge(true, 1, 1e-2, NONE, NONE, NONE, IGNORE, 0);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			canConverge(true, 1, 1e-2, NONE, NONE, NONE, IGNORE, 0);
+		});
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void cannotConvergeOnMinimumAbsoluteValueIfMaximising()
 	{
-		canConverge(true, 1, NONE, 1e-2, NONE, NONE, IGNORE, 0);
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			canConverge(true, 1, NONE, 1e-2, NONE, NONE, IGNORE, 0);
+		});
 	}
 
 	@Test
@@ -130,8 +141,8 @@ public class ToleranceCheckerTest
 	private static void canConverge(boolean minimiseValue, double dir, double relativeValue, double absoluteValue,
 			double relativeParameters, double absoluteParameters, int maxIterations, int expected)
 	{
-		final ToleranceChecker tc = new ToleranceChecker(minimiseValue, relativeValue, absoluteValue, relativeParameters,
-				absoluteParameters, maxIterations);
+		final ToleranceChecker tc = new ToleranceChecker(minimiseValue, relativeValue, absoluteValue,
+				relativeParameters, absoluteParameters, maxIterations);
 
 		double v = 10;
 		double v2 = 1 + v;
@@ -149,16 +160,16 @@ public class ToleranceCheckerTest
 			final int observed = tc.converged(v1, p1, v2, p2);
 			if (observed != 0)
 			{
-				Assert.assertEquals(expected, observed);
+				Assertions.assertEquals(expected, observed);
 				if (BitFlags.areSet(expected, ToleranceChecker.STATUS_TARGET_ITERATIONS))
-					Assert.assertEquals(-maxIterations, tc.getIterations());
+					Assertions.assertEquals(-maxIterations, tc.getIterations());
 				if (BitFlags.areSet(expected, ToleranceChecker.STATUS_MAX_ITERATIONS))
-					Assert.assertEquals(maxIterations, tc.getIterations());
+					Assertions.assertEquals(maxIterations, tc.getIterations());
 				return;
 			}
 		}
 
-		Assert.fail();
+		Assertions.fail("Failed to converge");
 	}
 
 	@Test
@@ -166,13 +177,13 @@ public class ToleranceCheckerTest
 	{
 		final double tolerance = 1e-2;
 		final ToleranceChecker tc = new ToleranceChecker(false, NONE, tolerance, NONE, NONE, 100);
-		Assert.assertEquals(0, tc.converged(0, null, 1, null));
-		Assert.assertEquals(0, tc.converged(0, null, -1, null));
-		Assert.assertEquals(0, tc.converged(0, null, 2 * tolerance, null));
-		Assert.assertEquals(0, tc.converged(0, null, -2 * tolerance, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, tolerance, null));
-		Assert.assertEquals(0, tc.converged(0, null, -tolerance, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
+		Assertions.assertEquals(0, tc.converged(0, null, 1, null));
+		Assertions.assertEquals(0, tc.converged(0, null, -1, null));
+		Assertions.assertEquals(0, tc.converged(0, null, 2 * tolerance, null));
+		Assertions.assertEquals(0, tc.converged(0, null, -2 * tolerance, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, tolerance, null));
+		Assertions.assertEquals(0, tc.converged(0, null, -tolerance, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
 	}
 
 	@Test
@@ -180,13 +191,13 @@ public class ToleranceCheckerTest
 	{
 		final double tolerance = 1e-2;
 		final ToleranceChecker tc = new ToleranceChecker(true, NONE, tolerance, NONE, NONE, 100);
-		Assert.assertEquals(0, tc.converged(0, null, 1, null));
-		Assert.assertEquals(0, tc.converged(0, null, -1, null));
-		Assert.assertEquals(0, tc.converged(0, null, 2 * tolerance, null));
-		Assert.assertEquals(0, tc.converged(0, null, -2 * tolerance, null));
-		Assert.assertEquals(0, tc.converged(0, null, tolerance, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, -tolerance, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
+		Assertions.assertEquals(0, tc.converged(0, null, 1, null));
+		Assertions.assertEquals(0, tc.converged(0, null, -1, null));
+		Assertions.assertEquals(0, tc.converged(0, null, 2 * tolerance, null));
+		Assertions.assertEquals(0, tc.converged(0, null, -2 * tolerance, null));
+		Assertions.assertEquals(0, tc.converged(0, null, tolerance, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, -tolerance, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
 	}
 
 	@Test
@@ -196,36 +207,36 @@ public class ToleranceCheckerTest
 		ToleranceChecker tc;
 
 		tc = new ToleranceChecker(false, NONE, NONE, NONE, NONE, 100);
-		Assert.assertFalse(tc.checkValue);
-		Assert.assertFalse(tc.checkParameters);
+		Assertions.assertFalse(tc.checkValue);
+		Assertions.assertFalse(tc.checkParameters);
 
 		tc = new ToleranceChecker(true, tolerance, NONE, NONE, NONE, 100);
-		Assert.assertTrue(tc.checkValue);
-		Assert.assertFalse(tc.checkParameters);
-		Assert.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
-		Assert.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
+		Assertions.assertTrue(tc.checkValue);
+		Assertions.assertFalse(tc.checkParameters);
+		Assertions.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
+		Assertions.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
 
 		tc = new ToleranceChecker(false, tolerance, NONE, NONE, NONE, 100);
-		Assert.assertTrue(tc.checkValue);
-		Assert.assertFalse(tc.checkParameters);
-		Assert.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
-		Assert.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
+		Assertions.assertTrue(tc.checkValue);
+		Assertions.assertFalse(tc.checkParameters);
+		Assertions.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
+		Assertions.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
 
 		tc = new ToleranceChecker(true, NONE, tolerance, NONE, NONE, 100);
-		Assert.assertTrue(tc.checkValue);
-		Assert.assertFalse(tc.checkParameters);
-		Assert.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
-		Assert.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
+		Assertions.assertTrue(tc.checkValue);
+		Assertions.assertFalse(tc.checkParameters);
+		Assertions.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
+		Assertions.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
 
 		tc = new ToleranceChecker(false, NONE, tolerance, NONE, NONE, 100);
-		Assert.assertTrue(tc.checkValue);
-		Assert.assertFalse(tc.checkParameters);
-		Assert.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
-		Assert.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
-		Assert.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
+		Assertions.assertTrue(tc.checkValue);
+		Assertions.assertFalse(tc.checkParameters);
+		Assertions.assertEquals(0, tc.converged(0, null, -Double.MIN_VALUE, null));
+		Assertions.assertEquals(0, tc.converged(0, null, Double.MIN_VALUE, null));
+		Assertions.assertEquals(ToleranceChecker.STATUS_VALUE, tc.converged(0, null, 0, null));
 	}
 
 	@Test
@@ -236,21 +247,21 @@ public class ToleranceCheckerTest
 		final double[] p = new double[1];
 
 		tc = new ToleranceChecker(false, NONE, NONE, NONE, NONE, 100);
-		Assert.assertFalse(tc.checkValue);
-		Assert.assertFalse(tc.checkParameters);
+		Assertions.assertFalse(tc.checkValue);
+		Assertions.assertFalse(tc.checkParameters);
 
 		tc = new ToleranceChecker(true, NONE, NONE, tolerance, NONE, 100);
-		Assert.assertFalse(tc.checkValue);
-		Assert.assertTrue(tc.checkParameters);
-		Assert.assertEquals(0, tc.converged(0, p, 0, new double[] { -Double.MIN_VALUE }));
-		Assert.assertEquals(0, tc.converged(0, p, 0, new double[] { Double.MIN_VALUE }));
-		Assert.assertEquals(ToleranceChecker.STATUS_PARAMETERS, tc.converged(0, p, 0, p));
+		Assertions.assertFalse(tc.checkValue);
+		Assertions.assertTrue(tc.checkParameters);
+		Assertions.assertEquals(0, tc.converged(0, p, 0, new double[] { -Double.MIN_VALUE }));
+		Assertions.assertEquals(0, tc.converged(0, p, 0, new double[] { Double.MIN_VALUE }));
+		Assertions.assertEquals(ToleranceChecker.STATUS_PARAMETERS, tc.converged(0, p, 0, p));
 
 		tc = new ToleranceChecker(true, NONE, NONE, NONE, tolerance, 100);
-		Assert.assertFalse(tc.checkValue);
-		Assert.assertTrue(tc.checkParameters);
-		Assert.assertEquals(0, tc.converged(0, p, 0, new double[] { -Double.MIN_VALUE }));
-		Assert.assertEquals(0, tc.converged(0, p, 0, new double[] { Double.MIN_VALUE }));
-		Assert.assertEquals(ToleranceChecker.STATUS_PARAMETERS, tc.converged(0, p, 0, p));
+		Assertions.assertFalse(tc.checkValue);
+		Assertions.assertTrue(tc.checkParameters);
+		Assertions.assertEquals(0, tc.converged(0, p, 0, new double[] { -Double.MIN_VALUE }));
+		Assertions.assertEquals(0, tc.converged(0, p, 0, new double[] { Double.MIN_VALUE }));
+		Assertions.assertEquals(ToleranceChecker.STATUS_PARAMETERS, tc.converged(0, p, 0, p));
 	}
 }

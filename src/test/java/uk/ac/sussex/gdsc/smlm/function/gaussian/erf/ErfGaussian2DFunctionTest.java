@@ -25,9 +25,9 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
@@ -48,8 +48,8 @@ import uk.ac.sussex.gdsc.test.MessageProvider;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
@@ -73,13 +73,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		{
 			f = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
 			f2 = GaussianFunctionFactory.create2D(2, maxx, maxy, flags2, zModel);
-			Assert.assertTrue("Incorrect function2", f.getClass() == f2.getClass());
+			Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function2");
 		}
 		else
 		{
 			f = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
 			f2 = GaussianFunctionFactory.create2D(1, maxx, maxy, flags2, zModel);
-			Assert.assertTrue("Incorrect function1", f.getClass() == f2.getClass());
+			Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function1");
 		}
 	}
 
@@ -189,14 +189,16 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 											f1.eval(i, dyda, dyda2);
 
 											final double gradient = (value2 - value3) / (2 * h);
-											final double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
+											final double error = DoubleEquality.relativeError(gradient,
+													dyda2[gradientIndex]);
 											s.add(error);
-											Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
-													(gradient * dyda2[gradientIndex]) >= 0);
+											Assertions.assertTrue((gradient * dyda2[gradientIndex]) >= 0,
+													() -> gradient + " sign != " + dyda2[gradientIndex]);
 											//TestLog.debug("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 											//		gradientIndex, dyda2[gradientIndex], error);
-											Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
-													eq.almostEqualRelativeOrAbsolute(gradient, dyda2[gradientIndex]));
+											Assertions.assertTrue(
+													eq.almostEqualRelativeOrAbsolute(gradient, dyda2[gradientIndex]),
+													() -> gradient + " != " + dyda2[gradientIndex]);
 
 										}
 								}
@@ -215,7 +217,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondBackgroundGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		if (f2.evaluatesBackground())
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
 	}
@@ -223,7 +225,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondSignalGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		if (f2.evaluatesSignal())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
@@ -235,7 +237,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondXGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
 		functionComputesSecondTargetGradientWith2Peaks(
 				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -244,7 +246,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondYGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
 		functionComputesSecondTargetGradientWith2Peaks(
 				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -253,7 +255,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondZGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		if (f2.evaluatesZ())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
@@ -265,7 +267,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondXWidthGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		if (f2.evaluatesSD0())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
@@ -277,7 +279,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondYWidthGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		if (f2.evaluatesSD1())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
@@ -289,7 +291,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondAngleGradientWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		if (f2.evaluatesAngle())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
@@ -362,16 +364,19 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																	final double error = DoubleEquality.relativeError(
 																			gradient, dyda2[gradientIndex]);
 																	s.add(error);
-																	Assert.assertTrue(
-																			gradient + " sign != " +
-																					dyda2[gradientIndex],
-																			(gradient * dyda2[gradientIndex]) >= 0);
+																	Assertions.assertTrue(
+
+																			(gradient * dyda2[gradientIndex]) >= 0,
+																			() -> gradient + " sign != " +
+																					dyda2[gradientIndex]);
 																	//TestLog.debug("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 																	//		gradientIndex, dyda2[gradientIndex], error);
-																	Assert.assertTrue(
-																			gradient + " != " + dyda2[gradientIndex],
+																	Assertions.assertTrue(
+
 																			eq.almostEqualRelativeOrAbsolute(gradient,
-																					dyda2[gradientIndex]));
+																					dyda2[gradientIndex]),
+																			() -> gradient + " != " +
+																					dyda2[gradientIndex]);
 																}
 														}
 		TestLog.info(new MessageProvider()
@@ -454,7 +459,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterThanEquivalentGaussian2DFunction()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
 		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
@@ -505,8 +510,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		{
 			final double t1 = ts.get(-i).getMean();
 			final double t2 = ts.get(-i - 3).getMean();
-			TestLog.logSpeedTestResult(t1 < t2,
-					"ERF function %d  %s  vs equivalent Gaussian2DFunction  %s : %.2fx\n", i - 1, t1, t2, t2 / t1);
+			TestLog.logSpeedTestResult(t1 < t2, "ERF function %d  %s  vs equivalent Gaussian2DFunction  %s : %.2fx\n",
+					i - 1, t1, t2, t2 / t1);
 		}
 	}
 
@@ -533,8 +538,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 							for (final double[] w1 : testw1)
 								for (final double angle1 : testangle1)
 								{
-									final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
-											angle1);
+									final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0],
+											w1[1], angle1);
 									f1.initialiseExtended2(a);
 
 									// Compute single
@@ -542,8 +547,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									{
 										final double o1 = f1.eval(i, du_da);
 										final double o2 = f1.eval(i, du_db, d2u_da2);
-										Assert.assertEquals("Value", o1, o2, 1e-10);
-										Assert.assertArrayEquals("Jacobian!=Jacobian", du_da, du_db, 1e-10);
+										Assertions.assertEquals(o1, o2, 1e-10, "Value");
+										Assertions.assertArrayEquals(du_da, du_db, 1e-10, "Jacobian!=Jacobian");
 										values[i] = o1;
 										jacobian[i] = du_da.clone();
 										jacobian2[i] = d2u_da2.clone();
@@ -557,7 +562,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 										@Override
 										public void execute(double value)
 										{
-											Assert.assertEquals("Value ValueProcedure", values[i], value, 1e-10);
+											Assertions.assertEquals(values[i], value, 1e-10, "Value ValueProcedure");
 											i++;
 										}
 									});
@@ -569,9 +574,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 										@Override
 										public void execute(double value, double[] dy_da)
 										{
-											Assert.assertEquals("Value Gradient1Procedure", values[i], value, 1e-10);
-											Assert.assertArrayEquals("du_da Gradient1Procedure", jacobian[i], dy_da,
-													1e-10);
+											Assertions.assertEquals(values[i], value, 1e-10,
+													"Value Gradient1Procedure");
+											Assertions.assertArrayEquals(jacobian[i], dy_da, 1e-10,
+													"du_da Gradient1Procedure");
 											i++;
 										}
 									});
@@ -583,11 +589,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 										@Override
 										public void execute(double value, double[] dy_da, double[] d2y_da2)
 										{
-											Assert.assertEquals("Value Gradient2Procedure", values[i], value, 1e-10);
-											Assert.assertArrayEquals("du_da Gradient2Procedure", jacobian[i], dy_da,
-													1e-10);
-											Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i],
-													d2y_da2, 1e-10);
+											Assertions.assertEquals(values[i], value, 1e-10,
+													"Value Gradient2Procedure");
+											Assertions.assertArrayEquals(jacobian[i], dy_da, 1e-10,
+													"du_da Gradient2Procedure");
+											Assertions.assertArrayEquals(jacobian2[i], d2y_da2, 1e-10,
+													"d2u_da2 Gradient2Procedure");
 											i++;
 										}
 									});
@@ -599,14 +606,14 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 										@Override
 										public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 										{
-											Assert.assertEquals("Value ExtendedGradient2Procedure", values[i], value,
-													1e-10);
-											Assert.assertArrayEquals("du_da ExtendedGradient2Procedure", jacobian[i],
-													dy_da, 1e-10);
+											Assertions.assertEquals(values[i], value, 1e-10,
+													"Value ExtendedGradient2Procedure");
+											Assertions.assertArrayEquals(jacobian[i], dy_da, 1e-10,
+													"du_da ExtendedGradient2Procedure");
 											for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length + 1)
 												d2u_da2[j] = d2y_dadb[k];
-											Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i],
-													d2u_da2, 1e-10);
+											Assertions.assertArrayEquals(jacobian2[i], d2u_da2, 1e-10,
+													"d2u_da2 Gradient2Procedure");
 											i++;
 										}
 									});
@@ -620,8 +627,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		final int nparams = f1.getNumberOfGradients();
 		final int[] gradientIndices = f1.gradientIndices();
-		final double[] du_da = new double[f1.getNumberOfGradients()];
-		final double[] du_db = new double[f1.getNumberOfGradients()];
 
 		final ErfGaussian2DFunction[] fHigh = new ErfGaussian2DFunction[nparams];
 		final ErfGaussian2DFunction[] fLow = new ErfGaussian2DFunction[nparams];
@@ -641,8 +646,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 							for (final double[] w1 : testw1)
 								for (final double angle1 : testangle1)
 								{
-									final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
-											angle1);
+									final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0],
+											w1[1], angle1);
 									f1.initialiseExtended2(a);
 
 									// Create a set of functions initialised +/- delta in each parameter
@@ -670,6 +675,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									f1.forEach(new ExtendedGradient2Procedure()
 									{
 										int i = -1;
+										final double[] du_da = new double[f1.getNumberOfGradients()];
+										final double[] du_db = new double[f1.getNumberOfGradients()];
 
 										@Override
 										public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
@@ -691,7 +698,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 													{
 														TestLog.info("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
 																m.get(j, k));
-														TestAssert.fail("%d [%d,%d] %f != %f", i, j, k, gradient,
+														ExtraAssertions.fail("%d [%d,%d] %f != %f", i, j, k, gradient,
 																m.get(j, k));
 													}
 												}
@@ -704,7 +711,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesGradientForEachWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
 
 		final int n = f2.size();
@@ -732,9 +739,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 													for (final double[] w2 : testw2)
 														for (final double angle2 : testangle2)
 														{
-															final double[] a = createParameters(background, signal1, cx1, cy1,
-																	cz1, w1[0], w1[1], angle1, signal2, cx2, cy2, cz2,
-																	w2[0], w2[1], angle2);
+															final double[] a = createParameters(background, signal1,
+																	cx1, cy1, cz1, w1[0], w1[1], angle1, signal2, cx2,
+																	cy2, cz2, w2[0], w2[1], angle2);
 															f2.initialiseExtended2(a);
 
 															// Compute single
@@ -742,9 +749,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															{
 																final double o1 = f2.eval(i, du_da);
 																final double o2 = f2.eval(i, du_db, d2u_da2);
-																Assert.assertEquals("Value", o1, o2, 1e-10);
-																Assert.assertArrayEquals("Jacobian!=Jacobian", du_da,
-																		du_db, 1e-10);
+																Assertions.assertEquals(o1, o2, 1e-10, "Value");
+																Assertions.assertArrayEquals(du_da, du_db, 1e-10,
+																		"Jacobian!=Jacobian");
 																values[i] = o1;
 																jacobian[i] = du_da.clone();
 																jacobian2[i] = d2u_da2.clone();
@@ -758,8 +765,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																@Override
 																public void execute(double value)
 																{
-																	Assert.assertEquals("Value ValueProcedure",
-																			values[i], value, 1e-10);
+																	Assertions.assertEquals(values[i], value, 1e-10,
+																			"Value ValueProcedure");
 																	i++;
 																}
 															});
@@ -771,10 +778,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																@Override
 																public void execute(double value, double[] dy_da)
 																{
-																	Assert.assertEquals("Value Gradient1Procedure",
-																			values[i], value, 1e-10);
-																	Assert.assertArrayEquals("du_da Gradient1Procedure",
-																			jacobian[i], dy_da, 1e-10);
+																	Assertions.assertEquals(values[i], value, 1e-10,
+																			"Value Gradient1Procedure");
+																	Assertions.assertArrayEquals(jacobian[i], dy_da,
+																			1e-10, "du_da Gradient1Procedure");
 																	i++;
 																}
 															});
@@ -787,13 +794,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																public void execute(double value, double[] dy_da,
 																		double[] d2y_da2)
 																{
-																	Assert.assertEquals("Value Gradient2Procedure",
-																			values[i], value, 1e-10);
-																	Assert.assertArrayEquals("du_da Gradient2Procedure",
-																			jacobian[i], dy_da, 1e-10);
-																	Assert.assertArrayEquals(
-																			"d2u_da2 Gradient2Procedure", jacobian2[i],
-																			d2y_da2, 1e-10);
+																	Assertions.assertEquals(values[i], value, 1e-10,
+																			"Value Gradient2Procedure");
+																	Assertions.assertArrayEquals(jacobian[i], dy_da,
+																			1e-10, "du_da Gradient2Procedure");
+																	Assertions.assertArrayEquals(jacobian2[i], d2y_da2,
+																			1e-10, "d2u_da2 Gradient2Procedure");
 																	i++;
 																}
 															});
@@ -806,18 +812,19 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																public void executeExtended(double value,
 																		double[] dy_da, double[] d2y_dadb)
 																{
-																	Assert.assertEquals(
-																			"Value ExtendedGradient2Procedure",
-																			values[i], value, 1e-10);
-																	Assert.assertArrayEquals(
-																			"du_da ExtendedGradient2Procedure",
-																			jacobian[i], dy_da, 1e-10);
+																	Assertions.assertEquals(
+
+																			values[i], value, 1e-10,
+																			"Value ExtendedGradient2Procedure");
+																	Assertions.assertArrayEquals(
+
+																			jacobian[i], dy_da, 1e-10,
+																			"du_da ExtendedGradient2Procedure");
 																	for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length +
 																			1)
 																		d2u_da2[j] = d2y_dadb[k];
-																	Assert.assertArrayEquals(
-																			"d2u_da2 Gradient2Procedure", jacobian2[i],
-																			d2u_da2, 1e-10);
+																	Assertions.assertArrayEquals(jacobian2[i], d2u_da2,
+																			1e-10, "d2u_da2 Gradient2Procedure");
 																	i++;
 																}
 															});
@@ -827,13 +834,11 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesExtendedGradientForEachWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
 
 		final int nparams = f2.getNumberOfGradients();
 		final int[] gradientIndices = f2.gradientIndices();
-		final double[] du_da = new double[f2.getNumberOfGradients()];
-		final double[] du_db = new double[f2.getNumberOfGradients()];
 
 		final ErfGaussian2DFunction[] fHigh = new ErfGaussian2DFunction[nparams];
 		final ErfGaussian2DFunction[] fLow = new ErfGaussian2DFunction[nparams];
@@ -860,9 +865,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 													for (final double[] w2 : testw2)
 														for (final double angle2 : testangle2)
 														{
-															final double[] a = createParameters(background, signal1, cx1, cy1,
-																	cz1, w1[0], w1[1], angle1, signal2, cx2, cy2, cz2,
-																	w2[0], w2[1], angle2);
+															final double[] a = createParameters(background, signal1,
+																	cx1, cy1, cz1, w1[0], w1[1], angle1, signal2, cx2,
+																	cy2, cz2, w2[0], w2[1], angle2);
 
 															f2.initialiseExtended2(a);
 
@@ -891,6 +896,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															f2.forEach(new ExtendedGradient2Procedure()
 															{
 																int i = -1;
+																final double[] du_da = new double[f2
+																		.getNumberOfGradients()];
+																final double[] du_db = new double[f2
+																		.getNumberOfGradients()];
 
 																@Override
 																public void executeExtended(double value,
@@ -898,8 +907,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																{
 																	i++;
 																	//if (i!=f2.size()/2) return;
-																	final DenseMatrix64F m = DenseMatrix64F.wrap(nparams,
-																			nparams, d2y_dadb);
+																	final DenseMatrix64F m = DenseMatrix64F
+																			.wrap(nparams, nparams, d2y_dadb);
 																	for (int j = 0; j < nparams; j++)
 																	{
 																		// Evaluate the function +/- delta for parameter j
@@ -908,18 +917,18 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																		// Check the gradient with respect to parameter k
 																		for (int k = 0; k < nparams; k++)
 																		{
-																			final double gradient = (du_da[k] - du_db[k]) /
-																					delta[j];
+																			final double gradient = (du_da[k] -
+																					du_db[k]) / delta[j];
 																			final boolean ok = eq
 																					.almostEqualRelativeOrAbsolute(
 																							gradient, m.get(j, k));
 																			if (!ok)
 																			{
-																				TestLog.info(
-																						"%d [%d,%d] %f ?= %f\n", i, j,
-																						k, gradient, m.get(j, k));
-																				TestAssert.fail("%d [%d,%d] %f != %f",
-																						i, j, k, gradient, m.get(j, k));
+																				TestLog.info("%d [%d,%d] %f ?= %f\n", i,
+																						j, k, gradient, m.get(j, k));
+																				ExtraAssertions.fail(
+																						"%d [%d,%d] %f != %f", i, j, k,
+																						gradient, m.get(j, k));
 																			}
 																		}
 																	}
@@ -1077,7 +1086,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterUsingForEach()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
@@ -1091,8 +1100,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 							for (final double[] w1 : testw1)
 								for (final double angle1 : testangle1)
 								{
-									final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
-											angle1);
+									final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0],
+											w1[1], angle1);
 									params.add(a);
 								}
 		final double[][] x = params.toArray(new double[params.size()][]);
@@ -1136,14 +1145,14 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 									final double e = new IntegralValueProcedure().getIntegral(f1, a);
 									final double o = f1.integral(a);
-									Assert.assertEquals(e, o, e * 1e-8);
+									ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
 								}
 	}
 
 	@Test
 	public void computeIntegralIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final TurboList<double[]> p = new TurboList<>();
 		for (final double background : testbackground)
@@ -1170,14 +1179,14 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		t2 = t3 - t2;
 		TestLog.info("computeIntegralIsFaster %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1, t2,
 				(double) t1 / t2);
-		Assert.assertEquals(s1, s2, s1 * 1e-3);
-		Assert.assertTrue(t2 < t1);
+		ExtraAssertions.assertEqualsRelative(s1, s2, 1e-3);
+		Assertions.assertTrue(t2 < t1);
 	}
 
 	@Test
 	public void functionCanComputeIntegralWith2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 
 		double[] a;
 		for (final double background : testbackground)
@@ -1199,17 +1208,18 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															a = createParameters(background, signal1, cx1, cy1, cz1,
 																	w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
 																	w2[1], angle2);
-															final double e = new IntegralValueProcedure().getIntegral(f2, a);
+															final double e = new IntegralValueProcedure()
+																	.getIntegral(f2, a);
 															final double o = f2.integral(a);
-															Assert.assertEquals(e, o, e * 1e-8);
+															ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
 														}
 	}
 
 	@Test
 	public void computeIntegralIsFasterWith2Peaks()
 	{
-		TestAssume.assumeMediumComplexity();
-		Assume.assumeNotNull(f2);
+		ExtraAssumptions.assumeMediumComplexity();
+		Assumptions.assumeTrue(null != f2);
 
 		final TurboList<double[]> p = new TurboList<>();
 		for (final double background : testbackground)
@@ -1243,9 +1253,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final long t3 = System.nanoTime();
 		t1 = t2 - t1;
 		t2 = t3 - t2;
-		TestLog.info("computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1,
-				t2, (double) t1 / t2);
-		Assert.assertEquals(s1, s2, s1 * 1e-3);
-		Assert.assertTrue(t2 < t1);
+		TestLog.info("computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1, t2,
+				(double) t1 / t2);
+		ExtraAssertions.assertEqualsRelative(s1, s2, 1e-3);
+		Assertions.assertTrue(t2 < t1);
 	}
 }

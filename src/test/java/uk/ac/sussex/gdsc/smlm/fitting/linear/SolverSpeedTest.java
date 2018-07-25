@@ -29,7 +29,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -38,8 +38,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunc
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class SolverSpeedTest
@@ -88,21 +88,21 @@ public class SolverSpeedTest
 			final boolean r1 = solver.solve(a, b);
 			final boolean r2 = solver2.solveLinear(a2, b2);
 			solver2.invertLastA(a2);
-			//Assert.assertTrue("Different solve result @ " + i, r1 == r2);
+			//Assertions.assertTrue("Different solve result @ " + i, r1 == r2);
 			if (r1 && r2)
 			{
 				failCounter.run(0, () -> {
-					TestAssert.assertArrayEqualsRelative("Different b result", b, b2, 1e-2);
+					ExtraAssertions.assertArrayEqualsRelative(b, b2, 1e-2, "Different b result");
 				});
 				failCounter.run(0, () -> {
-					TestAssert.assertDoubleArrayEqualsRelative("Different a result", a, a2, 1e-2);
+					ExtraAssertions.assertArrayEqualsRelative(a, a2, 1e-2, "Different a result");
 				});
 			}
 			else
 				c++;
 		}
 		if (c > ITER / 2)
-			TestAssert.fail("Failed to solve %d / %d", c, ITER);
+			ExtraAssertions.fail("Failed to solve %d / %d", c, ITER);
 	}
 
 	@Test
@@ -130,16 +130,16 @@ public class SolverSpeedTest
 			final double[] b2 = B2.get(i);
 			final boolean r1 = solver.solve(a, b);
 			final boolean r2 = solver2.solve(a2, b2);
-			//Assert.assertTrue("Different solve result @ " + i, r1 == r2);
+			//Assertions.assertTrue("Different solve result @ " + i, r1 == r2);
 			if (r1 && r2)
 				failCounter.run(() -> {
-					TestAssert.assertArrayEqualsRelative("Different b result", b, b2, 1e-2);
+					ExtraAssertions.assertArrayEqualsRelative(b, b2, 1e-2, "Different b result");
 				});
 			else
 				c++;
 		}
 		if (c > ITER / 2)
-			TestAssert.fail("Failed to solve %d / %d", c, ITER);
+			ExtraAssertions.fail("Failed to solve %d / %d", c, ITER);
 	}
 
 	@Test
@@ -166,7 +166,7 @@ public class SolverSpeedTest
 			final double[] b2 = B2.get(i);
 			final boolean r1 = solver.solve(a, b);
 			final boolean r2 = solver.solve(a2, b2);
-			//Assert.assertTrue("Different solve result @ " + i, r1 == r2);
+			//Assertions.assertTrue("Different solve result @ " + i, r1 == r2);
 			if (r1 && r2)
 			{
 				final double[] b1 = SimpleArrayUtils.toDouble(b);
@@ -174,23 +174,23 @@ public class SolverSpeedTest
 				for (int j = a1.length; j-- > 0;)
 					a1[j] = SimpleArrayUtils.toDouble(a[j]);
 				failCounter.run(0, () -> {
-					TestAssert.assertArrayEqualsRelative("Different b result", b1, b2, 1e-2);
+					ExtraAssertions.assertArrayEqualsRelative(b1, b2, 1e-2, "Different b result");
 				});
 				failCounter.run(1, () -> {
-					TestAssert.assertDoubleArrayEqualsRelative("Different a result", a1, a2, 1e-2);
+					ExtraAssertions.assertArrayEqualsRelative(a1, a2, 1e-2, "Different a result");
 				});
 			}
 			else
 				c++;
 		}
 		if (c > ITER / 2)
-			TestAssert.fail("Failed to solve %d / %d", c, ITER);
+			ExtraAssertions.fail("Failed to solve %d / %d", c, ITER);
 	}
 
 	@Test
 	public void solveLinearWithInversionIsNotFasterThanGaussJordanFloat()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -223,7 +223,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanFloat()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -249,8 +249,8 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", t1,
-				t2, (1.0 * t1) / t2);
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", t1, t2,
+				(1.0 * t1) / t2);
 	}
 
 	protected void runFloat(ArrayList<float[][]> A, ArrayList<float[]> B, int ITER, GaussJordan solver)
@@ -262,7 +262,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsNotFasterThanGaussJordanDouble()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -295,7 +295,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanDouble()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -321,14 +321,14 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", t1,
-				t2, (1.0 * t1) / t2);
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", t1, t2,
+				(1.0 * t1) / t2);
 	}
 
 	@Test
 	public void solveCholeskyIsFasterThanGaussJordanDouble()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -354,14 +354,14 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", t1,
-				t2, (1.0 * t1) / t2);
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", t1, t2,
+				(1.0 * t1) / t2);
 	}
 
 	@Test
 	public void solveCholeskyLDLTIsFasterThanGaussJordanDouble()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);
@@ -387,14 +387,14 @@ public class SolverSpeedTest
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n",
-				t1, t2, (1.0 * t1) / t2);
+		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", t1,
+				t2, (1.0 * t1) / t2);
 	}
 
 	@Test
 	public void solveIsFasterThanGaussJordanDouble()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
 		ensureData(ITER);

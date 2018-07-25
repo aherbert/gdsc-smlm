@@ -46,7 +46,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import ij.IJ;
@@ -378,7 +377,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		 * Only start elements have attributes so this is where the substitutions are made
 		 */
 		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
 		{
 			sb.append("<").append(qName);
 			for (int attribute = 0; attribute < attributes.getLength(); attribute++)
@@ -409,7 +408,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		 * pretty print XML method.
 		 */
 		@Override
-		public void endElement(String uri, String localName, String qName) throws SAXException
+		public void endElement(String uri, String localName, String qName)
 		{
 			sb.append("</").append(qName).append(">");
 		}

@@ -28,8 +28,8 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -65,18 +65,18 @@ public class ChiSquaredDistributionTableTest
 
 			o = ChiSquaredDistributionTable.computePValue(chi, df);
 			e = d.cumulativeProbability(chi);
-			Assert.assertEquals(e, o, 1e-10);
+			Assertions.assertEquals(e, o, 1e-10);
 
 			chi = 1;
 			for (int i = 0; i < 10; i++, chi *= 2)
 			{
 				o = ChiSquaredDistributionTable.computePValue(chi, df);
 				e = d.cumulativeProbability(chi);
-				Assert.assertEquals(e, o, 1e-10);
+				Assertions.assertEquals(e, o, 1e-10);
 
 				o = ChiSquaredDistributionTable.computeQValue(chi, df);
 				e = 1 - e;
-				Assert.assertEquals(e, o, 1e-10);
+				Assertions.assertEquals(e, o, 1e-10);
 			}
 		}
 	}
@@ -99,19 +99,19 @@ public class ChiSquaredDistributionTableTest
 				final double o = upperTable.getCrititalValue(df);
 				final double e = et[j++];
 				//System.out.printf("p=%.3f,df=%d = %f\n", p[i], df, o);
-				Assert.assertEquals(e, o, 1e-2);
+				Assertions.assertEquals(e, o, 1e-2);
 
 				// The test only stores 2 decimal places so use the computed value to set upper/lower
 				final double upper = o * 1.01;
 				final double lower = o * 0.99;
 
-				Assert.assertTrue("Upper did not reject higher", upperTable.reject(upper, df));
-				Assert.assertFalse("Upper did not reject actual value", upperTable.reject(o, df));
-				Assert.assertFalse("Upper did not accept lower", upperTable.reject(lower, df));
+				Assertions.assertTrue(upperTable.reject(upper, df), "Upper did not reject higher");
+				Assertions.assertFalse(upperTable.reject(o, df), "Upper did not reject actual value");
+				Assertions.assertFalse(upperTable.reject(lower, df), "Upper did not accept lower");
 
-				Assert.assertTrue("Lower did not reject lower", lowerTable.reject(lower, df));
-				Assert.assertFalse("Lower did not accept actual value", lowerTable.reject(o, df));
-				Assert.assertFalse("Lower did not accept higher", lowerTable.reject(upper, df));
+				Assertions.assertTrue(lowerTable.reject(lower, df), "Lower did not reject lower");
+				Assertions.assertFalse(lowerTable.reject(o, df), "Lower did not accept actual value");
+				Assertions.assertFalse(lowerTable.reject(upper, df), "Lower did not accept higher");
 			}
 		}
 	}
@@ -131,16 +131,16 @@ public class ChiSquaredDistributionTableTest
 			final double ep = test.chiSquareTest(x, l);
 			final int df = x.length - 1;
 			final double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
-			Assert.assertEquals(ep, o, 1e-10);
+			Assertions.assertEquals(ep, o, 1e-10);
 
 			final ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(o, df);
 
 			final double upper = chi2 * 1.01;
 			final double lower = chi2 * 0.99;
 
-			Assert.assertTrue("Upper did not reject higher", upperTable.reject(upper, df));
-			Assert.assertFalse("Upper did not reject actual value", upperTable.reject(o, df));
-			Assert.assertFalse("Upper did not accept lower", upperTable.reject(lower, df));
+			Assertions.assertTrue(upperTable.reject(upper, df), "Upper did not reject higher");
+			Assertions.assertFalse(upperTable.reject(o, df), "Upper did not reject actual value");
+			Assertions.assertFalse(upperTable.reject(lower, df), "Upper did not accept lower");
 		}
 	}
 }

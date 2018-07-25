@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
@@ -85,8 +85,8 @@ public class InterpolatedPoissonFisherInformationTest
 		//System.out.printf("logU=%g  u=%g  e=%g  o=%g  error=%g\n", logU, u, e, o, DoubleEquality.relativeError(o, e));
 
 		// Small numbers may have a large relative error but the absolute error is small
-		//Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, 5e-3, 1e-20));
-		Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, tol, 1e-20));
+		//Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, 5e-3, 1e-20));
+		Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e, o, tol, 1e-20));
 	}
 
 	@Test

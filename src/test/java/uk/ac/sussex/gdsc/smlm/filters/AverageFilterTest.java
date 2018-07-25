@@ -27,14 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
@@ -231,7 +231,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -307,7 +307,7 @@ public class AverageFilterTest extends AbstractFilterTest
 	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
 		// These test a deprecated filter
-		TestAssume.assumeSpeedTest(TestComplexity.VERY_HIGH);
+		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

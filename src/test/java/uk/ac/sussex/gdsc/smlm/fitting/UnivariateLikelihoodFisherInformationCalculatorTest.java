@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class UnivariateLikelihoodFisherInformationCalculatorTest
@@ -128,7 +128,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			// Assumes half the poisson fisher information
 			SimpleArrayUtils.multiply(e, 0.5);
 
-		Assert.assertArrayEquals(e, o, 1e-6);
+		Assertions.assertArrayEquals(e, o, 1e-6);
 
 		if (model == Model.POISSON || model == Model.HALF_POISSON)
 		{
@@ -146,8 +146,8 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			// Get the limits by inverting the Fisher information
 			final double[] crlb = I.crlb();
 
-			TestAssert.assertEqualsRelative(var, crlb[2], 5e-2);
-			TestAssert.assertEqualsRelative(var, crlb[3], 5e-2);
+			ExtraAssertions.assertEqualsRelative(var, crlb[2], 5e-2);
+			ExtraAssertions.assertEqualsRelative(var, crlb[3], 5e-2);
 		}
 	}
 
@@ -199,6 +199,6 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		final FisherInformationMatrix I = calc.compute(params);
 		final double[] o = I.getMatrix().data;
 
-		TestAssert.assertArrayEqualsRelative(e, o, 1e-6);
+		ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6);
 	}
 }

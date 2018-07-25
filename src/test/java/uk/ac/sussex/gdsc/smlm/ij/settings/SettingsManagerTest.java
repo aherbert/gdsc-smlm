@@ -27,8 +27,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -53,15 +53,15 @@ public class SettingsManagerTest
 		{
 			SettingsManager.setSettingsDirectory(tmp.getPath());
 			o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
-			Assert.assertTrue("Failed to read null", o == null);
+			Assertions.assertTrue(o == null, "Failed to read null");
 			o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT);
-			Assert.assertTrue("Failed to read default", e.getDefaultInstanceForType().equals(o));
-			Assert.assertTrue("Failed to write", SettingsManager.writeSettings(e));
+			Assertions.assertTrue(e.getDefaultInstanceForType().equals(o), "Failed to read default");
+			Assertions.assertTrue(SettingsManager.writeSettings(e), "Failed to write");
 			o = SettingsManager.readCalibration(0);
-			Assert.assertTrue("Not equal", e.equals(o));
+			Assertions.assertTrue(e.equals(o), "Not equal");
 			SettingsManager.clearSettings(e.getClass());
 			o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
-			Assert.assertTrue("Failed to clear", o == null);
+			Assertions.assertTrue(o == null, "Failed to clear");
 		}
 		finally
 		{

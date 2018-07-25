@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
@@ -228,7 +228,7 @@ public class FastLogTest
 				return;
 			if (e == o)
 				return;
-			Assert.assertTrue(error < 1e-4f);
+			Assertions.assertTrue(error < 1e-4f);
 		}
 	}
 
@@ -312,7 +312,7 @@ public class FastLogTest
 				return;
 			if (e == o)
 				return;
-			Assert.assertTrue(error < 1e-4);
+			Assertions.assertTrue(error < 1e-4);
 		}
 	}
 
@@ -323,7 +323,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatError()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final float[] d = generateRandomFloats(1000000);
@@ -371,7 +371,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatErrorRange()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final TurboList<TestFastLog> test = new TurboList<>();
 		final int n = 13;
@@ -538,7 +538,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleError()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final RandomGenerator r = TestSettings.getRandomGenerator();
@@ -577,7 +577,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleErrorLog1P()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final RandomGenerator r = TestSettings.getRandomGenerator();
@@ -607,7 +607,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleErrorRange()
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 
@@ -766,7 +766,7 @@ public class FastLogTest
 	public void canTestFloatSpeed()
 	{
 		// No assertions, this is just a report
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final float[] x = new float[1000000];
@@ -853,7 +853,7 @@ public class FastLogTest
 	public void canTestDoubleSpeed()
 	{
 		// No assertions, this is just a report
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final double[] x = new double[1000000];
@@ -902,7 +902,7 @@ public class FastLogTest
 	public void canTestDoubleSpeedLog1P()
 	{
 		// No assertions, this is just a report
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final double[] x = new double[1000000];
@@ -930,7 +930,7 @@ public class FastLogTest
 	public void canTestFloatVsDoubleSpeed()
 	{
 		// No assertions, this is just a report
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final double[] x = new double[1000000];

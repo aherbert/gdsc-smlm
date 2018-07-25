@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -59,7 +59,7 @@ public class TimeUnitTest
 				final TimeUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2, msPerFrame);
 				final double o = c.convert(v1);
-				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
+				Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
 			}
 		}
 	}

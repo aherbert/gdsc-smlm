@@ -27,8 +27,8 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -37,7 +37,8 @@ import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class WPoissonGradientProcedureTest
@@ -71,11 +72,14 @@ public class WPoissonGradientProcedureTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
-		Assert.assertEquals(WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
+		Assertions.assertEquals(
+				WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
 				WPoissonGradientProcedure6.class);
-		Assert.assertEquals(WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(5)).getClass(),
+		Assertions.assertEquals(
+				WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(5)).getClass(),
 				WPoissonGradientProcedure5.class);
-		Assert.assertEquals(WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(4)).getClass(),
+		Assertions.assertEquals(
+				WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(4)).getClass(),
 				WPoissonGradientProcedure4.class);
 	}
 
@@ -104,15 +108,15 @@ public class WPoissonGradientProcedureTest
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final double[] y = createFakeData();
-			final WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y, var, func);
-			p.computeFisherInformation(paramsList.get(i));
+			final WPoissonGradientProcedure p1 = WPoissonGradientProcedureFactory.create(y, var, func);
+			p1.computeFisherInformation(paramsList.get(i));
 			final WLSQLVMGradientProcedure p2 = new WLSQLVMGradientProcedure(y, var, func);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p.data, p2.alpha, 0);
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p.getLinear(), p2.getAlphaLinear(),
-					0);
+			ExtraAssertions.assertArrayEquals(p1.data, p2.alpha, "%s Observations: Not same alpha @ %d", name, i);
+			ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getAlphaLinear(),
+					"%s Observations: Not same alpha linear @ %d", name, i);
 		}
 	}
 
@@ -196,7 +200,8 @@ public class WPoissonGradientProcedureTest
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Exactly the same ...
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getLinear(), p2.getLinear(), 0);
+			ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), "%s Observations: Not same linear @ %d",
+					name, i);
 		}
 	}
 
@@ -218,7 +223,7 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -242,7 +247,7 @@ public class WPoissonGradientProcedureTest
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Check they are the same
-			Assert.assertArrayEquals("M " + i, p1.getLinear(), p2.getLinear(), 0);
+			ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), "M %d", i);
 		}
 
 		// Realistic loops for an optimisation
@@ -294,7 +299,7 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterThanWLSEGradientProcedure(final int nparams)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -316,7 +321,7 @@ public class WPoissonGradientProcedureTest
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Check they are the same
-			Assert.assertArrayEquals("M " + i, p1.getAlphaLinear(), p2.getLinear(), 0);
+			ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getLinear(), "M %d", i);
 		}
 
 		// Realistic loops for an optimisation
@@ -345,7 +350,8 @@ public class WPoissonGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(yList.get(i), var, func);
+					final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(yList.get(i), var,
+							func);
 					for (int j = loops; j-- > 0;)
 						p2.computeFisherInformation(paramsList.get(k++ % iter));
 				}

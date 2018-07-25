@@ -24,15 +24,15 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 /**
  * Test that a bounded fitter can return the same results with and without bounds.
@@ -138,10 +138,10 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 								final double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
 
 								// The result should be the same without a bias
-								Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
-										solver2.getEvaluations());
+								Assertions.assertEquals(solver.getEvaluations(), solver2.getEvaluations(),
+										() -> name + " Iterations");
 								fp2[0] -= bias;
-								Assert.assertArrayEquals(name + " Solution", fp, fp2, 1e-6);
+								Assertions.assertArrayEquals(fp, fp2, 1e-6, () -> name + " Solution");
 							}
 			}
 		}
@@ -330,7 +330,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 	private void fitSingleGaussianBetterLVM(boolean bounded2, int clamping2, boolean mle2, boolean bounded,
 			int clamping, boolean mle)
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 		final NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
 		final NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),

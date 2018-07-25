@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -54,42 +54,42 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 	}
 
 	@Override
 	@Test
 	public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator()
 	{
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 	}
 
 	@Override
 	@Test
 	public void gradientProcedureIsNotSlowerThanGradientCalculator()
 	{
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 	}
 
 	@Override
 	@Test
 	public void gradientProcedureComputesSameWithPrecomputed()
 	{
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 	}
 
 	@Override
 	@Test
 	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
 	{
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 	}
 
 	@Override
 	@Test
 	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
 	{
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 	}
 
 	@Test
@@ -121,8 +121,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 			p.computeSecondDerivative(paramsList.get(i));
 			p2.computeSecondDerivative(paramsList.get(i));
 			// Virtually the same ...
-			TestAssert.assertArrayEqualsRelative(p.d1, p2.d1, 1e-5);
-			TestAssert.assertArrayEqualsRelative(p.d2, p2.d2, 1e-5);
+			ExtraAssertions.assertArrayEqualsRelative(p.d1, p2.d1, 1e-5);
+			ExtraAssertions.assertArrayEqualsRelative(p.d2, p2.d2, 1e-5);
 		}
 	}
 
@@ -206,13 +206,13 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 				failCounter.run(j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
 				}, () -> {
-					TestAssert.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
+					ExtraAssertions.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
 							DoubleEquality.relativeError(gradient1, d1[j_]));
 				});
 				failCounter.run(nparams + j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
 				}, () -> {
-					TestAssert.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
+					ExtraAssertions.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
 							DoubleEquality.relativeError(gradient2, d2[j_]));
 				});
 
@@ -245,12 +245,12 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					//		a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
 					//if (!ok)
 					//{
-					//	TestAssert.fail("Not same gradientJ @ [%d,%d]", j, jj);
+					//	ExtraAssertions.fail("Not same gradientJ @ [%d,%d]", j, jj);
 					//}
 					failCounter2.run(nparams * j_ + jj_, () -> {
 						return ok;
 					}, () -> {
-						TestAssert.fail("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_, gradient3,
+						ExtraAssertions.fail("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_, gradient3,
 								J.get(j_, jj_), DoubleEquality.relativeError(gradient3, J.get(j_, jj_)));
 					});
 				}

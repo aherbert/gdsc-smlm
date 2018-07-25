@@ -21,18 +21,19 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package org.apache.commons.math3.distribution;
+package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomGammaDistributionTest
@@ -125,13 +126,13 @@ public class CustomGammaDistributionTest
 		t2.getData(0);
 		final double[] o = (double[]) t2.run(null);
 
-		Assert.assertArrayEquals(e, o, 0);
+		Assertions.assertArrayEquals(e, o);
 	}
 
 	@Test
 	public void customDistributionIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask());
@@ -142,6 +143,6 @@ public class CustomGammaDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
 }

@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestSettings;

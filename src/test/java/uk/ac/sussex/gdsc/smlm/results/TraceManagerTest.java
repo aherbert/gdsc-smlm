@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TIntArrayList;
 import uk.ac.sussex.gdsc.core.utils.Random;
@@ -113,7 +113,7 @@ public class TraceManagerTest
 		final MemoryPeakResults results = toPeakResults(expected);
 		final TraceManager tm = new TraceManager(results);
 		final int n = tm.traceMolecules(d, t);
-		Assert.assertEquals("Incorrect number of traces", expected.length, n);
+		Assertions.assertEquals(expected.length, n, "Incorrect number of traces");
 
 		final Trace[] actual = tm.getTraces();
 		areEqual(expected, actual);
@@ -170,7 +170,8 @@ public class TraceManagerTest
 		runTracing(d, maxOffTime + 1, expected);
 	}
 
-	private static void simulateMoving(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime, int maxOffTime)
+	private static void simulateMoving(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime,
+			int maxOffTime)
 	{
 		// When the molecules are moving their paths may intersect.
 		// Thus each molecule is allocated a 2x2 square to move within
@@ -235,25 +236,30 @@ public class TraceManagerTest
 
 	private static void areEqual(Trace[] expected, Trace[] actual)
 	{
-		Assert.assertNotNull(expected);
-		Assert.assertNotNull(actual);
-		Assert.assertEquals("Traces are different lengths", expected.length, actual.length);
+		Assertions.assertNotNull(expected);
+		Assertions.assertNotNull(actual);
+		Assertions.assertEquals(expected.length, actual.length, "Traces are different lengths");
 
 		sort(expected);
 		sort(actual);
 
 		for (int i = 0; i < expected.length; i++)
 		{
+			final int ii = i;
 			final PeakResultStoreList e = expected[i].getPoints();
 			final PeakResultStoreList a = actual[i].getPoints();
-			Assert.assertEquals("Points are different lengths [" + i + "]", e.size(), a.size());
+			Assertions.assertEquals(e.size(), a.size(), () -> "Points are different lengths [" + ii + "]");
 			for (int j = 0; j < e.size(); j++)
 			{
+				final int jj = j;
 				final PeakResult p1 = e.get(j);
 				final PeakResult p2 = a.get(j);
-				Assert.assertEquals("Frames different", p1.getFrame(), p2.getFrame());
-				Assert.assertEquals("X different", p1.getXPosition(), p2.getXPosition(), 1e-3f);
-				Assert.assertEquals("Y different", p1.getYPosition(), p2.getYPosition(), 1e-3f);
+				Assertions.assertEquals(p1.getFrame(), p2.getFrame(),
+						() -> "Frames different [" + ii + "][" + jj + "]");
+				Assertions.assertEquals(p1.getXPosition(), p2.getXPosition(), 1e-3f,
+						() -> "X different [" + ii + "][" + jj + "]");
+				Assertions.assertEquals(p1.getYPosition(), p2.getYPosition(), 1e-3f,
+						() -> "Y different [" + ii + "][" + jj + "]");
 			}
 		}
 	}

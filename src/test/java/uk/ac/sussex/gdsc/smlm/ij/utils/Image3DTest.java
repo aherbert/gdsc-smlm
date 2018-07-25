@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.ImageStack;
 import ij.process.ImageProcessor;
@@ -50,17 +50,17 @@ public abstract class Image3DTest
 		final ImageStack stack = image.getImageStack();
 
 		final Image3D croppedData = image.crop(x, y, z, w, h, d);
-		Assert.assertEquals(croppedData.getWidth(), w);
-		Assert.assertEquals(croppedData.getHeight(), h);
-		Assert.assertEquals(croppedData.getSize(), d);
+		Assertions.assertEquals(croppedData.getWidth(), w);
+		Assertions.assertEquals(croppedData.getHeight(), h);
+		Assertions.assertEquals(croppedData.getSize(), d);
 
 		final Image3D croppedData2 = FloatImage3D.crop(stack, x, y, z, w, h, d, null);
 		assertEquals(croppedData, croppedData2);
 
 		final ImageStack croppedStack = image.cropToStack(x, y, z, w, h, d);
-		Assert.assertEquals(croppedStack.getWidth(), w);
-		Assert.assertEquals(croppedStack.getHeight(), h);
-		Assert.assertEquals(croppedStack.getSize(), d);
+		Assertions.assertEquals(croppedStack.getWidth(), w);
+		Assertions.assertEquals(croppedStack.getHeight(), h);
+		Assertions.assertEquals(croppedStack.getSize(), d);
 
 		assertEquals(croppedData, new FloatImage3D(croppedStack));
 
@@ -79,11 +79,11 @@ public abstract class Image3DTest
 
 			// Compare to the cropped stack
 			final float[] o = (float[]) croppedStack.getPixels(1 + zz);
-			Assert.assertArrayEquals(e, o, 0);
+			Assertions.assertArrayEquals(e, o);
 
 			// Compare to the cropped data
 			for (int i = 0, j = zz * e.length; i < e.length; i++, j++)
-				Assert.assertEquals(e[i], croppedData.get(j), 0);
+				Assertions.assertEquals(e[i], croppedData.get(j));
 		}
 	}
 
@@ -132,14 +132,14 @@ public abstract class Image3DTest
 	public void canFindMin()
 	{
 		final Image3D image = createData(2, 2, 2);
-		Assert.assertEquals(0, image.findMinIndex(0, 0, 0, 2, 2, 2));
-		Assert.assertEquals(1, image.findMinIndex(1, 0, 0, 2, 2, 2));
-		Assert.assertEquals(2, image.findMinIndex(0, 1, 0, 2, 2, 2));
-		Assert.assertEquals(3, image.findMinIndex(1, 1, 0, 2, 2, 2));
-		Assert.assertEquals(4, image.findMinIndex(0, 0, 1, 2, 2, 2));
-		Assert.assertEquals(5, image.findMinIndex(1, 0, 1, 2, 2, 2));
-		Assert.assertEquals(6, image.findMinIndex(0, 1, 1, 2, 2, 2));
-		Assert.assertEquals(7, image.findMinIndex(1, 1, 1, 2, 2, 2));
+		Assertions.assertEquals(0, image.findMinIndex(0, 0, 0, 2, 2, 2));
+		Assertions.assertEquals(1, image.findMinIndex(1, 0, 0, 2, 2, 2));
+		Assertions.assertEquals(2, image.findMinIndex(0, 1, 0, 2, 2, 2));
+		Assertions.assertEquals(3, image.findMinIndex(1, 1, 0, 2, 2, 2));
+		Assertions.assertEquals(4, image.findMinIndex(0, 0, 1, 2, 2, 2));
+		Assertions.assertEquals(5, image.findMinIndex(1, 0, 1, 2, 2, 2));
+		Assertions.assertEquals(6, image.findMinIndex(0, 1, 1, 2, 2, 2));
+		Assertions.assertEquals(7, image.findMinIndex(1, 1, 1, 2, 2, 2));
 
 		// Larger slices
 		canFindMin(3, 4, 5, 6, 7, 8);
@@ -161,9 +161,9 @@ public abstract class Image3DTest
 			final int j = image.findMinIndex(x, y, z, w, h, d);
 			final int[] xyz2 = image.getXYZ(j);
 
-			Assert.assertEquals(xyz[0] + x, xyz2[0]);
-			Assert.assertEquals(xyz[1] + y, xyz2[1]);
-			Assert.assertEquals(xyz[2] + z, xyz2[2]);
+			Assertions.assertEquals(xyz[0] + x, xyz2[0]);
+			Assertions.assertEquals(xyz[1] + y, xyz2[1]);
+			Assertions.assertEquals(xyz[2] + z, xyz2[2]);
 		}
 	}
 
@@ -171,14 +171,14 @@ public abstract class Image3DTest
 	public void canFindMax()
 	{
 		final Image3D image = createData(2, 2, 2);
-		Assert.assertEquals(7, image.findMaxIndex(0, 0, 0, 2, 2, 2));
-		Assert.assertEquals(6, image.findMaxIndex(0, 0, 0, 1, 2, 2));
-		Assert.assertEquals(5, image.findMaxIndex(0, 0, 0, 2, 1, 2));
-		Assert.assertEquals(4, image.findMaxIndex(0, 0, 0, 1, 1, 2));
-		Assert.assertEquals(3, image.findMaxIndex(0, 0, 0, 2, 2, 1));
-		Assert.assertEquals(2, image.findMaxIndex(0, 0, 0, 1, 2, 1));
-		Assert.assertEquals(1, image.findMaxIndex(0, 0, 0, 2, 1, 1));
-		Assert.assertEquals(0, image.findMaxIndex(0, 0, 0, 1, 1, 1));
+		Assertions.assertEquals(7, image.findMaxIndex(0, 0, 0, 2, 2, 2));
+		Assertions.assertEquals(6, image.findMaxIndex(0, 0, 0, 1, 2, 2));
+		Assertions.assertEquals(5, image.findMaxIndex(0, 0, 0, 2, 1, 2));
+		Assertions.assertEquals(4, image.findMaxIndex(0, 0, 0, 1, 1, 2));
+		Assertions.assertEquals(3, image.findMaxIndex(0, 0, 0, 2, 2, 1));
+		Assertions.assertEquals(2, image.findMaxIndex(0, 0, 0, 1, 2, 1));
+		Assertions.assertEquals(1, image.findMaxIndex(0, 0, 0, 2, 1, 1));
+		Assertions.assertEquals(0, image.findMaxIndex(0, 0, 0, 1, 1, 1));
 
 		// Larger slices
 		canFindMax(3, 4, 5, 6, 7, 8);
@@ -200,9 +200,9 @@ public abstract class Image3DTest
 			final int j = image.findMaxIndex(x, y, z, w, h, d);
 			final int[] xyz2 = image.getXYZ(j);
 
-			Assert.assertEquals(xyz[0] + x, xyz2[0]);
-			Assert.assertEquals(xyz[1] + y, xyz2[1]);
-			Assert.assertEquals(xyz[2] + z, xyz2[2]);
+			Assertions.assertEquals(xyz[0] + x, xyz2[0]);
+			Assertions.assertEquals(xyz[1] + y, xyz2[1]);
+			Assertions.assertEquals(xyz[2] + z, xyz2[2]);
 		}
 	}
 
@@ -211,16 +211,16 @@ public abstract class Image3DTest
 	{
 		// Bounds checks
 		final Image3D image = createData(2, 2, 2);
-		Assert.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2), 0);
-		Assert.assertEquals(0, image.computeSum(0, 0, 0, 0, 0, 0), 0);
-		Assert.assertEquals(1, image.computeSum(0, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(2, image.computeSum(1, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(-10, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(10, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, 10, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, -10, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, 0, 10, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, 0, -10, 1, 1, 1), 0);
+		Assertions.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2));
+		Assertions.assertEquals(0, image.computeSum(0, 0, 0, 0, 0, 0));
+		Assertions.assertEquals(1, image.computeSum(0, 0, 0, 1, 1, 1));
+		Assertions.assertEquals(2, image.computeSum(1, 0, 0, 1, 1, 1));
+		Assertions.assertEquals(0, image.computeSum(-10, 0, 0, 1, 1, 1));
+		Assertions.assertEquals(0, image.computeSum(10, 0, 0, 1, 1, 1));
+		Assertions.assertEquals(0, image.computeSum(0, 10, 0, 1, 1, 1));
+		Assertions.assertEquals(0, image.computeSum(0, -10, 0, 1, 1, 1));
+		Assertions.assertEquals(0, image.computeSum(0, 0, 10, 1, 1, 1));
+		Assertions.assertEquals(0, image.computeSum(0, 0, -10, 1, 1, 1));
 
 		// Larger slices
 		canComputeSum(3, 4, 5, 6, 7, 8);
@@ -239,7 +239,7 @@ public abstract class Image3DTest
 			final double e = sum(croppedData);
 			final double o = image.computeSum(x, y, z, w, h, d);
 
-			Assert.assertEquals(o, e, 0);
+			Assertions.assertEquals(o, e);
 		}
 	}
 
@@ -255,7 +255,7 @@ public abstract class Image3DTest
 				{
 					final double e = image.computeSum(0, 0, 0, ww, hh, dd);
 					final double o = table[i++];
-					Assert.assertEquals(e, o, 1e-3);
+					Assertions.assertEquals(e, o, 1e-3);
 				}
 	}
 
@@ -305,8 +305,8 @@ public abstract class Image3DTest
 
 		// This may be different due to floating point error
 		// but we are adding integers so it should be OK
-		Assert.assertEquals(e, o, 0);
-		Assert.assertEquals(e, o2, 0);
+		Assertions.assertEquals(e, o);
+		Assertions.assertEquals(e, o2);
 	}
 
 	@Test
@@ -374,7 +374,8 @@ public abstract class Image3DTest
 	private static void assertEquals(Image3D a, Image3D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)
-			Assert.assertTrue(null, a.get(i) == b.get(i));
+			if (a.get(i) != b.get(i))
+				Assertions.assertEquals(a.get(i), b.get(i), "Not equal @ " + i);
 	}
 
 	private static int findMinIndex(Image3D image)

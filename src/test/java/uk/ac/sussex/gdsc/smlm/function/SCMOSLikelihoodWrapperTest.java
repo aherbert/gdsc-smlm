@@ -36,8 +36,8 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class SCMOSLikelihoodWrapperTest
@@ -184,7 +184,7 @@ public class SCMOSLikelihoodWrapperTest
 		if (!f1.evaluatesBackground())
 			testbackground = new double[] { testbackground[0] };
 		if (!f1.evaluatesSignal())
-		 testsignal1 = new double[] { testsignal1[0] };
+			testsignal1 = new double[] { testsignal1[0] };
 
 		if (!f1.evaluatesZ())
 			testcz1 = new double[] { 0 };
@@ -289,8 +289,8 @@ public class SCMOSLikelihoodWrapperTest
 											//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
 											//		dyda[gradientIndex]);
 											if (!ok)
-												Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
-														dyda[gradientIndex], ok);
+												Assertions.fail(NAME[targetParameter] + ": " + gradient + " != " +
+														dyda[gradientIndex]);
 											ok = eqPerDatum.almostEqualRelativeOrAbsolute(gradient,
 													dyda[gradientIndex]);
 											if (ok)
@@ -301,7 +301,7 @@ public class SCMOSLikelihoodWrapperTest
 		final double p = (100.0 * count) / total;
 		TestLog.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
 				count, total, p);
-		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
+		Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
 	}
 
 	@Test
@@ -374,7 +374,7 @@ public class SCMOSLikelihoodWrapperTest
 		if (!f1.evaluatesBackground())
 			testbackground = new double[] { testbackground[0] };
 		if (!f1.evaluatesSignal())
-		 testsignal1 = new double[] { testsignal1[0] };
+			testsignal1 = new double[] { testsignal1[0] };
 
 		if (!f1.evaluatesZ())
 			testcz1 = new double[] { 0 };
@@ -475,7 +475,8 @@ public class SCMOSLikelihoodWrapperTest
 									//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
 									//		dyda[gradientIndex]);
 									if (!ok)
-										TestAssert.fail(NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex]);
+										ExtraAssertions.fail(
+												NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex]);
 									ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 									if (ok)
 										count++;
@@ -483,9 +484,9 @@ public class SCMOSLikelihoodWrapperTest
 
 								}
 		final double p = (100.0 * count) / total;
-		TestLog.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
-				total, p);
-		TestAssert.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
+		TestLog.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
+				p);
+		ExtraAssertions.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
 	}
 
 	private static double[] getVariables(int[] indices, double[] a)
@@ -499,7 +500,7 @@ public class SCMOSLikelihoodWrapperTest
 	private static int findGradientIndex(Gaussian2DFunction f, int targetParameter)
 	{
 		final int i = f.findGradientIndex(targetParameter);
-		Assert.assertTrue("Cannot find gradient index", i >= 0);
+		Assertions.assertTrue(i >= 0, "Cannot find gradient index");
 		return i;
 	}
 
@@ -555,7 +556,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		//TestLog.debug("mu=%f, p=%f\n", mu, p);
 		if (test)
-			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
+			ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
 	}
 
 	@Test
@@ -590,9 +591,9 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			@Override
 			public void initialise(double[] a)
-				{
-		// Ignore
-	}
+			{
+				// Ignore
+			}
 
 			@Override
 			public int[] gradientIndices()
@@ -647,8 +648,8 @@ public class SCMOSLikelihoodWrapperTest
 			final double nll2 = f.computeLikelihood(gradient, i);
 			final double nll3 = SCMOSLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
 			total += nll;
-			TestAssert.assertEqualsRelative("computeLikelihood @" + i, nll3, nll, 1e-10);
-			TestAssert.assertEqualsRelative("computeLikelihood+gradient @" + i, nll3, nll2, 1e-10);
+			ExtraAssertions.assertEqualsRelative(nll3, nll, 1e-10, "computeLikelihood @%d", i);
+			ExtraAssertions.assertEqualsRelative(nll3, nll2, 1e-10, "computeLikelihood+gradient @%d", i);
 			final double pp = FastMath.exp(-nll);
 			if (maxp < pp)
 			{
@@ -671,24 +672,24 @@ public class SCMOSLikelihoodWrapperTest
 		final double mode2 = Math.ceil(lambda) - 1;
 		final double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
 		//TestLog.debug("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
-		TestAssert.assertEqualsRelative("k-max", kmax, k[maxi], 1e-3);
+		ExtraAssertions.assertEqualsRelative(kmax, k[maxi], 1e-3, "k-max");
 
 		if (test)
-			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
+			ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
 
 		// Check the function can compute the same total
 		double sum, sum2;
 		sum = f.computeLikelihood();
 		sum2 = f.computeLikelihood(gradient);
-		TestAssert.assertEqualsRelative("computeLikelihood", total, sum, 1e-10);
-		TestAssert.assertEqualsRelative("computeLikelihood with gradient", total, sum2, 1e-10);
+		ExtraAssertions.assertEqualsRelative(total, sum, 1e-10, "computeLikelihood");
+		ExtraAssertions.assertEqualsRelative(total, sum2, 1e-10, "computeLikelihood with gradient");
 
 		// Check the function can compute the same total after duplication
 		f = f.build(nlf, a);
 		sum = f.computeLikelihood();
 		sum2 = f.computeLikelihood(gradient);
-		TestAssert.assertEqualsRelative("computeLikelihood", total, sum, 1e-10);
-		TestAssert.assertEqualsRelative("computeLikelihood with gradient", total, sum2, 1e-10);
+		ExtraAssertions.assertEqualsRelative(total, sum, 1e-10, "computeLikelihood");
+		ExtraAssertions.assertEqualsRelative(total, sum2, 1e-10, "computeLikelihood with gradient");
 	}
 
 	private static float[] newArray(int n, float val)
@@ -810,7 +811,7 @@ public class SCMOSLikelihoodWrapperTest
 			oll2 -= Math.log(op[j]);
 		}
 		TestLog.info("oll=%f, oll2=%f\n", oll, oll2);
-		TestAssert.assertEqualsRelative("Observed Log-likelihood", oll2, oll, 1e-10);
+		ExtraAssertions.assertEqualsRelative(oll2, oll, 1e-10, "Observed Log-likelihood");
 
 		final TDoubleArrayList list = new TDoubleArrayList();
 		final int imin = 5, imax = 15;
@@ -837,7 +838,7 @@ public class SCMOSLikelihoodWrapperTest
 			// Only value if the product could be computed. Low ratios cause it to becomes
 			// too small to store in a double.
 			if (product.doubleValue() > 0)
-				TestAssert.assertEqualsRelative("Log-likelihood", llr, llr2, 1e-10);
+				ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood");
 		}
 
 		// Find min using quadratic fit
@@ -866,6 +867,6 @@ public class SCMOSLikelihoodWrapperTest
 		// Allow a tolerance as the random data may alter the p-value computation.
 		// Should allow it to be less than 2 increment either side of the answer.
 		TestLog.info("min fit = %g => %g\n", mina, fita);
-		Assert.assertEquals("min", 1, fita, 0.199);
+		Assertions.assertEquals(1, fita, 0.199, "min");
 	}
 }

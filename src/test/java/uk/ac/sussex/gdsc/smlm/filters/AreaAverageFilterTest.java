@@ -26,12 +26,12 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AreaAverageFilterTest extends AbstractFilterTest
@@ -42,7 +42,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 
@@ -98,7 +98,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float areaAverageInternal [%dx%d] @ %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -114,7 +114,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageIsFasterThanAreaAverage()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 		final AverageFilter filter2 = new AverageFilter();
@@ -171,7 +171,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float areaAverageUsingAverages [%dx%d] @ %.1f : %d => stripedBlockAverage %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -187,7 +187,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 		final AverageFilter filter2 = new AverageFilter();
@@ -244,7 +244,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -303,13 +303,13 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					for (int j = i + 1; j < i + 10; j++)
 						if (up)
 						{
-							Assert.assertTrue(yy[j] >= yy[j - 1]);
-							Assert.assertTrue(yy[j] <= yy[j + 1]);
+							Assertions.assertTrue(yy[j] >= yy[j - 1]);
+							Assertions.assertTrue(yy[j] <= yy[j + 1]);
 						}
 						else
 						{
-							Assert.assertTrue(yy[j] <= yy[j - 1]);
-							Assert.assertTrue(yy[j] >= yy[j + 1]);
+							Assertions.assertTrue(yy[j] <= yy[j - 1]);
+							Assertions.assertTrue(yy[j] >= yy[j + 1]);
 						}
 				}
 

@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class FilterTest
@@ -50,7 +50,7 @@ public class FilterTest
 			final MultiFilter f2 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
 			final int e = f1.weakest((Filter) f2);
 			final int o = f1.weakest(f2);
-			Assert.assertEquals(e, o);
+			Assertions.assertEquals(e, o);
 		}
 	}
 
@@ -65,14 +65,14 @@ public class FilterTest
 			final MultiFilter2 f2 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
 			final int e = f1.weakest((Filter) f2);
 			final int o = f1.weakest(f2);
-			Assert.assertEquals(e, o);
+			Assertions.assertEquals(e, o);
 		}
 	}
 
 	@Test
 	public void directCompareMultiFilterIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -194,7 +194,7 @@ public class FilterTest
 		{
 			final TimingResult slow = ts.get(-(i + 2));
 			final TimingResult fast = ts.get(-(i + 1));
-			Assert.assertTrue(slow.getMin() > fast.getMin());
+			Assertions.assertTrue(slow.getMin() > fast.getMin());
 		}
 	}
 
@@ -224,8 +224,8 @@ public class FilterTest
 			final String xml = f1.toXML();
 			TestLog.debugln(XmlUtils.prettyPrintXml(xml));
 			final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
-			Assert.assertTrue(f1.getClass().equals(f2.getClass()));
-			Assert.assertEquals(f1, f2);
+			Assertions.assertTrue(f1.getClass().equals(f2.getClass()));
+			Assertions.assertEquals(f1, f2);
 		}
 	}
 }

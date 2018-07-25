@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
 
@@ -43,8 +43,7 @@ public class NormaliserTest extends AbstractFilterTest
 				final float[] data = createData(rg, width, height);
 				for (final int boxSize : boxSizes)
 				{
-					final String msg = null; //String.format("%dx%d : border=%d", width, height, boxSize);
-					//System.out.println(msg);
+					//System.out.printf("%dx%d : border=%d\n", width, height, boxSize);
 
 					// Assume fixed normaliser works
 					final FixedNormaliser n = new FixedNormaliser(1);
@@ -53,7 +52,8 @@ public class NormaliserTest extends AbstractFilterTest
 					final float[] o = new float[data.length];
 					n.normalise(data, e, width, height, boxSize);
 					nn.normalise(data, o, width, height, boxSize);
-					Assert.assertArrayEquals(msg, o, e, 0);
+					Assertions.assertArrayEquals(o, e,
+							() -> String.format("%dx%d : border=%d", width, height, boxSize));
 				}
 			}
 	}

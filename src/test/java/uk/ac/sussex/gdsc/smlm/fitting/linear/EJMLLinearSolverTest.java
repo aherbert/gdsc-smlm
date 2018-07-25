@@ -27,8 +27,8 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
@@ -72,14 +72,14 @@ public class EJMLLinearSolverTest
 		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
-		Assert.assertTrue("Failed to solve", result);
-		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
+		Assertions.assertTrue(result, "Failed to invert");
+		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		log("x = %s\n", Arrays.toString(b));
 		for (int i = 0; i < b.length; i++)
 		{
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
-			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
 
@@ -107,14 +107,14 @@ public class EJMLLinearSolverTest
 		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
-		Assert.assertTrue("Failed to solve", result);
-		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
+		Assertions.assertTrue(result, "Failed to invert");
+		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		log("x = %s\n", Arrays.toString(b));
 		for (int i = 0; i < b.length; i++)
 		{
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
-			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
 
@@ -143,14 +143,14 @@ public class EJMLLinearSolverTest
 		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
-		Assert.assertTrue("Failed to solve", result);
-		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
+		Assertions.assertTrue(result, "Failed to invert");
+		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		log("x = %s\n", Arrays.toString(b));
 		for (int i = 0; i < b.length; i++)
 		{
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
-			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
 
@@ -185,14 +185,14 @@ public class EJMLLinearSolverTest
 		final boolean result = solver.solve(a, b);
 		solver.invertLastA(a);
 
-		Assert.assertTrue("Failed to solve", result);
-		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
+		Assertions.assertTrue(result, "Failed to invert");
+		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		log("x = %s\n", Arrays.toString(b));
 		for (int i = 0; i < b.length; i++)
 		{
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
-			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
 
@@ -217,12 +217,12 @@ public class EJMLLinearSolverTest
 
 		final boolean result = solver.invert(a);
 
-		Assert.assertTrue("Failed to invert", result);
+		Assertions.assertTrue(result, "Failed to invert");
 
 		for (int i = 0; i < a[0].length; i++)
 		{
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
-			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
 
@@ -253,12 +253,12 @@ public class EJMLLinearSolverTest
 
 		final boolean result = solver.invert(a);
 
-		Assert.assertTrue("Failed to invert", result);
+		Assertions.assertTrue(result, "Failed to invert");
 
 		for (int i = 0; i < a[0].length; i++)
 		{
 			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
-			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
 
@@ -280,10 +280,10 @@ public class EJMLLinearSolverTest
 
 		final double[] o = solver.invertDiagonal(a);
 
-		Assert.assertNotNull("Failed to invert", o);
+		Assertions.assertNotNull(o, "Failed to invert");
 
 		log("a diagonal = %s\n", Arrays.toString(o));
-		Assert.assertArrayEquals("Bad inversion", e, o, 1e-4);
+		Assertions.assertArrayEquals(e, o, 1e-4, "Bad inversion");
 	}
 
 	@Test
@@ -307,10 +307,10 @@ public class EJMLLinearSolverTest
 
 		final double[] o = solver.invertDiagonal(a);
 
-		Assert.assertNotNull("Failed to invert", o);
+		Assertions.assertNotNull(o, "Failed to invert");
 
 		log("a diagonal = %s\n", Arrays.toString(o));
-		Assert.assertArrayEquals("Bad inversion", e, o, 1e-4);
+		Assertions.assertArrayEquals(e, o, 1e-4, "Bad inversion");
 	}
 	//@formatter:on
 
@@ -484,7 +484,7 @@ public class EJMLLinearSolverTest
 
 	private void runSolverSpeedTest(int flags)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		final int n = f0.size();
@@ -788,7 +788,7 @@ public class EJMLLinearSolverTest
 
 	private void runInversionSpeedTest(int flags)
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		final int n = f0.size();

@@ -32,9 +32,9 @@ import java.util.Arrays;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.logging.Logger;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
@@ -43,8 +43,8 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumu
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
@@ -108,7 +108,7 @@ public class JumpDistanceAnalysisTest
 				final double o = si.integrate(10000, func, 0, x);
 				//log("Integrate d=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d\n", d, x, e, o, si.getIterations(),
 				//		si.getEvaluations());
-				Assert.assertEquals("Failed to integrate", e, o, e * 1e-2);
+				ExtraAssertions.assertEqualsRelative(e, o, 1e-2, "Failed to integrate: x=%g", x);
 			}
 		}
 	}
@@ -143,7 +143,7 @@ public class JumpDistanceAnalysisTest
 					final double o = si.integrate(10000, func, 0, x);
 					//log("Integrate d=%.1f, f=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d\n", d, f, x, e, o,
 					//		si.getIterations(), si.getEvaluations());
-					Assert.assertEquals("Failed to integrate", e, o, e * 1e-2);
+					ExtraAssertions.assertEqualsRelative(e, o, 1e-2, "Failed to integrate: x=%g", x);
 				}
 			}
 	}
@@ -219,7 +219,7 @@ public class JumpDistanceAnalysisTest
 
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
-		TestAssume.assumeMaximumComplexity();
+		ExtraAssumptions.assumeMaximumComplexity();
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
@@ -253,7 +253,7 @@ public class JumpDistanceAnalysisTest
 	public void canDoBenchmark()
 	{
 		// Skip this as it is slow
-		Assume.assumeTrue(false);
+		Assumptions.assumeTrue(false);
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		out = null;
@@ -376,9 +376,9 @@ public class JumpDistanceAnalysisTest
 		AssertionError error = null;
 		try
 		{
-			Assert.assertEquals("Failed to fit n", d.length, fitD.length);
-			TestAssert.assertArrayEqualsRelative("Failed to fit d", d, fitD, deltaD);
-			TestAssert.assertArrayEqualsRelative("Failed to fit f", f, fitF, deltaF);
+			Assertions.assertEquals(d.length, fitD.length, "Failed to fit n");
+			ExtraAssertions.assertArrayEqualsRelative(d, fitD, deltaD, "Failed to fit d");
+			ExtraAssertions.assertArrayEqualsRelative(f, fitF, deltaF, "Failed to fit f");
 		}
 		catch (final AssertionError e)
 		{

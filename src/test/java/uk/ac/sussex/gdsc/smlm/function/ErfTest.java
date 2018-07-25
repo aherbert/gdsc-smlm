@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.function;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
@@ -35,8 +35,8 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class ErfTest
@@ -117,7 +117,7 @@ public class ErfTest
 				if (max < error)
 					max = error;
 				//System.out.printf("x=%f, e=%f, o=%f, error=%f\n", x, e, o, error);
-				Assert.assertTrue(error < expected);
+				Assertions.assertTrue(error < expected);
 			}
 		TestLog.info("erfx %s max error = %g\n", erf.name, max);
 	}
@@ -148,7 +148,7 @@ public class ErfTest
 
 	private static void erfxIndistinguishableFrom1(BaseErf erf)
 	{
-		TestAssume.assume(LogLevel.INFO);
+		ExtraAssumptions.assume(LogLevel.INFO);
 
 		// Find switch using a binary search
 		double lower = 1;
@@ -207,7 +207,7 @@ public class ErfTest
 						if (max < error)
 							max = error;
 						//System.out.printf("x=%f, x2=%f, e=%f, o=%f, error=%f\n", x, x2, e, o, error);
-						Assert.assertTrue(error < expected);
+						Assertions.assertTrue(error < expected);
 					}
 				}
 
@@ -247,7 +247,7 @@ public class ErfTest
 			if (max < error)
 				max = error;
 			//System.out.printf("x=%f, x2=%f, e=%f, o=%f, error=%f\n", x, x2, e, o, error);
-			Assert.assertTrue(error < expected);
+			Assertions.assertTrue(error < expected);
 		}
 
 		TestLog.info("erfxx %s unit max error = %g\n", erf.name, max);
@@ -311,15 +311,15 @@ public class ErfTest
 				if (max2 < error2)
 					max2 = error2;
 				//System.out.printf("x=%d, y=%d, e=%g, o=%g, o2=%g, error=%f, error2=%f\n", x, y, e, o, oo, error, error2);
-				Assert.assertTrue(error < error2);
+				Assertions.assertTrue(error < error2);
 			}
 		}
 
-		Assert.assertTrue(erf.name + " Gaussian 2D integral is not 1", sum1 > 0.999);
-		Assert.assertTrue(erf.name + " Erf approx integral is incorrect",
-				DoubleEquality.relativeError(sum1, sum2) < 1e-3);
-		Assert.assertTrue(erf.name + " Gaussian approx integral is incorrect",
-				DoubleEquality.relativeError(sum1, sum3) < 1e-3);
+		Assertions.assertTrue(sum1 > 0.999, () -> erf.name + " Gaussian 2D integral is not 1");
+		Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum2) < 1e-3,
+				() -> erf.name + " Erf approx integral is incorrect");
+		Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum3) < 1e-3,
+				() -> erf.name + " Gaussian approx integral is incorrect");
 
 		TestLog.info("%s Erf approx pixel unit max error = %f\n", erf.name, max);
 		TestLog.info("%s Gaussian approx pixel unit max error = %f\n", erf.name, max2);
@@ -361,7 +361,7 @@ public class ErfTest
 	@Test
 	public void erfApproxIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final int range = 5;
 		final int steps = 10000;
@@ -382,7 +382,7 @@ public class ErfTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-3).getMean() < ts.get(-4).getMean());
+		Assertions.assertTrue(ts.get(-3).getMean() < ts.get(-4).getMean());
 	}
 
 	@Test
@@ -458,7 +458,7 @@ public class ErfTest
 			TestLog.info("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
 		}
 
-		TestAssert.assertEqualsRelative(e, o, 1e-2);
+		ExtraAssertions.assertEqualsRelative(e, o, 1e-2);
 	}
 
 	@Test
@@ -481,7 +481,7 @@ public class ErfTest
 			final double g = (o1 - o2) / delta2;
 			final double e = uk.ac.sussex.gdsc.smlm.function.Erf.dErf_dx(x);
 			if (!eq.almostEqualRelativeOrAbsolute(e, g))
-				Assert.fail(x + " : " + e + " != " + g);
+				Assertions.fail(x + " : " + e + " != " + g);
 		}
 	}
 
@@ -494,7 +494,7 @@ public class ErfTest
 				final double f = i + d;
 				final double e = Math.pow(f, 4);
 				final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow4(f);
-				TestAssert.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
+				ExtraAssertions.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
 			}
 	}
 
@@ -507,7 +507,7 @@ public class ErfTest
 				final double f = i + d;
 				final double e = Math.pow(f, 16);
 				final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow16(f);
-				TestAssert.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
+				ExtraAssertions.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
 			}
 	}
 
@@ -594,7 +594,7 @@ public class ErfTest
 	@Test
 	public void powerApproxIsFaster()
 	{
-		TestAssume.assumeMediumComplexity();
+		ExtraAssumptions.assumeMediumComplexity();
 
 		final int range = 5000;
 		final int steps = 100000;
@@ -619,8 +619,8 @@ public class ErfTest
 		for (int i = 0; i < 2; i++)
 		{
 			final int j = -(1 + i * 3);
-			Assert.assertTrue(ts.get(j).getMean() < ts.get(j - 1).getMean());
-			Assert.assertTrue(ts.get(j).getMean() < ts.get(j - 2).getMean());
+			Assertions.assertTrue(ts.get(j).getMean() < ts.get(j - 1).getMean());
+			Assertions.assertTrue(ts.get(j).getMean() < ts.get(j - 2).getMean());
 		}
 	}
 }

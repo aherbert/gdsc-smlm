@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultHelperTest
@@ -42,7 +42,7 @@ public class PeakResultHelperTest
 			// Assuming a Poisson distribution N photons should have a noise of sqrt(N).
 			// However the input and output are in ADU counts so we apply the gain.
 			final double n = PeakResultHelper.localBackgroundToNoise(p * gain, gain, false);
-			Assert.assertEquals("CCD " + p, Math.sqrt(p) * gain, n, 0);
+			Assertions.assertEquals(Math.sqrt(p) * gain, n, () -> "CCD " + p);
 		}
 
 		// EM-CCD
@@ -52,7 +52,7 @@ public class PeakResultHelperTest
 			// (due to the EM-CCD noise factor of 2).
 			// However the input and output are in ADU counts so we apply the gain.
 			final double n = PeakResultHelper.localBackgroundToNoise(p * gain, gain, true);
-			Assert.assertEquals("EM-CCD " + p, Math.sqrt(2 * p) * gain, n, 0);
+			Assertions.assertEquals(Math.sqrt(2 * p) * gain, n, () -> "EM-CCD " + p);
 		}
 	}
 
@@ -69,7 +69,7 @@ public class PeakResultHelperTest
 				final double b = p * gain;
 				final double n = PeakResultHelper.localBackgroundToNoise(b, gain, emCCD);
 				final double b2 = PeakResultHelper.noiseToLocalBackground(n, gain, emCCD);
-				Assert.assertEquals(emCCD + " " + p, b, b2, 1e-6);
+				Assertions.assertEquals(b, b2, 1e-6, () -> emCCD + " " + p);
 			}
 	}
 

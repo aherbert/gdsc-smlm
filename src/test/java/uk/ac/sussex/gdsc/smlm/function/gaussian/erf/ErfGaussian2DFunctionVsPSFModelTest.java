@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.model.GaussianPSFModel;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class ErfGaussian2DFunctionVsPSFModelTest
@@ -84,7 +84,7 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 				// fast approximation of the Erf(..) (the error function). The PSFModel
 				// uses the Apache commons implementation.
 				if (error > 5e-4)
-					TestAssert.fail("[%d] %s != %s  error = %f\n", i, Double.toString(e[i]), Double.toString(o[i]),
+					ExtraAssertions.fail("[%d] %s != %s  error = %f\n", i, Double.toString(e[i]), Double.toString(o[i]),
 							error);
 			}
 	}

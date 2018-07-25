@@ -30,8 +30,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
@@ -49,8 +49,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultsReaderTest
@@ -64,7 +64,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, false, false);
 	}
 
@@ -77,28 +77,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithDeviationsMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, true, false, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithEndFrameMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, true, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithIdMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, true, false, false);
 	}
 
 	@Test
 	public void writeTextWithPrecisionMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, true, false);
 	}
 
@@ -113,7 +113,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, false);
 	}
 
@@ -126,28 +126,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithDeviationsMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, true, false, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, true, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithIdMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, true, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithPrecisionMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, false);
 	}
 
@@ -162,7 +162,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, false, true);
 	}
 
@@ -175,28 +175,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithDeviationsWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, true, false, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithEndFrameWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, true, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithIdWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, true, false, true);
 	}
 
 	@Test
 	public void writeTextWithPrecisionWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, true, true);
 	}
 
@@ -211,7 +211,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, true);
 	}
 
@@ -224,28 +224,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithDeviationsWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, true, false, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, true, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithIdWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, true, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithPrecisionWithSortMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, true);
 	}
 
@@ -291,7 +291,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTSFMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, false, false);
 	}
 
@@ -304,28 +304,28 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTSFWithDeviationsMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, false, false, false);
 	}
 
 	@Test
 	public void writeTSFWithEndFrameMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, true, false, false, false);
 	}
 
 	@Test
 	public void writeTSFWithIdMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, true, false, false);
 	}
 
 	@Test
 	public void writeTSFWithPrecisionMatchesRead()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, true, false);
 	}
 
@@ -340,42 +340,42 @@ public class PeakResultsReaderTest
 	@Test
 	public void readWithScannerMatchesNonScanner()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviations()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(true, false, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithEndFrame()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, true, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithId()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, true, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithPrecision()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, true, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithCombinations()
 	{
-		TestAssume.assumeLowComplexity(); // Scanner is not a default so do not always test
+		ExtraAssumptions.assumeLowComplexity(); // Scanner is not a default so do not always test
 		readWithScannerMatchesNonScannerWithCombinations(false);
 	}
 
@@ -384,42 +384,42 @@ public class PeakResultsReaderTest
 	@Test
 	public void readWithScannerMatchesNonScannerWithSort()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithSort()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(true, false, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithEndFrameWithSort()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, true, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithIdWithSort()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, true, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithPrecisionWithSort()
 	{
-		TestAssume.assumeMediumComplexity(); // The combinations test overlaps this
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
 		readWithScannerMatchesNonScanner(false, false, false, true, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithCombinationsWithSort()
 	{
-		TestAssume.assumeLowComplexity(); // Scanner is not a default so do not always test
+		ExtraAssumptions.assumeLowComplexity(); // Scanner is not a default so do not always test
 		readWithScannerMatchesNonScannerWithCombinations(true);
 	}
 
@@ -656,7 +656,7 @@ public class PeakResultsReaderTest
 			boolean showPrecision, ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2,
 			int loops)
 	{
-		TestAssume.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		final MemoryPeakResults out = createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);
@@ -673,7 +673,7 @@ public class PeakResultsReaderTest
 					(double) time1 / time2, f1, useScanner1);
 		else
 			System.out.printf("%s is %.2fx faster than %s\n", f2, (double) time1 / time2, f1);
-		TestAssert.assertTrue(time2 < time1, "%s (%d) is not faster than %s (%d)", f2, time2, f1, time1);
+		ExtraAssertions.assertTrue(time2 < time1, "%s (%d) is not faster than %s (%d)", f2, time2, f1, time1);
 	}
 
 	// -=-=-=-=-
@@ -809,10 +809,8 @@ public class PeakResultsReaderTest
 			boolean showId, boolean showPrecision, boolean sort, MemoryPeakResults expectedResults,
 			MemoryPeakResults actualResults) throws ArrayComparisonFailure
 	{
-		Assert.assertNotNull("Input results are null", actualResults);
-		Assert.assertEquals("Size differ", expectedResults.size(), actualResults.size());
-
-		final double delta = (fileFormat == ResultsFileFormat.BINARY) ? 0 : 1e-5f;
+		Assertions.assertNotNull(actualResults, "Input results are null");
+		Assertions.assertEquals(expectedResults.size(), actualResults.size(), "Size differ");
 
 		final PeakResult[] expected = expectedResults.toArray();
 		final PeakResult[] actual = actualResults.toArray();
@@ -835,64 +833,80 @@ public class PeakResultsReaderTest
 			final PeakResult p1 = expected[i];
 			final PeakResult p2 = actual[i];
 
-			TestAssert.assertEquals(p1.getFrame(), p2.getFrame(), "Peak mismatch @ [%d]", i);
+			ExtraAssertions.assertEquals(p1.getFrame(), p2.getFrame(), "Peak mismatch @ [%d]", i);
 
 			if (fileFormat == ResultsFileFormat.MALK)
 			{
-				TestAssert.assertEqualsRelative(p1.getXPosition(), p2.getXPosition(), delta, "X @ [%d]", i);
-				TestAssert.assertEqualsRelative(p1.getYPosition(), p2.getYPosition(), delta, "Y @ [%d]", i);
-				TestAssert.assertEqualsRelative(p1.getIntensity(), p2.getIntensity(), delta, "Signal @ " + i);
+				final double delta = 1e-5f;
+				ExtraAssertions.assertEqualsRelative(p1.getXPosition(), p2.getXPosition(), delta, "X @ [%d]", i);
+				ExtraAssertions.assertEqualsRelative(p1.getYPosition(), p2.getYPosition(), delta, "Y @ [%d]", i);
+				ExtraAssertions.assertEqualsRelative(p1.getIntensity(), p2.getIntensity(), delta, "Signal @ " + i);
 				continue;
 			}
 
-			TestAssert.assertEquals(p1.getOrigX(), p2.getOrigX(), "Orig X mismatch @ [%d]", i);
-			TestAssert.assertEquals(p1.getOrigY(), p2.getOrigY(), "Orig Y mismatch @ [%d]", i);
-			TestAssert.assertEqualsRelative(p1.getOrigValue(), p2.getOrigValue(), delta, "Orig value mismatch @ [%d]",
-					i);
-			TestAssert.assertEqualsRelative(p1.getError(), p2.getError(), 1e-6, "Error mismatch @ [%d]", i);
-			TestAssert.assertEqualsRelative(p1.getNoise(), p2.getNoise(), delta, "Noise mismatch @ [%d]", i);
-			TestAssert.assertEqualsRelative(p1.getMeanIntensity(), p2.getMeanIntensity(), delta,
+			ExtraAssertions.assertEquals(p1.getOrigX(), p2.getOrigX(), "Orig X mismatch @ [%d]", i);
+			ExtraAssertions.assertEquals(p1.getOrigY(), p2.getOrigY(), "Orig Y mismatch @ [%d]", i);
+			ExtraAssertions.assertNotNull(p2.getParameters(), "Params is null @ [%d]", i);
+			if (showEndFrame)
+				ExtraAssertions.assertEquals(p1.getEndFrame(), p2.getEndFrame(), "End frame mismatch @ [%d]", i);
+			if (showId)
+				ExtraAssertions.assertEquals(p1.getId(), p2.getId(), "ID mismatch @ [%d]", i);
+			if (showDeviations)
+				ExtraAssertions.assertNotNull(p2.getParameterDeviations(), "Deviations @ [%d]", i);
+
+			// Binary should be exact for float numbers
+			if (fileFormat == ResultsFileFormat.BINARY)
+			{
+				ExtraAssertions.assertEquals(p1.getOrigValue(), p2.getOrigValue(), "Orig value mismatch @ [%d]", i);
+				ExtraAssertions.assertEquals(p1.getError(), p2.getError(), "Error mismatch @ [%d]", i);
+				ExtraAssertions.assertEquals(p1.getNoise(), p2.getNoise(), "Noise mismatch @ [%d]", i);
+				ExtraAssertions.assertEquals(p1.getMeanIntensity(), p2.getMeanIntensity(),
+						"Mean intensity mismatch @ [%d]", i);
+				ExtraAssertions.assertArrayEquals(p1.getParameters(), p2.getParameters(), "Params mismatch @ [%d]", i);
+				if (showDeviations)
+					ExtraAssertions.assertArrayEquals(p1.getParameterDeviations(), p2.getParameterDeviations(),
+							"Params StdDev mismatch @ [%d]", i);
+				if (showPrecision)
+					ExtraAssertions.assertEquals(p1.getPrecision(), p2.getPrecision(), "Precision mismatch @ [%d]", i);
+				continue;
+			}
+
+			// Otherwise have an error
+			final double delta = 1e-5f;
+			ExtraAssertions.assertEqualsRelative(p1.getOrigValue(), p2.getOrigValue(), delta,
+					"Orig value mismatch @ [%d]", i);
+			ExtraAssertions.assertEqualsRelative(p1.getError(), p2.getError(), delta, "Error mismatch @ [%d]", i);
+			ExtraAssertions.assertEqualsRelative(p1.getNoise(), p2.getNoise(), delta, "Noise mismatch @ [%d]", i);
+			ExtraAssertions.assertEqualsRelative(p1.getMeanIntensity(), p2.getMeanIntensity(), delta,
 					"Mean intensity mismatch @ [%d]", i);
-			TestAssert.assertNotNull(p2.getParameters(), "Params is null @ [%d]", i);
-
-			final float[] p = p2.getParameters();
-			for (final float f : p)
-				if (Float.isNaN(f))
-					System.out.println(Arrays.toString(p1.getParameters()));
-
-			TestAssert.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
+			ExtraAssertions.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
 					"Params mismatch @ [%d]", i);
 			if (showDeviations)
 			{
-				Assert.assertNotNull(p2.getParameterDeviations());
-				TestAssert.assertArrayEqualsRelative(p1.getParameterDeviations(), p2.getParameterDeviations(), delta,
-						"Params StdDev mismatch @ [%d]", i);
+				ExtraAssertions.assertArrayEqualsRelative(p1.getParameterDeviations(), p2.getParameterDeviations(),
+						delta, "Params StdDev mismatch @ [%d]", i);
 			}
-			if (showEndFrame)
-				TestAssert.assertEquals(p1.getEndFrame(), p2.getEndFrame(), "End frame mismatch @ [%d]", i);
-			if (showId)
-				TestAssert.assertEquals(p1.getId(), p2.getId(), "ID mismatch @ [%d]", i);
 			if (showPrecision)
-				TestAssert.assertEqualsRelative(p1.getPrecision(), p2.getPrecision(), delta,
+				ExtraAssertions.assertEqualsRelative(p1.getPrecision(), p2.getPrecision(), delta,
 						"Precision mismatch @ [%d]", i);
 		}
 
 		// Check the header information
-		Assert.assertEquals("Name", expectedResults.getName(), actualResults.getName());
-		Assert.assertEquals("Configuration", expectedResults.getConfiguration(), actualResults.getConfiguration());
+		Assertions.assertEquals(expectedResults.getName(), actualResults.getName(), "Name");
+		Assertions.assertEquals(expectedResults.getConfiguration(), actualResults.getConfiguration(), "Configuration");
 
 		final Rectangle r1 = expectedResults.getBounds();
 		final Rectangle r2 = actualResults.getBounds();
 		if (r1 != null)
 		{
-			Assert.assertNotNull("Bounds", r2);
-			Assert.assertEquals("Bounds x", r1.x, r2.x);
-			Assert.assertEquals("Bounds y", r1.y, r2.y);
-			Assert.assertEquals("Bounds width", r1.width, r2.width);
-			Assert.assertEquals("Bounds height", r1.height, r2.height);
+			Assertions.assertNotNull(r2, "Bounds");
+			Assertions.assertEquals(r1.x, r2.x, "Bounds x");
+			Assertions.assertEquals(r1.y, r2.y, "Bounds y");
+			Assertions.assertEquals(r1.width, r2.width, "Bounds width");
+			Assertions.assertEquals(r1.height, r2.height, "Bounds height");
 		}
 		else
-			Assert.assertNull("Bounds", r2);
+			Assertions.assertNull(r2, "Bounds");
 
 		final Calibration c1 = expectedResults.getCalibration();
 		final Calibration c2 = actualResults.getCalibration();
@@ -911,21 +925,21 @@ public class PeakResultsReaderTest
 
 		if (c1 != null)
 		{
-			Assert.assertNotNull("Calibration", c2);
-			Assert.assertTrue("Calibration", c1.equals(c2));
+			Assertions.assertNotNull(c2, "Calibration");
+			Assertions.assertTrue(c1.equals(c2), "Calibration");
 		}
 		else
-			Assert.assertNull("Calibration", c2);
+			Assertions.assertNull(c2, "Calibration");
 
 		final PSF p1 = expectedResults.getPSF();
 		final PSF p2 = actualResults.getPSF();
 		if (p1 != null)
 		{
-			Assert.assertNotNull("PSF", p2);
-			Assert.assertTrue("PSF", p1.equals(p2));
+			Assertions.assertNotNull(p2, "PSF");
+			Assertions.assertTrue(p1.equals(p2), "PSF");
 		}
 		else
-			Assert.assertNull("PSF", p2);
+			Assertions.assertNull(p2, "PSF");
 	}
 
 	private static MemoryPeakResults createResults(RandomGenerator rg, int i, boolean showDeviations,
@@ -935,7 +949,8 @@ public class PeakResultsReaderTest
 
 		final boolean extended = showEndFrame || showId || showPrecision;
 
-		final MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
+		final MemoryPeakResults results = new MemoryPeakResults(
+				PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
 		while (i-- > 0)
 		{
 			final int startFrame = rg.nextInt(i + 1);
@@ -999,7 +1014,7 @@ public class PeakResultsReaderTest
 		}
 		catch (final IOException e)
 		{
-			Assert.fail("Cannot create temp files for IO testing");
+			Assertions.fail("Cannot create temp files for IO testing");
 		}
 		return null; // Allow compilation but the assert will stop the code
 	}

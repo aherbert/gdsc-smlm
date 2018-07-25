@@ -21,13 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package org.apache.commons.math3.distribution;
+package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
@@ -133,7 +134,7 @@ public class CustomPoissonDistributionTest
 		t2.getData(0);
 		final long[] o = (long[]) t2.run(null);
 
-		Assert.assertArrayEquals(e, o);
+		Assertions.assertArrayEquals(e, o);
 	}
 
 	@Test
@@ -148,7 +149,7 @@ public class CustomPoissonDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
 		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
@@ -167,7 +168,7 @@ public class CustomPoissonDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
 		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
@@ -192,7 +193,7 @@ public class CustomPoissonDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
 		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,

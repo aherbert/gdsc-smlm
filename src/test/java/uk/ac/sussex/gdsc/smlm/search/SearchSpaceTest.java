@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.search;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class SearchSpaceTest
@@ -35,7 +35,7 @@ public class SearchSpaceTest
 		final SearchDimension d1 = new SearchDimension(0, 10, 1, 1);
 		final SearchDimension d2 = new SearchDimension(0, 10, 0.5, 2, 2.5, 7.5);
 		final double[][] ss = SearchSpace.createSearchSpace(createDimensions(d1, d2));
-		Assert.assertEquals(d1.getMaxLength() * d2.getMaxLength(), ss.length);
+		Assertions.assertEquals(d1.getMaxLength() * d2.getMaxLength(), ss.length);
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
 	}
@@ -49,17 +49,17 @@ public class SearchSpaceTest
 		double[][] ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[] { 0, 5 });
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
-		Assert.assertEquals(2 + 3, ss.length);
+		Assertions.assertEquals(2 + 3, ss.length);
 
 		ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[] { 4, 5 });
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
-		Assert.assertEquals(3 + 3, ss.length);
+		Assertions.assertEquals(3 + 3, ss.length);
 
 		ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[] { 10, 5 });
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
-		Assert.assertEquals(2 + 3, ss.length);
+		Assertions.assertEquals(2 + 3, ss.length);
 	}
 
 	@Test
@@ -67,19 +67,19 @@ public class SearchSpaceTest
 	{
 		final SearchDimension d1 = new SearchDimension(0, 10, 0, 1, 2.5, 7.5);
 		final double[] v1 = d1.values();
-		Assert.assertTrue(d1.isAtBounds(0));
-		Assert.assertTrue(d1.isAtBounds(v1[0]));
-		Assert.assertTrue(d1.isAtBounds(v1[v1.length - 1]));
-		Assert.assertFalse(d1.isAtBounds(5));
+		Assertions.assertTrue(d1.isAtBounds(0));
+		Assertions.assertTrue(d1.isAtBounds(v1[0]));
+		Assertions.assertTrue(d1.isAtBounds(v1[v1.length - 1]));
+		Assertions.assertFalse(d1.isAtBounds(5));
 
 		d1.setCentre(0);
-		Assert.assertTrue(d1.isAtBounds(0));
-		Assert.assertTrue(d1.isAtBounds(5));
+		Assertions.assertTrue(d1.isAtBounds(0));
+		Assertions.assertTrue(d1.isAtBounds(5));
 
 		final double[] v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v1));
 		//System.out.println(java.util.Arrays.toString(v2));
-		Assert.assertTrue(v1.length > v2.length);
+		Assertions.assertTrue(v1.length > v2.length);
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class SearchSpaceTest
 		//System.out.println(java.util.Arrays.toString(v1));
 		//System.out.println(java.util.Arrays.toString(v2));
 		for (int i = 0; i < v1.length; i++)
-			Assert.assertEquals(v1[i] * d1.getReduceFactor(), v2[i], 0);
+			Assertions.assertEquals(v1[i] * d1.getReduceFactor(), v2[i]);
 	}
 
 	@Test
@@ -103,32 +103,32 @@ public class SearchSpaceTest
 		d1.setPad(false);
 
 		final double[] v1 = d1.values();
-		Assert.assertTrue(d1.isAtBounds(0));
+		Assertions.assertTrue(d1.isAtBounds(0));
 
 		d1.setCentre(0);
-		Assert.assertTrue(d1.isAtBounds(0));
+		Assertions.assertTrue(d1.isAtBounds(0));
 
 		double[] v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v1));
 		//System.out.println(java.util.Arrays.toString(v2));
-		Assert.assertTrue(v1.length > v2.length);
+		Assertions.assertTrue(v1.length > v2.length);
 
 		d1.setCentre(10);
 		v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v2));
-		Assert.assertTrue(v1.length > v2.length);
+		Assertions.assertTrue(v1.length > v2.length);
 
 		d1.setPad(true);
 
 		double[] v3 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v3));
-		Assert.assertTrue(v1.length == v3.length);
+		Assertions.assertTrue(v1.length == v3.length);
 
 		d1.setCentre(0);
 
 		v3 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v3));
-		Assert.assertTrue(v1.length == v3.length);
+		Assertions.assertTrue(v1.length == v3.length);
 	}
 
 	private static SearchDimension[] createDimensions(SearchDimension... d)

@@ -23,14 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.function.Supplier;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunction2Test
@@ -65,21 +67,21 @@ public class PoissonGaussianFunction2Test
 		// For example in the following:
 
 		// OVER
-		Assert.assertTrue(1.02 < cumulativeProbability(1.7, 0.25, 0.01, true));
-		Assert.assertTrue(1.02 < cumulativeProbability(1.7, 0.25, 0.1, true));
+		Assertions.assertTrue(1.02 < cumulativeProbability(1.7, 0.25, 0.01, true));
+		Assertions.assertTrue(1.02 < cumulativeProbability(1.7, 0.25, 0.1, true));
 		// OK
-		Assert.assertEquals(1, cumulativeProbability(1.7, 0.25, 0.3, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 0.25, 0.3, true), 0.02);
 		// UNDER
-		Assert.assertTrue(0.98 > cumulativeProbability(1.7, 0.25, 0.5, true));
+		Assertions.assertTrue(0.98 > cumulativeProbability(1.7, 0.25, 0.5, true));
 		// OK
-		Assert.assertEquals(1, cumulativeProbability(1.7, 0.25, 0.75, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 0.25, 0.75, true), 0.02);
 
 		// Fine with higher mean
-		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.01, true), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.1, true), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.3, true), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.5, true), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.75, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 10, 0.01, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 10, 0.1, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 10, 0.3, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 10, 0.5, true), 0.02);
+		Assertions.assertEquals(1, cumulativeProbability(1.7, 10, 0.75, true), 0.02);
 	}
 
 	@Test
@@ -97,7 +99,7 @@ public class PoissonGaussianFunction2Test
 	private static void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
 	{
 		final double p2 = cumulativeProbability(gain, mu, s, usePicard);
-		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
+		ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private static double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)
@@ -133,7 +135,7 @@ public class PoissonGaussianFunction2Test
 				p += pp;
 			}
 			//if (p > 1.01)
-			//	Assert.fail("P > 1: " + p);
+			//	Assertions.fail("P > 1: " + p);
 		}
 
 		// We have most of the likelihood density.
@@ -191,14 +193,14 @@ public class PoissonGaussianFunction2Test
 		final int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		final String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
+			ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
 		}
 	}
 }

@@ -26,9 +26,9 @@ package uk.ac.sussex.gdsc.smlm.function.cspline;
 import java.util.Arrays;
 
 import org.apache.commons.math3.util.Precision;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.data.DoubleStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.ij.Utils;
@@ -56,7 +56,8 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class CubicSplineFunctionTest
@@ -195,22 +196,23 @@ public abstract class CubicSplineFunctionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			TestLog.info("Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
 
-		Assert.assertEquals("Incorrect number of peaks", cf.getN(), npeaks);
+		Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");
 
 		int p = 0;
 		if (cf.evaluatesBackground())
-			Assert.assertEquals("Background", 0, gradientIndices[p++]);
+			Assertions.assertEquals(0, gradientIndices[p++], "Background");
 		for (int peak = 1, i = 1; peak <= npeaks; peak++, i += CubicSplineFunction.PARAMETERS_PER_PEAK)
 		{
+			final int ii = i;
 			if (cf.evaluatesSignal())
-				Assert.assertEquals(CubicSplineFunction.getName(i), i, gradientIndices[p++]);
+				Assertions.assertEquals(i, gradientIndices[p++], () -> CubicSplineFunction.getName(ii));
 			if (cf.evaluatesPosition())
 			{
-				Assert.assertEquals(CubicSplineFunction.getName(i + 1), i + 1, gradientIndices[p++]);
-				Assert.assertEquals(CubicSplineFunction.getName(i + 2), i + 2, gradientIndices[p++]);
+				Assertions.assertEquals(i + 1, gradientIndices[p++], () -> CubicSplineFunction.getName(ii + 1));
+				Assertions.assertEquals(i + 2, gradientIndices[p++], () -> CubicSplineFunction.getName(ii + 2));
 			}
 			if (cf.evaluatesZ())
-				Assert.assertEquals(CubicSplineFunction.getName(i + 3), i + 3, gradientIndices[p++]);
+				Assertions.assertEquals(i + 3, gradientIndices[p++], () -> CubicSplineFunction.getName(ii + 3));
 		}
 	}
 
@@ -222,12 +224,12 @@ public abstract class CubicSplineFunctionTest
 		if (f2 != null)
 		{
 			f = CubicSplineFunctionFactory.createCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, 2, 2);
-			Assert.assertTrue("Incorrect function2", f.getClass() == f2.getClass());
+			Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function2");
 		}
 		else
 		{
 			f = CubicSplineFunctionFactory.createCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, 2, 1);
-			Assert.assertTrue("Incorrect function1", f.getClass() == f1.getClass());
+			Assertions.assertTrue(f.getClass() == f1.getClass(), "Incorrect function1");
 		}
 	}
 
@@ -251,24 +253,24 @@ public abstract class CubicSplineFunctionTest
 							final double[] o1 = p1.getValues(f1, a);
 							final double[] o2 = p2.getValues(f1, a);
 
-							Assert.assertArrayEquals(e, o1, 0);
-							Assert.assertArrayEquals(e, o2, 0);
+							Assertions.assertArrayEquals(e, o1);
+							Assertions.assertArrayEquals(e, o2);
 							for (int i = e.length; i-- > 0;)
-								Assert.assertArrayEquals(p1.dyda[i], p2.dyda[i], 0);
+								Assertions.assertArrayEquals(p1.dyda[i], p2.dyda[i]);
 						}
 	}
 
 	@Test
 	public void functionComputesBackgroundGradient1()
 	{
-		Assume.assumeTrue(f1.evaluatesBackground());
+		Assumptions.assumeTrue(f1.evaluatesBackground());
 		functionComputesTargetGradient1(CubicSplineFunction.BACKGROUND);
 	}
 
 	@Test
 	public void functionComputesSignalGradient1()
 	{
-		Assume.assumeTrue(f1.evaluatesSignal());
+		Assumptions.assumeTrue(f1.evaluatesSignal());
 		functionComputesTargetGradient1(CubicSplineFunction.SIGNAL);
 	}
 
@@ -287,7 +289,7 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesZGradient1()
 	{
-		Assume.assumeTrue(f1.evaluatesZ());
+		Assumptions.assumeTrue(f1.evaluatesZ());
 		functionComputesTargetGradient1(CubicSplineFunction.Z_POSITION);
 	}
 
@@ -341,10 +343,10 @@ public abstract class CubicSplineFunctionTest
 									final double dyda = p2.dyda[i][gradientIndex];
 									final double error = DoubleEquality.relativeError(gradient, dyda);
 									s.add(error);
-									Assert.assertTrue(gradient + " sign != " + dyda, (gradient * dyda) >= 0);
+									ExtraAssertions.assertTrue((gradient * dyda) >= 0, "%s sign != %s", gradient, dyda);
 									//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, dyda, error);
-									Assert.assertTrue(gradient + " != " + dyda,
-											eq.almostEqualRelativeOrAbsolute(gradient, dyda));
+									ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(gradient, dyda),
+											"%s != %s", gradient, dyda);
 								}
 						}
 		TestLog.info(new MessageProvider()
@@ -362,21 +364,21 @@ public abstract class CubicSplineFunctionTest
 	protected int findGradientIndex(CubicSplineFunction f, int targetParameter)
 	{
 		final int i = f.findGradientIndex(targetParameter);
-		Assert.assertTrue("Cannot find gradient index", i >= 0);
+		Assertions.assertTrue(i >= 0, "Cannot find gradient index");
 		return i;
 	}
 
 	@Test
 	public void functionComputesBackgroundGradient2()
 	{
-		Assume.assumeTrue(f1.evaluatesBackground());
+		Assumptions.assumeTrue(f1.evaluatesBackground());
 		functionComputesTargetGradient2(CubicSplineFunction.BACKGROUND);
 	}
 
 	@Test
 	public void functionComputesSignalGradient2()
 	{
-		Assume.assumeTrue(f1.evaluatesSignal());
+		Assumptions.assumeTrue(f1.evaluatesSignal());
 		functionComputesTargetGradient2(CubicSplineFunction.SIGNAL);
 	}
 
@@ -395,7 +397,7 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesZGradient2()
 	{
-		Assume.assumeTrue(f1.evaluatesZ());
+		Assumptions.assumeTrue(f1.evaluatesZ());
 		functionComputesTargetGradient2(CubicSplineFunction.Z_POSITION);
 	}
 
@@ -458,9 +460,11 @@ public abstract class CubicSplineFunctionTest
 									if (test)
 									{
 										s.add(error);
-										Assert.assertTrue(gradient + " sign != " + d2yda2, (gradient * d2yda2) >= 0);
-										Assert.assertTrue(gradient + " != " + d2yda2,
-												eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+										ExtraAssertions.assertTrue((gradient * d2yda2) >= 0, "%s sign != %s", gradient,
+												d2yda2);
+										//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, d2yda2, error);
+										ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(gradient, d2yda2),
+												"%s != %s", gradient, d2yda2);
 									}
 								}
 						}
@@ -505,18 +509,18 @@ public abstract class CubicSplineFunctionTest
 											final double[] o1 = p1.getValues(f1, a);
 											final double[] o2 = p2.getValues(f1, a);
 
-											Assert.assertArrayEquals(e, o1, 0);
-											Assert.assertArrayEquals(e, o2, 0);
+											Assertions.assertArrayEquals(e, o1);
+											Assertions.assertArrayEquals(e, o2);
 											for (int i = e.length; i-- > 0;)
-												Assert.assertArrayEquals(p1.dyda[i], p2.dyda[i], 0);
+												Assertions.assertArrayEquals(p1.dyda[i], p2.dyda[i]);
 										}
 	}
 
 	@Test
 	public void functionComputesBackgroundGradient1With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
-		Assume.assumeTrue(f2.evaluatesBackground());
+		Assumptions.assumeTrue(null != f2);
+		Assumptions.assumeTrue(f2.evaluatesBackground());
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.BACKGROUND);
 		functionComputesTargetGradient1With2Peaks(
 				CubicSplineFunction.BACKGROUND + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -525,8 +529,8 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesSignalGradient1With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
-		Assume.assumeTrue(f2.evaluatesSignal());
+		Assumptions.assumeTrue(null != f2);
+		Assumptions.assumeTrue(f2.evaluatesSignal());
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.SIGNAL);
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.SIGNAL + CubicSplineFunction.PARAMETERS_PER_PEAK);
 	}
@@ -534,7 +538,7 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesXGradient1With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.X_POSITION);
 		functionComputesTargetGradient1With2Peaks(
 				CubicSplineFunction.X_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -543,7 +547,7 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesYGradient1With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Y_POSITION);
 		functionComputesTargetGradient1With2Peaks(
 				CubicSplineFunction.Y_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -552,8 +556,8 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesZGradient1With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
-		Assume.assumeTrue(f2.evaluatesZ());
+		Assumptions.assumeTrue(null != f2);
+		Assumptions.assumeTrue(f2.evaluatesZ());
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Z_POSITION);
 		functionComputesTargetGradient1With2Peaks(
 				CubicSplineFunction.Z_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -615,11 +619,13 @@ public abstract class CubicSplineFunctionTest
 													final double dyda = p2.dyda[i][gradientIndex];
 													final double error = DoubleEquality.relativeError(gradient, dyda);
 													s.add(error);
-													Assert.assertTrue(gradient + " sign != " + dyda,
-															(gradient * dyda) >= 0);
+
+													ExtraAssertions.assertTrue((gradient * dyda) >= 0, "%s sign != %s",
+															gradient, dyda);
 													//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, dyda, error);
-													Assert.assertTrue(gradient + " != " + dyda,
-															eq.almostEqualRelativeOrAbsolute(gradient, dyda));
+													ExtraAssertions.assertTrue(
+															eq.almostEqualRelativeOrAbsolute(gradient, dyda),
+															"%s != %s", gradient, dyda);
 												}
 										}
 		TestLog.info(new MessageProvider()
@@ -637,8 +643,8 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesBackgroundGradient2With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
-		Assume.assumeTrue(f2.evaluatesBackground());
+		Assumptions.assumeTrue(null != f2);
+		Assumptions.assumeTrue(f2.evaluatesBackground());
 		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.BACKGROUND);
 		functionComputesTargetGradient2With2Peaks(
 				CubicSplineFunction.BACKGROUND + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -647,8 +653,8 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesSignalGradient2With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
-		Assume.assumeTrue(f2.evaluatesSignal());
+		Assumptions.assumeTrue(null != f2);
+		Assumptions.assumeTrue(f2.evaluatesSignal());
 		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.SIGNAL);
 		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.SIGNAL + CubicSplineFunction.PARAMETERS_PER_PEAK);
 	}
@@ -656,7 +662,7 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesXGradient2With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.X_POSITION);
 		functionComputesTargetGradient2With2Peaks(
 				CubicSplineFunction.X_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -665,7 +671,7 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesYGradient2With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
+		Assumptions.assumeTrue(null != f2);
 		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.Y_POSITION);
 		functionComputesTargetGradient2With2Peaks(
 				CubicSplineFunction.Y_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -674,8 +680,8 @@ public abstract class CubicSplineFunctionTest
 	@Test
 	public void functionComputesZGradient2With2Peaks()
 	{
-		Assume.assumeNotNull(f2);
-		Assume.assumeTrue(f2.evaluatesZ());
+		Assumptions.assumeTrue(null != f2);
+		Assumptions.assumeTrue(f2.evaluatesZ());
 		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Z_POSITION);
 		functionComputesTargetGradient1With2Peaks(
 				CubicSplineFunction.Z_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
@@ -746,10 +752,12 @@ public abstract class CubicSplineFunctionTest
 													if (test)
 													{
 														s.add(error);
-														Assert.assertTrue(gradient + " sign != " + d2yda2,
-																(gradient * d2yda2) >= 0);
-														Assert.assertTrue(gradient + " != " + d2yda2,
-																eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+														ExtraAssertions.assertTrue((gradient * d2yda2) >= 0,
+																"%s sign != %s", gradient, d2yda2);
+														//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, d2yda2, error);
+														ExtraAssertions.assertTrue(
+																eq.almostEqualRelativeOrAbsolute(gradient, d2yda2),
+																"%s != %s", gradient, d2yda2);
 													}
 												}
 										}
@@ -879,10 +887,10 @@ public abstract class CubicSplineFunctionTest
 	private void speedTest(int n, int order)
 	{
 		// No assertions, this is just a report
-		TestAssume.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		final CubicSplineFunction cf = (n == 2) ? f2 : f1;
-		Assume.assumeNotNull(cf);
+		Assumptions.assumeTrue(null != cf);
 		final CubicSplineFunction cff = (n == 2) ? f2f : f1f;
 		final ErfGaussian2DFunction gf = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(n, maxx, maxy,
 				GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);

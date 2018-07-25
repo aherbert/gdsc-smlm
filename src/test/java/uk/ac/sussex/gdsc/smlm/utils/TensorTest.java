@@ -24,11 +24,12 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class TensorTest
@@ -44,14 +45,14 @@ public class TensorTest
 		};
 		//@formatter:on
 		final Tensor3D t = new Tensor3D(data, 3, 3);
-		Assert.assertTrue(t.hasDecomposition());
+		Assertions.assertTrue(t.hasDecomposition());
 		final double[] com = t.getCentreOfMass();
-		Assert.assertArrayEquals(new double[] { 1, 1, 0 }, com, 0);
+		Assertions.assertArrayEquals(new double[] { 1, 1, 0 }, com);
 		final double[] v = t.getEigenValues();
 		final double[][] vv = t.getEigenVectors();
 		print(com, v, vv);
 		for (int i = 1; i < v.length; i++)
-			Assert.assertTrue(v[i - 1] >= v[i]);
+			Assertions.assertTrue(v[i - 1] >= v[i]);
 	}
 
 	private static void print(double[] com, double[] v, double[][] vv)
@@ -78,14 +79,14 @@ public class TensorTest
 				};
 		//@formatter:on
 		final Tensor2D t = new Tensor2D(data, 3, 3);
-		Assert.assertTrue(t.hasDecomposition());
+		Assertions.assertTrue(t.hasDecomposition());
 		final double[] com = t.getCentreOfMass();
-		Assert.assertArrayEquals(new double[] { 1, 1 }, com, 0);
+		Assertions.assertArrayEquals(new double[] { 1, 1 }, com);
 		final double[] v = t.getEigenValues();
 		final double[][] vv = t.getEigenVectors();
 		print(com, v, vv);
 		for (int i = 1; i < v.length; i++)
-			Assert.assertTrue(v[i - 1] >= v[i]);
+			Assertions.assertTrue(v[i - 1] >= v[i]);
 	}
 
 	@Test
@@ -110,8 +111,8 @@ public class TensorTest
 			final double[][] vv3 = t3.getEigenVectors();
 			for (int k = 0; k < 2; k++)
 			{
-				Assert.assertEquals(com2[k], com3[k], 0);
-				Assert.assertEquals(v2[k], v3[k + 1], Math.abs(v2[k] * 1e-6));
+				Assertions.assertEquals(com2[k], com3[k]);
+				ExtraAssertions.assertEqualsRelative(v2[k], v3[k + 1], 1e-6);
 				for (int kk = 0; kk < 2; kk++)
 				{
 					// Swap vector direction
@@ -120,7 +121,7 @@ public class TensorTest
 						vv2[k][0] = -vv2[k][0];
 						vv2[k][1] = -vv2[k][1];
 					}
-					Assert.assertEquals(vv2[k][kk], vv3[k + 1][kk], Math.abs(vv2[k][kk] * 1e-6));
+					ExtraAssertions.assertEqualsRelative(vv2[k][kk], vv3[k + 1][kk], 1e-6);
 				}
 			}
 		}

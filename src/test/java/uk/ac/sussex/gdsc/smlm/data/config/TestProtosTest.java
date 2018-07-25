@@ -27,8 +27,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class TestProtosTest
@@ -59,7 +59,7 @@ public class TestProtosTest
 				final TestProtos.Message2 o2 = TestProtos.Message2.parseDelimitedFrom(input);
 
 				// They should match as the field value is the same
-				Assert.assertEquals(m2, o2);
+				Assertions.assertEquals(m2, o2);
 			}
 		}
 	}
@@ -92,7 +92,7 @@ public class TestProtosTest
 				final TestProtos.Message3 o3 = TestProtos.Message3.parseDelimitedFrom(input);
 
 				// They should not match as the field size has changed
-				Assert.assertNotEquals(m3, o3);
+				Assertions.assertNotEquals(m3, o3);
 			}
 		}
 	}

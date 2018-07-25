@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import java.util.Arrays;
 
 import org.jtransforms.fft.DoubleFFT_3D;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.ImageStack;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -109,7 +109,7 @@ public class DoubleDHT3DTest
 
 					checkOctants(in, o);
 
-					Assert.assertArrayEquals(e, o, 0);
+					Assertions.assertArrayEquals(e, o);
 				}
 	}
 
@@ -125,7 +125,7 @@ public class DoubleDHT3DTest
 		swap[7] = 1;
 		swap[8] = 2;
 		for (int i = 0; i < in.length; i++)
-			Assert.assertEquals(in[i], swap[(int) out[i]], 0);
+			Assertions.assertEquals(in[i], swap[(int) out[i]]);
 	}
 
 	@Test
@@ -144,13 +144,13 @@ public class DoubleDHT3DTest
 		final DoubleDHT3D convolved2 = dht.multiply(copy);
 		final DoubleDHT3D deconvolved2 = convolved.divide(copy);
 
-		Assert.assertArrayEquals(convolved.getData(), convolved2.getData(), 0);
-		Assert.assertArrayEquals(deconvolved.getData(), deconvolved2.getData(), 0);
+		Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
+		Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
 
 		double[] e = dht.getData();
 		double[] o = deconvolved.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
 
 		deconvolved.inverseTransform();
 
@@ -159,7 +159,7 @@ public class DoubleDHT3DTest
 		o = deconvolved.getData();
 
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class DoubleDHT3DTest
 
 					final DoubleDHT3D correlation = dht2.conjugateMultiply(dht);
 					final DoubleDHT3D correlation2 = dht2.conjugateMultiply(copy);
-					Assert.assertArrayEquals(correlation.getData(), correlation2.getData(), 0);
+					Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
 					correlation.inverseTransform();
 					correlation.swapOctants();
@@ -199,9 +199,9 @@ public class DoubleDHT3DTest
 					final int oy = xyz[1] - icentre;
 					final int oz = xyz[2] - icentre;
 					//System.out.printf("Shift [%d,%d,%d], centre [%d,%d,%d]\n", x, y, z, xyz[0], xyz[1], xyz[2]);
-					Assert.assertEquals(x, ox);
-					Assert.assertEquals(y, oy);
-					Assert.assertEquals(z, oz);
+					Assertions.assertEquals(x, ox);
+					Assertions.assertEquals(y, oy);
+					Assertions.assertEquals(z, oz);
 				}
 	}
 
@@ -223,7 +223,7 @@ public class DoubleDHT3DTest
 		final double[] e = dht.getData();
 		final double[] o = dht2.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
 
 		// Test verses full forward transform
 		final DoubleFFT_3D fft = new DoubleFFT_3D(dht.ns, dht.nr, dht.nc);
@@ -234,8 +234,8 @@ public class DoubleDHT3DTest
 		final double[] oi = result[1].getData();
 		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
 		{
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
-			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
+			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
 		}
 	}
 }

@@ -24,8 +24,8 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
 
@@ -33,13 +33,13 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 public class PeakResultTest
 {
 	@Test
-	public void sameResultsIsEqual()
+	public void sameResultIsEqual()
 	{
 		final RandomGenerator r = TestSettings.getRandomGenerator();
 		final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
 		final PeakResult p = r1[0];
-		Assert.assertTrue("Same object", PeakResult.equals(p, p));
-		Assert.assertTrue("Null object", PeakResult.equals(null, null));
+		Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
+		Assertions.assertTrue(PeakResult.equals(null, null), "Null object");
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class PeakResultTest
 						final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						for (int i = 0; i < r1.length; i++)
-							Assert.assertTrue(PeakResult.equals(r1[i], r2[i]));
+							Assertions.assertTrue(PeakResult.equals(r1[i], r2[i]));
 					}
 	}
 
@@ -83,12 +83,12 @@ public class PeakResultTest
 						final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						for (int i = 0; i < r1.length; i++)
-							Assert.assertFalse(PeakResult.equals(r1[i], r2[i]));
+							Assertions.assertFalse(PeakResult.equals(r1[i], r2[i]));
 					}
 	}
 
-	private static PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations, boolean withId,
-			boolean withEndFrame, boolean withPrecision)
+	private static PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations,
+			boolean withId, boolean withEndFrame, boolean withPrecision)
 	{
 		final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
 		while (size-- > 0)

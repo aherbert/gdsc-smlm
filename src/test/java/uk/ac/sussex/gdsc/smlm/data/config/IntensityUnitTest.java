@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -69,7 +69,7 @@ public class IntensityUnitTest
 				final IntensityUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
 				final double o = c.convert(v1);
-				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
+				Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
 			}
 		}
 	}
@@ -87,7 +87,7 @@ public class IntensityUnitTest
 				final IntensityUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2, countPerPhoton);
 				final double o = c.convert(v1);
-				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
+				Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
 			}
 		}
 	}

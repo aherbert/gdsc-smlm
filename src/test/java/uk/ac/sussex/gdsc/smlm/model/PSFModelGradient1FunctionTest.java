@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit4.TestAssert;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class PSFModelGradient1FunctionTest
@@ -111,8 +111,8 @@ public class PSFModelGradient1FunctionTest
 
 						for (int ii = 0; ii < ve.length; ii++)
 						{
-							TestAssert.assertEqualsRelative(ve[ii], vo[ii], 1e-8);
-							TestAssert.assertArrayEqualsRelative(ge[ii], go[ii], 1e-8);
+							ExtraAssertions.assertEqualsRelative(ve[ii], vo[ii], 1e-8);
+							ExtraAssertions.assertArrayEqualsRelative(ge[ii], go[ii], 1e-8);
 						}
 					}
 				}

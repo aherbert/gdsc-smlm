@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -75,8 +75,8 @@ public class PeakResultStoreTest
 		PeakResult[] list = new PeakResult[20];
 		int size = 0;
 
-		Assert.assertEquals(size, store.size());
-		Assert.assertEquals(size, store.toArray().length);
+		Assertions.assertEquals(size, store.size(), "Not empty on construction");
+		Assertions.assertEquals(size, store.toArray().length, "Not empty list");
 
 		// Can store data in order
 		for (int i = 0; i < 10; i++)
@@ -95,7 +95,7 @@ public class PeakResultStoreTest
 			storeList.sort();
 
 			for (int i = 0; i < size; i++)
-				Assert.assertTrue(list[i] == storeList.get(i));
+				Assertions.assertTrue(list[i] == storeList.get(i), "List entry not same reference");
 
 			final Comparator<PeakResult> c = new Comparator<PeakResult>()
 			{
@@ -109,7 +109,7 @@ public class PeakResultStoreTest
 			storeList.sort(c);
 
 			for (int i = 0; i < size; i++)
-				Assert.assertTrue(list[i] == storeList.get(i));
+				Assertions.assertTrue(list[i] == storeList.get(i), "List entry not same reference after sort");
 		}
 
 		// Can trim to size
@@ -129,7 +129,7 @@ public class PeakResultStoreTest
 			list[size++] = result;
 			store.add(result);
 		}
-		Assert.assertNotEquals(size, store.size());
+		Assertions.assertTrue(size != store.size(), "Same size after adding null results");
 		store.removeIf(new PeakResultPredicate()
 		{
 			@Override
@@ -182,7 +182,8 @@ public class PeakResultStoreTest
 
 		// Can copy
 		final PeakResultStore copy = store.copy();
-		Assert.assertNotEquals(copy, store);
+		//Assertions.assertNotEquals(copy, store);
+		Assertions.assertTrue(copy != store, "Copy is the same reference");
 		assertEquals(list, size, store);
 
 		// Can remove single
@@ -200,7 +201,7 @@ public class PeakResultStoreTest
 					toRemove = result;
 				store.add(result);
 			}
-			Assert.assertNotEquals(size, store.size());
+			Assertions.assertTrue(size != store.size(), "Same size after adding extra single result");
 			store.remove(toRemove);
 			assertEquals(list, size, store);
 		}
@@ -284,7 +285,7 @@ public class PeakResultStoreTest
 
 	private static void assertEquals(PeakResult[] list, int size, PeakResultStore store)
 	{
-		Assert.assertEquals(size, store.size());
+		Assertions.assertEquals(size, store.size(), "Not the same size");
 
 		final boolean isList = store instanceof PeakResultStoreList;
 		if (isList)
@@ -292,15 +293,15 @@ public class PeakResultStoreTest
 			final PeakResultStoreList storeList = (PeakResultStoreList) store;
 			for (int i = 0; i < size; i++)
 			{
-				Assert.assertTrue(list[i] == storeList.get(i));
-				Assert.assertEquals(i, storeList.indexOf(storeList.get(i)));
+				Assertions.assertTrue(list[i] == storeList.get(i), "Not the same list index reference");
+				Assertions.assertEquals(i, storeList.indexOf(storeList.get(i)), "indexOf finds wrong item");
 			}
 		}
 		// Set equals
 		final PeakResult[] list2 = store.toArray();
-		Assert.assertEquals(size, list2.length);
+		Assertions.assertEquals(size, list2.length, "toArray() creates wrong size");
 		for (int i = 0; i < size; i++)
-			Assert.assertTrue(contains(list, size, list2[i]));
+			Assertions.assertTrue(contains(list, size, list2[i]), "Cannot find item in the array");
 	}
 
 	private static boolean contains(PeakResult[] list, int size, PeakResult peakResult)

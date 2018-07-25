@@ -28,22 +28,22 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.jtransforms.dht.FloatDHT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 import org.jtransforms.utils.CommonUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT;
-import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import uk.ac.sussex.gdsc.core.ij.process.FHT2;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.junit4.TestAssume;
+import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 
 @SuppressWarnings({ "javadoc" })
 public class JTransformsTest
@@ -121,7 +121,7 @@ public class JTransformsTest
 			o[i] = data1[j];
 		FHT2.swapQuadrants(new FloatProcessor(size, size, o));
 
-		Assert.assertArrayEquals(e, o, 1e-3f);
+		Assertions.assertArrayEquals(e, o, 1e-3f);
 	}
 
 	@Test
@@ -151,8 +151,8 @@ public class JTransformsTest
 		dht.forward(input1);
 		dht.forward(input2);
 
-		Assert.assertArrayEquals(fht1.getData(), input1, 1e-5f);
-		Assert.assertArrayEquals(fht2.getData(), input2, 1e-5f);
+		Assertions.assertArrayEquals(fht1.getData(), input1, 1e-5f);
+		Assertions.assertArrayEquals(fht2.getData(), input2, 1e-5f);
 	}
 
 	private abstract class DHTSpeedTask extends BaseTimingTask
@@ -296,7 +296,7 @@ public class JTransformsTest
 	@Test
 	public void jTransforms2DDHTIsFasterThanFHT2()
 	{
-		TestAssume.assumeSpeedTest();
+		ExtraAssumptions.assumeSpeedTest();
 
 		// Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 
@@ -343,7 +343,7 @@ public class JTransformsTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report();
 
-		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
