@@ -859,23 +859,23 @@ public class EJMLLinearSolverTest
 		if (np <= 5)
 		{
 			for (int i = 2; i <= size; i++)
-				TestLog.logSpeedTestResult(ts.get(-1), ts.get(-i));
+				TestLog.logSpeedTestResult(ts.get(-i), ts.get(-1));
 
 			if (np < 5)
 				// n < 5 Direct is fastest
 				for (int i = 3; i <= size; i++)
-					TestLog.logSpeedTestResult(ts.get(-2), ts.get(-i));
+					TestLog.logSpeedTestResult(ts.get(-i), ts.get(-2));
 			else
 				// Cholesky should be fastest. It is marginal over CholeskyLDLT.
 				// and may not be faster than Direct at n=5 so that comparison is ignored.
 				for (int i = 4; i <= size; i++)
-					TestLog.logSpeedTestResult(ts.get(-3), ts.get(-i));
+					TestLog.logSpeedTestResult(ts.get(-i), ts.get(-3));
 		}
 		else
 			// No Direct inversion possible.
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
-				TestLog.logSpeedTestResult(ts.get(-2), ts.get(-i));
+				TestLog.logSpeedTestResult(ts.get(-i), ts.get(-2));
 	}
 
 	void log(String format, Object... args)
