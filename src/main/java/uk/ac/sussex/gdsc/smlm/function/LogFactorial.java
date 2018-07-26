@@ -42,7 +42,7 @@ public class LogFactorial
 	static
 	{
 		table = new double[FACTORIALS.length];
-		for (int k = 0; k < FACTORIALS.length; k++)
+		for (int k = 2; k < FACTORIALS.length; k++)
 			table[k] = Math.log(FACTORIALS[k]);
 	}
 
