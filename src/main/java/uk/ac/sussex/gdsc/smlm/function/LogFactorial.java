@@ -42,6 +42,7 @@ public class LogFactorial
 	static
 	{
 		table = new double[FACTORIALS.length];
+		// Since log(1) == 0 ignore the first two values
 		for (int k = 2; k < FACTORIALS.length; k++)
 			table[k] = Math.log(FACTORIALS[k]);
 	}
