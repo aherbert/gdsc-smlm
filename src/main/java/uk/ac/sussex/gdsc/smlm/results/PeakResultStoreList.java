@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 
@@ -85,11 +86,19 @@ public interface PeakResultStoreList extends PeakResultStore
 	/**
 	 * Shuffle the results.
 	 *
-	 * @param randomGenerator
-	 *            the random generator
+	 * @param randomSource
+	 *            the random source
 	 */
-	public void shuffle(final RandomGenerator randomGenerator);
+	public void shuffle(final RandomGenerator randomSource);
 
+	/**
+	 * Shuffle the results.
+	 *
+	 * @param randomSource
+	 *            the random source
+	 */
+	public void shuffle(final UniformRandomProvider randomSource);
+	
 	/**
 	 * Returns the index of the first occurrence of the specified result
 	 * in this store, or -1 if this list does not contain the element.

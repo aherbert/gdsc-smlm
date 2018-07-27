@@ -25,11 +25,11 @@ package uk.ac.sussex.gdsc.smlm.ij.frc;
 
 import java.awt.Rectangle;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -67,7 +67,7 @@ public class FRCTest
 		// Sample lines through an image to create a structure.
 		final int size = 1024;
 		final double[][] data = new double[size * 2][];
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
 		{
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };
@@ -233,7 +233,7 @@ public class FRCTest
 		// Sample lines through an image to create a structure.
 		final int N = 2048;
 		final double[][] data = new double[N * 2][];
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
 		{
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };

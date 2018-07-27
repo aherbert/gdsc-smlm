@@ -25,9 +25,9 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -260,7 +260,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageCorrectlyInterpolatesBetweenBlocks()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
 		final float[] data = createData(rg, max, max);
 		final AreaAverageFilter filter = new AreaAverageFilter();
@@ -319,7 +319,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
 		final float[] data = createData(rg, max, max);
 		final AreaAverageFilter filter = new AreaAverageFilter();
@@ -341,7 +341,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
 		final float[] data = createData(rg, max, max);
 		final AreaAverageFilter filter = new AreaAverageFilter();
@@ -364,7 +364,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
 		final float[] data = createData(rg, max, max);
 		final AreaAverageFilter filter = new AreaAverageFilter();

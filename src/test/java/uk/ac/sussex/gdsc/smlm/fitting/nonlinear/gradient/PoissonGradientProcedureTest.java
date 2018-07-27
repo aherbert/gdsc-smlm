@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -100,7 +100,7 @@ public class PoissonGradientProcedureTest
 		final int iter = 10;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 		final int n = blockWidth * blockWidth;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -171,7 +171,7 @@ public class PoissonGradientProcedureTest
 		final int iter = 1000;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 		final int n = blockWidth * blockWidth;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -245,7 +245,7 @@ public class PoissonGradientProcedureTest
 		final int iter = 10;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
@@ -294,7 +294,7 @@ public class PoissonGradientProcedureTest
 		final int iter = 100;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 
 		// Remove the timing of the function call by creating a dummy function
 		final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
@@ -359,7 +359,7 @@ public class PoissonGradientProcedureTest
 	public void crlbIsHigherWithPrecomputed()
 	{
 		final int iter = 10;
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -452,7 +452,7 @@ public class PoissonGradientProcedureTest
 		}
 	}
 
-	protected int[] createFakeData(RandomGenerator r, int nparams, int iter, ArrayList<double[]> paramsList,
+	protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList,
 			ArrayList<double[]> yList)
 	{
 		final int[] x = new int[blockWidth * blockWidth];
@@ -468,7 +468,7 @@ public class PoissonGradientProcedureTest
 		return x;
 	}
 
-	private double[] createFakeData(RandomGenerator r, double[] params)
+	private double[] createFakeData(UniformRandomProvider r, double[] params)
 	{
 		final int n = blockWidth * blockWidth;
 
@@ -482,7 +482,7 @@ public class PoissonGradientProcedureTest
 		return y;
 	}
 
-	protected void createFakeParams(RandomGenerator r, int nparams, int iter, ArrayList<double[]> paramsList)
+	protected void createFakeParams(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList)
 	{
 		for (int i = 0; i < iter; i++)
 		{
@@ -492,7 +492,7 @@ public class PoissonGradientProcedureTest
 		}
 	}
 
-	private static void createFakeParams(RandomGenerator r, double[] params)
+	private static void createFakeParams(UniformRandomProvider r, double[] params)
 	{
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();

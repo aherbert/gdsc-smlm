@@ -23,29 +23,30 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultTest
 {
-	@Test
-	public void sameResultIsEqual()
+	@SeededTest
+	public void sameResultIsEqual(RandomSeed seed)
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
 		final PeakResult p = r1[0];
 		Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
 		Assertions.assertTrue(PeakResult.equals(null, null), "Null object");
 	}
 
-	@Test
-	public void sameResultsAreEqual()
+	@SeededTest
+	public void sameResultsAreEqual(RandomSeed seed)
 	{
-		RandomGenerator r;
+		UniformRandomProvider r;
 		final int size = 10;
 		final int n = 5;
 		final boolean[] both = { true, false };
@@ -54,10 +55,10 @@ public class PeakResultTest
 				for (final boolean withEndFrame : both)
 					for (final boolean withPrecision : both)
 					{
-						r = TestSettings.getRandomGenerator();
+						r = TestSettings.getRandomGenerator(seed.getSeed());
 						final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
-						r = TestSettings.getRandomGenerator();
+						r = TestSettings.getRandomGenerator(seed.getSeed());
 						final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						for (int i = 0; i < r1.length; i++)
@@ -65,10 +66,10 @@ public class PeakResultTest
 					}
 	}
 
-	@Test
-	public void differentResultsAreNotEqual()
+	@SeededTest
+	public void differentResultsAreNotEqual(RandomSeed seed)
 	{
-		RandomGenerator r;
+		UniformRandomProvider r;
 		final int size = 1;
 		final int n = 5;
 		final boolean[] both = { true, false };
@@ -77,7 +78,7 @@ public class PeakResultTest
 				for (final boolean withEndFrame : both)
 					for (final boolean withPrecision : both)
 					{
-						r = TestSettings.getRandomGenerator();
+						r = TestSettings.getRandomGenerator(seed.getSeed());
 						final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
 								withPrecision);
 						final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
@@ -87,7 +88,7 @@ public class PeakResultTest
 					}
 	}
 
-	private static PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations,
+	private static PeakResult[] createResults(UniformRandomProvider r, int size, int n, boolean withDeviations,
 			boolean withId, boolean withEndFrame, boolean withPrecision)
 	{
 		final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
@@ -109,7 +110,7 @@ public class PeakResultTest
 		return store.toArray();
 	}
 
-	private static float[] createParams(int n, RandomGenerator r)
+	private static float[] createParams(int n, UniformRandomProvider r)
 	{
 		final float[] p = new float[n];
 		while (n-- > 0)

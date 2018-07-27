@@ -29,7 +29,7 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -119,7 +119,7 @@ public class ChiSquaredDistributionTableTest
 	@Test
 	public void canPerformChiSquaredTest()
 	{
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final ChiSquareTest test = new ChiSquareTest();
 		for (final int n : new int[] { 10, 50, 100 })
 		{

@@ -24,31 +24,34 @@
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomPoissonDistributionTest
 {
 	private abstract class MyTimingTask extends BaseTimingTask
 	{
-		RandomGenerator r;
+		RandomSeed seed;
+		UniformRandomProvider r;
 		double mean;
 		double min;
 		int n, m = 10;
 
-		public MyTimingTask(String name, double min, double max)
+		public MyTimingTask(String name, RandomSeed seed, double min, double max)
 		{
 			super(String.format("%s %.1f - %.1f", name, min, max));
-			r = TestSettings.getRandomGenerator();
+			this.seed = seed;
 			this.min = min;
 			mean = min;
 			n = 0;
@@ -68,7 +71,7 @@ public class CustomPoissonDistributionTest
 		@Override
 		public Object getData(int i)
 		{
-			r.setSeed(TestSettings.getSeed());
+			r = TestSettings.getRandomGenerator(seed.getSeed());
 			mean = min;
 			return null;
 		}
@@ -76,17 +79,15 @@ public class CustomPoissonDistributionTest
 
 	private class StaticTimingTask extends MyTimingTask
 	{
-		RandomDataGenerator rdg;
-
-		public StaticTimingTask(double min, double max)
+		public StaticTimingTask(RandomSeed seed, double min, double max)
 		{
-			super("RandomDataGenerator", min, max);
-			rdg = new RandomDataGenerator(r);
+			super("RandomDataGenerator", seed, min, max);
 		}
 
 		@Override
 		public Object run(Object data)
 		{
+			RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
 			final long[] e = new long[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
@@ -100,17 +101,15 @@ public class CustomPoissonDistributionTest
 
 	private class InstanceTimingTask extends MyTimingTask
 	{
-		CustomPoissonDistribution dist;
-
-		public InstanceTimingTask(double min, double max)
+		public InstanceTimingTask(RandomSeed seed, double min, double max)
 		{
-			super("Instance", min, max);
-			dist = new CustomPoissonDistribution(r, 1);
+			super("Instance", seed, min, max);
 		}
 
 		@Override
 		public Object run(Object data)
 		{
+			CustomPoissonDistribution dist = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 			final long[] e = new long[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
@@ -123,26 +122,27 @@ public class CustomPoissonDistributionTest
 		}
 	}
 
-	@Test
-	public void canCreateSamples()
+	@SeededTest
+	public void canCreateSamples(RandomSeed seed)
 	{
-		final StaticTimingTask t1 = new StaticTimingTask(0.5, 60);
+		final StaticTimingTask t1 = new StaticTimingTask(seed, 0.5, 60);
 		t1.getData(0);
 		final long[] e = (long[]) t1.run(null);
 
-		final InstanceTimingTask t2 = new InstanceTimingTask(0.5, 60);
+		final InstanceTimingTask t2 = new InstanceTimingTask(seed, 0.5, 60);
 		t2.getData(0);
 		final long[] o = (long[]) t2.run(null);
 
 		Assertions.assertArrayEquals(e, o);
 	}
 
-	@Test
-	public void customDistributionIsFasterWithTinyMean()
+	@SpeedTag
+	@SeededTest
+	public void customDistributionIsFasterWithTinyMean(RandomSeed seed)
 	{
 		final TimingService ts = new TimingService(5);
-		ts.execute(new StaticTimingTask(0.5, 10));
-		ts.execute(new InstanceTimingTask(0.5, 10));
+		ts.execute(new StaticTimingTask(seed, 0.5, 10));
+		ts.execute(new InstanceTimingTask(seed, 0.5, 10));
 
 		final int size = ts.getSize();
 		ts.repeat(size);
@@ -152,16 +152,17 @@ public class CustomPoissonDistributionTest
 		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
-		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
-				t1, t2 / t1);
+		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2, t1,
+				t2 / t1);
 	}
 
-	@Test
-	public void customDistributionIsFasterWithSmallMean()
+	@SpeedTag
+	@SeededTest
+	public void customDistributionIsFasterWithSmallMean(RandomSeed seed)
 	{
 		final TimingService ts = new TimingService(5);
-		ts.execute(new StaticTimingTask(10, 38));
-		ts.execute(new InstanceTimingTask(10, 38));
+		ts.execute(new StaticTimingTask(seed, 10, 38));
+		ts.execute(new InstanceTimingTask(seed, 10, 38));
 
 		final int size = ts.getSize();
 		ts.repeat(size);
@@ -171,12 +172,13 @@ public class CustomPoissonDistributionTest
 		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
-		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
-				t1, t2 / t1);
+		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2, t1,
+				t2 / t1);
 	}
 
-	@Test
-	public void customDistributionIsFasterWithBigMean()
+	@SpeedTag
+	@SeededTest
+	public void customDistributionIsFasterWithBigMean(RandomSeed seed)
 	{
 		// When the mean is above 40 the PoissonDistribution switches to a different
 		// sampling method and this is so slow that the speed increase from using
@@ -185,8 +187,8 @@ public class CustomPoissonDistributionTest
 		// class should be updated.
 
 		final TimingService ts = new TimingService(5);
-		ts.execute(new StaticTimingTask(40.5, 60));
-		ts.execute(new InstanceTimingTask(40.5, 60));
+		ts.execute(new StaticTimingTask(seed, 40.5, 60));
+		ts.execute(new InstanceTimingTask(seed, 40.5, 60));
 
 		final int size = ts.getSize();
 		ts.repeat(size);
@@ -196,7 +198,7 @@ public class CustomPoissonDistributionTest
 		//Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		final double t1 = ts.get(-1).getMean();
 		final double t2 = ts.get(-2).getMean();
-		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
-				t1, t2 / t1);
+		TestLog.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2, t1,
+				t2 / t1);
 	}
 }

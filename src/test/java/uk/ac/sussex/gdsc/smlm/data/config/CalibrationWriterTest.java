@@ -23,28 +23,29 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class CalibrationWriterTest
 {
-	@Test
-	public void canWrite()
+	@SeededTest
+	public void canWrite(RandomSeed seed)
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int i = 0; i < 100; i++)
 			canWrite(r);
 	}
 
-	private static void canWrite(RandomGenerator r)
+	private static void canWrite(UniformRandomProvider r)
 	{
 		final double qe = r.nextDouble();
 		final double bias = 1 + r.nextDouble();

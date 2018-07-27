@@ -28,7 +28,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -498,7 +498,7 @@ public class EJMLLinearSolverTest
 		final double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
 		final int np = f0.getNumberOfGradients();
 		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		//double lambda = 10;
 		for (final double background : testbackground)
 			// Peak 1
@@ -801,7 +801,7 @@ public class EJMLLinearSolverTest
 		final double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
 		final int np = f0.getNumberOfGradients();
 		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		//double lambda = 10;
 		for (final double background : testbackground)
 			// Peak 1

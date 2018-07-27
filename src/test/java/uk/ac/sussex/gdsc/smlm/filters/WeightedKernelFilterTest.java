@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -40,7 +40,7 @@ public abstract class WeightedKernelFilterTest extends WeightedFilterTest
 	{
 		final DataFilter filter = createDataFilter();
 
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final float[] offsets = getOffsets(filter);
 		final int[] boxSizes = getBoxSizes(filter);

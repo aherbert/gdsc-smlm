@@ -32,10 +32,10 @@ import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussInteg
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -305,7 +305,7 @@ public class PoissonCalculatorTest
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[] x = new double[n];
 		final double[] u = new double[n];
 		for (int i = 0; i < n; i++)
@@ -435,7 +435,7 @@ public class PoissonCalculatorTest
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[] x = new double[n];
 		final double[] u = new double[n];
 		for (int i = 0; i < n; i++)
@@ -510,7 +510,7 @@ public class PoissonCalculatorTest
 		nlf1.initialise(a);
 		nlf2.initialise(a);
 		nlf3.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
 		final double[] u = new double[x.length];
 		final double[] b1 = new double[x.length];
@@ -682,7 +682,7 @@ public class PoissonCalculatorTest
 	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod()
 	{
 		final DoubleEquality eq = new DoubleEquality(3e-4, 0);
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		// Test for different x. The calculator approximation begins
 		final int n = 100;
 		final double[] u = new double[n];

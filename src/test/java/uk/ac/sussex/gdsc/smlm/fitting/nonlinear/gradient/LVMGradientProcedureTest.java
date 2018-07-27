@@ -27,11 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -227,7 +227,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, Type type, double error)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
@@ -317,7 +317,7 @@ public class LVMGradientProcedureTest
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
@@ -438,7 +438,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, Type type, boolean precomputed)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -553,7 +553,7 @@ public class LVMGradientProcedureTest
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -723,7 +723,7 @@ public class LVMGradientProcedureTest
 		final int[] indices = func.gradientIndices();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -835,7 +835,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureSupportsPrecomputed(final Type type, boolean checkGradients)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -1200,7 +1200,7 @@ public class LVMGradientProcedureTest
 	private double[] createFakeData(double[] params)
 	{
 		final int n = blockWidth * blockWidth;
-		final RandomGenerator r = rdg.getRandomGenerator();
+		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();

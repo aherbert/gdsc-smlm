@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
@@ -43,7 +43,7 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 	@Test
 	public void computesSameAsPSFModel()
 	{
-		final RandomDataGenerator r = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator r = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		for (int i = 0; i < 10; i++)
 			//@formatter:off
 			computesSameAsPSFModel(

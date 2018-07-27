@@ -27,14 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
 
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -55,6 +55,8 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class BlinkEstimatorTest
@@ -87,84 +89,93 @@ public class BlinkEstimatorTest
 	// account for the integer frame sampling and get the population statistics.
 	boolean usePopulationStatistics = true;
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndMediumOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndMediumOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndMediumOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndMediumOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndMediumOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndMediumOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndHighOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndHighOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[LOW], tOn[HIGH], tOff[HIGH], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[LOW], tOn[HIGH], tOff[HIGH],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndHighOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndHighOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndHighOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndHighOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[HIGH], tOn[HIGH], tOff[HIGH], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[HIGH], tOn[HIGH], tOff[HIGH],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndLowOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithLowNBlinksAndLowOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[LOW], tOn[LOW], tOff[LOW], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[LOW], tOn[LOW], tOff[LOW], particles,
+				fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndLowOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndLowOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[MEDIUM], tOn[LOW], tOff[LOW], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[MEDIUM], tOn[LOW], tOff[LOW],
+				particles, fixedFraction, false, true);
 	}
 
-	@Test
-	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndLowOnOffTimesWithFixedMolecules()
+	@SeededTest
+	public void canEstimateBlinkingFromSimulationWithHighNBlinksAndLowOnOffTimesWithFixedMolecules(RandomSeed seed)
 	{
 		final int particles = 1000;
 		final double fixedFraction = 1;
-		estimateBlinking(null, nBlinks[HIGH], tOn[LOW], tOff[LOW], particles, fixedFraction, false, true);
+		estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[HIGH], tOn[LOW], tOff[LOW], particles,
+				fixedFraction, false, true);
 	}
 
-	@Test
-	public void findOptimalFittedPoints()
+	@SeededTest
+	public void findOptimalFittedPoints(RandomSeed seed)
 	{
 		// Skip this as it is slow
 		Assumptions.assumeTrue(false);
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final int particles = 1000;
 		final double fixedFraction = 1;
@@ -201,38 +212,40 @@ public class BlinkEstimatorTest
 		}
 	}
 
-	private TIntHashSet estimateBlinking(RandomGenerator rg, double nBlinks, double tOn, double tOff, int particles,
-			double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
+	private TIntHashSet estimateBlinking(UniformRandomProvider rg, double nBlinks, double tOn, double tOff,
+			int particles, double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
 	{
 		ExtraAssumptions.assumeMaximumComplexity();
-		if (rg == null)
-			rg = TestSettings.getRandomGenerator();
 
 		final SpatialIllumination activationIllumination = new UniformIllumination(100);
 		int totalSteps = 100;
 		final double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
-		final ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, tOn, 0, tOff, 0, nBlinks);
-		imageModel.setRandomGenerator(rg);
+		final ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, tOn, 0, tOff, 0,
+				nBlinks);
+		imageModel.setRandomGenerator(new RandomGeneratorAdapter(rg));
 
 		final double[] max = new double[] { 256, 256, 32 };
 		final double[] min = new double[3];
 		final SpatialDistribution distribution = new UniformDistribution(min, max, rg.nextInt());
 		final List<CompoundMoleculeModel> compounds = new ArrayList<>(1);
-		final CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0, Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
+		final CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0,
+				Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 		c.setDiffusionRate(diffusionRate);
 		c.setDiffusionType(DiffusionType.RANDOM_WALK);
 		compounds.add(c);
 
-		final List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, particles, distribution, false);
+		final List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, particles, distribution,
+				false);
 
 		// Activate fluorophores
-		final List<? extends FluorophoreSequenceModel> fluorophores = imageModel.createFluorophores(molecules, totalSteps);
+		final List<? extends FluorophoreSequenceModel> fluorophores = imageModel.createFluorophores(molecules,
+				totalSteps);
 
 		totalSteps = checkTotalSteps(totalSteps, fluorophores);
 
-		final List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps, photons,
-				0.5, false);
+		final List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps,
+				photons, 0.5, false);
 
 		//		// Remove localisations to simulate missed counts.
 		//		List<LocalisationModel> newLocalisations = new ArrayList<LocalisationModel>(localisations.size());

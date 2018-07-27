@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
@@ -76,7 +76,7 @@ public class AbstractFilterTest
 	 *            the height
 	 * @return the float data
 	 */
-	static float[] createData(RandomGenerator rg, int width, int height)
+	static float[] createData(UniformRandomProvider rg, int width, int height)
 	{
 		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
@@ -95,7 +95,7 @@ public class AbstractFilterTest
 	 *            the height
 	 * @return the int data
 	 */
-	static int[] createIntData(RandomGenerator rg, int width, int height)
+	static int[] createIntData(UniformRandomProvider rg, int width, int height)
 	{
 		final int[] data = new int[width * height];
 		for (int i = data.length; i-- > 0;)
@@ -105,7 +105,7 @@ public class AbstractFilterTest
 	}
 
 	static ArrayList<float[]> dataSet = new ArrayList<>();
-	static RandomGenerator rg = null;
+	static UniformRandomProvider rg = null;
 
 	/**
 	 * Create random float data.
@@ -119,7 +119,7 @@ public class AbstractFilterTest
 		synchronized (dataSet)
 		{
 			if (rg == null)
-				rg = TestSettings.getRandomGenerator();
+				rg = TestSettings.getRandomGenerator(seed.getSeed());
 			while (dataSet.size() < size)
 				dataSet.add(createData(rg, primes[0], primes[0]));
 		}
@@ -142,7 +142,7 @@ public class AbstractFilterTest
 		synchronized (dataSet)
 		{
 			if (rg == null)
-				rg = TestSettings.getRandomGenerator();
+				rg = TestSettings.getRandomGenerator(seed.getSeed());
 			while (dataSet.size() < size)
 				dataSet.add(createData(rg, primes[0], primes[0]));
 		}

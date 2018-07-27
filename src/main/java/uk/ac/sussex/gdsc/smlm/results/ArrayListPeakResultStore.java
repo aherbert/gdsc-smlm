@@ -31,7 +31,9 @@ import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomAdaptor;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.TurboList.SimplePredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -375,9 +377,15 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
 	 */
 	@Override
-	public void shuffle(RandomGenerator randomGenerator)
+	public void shuffle(RandomGenerator randomSource)
 	{
-		Collections.shuffle(results, RandomAdaptor.createAdaptor(randomGenerator));
+		Collections.shuffle(results, RandomAdaptor.createAdaptor(randomSource));
+	}
+
+	@Override
+	public void shuffle(UniformRandomProvider randomSource)
+	{
+		Collections.shuffle(results, RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
 	}
 
 	/*

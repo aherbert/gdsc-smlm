@@ -33,11 +33,11 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -107,7 +107,7 @@ public class SCMOSLikelihoodWrapperTest
 		g = new float[n];
 		o = new float[n];
 		sd = new float[n];
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final PoissonDistribution pd = new PoissonDistribution(rg, O, PoissonDistribution.DEFAULT_EPSILON,
 				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 		final ExponentialDistribution ed = new ExponentialDistribution(rg, VAR,
@@ -236,7 +236,7 @@ public class SCMOSLikelihoodWrapperTest
 		final int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		for (final double background : testbackground)
 			for (final double signal1 : testsignal1)
@@ -427,7 +427,7 @@ public class SCMOSLikelihoodWrapperTest
 		final int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		for (final double background : testbackground)
 			for (final double signal1 : testsignal1)
@@ -790,7 +790,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		// Simulate sCMOS camera
 		nlf.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
 		for (int i = 0; i < n; i++)
 		{

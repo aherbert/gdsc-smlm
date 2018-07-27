@@ -29,9 +29,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import ij.Macro;
@@ -133,7 +133,7 @@ public class ResultsManagerTest
 		}
 
 		// Generate random spots
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final int size = 100;
 		final Spot[] spots = new Spot[size];
 		for (int i = 1; i <= size; i++)
@@ -259,7 +259,7 @@ public class ResultsManagerTest
 					}
 	}
 
-	private static int nextInt(RandomGenerator rand, int n)
+	private static int nextInt(UniformRandomProvider rand, int n)
 	{
 		return (n == 1) ? 1 : 1 + rand.nextInt(n);
 	}

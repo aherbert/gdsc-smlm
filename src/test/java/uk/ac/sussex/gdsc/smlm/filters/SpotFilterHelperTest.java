@@ -25,9 +25,9 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class SpotFilterHelperTest
 {
-	private static Spot[] createData(RandomGenerator rg, int width, int height, int n)
+	private static Spot[] createData(UniformRandomProvider rg, int width, int height, int n)
 	{
 		if (n == 0)
 			return new Spot[0];
@@ -61,7 +61,7 @@ public class SpotFilterHelperTest
 	@Test
 	public void canCountNeighbours()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final int width = 64, height = 64;
 		final int size = width * height;

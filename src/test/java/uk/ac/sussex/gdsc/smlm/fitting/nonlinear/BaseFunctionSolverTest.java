@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.junit.jupiter.api.Assertions;
 
@@ -199,7 +199,7 @@ public abstract class BaseFunctionSolverTest
 	{
 		// Per observation read noise.
 		// This is generated once so create the randon generator here.
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 		for (int i = 0; i < weights.length; i++)
@@ -238,7 +238,7 @@ public abstract class BaseFunctionSolverTest
 		if (solver.isWeighted())
 			solver.setWeights(getWeights(noiseModel));
 
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		for (final double s : signal)
 		{
@@ -312,7 +312,7 @@ public abstract class BaseFunctionSolverTest
 			solver.setWeights(getWeights(noiseModel));
 
 		final int LOOPS = 5;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 		final String[] statName = { "Signal", "X", "Y" };
 
@@ -524,12 +524,12 @@ public abstract class BaseFunctionSolverTest
 		return params;
 	}
 
-	static double[] drawGaussian(double[] params, RandomGenerator rg)
+	static double[] drawGaussian(double[] params, UniformRandomProvider rg)
 	{
 		return drawGaussian(params, null, NoiseModel.NONE, rg);
 	}
 
-	static double[] drawGaussian(double[] params, double[] noise, RandomGenerator rg)
+	static double[] drawGaussian(double[] params, double[] noise, UniformRandomProvider rg)
 	{
 		return drawGaussian(params, noise, NoiseModel.NONE, rg);
 	}
@@ -549,7 +549,7 @@ public abstract class BaseFunctionSolverTest
 	 *            the random generator
 	 * @return The data
 	 */
-	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel, RandomGenerator rg)
+	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel, UniformRandomProvider rg)
 	{
 		final int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
@@ -631,7 +631,7 @@ public abstract class BaseFunctionSolverTest
 	 * @param useWeights
 	 *            the use weights
 	 */
-	void fitAndComputeDeviationsMatch(RandomGenerator rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
+	void fitAndComputeDeviationsMatch(UniformRandomProvider rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
 			NoiseModel noiseModel, boolean useWeights)
 	{
 		final double[] noise = getNoise(noiseModel);
@@ -742,7 +742,7 @@ public abstract class BaseFunctionSolverTest
 	 * @param useWeights
 	 *            the use weights
 	 */
-	void fitAndComputeValueMatch(RandomGenerator rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
+	void fitAndComputeValueMatch(UniformRandomProvider rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
 			NoiseModel noiseModel, boolean useWeights)
 	{
 		final double[] noise = getNoise(noiseModel);

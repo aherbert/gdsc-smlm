@@ -25,9 +25,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
@@ -40,6 +39,8 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class KernelFilterTest
@@ -168,7 +169,7 @@ public class KernelFilterTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void canRotate180()
 	{
 		for (int kw = 1; kw < 3; kw++)
@@ -183,27 +184,28 @@ public class KernelFilterTest
 			}
 	}
 
-	@Test
-	public void kernelFilterIsSameAsIJFilter()
+	@SeededTest
+	public void kernelFilterIsSameAsIJFilter(RandomSeed seed)
 	{
 		final int kw = 5, kh = 5;
 		final float[] kernel = createKernel(kw, kh);
-		filter1IsSameAsFilter2(new KernelFilterWrapper(kernel, kw, kh), new ConvolverWrapper(kernel, kw, kh), false,
-				1e-2);
+		filter1IsSameAsFilter2(seed, new KernelFilterWrapper(kernel, kw, kh), new ConvolverWrapper(kernel, kw, kh),
+				false, 1e-2);
 	}
 
-	@Test
-	public void zeroKernelFilterIsSameAsIJFilter()
+	@SeededTest
+	public void zeroKernelFilterIsSameAsIJFilter(RandomSeed seed)
 	{
 		final int kw = 5, kh = 5;
 		final float[] kernel = createKernel(kw, kh);
-		filter1IsSameAsFilter2(new ZeroKernelFilterWrapper(kernel, kw, kh), new ConvolverWrapper(kernel, kw, kh), true,
-				1e-2);
+		filter1IsSameAsFilter2(seed, new ZeroKernelFilterWrapper(kernel, kw, kh), new ConvolverWrapper(kernel, kw, kh),
+				true, 1e-2);
 	}
 
-	private void filter1IsSameAsFilter2(FilterWrapper f1, FilterWrapper f2, boolean internal, double tolerance)
+	private void filter1IsSameAsFilter2(RandomSeed seed, FilterWrapper f1, FilterWrapper f2, boolean internal,
+			double tolerance)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] data = createData(rand, size, size);
 
 		final int testBorder = (internal) ? f1.kw / 2 : 0;
@@ -277,17 +279,17 @@ public class KernelFilterTest
 		}
 	}
 
-	@Test
-	public void floatFilterIsFasterThanIJFilter()
+	@SeededTest
+	public void floatFilterIsFasterThanIJFilter(RandomSeed seed)
 	{
-		floatFilterIsFasterThanIJFilter(5);
-		floatFilterIsFasterThanIJFilter(11);
+		floatFilterIsFasterThanIJFilter(seed, 5);
+		floatFilterIsFasterThanIJFilter(seed, 11);
 	}
 
-	private void floatFilterIsFasterThanIJFilter(int k)
+	private void floatFilterIsFasterThanIJFilter(RandomSeed seed, int k)
 	{
 		ExtraAssumptions.assumeSpeedTest();
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
@@ -308,7 +310,7 @@ public class KernelFilterTest
 		}
 	}
 
-	private static float[] createData(RandomGenerator rg, int width, int height)
+	private static float[] createData(UniformRandomProvider rg, int width, int height)
 	{
 		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)

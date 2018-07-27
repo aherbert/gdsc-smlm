@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -352,14 +352,14 @@ public class FastLogTest
 
 	private static float[] generateRandomFloats(int n)
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] d = new float[n];
 		for (int i = 0; i < d.length; i++)
 			d[i] = nextUniformFloat(r);
 		return d;
 	}
 
-	private static float nextUniformFloat(RandomGenerator r)
+	private static float nextUniformFloat(UniformRandomProvider r)
 	{
 		int u = r.nextInt();
 		// Mask out sign and the last bit of the exponent (avoid infinity and NaN)
@@ -541,7 +541,7 @@ public class FastLogTest
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
 		final double[] d = new double[10000000];
 		final double[] logD = new double[d.length];
@@ -580,7 +580,7 @@ public class FastLogTest
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
 		final double[] d = new double[100000];
 		final double[] logD = new double[d.length];
@@ -595,7 +595,7 @@ public class FastLogTest
 		canTestDoubleError(new TestLog1P(new MathLog()), d, logD);
 	}
 
-	private static double nextUniformDouble(RandomGenerator r)
+	private static double nextUniformDouble(UniformRandomProvider r)
 	{
 		long u = r.nextLong();
 		// Mask out sign and the last bit of the exponent (avoid infinity and NaN)
@@ -609,7 +609,7 @@ public class FastLogTest
 	{
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final TurboList<TestFastLog> test = new TurboList<>();
 		final int n = 13;
@@ -631,7 +631,7 @@ public class FastLogTest
 		testDoubleErrorRange(r, test, n, d, logD, 2045, 2047, 0);
 	}
 
-	private void testDoubleErrorRange(RandomGenerator r, TurboList<TestFastLog> test, int n, double[] d, double[] logD,
+	private void testDoubleErrorRange(UniformRandomProvider r, TurboList<TestFastLog> test, int n, double[] d, double[] logD,
 			int mine, int maxe, int ee)
 	{
 		for (int e = mine; e < maxe; e += ee + 1)
@@ -647,7 +647,7 @@ public class FastLogTest
 		}
 	}
 
-	private static double[] generateDoubles(RandomGenerator r, int mine, int maxe, double[] d)
+	private static double[] generateDoubles(UniformRandomProvider r, int mine, int maxe, double[] d)
 	{
 		// Mantissa = 52-bit, Exponent = 11-bit
 		mine = Maths.clip(0, 2047, mine);
@@ -768,7 +768,7 @@ public class FastLogTest
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] x = new float[1000000];
 		for (int i = 0; i < x.length; i++)
 			x[i] = nextUniformFloat(r);
@@ -855,7 +855,7 @@ public class FastLogTest
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
 			x[i] = nextUniformDouble(r);
@@ -904,7 +904,7 @@ public class FastLogTest
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
 			x[i] = nextUniformDouble(r);
@@ -932,7 +932,7 @@ public class FastLogTest
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] x = new double[1000000];
 		final float[] xf = new float[x.length];
 		for (int i = 0; i < x.length; i++)

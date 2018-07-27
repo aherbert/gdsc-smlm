@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
@@ -94,7 +94,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 		final String name = getLVMName(applyBounds, clamping, false);
 
 		final int LOOPS = 5;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
 		for (final double s : signal)
@@ -398,7 +398,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private void canFitAndComputeDeviationsLVM(boolean mle)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final NonLinearFit solver1 = getLVM(0, 0, mle);
 		final NonLinearFit solver2 = getLVM(0, 0, mle);
 		solver1.setStoppingCriteria(new CheatingStoppingCriteria());

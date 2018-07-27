@@ -23,9 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
@@ -35,53 +34,55 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class FilterTest
 {
-	@Test
-	public void canCompareMultiFilter()
+	@SeededTest
+	public void canCompareMultiFilter(RandomSeed seed)
 	{
-		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
 		final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
-			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			final MultiFilter f2 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
+			final MultiFilter f2 = (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
 			final int e = f1.weakest((Filter) f2);
 			final int o = f1.weakest(f2);
 			Assertions.assertEquals(e, o);
 		}
 	}
 
-	@Test
-	public void canCompareMultiFilter2()
+	@SeededTest
+	public void canCompareMultiFilter2(RandomSeed seed)
 	{
-		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
 		final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
-			final MultiFilter2 f1 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
-			final MultiFilter2 f2 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final MultiFilter2 f1 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
+			final MultiFilter2 f2 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
 			final int e = f1.weakest((Filter) f2);
 			final int o = f1.weakest(f2);
 			Assertions.assertEquals(e, o);
 		}
 	}
 
-	@Test
-	public void directCompareMultiFilterIsFaster()
+	@SeededTest
+	public void directCompareMultiFilterIsFaster(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity();
 
-		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
+		final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
 		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		final double[][][] data = new double[1000][][];
 		for (int i = data.length; i-- > 0;)
-			data[i] = new double[][] { random(f1.getNumberOfParameters(), randomGenerator),
-					random(f1.getNumberOfParameters(), randomGenerator) };
+			data[i] = new double[][] { random(f1.getNumberOfParameters(), UniformRandomProvider),
+					random(f1.getNumberOfParameters(), UniformRandomProvider) };
 
 		final TimingService ts = new TimingService();
 
@@ -198,7 +199,7 @@ public class FilterTest
 		}
 	}
 
-	private static double[] random(int n, RandomGenerator r)
+	private static double[] random(int n, UniformRandomProvider r)
 	{
 		final double[] p = new double[n];
 		while (n-- > 0)
@@ -206,21 +207,21 @@ public class FilterTest
 		return p;
 	}
 
-	@Test
-	public void canSerialiseMultiFilter()
+	@SeededTest
+	public void canSerialiseMultiFilter(RandomSeed seed)
 	{
 		// Check the XStream serialisation supports inheritance
-		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
-		testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
-		testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
-		testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
+		final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
+		testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
+		testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
+		testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
 	}
 
-	private static void testSerialisation(MultiFilter f, RandomGenerator randomGenerator)
+	private static void testSerialisation(MultiFilter f, UniformRandomProvider UniformRandomProvider)
 	{
 		for (int i = 10; i-- > 0;)
 		{
-			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
 			final String xml = f1.toXML();
 			TestLog.debugln(XmlUtils.prettyPrintXml(xml));
 			final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);

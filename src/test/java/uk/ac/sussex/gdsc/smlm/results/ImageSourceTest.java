@@ -28,10 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -152,8 +155,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(i, data.length);
 	}
 
-	@Test
-	public void memoryImageSourceCanReturnDataWithGet()
+	@SeededTest
+	public void memoryImageSourceCanReturnDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -163,7 +166,7 @@ public class ImageSourceTest
 		final int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		Assertions.assertTrue(source.open());
@@ -197,8 +200,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(i, data.length);
 	}
 
-	@Test
-	public void memoryImageSourceCanReturnCroppedDataWithGet()
+	@SeededTest
+	public void memoryImageSourceCanReturnCroppedDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -209,7 +212,7 @@ public class ImageSourceTest
 		final int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		Assertions.assertTrue(source.open());
@@ -341,8 +344,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(i, source.getFrames());
 	}
 
-	@Test
-	public void interlacedImageSourceCanReturnDataWithGet()
+	@SeededTest
+	public void interlacedImageSourceCanReturnDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -355,7 +358,7 @@ public class ImageSourceTest
 		final int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		final int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
@@ -404,8 +407,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(i, source.getFrames());
 	}
 
-	@Test
-	public void interlacedImageSourceCanReturnCroppedDataWithGet()
+	@SeededTest
+	public void interlacedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -419,7 +422,7 @@ public class ImageSourceTest
 		final int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		final int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
@@ -504,8 +507,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(ii, source.getFrames());
 	}
 
-	@Test
-	public void aggregatedImageSourceCanReturnDataWithGet()
+	@SeededTest
+	public void aggregatedImageSourceCanReturnDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -516,7 +519,7 @@ public class ImageSourceTest
 		final int[] frames = new int[data.length / 3];
 		for (int i = 0, frame = 1; i < frames.length; i++, frame += 3)
 			frames[i] = frame;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		Assertions.assertTrue(source.open());
@@ -562,8 +565,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(ii, source.getFrames());
 	}
 
-	@Test
-	public void aggregatedImageSourceCanReturnCroppedDataWithGet()
+	@SeededTest
+	public void aggregatedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -575,7 +578,7 @@ public class ImageSourceTest
 		final int[] frames = new int[data.length / 3];
 		for (int i = 0, frame = 1; i < frames.length; i++, frame += 3)
 			frames[i] = frame;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		Assertions.assertTrue(source.open());
@@ -678,8 +681,8 @@ public class ImageSourceTest
 		Assertions.assertEquals(ii, source.getFrames());
 	}
 
-	@Test
-	public void aggregatedInterlacedImageSourceCanReturnDataWithGet()
+	@SeededTest
+	public void aggregatedInterlacedImageSourceCanReturnDataWithGet(RandomSeed seed)
 	{
 		final int w = 5;
 		final int h = 3;
@@ -699,7 +702,7 @@ public class ImageSourceTest
 		final int[] frames = new int[source.getFrames()];
 		for (int i = 0, ii = 0; ii < expected.length; i++, ii += 3)
 			frames[i] = ii;
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		Random.shuffle(frames, rg);
 
 		Assertions.assertTrue(source.open());

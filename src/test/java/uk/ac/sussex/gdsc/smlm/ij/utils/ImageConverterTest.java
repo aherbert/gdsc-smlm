@@ -25,9 +25,9 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import java.awt.Rectangle;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
@@ -44,7 +44,7 @@ public class ImageConverterTest
 	final static int w = 200, h = 300;
 	static
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final ByteProcessor bp = new ByteProcessor(w, h);
 		bdata = (byte[]) bp.getPixels();
 		sdata = new short[bdata.length];
@@ -90,7 +90,7 @@ public class ImageConverterTest
 	@Test
 	public void canGetCropData()
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(fdata, w, h);
 		for (int i = 0; i < 10; i++)
 		{

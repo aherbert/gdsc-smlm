@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -138,7 +138,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 
 	private static void checkIsCorrect(BlockSumDataFilter filter)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		for (final int width : primes)
 			for (final int height : primes)

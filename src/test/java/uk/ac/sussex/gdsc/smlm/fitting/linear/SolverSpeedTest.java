@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.linear;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -46,7 +46,7 @@ public class SolverSpeedTest
 {
 	private static ArrayList<float[][]> Adata = new ArrayList<>();
 	private static ArrayList<float[]> Bdata = new ArrayList<>();
-	private static RandomGenerator rand = TestSettings.getRandomGenerator();
+	private static UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 
 	private static synchronized void ensureData(int size)
 	{
@@ -424,7 +424,7 @@ public class SolverSpeedTest
 				(1.0 * t1) / t2);
 	}
 
-	private static boolean createData(RandomGenerator rand, float[][] alpha, float[] beta, boolean positiveDifinite)
+	private static boolean createData(UniformRandomProvider rand, float[][] alpha, float[] beta, boolean positiveDifinite)
 	{
 		// Generate a 2D Gaussian
 		final SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(10, 10);

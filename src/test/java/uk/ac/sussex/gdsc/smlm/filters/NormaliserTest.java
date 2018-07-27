@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
 
@@ -35,7 +35,7 @@ public class NormaliserTest extends AbstractFilterTest
 	@Test
 	public void nonNormaliserCanCopyToOutDataWithBorder()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		for (final int width : primes)
 			for (final int height : primes)

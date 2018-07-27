@@ -28,9 +28,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -140,7 +140,7 @@ public class ConfigurationTemplateTest
 		// Create a dummy image
 		final int size = 20;
 		final float[] pixels = new float[size * size];
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int i = pixels.length; i-- > 0;)
 			pixels[i] = r.nextFloat();
 		final ImagePlus imp = new ImagePlus("test", new FloatProcessor(size, size, pixels));

@@ -24,31 +24,34 @@
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomGammaDistributionTest
 {
 	private abstract class MyTimingTask extends BaseTimingTask
 	{
-		RandomGenerator r;
+		RandomSeed seed;
+		UniformRandomProvider r;
 		double shape = 0.5;
 		double scale = 300;
 		int n = 1000, m = 10;
 
-		public MyTimingTask(String name)
+		public MyTimingTask(String name, RandomSeed seed)
 		{
 			super(name);
-			r = TestSettings.getRandomGenerator();
+			this.seed = seed;
 		}
 
 		@Override
@@ -60,7 +63,7 @@ public class CustomGammaDistributionTest
 		@Override
 		public Object getData(int i)
 		{
-			r.setSeed(TestSettings.getSeed());
+			r = TestSettings.getRandomGenerator(seed.getSeed());
 			shape = 0.5;
 			return null;
 		}
@@ -68,17 +71,15 @@ public class CustomGammaDistributionTest
 
 	private class StaticTimingTask extends MyTimingTask
 	{
-		RandomDataGenerator rdg;
-
-		public StaticTimingTask()
+		public StaticTimingTask(RandomSeed seed)
 		{
-			super("RandomDataGenerator");
-			rdg = new RandomDataGenerator(r);
+			super("RandomDataGenerator", seed);
 		}
 
 		@Override
 		public Object run(Object data)
 		{
+			RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
 			final double[] e = new double[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
@@ -92,17 +93,15 @@ public class CustomGammaDistributionTest
 
 	private class InstanceTimingTask extends MyTimingTask
 	{
-		CustomGammaDistribution dist;
-
-		public InstanceTimingTask()
+		public InstanceTimingTask(RandomSeed seed)
 		{
-			super("Instance");
-			dist = new CustomGammaDistribution(r, 1, scale);
+			super("Instance", seed);
 		}
 
 		@Override
 		public Object run(Object data)
 		{
+			CustomGammaDistribution dist = new CustomGammaDistribution(new RandomGeneratorAdapter(r), 1, scale);
 			final double[] e = new double[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
@@ -115,28 +114,29 @@ public class CustomGammaDistributionTest
 		}
 	}
 
-	@Test
-	public void canCreateSamples()
+	@SeededTest
+	public void canCreateSamples(RandomSeed seed)
 	{
-		final StaticTimingTask t1 = new StaticTimingTask();
+		final StaticTimingTask t1 = new StaticTimingTask(seed);
 		t1.getData(0);
 		final double[] e = (double[]) t1.run(null);
 
-		final InstanceTimingTask t2 = new InstanceTimingTask();
+		final InstanceTimingTask t2 = new InstanceTimingTask(seed);
 		t2.getData(0);
 		final double[] o = (double[]) t2.run(null);
 
 		Assertions.assertArrayEquals(e, o);
 	}
 
-	@Test
-	public void customDistributionIsFaster()
+	@SpeedTag
+	@SeededTest
+	public void customDistributionIsFaster(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity();
 
 		final TimingService ts = new TimingService(5);
-		ts.execute(new StaticTimingTask());
-		ts.execute(new InstanceTimingTask());
+		ts.execute(new StaticTimingTask(seed));
+		ts.execute(new InstanceTimingTask(seed));
 
 		final int size = ts.getSize();
 		ts.repeat(size);

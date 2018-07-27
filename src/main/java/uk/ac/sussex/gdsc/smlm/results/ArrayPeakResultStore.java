@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -562,12 +563,30 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
 	 */
 	@Override
-	public void shuffle(RandomGenerator randomGenerator)
+	public void shuffle(RandomGenerator randomSource)
 	{
 		// Fisher-Yates shuffle
 		for (int i = size; i-- > 1;)
 		{
-			final int j = randomGenerator.nextInt(i + 1);
+			final int j = randomSource.nextInt(i + 1);
+			final PeakResult tmp = results[i];
+			results[i] = results[j];
+			results[j] = tmp;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.rng.UniformRandomProvider)
+	 */
+	@Override
+	public void shuffle(UniformRandomProvider randomSource)
+	{
+		// Fisher-Yates shuffle
+		for (int i = size; i-- > 1;)
+		{
+			final int j = randomSource.nextInt(i + 1);
 			final PeakResult tmp = results[i];
 			results[i] = results[j];
 			results[j] = tmp;

@@ -24,12 +24,12 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.jtransforms.dht.FloatDHT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 import org.jtransforms.utils.CommonUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 @SuppressWarnings({ "javadoc" })
 public class JTransformsTest
 {
-	private static FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
+	private static FloatProcessor createProcessor(int size, int x, int y, int w, int h, UniformRandomProvider r)
 	{
 		final ByteProcessor bp = new ByteProcessor(size, size);
 		bp.setColor(255);
@@ -302,7 +302,7 @@ public class JTransformsTest
 
 		final int size = 256;
 		final int w = size / 4;
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 
 		// Blob in the centre

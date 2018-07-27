@@ -29,10 +29,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.internal.ArrayComparisonFailure;
+import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -51,6 +50,8 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultsReaderTest
@@ -61,226 +62,226 @@ public class PeakResultsReaderTest
 
 	// -=-=-=-=-
 
-	@Test
-	public void writeTextMatchesRead()
+	@SeededTest
+	public void writeTextMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeSequentialTextMatchesRead()
+	@SeededTest
+	public void writeSequentialTextMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.TEXT, false, false, false, false, false);
+		writeMatchesRead(seed, true, ResultsFileFormat.TEXT, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeTextWithDeviationsMatchesRead()
-	{
-		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, true, false, false, false, false);
-	}
-
-	@Test
-	public void writeTextWithEndFrameMatchesRead()
+	@SeededTest
+	public void writeTextWithDeviationsMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, true, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, true, false, false, false, false);
 	}
 
-	@Test
-	public void writeTextWithIdMatchesRead()
+	@SeededTest
+	public void writeTextWithEndFrameMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, true, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, true, false, false, false);
 	}
 
-	@Test
-	public void writeTextWithPrecisionMatchesRead()
+	@SeededTest
+	public void writeTextWithIdMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, true, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, true, false, false);
 	}
 
-	@Test
-	public void writeTextWithCombinationsMatchesRead()
+	@SeededTest
+	public void writeTextWithPrecisionMatchesRead(RandomSeed seed)
 	{
-		writeWithCombinationsMatchesRead(false, ResultsFileFormat.TEXT, false);
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, true, false);
+	}
+
+	@SeededTest
+	public void writeTextWithCombinationsMatchesRead(RandomSeed seed)
+	{
+		writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TEXT, false);
 	}
 
 	// -=-=-=-=-
 
-	@Test
-	public void writeBinaryMatchesRead()
+	@SeededTest
+	public void writeBinaryMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeSequentialBinaryMatchesRead()
+	@SeededTest
+	public void writeSequentialBinaryMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.BINARY, false, false, false, false, false);
+		writeMatchesRead(seed, true, ResultsFileFormat.BINARY, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeBinaryWithDeviationsMatchesRead()
-	{
-		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, true, false, false, false, false);
-	}
-
-	@Test
-	public void writeBinaryWithEndFrameMatchesRead()
+	@SeededTest
+	public void writeBinaryWithDeviationsMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, true, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, true, false, false, false, false);
 	}
 
-	@Test
-	public void writeBinaryWithIdMatchesRead()
+	@SeededTest
+	public void writeBinaryWithEndFrameMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, true, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, true, false, false, false);
 	}
 
-	@Test
-	public void writeBinaryWithPrecisionMatchesRead()
+	@SeededTest
+	public void writeBinaryWithIdMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, true, false, false);
 	}
 
-	@Test
-	public void writeBinaryWithCombinationsMatchesRead()
+	@SeededTest
+	public void writeBinaryWithPrecisionMatchesRead(RandomSeed seed)
 	{
-		writeWithCombinationsMatchesRead(false, ResultsFileFormat.BINARY, false);
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, true, false);
+	}
+
+	@SeededTest
+	public void writeBinaryWithCombinationsMatchesRead(RandomSeed seed)
+	{
+		writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.BINARY, false);
 	}
 
 	// -=-=-=-=-
 
-	@Test
-	public void writeTextWithSortMatchesRead()
+	@SeededTest
+	public void writeTextWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, false, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, false, true);
 	}
 
-	@Test
-	public void writeSequentialTextWithSortMatchesRead()
+	@SeededTest
+	public void writeSequentialTextWithSortMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.TEXT, false, false, false, false, true);
+		writeMatchesRead(seed, true, ResultsFileFormat.TEXT, false, false, false, false, true);
 	}
 
-	@Test
-	public void writeTextWithDeviationsWithSortMatchesRead()
-	{
-		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, true, false, false, false, true);
-	}
-
-	@Test
-	public void writeTextWithEndFrameWithSortMatchesRead()
+	@SeededTest
+	public void writeTextWithDeviationsWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, true, false, false, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, true, false, false, false, true);
 	}
 
-	@Test
-	public void writeTextWithIdWithSortMatchesRead()
+	@SeededTest
+	public void writeTextWithEndFrameWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, true, false, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, true, false, false, true);
 	}
 
-	@Test
-	public void writeTextWithPrecisionWithSortMatchesRead()
+	@SeededTest
+	public void writeTextWithIdWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TEXT, false, false, false, true, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, true, false, true);
 	}
 
-	@Test
-	public void writeTextWithCombinationsWithSortMatchesRead()
+	@SeededTest
+	public void writeTextWithPrecisionWithSortMatchesRead(RandomSeed seed)
 	{
-		writeWithCombinationsMatchesRead(false, ResultsFileFormat.TEXT, true);
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
+		writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, true, true);
+	}
+
+	@SeededTest
+	public void writeTextWithCombinationsWithSortMatchesRead(RandomSeed seed)
+	{
+		writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TEXT, true);
 	}
 
 	// -=-=-=-=-
 
-	@Test
-	public void writeBinaryWithSortMatchesRead()
+	@SeededTest
+	public void writeBinaryWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, false, true);
 	}
 
-	@Test
-	public void writeSequentialBinaryWithSortMatchesRead()
+	@SeededTest
+	public void writeSequentialBinaryWithSortMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.BINARY, false, false, false, false, true);
+		writeMatchesRead(seed, true, ResultsFileFormat.BINARY, false, false, false, false, true);
 	}
 
-	@Test
-	public void writeBinaryWithDeviationsWithSortMatchesRead()
-	{
-		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, true, false, false, false, true);
-	}
-
-	@Test
-	public void writeBinaryWithEndFrameWithSortMatchesRead()
+	@SeededTest
+	public void writeBinaryWithDeviationsWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, true, false, false, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, true, false, false, false, true);
 	}
 
-	@Test
-	public void writeBinaryWithIdWithSortMatchesRead()
+	@SeededTest
+	public void writeBinaryWithEndFrameWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, true, false, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, true, false, false, true);
 	}
 
-	@Test
-	public void writeBinaryWithPrecisionWithSortMatchesRead()
+	@SeededTest
+	public void writeBinaryWithIdWithSortMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, true);
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, true, false, true);
 	}
 
-	@Test
-	public void writeBinaryWithCombinationsWithSortMatchesRead()
+	@SeededTest
+	public void writeBinaryWithPrecisionWithSortMatchesRead(RandomSeed seed)
 	{
-		writeWithCombinationsMatchesRead(false, ResultsFileFormat.BINARY, true);
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
+		writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, true, true);
+	}
+
+	@SeededTest
+	public void writeBinaryWithCombinationsWithSortMatchesRead(RandomSeed seed)
+	{
+		writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.BINARY, true);
 	}
 
 	// -=-=-=-=-
 
 	// Note: For MALK we cannot do all the tests as the format only contains X,Y,T,I
 
-	@Test
-	public void writeMALKMatchesRead()
+	@SeededTest
+	public void writeMALKMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(false, ResultsFileFormat.MALK, false, false, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.MALK, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeSequentialMALKMatchesRead()
+	@SeededTest
+	public void writeSequentialMALKMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.MALK, false, false, false, false, false);
+		writeMatchesRead(seed, true, ResultsFileFormat.MALK, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeMALKWithSortMatchesRead()
+	@SeededTest
+	public void writeMALKWithSortMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(false, ResultsFileFormat.MALK, false, false, false, true, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.MALK, false, false, false, true, false);
 	}
 
-	@Test
-	public void writeSequentialMALKWithSortMatchesRead()
+	@SeededTest
+	public void writeSequentialMALKWithSortMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.MALK, false, false, false, true, false);
+		writeMatchesRead(seed, true, ResultsFileFormat.MALK, false, false, false, true, false);
 	}
 
 	// -=-=-=-=-
@@ -288,181 +289,182 @@ public class PeakResultsReaderTest
 	// Note: For TSF we cannot specify as binary because the widths are converted into a
 	// different format and then back again.
 
-	@Test
-	public void writeTSFMatchesRead()
+	@SeededTest
+	public void writeTSFMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeSequentialTSFMatchesRead()
+	@SeededTest
+	public void writeSequentialTSFMatchesRead(RandomSeed seed)
 	{
-		writeMatchesRead(true, ResultsFileFormat.TSF, false, false, false, false, false);
+		writeMatchesRead(seed, true, ResultsFileFormat.TSF, false, false, false, false, false);
 	}
 
-	@Test
-	public void writeTSFWithDeviationsMatchesRead()
-	{
-		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, false, false, false);
-	}
-
-	@Test
-	public void writeTSFWithEndFrameMatchesRead()
+	@SeededTest
+	public void writeTSFWithDeviationsMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, true, false, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TSF, true, false, false, false, false);
 	}
 
-	@Test
-	public void writeTSFWithIdMatchesRead()
+	@SeededTest
+	public void writeTSFWithEndFrameMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, true, false, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, true, false, false, false);
 	}
 
-	@Test
-	public void writeTSFWithPrecisionMatchesRead()
+	@SeededTest
+	public void writeTSFWithIdMatchesRead(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, true, false);
+		writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, true, false, false);
 	}
 
-	@Test
-	public void writeTSFWithCombinationsMatchesRead()
+	@SeededTest
+	public void writeTSFWithPrecisionMatchesRead(RandomSeed seed)
 	{
-		writeWithCombinationsMatchesRead(false, ResultsFileFormat.TSF, false);
+		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
+		writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, false, true, false);
+	}
+
+	@SeededTest
+	public void writeTSFWithCombinationsMatchesRead(RandomSeed seed)
+	{
+		writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TSF, false);
 	}
 
 	// -=-=-=-=-
 
-	@Test
-	public void readWithScannerMatchesNonScanner()
+	@SeededTest
+	public void readWithScannerMatchesNonScanner(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, false, false, false, false);
+		readWithScannerMatchesNonScanner(seed, false, false, false, false, false);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithDeviations()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithDeviations(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(true, false, false, false, false);
+		readWithScannerMatchesNonScanner(seed, true, false, false, false, false);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithEndFrame()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithEndFrame(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, true, false, false, false);
+		readWithScannerMatchesNonScanner(seed, false, true, false, false, false);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithId()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithId(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, false, true, false, false);
+		readWithScannerMatchesNonScanner(seed, false, false, true, false, false);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithPrecision()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithPrecision(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, false, false, true, false);
+		readWithScannerMatchesNonScanner(seed, false, false, false, true, false);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithCombinations()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithCombinations(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeLowComplexity(); // Scanner is not a default so do not always test
-		readWithScannerMatchesNonScannerWithCombinations(false);
+		readWithScannerMatchesNonScannerWithCombinations(seed, false);
 	}
 
 	// -=-=-=-=-
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithSort()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithSort(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, false, false, false, true);
+		readWithScannerMatchesNonScanner(seed, false, false, false, false, true);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithDeviationsWithSort()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithDeviationsWithSort(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(true, false, false, false, true);
+		readWithScannerMatchesNonScanner(seed, true, false, false, false, true);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithEndFrameWithSort()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithEndFrameWithSort(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, true, false, false, true);
+		readWithScannerMatchesNonScanner(seed, false, true, false, false, true);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithIdWithSort()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithIdWithSort(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, false, true, false, true);
+		readWithScannerMatchesNonScanner(seed, false, false, true, false, true);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithPrecisionWithSort()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithPrecisionWithSort(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity(); // The combinations test overlaps this
-		readWithScannerMatchesNonScanner(false, false, false, true, true);
+		readWithScannerMatchesNonScanner(seed, false, false, false, true, true);
 	}
 
-	@Test
-	public void readWithScannerMatchesNonScannerWithCombinationsWithSort()
+	@SeededTest
+	public void readWithScannerMatchesNonScannerWithCombinationsWithSort(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeLowComplexity(); // Scanner is not a default so do not always test
-		readWithScannerMatchesNonScannerWithCombinations(true);
+		readWithScannerMatchesNonScannerWithCombinations(seed, true);
 	}
 
 	// -=-=-=-=-
 
-	@Test
-	public void readTextWithNonScannerIsFasterThanScanner()
+	@SeededTest
+	public void readTextWithNonScannerIsFasterThanScanner(RandomSeed seed)
 	{
-		readWith2IsFasterThan1(false, false, false, false, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT, false,
-				1);
+		readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT,
+				false, 1);
 	}
 
-	@Test
-	public void readTextWithNonScannerIsFasterThanScannerWithDeviationsWithEndFrameWithIdWithPrecision()
+	@SeededTest
+	public void readTextWithNonScannerIsFasterThanScannerWithDeviationsWithEndFrameWithIdWithPrecision(RandomSeed seed)
 	{
-		readWith2IsFasterThan1(true, true, true, true, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT, false, 1);
+		readWith2IsFasterThan1(seed, true, true, true, true, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT,
+				false, 1);
 	}
 
-	@Test
-	public void readWithMALKIsFasterThanText()
+	@SeededTest
+	public void readWithMALKIsFasterThanText(RandomSeed seed)
 	{
-		readWith2IsFasterThan1(false, false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.MALK, false,
-				2);
-	}
-
-	@Test
-	public void readWithBinaryIsFasterThanText()
-	{
-		readWith2IsFasterThan1(false, false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.BINARY,
+		readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.MALK,
 				false, 2);
 	}
 
-	@Test
-	public void readWithBinaryIsFasterThanTSF()
+	@SeededTest
+	public void readWithBinaryIsFasterThanText(RandomSeed seed)
 	{
-		readWith2IsFasterThan1(false, false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.BINARY,
+		readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, false,
+				ResultsFileFormat.BINARY, false, 2);
+	}
+
+	@SeededTest
+	public void readWithBinaryIsFasterThanTSF(RandomSeed seed)
+	{
+		readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.BINARY,
 				false, 20);
 	}
 
-	@Test
-	public void canConvertMalkToNMAndPhotons()
+	@SeededTest
+	public void canConvertMalkToNMAndPhotons(RandomSeed seed)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
 		// Output in pixel and count
@@ -484,11 +486,11 @@ public class PeakResultsReaderTest
 		checkEqual(ResultsFileFormat.MALK, false, false, false, false, false, out, in);
 	}
 
-	@Test
-	public void writeTextWithComputedPrecisionMatchesRead()
+	@SeededTest
+	public void writeTextWithComputedPrecisionMatchesRead(RandomSeed seed)
 	{
 		// Create without precision
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults results = createResults(rg, 200, false, false, false, false);
 		// Ensure units are OK for computing precision
 		final CalibrationWriter cw = results.getCalibrationWriter();
@@ -511,27 +513,27 @@ public class PeakResultsReaderTest
 		checkEqual(ResultsFileFormat.TEXT, false, false, false, false, false, results, in);
 	}
 
-	@Test
-	public void canReadTextIntoPreferredUnits()
+	@SeededTest
+	public void canReadTextIntoPreferredUnits(RandomSeed seed)
 	{
-		canReadIntoPreferredUnits(ResultsFileFormat.TEXT);
+		canReadIntoPreferredUnits(seed, ResultsFileFormat.TEXT);
 	}
 
-	@Test
-	public void canReadBinaryIntoPreferredUnits()
+	@SeededTest
+	public void canReadBinaryIntoPreferredUnits(RandomSeed seed)
 	{
-		canReadIntoPreferredUnits(ResultsFileFormat.BINARY);
+		canReadIntoPreferredUnits(seed, ResultsFileFormat.BINARY);
 	}
 
-	@Test
-	public void canReadTSFIntoPreferredUnits()
+	@SeededTest
+	public void canReadTSFIntoPreferredUnits(RandomSeed seed)
 	{
-		canReadIntoPreferredUnits(ResultsFileFormat.TSF);
+		canReadIntoPreferredUnits(seed, ResultsFileFormat.TSF);
 	}
 
-	private static void canReadIntoPreferredUnits(ResultsFileFormat fileFormat)
+	private static void canReadIntoPreferredUnits(RandomSeed seed, ResultsFileFormat fileFormat)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
 		// Output in nm and count
@@ -556,27 +558,27 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, false, false, false, false, false, out, in);
 	}
 
-	@Test
-	public void canReadTextAndSimplifyGaussian2DPSF()
+	@SeededTest
+	public void canReadTextAndSimplifyGaussian2DPSF(RandomSeed seed)
 	{
-		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.TEXT);
+		canReadAndSimplifyGaussian2DPSF(seed, ResultsFileFormat.TEXT);
 	}
 
-	@Test
-	public void canReadBinaryAndSimplifyGaussian2DPSF()
+	@SeededTest
+	public void canReadBinaryAndSimplifyGaussian2DPSF(RandomSeed seed)
 	{
-		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.BINARY);
+		canReadAndSimplifyGaussian2DPSF(seed, ResultsFileFormat.BINARY);
 	}
 
-	@Test
-	public void canReadTSFAndSimplifyGaussian2DPSF()
+	@SeededTest
+	public void canReadTSFAndSimplifyGaussian2DPSF(RandomSeed seed)
 	{
-		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.TSF);
+		canReadAndSimplifyGaussian2DPSF(seed, ResultsFileFormat.TSF);
 	}
 
-	private static void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
+	private static void canReadAndSimplifyGaussian2DPSF(RandomSeed seed, ResultsFileFormat fileFormat)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
 
 		final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -652,13 +654,13 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, false, false, false, false, false, out, in);
 	}
 
-	private static void readWith2IsFasterThan1(boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean showPrecision, ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2,
-			int loops)
+	private static void readWith2IsFasterThan1(RandomSeed seed, boolean showDeviations, boolean showEndFrame,
+			boolean showId, boolean showPrecision, ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2,
+			boolean useScanner2, int loops)
 	{
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults out = createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);
 		final String filename = createFile();
 
@@ -678,10 +680,10 @@ public class PeakResultsReaderTest
 
 	// -=-=-=-=-
 
-	private static void writeMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
-			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
+	private static void writeMatchesRead(RandomSeed seed, boolean sequential, ResultsFileFormat fileFormat,
+			boolean showDeviations, boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults out = createResults(rg, 200, showDeviations, showEndFrame, showId, showPrecision);
 		if (fileFormat == ResultsFileFormat.MALK)
 		{
@@ -746,7 +748,8 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, in);
 	}
 
-	private static void writeWithCombinationsMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean sort)
+	private static void writeWithCombinationsMatchesRead(RandomSeed seed, boolean sequential,
+			ResultsFileFormat fileFormat, boolean sort)
 	{
 		for (final boolean showDeviations : onOff)
 			for (final boolean showEndFrame : onOff)
@@ -755,8 +758,8 @@ public class PeakResultsReaderTest
 					{
 						if (count(showDeviations, showEndFrame, showId, showPrecision) < 2)
 							continue;
-						writeMatchesRead(sequential, fileFormat, showDeviations, showEndFrame, showId, showPrecision,
-								sort);
+						writeMatchesRead(seed, sequential, fileFormat, showDeviations, showEndFrame, showId,
+								showPrecision, sort);
 					}
 	}
 
@@ -769,16 +772,10 @@ public class PeakResultsReaderTest
 		return c;
 	}
 
-	private static void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean showPrecision, boolean sort)
+	private static void readWithScannerMatchesNonScanner(RandomSeed seed, boolean showDeviations, boolean showEndFrame,
+			boolean showId, boolean showPrecision, boolean sort)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
-		readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
-	}
-
-	private static void readWithScannerMatchesNonScanner(RandomGenerator rg, boolean showDeviations,
-			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
-	{
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MemoryPeakResults out = createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision);
 		final String filename = createFile();
 
@@ -791,9 +788,8 @@ public class PeakResultsReaderTest
 		checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, in, in2);
 	}
 
-	private static void readWithScannerMatchesNonScannerWithCombinations(boolean sort)
+	private static void readWithScannerMatchesNonScannerWithCombinations(RandomSeed seed, boolean sort)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (final boolean showDeviations : onOff)
 			for (final boolean showEndFrame : onOff)
 				for (final boolean showId : onOff)
@@ -801,7 +797,8 @@ public class PeakResultsReaderTest
 					{
 						if (count(showDeviations, showEndFrame, showId, showPrecision) < 2)
 							continue;
-						readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
+						readWithScannerMatchesNonScanner(seed, showDeviations, showEndFrame, showId, showPrecision,
+								sort);
 					}
 	}
 
@@ -942,7 +939,7 @@ public class PeakResultsReaderTest
 			Assertions.assertNull(p2, "PSF");
 	}
 
-	private static MemoryPeakResults createResults(RandomGenerator rg, int i, boolean showDeviations,
+	private static MemoryPeakResults createResults(UniformRandomProvider rg, int i, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision)
 	{
 		final double bias = rg.nextDouble();
@@ -996,7 +993,7 @@ public class PeakResultsReaderTest
 		return results;
 	}
 
-	private static float[] createData(RandomGenerator rg)
+	private static float[] createData(UniformRandomProvider rg)
 	{
 		return Gaussian2DPeakResultHelper.createTwoAxisAndAngleParams(rg.nextFloat(), rg.nextFloat(), rg.nextFloat(),
 				rg.nextFloat(), rg.nextFloat(), rg.nextFloat(), rg.nextFloat(), rg.nextFloat());

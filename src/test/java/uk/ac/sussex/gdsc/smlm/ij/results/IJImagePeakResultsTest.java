@@ -26,9 +26,9 @@ package uk.ac.sussex.gdsc.smlm.ij.results;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -446,7 +446,7 @@ public class IJImagePeakResultsTest
 
 	private void canAddUsingDifferentMethods(int displayFlags)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
 
 		final IJImagePeakResults[] r = new IJImagePeakResults[8];

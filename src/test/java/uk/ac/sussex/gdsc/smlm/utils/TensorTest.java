@@ -23,13 +23,15 @@
  */
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class TensorTest
@@ -89,10 +91,10 @@ public class TensorTest
 			Assertions.assertTrue(v[i - 1] >= v[i]);
 	}
 
-	@Test
-	public void canComputeSameTensor()
+	@SeededTest
+	public void canComputeSameTensor(RandomSeed seed)
 	{
-		final RandomGenerator random = TestSettings.getRandomGenerator();
+		final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
 		final int w = 3, h = 4;
 		final float[] data = new float[w * h];
 		for (int i = 0; i < 10; i++)

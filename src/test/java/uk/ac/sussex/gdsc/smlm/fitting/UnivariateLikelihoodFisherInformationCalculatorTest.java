@@ -24,9 +24,9 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
@@ -54,7 +54,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePoissonFisherInformation()
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputePoissonFisherInformation(r, Model.POISSON);
 	}
@@ -62,7 +62,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputeHalfPoissonFisherInformation()
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputePoissonFisherInformation(r, Model.HALF_POISSON);
 	}
@@ -70,12 +70,12 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePoissonGaussianApproximationFisherInformation()
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
 	}
 
-	private static void canComputePoissonFisherInformation(RandomGenerator r, Model model)
+	private static void canComputePoissonFisherInformation(UniformRandomProvider r, Model model)
 	{
 		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 
@@ -154,12 +154,12 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePerPixelPoissonGaussianApproximationFisherInformation()
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputePerPixelPoissonGaussianApproximationFisherInformation(r);
 	}
 
-	private static void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomGenerator r)
+	private static void canComputePerPixelPoissonGaussianApproximationFisherInformation(UniformRandomProvider r)
 	{
 		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 

@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -50,7 +50,7 @@ public abstract class WeightedFilterTest
 	/** The check internal flags [true,false]. */
 	static boolean[] checkInternal = new boolean[] { true, false };
 
-	float[] createData(int width, int height, RandomGenerator rg)
+	float[] createData(int width, int height, UniformRandomProvider rg)
 	{
 		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
@@ -64,7 +64,7 @@ public abstract class WeightedFilterTest
 	@Test
 	public void evenWeightsDoesNotAlterFiltering()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final DataFilter filter1 = createDataFilter();
 		final DataFilter filter2 = createDataFilter();
@@ -123,7 +123,7 @@ public abstract class WeightedFilterTest
 	@Test
 	public void filterDoesNotAlterFilteredImageMean()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		//ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
 		//		ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 

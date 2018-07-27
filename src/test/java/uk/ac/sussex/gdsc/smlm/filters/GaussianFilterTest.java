@@ -26,9 +26,9 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
@@ -242,7 +242,7 @@ public class GaussianFilterTest
 
 	private void filter1IsSameAsFilter2(GFilter f1, GFilter f2, boolean weighted, double tolerance)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] data = createData(rand, size, size);
 		float[] w = null;
 		if (weighted)
@@ -318,7 +318,7 @@ public class GaussianFilterTest
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
@@ -351,7 +351,7 @@ public class GaussianFilterTest
 	{
 		ExtraAssumptions.assumeHighComplexity();
 
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
@@ -379,7 +379,7 @@ public class GaussianFilterTest
 			}
 	}
 
-	private static float[] createData(RandomGenerator rg, int width, int height)
+	private static float[] createData(UniformRandomProvider rg, int width, int height)
 	{
 		final float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)

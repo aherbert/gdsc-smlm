@@ -26,51 +26,52 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultStoreTest
 {
 	int capacity = 1;
 
-	@Test
-	public void canStoreResultsUsingArrayList()
+	@SeededTest
+	public void canStoreResultsUsingArrayList(RandomSeed seed)
 	{
-		canStoreResults(new ArrayListPeakResultStore(capacity));
+		canStoreResults(seed, new ArrayListPeakResultStore(capacity));
 	}
 
-	@Test
-	public void canStoreResultsUsingTurboList()
+	@SeededTest
+	public void canStoreResultsUsingTurboList(RandomSeed seed)
 	{
-		canStoreResults(new TurboListPeakResultStore(capacity));
+		canStoreResults(seed, new TurboListPeakResultStore(capacity));
 	}
 
-	@Test
-	public void canStoreResultsUsingArray()
+	@SeededTest
+	public void canStoreResultsUsingArray(RandomSeed seed)
 	{
-		canStoreResults(new ArrayPeakResultStore(capacity));
+		canStoreResults(seed, new ArrayPeakResultStore(capacity));
 	}
 
-	@Test
-	public void canStoreResultsUsingHashSet()
+	@SeededTest
+	public void canStoreResultsUsingHashSet(RandomSeed seed)
 	{
-		canStoreResults(new SetPeakResultStore(capacity));
+		canStoreResults(seed, new SetPeakResultStore(capacity));
 	}
 
 	@SuppressWarnings("null")
-	private static void canStoreResults(PeakResultStore store)
+	private static void canStoreResults(RandomSeed seed, PeakResultStore store)
 	{
 		final boolean isList = store instanceof PeakResultStoreList;
 		final PeakResultStoreList storeList = (isList) ? (PeakResultStoreList) store : null;
 		PeakResult result;
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
 		PeakResult[] list = new PeakResult[20];
 		int size = 0;
@@ -275,7 +276,7 @@ public class PeakResultStoreTest
 		assertEquals(list, size, store);
 	}
 
-	private static PeakResult create(RandomGenerator r)
+	private static PeakResult create(UniformRandomProvider r)
 	{
 		return new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(), r.nextFloat(),
 				r.nextFloat(),

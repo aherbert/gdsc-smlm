@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -38,7 +38,7 @@ public class OffsetFunctionTest
 	public void offsetValueFunctionWrapsPrecomputedValues()
 	{
 		final int n = 3;
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final ValueFunction f0 = new FakeGradientFunction(3, n);
 		final int size = f0.size();
 		final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
@@ -82,7 +82,7 @@ public class OffsetFunctionTest
 	public void offsetGradient1FunctionWrapsPrecomputedValues()
 	{
 		final int n = 3;
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final Gradient1Function f0 = new FakeGradientFunction(3, n);
 		final int size = f0.size();
 		final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
@@ -133,7 +133,7 @@ public class OffsetFunctionTest
 	public void offsetGradient2FunctionWrapsPrecomputedValues()
 	{
 		final int n = 3;
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final Gradient2Function f0 = new FakeGradientFunction(3, n);
 		final int size = f0.size();
 		final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();

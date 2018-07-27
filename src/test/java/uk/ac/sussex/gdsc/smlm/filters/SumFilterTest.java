@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestComplexity;
@@ -81,12 +81,12 @@ public class SumFilterTest extends AbstractFilterTest
 		ExtraAssertions.assertArrayEquals(data1, data2, format, args);
 	}
 
-	private static float[] floatCreateData(RandomGenerator rg, int width, int height)
+	private static float[] floatCreateData(UniformRandomProvider rg, int width, int height)
 	{
 		return createData(rg, width, height);
 	}
 
-	private static int[] intCreateData(RandomGenerator rg, int width, int height)
+	private static int[] intCreateData(UniformRandomProvider rg, int width, int height)
 	{
 		return createIntData(rg, width, height);
 	}
@@ -105,7 +105,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -114,7 +114,7 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+	private static void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -129,7 +129,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -138,7 +138,7 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg,
+	private static void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(UniformRandomProvider rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -153,7 +153,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -161,7 +161,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+	private static void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -176,7 +176,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -187,7 +187,7 @@ public class SumFilterTest extends AbstractFilterTest
 	}
 
 	private static void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
-			RandomGenerator rg, SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
+			UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
 		final float[] data2 = floatClone(data1);
@@ -411,7 +411,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -419,7 +419,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -683,7 +683,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -691,7 +691,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+	private static void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -904,7 +904,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -913,7 +913,7 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void floatCompareBlockSumNxNAndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -928,7 +928,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -937,7 +937,7 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void floatCompareBlockSumNxNAndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -1299,7 +1299,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3AndBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1307,7 +1307,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void floatCompareBlockSum3x3AndBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -1383,7 +1383,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1391,7 +1391,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter,
+	private static void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -1468,7 +1468,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1476,7 +1476,7 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter,
+	private static void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
@@ -1739,7 +1739,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1748,7 +1748,7 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -1763,7 +1763,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1772,7 +1772,7 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -1787,7 +1787,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1795,7 +1795,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -1810,7 +1810,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -1820,7 +1820,7 @@ public class SumFilterTest extends AbstractFilterTest
 							height, boxSize);
 	}
 
-	private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
+	private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(UniformRandomProvider rg,
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -2045,7 +2045,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -2053,7 +2053,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+	private static void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -2317,7 +2317,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -2325,7 +2325,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+	private static void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg,
 			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -2538,7 +2538,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -2547,7 +2547,7 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void intCompareBlockSumNxNAndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -2562,7 +2562,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -2571,7 +2571,7 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+	private static void intCompareBlockSumNxNAndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -2930,7 +2930,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3AndBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -2938,7 +2938,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void intCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
+	private static void intCompareBlockSum3x3AndBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -3014,7 +3014,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -3022,7 +3022,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter,
+	private static void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
@@ -3099,7 +3099,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
 
 		for (final int width : primes)
@@ -3107,7 +3107,7 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter,
+	private static void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);

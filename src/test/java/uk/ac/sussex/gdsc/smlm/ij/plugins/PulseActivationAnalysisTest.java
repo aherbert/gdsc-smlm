@@ -25,10 +25,10 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import java.util.Iterator;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -43,13 +43,13 @@ public class PulseActivationAnalysisTest
 	@Test
 	public void canLinearlyUnmix2Channels()
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 0; n <= 2; n++)
 			for (int m = 0; m <= 2; m++)
 				canLinearlyUnmix2Channels(r, n, m);
 	}
 
-	private static void canLinearlyUnmix2Channels(RandomGenerator r, int n, int m)
+	private static void canLinearlyUnmix2Channels(UniformRandomProvider r, int n, int m)
 	{
 		try
 		{
@@ -89,7 +89,7 @@ public class PulseActivationAnalysisTest
 		}
 	}
 
-	private static double[] create(int size, RandomGenerator r, double min, double range)
+	private static double[] create(int size, UniformRandomProvider r, double min, double range)
 	{
 		final double[] d = new double[size];
 		for (int i = 0; i < size; i++)
@@ -125,13 +125,13 @@ public class PulseActivationAnalysisTest
 	@Test
 	public void canLinearlyUnmix3Channels()
 	{
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 0; n <= 3; n++)
 			for (int m = 0; m <= 6; m++)
 				canLinearlyUnmix3Channels(r, n, m);
 	}
 
-	private void canLinearlyUnmix3Channels(RandomGenerator r, int n, int m)
+	private void canLinearlyUnmix3Channels(UniformRandomProvider r, int n, int m)
 	{
 		try
 		{

@@ -26,9 +26,12 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import gnu.trove.list.array.TIntArrayList;
 import uk.ac.sussex.gdsc.core.utils.Random;
@@ -38,22 +41,22 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class TraceManagerTest
 {
-	@Test
-	public void canTraceSinglePulseWithFixedCoords()
+	@SeededTest
+	public void canTraceSinglePulseWithFixedCoords(RandomSeed seed)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] params = createParams(rand);
 		final Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
 
-		runTracing(0, 1, trace);
+		runTracing(rand, 0, 1, trace);
 	}
 
-	@Test
-	public void canTraceSinglePulseWithMovingCoords()
+	@SeededTest
+	public void canTraceSinglePulseWithMovingCoords(RandomSeed seed)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final float distance = 0.5f;
 
 		final float[] params = createParams(rand);
@@ -64,13 +67,13 @@ public class TraceManagerTest
 			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
-		runTracing(distance, 1, trace);
+		runTracing(rand, distance, 1, trace);
 	}
 
-	@Test
-	public void canTraceMultiplePulseWithFixedCoords()
+	@SeededTest
+	public void canTraceMultiplePulseWithFixedCoords(RandomSeed seed)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final float[] params = createParams(rand);
 		final Trace trace = new Trace();
@@ -81,13 +84,13 @@ public class TraceManagerTest
 		for (int i = 0; i < 5; i++)
 			trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 
-		runTracing(0, 2, trace);
+		runTracing(rand, 0, 2, trace);
 	}
 
-	@Test
-	public void canTraceMultiplePulseWithMovingCoords()
+	@SeededTest
+	public void canTraceMultiplePulseWithMovingCoords(RandomSeed seed)
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final float distance = 0.5f;
 
 		final float[] params = createParams(rand);
@@ -105,12 +108,12 @@ public class TraceManagerTest
 			trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
-		runTracing(distance, 2, trace);
+		runTracing(rand, distance, 2, trace);
 	}
 
-	private static void runTracing(double d, int t, Trace... expected)
+	private static void runTracing(final UniformRandomProvider rnd, double d, int t, Trace... expected)
 	{
-		final MemoryPeakResults results = toPeakResults(expected);
+		final MemoryPeakResults results = toPeakResults(rnd, expected);
 		final TraceManager tm = new TraceManager(results);
 		final int n = tm.traceMolecules(d, t);
 		Assertions.assertEquals(expected.length, n, "Incorrect number of traces");
@@ -119,33 +122,34 @@ public class TraceManagerTest
 		areEqual(expected, actual);
 	}
 
-	@Test
-	public void canTraceMultipleFluorophoresWithFixedCoords()
+	@SeededTest
+	public void canTraceMultipleFluorophoresWithFixedCoords(RandomSeed seed)
 	{
-		simulate(TestSettings.getRandomGenerator(), 1000, 1, 5, 2, 0);
+		simulate(seed, 1000, 1, 5, 2, 0);
 	}
 
-	@Test
-	public void canTraceMultiplePulsingFluorophoresWithFixedCoords()
+	@SeededTest
+	public void canTraceMultiplePulsingFluorophoresWithFixedCoords(RandomSeed seed)
 	{
-		simulate(TestSettings.getRandomGenerator(), 1000, 5, 5, 10, 0);
+		simulate(seed, 1000, 5, 5, 10, 0);
 	}
 
-	@Test
-	public void canTraceMultipleFluorophoresWithMovingCoords()
+	@SeededTest
+	public void canTraceMultipleFluorophoresWithMovingCoords(RandomSeed seed)
 	{
-		simulateMoving(TestSettings.getRandomGenerator(), 1000, 1, 5, 2);
+		simulateMoving(seed, 1000, 1, 5, 2);
 	}
 
-	@Test
-	public void canTraceMultiplePulsingFluorophoresWithMovingCoords()
+	@SeededTest
+	public void canTraceMultiplePulsingFluorophoresWithMovingCoords(RandomSeed seed)
 	{
-		simulateMoving(TestSettings.getRandomGenerator(), 100, 5, 5, 10);
+		simulateMoving(seed, 100, 5, 5, 10);
 	}
 
-	private static void simulate(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime, int maxOffTime,
+	private static void simulate(RandomSeed seed, int molecules, int maxPulses, int maxOnTime, int maxOffTime,
 			float distance)
 	{
+		UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final Trace[] expected = new Trace[molecules];
 		for (int j = 0; j < expected.length; j++)
 		{
@@ -167,12 +171,13 @@ public class TraceManagerTest
 		}
 
 		final double d = (distance > 0) ? Math.sqrt(2.05 * distance * distance) : 0;
-		runTracing(d, maxOffTime + 1, expected);
+		runTracing(rand, d, maxOffTime + 1, expected);
 	}
 
-	private static void simulateMoving(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime,
-			int maxOffTime)
+	private static void simulateMoving(RandomSeed seed, int molecules, int maxPulses, int maxOnTime, int maxOffTime)
 	{
+		UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+
 		// When the molecules are moving their paths may intersect.
 		// Thus each molecule is allocated a 2x2 square to move within
 		// with a 2 pixel border (i.e. a 4x4 square per molecule) ensuring
@@ -214,22 +219,21 @@ public class TraceManagerTest
 		}
 
 		// distance should be bigger than sqrt(2) but less than 2
-		runTracing(1.5, maxOffTime + 1, expected);
+		runTracing(rand, 1.5, maxOffTime + 1, expected);
 	}
 
-	private static float[] createParams(RandomGenerator rand)
+	private static float[] createParams(UniformRandomProvider rand)
 	{
 		return Gaussian2DPeakResultHelper.createOneAxisParams(0, 1, rand.nextFloat() * 256f, rand.nextFloat() * 256f, 0,
 				1);
 	}
 
-	private static MemoryPeakResults toPeakResults(Trace... traces)
+	private static MemoryPeakResults toPeakResults(final UniformRandomProvider rnd, Trace... traces)
 	{
 		final PeakResultStoreList results = new ArrayPeakResultStore(traces.length);
 		for (final Trace t : traces)
 			results.addStore(t.getPoints());
 		// Shuffle
-		final RandomGenerator rnd = TestSettings.getRandomGenerator();
 		results.shuffle(rnd);
 		return new MemoryPeakResults(results);
 	}
@@ -289,7 +293,7 @@ public class TraceManagerTest
 		});
 	}
 
-	private static void move(RandomGenerator rand, float[] params, float distance)
+	private static void move(UniformRandomProvider rand, float[] params, float distance)
 	{
 		if (distance > 0)
 		{

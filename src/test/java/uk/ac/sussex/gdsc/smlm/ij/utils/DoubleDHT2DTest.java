@@ -27,7 +27,7 @@ import java.util.Arrays;
 
 import org.jtransforms.fft.DoubleFFT_2D;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.ij.process.FHT2;

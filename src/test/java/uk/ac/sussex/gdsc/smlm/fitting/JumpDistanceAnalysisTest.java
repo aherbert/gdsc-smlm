@@ -31,10 +31,10 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.logging.Logger;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
@@ -157,7 +157,7 @@ public class JumpDistanceAnalysisTest
 
 	private void fitSinglePopulation(boolean mle)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
 		AssertionError error = null;
 		NEXT_D: for (final double d : D)
@@ -220,7 +220,7 @@ public class JumpDistanceAnalysisTest
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
 		ExtraAssumptions.assumeMaximumComplexity();
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
 		AssertionError error = null;
@@ -254,7 +254,7 @@ public class JumpDistanceAnalysisTest
 	{
 		// Skip this as it is slow
 		Assumptions.assumeTrue(false);
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		out = null;
 		try
@@ -333,7 +333,7 @@ public class JumpDistanceAnalysisTest
 	// Store the fitted N to allow repeat in the benchmark with fixed N if necessary
 	int fitN = 0;
 
-	private void fit(RandomGenerator rg, String title, int samples, int n, double[] d, double[] f, boolean mle)
+	private void fit(UniformRandomProvider rg, String title, int samples, int n, double[] d, double[] f, boolean mle)
 	{
 		// Used for testing
 		// @formatter:off
@@ -582,7 +582,7 @@ public class JumpDistanceAnalysisTest
 			return (data == null) ? 0 : data.length;
 		}
 
-		double[][] getSample(RandomGenerator random, int size)
+		double[][] getSample(UniformRandomProvider random, int size)
 		{
 			if (size > getSize())
 			{
@@ -675,7 +675,7 @@ public class JumpDistanceAnalysisTest
 	 *            Fraction of population (will be updated with the actual fractions, normalised to sum to 1)
 	 * @return The jump distances
 	 */
-	private double[] createData(RandomGenerator rg, int n, double[] d, double[] f)
+	private double[] createData(UniformRandomProvider rg, int n, double[] d, double[] f)
 	{
 		// Cache the data so that if we run a second test with
 		// the same d and f we use the same data

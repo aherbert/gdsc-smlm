@@ -29,7 +29,7 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -242,7 +242,7 @@ public class GradientCalculatorSpeedTest
 		Assertions.assertEquals(nparams, func.gradientIndices().length);
 
 		final int iter = 50;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
@@ -320,7 +320,7 @@ public class GradientCalculatorSpeedTest
 		Assertions.assertEquals(nparams, func.gradientIndices().length);
 
 		final int iter = 10000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
@@ -360,7 +360,7 @@ public class GradientCalculatorSpeedTest
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 10000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -417,7 +417,7 @@ public class GradientCalculatorSpeedTest
 		Assertions.assertEquals(nparams, indices.length);
 
 		final int iter = 50;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final double[] beta = new double[nparams];
 		final double[] beta2 = new double[nparams];
@@ -520,7 +520,7 @@ public class GradientCalculatorSpeedTest
 		final int n = func.size();
 
 		final int iter = 50;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -631,7 +631,7 @@ public class GradientCalculatorSpeedTest
 		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
 		final int n = blockWidth * blockWidth;
 		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		for (int run = 5; run-- > 0;)
 		{
 			a[Gaussian2DFunction.BACKGROUND] = random(Background);

@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.Maths;
@@ -49,7 +49,7 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canComputeCRLB()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputeCRLB(rg, n, 0, true);
 	}
@@ -57,7 +57,7 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canComputeCRLBWithZeros()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 2; n < 10; n++)
 		{
 			canComputeCRLB(rg, n, 1, true);
@@ -68,7 +68,7 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canComputeCRLBWithReciprocal()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputeCRLB(rg, n, 0, false);
 	}
@@ -76,7 +76,7 @@ public class FisherInformationMatrixTest
 	@Test
 	public void canComputeCRLBWithReciprocalWithZeros()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 2; n < 10; n++)
 		{
 			canComputeCRLB(rg, n, 1, false);
@@ -87,7 +87,7 @@ public class FisherInformationMatrixTest
 	@Test
 	public void inversionDoesNotMatchReciprocal()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 		{
 			final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
@@ -103,7 +103,7 @@ public class FisherInformationMatrixTest
 		}
 	}
 
-	private static double[] canComputeCRLB(RandomGenerator rg, int n, int k, boolean invert)
+	private static double[] canComputeCRLB(UniformRandomProvider rg, int n, int k, boolean invert)
 	{
 		final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, k);
 
@@ -114,7 +114,7 @@ public class FisherInformationMatrixTest
 		return crlb;
 	}
 
-	private static FisherInformationMatrix createFisherInformationMatrix(RandomGenerator rg, int n, int k)
+	private static FisherInformationMatrix createFisherInformationMatrix(UniformRandomProvider rg, int n, int k)
 	{
 		final int maxx = 10;
 		final int size = maxx * maxx;
@@ -158,7 +158,7 @@ public class FisherInformationMatrixTest
 		// Zero selected columns
 		if (k > 0)
 		{
-			final int[] zero = Random.sample(k, n, rg); // new RandomDataGenerator(randomGenerator).nextPermutation(n, k);
+			final int[] zero = Random.sample(k, n, rg); // new RandomDataGenerator(UniformRandomProvider).nextPermutation(n, k);
 			for (final int i : zero)
 				for (int j = 0; j < n; j++)
 					I[i][j] = I[j][i] = 0;
@@ -190,14 +190,14 @@ public class FisherInformationMatrixTest
 		final int k = 5;
 		final int n = 10;
 
-		final RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
-		final FisherInformationMatrix m = createRandomMatrix(randomGenerator, n);
+		final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
+		final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
 		final DenseMatrix64F e = m.getMatrix();
 		TestLog.infoln(e);
 
 		for (int run = 1; run < 10; run++)
 		{
-			final int[] indices = Random.sample(k, n, randomGenerator);
+			final int[] indices = Random.sample(k, n, UniformRandomProvider);
 			Arrays.sort(indices);
 			final DenseMatrix64F o = m.subset(indices).getMatrix();
 			TestLog.infoln(Arrays.toString(indices));
@@ -208,18 +208,18 @@ public class FisherInformationMatrixTest
 		}
 	}
 
-	private static FisherInformationMatrix createRandomMatrix(RandomGenerator randomGenerator, int n)
+	private static FisherInformationMatrix createRandomMatrix(UniformRandomProvider UniformRandomProvider, int n)
 	{
 		final double[] data = new double[n * n];
 		for (int i = 0; i < data.length; i++)
-			data[i] = randomGenerator.nextDouble();
+			data[i] = UniformRandomProvider.nextDouble();
 		return new FisherInformationMatrix(data, n);
 	}
 
 	@Test
 	public void computeWithSubsetReducesTheCRLB()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final Gaussian2DFunction f = createFunction(10, 1);
 		final int perPeak = f.getGradientParametersPerPeak();
 		// Create a matrix with 2 peaks + background

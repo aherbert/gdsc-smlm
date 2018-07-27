@@ -26,9 +26,9 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -62,7 +62,7 @@ public class WPoissonGradientProcedureTest
 	{
 		int n = blockWidth * blockWidth;
 		var = new double[n];
-		final RandomGenerator r = TestSettings.getRandomGenerator();
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		while (n-- > 0)
 			// Range 0.9 to 1.1
 			var[n] = 0.9 + 0.2 * r.nextDouble();
@@ -96,7 +96,7 @@ public class WPoissonGradientProcedureTest
 	private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(int nparams)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
@@ -180,7 +180,7 @@ public class WPoissonGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
@@ -226,7 +226,7 @@ public class WPoissonGradientProcedureTest
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -302,7 +302,7 @@ public class WPoissonGradientProcedureTest
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -382,7 +382,7 @@ public class WPoissonGradientProcedureTest
 	private double[] createFakeData(double[] params)
 	{
 		final int n = blockWidth * blockWidth;
-		final RandomGenerator r = rdg.getRandomGenerator();
+		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
@@ -397,7 +397,7 @@ public class WPoissonGradientProcedureTest
 	private double[] createFakeData()
 	{
 		final int n = blockWidth * blockWidth;
-		final RandomGenerator r = rdg.getRandomGenerator();
+		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
@@ -418,7 +418,7 @@ public class WPoissonGradientProcedureTest
 
 	private void createFakeParams(double[] params)
 	{
-		final RandomGenerator r = rdg.getRandomGenerator();
+		final UniformRandomProvider r = rdg.getRandomGenerator();
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
 	}

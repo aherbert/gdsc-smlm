@@ -194,7 +194,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 				final double x = getX(D, q);
 				p +=
 						// Poisson PMF
-						FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
+						FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q)) *
 								// Gaussian CDF
 								(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 			}
@@ -202,7 +202,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			for (int q = qmin; q <= qmax; q++)
 				p += FastMath.exp(
 						// Poisson
-						q * logu - u - LogFactorial.logF(q)
+						q * logu - u - logFactorial.getLogFUnsafe(q)
 						// Gaussian
 								- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
 
@@ -282,7 +282,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 				final double x = getX(D, q);
 				p +=
 						// Poisson PMF
-						FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
+						FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q)) *
 								// Gaussian CDF
 								(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 			}
@@ -290,7 +290,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			for (int q = qmin; q <= qmax; q++)
 				p += FastMath.exp(
 						// Poisson
-						q * logu - u - LogFactorial.logF(q)
+						q * logu - u - logFactorial.getLogFUnsafe(q)
 						// Gaussian
 								- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
 		return Math.log(p);

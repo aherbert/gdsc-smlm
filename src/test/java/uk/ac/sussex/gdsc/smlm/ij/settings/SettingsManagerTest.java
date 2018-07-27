@@ -26,20 +26,21 @@ package uk.ac.sussex.gdsc.smlm.ij.settings;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class SettingsManagerTest
 {
-	@Test
-	public void canReadWriteConfiguration() throws IOException
+	@SeededTest
+	public void canReadWriteConfiguration(RandomSeed seed) throws IOException
 	{
-		final RandomGenerator rand = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final Calibration.Builder builder = Calibration.newBuilder();
 		builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());

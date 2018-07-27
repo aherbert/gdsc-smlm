@@ -25,8 +25,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestLog;
@@ -59,7 +59,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 		for (final int width : primes)
 			for (final int height : primes)
@@ -67,7 +67,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(RandomGenerator rg,
+	private static void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(UniformRandomProvider rg,
 			MedianFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
@@ -82,14 +82,14 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 		for (final int width : primes)
 			for (final int height : primes)
 				floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg,
+	private static void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(UniformRandomProvider rg,
 			MedianFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
@@ -173,14 +173,14 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 		for (final int width : primes)
 			for (final int height : primes)
 				floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(RandomGenerator rg,
+	private static void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(UniformRandomProvider rg,
 			MedianFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
@@ -318,14 +318,14 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 		for (final int width : primes)
 			for (final int height : primes)
 				floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg,
+	private static void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(UniformRandomProvider rg,
 			MedianFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
@@ -402,7 +402,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 		for (final int width : primes)
 			for (final int height : primes)
@@ -410,7 +410,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					floatCompareBlockMedianNxNAndRollingMedianNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockMedianNxNAndRollingMedianNxN(RandomGenerator rg, MedianFilter filter,
+	private static void floatCompareBlockMedianNxNAndRollingMedianNxN(UniformRandomProvider rg, MedianFilter filter,
 			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
@@ -630,14 +630,14 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 		for (final int width : primes)
 			for (final int height : primes)
 				floatCompareBlockMedian3x3AndBlockMedianNxN(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockMedian3x3AndBlockMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+	private static void floatCompareBlockMedian3x3AndBlockMedianNxN(UniformRandomProvider rg, MedianFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
@@ -712,7 +712,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult()
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
 
 		for (final int width : primes)
@@ -720,7 +720,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareRollingMedian3x3AndRollingMedianNxN(rg, filter, width, height);
 	}
 
-	private static void floatCompareRollingMedian3x3AndRollingMedianNxN(RandomGenerator rg, MedianFilter filter,
+	private static void floatCompareRollingMedian3x3AndRollingMedianNxN(UniformRandomProvider rg, MedianFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);

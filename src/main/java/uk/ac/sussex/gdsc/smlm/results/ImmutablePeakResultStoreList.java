@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
 
@@ -69,13 +70,15 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore imple
 	@Override
 	public void sort()
 	{
-		store.sort();
+		//store.sort();
+		throw new DataException("This result store is immutable");
 	}
 
 	@Override
 	public void sort(Comparator<PeakResult> comparator)
 	{
-		store.sort(comparator);
+		//store.sort(comparator);
+		throw new DataException("This result store is immutable");
 	}
 
 	@Override
@@ -91,9 +94,17 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore imple
 	}
 
 	@Override
-	public void shuffle(final RandomGenerator randomGenerator)
+	public void shuffle(final RandomGenerator randomSource)
 	{
-		store.shuffle(randomGenerator);
+		//store.shuffle(randomGenerator);
+		throw new DataException("This result store is immutable");
+	}
+	
+	@Override
+	public void shuffle(UniformRandomProvider randomSource)
+	{
+		//store.shuffle(randomSource);
+		throw new DataException("This result store is immutable");
 	}
 
 	@Override

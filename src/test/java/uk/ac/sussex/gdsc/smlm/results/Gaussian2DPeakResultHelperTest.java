@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +44,8 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class Gaussian2DPeakResultHelperTest
@@ -92,8 +94,8 @@ public class Gaussian2DPeakResultHelperTest
 							final double error = DoubleEquality.relativeError(e, o);
 							sum[points] += error;
 							if (error > 1e-2)
-								ExtraAssertions.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s, N, b2,
-										points, e, o, error);
+								ExtraAssertions.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s, N,
+										b2, points, e, o, error);
 						}
 					}
 
@@ -165,8 +167,8 @@ public class Gaussian2DPeakResultHelperTest
 		paramsf[Gaussian2DFunction.BACKGROUND] = 0;
 		paramsf[Gaussian2DFunction.SIGNAL] = 105;
 
-		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE,
-				null);
+		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, 1, 1,
+				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
 		final SimpleRegression r = new SimpleRegression(false);
 
@@ -236,10 +238,10 @@ public class Gaussian2DPeakResultHelperTest
 		}
 	}
 
-	@Test
-	public void canComputeMeanSignalUsingR()
+	@SeededTest
+	public void canComputeMeanSignalUsingR(RandomSeed seed)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		for (int i = 0; i < 10; i++)
 		{
@@ -263,10 +265,10 @@ public class Gaussian2DPeakResultHelperTest
 		ExtraAssertions.assertEqualsRelative(e, o, 1e-10);
 	}
 
-	@Test
-	public void canComputeMeanSignalUsingP()
+	@SeededTest
+	public void canComputeMeanSignalUsingP(RandomSeed seed)
 	{
-		final RandomGenerator rg = TestSettings.getRandomGenerator();
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		for (int i = 0; i < 10; i++)
 		{
