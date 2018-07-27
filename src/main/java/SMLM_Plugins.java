@@ -27,21 +27,21 @@ import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools;
 
 /**
- * Default ImageJ plugin (no Java package) to run the uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools plugin.
+ * Default ImageJ plugin (no Java package) to run the {@link SMLMTools} plugin.
  * <p>
  * This class allows the project to be run in debug mode from an IDE (e.g. Eclipse). The Maven output directory will be
  * target/classes. Create a symbolic link to that directory from the project root and name it plugins. Optionally create
  * a link to the macros directory to allow the toolset to be loaded:
  *
  * <pre>
- * ${smlm_home}/plugins -&gt; ${smlm_home}/target/classes
- * ${smlm_home}/macros -&gt; ${smlm_home}/target/classes/macros
+ * ${root}/plugins -&gt; ${root}/target/classes
+ * ${root}/macros -&gt; ${root}/target/classes/macros
  * </pre>
  *
- * Set the project to run ij.ImageJ as the main class and use the smlm directory as the ImageJ path:
+ * Set the project to run ij.ImageJ as the main class and use the root directory as the ImageJ path:
  *
  * <pre>
- * ij.ImageJ -ijpath ${smlm_home}
+ * ij.ImageJ -ijpath ${root}
  * </pre>
  *
  * ImageJ will load this class from the plugins directory. This class can call all other plugins.

@@ -712,7 +712,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (TextUtils.isNullOrEmpty(templateFilename))
 		{
 			final String currentUsersHomeDir = System.getProperty("user.home");
-			templateFilename = currentUsersHomeDir + File.separator + "uk.ac.sussex.gdsc.smlm" + File.separator + "template";
+			templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
 		}
 	}
 

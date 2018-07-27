@@ -49,6 +49,7 @@ public class LogFactorial
 	static
 	{
 		MASTER_TABLE = new double[FACTORIALS.length];
+		// Since log(1) == 0 ignore the first two values
 		for (int k = 0; k < FACTORIALS.length; k++)
 			MASTER_TABLE[k] = Math.log(FACTORIALS[k]);
 	}

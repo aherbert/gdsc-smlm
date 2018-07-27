@@ -186,7 +186,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	static
 	{
 		final String currentUsersHomeDir = System.getProperty("user.home");
-		templateFilename = currentUsersHomeDir + File.separator + "uk.ac.sussex.gdsc.smlm" + File.separator + "template";
+		templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
 	}
 
 	private static String[] SELECTION_CRITERIA = { "R2", "AIC", "BIC", "ML AIC", "ML BIC" };

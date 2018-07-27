@@ -419,7 +419,9 @@ public class BatchPeakFit implements PlugIn
 						// Look for nodes that are part of the fit configuration
 						final XPathFactory factory = XPathFactory.newInstance();
 						final XPath xpath = factory.newXPath();
-						final XPathExpression expr = xpath.compile("//uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration//*");
+						// TODO: Check this still works after the package was refactored 
+						final XPathExpression expr = xpath
+								.compile("//uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration//*");
 
 						// For each node, add the name and value to the BatchParameters
 						final BatchSettings batchSettings = new BatchSettings();
@@ -473,6 +475,7 @@ public class BatchPeakFit implements PlugIn
 	{
 		final XStream xs = new XStream(new DomDriver());
 		XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+		// TODO: Check this still works after the package was refactored 
 		xs.allowTypesByWildcard(new String[] { "uk.ac.sussex.gdsc.smlm.**" });
 		xs.alias("gdsc.fitting.batchSettings", BatchSettings.class);
 		xs.alias("parameter", ParameterSettings.class);
