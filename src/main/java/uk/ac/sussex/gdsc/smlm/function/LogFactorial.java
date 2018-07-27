@@ -269,7 +269,7 @@ public class LogFactorial
 	public LogFactorial(int n)
 	{
 		// Copy the static values already present
-		objectTable = changeSize(MASTER_TABLE, getLowerLimitN(n));
+		objectTable = changeSize(LogFactorial.MASTER_TABLE, getLowerLimitN(n));
 	}
 
 	/**
