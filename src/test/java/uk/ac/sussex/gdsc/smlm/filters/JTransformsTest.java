@@ -23,13 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.jtransforms.dht.FloatDHT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 import org.jtransforms.utils.CommonUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -44,6 +43,9 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class JTransformsTest
@@ -293,8 +295,9 @@ public class JTransformsTest
 		}
 	}
 
-	@Test
-	public void jTransforms2DDHTIsFasterThanFHT2()
+	@SpeedTag
+	@SeededTest
+	public void jTransforms2DDHTIsFasterThanFHT2(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -303,7 +306,6 @@ public class JTransformsTest
 		final int size = 256;
 		final int w = size / 4;
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-		final RandomDataGenerator rdg = new RandomDataGenerator(r);
 
 		// Blob in the centre
 		FloatProcessor fp = createProcessor(size, size / 2 - w / 2, size / 2 - w / 2, w, w, null);
@@ -316,10 +318,11 @@ public class JTransformsTest
 		final float[][] data = new float[N * 2][];
 		final int lower = w;
 		final int upper = size - w;
+		final int range = upper - lower;
 		for (int i = 0, j = 0; i < N; i++)
 		{
-			final int x = rdg.nextInt(lower, upper);
-			final int y = rdg.nextInt(lower, upper);
+			final int x = lower + r.nextInt(range);
+			final int y = lower + r.nextInt(range);
 			fp = createProcessor(size, x, y, w, w, r);
 			final float[] pixels = (float[]) fp.getPixels();
 			data[j++] = pixels.clone();

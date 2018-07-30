@@ -25,24 +25,28 @@ package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
@@ -452,37 +456,42 @@ public class EJMLLinearSolverTest
 	}
 
 	// Create a speed test of the different methods
-	@Test
-	public void runSolverSpeedTest6()
+	@SpeedTag
+	@SeededTest
+	public void runSolverSpeedTest6(RandomSeed seed)
 	{
-		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+		runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
 	}
 
-	@Test
-	public void runSolverSpeedTest5()
+	@SpeedTag
+	@SeededTest
+	public void runSolverSpeedTest5(RandomSeed seed)
 	{
-		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
+		runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
 	}
 
-	@Test
-	public void runSolverSpeedTest4()
+	@SpeedTag
+	@SeededTest
+	public void runSolverSpeedTest4(RandomSeed seed)
 	{
-		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_FIXED);
+		runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
 	}
 
-	@Test
-	public void runSolverSpeedTest3()
+	@SpeedTag
+	@SeededTest
+	public void runSolverSpeedTest3(RandomSeed seed)
 	{
-		runSolverSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+		runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
-	@Test
-	public void runSolverSpeedTest2()
+	@SpeedTag
+	@SeededTest
+	public void runSolverSpeedTest2(RandomSeed seed)
 	{
-		runSolverSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
+		runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
 	}
 
-	private void runSolverSpeedTest(int flags)
+	private void runSolverSpeedTest(RandomSeed seed, int flags)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -498,7 +507,8 @@ public class EJMLLinearSolverTest
 		final double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
 		final int np = f0.getNumberOfGradients();
 		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(
+				new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
 		//double lambda = 10;
 		for (final double background : testbackground)
 			// Peak 1
@@ -517,7 +527,8 @@ public class EJMLLinearSolverTest
 								public void execute(double value)
 								{
 									// Poisson data
-									y[i++] = rdg.nextPoisson(value);
+									pd.setMeanUnsafe(value);
+									y[i++] = pd.sample();
 								}
 							});
 							final double[][] alpha = new double[np][np];
@@ -756,37 +767,42 @@ public class EJMLLinearSolverTest
 	}
 
 	// Create a speed test of the different methods
-	@Test
-	public void runInversionSpeedTest6()
+	@SpeedTag
+	@SeededTest
+	public void runInversionSpeedTest6(RandomSeed seed)
 	{
-		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+		runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
 	}
 
-	@Test
-	public void runInversionSpeedTest5()
+	@SpeedTag
+	@SeededTest
+	public void runInversionSpeedTest5(RandomSeed seed)
 	{
-		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
+		runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
 	}
 
-	@Test
-	public void runInversionSpeedTest4()
+	@SpeedTag
+	@SeededTest
+	public void runInversionSpeedTest4(RandomSeed seed)
 	{
-		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_FIXED);
+		runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
 	}
 
-	@Test
-	public void runInversionSpeedTest3()
+	@SpeedTag
+	@SeededTest
+	public void runInversionSpeedTest3(RandomSeed seed)
 	{
-		runInversionSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+		runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
-	@Test
-	public void runInversionSpeedTest2()
+	@SpeedTag
+	@SeededTest
+	public void runInversionSpeedTest2(RandomSeed seed)
 	{
-		runInversionSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
+		runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
 	}
 
-	private void runInversionSpeedTest(int flags)
+	private void runInversionSpeedTest(RandomSeed seed, int flags)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -801,7 +817,8 @@ public class EJMLLinearSolverTest
 		final double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
 		final int np = f0.getNumberOfGradients();
 		final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(
+				new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
 		//double lambda = 10;
 		for (final double background : testbackground)
 			// Peak 1
@@ -820,7 +837,8 @@ public class EJMLLinearSolverTest
 								public void execute(double value)
 								{
 									// Poisson data
-									y[i++] = rdg.nextPoisson(value);
+									pd.setMeanUnsafe(value);
+									y[i++] = pd.sample();
 								}
 							});
 							final double[][] alpha = new double[np][np];

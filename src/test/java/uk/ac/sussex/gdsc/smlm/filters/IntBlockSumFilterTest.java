@@ -24,10 +24,11 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class IntBlockSumFilterTest extends AbstractFilterTest
@@ -136,7 +137,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private static void checkIsCorrect(BlockSumDataFilter filter)
+	private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
@@ -151,8 +152,8 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 			}
 	}
 
-	@Test
-	public void rollingBlockFilterIsCorrect()
+	@SeededTest
+	public void rollingBlockFilterIsCorrect(RandomSeed seed)
 	{
 		final BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false)
 		{
@@ -168,7 +169,6 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 				f.rollingBlockFilterInternal(data, width, height, boxSize);
 			}
 		};
-		checkIsCorrect(filter);
+		checkIsCorrect(seed, filter);
 	}
-
 }

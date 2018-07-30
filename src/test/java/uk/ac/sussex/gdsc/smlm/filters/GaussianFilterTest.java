@@ -25,10 +25,9 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
-import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
@@ -40,6 +39,9 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianFilterTest
@@ -204,57 +206,56 @@ public class GaussianFilterTest
 		}
 	}
 
-	@Test
-	public void floatFilterIsSameAsIJFilter()
+	@SeededTest
+	public void floatFilterIsSameAsIJFilter(RandomSeed seed)
 	{
-		filter1IsSameAsFilter2(new FloatFilter(false), new IJFilter(false), false, 1e-2);
+		filter1IsSameAsFilter2(seed, new FloatFilter(false), new IJFilter(false), false, 1e-2);
 	}
 
-	@Test
-	public void floatFilterInternalIsSameAsIJFilter()
+	@SeededTest
+	public void floatFilterInternalIsSameAsIJFilter(RandomSeed seed)
 	{
-		filter1IsSameAsFilter2(new FloatFilter(true), new IJFilter(true), false, 1e-2);
+		filter1IsSameAsFilter2(seed, new FloatFilter(true), new IJFilter(true), false, 1e-2);
 	}
 
-	@Test
-	public void floatFilterIsSameAsDoubleFilter()
+	@SeededTest
+	public void floatFilterIsSameAsDoubleFilter(RandomSeed seed)
 	{
-		filter1IsSameAsFilter2(new FloatFilter(false), new DoubleFilter(false), false, 1e-2);
+		filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), false, 1e-2);
 	}
 
-	@Test
-	public void floatFilterIsSameAsDoubleFilterWeighted()
+	@SeededTest
+	public void floatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed)
 	{
-		filter1IsSameAsFilter2(new FloatFilter(false), new DoubleFilter(false), true, 1e-2);
+		filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), true, 1e-2);
 	}
 
-	@Test
-	public void dpFloatFilterIsSameAsDoubleFilter()
+	@SeededTest
+	public void dpFloatFilterIsSameAsDoubleFilter(RandomSeed seed)
 	{
-		filter1IsSameAsFilter2(new DPFilter(false), new DoubleFilter(false), false, 1e-2);
+		filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), false, 1e-2);
 	}
 
-	@Test
-	public void dpFloatFilterIsSameAsDoubleFilterWeighted()
+	@SeededTest
+	public void dpFloatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed)
 	{
-		filter1IsSameAsFilter2(new DPFilter(false), new DoubleFilter(false), true, 1e-2);
+		filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), true, 1e-2);
 	}
 
-	private void filter1IsSameAsFilter2(GFilter f1, GFilter f2, boolean weighted, double tolerance)
+	private void filter1IsSameAsFilter2(RandomSeed seed, GFilter f1, GFilter f2, boolean weighted, double tolerance)
 	{
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] data = createData(rand, size, size);
 		float[] w = null;
 		if (weighted)
 		{
-			final ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
-					ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+			final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rand, 57);
 
 			w = new float[data.length];
 			for (int i = 0; i < w.length; i++)
 				w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
-				//w[i] = (float) (1.0 / Math.max(0.01, rand.nextGaussian() * 0.2 + 2));
-				//w[i] = 0.5f;
+			//w[i] = (float) (1.0 / Math.max(0.01, rand.nextGaussian() * 0.2 + 2));
+			//w[i] = 0.5f;
 			f1.setWeights(w);
 			f2.setWeights(w);
 		}
@@ -313,8 +314,9 @@ public class GaussianFilterTest
 		}
 	}
 
-	@Test
-	public void floatFilterIsFasterThanDoubleFilter()
+	@SpeedTag
+	@SeededTest
+	public void floatFilterIsFasterThanDoubleFilter(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -341,13 +343,14 @@ public class GaussianFilterTest
 			{
 				final double t1 = ts.get(j).getMean();
 				final double t2 = ts.get(j + k).getMean();
-				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
-						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
+				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(), t2,
+						ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
 	}
 
-	@Test
-	public void floatFilterInternalIsFasterThanDoubleFilterInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeHighComplexity();
 
@@ -374,8 +377,8 @@ public class GaussianFilterTest
 			{
 				final double t1 = ts.get(j).getMean();
 				final double t2 = ts.get(j + k).getMean();
-				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
-						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
+				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(), t2,
+						ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
 	}
 

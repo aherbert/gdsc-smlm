@@ -25,7 +25,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -37,29 +37,31 @@ import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class FHTFilterTest
 {
-	@Test
-	public void canCorrelate()
+	@SeededTest
+	public void canCorrelate(RandomSeed seed)
 	{
-		canFilter(Operation.CORRELATION);
+		canFilter(seed, Operation.CORRELATION);
 	}
 
-	@Test
-	public void canConvolve()
+	@SeededTest
+	public void canConvolve(RandomSeed seed)
 	{
-		canFilter(Operation.CONVOLUTION);
+		canFilter(seed, Operation.CONVOLUTION);
 	}
 
-	@Test
-	public void canDeconvolve()
+	@SeededTest
+	public void canDeconvolve(RandomSeed seed)
 	{
-		canFilter(Operation.DECONVOLUTION);
+		canFilter(seed, Operation.DECONVOLUTION);
 	}
 
-	private static void canFilter(Operation operation)
+	private static void canFilter(RandomSeed seed, Operation operation)
 	{
 		final int size = 16;
 		final int ex = 5, ey = 7;

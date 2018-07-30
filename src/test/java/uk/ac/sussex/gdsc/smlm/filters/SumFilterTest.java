@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestComplexity;
@@ -34,6 +33,9 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class SumFilterTest extends AbstractFilterTest
@@ -91,19 +93,19 @@ public class SumFilterTest extends AbstractFilterTest
 		return createIntData(rg, width, height);
 	}
 
-	private static ArrayList<float[]> floatCreateSpeedData(int iter)
+	private ArrayList<float[]> floatCreateSpeedData(RandomSeed seed, int iter)
 	{
-		return getSpeedData(iter);
+		return getSpeedData(seed, iter);
 	}
 
-	private static ArrayList<int[]> intCreateSpeedData(int iter)
+	private ArrayList<int[]> intCreateSpeedData(RandomSeed seed, int iter)
 	{
-		return getIntSpeedData(iter);
+		return getIntSpeedData(seed, iter);
 	}
 
 	// COPY CODE FROM HERE...
-	@Test
-	public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -126,8 +128,8 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -150,8 +152,8 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -173,8 +175,8 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
+	@SeededTest
+	public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -187,7 +189,8 @@ public class SumFilterTest extends AbstractFilterTest
 	}
 
 	private static void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
-			UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
+			UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
 		final float[] data2 = floatClone(data1);
@@ -198,15 +201,16 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -268,15 +272,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -338,15 +343,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -408,8 +414,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -419,8 +425,8 @@ public class SumFilterTest extends AbstractFilterTest
 				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private static void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(UniformRandomProvider rg,
+			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
 		final float[] data2 = floatClone(data1);
@@ -431,15 +437,15 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
+	@SeededTest
+	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -493,15 +499,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -555,15 +562,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -617,15 +625,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -680,8 +689,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -703,15 +712,16 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -766,15 +776,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -829,15 +840,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -901,8 +913,8 @@ public class SumFilterTest extends AbstractFilterTest
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -913,8 +925,8 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockSumNxNAndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private static void floatCompareBlockSumNxNAndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
 		final float[] data2 = floatClone(data1);
@@ -925,8 +937,8 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -937,8 +949,8 @@ public class SumFilterTest extends AbstractFilterTest
 					floatCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void floatCompareBlockSumNxNAndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private static void floatCompareBlockSumNxNAndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final float[] data1 = floatCreateData(rg, width, height);
 		final float[] data2 = floatClone(data1);
@@ -949,15 +961,16 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1013,20 +1026,20 @@ public class SumFilterTest extends AbstractFilterTest
 					"float blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockSumNxN %d => blockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => blockSumNxNInternal %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1082,20 +1095,20 @@ public class SumFilterTest extends AbstractFilterTest
 					"float blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockSumNxN %d => stripedBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => stripedBlockSumNxN %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1157,15 +1170,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1221,20 +1235,20 @@ public class SumFilterTest extends AbstractFilterTest
 					"float blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockSumNxN %d => rollingBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => rollingBlockSumNxN %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1296,8 +1310,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockSum3x3AndBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void floatBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1319,15 +1333,15 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
+	@SeededTest
+	public void floatBlockSum3x3IsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1376,12 +1390,12 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => blockSum3x3 %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => blockSum3x3 %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1403,15 +1417,16 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1465,8 +1480,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1488,15 +1503,16 @@ public class SumFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1550,15 +1566,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1607,20 +1624,20 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1669,20 +1686,20 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1736,8 +1753,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1748,8 +1765,8 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
-			int width, int height, int boxSize) throws ArrayComparisonFailure
+	private static void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg,
+			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -1760,8 +1777,8 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1772,8 +1789,8 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
-			int width, int height, int boxSize) throws ArrayComparisonFailure
+	private static void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(UniformRandomProvider rg,
+			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -1784,8 +1801,8 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1795,8 +1812,8 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private static void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg, SumFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private static void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(UniformRandomProvider rg,
+			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -1807,8 +1824,8 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
+	@SeededTest
+	public void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -1820,8 +1837,9 @@ public class SumFilterTest extends AbstractFilterTest
 							height, boxSize);
 	}
 
-	private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(UniformRandomProvider rg,
-			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
+	private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
+			UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -1832,15 +1850,15 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
+	@SeededTest
+	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1902,15 +1920,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
+	@SeededTest
+	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1972,15 +1990,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
+	@SeededTest
+	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2042,8 +2060,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -2065,15 +2083,16 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2127,15 +2146,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
+	@SeededTest
+	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2189,15 +2208,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
+	@SeededTest
+	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2251,15 +2270,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
+	@SeededTest
+	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2314,8 +2333,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
+	@SeededTest
+	public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -2337,15 +2356,15 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
+	@SeededTest
+	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2400,15 +2419,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
+	@SeededTest
+	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2463,15 +2482,15 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
+	@SeededTest
+	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2535,8 +2554,8 @@ public class SumFilterTest extends AbstractFilterTest
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -2547,8 +2566,8 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNAndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private static void intCompareBlockSumNxNAndStripedBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -2559,8 +2578,8 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -2571,8 +2590,8 @@ public class SumFilterTest extends AbstractFilterTest
 					intCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private static void intCompareBlockSumNxNAndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private static void intCompareBlockSumNxNAndRollingBlockSumNxN(UniformRandomProvider rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -2583,15 +2602,16 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2651,15 +2671,16 @@ public class SumFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2719,15 +2740,16 @@ public class SumFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2789,15 +2811,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2857,15 +2880,16 @@ public class SumFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2927,8 +2951,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intBlockSum3x3AndBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void intBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -2938,8 +2962,8 @@ public class SumFilterTest extends AbstractFilterTest
 				intCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private static void intCompareBlockSum3x3AndBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private static void intCompareBlockSum3x3AndBlockSumNxN(UniformRandomProvider rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
 		final int[] data1 = intCreateData(rg, width, height);
 		final int[] data2 = intClone(data1);
@@ -2950,15 +2974,16 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void intBlockSum3x3IsFasterThanBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intBlockSum3x3IsFasterThanBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -3007,12 +3032,12 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => blockSum3x3 %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => blockSum3x3 %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -3034,15 +3059,16 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -3096,8 +3122,8 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
+	@SeededTest
+	public void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final SumFilter filter = new SumFilter();
@@ -3119,15 +3145,16 @@ public class SumFilterTest extends AbstractFilterTest
 		intArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
+	@SpeedTag
+	@SeededTest
+	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -3181,15 +3208,16 @@ public class SumFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3()
+	@SpeedTag
+	@SeededTest
+	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -3242,15 +3270,16 @@ public class SumFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3()
+	@SpeedTag
+	@SeededTest
+	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -3303,15 +3332,16 @@ public class SumFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
+	@SpeedTag
+	@SeededTest
+	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3(RandomSeed seed)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		final SumFilter filter = new SumFilter();
 
-		final ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
+		final ArrayList<int[]> dataSet = intCreateSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 

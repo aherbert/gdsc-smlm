@@ -25,11 +25,11 @@ package uk.ac.sussex.gdsc.smlm.ij.frc;
 
 import java.awt.Rectangle;
 
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.MathArrays;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.PermutationSampler;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -41,11 +41,13 @@ import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class FRCTest
 {
-	@Test
+	@SeededTest
 	public void canComputeSine()
 	{
 		final int steps = 1000;
@@ -61,24 +63,25 @@ public class FRCTest
 		}
 	}
 
-	@Test
-	public void canComputeMirrored()
+	@SeededTest
+	public void canComputeMirrored(RandomSeed seed)
 	{
 		// Sample lines through an image to create a structure.
 		final int size = 1024;
 		final double[][] data = new double[size * 2][];
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 5);
 		for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
 		{
-			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };
-			data[i++] = new double[] { x + r.nextGaussian() * 5, y2 + r.nextGaussian() * 5 };
+			data[i++] = new double[] { x + gs.sample(), y + gs.sample() };
+			data[i++] = new double[] { x + gs.sample(), y2 + gs.sample() };
 		}
 		// Create 2 images
 		final Rectangle bounds = new Rectangle(0, 0, size, size);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
 		final int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
-		MathArrays.shuffle(indices, r);
+		PermutationSampler.shuffle(r, indices);
 		for (final int i : indices)
 		{
 			final IJImagePeakResults image = i1;
@@ -166,7 +169,7 @@ public class FRCTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void computeSineIsFaster()
 	{
 		ExtraAssumptions.assumeHighComplexity();
@@ -225,8 +228,8 @@ public class FRCTest
 		Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
 	}
 
-	@Test
-	public void computeMirroredIsFaster()
+	@SeededTest
+	public void computeMirroredIsFaster(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity();
 
@@ -234,17 +237,18 @@ public class FRCTest
 		final int N = 2048;
 		final double[][] data = new double[N * 2][];
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 5);
 		for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
 		{
-			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };
-			data[i++] = new double[] { x + r.nextGaussian() * 5, y2 + r.nextGaussian() * 5 };
+			data[i++] = new double[] { x + gs.sample(), y + gs.sample() };
+			data[i++] = new double[] { x + gs.sample(), y2 + gs.sample() };
 		}
 		// Create 2 images
 		final Rectangle bounds = new Rectangle(0, 0, N, N);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
 		final int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
-		MathArrays.shuffle(indices, r);
+		PermutationSampler.shuffle(r, indices);
 		for (final int i : indices)
 		{
 			final IJImagePeakResults image = i1;

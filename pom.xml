@@ -303,6 +303,11 @@ Software for single molecule localisation microscopy (SMLM)
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-rng-sampling</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.wendykierp</groupId>
 			<artifactId>JTransforms</artifactId>
 			<version>3.1</version>

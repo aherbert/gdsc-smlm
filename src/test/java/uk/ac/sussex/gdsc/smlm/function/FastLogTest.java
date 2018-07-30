@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -40,6 +40,9 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
@@ -320,13 +323,13 @@ public class FastLogTest
 	// The error 'should' always be negative as the truncation rounds down. However the table
 	// pre-computes using an exponent offset which can lead to rounding up.
 
-	@Test
-	public void canTestFloatError()
+	@SeededTest
+	public void canTestFloatError(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
-		final float[] d = generateRandomFloats(1000000);
+		final float[] d = generateRandomFloats(seed, 1000000);
 		final float[] logD = new float[d.length];
 		for (int i = 0; i < d.length; i++)
 			logD[i] = (float) Math.log(d[i]);
@@ -350,7 +353,7 @@ public class FastLogTest
 			canTestFloatError(new TestFastLog(new TurboLog2(n)), d, logD);
 	}
 
-	private static float[] generateRandomFloats(int n)
+	private static float[] generateRandomFloats(RandomSeed seed, int n)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] d = new float[n];
@@ -535,8 +538,8 @@ public class FastLogTest
 		return false;
 	}
 
-	@Test
-	public void canTestDoubleError()
+	@SeededTest
+	public void canTestDoubleError(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
@@ -574,8 +577,8 @@ public class FastLogTest
 		}
 	}
 
-	@Test
-	public void canTestDoubleErrorLog1P()
+	@SeededTest
+	public void canTestDoubleErrorLog1P(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
@@ -604,8 +607,8 @@ public class FastLogTest
 		return Double.longBitsToDouble(u);
 	}
 
-	@Test
-	public void canTestDoubleErrorRange()
+	@SeededTest
+	public void canTestDoubleErrorRange(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
 
@@ -631,8 +634,8 @@ public class FastLogTest
 		testDoubleErrorRange(r, test, n, d, logD, 2045, 2047, 0);
 	}
 
-	private void testDoubleErrorRange(UniformRandomProvider r, TurboList<TestFastLog> test, int n, double[] d, double[] logD,
-			int mine, int maxe, int ee)
+	private void testDoubleErrorRange(UniformRandomProvider r, TurboList<TestFastLog> test, int n, double[] d,
+			double[] logD, int mine, int maxe, int ee)
 	{
 		for (int e = mine; e < maxe; e += ee + 1)
 		{
@@ -762,8 +765,9 @@ public class FastLogTest
 		}
 	}
 
-	@Test
-	public void canTestFloatSpeed()
+	@SpeedTag
+	@SeededTest
+	public void canTestFloatSpeed(RandomSeed seed)
 	{
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
@@ -849,8 +853,9 @@ public class FastLogTest
 		}
 	}
 
-	@Test
-	public void canTestDoubleSpeed()
+	@SpeedTag
+	@SeededTest
+	public void canTestDoubleSpeed(RandomSeed seed)
 	{
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
@@ -898,8 +903,9 @@ public class FastLogTest
 		ts.report(size);
 	}
 
-	@Test
-	public void canTestDoubleSpeedLog1P()
+	@SpeedTag
+	@SeededTest
+	public void canTestDoubleSpeedLog1P(RandomSeed seed)
 	{
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
@@ -926,8 +932,9 @@ public class FastLogTest
 		ts.report(size);
 	}
 
-	@Test
-	public void canTestFloatVsDoubleSpeed()
+	@SpeedTag
+	@SeededTest
+	public void canTestFloatVsDoubleSpeed(RandomSeed seed)
 	{
 		// No assertions, this is just a report
 		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);

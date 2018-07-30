@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
@@ -37,6 +37,8 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class ErfTest
@@ -83,25 +85,25 @@ public class ErfTest
 	}
 	//@formatter:on
 
-	@Test
-	public void erf0xHasLowError()
+	@SeededTest
+	public void erf0xHasLowError(RandomSeed seed)
 	{
-		erfxHasLowError(new Erf0(), 5e-4);
+		erfxHasLowError(seed, new Erf0(), 5e-4);
 	}
 
-	@Test
-	public void erfxHasLowError()
+	@SeededTest
+	public void erfxHasLowError(RandomSeed seed)
 	{
-		erfxHasLowError(new Erf(), 3e-7);
+		erfxHasLowError(seed, new Erf(), 3e-7);
 	}
 
-	@Test
-	public void erf2xHasLowError()
+	@SeededTest
+	public void erf2xHasLowError(RandomSeed seed)
 	{
-		erfxHasLowError(new Erf2(), 1.3e-4);
+		erfxHasLowError(seed, new Erf2(), 1.3e-4);
 	}
 
-	private static void erfxHasLowError(BaseErf erf, double expected)
+	private static void erfxHasLowError(RandomSeed seed, BaseErf erf, double expected)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int range = 8;
@@ -167,25 +169,25 @@ public class ErfTest
 				Double.toString(upper));
 	}
 
-	@Test
-	public void erf0xxHasLowError()
+	@SeededTest
+	public void erf0xxHasLowError(RandomSeed seed)
 	{
-		erfxxHasLowError(new Erf0(), 4e-2);
+		erfxxHasLowError(seed, new Erf0(), 4e-2);
 	}
 
-	@Test
-	public void erfxxHasLowError()
+	@SeededTest
+	public void erfxxHasLowError(RandomSeed seed)
 	{
-		erfxxHasLowError(new Erf(), 7e-4);
+		erfxxHasLowError(seed, new Erf(), 7e-4);
 	}
 
-	@Test
-	public void erf2xxHasLowError()
+	@SeededTest
+	public void erf2xxHasLowError(RandomSeed seed)
 	{
-		erfxxHasLowError(new Erf2(), 1.1e-2);
+		erfxxHasLowError(seed, new Erf2(), 1.1e-2);
 	}
 
-	private static void erfxxHasLowError(BaseErf erf, double expected)
+	private static void erfxxHasLowError(RandomSeed seed, BaseErf erf, double expected)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 

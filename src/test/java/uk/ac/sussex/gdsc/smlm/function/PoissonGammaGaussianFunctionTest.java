@@ -32,7 +32,7 @@ import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -42,6 +42,9 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFunctionTest
@@ -322,7 +325,7 @@ public class PoissonGammaGaussianFunctionTest
 	public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMFAtLowNoise()
 	{
 		ExtraAssumptions.assumeHighComplexity();
-		
+
 		// This is the whole test. It could be separated into parameters that fail 
 		// and parameters that are OK.
 		Assertions.assertThrows(AssertionFailedError.class, () -> {
@@ -610,28 +613,32 @@ public class PoissonGammaGaussianFunctionTest
 	// Speed order is roughly: Approx, Simpson, Discrete PDF, Legendre, Discrete PMF
 	// The most accurate over most settings p<<1e-5, p=1, p>>10 is the Simpson.
 
-	@Test
-	public void approximationFasterThanSimpsonIntegration()
+	@SpeedTag
+	@SeededTest
+	public void approximationFasterThanSimpsonIntegration(RandomSeed seed)
 	{
-		fasterThan(ConvolutionMode.SIMPSON_PDF, ConvolutionMode.APPROXIMATION);
+		fasterThan(seed, ConvolutionMode.SIMPSON_PDF, ConvolutionMode.APPROXIMATION);
 	}
 
-	@Test
-	public void simpsonIntegrationFasterThanDiscretePDFIntegration()
+	@SpeedTag
+	@SeededTest
+	public void simpsonIntegrationFasterThanDiscretePDFIntegration(RandomSeed seed)
 	{
-		fasterThan(ConvolutionMode.DISCRETE_PDF, ConvolutionMode.SIMPSON_PDF);
+		fasterThan(seed, ConvolutionMode.DISCRETE_PDF, ConvolutionMode.SIMPSON_PDF);
 	}
 
-	@Test
-	public void simpsonIntegrationFasterThanLegendreGaussIntegration()
+	@SpeedTag
+	@SeededTest
+	public void simpsonIntegrationFasterThanLegendreGaussIntegration(RandomSeed seed)
 	{
-		fasterThan(ConvolutionMode.LEGENDRE_GAUSS_PDF, ConvolutionMode.SIMPSON_PDF);
+		fasterThan(seed, ConvolutionMode.LEGENDRE_GAUSS_PDF, ConvolutionMode.SIMPSON_PDF);
 	}
 
-	@Test
-	public void discretePDFIntegrationFasterThanDiscretePMFIntegration()
+	@SpeedTag
+	@SeededTest
+	public void discretePDFIntegrationFasterThanDiscretePMFIntegration(RandomSeed seed)
 	{
-		fasterThan(ConvolutionMode.DISCRETE_PMF, ConvolutionMode.DISCRETE_PDF);
+		fasterThan(seed, ConvolutionMode.DISCRETE_PMF, ConvolutionMode.DISCRETE_PDF);
 	}
 
 	private static void cumulativeProbabilityIsOne(final double mu, final double s, final double g,
@@ -779,7 +786,7 @@ public class PoissonGammaGaussianFunctionTest
 		return maxError;
 	}
 
-	private void fasterThan(ConvolutionMode slow, ConvolutionMode fast)
+	private void fasterThan(RandomSeed seed, ConvolutionMode slow, ConvolutionMode fast)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -815,6 +822,9 @@ public class PoissonGammaGaussianFunctionTest
 			final double[] data = stats.getValues();
 			for (int i = 1; i < data.length; i++)
 				data[i] += data[i - 1];
+			// Normalise
+			for (int i = 0, end = data.length - 1; i < data.length; i++)
+				data[i] /= data[end];
 
 			// Sample
 			final double[] sample = new double[1000];
@@ -824,7 +834,7 @@ public class PoissonGammaGaussianFunctionTest
 				int x = 0;
 				while (x < data.length && data[x] < p)
 					x++;
-				sample[i] = x;
+				sample[i] = start + x;
 			}
 			samples[j] = sample;
 		}

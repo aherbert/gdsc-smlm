@@ -127,7 +127,7 @@ folder.
 Legal
 -----
 
-See [LICENSE](LICENSE)
+See [LICENSE](LICENSE.txt)
 
 
 # About #

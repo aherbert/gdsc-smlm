@@ -25,10 +25,8 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -44,6 +42,9 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class LSQVarianceGradientProcedureTest
@@ -52,17 +53,20 @@ public class LSQVarianceGradientProcedureTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	double Background = 0.5;
-	double Signal = 100;
-	double Angle = Math.PI;
-	double Xpos = 5;
-	double Ypos = 5;
-	double Xwidth = 1.2;
-	double Ywidth = 1.2;
+	double background = 0.5;
+	double signal = 100;
+	double angle = Math.PI;
+	double xpos = 5;
+	double ypos = 5;
+	double xwidth = 1.2;
+	double ywidth = 1.2;
 
-	RandomDataGenerator rdg;
+	private static double nextUniform(UniformRandomProvider r, double min, double max)
+	{
+		return min + r.nextDouble() * (max - min);
+	}
 
-	@Test
+	@SeededTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		Assertions.assertEquals(LSQVarianceGradientProcedureFactory.create(new DummyGradientFunction(6)).getClass(),
@@ -73,36 +77,35 @@ public class LSQVarianceGradientProcedureTest
 				LSQVarianceGradientProcedure4.class);
 	}
 
-	@Test
-	public void gradientProcedureComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(4);
-		gradientProcedureComputesSameAsGradientCalculator(5);
-		gradientProcedureComputesSameAsGradientCalculator(6);
-		gradientProcedureComputesSameAsGradientCalculator(11);
-		gradientProcedureComputesSameAsGradientCalculator(21);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 4);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 5);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 6);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 11);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 21);
 	}
 
-	@Test
-	public void gradientProcedureIsNotSlowerThanGradientCalculator()
+	@SeededTest
+	public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(4);
-		gradientProcedureIsNotSlowerThanGradientCalculator(5);
-		gradientProcedureIsNotSlowerThanGradientCalculator(6);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6);
 		// 2 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(11);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11);
 		// 4 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(21);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(int nparams)
+	private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, int nparams)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 		final int n = blockWidth * blockWidth;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -160,16 +163,15 @@ public class LSQVarianceGradientProcedureTest
 		abstract void run();
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 		final int n = blockWidth * blockWidth;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -223,30 +225,30 @@ public class LSQVarianceGradientProcedureTest
 				(1.0 * time1) / time2);
 	}
 
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, false);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, false);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, false);
 	}
 
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, true);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, true);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, true);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed, int nparams,
+			boolean precomputed)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
@@ -267,32 +269,34 @@ public class LSQVarianceGradientProcedureTest
 		}
 	}
 
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, false);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, false);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, false);
 	}
 
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, true);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, true);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, true);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
+			final boolean precomputed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList);
 
 		// Remove the timing of the function call by creating a dummy function
 		final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
@@ -352,11 +356,11 @@ public class LSQVarianceGradientProcedureTest
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
-	@Test
-	public void crlbIsHigherWithPrecomputed()
+	@SeededTest
+	public void crlbIsHigherWithPrecomputed(RandomSeed seed)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -367,16 +371,16 @@ public class LSQVarianceGradientProcedureTest
 		// Get a background
 		final double[] b = new double[func.size()];
 		for (int i = 0; i < b.length; i++)
-			b[i] = rdg.nextUniform(1, 2);
+			b[i] = nextUniform(r, 1, 2);
 
 		for (int i = 0; i < iter; i++)
 		{
-			a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
-			a[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-			a[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
-			a[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
-			a[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
-			a[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
+			a[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
+			a[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
+			a[Gaussian2DFunction.X_POSITION] = nextUniform(r, 4, 6);
+			a[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 4, 6);
+			a[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
+			a[Gaussian2DFunction.Y_SD] = nextUniform(r, 1, 1.3);
 
 			final LSQVarianceGradientProcedure p1 = LSQVarianceGradientProcedureFactory.create(func);
 			p1.variance(a);
@@ -395,7 +399,7 @@ public class LSQVarianceGradientProcedureTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void varianceMatchesFormula()
 	{
 		//Assumptions.assumeTrue(false);
@@ -443,7 +447,8 @@ public class LSQVarianceGradientProcedureTest
 		}
 	}
 
-	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	protected int[] createFakeData(final UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
 		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -451,17 +456,16 @@ public class LSQVarianceGradientProcedureTest
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[nparams];
-			final double[] y = createFakeData(params);
+			final double[] y = createFakeData(r, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	private double[] createFakeData(double[] params)
+	private double[] createFakeData(final UniformRandomProvider r, double[] params)
 	{
 		final int n = blockWidth * blockWidth;
-		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
@@ -473,19 +477,19 @@ public class LSQVarianceGradientProcedureTest
 		return y;
 	}
 
-	protected void createFakeParams(int nparams, int iter, ArrayList<double[]> paramsList)
+	protected void createFakeParams(final UniformRandomProvider r, int nparams, int iter,
+			ArrayList<double[]> paramsList)
 	{
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[nparams];
-			createFakeParams(params);
+			createFakeParams(r, params);
 			paramsList.add(params);
 		}
 	}
 
-	private void createFakeParams(double[] params)
+	private static void createFakeParams(final UniformRandomProvider r, double[] params)
 	{
-		final UniformRandomProvider r = rdg.getRandomGenerator();
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
 	}

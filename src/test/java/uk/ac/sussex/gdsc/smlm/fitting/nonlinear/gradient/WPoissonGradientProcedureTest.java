@@ -25,52 +25,57 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
+import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
-public class WPoissonGradientProcedureTest
+public class WPoissonGradientProcedureTest implements DataProvider<RandomSeed, double[]>
 {
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
 	static int blockWidth = 10;
-	double Background = 0.5;
-	double Signal = 100;
-	double Angle = Math.PI;
-	double Xpos = 5;
-	double Ypos = 5;
-	double Xwidth = 1.2;
-	double Ywidth = 1.2;
+	double background = 0.5;
+	double signal = 100;
+	double angle = Math.PI;
+	double xpos = 5;
+	double ypos = 5;
+	double xwidth = 1.2;
+	double ywidth = 1.2;
 
-	RandomDataGenerator rdg;
+	private static final DataCache<RandomSeed, double[]> dataCache = new DataCache<>();
 
-	static double[] var;
-	static
+	@Override
+	public double[] getData(RandomSeed source)
 	{
 		int n = blockWidth * blockWidth;
-		var = new double[n];
-		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		double[] var = new double[n];
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(source.getSeed());
 		while (n-- > 0)
 			// Range 0.9 to 1.1
 			var[n] = 0.9 + 0.2 * r.nextDouble();
+		return var;
 	}
 
-	@Test
-	public void gradientProcedureFactoryCreatesOptimisedProcedures()
+	@SeededTest
+	public void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed)
 	{
+		double[] var = dataCache.getData(seed, this);
 		final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
 		Assertions.assertEquals(
 				WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
@@ -83,31 +88,33 @@ public class WPoissonGradientProcedureTest
 				WPoissonGradientProcedure4.class);
 	}
 
-	@Test
-	public void poissonGradientProcedureComputesSameAsWLSQGradientProcedure()
+	@SeededTest
+	public void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed)
 	{
-		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(4);
-		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(5);
-		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(6);
-		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(11);
-		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(21);
+		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 4);
+		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 5);
+		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 6);
+		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 11);
+		poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 21);
 	}
 
-	private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(int nparams)
+	private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed, int nparams)
 	{
+		double[] var = dataCache.getData(seed, this);
+
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		createFakeParams(r, nparams, iter, paramsList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		final String name = String.format("[%d]", nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			final double[] y = createFakeData();
+			final double[] y = createFakeData(r);
 			final WPoissonGradientProcedure p1 = WPoissonGradientProcedureFactory.create(y, var, func);
 			p1.computeFisherInformation(paramsList.get(i));
 			final WLSQLVMGradientProcedure p2 = new WLSQLVMGradientProcedure(y, var, func);
@@ -161,38 +168,39 @@ public class WPoissonGradientProcedureTest
 		abstract void run();
 	}
 
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, false);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, false);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, false);
 	}
 
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, true);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, true);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, true);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed, int nparams,
+			boolean precomputed)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		createFakeParams(r, nparams, iter, paramsList);
 		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-		final double[] v = (precomputed) ? var : null;
+		final double[] v = (precomputed) ? dataCache.getData(seed, this) : null;
 
 		final String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			final double[] y = createFakeData();
+			final double[] y = createFakeData(r);
 			final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
 			p1.computeFisherInformation(paramsList.get(i));
 
@@ -205,37 +213,39 @@ public class WPoissonGradientProcedureTest
 		}
 	}
 
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, false);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, false);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, false);
 	}
 
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, true);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, true);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, true);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
+			final boolean precomputed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createFakeData(nparams, iter, paramsList, yList);
+		createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
-		final double[] v = (precomputed) ? var : null;
+		final double[] v = (precomputed) ? dataCache.getData(seed, this) : null;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -288,26 +298,27 @@ public class WPoissonGradientProcedureTest
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
-	@Test
-	public void gradientProcedureIsFasterThanWLSEGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterThanWLSEGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterThanWLSEGradientProcedure(4);
-		gradientProcedureIsFasterThanWLSEGradientProcedure(5);
-		gradientProcedureIsFasterThanWLSEGradientProcedure(6);
-		gradientProcedureIsFasterThanWLSEGradientProcedure(11);
+		gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 4);
+		gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 5);
+		gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 6);
+		gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 11);
 	}
 
-	private void gradientProcedureIsFasterThanWLSEGradientProcedure(final int nparams)
+	private void gradientProcedureIsFasterThanWLSEGradientProcedure(RandomSeed seed, final int nparams)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createFakeData(nparams, iter, paramsList, yList);
+		double[] var = dataCache.getData(seed, this);
+		createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -364,7 +375,8 @@ public class WPoissonGradientProcedureTest
 				(1.0 * time1) / time2);
 	}
 
-	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
 		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -372,17 +384,16 @@ public class WPoissonGradientProcedureTest
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[nparams];
-			final double[] y = createFakeData(params);
+			final double[] y = createFakeData(r, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	private double[] createFakeData(double[] params)
+	private static double[] createFakeData(UniformRandomProvider r, double[] params)
 	{
 		final int n = blockWidth * blockWidth;
-		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
@@ -394,10 +405,9 @@ public class WPoissonGradientProcedureTest
 		return y;
 	}
 
-	private double[] createFakeData()
+	private static double[] createFakeData(UniformRandomProvider r)
 	{
 		final int n = blockWidth * blockWidth;
-		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		final double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
@@ -406,19 +416,18 @@ public class WPoissonGradientProcedureTest
 		return y;
 	}
 
-	protected void createFakeParams(int nparams, int iter, ArrayList<double[]> paramsList)
+	protected void createFakeParams(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList)
 	{
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[nparams];
-			createFakeParams(params);
+			createFakeParams(r, params);
 			paramsList.add(params);
 		}
 	}
 
-	private void createFakeParams(double[] params)
+	private static void createFakeParams(UniformRandomProvider r, double[] params)
 	{
-		final UniformRandomProvider r = rdg.getRandomGenerator();
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
 	}

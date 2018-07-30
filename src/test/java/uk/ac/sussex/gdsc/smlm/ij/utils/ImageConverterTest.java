@@ -27,39 +27,56 @@ import java.awt.Rectangle;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
-public class ImageConverterTest
+public class ImageConverterTest implements DataProvider<RandomSeed, Object>
 {
-	static byte[] bdata;
-	static short[] sdata;
-	static float[] fdata;
 	final static int w = 200, h = 300;
-	static
+
+	private class ImageConverterTestData
+	{
+		byte[] bdata;
+		short[] sdata;
+		float[] fdata;
+	}
+
+	private static DataCache<RandomSeed, Object> dataCache = new DataCache<>();
+
+	@Override
+	public Object getData(RandomSeed seed)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final ByteProcessor bp = new ByteProcessor(w, h);
-		bdata = (byte[]) bp.getPixels();
-		sdata = new short[bdata.length];
-		fdata = new float[bdata.length];
+		ImageConverterTestData data = new ImageConverterTestData();
+		data.bdata = (byte[]) bp.getPixels();
+		data.sdata = new short[data.bdata.length];
+		data.fdata = new float[data.bdata.length];
 		for (int i = 0; i < bp.getPixelCount(); i++)
 		{
 			final int value = r.nextInt(256);
 			bp.set(i, value);
-			fdata[i] = sdata[i] = (short) value;
+			data.fdata[i] = data.sdata[i] = (short) value;
 		}
+		return data;
 	}
 
-	@Test
-	public void canGetData()
+	@SeededTest
+	public void canGetData(RandomSeed seed)
 	{
+		ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
+		byte[] bdata = data.bdata;
+		short[] sdata = data.sdata;
+		float[] fdata = data.fdata;
 		final Rectangle bounds = null;
 		final float[] fe = fdata;
 		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
@@ -72,9 +89,13 @@ public class ImageConverterTest
 		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
 	}
 
-	@Test
-	public void canGetDataWithFullBounds()
+	@SeededTest
+	public void canGetDataWithFullBounds(RandomSeed seed)
 	{
+		ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
+		byte[] bdata = data.bdata;
+		short[] sdata = data.sdata;
+		float[] fdata = data.fdata;
 		final Rectangle bounds = new Rectangle(0, 0, w, h);
 		final float[] fe = fdata;
 		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
@@ -87,9 +108,13 @@ public class ImageConverterTest
 		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
 	}
 
-	@Test
-	public void canGetCropData()
+	@SeededTest
+	public void canGetCropData(RandomSeed seed)
 	{
+		ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
+		byte[] bdata = data.bdata;
+		short[] sdata = data.sdata;
+		float[] fdata = data.fdata;
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(fdata, w, h);
 		for (int i = 0; i < 10; i++)

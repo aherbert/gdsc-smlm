@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class RampedSelectionStrategyTest
@@ -101,6 +102,7 @@ public class RampedSelectionStrategyTest
 		}
 	}
 
+	@SpeedTag
 	@Test
 	public void speedTest50()
 	{
@@ -108,6 +110,7 @@ public class RampedSelectionStrategyTest
 		speedTest(50, false, 10);
 	}
 
+	@SpeedTag
 	@Test
 	public void speedTest200()
 	{
@@ -115,6 +118,7 @@ public class RampedSelectionStrategyTest
 		speedTest(200, true, 5);
 	}
 
+	@SpeedTag
 	@Test
 	public void speedTest1000()
 	{
@@ -123,6 +127,7 @@ public class RampedSelectionStrategyTest
 	}
 
 	// Too slow for common use
+	@SpeedTag
 	@Test
 	public void speedTest5000()
 	{

@@ -26,13 +26,15 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class MedianFilterTest extends AbstractFilterTest
@@ -56,8 +58,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		}
 	}
 
-	@Test
-	public void floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -79,8 +81,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -101,14 +103,15 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatBlockMedianNxNInternalIsFasterThanRollingMedianNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockMedianNxNInternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -170,8 +173,8 @@ public class MedianFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -192,14 +195,15 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -253,14 +257,15 @@ public class MedianFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockMedian3x3InternalIsFasterThanRollingMedian3x3Internal()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockMedian3x3InternalIsFasterThanRollingMedian3x3Internal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -315,8 +320,8 @@ public class MedianFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
+	@SeededTest
+	public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -337,14 +342,15 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -399,8 +405,8 @@ public class MedianFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult()
+	@SeededTest
+	public void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -422,14 +428,15 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
-	@Test
-	public void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -491,14 +498,15 @@ public class MedianFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockMedianNxNIsFasterThanRollingMedianNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockMedianNxNIsFasterThanRollingMedianNxN(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -558,14 +566,15 @@ public class MedianFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -627,8 +636,8 @@ public class MedianFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult()
+	@SeededTest
+	public void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -637,8 +646,8 @@ public class MedianFilterTest extends AbstractFilterTest
 				floatCompareBlockMedian3x3AndBlockMedianNxN(rg, filter, width, height);
 	}
 
-	private static void floatCompareBlockMedian3x3AndBlockMedianNxN(UniformRandomProvider rg, MedianFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private static void floatCompareBlockMedian3x3AndBlockMedianNxN(UniformRandomProvider rg, MedianFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
 		final float[] data2 = floatClone(data1);
@@ -649,14 +658,15 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatBlockMedian3x3IsFasterThanBlockMedianNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatBlockMedian3x3IsFasterThanBlockMedianNxN(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -709,8 +719,8 @@ public class MedianFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult()
+	@SeededTest
+	public void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final MedianFilter filter = new MedianFilter();
@@ -732,14 +742,15 @@ public class MedianFilterTest extends AbstractFilterTest
 		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
-	@Test
-	public void floatRollingMedian3x3IsFasterThanRollingMedianNxN()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingMedian3x3IsFasterThanRollingMedianNxN(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -792,14 +803,15 @@ public class MedianFilterTest extends AbstractFilterTest
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingMedian3x3IsFasterThanBlockMedian3x3()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingMedian3x3IsFasterThanBlockMedian3x3(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final MedianFilter filter = new MedianFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER3);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 

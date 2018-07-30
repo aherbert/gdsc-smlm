@@ -26,12 +26,12 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -45,11 +45,15 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFuncti
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -62,17 +66,20 @@ public class GradientCalculatorSpeedTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	double Background = 0.5;
-	double Amplitude = 100;
-	double Angle = Math.PI;
-	double Xpos = 5;
-	double Ypos = 5;
-	double Xwidth = 1.2;
-	double Ywidth = 1.2;
+	double background = 0.5;
+	double amplitude = 100;
+	double angle = Math.PI;
+	double xpos = 5;
+	double ypos = 5;
+	double xwidth = 1.2;
+	double ywidth = 1.2;
 
-	RandomDataGenerator rdg;
-
-	@Test
+	private static double random(UniformRandomProvider r, double d)
+	{
+		return d - d * 0.1 + r.nextDouble() * 0.2;
+	}
+	
+	@SeededTest
 	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
 	{
 		Assertions.assertEquals(GradientCalculatorFactory.newCalculator(3).getClass(), GradientCalculator3.class);
@@ -96,153 +103,163 @@ public class GradientCalculatorSpeedTest
 				MLEGradientCalculator.class);
 	}
 
-	@Test
-	public void mleGradientCalculator7ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void mleGradientCalculator7ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
 				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, true);
 	}
 
-	@Test
-	public void mleGradientCalculator7IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void mleGradientCalculator7IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
 				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, true);
 	}
 
-	@Test
-	public void mleGradientCalculator6ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void mleGradientCalculator6ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
 				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, true);
 	}
 
-	@Test
-	public void mleGradientCalculator6IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void mleGradientCalculator6IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
 				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, true);
 	}
 
-	@Test
-	public void mleGradientCalculator5ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void mleGradientCalculator5ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
 				new SingleCircularGaussian2DFunction(blockWidth, blockWidth), 5, true);
 	}
 
-	@Test
-	public void mleGradientCalculator5IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void mleGradientCalculator5IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth, blockWidth),
-				5, true);
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
+				new SingleCircularGaussian2DFunction(blockWidth, blockWidth), 5, true);
 	}
 
-	@Test
-	public void mleGradientCalculator4ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void mleGradientCalculator4ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth),
-				4, true);
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
+				new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4, true);
 	}
 
-	@Test
-	public void mleGradientCalculator4IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void mleGradientCalculator4IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4,
-				true);
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
+				new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4, true);
 	}
 
-	@Test
-	public void mleGradientCalculator3ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void mleGradientCalculator3ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
-				3, true);
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
+				new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, true);
 	}
 
-	@Test
-	public void mleGradientCalculator3IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void mleGradientCalculator3IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
-				3, true);
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
+				new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, true);
 	}
 
-	@Test
-	public void gradientCalculator7ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientCalculator7ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
 				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, false);
 	}
 
-	@Test
-	public void gradientCalculator7IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientCalculator7IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
 				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, false);
 	}
 
-	@Test
-	public void gradientCalculator6ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientCalculator6ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
 				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, false);
 	}
 
-	@Test
-	public void gradientCalculator6IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientCalculator6IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
 				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, false);
 	}
 
-	@Test
-	public void gradientCalculator5ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientCalculator5ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
 				new SingleCircularGaussian2DFunction(blockWidth, blockWidth), 5, false);
 	}
 
-	@Test
-	public void gradientCalculator5IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientCalculator5IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth, blockWidth),
-				5, false);
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
+				new SingleCircularGaussian2DFunction(blockWidth, blockWidth), 5, false);
 	}
 
-	@Test
-	public void gradientCalculator4ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientCalculator4ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth),
-				4, false);
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
+				new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4, false);
 	}
 
-	@Test
-	public void gradientCalculator4IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientCalculator4IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4,
-				false);
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
+				new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4, false);
 	}
 
-	@Test
-	public void gradientCalculator3ComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientCalculator3ComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
-				3, false);
+		gradientCalculatorNComputesSameAsGradientCalculator(seed,
+				new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, false);
 	}
 
-	@Test
-	public void gradientCalculator3IsFasterThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientCalculator3IsFasterThanGradientCalculator(RandomSeed seed)
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
-				3, false);
+		gradientCalculatorNIsFasterThanGradientCalculator(seed,
+				new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, false);
 	}
 
-	private void gradientCalculatorNComputesSameAsGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
+	private void gradientCalculatorNComputesSameAsGradientCalculator(RandomSeed seed, Gaussian2DFunction func,
+			int nparams, boolean mle)
 	{
 		// Check the function is the correct size
 		Assertions.assertEquals(nparams, func.gradientIndices().length);
 
 		final int iter = 50;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
@@ -252,7 +269,7 @@ public class GradientCalculatorSpeedTest
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		final int[] x = createData(1, iter, paramsList, yList);
+		final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
 
 		final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length)
 				: new GradientCalculator(beta.length);
@@ -312,7 +329,8 @@ public class GradientCalculatorSpeedTest
 		}
 	}
 
-	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
+	private void gradientCalculatorNIsFasterThanGradientCalculator(RandomSeed seed, Gaussian2DFunction func,
+			int nparams, boolean mle)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -320,14 +338,13 @@ public class GradientCalculatorSpeedTest
 		Assertions.assertEquals(nparams, func.gradientIndices().length);
 
 		final int iter = 10000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		final int[] x = createData(1, iter, paramsList, yList);
+		final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
 
 		final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length)
 				: new GradientCalculator(beta.length);
@@ -354,18 +371,17 @@ public class GradientCalculatorSpeedTest
 				nparams, start2, (1.0 * start1) / start2);
 	}
 
-	@Test
-	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator()
+	@SeededTest
+	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 10000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		final int[] x = createData(1, iter, paramsList, yList);
+		final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
 
 		final GradientCalculator calc = new GradientCalculator6();
 		final GradientCalculator calc2 = new GradientCalculator6();
@@ -396,19 +412,19 @@ public class GradientCalculatorSpeedTest
 				start1, start2, (1.0 * start1) / start2);
 	}
 
-	@Test
-	public void gradientCalculatorComputesGradient()
+	@SeededTest
+	public void gradientCalculatorComputesGradient(RandomSeed seed)
 	{
-		gradientCalculatorComputesGradient(new GradientCalculator(7));
+		gradientCalculatorComputesGradient(seed, new GradientCalculator(7));
 	}
 
-	@Test
-	public void mleGradientCalculatorComputesGradient()
+	@SeededTest
+	public void mleGradientCalculatorComputesGradient(RandomSeed seed)
 	{
-		gradientCalculatorComputesGradient(new MLEGradientCalculator(7));
+		gradientCalculatorComputesGradient(seed, new MLEGradientCalculator(7));
 	}
 
-	private void gradientCalculatorComputesGradient(GradientCalculator calc)
+	private void gradientCalculatorComputesGradient(RandomSeed seed, GradientCalculator calc)
 	{
 		final int nparams = calc.nparams;
 		final Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
@@ -417,7 +433,6 @@ public class GradientCalculatorSpeedTest
 		Assertions.assertEquals(nparams, indices.length);
 
 		final int iter = 50;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final double[] beta = new double[nparams];
 		final double[] beta2 = new double[nparams];
@@ -425,7 +440,7 @@ public class GradientCalculatorSpeedTest
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		final int[] x = createData(1, iter, paramsList, yList, true);
+		final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList, true);
 
 		final double delta = 1e-3;
 		final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
@@ -457,7 +472,7 @@ public class GradientCalculatorSpeedTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void mleGradientCalculatorComputesLikelihood()
 	{
 		//@formatter:off
@@ -510,8 +525,8 @@ public class GradientCalculatorSpeedTest
 		}
 	}
 
-	@Test
-	public void gradientCalculatorComputesSameOutputWithBias()
+	@SeededTest
+	public void gradientCalculatorComputesSameOutputWithBias(RandomSeed seed)
 	{
 
 		final Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
@@ -520,7 +535,6 @@ public class GradientCalculatorSpeedTest
 		final int n = func.size();
 
 		final int iter = 50;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -530,12 +544,12 @@ public class GradientCalculatorSpeedTest
 		final ArrayList<double[]> xList = new ArrayList<>(iter);
 
 		// Manipulate the background
-		final double defaultBackground = Background;
+		final double defaultBackground = background;
 		final boolean report = TestSettings.allow(LogLevel.INFO);
 		try
 		{
-			Background = 1e-2;
-			createData(1, iter, paramsList, yList, true);
+			background = 1e-2;
+			createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList, true);
 
 			final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
@@ -613,7 +627,7 @@ public class GradientCalculatorSpeedTest
 		}
 		finally
 		{
-			Background = defaultBackground;
+			background = defaultBackground;
 		}
 	}
 
@@ -625,22 +639,23 @@ public class GradientCalculatorSpeedTest
 		return d;
 	}
 
-	@Test
-	public void mleCalculatorComputesLogLikelihoodRatio()
+	@SeededTest
+	public void mleCalculatorComputesLogLikelihoodRatio(RandomSeed seed)
 	{
 		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
 		final int n = blockWidth * blockWidth;
 		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		for (int run = 5; run-- > 0;)
 		{
-			a[Gaussian2DFunction.BACKGROUND] = random(Background);
-			a[Gaussian2DFunction.SIGNAL] = random(Amplitude);
-			a[Gaussian2DFunction.ANGLE] = random(Angle);
-			a[Gaussian2DFunction.X_POSITION] = random(Xpos);
-			a[Gaussian2DFunction.Y_POSITION] = random(Ypos);
-			a[Gaussian2DFunction.X_SD] = random(Xwidth);
-			a[Gaussian2DFunction.Y_SD] = random(Ywidth);
+			a[Gaussian2DFunction.BACKGROUND] = random(r, background);
+			a[Gaussian2DFunction.SIGNAL] = random(r, amplitude);
+			a[Gaussian2DFunction.ANGLE] = random(r, angle);
+			a[Gaussian2DFunction.X_POSITION] = random(r, xpos);
+			a[Gaussian2DFunction.Y_POSITION] = random(r, ypos);
+			a[Gaussian2DFunction.X_SD] = random(r, xwidth);
+			a[Gaussian2DFunction.Y_SD] = random(r, ywidth);
 
 			// Simulate Poisson process
 			func.initialise(a);
@@ -648,9 +663,15 @@ public class GradientCalculatorSpeedTest
 			final double[] u = new double[x.length];
 			for (int i = 0; i < n; i++)
 			{
-				u[i] = func.eval(i);
-				if (u[i] > 0)
-					x[i] = rdg.nextPoisson(u[i]);
+				// Add random Poisson noise
+				final double value = func.eval(i);
+				if (value > 0)
+				{
+					pd.setMeanUnsafe(value);
+					u[i++] = pd.sample();
+				}
+				else
+					u[i++] = 0;
 			}
 
 			final int ng = func.getNumberOfGradients();
@@ -671,6 +692,8 @@ public class GradientCalculatorSpeedTest
 	 * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude, angle, xpos,
 	 * ypos, xwidth, ywidth }
 	 *
+	 * @param r
+	 *            the random
 	 * @param npeaks
 	 *            the npeaks
 	 * @param params
@@ -679,59 +702,60 @@ public class GradientCalculatorSpeedTest
 	 *            Set to true to randomise the params
 	 * @return the double[]
 	 */
-	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
+	private double[] doubleCreateGaussianData(UniformRandomProvider r, int npeaks, double[] params,
+			boolean randomiseParams)
 	{
 		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
 		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
-		params[0] = random(Background);
+		params[0] = random(r, background);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j + Gaussian2DFunction.SIGNAL] = random(Amplitude);
-			params[j + Gaussian2DFunction.ANGLE] = random(Angle);
-			params[j + Gaussian2DFunction.X_POSITION] = random(Xpos);
-			params[j + Gaussian2DFunction.Y_POSITION] = random(Ypos);
-			params[j + Gaussian2DFunction.X_SD] = random(Xwidth);
-			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
+			params[j + Gaussian2DFunction.SIGNAL] = random(r, amplitude);
+			params[j + Gaussian2DFunction.ANGLE] = random(r, angle);
+			params[j + Gaussian2DFunction.X_POSITION] = random(r, xpos);
+			params[j + Gaussian2DFunction.Y_POSITION] = random(r, ypos);
+			params[j + Gaussian2DFunction.X_SD] = random(r, xwidth);
+			params[j + Gaussian2DFunction.Y_SD] = random(r, ywidth);
 		}
 
-		final double[] dy_da = new double[params.length];
 		final double[] y = new double[n];
 		func.initialise(params);
+		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		for (int i = 0; i < y.length; i++)
+		{
 			// Add random Poisson noise
-			y[i] = rdg.nextPoisson(func.eval(i, dy_da));
+			final double u = func.eval(i);
+			pd.setMean(u);
+			y[i] = pd.sample();
+		}
 
 		if (randomiseParams)
 		{
-			params[0] = random(params[0]);
+			params[0] = random(r, params[0]);
 			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
-				params[j + Gaussian2DFunction.SIGNAL] = random(params[j + Gaussian2DFunction.SIGNAL]);
-				params[j + Gaussian2DFunction.ANGLE] = random(params[j + Gaussian2DFunction.ANGLE]);
-				params[j + Gaussian2DFunction.X_POSITION] = random(params[j + Gaussian2DFunction.X_POSITION]);
-				params[j + Gaussian2DFunction.Y_POSITION] = random(params[j + Gaussian2DFunction.Y_POSITION]);
-				params[j + Gaussian2DFunction.X_SD] = random(params[j + Gaussian2DFunction.X_SD]);
-				params[j + Gaussian2DFunction.Y_SD] = random(params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
+				params[j + Gaussian2DFunction.SIGNAL] = random(r, params[j + Gaussian2DFunction.SIGNAL]);
+				params[j + Gaussian2DFunction.ANGLE] = random(r, params[j + Gaussian2DFunction.ANGLE]);
+				params[j + Gaussian2DFunction.X_POSITION] = random(r, params[j + Gaussian2DFunction.X_POSITION]);
+				params[j + Gaussian2DFunction.Y_POSITION] = random(r, params[j + Gaussian2DFunction.Y_POSITION]);
+				params[j + Gaussian2DFunction.X_SD] = random(r, params[j + Gaussian2DFunction.X_SD]);
+				params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
 			}
 		}
 
 		return y;
 	}
 
-	private double random(double d)
+	protected int[] createData(UniformRandomProvider r, int npeaks, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
-		return d + rdg.nextUniform(-d * 0.1, d * 0.1);
+		return createData(r, npeaks, iter, paramsList, yList, true);
 	}
 
-	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
-	{
-		return createData(npeaks, iter, paramsList, yList, true);
-	}
-
-	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
-			boolean randomiseParams)
+	protected int[] createData(UniformRandomProvider r, int npeaks, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList, boolean randomiseParams)
 	{
 		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -739,7 +763,7 @@ public class GradientCalculatorSpeedTest
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			final double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
+			final double[] y = doubleCreateGaussianData(r, npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}

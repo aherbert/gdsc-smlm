@@ -25,39 +25,63 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import java.util.ArrayList;
 
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
  * from a Gaussian 2D Function
  */
 @SuppressWarnings({ "javadoc" })
-public class Gaussian2DFunctionSpeedTest
+public class Gaussian2DFunctionSpeedTest implements DataProvider<RandomSeed, Object>
 {
-	private final int Single = 1;
-	private final int Multi = 2;
+	private final int single = 1;
+	private final int multi = 2;
 
 	private static int blockWidth = 10;
-	private static double Background = 20;
-	private static double Amplitude = 10;
-	private static double Xpos = 5;
-	private static double Ypos = 5;
-	private static double Xwidth = 5;
+	private static double background = 20;
+	private static double amplitude = 10;
+	private static double xpos = 5;
+	private static double ypos = 5;
+	private static double xwidth = 5;
 
-	private static UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+	private class Gaussian2DFunctionSpeedTestData
+	{
+		ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
+		ArrayList<double[]> yListSinglePeak = new ArrayList<>();
+		ArrayList<double[]> paramsListMultiPeak = new ArrayList<>();
+		ArrayList<double[]> yListMultiPeak = new ArrayList<>();
+		final UniformRandomProvider rand;
 
-	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
-	private static ArrayList<double[]> yListSinglePeak = new ArrayList<>();
-	private static ArrayList<double[]> paramsListMultiPeak = new ArrayList<>();
-	private static ArrayList<double[]> yListMultiPeak = new ArrayList<>();
+		Gaussian2DFunctionSpeedTestData(UniformRandomProvider rand)
+		{
+			this.rand = rand;
+		}
+	}
+
+	private static final DataCache<RandomSeed, Object> dataCache = new DataCache<>();
+
+	@Override
+	public Object getData(RandomSeed source)
+	{
+		return new Gaussian2DFunctionSpeedTestData(TestSettings.getRandomGenerator(source.getSeed()));
+	}
+
+	//	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
+	//	private static ArrayList<double[]> yListSinglePeak = new ArrayList<>();
+	//	private static ArrayList<double[]> paramsListMultiPeak = new ArrayList<>();
+	//	private static ArrayList<double[]> yListMultiPeak = new ArrayList<>();
 
 	private static int[] x;
 	static
@@ -67,188 +91,216 @@ public class Gaussian2DFunctionSpeedTest
 			x[i] = i;
 	}
 
-	private static synchronized void ensureDataSingle(int size)
+	private Gaussian2DFunctionSpeedTestData ensureDataSingle(RandomSeed seed, int size)
 	{
-		if (paramsListSinglePeak.size() < size)
-			createData(1, size, paramsListSinglePeak, yListSinglePeak);
+		Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache.getData(seed, this);
+		if (data.paramsListSinglePeak.size() < size)
+		{
+			synchronized (data.paramsListSinglePeak)
+			{
+				if (data.paramsListSinglePeak.size() < size)
+					createData(data.rand, 1, size, data.paramsListSinglePeak, data.yListSinglePeak);
+			}
+		}
+		return data;
 	}
 
-	private static synchronized void ensureDataMulti(int size)
+	private Gaussian2DFunctionSpeedTestData ensureDataMulti(RandomSeed seed, int size)
 	{
-		if (paramsListMultiPeak.size() < size)
-			createData(2, size, paramsListMultiPeak, yListMultiPeak);
+		Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache.getData(seed, this);
+		if (data.paramsListMultiPeak.size() < size)
+		{
+			synchronized (data.paramsListMultiPeak)
+			{
+				if (data.paramsListMultiPeak.size() < size)
+					createData(data.rand, 2, size, data.paramsListMultiPeak, data.yListMultiPeak);
+			}
+		}
+		return data;
 	}
 
-	@Test
-	public void freeCircularComputesSameAsEllipticalSinglePeak()
+	@SeededTest
+	public void freeCircularComputesSameAsEllipticalSinglePeak(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_FREE_CIRCLE,
+				GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
-	@Test
-	public void freeCircularFasterThanEllipticalSinglePeak()
+	@SpeedTag
+	@SeededTest
+	public void freeCircularFasterThanEllipticalSinglePeak(RandomSeed seed)
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
-	@Test
-	public void circularComputesSameAsFreeCircularSinglePeak()
+	@SeededTest
+	public void circularComputesSameAsFreeCircularSinglePeak(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void circularFasterThanFreeCircularSinglePeak()
+	@SpeedTag
+	@SeededTest
+	public void circularFasterThanFreeCircularSinglePeak(RandomSeed seed)
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedComputesSameAsFreeCircularSinglePeak()
+	@SeededTest
+	public void fixedComputesSameAsFreeCircularSinglePeak(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedFasterThanFreeCircularSinglePeak()
+	@SpeedTag
+	@SeededTest
+	public void fixedFasterThanFreeCircularSinglePeak(RandomSeed seed)
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void freeCircularComputesSameAsEllipticalSinglePeakNB()
+	@SeededTest
+	public void freeCircularComputesSameAsEllipticalSinglePeakNB(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+		f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
-	@Test
-	public void freeCircularFasterThanEllipticalSinglePeakNB()
+	@SpeedTag
+	@SeededTest
+	public void freeCircularFasterThanEllipticalSinglePeakNB(RandomSeed seed)
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+		f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
-	@Test
-	public void circularComputesSameAsFreeCircularSinglePeakNB()
+	@SeededTest
+	public void circularComputesSameAsFreeCircularSinglePeakNB(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+		f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void circularFasterThanFreeCircularSinglePeakNB()
+	@SpeedTag
+	@SeededTest
+	public void circularFasterThanFreeCircularSinglePeakNB(RandomSeed seed)
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+		f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedComputesSameAsFreeCircularSinglePeakNB()
+	@SeededTest
+	public void fixedComputesSameAsFreeCircularSinglePeakNB(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+		f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedFasterThanFreeCircularSinglePeakNB()
+	@SpeedTag
+@SeededTest
+	public void fixedFasterThanFreeCircularSinglePeakNB(RandomSeed seed)
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+		f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void freeCircularComputesSameAsEllipticalMultiPeak()
+	@SeededTest
+	public void freeCircularComputesSameAsEllipticalMultiPeak(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_FREE_CIRCLE,
+				GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
-	@Test
-	public void freeCircularFasterThanEllipticalMultiPeak()
+	@SpeedTag
+@SeededTest
+	public void freeCircularFasterThanEllipticalMultiPeak(RandomSeed seed)
 	{
-		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
-	@Test
-	public void circularComputesSameAsFreeCircularMultiPeak()
+	@SeededTest
+	public void circularComputesSameAsFreeCircularMultiPeak(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void circularFasterThanFreeCircularMultiPeak()
+	@SpeedTag
+	@SeededTest
+	public void circularFasterThanFreeCircularMultiPeak(RandomSeed seed)
 	{
-		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedComputesSameAsFreeCircularMultiPeak()
+	@SeededTest
+	public void fixedComputesSameAsFreeCircularMultiPeak(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedFasterThanFreeCircularMultiPeak()
+	@SpeedTag
+@SeededTest
+	public void fixedFasterThanFreeCircularMultiPeak(RandomSeed seed)
 	{
-		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void freeCircularComputesSameAsEllipticalMultiPeakNB()
+	@SeededTest
+	public void freeCircularComputesSameAsEllipticalMultiPeakNB(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+		f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
-	@Test
-	public void freeCircularFasterThanEllipticalMultiPeakNB()
+	@SpeedTag
+	@SeededTest
+	public void freeCircularFasterThanEllipticalMultiPeakNB(RandomSeed seed)
 	{
-		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+		f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
-	@Test
-	public void circularComputesSameAsFreeCircularMultiPeakNB()
+	@SeededTest
+	public void circularComputesSameAsFreeCircularMultiPeakNB(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+		f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void circularFasterThanFreeCircularMultiPeakNB()
+	@SpeedTag
+	@SeededTest
+	public void circularFasterThanFreeCircularMultiPeakNB(RandomSeed seed)
 	{
-		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+		f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedComputesSameAsFreeCircularMultiPeakNB()
+	@SeededTest
+	public void fixedComputesSameAsFreeCircularMultiPeakNB(RandomSeed seed)
 	{
-		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+		f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fixedFasterThanFreeCircularMultiPeakNB()
+	@SpeedTag
+	@SeededTest
+	public void fixedFasterThanFreeCircularMultiPeakNB(RandomSeed seed)
 	{
-		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+		f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)
+	void f1ComputesSameAsf2(RandomSeed seed, int npeaks, int flags1, int flags2)
 	{
 		final DoubleEquality eq = new DoubleEquality(1e-2, 1e-10);
 		final int iter = 50;
 		ArrayList<double[]> paramsList2;
 		if (npeaks == 1)
 		{
-			ensureDataSingle(iter);
-			paramsList2 = copyList(paramsListSinglePeak, iter);
+			paramsList2 = copyList(ensureDataSingle(seed, iter).paramsListSinglePeak, iter);
 		}
 		else
 		{
-			ensureDataMulti(iter);
-			paramsList2 = copyList(paramsListMultiPeak, iter);
+			paramsList2 = copyList(ensureDataMulti(seed, iter).paramsListMultiPeak, iter);
 		}
 
 		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
@@ -294,7 +346,7 @@ public class Gaussian2DFunctionSpeedTest
 		}
 	}
 
-	void f1FasterThanf2(int npeaks, int flags1, int flags2)
+	void f1FasterThanf2(RandomSeed seed, int npeaks, int flags1, int flags2)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -302,13 +354,11 @@ public class Gaussian2DFunctionSpeedTest
 		ArrayList<double[]> paramsList2;
 		if (npeaks == 1)
 		{
-			ensureDataSingle(iter);
-			paramsList2 = paramsListSinglePeak;
+			paramsList2 = copyList(ensureDataSingle(seed, iter).paramsListSinglePeak, iter);
 		}
 		else
 		{
-			ensureDataMulti(iter);
-			paramsList2 = paramsListMultiPeak;
+			paramsList2 = copyList(ensureDataMulti(seed, iter).paramsListMultiPeak, iter);
 		}
 
 		// Use the full list of parameters to build the functions
@@ -358,25 +408,27 @@ public class Gaussian2DFunctionSpeedTest
 	 * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude, angle, xpos,
 	 * ypos, xwidth, ywidth }
 	 *
+	 * @param rand
+	 *            the rand
 	 * @param npeaks
 	 *            the npeaks
 	 * @param params
 	 *            set on output
 	 * @return the data
 	 */
-	private static double[] doubleCreateGaussianData(int npeaks, double[] params)
+	private static double[] doubleCreateGaussianData(UniformRandomProvider rand, int npeaks, double[] params)
 	{
 		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
 		final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
-		params[0] = Background + rand.nextFloat() * 5f;
+		params[0] = background + rand.nextFloat() * 5f;
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j] = Amplitude + rand.nextFloat() * 5f;
-			params[j + Gaussian2DFunction.X_POSITION] = Xpos + rand.nextFloat() * 2f;
-			params[j + Gaussian2DFunction.Y_POSITION] = Ypos + rand.nextFloat() * 2f;
-			params[j + Gaussian2DFunction.X_SD] = Xwidth + rand.nextFloat() * 2f;
+			params[j] = amplitude + rand.nextFloat() * 5f;
+			params[j + Gaussian2DFunction.X_POSITION] = xpos + rand.nextFloat() * 2f;
+			params[j + Gaussian2DFunction.Y_POSITION] = ypos + rand.nextFloat() * 2f;
+			params[j + Gaussian2DFunction.X_SD] = xwidth + rand.nextFloat() * 2f;
 			params[j + Gaussian2DFunction.Y_SD] = params[j + 4];
 			params[j + Gaussian2DFunction.ANGLE] = 0f; //(double) (Math.PI / 4.0); // Angle
 		}
@@ -403,12 +455,13 @@ public class Gaussian2DFunctionSpeedTest
 		return y;
 	}
 
-	protected static void createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	protected static void createData(UniformRandomProvider rand, int npeaks, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
-		for (int i = 0; i < iter; i++)
+		while (paramsList.size() < iter)
 		{
 			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			final double[] y = doubleCreateGaussianData(npeaks, params);
+			final double[] y = doubleCreateGaussianData(rand, npeaks, params);
 			paramsList.add(params);
 			yList.add(y);
 		}

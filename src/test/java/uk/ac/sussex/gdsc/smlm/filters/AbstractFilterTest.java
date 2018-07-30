@@ -30,12 +30,15 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 
 @SuppressWarnings({ "javadoc" })
-public class AbstractFilterTest
+public class AbstractFilterTest implements DataProvider<RandomSeed, Object>
 {
 	static final boolean debug = TestSettings.allow(LogLevel.DEBUG);
 
@@ -104,24 +107,41 @@ public class AbstractFilterTest
 		return data;
 	}
 
-	static ArrayList<float[]> dataSet = new ArrayList<>();
-	static UniformRandomProvider rg = null;
+	// Cache data
+	private class FloatData
+	{
+		final ArrayList<float[]> dataSet = new ArrayList<>();
+		final UniformRandomProvider rg;
+
+		FloatData(UniformRandomProvider rg)
+		{
+			this.rg = rg;
+		}
+	}
+
+	private static DataCache<RandomSeed, Object> dataCache = new DataCache<>();
 
 	/**
 	 * Create random float data.
 	 *
+	 * @param seed
+	 *            the seed
 	 * @param size
 	 *            the number of datasets
 	 * @return the array list of random data
 	 */
-	static ArrayList<float[]> getSpeedData(int size)
+	ArrayList<float[]> getSpeedData(RandomSeed seed, int size)
 	{
-		synchronized (dataSet)
+		FloatData data = (FloatData) dataCache.getData(seed, this);
+		ArrayList<float[]> dataSet = data.dataSet;
+		if (dataSet.size() < size)
 		{
-			if (rg == null)
-				rg = TestSettings.getRandomGenerator(seed.getSeed());
-			while (dataSet.size() < size)
-				dataSet.add(createData(rg, primes[0], primes[0]));
+			UniformRandomProvider rg = data.rg;
+			synchronized (dataSet)
+			{
+				while (dataSet.size() < size)
+					dataSet.add(createData(rg, primes[0], primes[0]));
+			}
 		}
 
 		final ArrayList<float[]> dataSet2 = new ArrayList<>(size);
@@ -130,21 +150,34 @@ public class AbstractFilterTest
 		return dataSet2;
 	}
 
+	@Override
+	public Object getData(RandomSeed source)
+	{
+		// Just store the random generator and the empty data
+		return new FloatData(TestSettings.getRandomGenerator(source.getSeed()));
+	}
+
 	/**
 	 * Create random int data.
 	 *
+	 * @param seed
+	 *            the seed
 	 * @param size
 	 *            the number of datasets
 	 * @return the array list of random data
 	 */
-	static ArrayList<int[]> getIntSpeedData(int size)
+	ArrayList<int[]> getIntSpeedData(RandomSeed seed, int size)
 	{
-		synchronized (dataSet)
+		FloatData data = (FloatData) dataCache.getData(seed, this);
+		ArrayList<float[]> dataSet = data.dataSet;
+		if (dataSet.size() < size)
 		{
-			if (rg == null)
-				rg = TestSettings.getRandomGenerator(seed.getSeed());
-			while (dataSet.size() < size)
-				dataSet.add(createData(rg, primes[0], primes[0]));
+			UniformRandomProvider rg = data.rg;
+			synchronized (dataSet)
+			{
+				while (dataSet.size() < size)
+					dataSet.add(createData(rg, primes[0], primes[0]));
+			}
 		}
 
 		final ArrayList<int[]> dataSet2 = new ArrayList<>(size);

@@ -25,16 +25,17 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class PrecomputedFunctionTest
 {
-	@Test
-	public void precomputedValueFunctionWrapsPrecomputedValues()
+	@SeededTest
+	public void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final int size = 100;
@@ -61,8 +62,8 @@ public class PrecomputedFunctionTest
 		return v;
 	}
 
-	@Test
-	public void precomputedGradient1FunctionWrapsPrecomputedValues()
+	@SeededTest
+	public void precomputedGradient1FunctionWrapsPrecomputedValues(RandomSeed seed)
 	{
 		final int n = 3;
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
@@ -97,8 +98,8 @@ public class PrecomputedFunctionTest
 		return v;
 	}
 
-	@Test
-	public void precomputedGradient2FunctionWrapsPrecomputedValues()
+	@SeededTest
+	public void precomputedGradient2FunctionWrapsPrecomputedValues(RandomSeed seed)
 	{
 		final int n = 3;
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());

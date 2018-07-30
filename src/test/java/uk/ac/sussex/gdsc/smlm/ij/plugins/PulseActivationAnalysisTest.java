@@ -25,14 +25,15 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import java.util.Iterator;
 
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 /**
  * Test the PulseActivationAnalysis unmixing functions
@@ -40,9 +41,8 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class PulseActivationAnalysisTest
 {
-	@Test
-	public void canLinearlyUnmix2Channels()
-	{
+	@SeededTest
+public void canLinearlyUnmix2Channels(RandomSeed seed)	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 0; n <= 2; n++)
 			for (int m = 0; m <= 2; m++)
@@ -122,9 +122,8 @@ public class PulseActivationAnalysisTest
 		return d;
 	}
 
-	@Test
-	public void canLinearlyUnmix3Channels()
-	{
+	@SeededTest
+	public void canLinearlyUnmix3Channels(RandomSeed seed)	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 0; n <= 3; n++)
 			for (int m = 0; m <= 6; m++)

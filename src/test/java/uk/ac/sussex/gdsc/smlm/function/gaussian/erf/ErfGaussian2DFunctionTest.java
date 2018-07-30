@@ -27,7 +27,7 @@ import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.utils.BitFlags;
@@ -50,6 +50,7 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
@@ -456,6 +457,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	// Speed test verses equivalent Gaussian2DFunction
+	@SpeedTag
 	@Test
 	public void functionIsFasterThanEquivalentGaussian2DFunction()
 	{
@@ -1083,6 +1085,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	// Speed test forEach verses equivalent eval() function calls
+	@SpeedTag
 	@Test
 	public void functionIsFasterUsingForEach()
 	{

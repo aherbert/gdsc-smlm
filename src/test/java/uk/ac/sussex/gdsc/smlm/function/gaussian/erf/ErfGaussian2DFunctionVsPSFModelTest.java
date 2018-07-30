@@ -23,8 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
@@ -33,6 +32,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.model.GaussianPSFModel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class ErfGaussian2DFunctionVsPSFModelTest
@@ -40,19 +41,24 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 	private final int width = 10;
 	private final int height = 9;
 
-	@Test
-	public void computesSameAsPSFModel()
+	@SeededTest
+	public void computesSameAsPSFModel(RandomSeed seed)
 	{
-		final RandomDataGenerator r = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final UniformRandomProvider rng = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int i = 0; i < 10; i++)
 			//@formatter:off
 			computesSameAsPSFModel(
-					r.nextUniform(50, 100),
-					r.nextUniform((width-1)/2.0, (width+1)/2.0),
-					r.nextUniform((height-1)/2.0, (height+1)/2.0),
-					r.nextUniform(0.5, 2),
-					r.nextUniform(0.5, 2));
+					nextUniform(rng,50, 100),
+					nextUniform(rng,(width-1)/2.0, (width+1)/2.0),
+					nextUniform(rng,(height-1)/2.0, (height+1)/2.0),
+					nextUniform(rng,0.5, 2),
+					nextUniform(rng,0.5, 2));
 			//@formatter:on
+	}
+
+	private static double nextUniform(UniformRandomProvider rng, double min, double max)
+	{
+		return min + rng.nextDouble() * (max - min);
 	}
 
 	private void computesSameAsPSFModel(double sum, double x0, double x1, double s0, double s1)

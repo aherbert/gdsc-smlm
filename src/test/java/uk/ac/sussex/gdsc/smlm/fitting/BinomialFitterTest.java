@@ -23,16 +23,20 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.DiscreteInverseCumulativeProbabilityFunction;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class BinomialFitterTest
@@ -49,8 +53,8 @@ public class BinomialFitterTest
 	// This is the default level for all the tests
 	TestComplexity nonEssentialTestComplexity = TestComplexity.VERY_HIGH;
 
-	@Test
-	public void canFitBinomialWithKnownNUsingLeastSquaresEstimator()
+	@SeededTest
+	public void canFitBinomialWithKnownNUsingLeastSquaresEstimator(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -61,8 +65,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
 	}
 
-	@Test
-	public void canFitBinomialWithKnownNUsingMaximumLikelihood()
+	@SeededTest
+	public void canFitBinomialWithKnownNUsingMaximumLikelihood(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final boolean zeroTruncated = false;
@@ -80,8 +84,8 @@ public class BinomialFitterTest
 		}
 	}
 
-	@Test
-	public void canFitBinomialWithUnknownNUsingLeastSquaresEstimator()
+	@SeededTest
+	public void canFitBinomialWithUnknownNUsingLeastSquaresEstimator(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -92,8 +96,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
 	}
 
-	@Test
-	public void canFitBinomialWithUnknownNUsingMaximumLikelihood()
+	@SeededTest
+	public void canFitBinomialWithUnknownNUsingMaximumLikelihood(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(optionalTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -108,8 +112,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
 	}
 
-	@Test
-	public void canFitZeroTruncatedBinomialWithKnownNUsingLeastSquaresEstimator()
+	@SeededTest
+	public void canFitZeroTruncatedBinomialWithKnownNUsingLeastSquaresEstimator(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -120,8 +124,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
 	}
 
-	@Test
-	public void canFitZeroTruncatedBinomialWithKnownNUsingMaximumLikelihood()
+	@SeededTest
+	public void canFitZeroTruncatedBinomialWithKnownNUsingMaximumLikelihood(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -132,8 +136,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, n, n);
 	}
 
-	@Test
-	public void canFitZeroTruncatedBinomialWithUnknownNUsingLeastSquaresEstimator()
+	@SeededTest
+	public void canFitZeroTruncatedBinomialWithUnknownNUsingLeastSquaresEstimator(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -144,8 +148,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
 	}
 
-	@Test
-	public void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood()
+	@SeededTest
+	public void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -156,8 +160,8 @@ public class BinomialFitterTest
 				fitBinomial(rg, n, p, zeroTruncated, maximumLikelihood, 1, n);
 	}
 
-	@Test
-	public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE()
+	@SeededTest
+	public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -167,8 +171,8 @@ public class BinomialFitterTest
 				fitBinomialUsing_LSE_Or_MLE(rg, n, p, zeroTruncated, n, n);
 	}
 
-	@Test
-	public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE()
+	@SeededTest
+	public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE(RandomSeed seed)
 	{
 		ExtraAssumptions.assume(nonEssentialTestComplexity);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -178,8 +182,8 @@ public class BinomialFitterTest
 				fitBinomialUsing_LSE_Or_MLE(rg, n, p, zeroTruncated, n, n);
 	}
 
-	private void fitBinomial(UniformRandomProvider rg, int n, double p, boolean zeroTruncated, boolean maximumLikelihood,
-			int minN, int maxN)
+	private void fitBinomial(UniformRandomProvider rg, int n, double p, boolean zeroTruncated,
+			boolean maximumLikelihood, int minN, int maxN)
 	{
 		final BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
@@ -255,7 +259,17 @@ public class BinomialFitterTest
 
 	private static int[] createData(UniformRandomProvider rg, int n, double p, boolean zeroTruncated)
 	{
-		final RandomDataGenerator rdg = new RandomDataGenerator(rg);
+		final BinomialDistribution bd = new BinomialDistribution(null, n, p);
+		final DiscreteSampler sampler = new InverseTransformDiscreteSampler(rg,
+				new DiscreteInverseCumulativeProbabilityFunction()
+				{
+					@Override
+					public int inverseCumulativeProbability(double p)
+					{
+						return bd.inverseCumulativeProbability(p);
+					}
+				});
+		
 		final int[] data = new int[2000];
 		if (zeroTruncated)
 		{
@@ -265,14 +279,14 @@ public class BinomialFitterTest
 			{
 				int count;
 				do
-					count = rdg.nextBinomial(n, p);
+					count = sampler.sample();
 				while (count == 0);
 				data[i] = count;
 			}
 		}
 		else
 			for (int i = 0; i < data.length; i++)
-				data[i] = rdg.nextBinomial(n, p);
+				data[i] = sampler.sample();
 		return data;
 	}
 

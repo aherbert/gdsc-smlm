@@ -25,15 +25,17 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.stat.inference.TTest;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.rng.BoxMullerUnitGaussianSampler;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -49,16 +51,19 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 
 /**
  * Base class for testing the function solvers
  */
 @SuppressWarnings({ "javadoc" })
-public abstract class BaseFunctionSolverTest
+public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed, double[][]>
 {
 	// Basic Gaussian
 	static double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -147,44 +152,62 @@ public abstract class BaseFunctionSolverTest
 
 	private static double[][] weights = new double[NoiseModel.values().length][], noise = new double[weights.length][];
 
-	private static double[] getWeights(NoiseModel noiseModel)
+	private static DataCache<RandomSeed, double[][]> dataCache = new DataCache<>();
+
+	private double[] getWeights(RandomSeed seed, NoiseModel noiseModel)
 	{
 		final int index = noiseModel.ordinal();
 		if (weights[index] == null)
+		{
+			if (noiseModel == NoiseModel.SCMOS)
+			{
+				// Special case of per-pixel random weights
+				double[][] data = dataCache.getData(seed, this);
+				return data[0];
+			}
 			computeWeights(noiseModel, index);
+		}
 		return weights[index];
 	}
 
-	private static double[] getNoise(NoiseModel noiseModel)
+	private double[] getNoise(RandomSeed seed, NoiseModel noiseModel)
 	{
 		final int index = noiseModel.ordinal();
 		if (noise[index] == null)
+		{
+			if (noiseModel == NoiseModel.SCMOS)
+			{
+				// Special case of per-pixel random noise
+				double[][] data = dataCache.getData(seed, this);
+				return data[1];
+			}
 			computeWeights(noiseModel, index);
+		}
 		return noise[index];
 	}
 
 	private static void computeWeights(NoiseModel noiseModel, int index)
 	{
+		if (noiseModel == NoiseModel.SCMOS)
+		{
+			throw new IllegalStateException("This requires a random generator");
+		}
+		// The rest are fixed for all pixels
 		final double[] w = new double[size * size];
 		final double[] n = new double[size * size];
-		if (noiseModel == NoiseModel.SCMOS)
-			// Special case of per-pixel noise
-			computeSCMOSWeights(w, n);
-		else
-			// The rest are fixed for all pixels
-			switch (noiseModel)
-			{
-				case CCD:
-					computeWeights(w, n, noiseCCD);
-					break;
-				case EMCCD:
-					computeWeights(w, n, noiseEMCCD);
-					break;
-				case NONE:
-				default:
-					// Nothing to do
-					break;
-			}
+		switch (noiseModel)
+		{
+			case CCD:
+				computeWeights(w, n, noiseCCD);
+				break;
+			case EMCCD:
+				computeWeights(w, n, noiseEMCCD);
+				break;
+			case NONE:
+			default:
+				// Nothing to do
+				break;
+		}
 		noise[index] = n;
 		weights[index] = w;
 	}
@@ -195,48 +218,51 @@ public abstract class BaseFunctionSolverTest
 		Arrays.fill(noise, sd);
 	}
 
-	private static void computeSCMOSWeights(double[] weights, double[] noise)
+	@Override
+	public double[][] getData(RandomSeed source)
 	{
 		// Per observation read noise.
 		// This is generated once so create the randon generator here.
-		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
-		final ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
-				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-		for (int i = 0; i < weights.length; i++)
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
+		final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
+		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(rg);
+		final double[] w = new double[size * size];
+		final double[] n = new double[size * size];
+		for (int i = 0; i < w.length; i++)
 		{
 			final double pixelVariance = ed.sample();
-			final double pixelGain = Math.max(0.1, gain + rg.nextGaussian() * gainSD);
+			final double pixelGain = Math.max(0.1, gain + gs.sample() * gainSD);
 			// weights = var / g^2
-			weights[i] = pixelVariance / (pixelGain * pixelGain);
+			w[i] = pixelVariance / (pixelGain * pixelGain);
+
+			// Convert to standard deviation for simulation
+			n[i] = Math.sqrt(w[i]);
 		}
-		// Convert to standard deviation for simulation
-		noise = new double[weights.length];
-		for (int i = 0; i < weights.length; i++)
-			noise[i] = Math.sqrt(weights[i]);
+		return new double[][] { w, n };
 	}
 
-	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds)
+	void canFitSingleGaussian(RandomSeed seed, FunctionSolver solver, boolean applyBounds)
 	{
 		// This is here to support the old solver tests which used to have fixed noise of 0.1, 0.5, 1.
 		// Those levels are irrelevant for modern EM-CCD cameras which have effectively very low noise.
 		// The test has been changed to better simulate the cameras encountered.
-		canFitSingleGaussian(solver, applyBounds, NoiseModel.NONE);
+		canFitSingleGaussian(seed, solver, applyBounds, NoiseModel.NONE);
 		// We are not interested in high noise CCD so this is commented out
 		//canFitSingleGaussian(solver, applyBounds, NoiseModel.CCD);
-		canFitSingleGaussian(solver, applyBounds, NoiseModel.EMCCD);
-		canFitSingleGaussian(solver, applyBounds, NoiseModel.SCMOS);
+		canFitSingleGaussian(seed, solver, applyBounds, NoiseModel.EMCCD);
+		canFitSingleGaussian(seed, solver, applyBounds, NoiseModel.SCMOS);
 	}
 
-	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, NoiseModel noiseModel)
+	void canFitSingleGaussian(RandomSeed seed, FunctionSolver solver, boolean applyBounds, NoiseModel noiseModel)
 	{
 		// Allow reporting the fit deviations
 		final boolean report = false;
 		double[] crlb = null;
 		SimpleArrayMoment m = null;
 
-		final double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(seed, noiseModel);
 		if (solver.isWeighted())
-			solver.setWeights(getWeights(noiseModel));
+			solver.setWeights(getWeights(seed, noiseModel));
 
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
@@ -292,24 +318,24 @@ public abstract class BaseFunctionSolverTest
 		}
 	}
 
-	void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
+	void canFitSingleGaussianBetter(RandomSeed seed, FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
 			boolean applyBounds2, String name, String name2)
 	{
 		// This is here to support the old solver tests which used to have fixed noise of 0.1, 0.5, 1.
 		// Those levels are irrelevant for modern EM-CCD cameras which have effectively very low noise.
 		// The test has been changed to better simulate the cameras encountered.
-		canFitSingleGaussianBetter(solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.NONE);
+		canFitSingleGaussianBetter(seed, solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.NONE);
 		// We are not interested in high noise CCD so this is commented out
 		//canFitSingleGaussianBetter(solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.CCD);
-		canFitSingleGaussianBetter(solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.EMCCD);
+		canFitSingleGaussianBetter(seed, solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.EMCCD);
 	}
 
-	void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
+	void canFitSingleGaussianBetter(RandomSeed seed, FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
 			boolean applyBounds2, String name, String name2, NoiseModel noiseModel)
 	{
-		final double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(seed, noiseModel);
 		if (solver.isWeighted())
-			solver.setWeights(getWeights(noiseModel));
+			solver.setWeights(getWeights(seed, noiseModel));
 
 		final int LOOPS = 5;
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -556,7 +582,8 @@ public abstract class BaseFunctionSolverTest
 		final double[] data = f.computeValues(params);
 
 		// Poisson noise
-		final CustomPoissonDistribution pd = new CustomPoissonDistribution(rg, 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), 1);
+
 		for (int i = 0; i < data.length; i++)
 			if (data[i] > 0)
 			{
@@ -571,7 +598,7 @@ public abstract class BaseFunctionSolverTest
 			// Since the call random.nextGamma(...) creates a Gamma distribution
 			// which pre-calculates factors only using the scale parameter we
 			// create a custom gamma distribution where the shape can be set as a property.
-			final CustomGammaDistribution gd = new CustomGammaDistribution(rg, 1, emGain);
+			final CustomGammaDistribution gd = new CustomGammaDistribution(new RandomGeneratorAdapter(rg), 1, emGain);
 
 			for (int i = 0; i < data.length; i++)
 				if (data[i] > 0)
@@ -583,9 +610,10 @@ public abstract class BaseFunctionSolverTest
 		}
 
 		// Read-noise
+		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(rg);
 		if (noise != null)
 			for (int i = 0; i < data.length; i++)
-				data[i] += rg.nextGaussian() * noise[i];
+				data[i] += gs.sample() * noise[i];
 
 		//uk.ac.sussex.gdsc.core.ij.Utils.display("Spot", data, size, size);
 		return data;
@@ -620,8 +648,8 @@ public abstract class BaseFunctionSolverTest
 	 * the solution so the convergence criteria can be set to accept the first step. The second solver is used to
 	 * compute deviations (thus is not initialised for fitting).
 	 *
-	 * @param rg
-	 *            the random generator
+	 * @param seed
+	 *            the seed
 	 * @param solver1
 	 *            the solver 1
 	 * @param solver2
@@ -631,17 +659,18 @@ public abstract class BaseFunctionSolverTest
 	 * @param useWeights
 	 *            the use weights
 	 */
-	void fitAndComputeDeviationsMatch(UniformRandomProvider rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
+	void fitAndComputeDeviationsMatch(RandomSeed seed, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
 			NoiseModel noiseModel, boolean useWeights)
 	{
-		final double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(seed, noiseModel);
 		if (solver1.isWeighted() && useWeights)
 		{
-			solver1.setWeights(getWeights(noiseModel));
-			solver2.setWeights(getWeights(noiseModel));
+			solver1.setWeights(getWeights(seed, noiseModel));
+			solver2.setWeights(getWeights(seed, noiseModel));
 		}
 
 		// Draw target data
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
 		// fit with 2 peaks using the known params.
@@ -733,6 +762,8 @@ public abstract class BaseFunctionSolverTest
 	 * the solution so the convergence criteria can be set to accept the first step. The second solver is used to
 	 * compute values (thus is not initialised for fitting).
 	 *
+	 * @param seed
+	 *            the seed
 	 * @param solver1
 	 *            the solver
 	 * @param solver2
@@ -742,17 +773,18 @@ public abstract class BaseFunctionSolverTest
 	 * @param useWeights
 	 *            the use weights
 	 */
-	void fitAndComputeValueMatch(UniformRandomProvider rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
+	void fitAndComputeValueMatch(RandomSeed seed, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
 			NoiseModel noiseModel, boolean useWeights)
 	{
-		final double[] noise = getNoise(noiseModel);
+		final double[] noise = getNoise(seed, noiseModel);
 		if (solver1.isWeighted() && useWeights)
 		{
-			solver1.setWeights(getWeights(noiseModel));
-			solver2.setWeights(getWeights(noiseModel));
+			solver1.setWeights(getWeights(seed, noiseModel));
+			solver2.setWeights(getWeights(seed, noiseModel));
 		}
 
 		// Draw target data
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
 		// fit with 2 peaks using the known params.

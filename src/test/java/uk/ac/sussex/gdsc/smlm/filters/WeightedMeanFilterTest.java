@@ -26,21 +26,24 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedMeanFilterTest extends WeightedFilterTest
 {
-	@Test
-	public void filterPerformsWeightedMeanFiltering()
+	@SeededTest
+	public void filterPerformsWeightedMeanFiltering(RandomSeed seed)
 	{
 		final DataFilter filter = createDataFilter();
 
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, 2, 0.2);
 
 		final float[] offsets = getOffsets(filter);
 		final int[] boxSizes = getBoxSizes(filter);
@@ -60,7 +63,7 @@ public abstract class WeightedMeanFilterTest extends WeightedFilterTest
 				// Weights simulating the variance of sCMOS pixels
 				final float[] w2 = new float[width * height];
 				for (int i = 0; i < w2.length; i++)
-					w2[i] = (float) (1.0 / Math.max(0.01, rg.nextGaussian() * 0.2 + 2));
+					w2[i] = (float) (1.0 / Math.max(0.01, gs.sample()));
 
 				for (final int boxSize : boxSizes)
 					for (final float offset : offsets)

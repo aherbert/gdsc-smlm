@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
@@ -35,6 +34,9 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
@@ -124,8 +126,8 @@ public class AverageFilterTest extends AbstractFilterTest
 		public abstract void filterInternal(float[] data, int width, int height, float boxSize);
 	}
 
-	private static void averageIsCorrect(UniformRandomProvider rg, int width, int height, float boxSize, boolean internal,
-			DataFilter filter) throws ArrayComparisonFailure
+	private static void averageIsCorrect(UniformRandomProvider rg, int width, int height, float boxSize,
+			boolean internal, DataFilter filter) throws ArrayComparisonFailure
 	{
 		final float[] data1 = createData(rg, width, height);
 		final float[] data2 = data1.clone();
@@ -146,7 +148,7 @@ public class AverageFilterTest extends AbstractFilterTest
 		}
 	}
 
-	private static void checkIsCorrect(DataFilter filter)
+	private static void checkIsCorrect(RandomSeed seed, DataFilter filter)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (final int width : primes)
@@ -163,8 +165,8 @@ public class AverageFilterTest extends AbstractFilterTest
 					}
 	}
 
-	@Test
-	public void blockAverageIsCorrect()
+	@SeededTest
+	public void blockAverageIsCorrect(RandomSeed seed)
 	{
 		final DataFilter filter = new DataFilter("block", true)
 		{
@@ -180,11 +182,11 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.blockAverageInternal(data, width, height, boxSize);
 			}
 		};
-		checkIsCorrect(filter);
+		checkIsCorrect(seed, filter);
 	}
 
-	@Test
-	public void stripedBlockAverageIsCorrect()
+	@SeededTest
+	public void stripedBlockAverageIsCorrect(RandomSeed seed)
 	{
 		final DataFilter filter = new DataFilter("stripedBlock", true)
 		{
@@ -200,11 +202,11 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.stripedBlockAverageInternal(data, width, height, boxSize);
 			}
 		};
-		checkIsCorrect(filter);
+		checkIsCorrect(seed, filter);
 	}
 
-	@Test
-	public void rollingBlockAverageIsCorrect()
+	@SeededTest
+	public void rollingBlockAverageIsCorrect(RandomSeed seed)
 	{
 		final DataFilter filter = new DataFilter("rollingBlock", false)
 		{
@@ -220,20 +222,20 @@ public class AverageFilterTest extends AbstractFilterTest
 				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
 			}
 		};
-		checkIsCorrect(filter);
+		checkIsCorrect(seed, filter);
 	}
 
-	private void speedTest(DataFilter fast, DataFilter slow)
+	private void speedTest(RandomSeed seed, DataFilter fast, DataFilter slow)
 	{
-		speedTest(fast, slow, boxSizes);
+		speedTest(seed, fast, slow, boxSizes);
 	}
 
-	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
+	private void speedTest(RandomSeed seed, DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		ArrayList<float[]> dataSet = getSpeedData(ITER3);
+		ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -255,7 +257,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			for (final int width : primes)
 				for (final int height : primes)
 				{
-					dataSet = getSpeedData(iter);
+					dataSet = getSpeedData(seed, iter);
 
 					long time = System.nanoTime();
 					for (final float[] data : dataSet)
@@ -274,7 +276,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			for (final int width : primes)
 				for (final int height : primes)
 				{
-					dataSet = getSpeedData(iter);
+					dataSet = getSpeedData(seed, iter);
 
 					long time = System.nanoTime();
 					for (final float[] data : dataSet)
@@ -291,25 +293,24 @@ public class AverageFilterTest extends AbstractFilterTest
 								boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n",
-					slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
-					speedUpFactor(boxSlowTotal, boxFastTotal));
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", slow.name,
+					boxSize, boxSlowTotal, fast.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal,
-				fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal, fast.name,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	private void speedTestInternal(DataFilter fast, DataFilter slow)
+	private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow)
 	{
-		speedTestInternal(fast, slow, boxSizes);
+		speedTestInternal(seed, fast, slow, boxSizes);
 	}
 
-	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
+	private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
 		// These test a deprecated filter
 		ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
-		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
+		ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -331,7 +332,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			for (final int width : primes)
 				for (final int height : primes)
 				{
-					dataSet = getSpeedData(iter);
+					dataSet = getSpeedData(seed, iter);
 
 					long time = System.nanoTime();
 					for (final float[] data : dataSet)
@@ -350,7 +351,7 @@ public class AverageFilterTest extends AbstractFilterTest
 			for (final int width : primes)
 				for (final int height : primes)
 				{
-					dataSet = getSpeedData(iter);
+					dataSet = getSpeedData(seed, iter);
 
 					long time = System.nanoTime();
 					for (final float[] data : dataSet)
@@ -367,16 +368,17 @@ public class AverageFilterTest extends AbstractFilterTest
 								height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
-					"Internal %s %.1f : %d => %s %d = %.2fx\n", slow.name, boxSize, boxSlowTotal, fast.name,
-					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
+					slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name,
-				slowTotal, fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestLog.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name, slowTotal,
+				fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void stripedBlockIsFasterThanBlock()
+	@SpeedTag
+	@SeededTest
+	public void stripedBlockIsFasterThanBlock(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("block", false)
 		{
@@ -407,12 +409,13 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		speedTest(fast, slow);
-		speedTestInternal(fast, slow);
+		speedTest(seed, fast, slow);
+		speedTestInternal(seed, fast, slow);
 	}
 
-	@Test
-	public void interpolatedStripedBlockIsFasterThanBlock()
+	@SpeedTag
+	@SeededTest
+	public void interpolatedStripedBlockIsFasterThanBlock(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("block", true)
 		{
@@ -443,12 +446,13 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		speedTest(fast, slow);
-		speedTestInternal(fast, slow);
+		speedTest(seed, fast, slow);
+		speedTestInternal(seed, fast, slow);
 	}
 
-	@Test
-	public void rollingBlockIsFasterThanBlock()
+	@SpeedTag
+	@SeededTest
+	public void rollingBlockIsFasterThanBlock(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("block", false)
 		{
@@ -479,12 +483,13 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		speedTest(fast, slow);
-		speedTestInternal(fast, slow);
+		speedTest(seed, fast, slow);
+		speedTestInternal(seed, fast, slow);
 	}
 
-	@Test
-	public void rollingBlockIsFasterThanStripedBlock()
+	@SpeedTag
+	@SeededTest
+	public void rollingBlockIsFasterThanStripedBlock(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlock", false)
 		{
@@ -515,12 +520,13 @@ public class AverageFilterTest extends AbstractFilterTest
 			}
 		};
 
-		speedTest(fast, slow);
-		speedTestInternal(fast, slow);
+		speedTest(seed, fast, slow);
+		speedTestInternal(seed, fast, slow);
 	}
 
-	@Test
-	public void stripedBlock3x3IsFasterThanStripedBlockNxN()
+	@SpeedTag
+	@SeededTest
+	public void stripedBlock3x3IsFasterThanStripedBlockNxN(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
@@ -552,12 +558,13 @@ public class AverageFilterTest extends AbstractFilterTest
 		};
 
 		final int[] testBoxSizes = new int[] { 1 };
-		speedTest(fast, slow, testBoxSizes);
-		speedTestInternal(fast, slow, testBoxSizes);
+		speedTest(seed, fast, slow, testBoxSizes);
+		speedTestInternal(seed, fast, slow, testBoxSizes);
 	}
 
-	@Test
-	public void interpolatedStripedBlock3x3IsFasterThanStripedBlockNxN()
+	@SpeedTag
+	@SeededTest
+	public void interpolatedStripedBlock3x3IsFasterThanStripedBlockNxN(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
@@ -589,12 +596,13 @@ public class AverageFilterTest extends AbstractFilterTest
 		};
 
 		final int[] testBoxSizes = new int[] { 1 };
-		speedTest(fast, slow, testBoxSizes);
-		speedTestInternal(fast, slow, testBoxSizes);
+		speedTest(seed, fast, slow, testBoxSizes);
+		speedTestInternal(seed, fast, slow, testBoxSizes);
 	}
 
-	@Test
-	public void stripedBlock5x5IsFasterThanStripedBlockNxN()
+	@SpeedTag
+	@SeededTest
+	public void stripedBlock5x5IsFasterThanStripedBlockNxN(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
@@ -626,12 +634,13 @@ public class AverageFilterTest extends AbstractFilterTest
 		};
 
 		final int[] testBoxSizes = new int[] { 2 };
-		speedTest(fast, slow, testBoxSizes);
-		speedTestInternal(fast, slow, testBoxSizes);
+		speedTest(seed, fast, slow, testBoxSizes);
+		speedTestInternal(seed, fast, slow, testBoxSizes);
 	}
 
-	@Test
-	public void interpolatedStripedBlock5x5IsFasterThanStripedBlockNxN()
+	@SpeedTag
+	@SeededTest
+	public void interpolatedStripedBlock5x5IsFasterThanStripedBlockNxN(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
@@ -663,12 +672,13 @@ public class AverageFilterTest extends AbstractFilterTest
 		};
 
 		final int[] testBoxSizes = new int[] { 2 };
-		speedTest(fast, slow, testBoxSizes);
-		speedTestInternal(fast, slow, testBoxSizes);
+		speedTest(seed, fast, slow, testBoxSizes);
+		speedTestInternal(seed, fast, slow, testBoxSizes);
 	}
 
-	@Test
-	public void stripedBlock7x7IsFasterThanStripedBlockNxN()
+	@SpeedTag
+	@SeededTest
+	public void stripedBlock7x7IsFasterThanStripedBlockNxN(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
@@ -700,12 +710,13 @@ public class AverageFilterTest extends AbstractFilterTest
 		};
 
 		final int[] testBoxSizes = new int[] { 3 };
-		speedTest(fast, slow, testBoxSizes);
-		speedTestInternal(fast, slow, testBoxSizes);
+		speedTest(seed, fast, slow, testBoxSizes);
+		speedTestInternal(seed, fast, slow, testBoxSizes);
 	}
 
-	@Test
-	public void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN()
+	@SpeedTag
+	@SeededTest
+	public void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN(RandomSeed seed)
 	{
 		final DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
@@ -737,7 +748,7 @@ public class AverageFilterTest extends AbstractFilterTest
 		};
 
 		final int[] testBoxSizes = new int[] { 3 };
-		speedTest(fast, slow, testBoxSizes);
-		speedTestInternal(fast, slow, testBoxSizes);
+		speedTest(seed, fast, slow, testBoxSizes);
+		speedTestInternal(seed, fast, slow, testBoxSizes);
 	}
 }

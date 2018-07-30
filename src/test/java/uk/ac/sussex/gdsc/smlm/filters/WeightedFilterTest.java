@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -35,6 +35,8 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedFilterTest
@@ -61,8 +63,8 @@ public abstract class WeightedFilterTest
 
 	abstract DataFilter createDataFilter();
 
-	@Test
-	public void evenWeightsDoesNotAlterFiltering()
+	@SeededTest
+	public void evenWeightsDoesNotAlterFiltering(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
@@ -95,8 +97,8 @@ public abstract class WeightedFilterTest
 							}
 							catch (final AssertionError ex)
 							{
-								final String msg = String.format("%s : [%dx%d] @ %.1f [internal=%b]", filter2.name, width,
-										height, boxSize - offset, internal);
+								final String msg = String.format("%s : [%dx%d] @ %.1f [internal=%b]", filter2.name,
+										width, height, boxSize - offset, internal);
 								throw new AssertionError(msg, ex);
 							}
 						}
@@ -120,8 +122,8 @@ public abstract class WeightedFilterTest
 		return list.toArray();
 	}
 
-	@Test
-	public void filterDoesNotAlterFilteredImageMean()
+	@SeededTest
+	public void filterDoesNotAlterFilteredImageMean(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		//ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
@@ -132,6 +134,8 @@ public abstract class WeightedFilterTest
 		final int[] boxSizes = getBoxSizes(filter);
 
 		final TDoubleArrayList l1 = new TDoubleArrayList();
+
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, 2, 0.2);
 
 		for (final int width : primes)
 			for (final int height : primes)
@@ -161,8 +165,8 @@ public abstract class WeightedFilterTest
 				// Weights simulating the variance of sCMOS pixels
 				for (int i = 0; i < w.length; i++)
 					//w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
-					w[i] = (float) (1.0 / Math.max(0.01, rg.nextGaussian() * 0.2 + 2));
-					//w[i] = 0.5f;
+					w[i] = (float) (1.0 / Math.max(0.01, gs.sample()));
+				//w[i] = 0.5f;
 
 				ei = 0;
 				filter.setWeights(w, width, height);
@@ -197,8 +201,8 @@ public abstract class WeightedFilterTest
 		final double error = DoubleEquality.relativeError(u1, u2);
 		//System.out.printf("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)\n", filter.name, title,
 		//		width, height, boxSize, internal, u1, u2, error);
-		ExtraAssertions.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,
-				width, height, boxSize, internal, u1, u2, error);
+		ExtraAssertions.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name,
+				title, width, height, boxSize, internal, u1, u2, error);
 		return u2;
 	}
 }

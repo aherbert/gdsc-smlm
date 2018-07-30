@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -45,6 +45,8 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 /**
  * Test the IJImagePeakResults functionality.
@@ -408,43 +410,43 @@ public class IJImagePeakResultsTest
 		Assertions.assertArrayEquals(expecteds, actuals);
 	}
 
-	@Test
-	public void canAddUsingDifferentMethods()
+	@SeededTest
+	public void canAddUsingDifferentMethods(RandomSeed seed)
 	{
-		canAddUsingDifferentMethods(0);
+		canAddUsingDifferentMethods(seed, 0);
 	}
 
-	@Test
-	public void canAddUsingDifferentMethodsEqualized()
+	@SeededTest
+	public void canAddUsingDifferentMethodsEqualized(RandomSeed seed)
 	{
-		canAddUsingDifferentMethods(IJImagePeakResults.DISPLAY_EQUALIZED);
+		canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_EQUALIZED);
 	}
 
-	@Test
-	public void canAddUsingDifferentMethodsEqualizedWeighted()
+	@SeededTest
+	public void canAddUsingDifferentMethodsEqualizedWeighted(RandomSeed seed)
 	{
-		canAddUsingDifferentMethods(IJImagePeakResults.DISPLAY_EQUALIZED | IJImagePeakResults.DISPLAY_WEIGHTED);
+		canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_EQUALIZED | IJImagePeakResults.DISPLAY_WEIGHTED);
 	}
 
-	@Test
-	public void canAddUsingDifferentMethodsMax()
+	@SeededTest
+	public void canAddUsingDifferentMethodsMax(RandomSeed seed)
 	{
-		canAddUsingDifferentMethods(IJImagePeakResults.DISPLAY_MAX);
+		canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_MAX);
 	}
 
-	@Test
-	public void canAddUsingDifferentMethodsReplace()
+	@SeededTest
+	public void canAddUsingDifferentMethodsReplace(RandomSeed seed)
 	{
-		canAddUsingDifferentMethods(IJImagePeakResults.DISPLAY_REPLACE);
+		canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_REPLACE);
 	}
 
-	@Test
-	public void canAddUsingDifferentMethodsWeighted()
+	@SeededTest
+	public void canAddUsingDifferentMethodsWeighted(RandomSeed seed)
 	{
-		canAddUsingDifferentMethods(IJImagePeakResults.DISPLAY_WEIGHTED);
+		canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_WEIGHTED);
 	}
 
-	private void canAddUsingDifferentMethods(int displayFlags)
+	private void canAddUsingDifferentMethods(RandomSeed seed, int displayFlags)
 	{
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
@@ -495,7 +497,7 @@ public class IJImagePeakResultsTest
 		for (int i = 1; i < 4; i++)
 		{
 			final float[] actuals = image[i];
-			ExtraAssertions.assertArrayEquals( expecteds, actuals, "Single add image %d", i);
+			ExtraAssertions.assertArrayEquals(expecteds, actuals, "Single add image %d", i);
 		}
 
 		// Test multi value adds
@@ -503,11 +505,11 @@ public class IJImagePeakResultsTest
 		for (int i = 5; i < image.length; i++)
 		{
 			final float[] actuals = image[i];
-			ExtraAssertions.assertArrayEquals( expecteds, actuals, "Multi add image %d", i);
+			ExtraAssertions.assertArrayEquals(expecteds, actuals, "Multi add image %d", i);
 		}
 
 		// Test they are roughly the same (differences occur due to floating point summation
-		Assertions.assertArrayEquals( expecteds, image[0], 1e-5f, "Single != Multi");
+		Assertions.assertArrayEquals(expecteds, image[0], 1e-5f, "Single != Multi");
 	}
 
 	private static void begin(IJImagePeakResults r)

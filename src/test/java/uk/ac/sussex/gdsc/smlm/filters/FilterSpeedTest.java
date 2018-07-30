@@ -25,17 +25,18 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class FilterSpeedTest extends AbstractFilterTest
 {
-
-	@Test
-	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -43,7 +44,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final BlockMeanFilter filter2 = new BlockMeanFilter();
 
 		final int iter = 50;
-		final ArrayList<float[]> dataSet = getSpeedData(iter);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -107,8 +108,9 @@ public class FilterSpeedTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -116,7 +118,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final MedianFilter filter2 = new MedianFilter();
 
 		final int iter = 10;
-		final ArrayList<float[]> dataSet = getSpeedData(iter);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -180,8 +182,9 @@ public class FilterSpeedTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -189,7 +192,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final MedianFilter filter2 = new MedianFilter();
 
 		final int iter = 10;
-		final ArrayList<float[]> dataSet = getSpeedData(iter);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -253,8 +256,9 @@ public class FilterSpeedTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -262,7 +266,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final GaussianFilter filter2 = new GaussianFilter();
 
 		final int iter = 10;
-		final ArrayList<float[]> dataSet = getSpeedData(iter);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -326,8 +330,9 @@ public class FilterSpeedTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -335,7 +340,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final AreaAverageFilter filter2 = new AreaAverageFilter();
 
 		final int iter = 10;
-		final ArrayList<float[]> dataSet = getSpeedData(iter);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -405,8 +410,9 @@ public class FilterSpeedTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -414,7 +420,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final AreaAverageFilter filter2 = new AreaAverageFilter();
 
 		final int iter = 10;
-		final ArrayList<float[]> dataSet = getSpeedData(iter);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -486,8 +492,9 @@ public class FilterSpeedTest extends AbstractFilterTest
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
-	public void floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal()
+	@SpeedTag
+	@SeededTest
+	public void floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -495,7 +502,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 		final BlockSumFilter filter2 = new BlockSumFilter();
 
 		final int iter = 50;
-		final ArrayList<int[]> dataSet = getIntSpeedData(iter);
+		final ArrayList<int[]> dataSet = getIntSpeedData(seed, iter);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 

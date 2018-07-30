@@ -31,11 +31,10 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -44,7 +43,9 @@ import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
@@ -53,6 +54,9 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest
@@ -276,18 +280,18 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	@Test
-	public void canComputeLogLikelihoodRatio()
+	@SeededTest
+	public void canComputeLogLikelihoodRatio(RandomSeed seed)
 	{
 		final double n2 = maxx * maxx * 0.5;
 		// Functions must produce a strictly positive output so add background
 		//@formatter:off
-		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Quadratic")
+		canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic")
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
 		});
-		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
+		canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
@@ -295,7 +299,7 @@ public class PoissonCalculatorTest
 		//@formatter:on
 	}
 
-	private static void canComputeLogLikelihoodRatio(BaseNonLinearFunction nlf)
+	private static void canComputeLogLikelihoodRatio(RandomSeed seed, BaseNonLinearFunction nlf)
 	{
 		TestLog.info(nlf.name);
 
@@ -305,14 +309,18 @@ public class PoissonCalculatorTest
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(
+				new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
 		final double[] x = new double[n];
 		final double[] u = new double[n];
 		for (int i = 0; i < n; i++)
 		{
 			u[i] = nlf.eval(i);
 			if (u[i] > 0)
-				x[i] = rdg.nextPoisson(u[i]);
+			{
+				pd.setMeanUnsafe(u[i]);
+				x[i] = pd.sample();
+			}
 		}
 
 		double ll = PoissonCalculator.logLikelihood(u, x);
@@ -406,18 +414,18 @@ public class PoissonCalculatorTest
 		Assertions.assertEquals(1, fita, 0.199, "max");
 	}
 
-	@Test
-	public void canComputeFastLog_LogLikelihoodRatio()
+	@SeededTest
+	public void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed)
 	{
 		final double n2 = maxx * maxx * 0.5;
 		// Functions must produce a strictly positive output so add background
 		//@formatter:off
-		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Quadratic")
+		canComputeFastLog_LogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic")
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
 		});
-		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
+		canComputeFastLog_LogLikelihoodRatio(seed,new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
@@ -425,7 +433,7 @@ public class PoissonCalculatorTest
 		//@formatter:on
 	}
 
-	private static void canComputeFastLog_LogLikelihoodRatio(BaseNonLinearFunction nlf)
+	private static void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed, BaseNonLinearFunction nlf)
 	{
 		TestLog.infoln(nlf.name);
 
@@ -435,14 +443,18 @@ public class PoissonCalculatorTest
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(
+				new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
 		final double[] x = new double[n];
 		final double[] u = new double[n];
 		for (int i = 0; i < n; i++)
 		{
 			u[i] = nlf.eval(i);
 			if (u[i] > 0)
-				x[i] = rdg.nextPoisson(u[i]);
+			{
+				pd.setMeanUnsafe(u[i]);
+				x[i] = pd.sample();
+			}
 		}
 
 		// Only test the LLR
@@ -453,8 +465,8 @@ public class PoissonCalculatorTest
 		ExtraAssertions.assertEqualsRelative(llr, llr2, 5e-3, "Log-likelihood ratio");
 	}
 
-	@Test
-	public void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio()
+	@SeededTest
+	public void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(RandomSeed seed)
 	{
 		final int n = maxx * maxx;
 		final double n2 = n * 0.5;
@@ -462,7 +474,7 @@ public class PoissonCalculatorTest
 		final double n4 = n * 0.66;
 		// Functions must produce a strictly positive output so add background
 		//@formatter:off
-		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(
+		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(seed,
 		new BaseNonLinearFunction("Quadratic")
 		{
 			@Override
@@ -478,7 +490,7 @@ public class PoissonCalculatorTest
 			@Override
 			public double eval(int x) {	return 0.3 + 0.75 * a[0] * (x-n4) * (x-n4); }
 		});
-		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(
+		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(seed,
 		new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
@@ -497,8 +509,8 @@ public class PoissonCalculatorTest
 		//@formatter:on
 	}
 
-	private static void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(BaseNonLinearFunction nlf1,
-			BaseNonLinearFunction nlf2, BaseNonLinearFunction nlf3)
+	private static void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(RandomSeed seed,
+			BaseNonLinearFunction nlf1, BaseNonLinearFunction nlf2, BaseNonLinearFunction nlf3)
 	{
 		//System.out.println(nlf1.name);
 
@@ -510,7 +522,8 @@ public class PoissonCalculatorTest
 		nlf1.initialise(a);
 		nlf2.initialise(a);
 		nlf3.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(
+				new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
 		double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
 		final double[] u = new double[x.length];
 		final double[] b1 = new double[x.length];
@@ -523,7 +536,10 @@ public class PoissonCalculatorTest
 			b3[i] = nlf3.eval(i);
 			u[i] = b1[i] + b2[i] + b3[i];
 			if (u[i] > 0)
-				x[i] = rdg.nextPoisson(u[i]);
+			{
+				pd.setMeanUnsafe(u[i]);
+				x[i] = pd.sample();
+			}
 		}
 
 		// x is the target data
@@ -678,8 +694,8 @@ public class PoissonCalculatorTest
 		}
 	}
 
-	@Test
-	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod()
+	@SeededTest
+	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod(RandomSeed seed)
 	{
 		final DoubleEquality eq = new DoubleEquality(3e-4, 0);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -837,6 +853,7 @@ public class PoissonCalculatorTest
 		}
 	}
 
+	@SpeedTag
 	@Test
 	public void instanceMethodIsFaster()
 	{

@@ -30,28 +30,35 @@ import java.util.Arrays;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.BoxMullerUnitGaussianSampler;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
-public class SCMOSLikelihoodWrapperTest
+public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Object>
 {
 	private final double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
 
@@ -95,81 +102,88 @@ public class SCMOSLikelihoodWrapperTest
 	private static float G_SD = 0.2f;
 	private static float O = 100f;
 
-	private static float[] var;
-	private static float[] g;
-	private static float[] o;
-	private static float[] sd;
+	private class SCMOSLikelihoodWrapperTestData
+	{
+		float[] var;
+		float[] g;
+		float[] o;
+		float[] sd;
+	}
 
-	static
+	private static final DataCache<RandomSeed, Object> dataCache = new DataCache<>();
+
+	@Override
+	public Object getData(RandomSeed source)
 	{
 		final int n = maxx * maxx;
-		var = new float[n];
-		g = new float[n];
-		o = new float[n];
-		sd = new float[n];
-		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
-		final PoissonDistribution pd = new PoissonDistribution(rg, O, PoissonDistribution.DEFAULT_EPSILON,
-				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-		final ExponentialDistribution ed = new ExponentialDistribution(rg, VAR,
-				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+		SCMOSLikelihoodWrapperTestData data = new SCMOSLikelihoodWrapperTestData();
+		data.var = new float[n];
+		data.g = new float[n];
+		data.o = new float[n];
+		data.sd = new float[n];
+		final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), O);
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, G, G_SD);
+		final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
 		for (int i = 0; i < n; i++)
 		{
-			o[i] = pd.sample();
-			var[i] = (float) ed.sample();
-			sd[i] = (float) Math.sqrt(var[i]);
-			g[i] = (float) (G + rg.nextGaussian() * G_SD);
+			data.o[i] = pd.sample();
+			data.var[i] = (float) ed.sample();
+			data.sd[i] = (float) Math.sqrt(data.var[i]);
+			data.g[i] = (float) gs.sample();
 		}
+		return data;
 	}
 
-	@Test
-	public void fitFixedComputesGradientPerDatum()
+	@SeededTest
+	public void fitFixedComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_FIXED);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_FIXED);
 	}
 
-	@Test
-	public void fitCircleComputesGradientPerDatum()
+	@SeededTest
+	public void fitCircleComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_CIRCLE);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_CIRCLE);
 	}
 
-	@Test
-	public void fitFreeCircleComputesGradientPerDatum()
+	@SeededTest
+	public void fitFreeCircleComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fitEllipticalComputesGradientPerDatum()
+	@SeededTest
+	public void fitEllipticalComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_ELLIPTICAL);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
-	@Test
-	public void fitNBFixedComputesGradientPerDatum()
+	@SeededTest
+	public void fitNBFixedComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
-	@Test
-	public void fitNBCircleComputesGradientPerDatum()
+	@SeededTest
+	public void fitNBCircleComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
-	@Test
-	public void fitNBFreeCircleComputesGradientPerDatum()
+	@SeededTest
+	public void fitNBFreeCircleComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fitNBEllipticalComputesGradientPerDatum()
+	@SeededTest
+	public void fitNBEllipticalComputesGradientPerDatum(RandomSeed seed)
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
+		functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
-	private void functionComputesGradientPerDatum(int flags)
+	private void functionComputesGradientPerDatum(RandomSeed seed, int flags)
 	{
 		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		// Setup
@@ -209,22 +223,22 @@ public class SCMOSLikelihoodWrapperTest
 			testangle1 = new double[] { 0 };
 
 		if (f1.evaluatesBackground())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.BACKGROUND);
+			functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.BACKGROUND);
 		if (f1.evaluatesSignal())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.SIGNAL);
-		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.X_POSITION);
-		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Y_POSITION);
+			functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.SIGNAL);
+		functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.X_POSITION);
+		functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.Y_POSITION);
 		if (f1.evaluatesZ())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Z_POSITION);
+			functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.Z_POSITION);
 		if (f1.evaluatesSD0())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.X_SD);
+			functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.X_SD);
 		if (f1.evaluatesSD1())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Y_SD);
+			functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.Y_SD);
 		if (f1.evaluatesAngle())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.ANGLE);
+			functionComputesTargetGradientPerDatum(seed, f1, Gaussian2DFunction.ANGLE);
 	}
 
-	private void functionComputesTargetGradientPerDatum(Gaussian2DFunction f1, int targetParameter)
+	private void functionComputesTargetGradientPerDatum(RandomSeed seed, Gaussian2DFunction f1, int targetParameter)
 	{
 		final int[] indices = f1.gradientIndices();
 		final int gradientIndex = findGradientIndex(f1, targetParameter);
@@ -236,7 +250,14 @@ public class SCMOSLikelihoodWrapperTest
 		final int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache.getData(seed, this);
+		final float[] var = testData.var;
+		final float[] g = testData.g;
+		final float[] o = testData.o;
+		final float[] sd = testData.sd;
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
 
 		for (final double background : testbackground)
 			for (final double signal1 : testsignal1)
@@ -257,7 +278,8 @@ public class SCMOSLikelihoodWrapperTest
 									{
 										// Simulate sCMOS camera
 										final double u = f1.eval(i);
-										data[i] = rdg.nextPoisson(u) * g[i] + rdg.nextGaussian(o[i], sd[i]);
+										pd.setMeanUnsafe(u);
+										data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
 									}
 
 									ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
@@ -304,63 +326,63 @@ public class SCMOSLikelihoodWrapperTest
 		Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
 	}
 
-	@Test
-	public void fitFixedComputesGradient()
+	@SeededTest
+	public void fitFixedComputesGradient(RandomSeed seed)
 	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_FIXED);
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_FIXED);
 	}
 
-	@Test
-	public void fitCircleComputesGradient()
+	@SeededTest
+	public void fitCircleComputesGradient(RandomSeed seed)
 	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_CIRCLE);
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_CIRCLE);
 	}
 
-	@Test
-	public void fitFreeCircleComputesGradient()
+	@SeededTest
+	public void fitFreeCircleComputesGradient(RandomSeed seed)
 	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
-	@Test
-	public void fitEllipticalComputesGradient()
-	{
-		// The elliptical function gradient evaluation is worse
-		final DoubleEquality tmp = eq;
-		eq = eqPerDatum;
-		functionComputesGradient(GaussianFunctionFactory.FIT_ELLIPTICAL);
-		eq = tmp;
-	}
-
-	@Test
-	public void fitNBFixedComputesGradient()
-	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
-	}
-
-	@Test
-	public void fitNBCircleComputesGradient()
-	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
-	}
-
-	@Test
-	public void fitNBFreeCircleComputesGradient()
-	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
-	}
-
-	@Test
-	public void fitNBEllipticalComputesGradient()
+	@SeededTest
+	public void fitEllipticalComputesGradient(RandomSeed seed)
 	{
 		// The elliptical function gradient evaluation is worse
 		final DoubleEquality tmp = eq;
 		eq = eqPerDatum;
-		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_ELLIPTICAL);
 		eq = tmp;
 	}
 
-	private void functionComputesGradient(int flags)
+	@SeededTest
+	public void fitNBFixedComputesGradient(RandomSeed seed)
+	{
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+	}
+
+	@SeededTest
+	public void fitNBCircleComputesGradient(RandomSeed seed)
+	{
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
+	}
+
+	@SeededTest
+	public void fitNBFreeCircleComputesGradient(RandomSeed seed)
+	{
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+	}
+
+	@SeededTest
+	public void fitNBEllipticalComputesGradient(RandomSeed seed)
+	{
+		// The elliptical function gradient evaluation is worse
+		final DoubleEquality tmp = eq;
+		eq = eqPerDatum;
+		functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
+		eq = tmp;
+	}
+
+	private void functionComputesGradient(RandomSeed seed, int flags)
 	{
 		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		// Setup
@@ -400,22 +422,23 @@ public class SCMOSLikelihoodWrapperTest
 
 		final double fraction = 85;
 		if (f1.evaluatesBackground())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.BACKGROUND, fraction);
+			functionComputesTargetGradient(seed, f1, Gaussian2DFunction.BACKGROUND, fraction);
 		if (f1.evaluatesSignal())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.SIGNAL, fraction);
-		functionComputesTargetGradient(f1, Gaussian2DFunction.X_POSITION, fraction);
-		functionComputesTargetGradient(f1, Gaussian2DFunction.Y_POSITION, fraction);
+			functionComputesTargetGradient(seed, f1, Gaussian2DFunction.SIGNAL, fraction);
+		functionComputesTargetGradient(seed, f1, Gaussian2DFunction.X_POSITION, fraction);
+		functionComputesTargetGradient(seed, f1, Gaussian2DFunction.Y_POSITION, fraction);
 		if (f1.evaluatesZ())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.Z_POSITION, fraction);
+			functionComputesTargetGradient(seed, f1, Gaussian2DFunction.Z_POSITION, fraction);
 		if (f1.evaluatesSD0())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.X_SD, fraction);
+			functionComputesTargetGradient(seed, f1, Gaussian2DFunction.X_SD, fraction);
 		if (f1.evaluatesSD1())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.Y_SD, fraction);
+			functionComputesTargetGradient(seed, f1, Gaussian2DFunction.Y_SD, fraction);
 		if (f1.evaluatesAngle())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.ANGLE, fraction);
+			functionComputesTargetGradient(seed, f1, Gaussian2DFunction.ANGLE, fraction);
 	}
 
-	private void functionComputesTargetGradient(Gaussian2DFunction f1, int targetParameter, double threshold)
+	private void functionComputesTargetGradient(RandomSeed seed, Gaussian2DFunction f1, int targetParameter,
+			double threshold)
 	{
 		final int[] indices = f1.gradientIndices();
 		final int gradientIndex = findGradientIndex(f1, targetParameter);
@@ -427,7 +450,14 @@ public class SCMOSLikelihoodWrapperTest
 		final int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache.getData(seed, this);
+		final float[] var = testData.var;
+		final float[] g = testData.g;
+		final float[] o = testData.o;
+		final float[] sd = testData.sd;
+		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
 
 		for (final double background : testbackground)
 			for (final double signal1 : testsignal1)
@@ -448,7 +478,8 @@ public class SCMOSLikelihoodWrapperTest
 									{
 										// Simulate sCMOS camera
 										final double u = f1.eval(i);
-										data[i] = rdg.nextPoisson(u) * g[i] + rdg.nextGaussian(o[i], sd[i]);
+										pd.setMeanUnsafe(u);
+										data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
 									}
 
 									ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
@@ -752,27 +783,27 @@ public class SCMOSLikelihoodWrapperTest
 		}
 	}
 
-	@Test
-	public void canComputePValue()
+	@SeededTest
+	public void canComputePValue(RandomSeed seed)
 	{
 		final double n2 = maxx * maxx * 0.5;
 		//@formatter:off
-		canComputePValue(new BaseNonLinearFunction("Linear")
+		canComputePValue(seed,new BaseNonLinearFunction("Linear")
 		{
 			@Override
 			public double eval(int x) {	return a[0] * (x-n2); }
 		});
-		canComputePValue(new BaseNonLinearFunction("Quadratic")
+		canComputePValue(seed,new BaseNonLinearFunction("Quadratic")
 		{
 			@Override
 			public double eval(int x) {	return a[0] * (x-n2) * (x-n2); }
 		});
-		canComputePValue(new BaseNonLinearFunction("Linear+C")
+		canComputePValue(seed,new BaseNonLinearFunction("Linear+C")
 		{
 			@Override
 			public double eval(int x) {	return 10 * a[0] + (x-n2); }
 		});
-		canComputePValue(new BaseNonLinearFunction("Gaussian")
+		canComputePValue(seed,new BaseNonLinearFunction("Gaussian")
 		{
 			@Override
 			public double eval(int x) {	return 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
@@ -780,7 +811,7 @@ public class SCMOSLikelihoodWrapperTest
 		//@formatter:on
 	}
 
-	private static void canComputePValue(BaseNonLinearFunction nlf)
+	private void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf)
 	{
 		TestLog.infoln(nlf.name);
 
@@ -790,14 +821,26 @@ public class SCMOSLikelihoodWrapperTest
 
 		// Simulate sCMOS camera
 		nlf.initialise(a);
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+
+		final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache.getData(seed, this);
+		final float[] var = testData.var;
+		final float[] g = testData.g;
+		final float[] o = testData.o;
+		final float[] sd = testData.sd;
+		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
+
 		final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
 		for (int i = 0; i < n; i++)
 		{
 			double u = nlf.eval(i);
 			if (u > 0)
-				u = rdg.nextPoisson(u);
-			k[i] = u * g[i] + rdg.nextGaussian(o[i], sd[i]);
+			{
+				pd.setMeanUnsafe(u);
+				u = pd.sample();
+			}
+			k[i] = u * g[i] + o[i] + gs.sample() * sd[i];
 		}
 
 		final SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);

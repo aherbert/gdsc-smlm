@@ -34,9 +34,9 @@ import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.rng.BoxMullerUnitGaussianSampler;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
@@ -45,6 +45,8 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
@@ -86,7 +88,8 @@ public class JumpDistanceAnalysisTest
 		final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
 		jd.setMinD(0);
 		jd.setMinFraction(0);
-		final SimpsonIntegrator si = new SimpsonIntegrator(1e-3, 1e-8, 2, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		final SimpsonIntegrator si = new SimpsonIntegrator(1e-3, 1e-8, 2,
+				SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		for (final double d : D)
 		{
 			final double[] params = new double[] { d };
@@ -120,7 +123,8 @@ public class JumpDistanceAnalysisTest
 		final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
 		jd.setMinD(0);
 		jd.setMinFraction(0);
-		final SimpsonIntegrator si = new SimpsonIntegrator(1e-3, 1e-8, 2, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		final SimpsonIntegrator si = new SimpsonIntegrator(1e-3, 1e-8, 2,
+				SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		for (final double d : D)
 			for (final double f : new double[] { 0, 0.1, 0.2, 0.4, 0.7, 0.9, 1 })
 			{
@@ -149,13 +153,13 @@ public class JumpDistanceAnalysisTest
 	}
 
 	// @formatter:off
-	@Test
-	public void canFitSinglePopulationMLE() { fitSinglePopulation(true);  }
-	@Test
-	public void canFitSinglePopulation()    { fitSinglePopulation(false); }
+	@SeededTest
+	public void canFitSinglePopulationMLE(RandomSeed seed)	{ fitSinglePopulation(seed, true);  }
+	@SeededTest
+	public void canFitSinglePopulation(RandomSeed seed) { fitSinglePopulation(seed, false); }
 	// @formatter:on
 
-	private void fitSinglePopulation(boolean mle)
+	private void fitSinglePopulation(RandomSeed seed, boolean mle)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
@@ -179,45 +183,45 @@ public class JumpDistanceAnalysisTest
 	}
 
 	// @formatter:off
-	@Test
-	public void canFitDual0_1PopulationMLE() { fitDualPopulation(true,  0.1); }
-	@Test
-	public void canFitDual0_1Population()    { fitDualPopulation(false, 0.1); }
-	@Test
-	public void canFitDual0_2PopulationMLE() { fitDualPopulation(true,  0.2); }
-	@Test
-	public void canFitDual0_2Population()    { fitDualPopulation(false, 0.2); }
-	@Test
-	public void canFitDual0_3PopulationMLE() { fitDualPopulation(true,  0.3); }
-	@Test
-	public void canFitDual0_3Population()    { fitDualPopulation(false, 0.3); }
-	@Test
-	public void canFitDual0_4PopulationMLE() { fitDualPopulation(true,  0.4); }
-	@Test
-	public void canFitDual0_4Population()    { fitDualPopulation(false, 0.4); }
-	@Test
-	public void canFitDual0_5PopulationMLE() { fitDualPopulation(true,  0.5); }
-	@Test
-	public void canFitDual0_5Population()    { fitDualPopulation(false, 0.5); }
-	@Test
-	public void canFitDual0_6PopulationMLE() { fitDualPopulation(true,  0.6); }
-	@Test
-	public void canFitDual0_6Population()    { fitDualPopulation(false, 0.6); }
-	@Test
-	public void canFitDual0_7PopulationMLE() { fitDualPopulation(true,  0.7); }
-	@Test
-	public void canFitDual0_7Population()    { fitDualPopulation(false, 0.7); }
-	@Test
-	public void canFitDual0_8PopulationMLE() { fitDualPopulation(true,  0.8); }
-	@Test
-	public void canFitDual0_8Population()    { fitDualPopulation(false, 0.8); }
-	@Test
-	public void canFitDual0_9PopulationMLE() { fitDualPopulation(true,  0.9); }
-	@Test
-	public void canFitDual0_9Population()    { fitDualPopulation(false, 0.9); }
+	@SeededTest
+	public void canFitDual0_1PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.1); }
+	@SeededTest
+	public void canFitDual0_1Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.1); }
+	@SeededTest
+	public void canFitDual0_2PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.2); }
+	@SeededTest
+	public void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.2); }
+	@SeededTest
+	public void canFitDual0_3PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.3); }
+	@SeededTest
+	public void canFitDual0_3Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.3); }
+	@SeededTest
+	public void canFitDual0_4PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.4); }
+	@SeededTest
+	public void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.4); }
+	@SeededTest
+	public void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
+	@SeededTest
+	public void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.5); }
+	@SeededTest
+	public void canFitDual0_6PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.6); }
+	@SeededTest
+	public void canFitDual0_6Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.6); }
+	@SeededTest
+	public void canFitDual0_7PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.7); }
+	@SeededTest
+	public void canFitDual0_7Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.7); }
+	@SeededTest
+	public void canFitDual0_8PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.8); }
+	@SeededTest
+	public void canFitDual0_8Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.8); }
+	@SeededTest
+	public void canFitDual0_9PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.9); }
+	@SeededTest
+	public void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.9); }
 	// @formatter:on
 
-	private void fitDualPopulation(boolean mle, double fraction)
+	private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction)
 	{
 		ExtraAssumptions.assumeMaximumComplexity();
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
@@ -249,8 +253,8 @@ public class JumpDistanceAnalysisTest
 	/**
 	 * This is not actually a test but runs the fitting algorithm many times to collect benchmark data to file
 	 */
-	@Test
-	public void canDoBenchmark()
+	@SeededTest
+	public void canDoBenchmark(RandomSeed seed)
 	{
 		// Skip this as it is slow
 		Assumptions.assumeTrue(false);
@@ -494,8 +498,8 @@ public class JumpDistanceAnalysisTest
 		for (int i = 0; i < error.length; i++)
 			// As per the Weimann Plos One paper
 			error[i] = Math.abs(o[i] - e[i]) / e[i];
-			// Use the relative error from the largest value
-			//error[i] = uk.ac.sussex.gdsc.smlm.utils.DoubleEquality.relativeError(o[i], e[i]);
+		// Use the relative error from the largest value
+		//error[i] = uk.ac.sussex.gdsc.smlm.utils.DoubleEquality.relativeError(o[i], e[i]);
 		return error;
 	}
 
@@ -586,6 +590,7 @@ public class JumpDistanceAnalysisTest
 		{
 			if (size > getSize())
 			{
+				BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(random);
 				final int extra = size - getSize();
 
 				// Get cumulative fraction
@@ -613,8 +618,8 @@ public class JumpDistanceAnalysisTest
 					// Pick the population using the fraction
 					final int j = sample[i];
 					// Get the x/y shifts
-					final double x = random.nextGaussian() * s[j];
-					final double y = random.nextGaussian() * s[j];
+					final double x = gs.sample() * s[j];
+					final double y = gs.sample() * s[j];
 					// Get the squared jump distance
 					data[i] = x * x + y * y;
 				}

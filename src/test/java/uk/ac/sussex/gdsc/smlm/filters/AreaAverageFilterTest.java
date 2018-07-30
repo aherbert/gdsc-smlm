@@ -27,11 +27,13 @@ import java.util.ArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AreaAverageFilterTest extends AbstractFilterTest
@@ -39,14 +41,14 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	private final int ITER = 100;
 	private final int InternalITER = 300;
 
-	@Test
-	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
+	@SeededTest
+	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeMediumComplexity();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -111,15 +113,16 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void stripedBlockAverageIsFasterThanAreaAverage()
+	@SpeedTag
+	@SeededTest
+	public void stripedBlockAverageIsFasterThanAreaAverage(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 		final AverageFilter filter2 = new AverageFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(ITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, ITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -184,15 +187,16 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal()
+	@SpeedTag
+	@SeededTest
+	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal(RandomSeed seed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final AreaAverageFilter filter = new AreaAverageFilter();
 		final AverageFilter filter2 = new AverageFilter();
 
-		final ArrayList<float[]> dataSet = getSpeedData(InternalITER);
+		final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER);
 
 		final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -257,8 +261,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
-	@Test
-	public void areaAverageCorrectlyInterpolatesBetweenBlocks()
+	@SeededTest
+	public void areaAverageCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
@@ -316,8 +320,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 			}
 	}
 
-	@Test
-	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks()
+	@SeededTest
+	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
@@ -338,8 +342,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 		checkInterpolation(max, n, results, count);
 	}
 
-	@Test
-	public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks()
+	@SeededTest
+	public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;
@@ -361,8 +365,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 		checkInterpolation(max, n, results, count);
 	}
 
-	@Test
-	public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks()
+	@SeededTest
+	public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final int max = 50;

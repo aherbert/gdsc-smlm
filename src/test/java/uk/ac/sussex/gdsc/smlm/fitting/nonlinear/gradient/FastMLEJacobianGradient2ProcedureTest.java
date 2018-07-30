@@ -25,11 +25,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
@@ -41,6 +40,9 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussia
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -58,60 +60,61 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 	}
 
 	@Override
-	@Test
-	public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator()
+	@SeededTest
+	public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed)
 	{
 		Assumptions.assumeTrue(false);
 	}
 
 	@Override
-	@Test
-	public void gradientProcedureIsNotSlowerThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed)
 	{
 		Assumptions.assumeTrue(false);
 	}
 
 	@Override
-	@Test
-	public void gradientProcedureComputesSameWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed)
 	{
 		Assumptions.assumeTrue(false);
 	}
 
 	@Override
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
 		Assumptions.assumeTrue(false);
 	}
 
 	@Override
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
 		Assumptions.assumeTrue(false);
 	}
 
-	@Test
-	public void gradientProcedureComputesSameAsBaseGradientProcedure()
+	@SeededTest
+	public void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed)
 	{
 		// Test the base functionality of computing the partial derivatives is the same
-		gradientProcedureComputesSameAsBaseGradientProcedure(4);
-		gradientProcedureComputesSameAsBaseGradientProcedure(5);
-		gradientProcedureComputesSameAsBaseGradientProcedure(6);
-		gradientProcedureComputesSameAsBaseGradientProcedure(11);
-		gradientProcedureComputesSameAsBaseGradientProcedure(21);
+		gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4);
+		gradientProcedureComputesSameAsBaseGradientProcedure(seed, 5);
+		gradientProcedureComputesSameAsBaseGradientProcedure(seed, 6);
+		gradientProcedureComputesSameAsBaseGradientProcedure(seed, 11);
+		gradientProcedureComputesSameAsBaseGradientProcedure(seed, 21);
 	}
 
-	private void gradientProcedureComputesSameAsBaseGradientProcedure(int nparams)
+	private void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed, int nparams)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createFakeData(nparams, iter, paramsList, yList);
+		createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
@@ -127,11 +130,13 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 	}
 
 	@Override
-	@Test
-	public void gradientCalculatorComputesGradient()
+	@SeededTest
+	public void gradientCalculatorComputesGradient(RandomSeed seed)
 	{
-		gradientCalculatorComputesGradient(1, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
-		gradientCalculatorComputesGradient(2, new MultiFreeCircularErfGaussian2DFunction(2, blockWidth, blockWidth));
+		gradientCalculatorComputesGradient(seed, 1,
+				new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
+		gradientCalculatorComputesGradient(seed, 2,
+				new MultiFreeCircularErfGaussian2DFunction(2, blockWidth, blockWidth));
 
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
 		final double sx = 1.08;
@@ -144,23 +149,22 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		final double By = 0.0417;
 		final HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
-		gradientCalculatorComputesGradient(1,
+		gradientCalculatorComputesGradient(seed, 1,
 				new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}
 
-	private void gradientCalculatorComputesGradient(int nPeaks, ErfGaussian2DFunction func)
+	private void gradientCalculatorComputesGradient(RandomSeed seed, int nPeaks, ErfGaussian2DFunction func)
 	{
 		// Check the first and second derivatives
 		final int nparams = func.getNumberOfGradients();
 		final int[] indices = func.gradientIndices();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createData(nPeaks, iter, paramsList, yList, true);
+		createData(TestSettings.getRandomGenerator(seed.getSeed()), nPeaks, iter, paramsList, yList, true);
 
 		// for the gradients
 		final double delta = 1e-4;
@@ -250,8 +254,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					failCounter2.run(nparams * j_ + jj_, () -> {
 						return ok;
 					}, () -> {
-						ExtraAssertions.fail("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_, gradient3,
-								J.get(j_, jj_), DoubleEquality.relativeError(gradient3, J.get(j_, jj_)));
+						ExtraAssertions.fail("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_,
+								gradient3, J.get(j_, jj_), DoubleEquality.relativeError(gradient3, J.get(j_, jj_)));
 					});
 				}
 			}

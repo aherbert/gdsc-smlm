@@ -25,11 +25,9 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -46,6 +44,9 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGradientProcedureTest
@@ -54,15 +55,20 @@ public class PoissonGradientProcedureTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	double Background = 0.5;
-	double Signal = 100;
-	double Angle = Math.PI;
-	double Xpos = 5;
-	double Ypos = 5;
-	double Xwidth = 1.2;
-	double Ywidth = 1.2;
+	double background = 0.5;
+	double signal = 100;
+	double angle = Math.PI;
+	double xpos = 5;
+	double ypos = 5;
+	double xwidth = 1.2;
+	double ywidth = 1.2;
 
-	@Test
+	private static double nextUniform(UniformRandomProvider r, double min, double max)
+	{
+		return min + r.nextDouble() * (max - min);
+	}
+
+	@SeededTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		Assertions.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(6)).getClass(),
@@ -73,29 +79,30 @@ public class PoissonGradientProcedureTest
 				PoissonGradientProcedure4.class);
 	}
 
-	@Test
-	public void gradientProcedureComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(4);
-		gradientProcedureComputesSameAsGradientCalculator(5);
-		gradientProcedureComputesSameAsGradientCalculator(6);
-		gradientProcedureComputesSameAsGradientCalculator(11);
-		gradientProcedureComputesSameAsGradientCalculator(21);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 4);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 5);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 6);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 11);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 21);
 	}
 
-	@Test
-	public void gradientProcedureIsNotSlowerThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(4);
-		gradientProcedureIsNotSlowerThanGradientCalculator(5);
-		gradientProcedureIsNotSlowerThanGradientCalculator(6);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6);
 		// 2 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(11);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11);
 		// 4 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(21);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(int nparams)
+	private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, int nparams)
 	{
 		final int iter = 10;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -164,7 +171,7 @@ public class PoissonGradientProcedureTest
 		abstract void run();
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -224,23 +231,24 @@ public class PoissonGradientProcedureTest
 				time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, false);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, false);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, false);
 	}
 
-	@Test
-	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, true);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, true);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, true);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed, int nparams,
+			boolean precomputed)
 	{
 		final int iter = 10;
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -271,23 +279,26 @@ public class PoissonGradientProcedureTest
 		}
 	}
 
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, false);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, false);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, false);
 	}
 
-	@Test
-	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, true);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, true);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, true);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
+			final boolean precomputed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
@@ -355,11 +366,11 @@ public class PoissonGradientProcedureTest
 		//Assertions.assertTrue(time2 < time1);
 	}
 
-	@Test
-	public void crlbIsHigherWithPrecomputed()
+	@SeededTest
+	public void crlbIsHigherWithPrecomputed(RandomSeed seed)
 	{
 		final int iter = 10;
-		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -370,16 +381,16 @@ public class PoissonGradientProcedureTest
 		// Get a background
 		final double[] b = new double[func.size()];
 		for (int i = 0; i < b.length; i++)
-			b[i] = rdg.nextUniform(1, 2);
+			b[i] = nextUniform(r, 1, 2);
 
 		for (int i = 0; i < iter; i++)
 		{
-			a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
-			a[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-			a[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
-			a[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
-			a[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
-			a[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
+			a[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
+			a[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
+			a[Gaussian2DFunction.X_POSITION] = nextUniform(r, 4, 6);
+			a[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 4, 6);
+			a[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
+			a[Gaussian2DFunction.Y_SD] = nextUniform(r, 1, 1.3);
 
 			final PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(func);
 			p1.computeFisherInformation(a);
@@ -400,7 +411,7 @@ public class PoissonGradientProcedureTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void varianceMatchesFormula()
 	{
 		//Assumptions.assumeTrue(false);

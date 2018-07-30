@@ -29,27 +29,28 @@ import java.io.IOException;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class CubicSplineDataTest
 {
-	@Test
-	public void canExternaliseDoubleFunction() throws IOException
+	@SeededTest
+	public void canExternaliseDoubleFunction(RandomSeed seed) throws IOException
 	{
-		canExternaliseFunction(false);
+		canExternaliseFunction(seed, false);
 	}
 
-	@Test
-	public void canExternaliseFloatFunction() throws IOException
+	@SeededTest
+	public void canExternaliseFloatFunction(RandomSeed seed) throws IOException
 	{
-		canExternaliseFunction(true);
+		canExternaliseFunction(seed, true);
 	}
 
-	private static void canExternaliseFunction(boolean singlePrecision) throws IOException
+	private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision) throws IOException
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final int x = 6, y = 5, z = 4;

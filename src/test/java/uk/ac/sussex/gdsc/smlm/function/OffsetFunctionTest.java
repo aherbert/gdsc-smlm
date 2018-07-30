@@ -25,17 +25,18 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class OffsetFunctionTest
 {
-	@Test
-	public void offsetValueFunctionWrapsPrecomputedValues()
+	@SeededTest
+	public void offsetValueFunctionWrapsPrecomputedValues(RandomSeed seed)
 	{
 		final int n = 3;
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
@@ -78,8 +79,8 @@ public class OffsetFunctionTest
 		return v;
 	}
 
-	@Test
-	public void offsetGradient1FunctionWrapsPrecomputedValues()
+	@SeededTest
+	public void offsetGradient1FunctionWrapsPrecomputedValues(RandomSeed seed)
 	{
 		final int n = 3;
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
@@ -129,8 +130,8 @@ public class OffsetFunctionTest
 		return v;
 	}
 
-	@Test
-	public void offsetGradient2FunctionWrapsPrecomputedValues()
+	@SeededTest
+	public void offsetGradient2FunctionWrapsPrecomputedValues(RandomSeed seed)
 	{
 		final int n = 3;
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
@@ -189,7 +190,7 @@ public class OffsetFunctionTest
 		return v;
 	}
 
-	@Test
+	@SeededTest
 	public void offsetValueFunctionCanWrapPrecomputed()
 	{
 		final double[] a = new double[] { 3.2, 5.6 };
@@ -209,7 +210,7 @@ public class OffsetFunctionTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void offsetGradient1FunctionCanWrapPrecomputed()
 	{
 		final double[] a = new double[] { 3.2, 5.6 };
@@ -229,7 +230,7 @@ public class OffsetFunctionTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void offsetGradient2FunctionCanWrapPrecomputed()
 	{
 		final double[] a = new double[] { 3.2, 5.6 };
@@ -249,7 +250,7 @@ public class OffsetFunctionTest
 		}
 	}
 
-	@Test
+	@SeededTest
 	public void offsetExtendedGradient2FunctionCanWrapPrecomputed()
 	{
 		final double[] a = new double[] { 3.2, 5.6 };

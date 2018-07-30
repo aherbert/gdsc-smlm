@@ -30,9 +30,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.junit.internal.ArrayComparisonFailure;
+import org.junit.jupiter.api.Assertions;
 
 import ij.Macro;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
@@ -50,6 +49,8 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 /**
  * Test the ResultsManager functionality to load results from file when the file has options.
@@ -57,52 +58,52 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 @SuppressWarnings({ "javadoc" })
 public class ResultsManagerTest
 {
-	@Test
-	public void writeTSFMatchesRead()
+	@SeededTest
+	public void writeTSFMatchesRead(RandomSeed seed)
 	{
 		// This is redundant
 		ExtraAssumptions.assumeLowComplexity();
-		writeTSFMatchesRead(1, 1, 1, 1);
+		writeTSFMatchesRead(seed, 1, 1, 1, 1);
 	}
 
-	@Test
-	public void writeTSFMatchesReadWithChannels()
+	@SeededTest
+	public void writeTSFMatchesReadWithChannels(RandomSeed seed)
 	{
 		//ExtraAssumptions.assumeLowComplexity();
-		writeTSFMatchesRead(2, 1, 1, 1);
+		writeTSFMatchesRead(seed, 2, 1, 1, 1);
 	}
 
-	@Test
-	public void writeTSFMatchesReadWithSlices()
+	@SeededTest
+	public void writeTSFMatchesReadWithSlices(RandomSeed seed)
 	{
 		//ExtraAssumptions.assumeLowComplexity();
-		writeTSFMatchesRead(1, 2, 1, 1);
+		writeTSFMatchesRead(seed, 1, 2, 1, 1);
 	}
 
-	@Test
-	public void writeTSFMatchesReadWithPositions()
+	@SeededTest
+	public void writeTSFMatchesReadWithPositions(RandomSeed seed)
 	{
 		//ExtraAssumptions.assumeLowComplexity();
-		writeTSFMatchesRead(1, 1, 2, 1);
+		writeTSFMatchesRead(seed, 1, 1, 2, 1);
 	}
 
-	@Test
-	public void writeTSFMatchesReadWithTypes()
+	@SeededTest
+	public void writeTSFMatchesReadWithTypes(RandomSeed seed)
 	{
 		//ExtraAssumptions.assumeLowComplexity();
-		writeTSFMatchesRead(1, 1, 1, 2);
+		writeTSFMatchesRead(seed, 1, 1, 1, 2);
 	}
 
-	@Test
-	public void writeTSFMatchesReadWithCombinations()
+	@SeededTest
+	public void writeTSFMatchesReadWithCombinations(RandomSeed seed)
 	{
 		// This takes longer
 		ExtraAssumptions.assumeMediumComplexity();
-		writeTSFMatchesRead(2, 2, 2, 2);
+		writeTSFMatchesRead(seed, 2, 2, 2, 2);
 	}
 
 	@SuppressWarnings("null")
-	private static void writeTSFMatchesRead(int channels, int slices, int positions, int types)
+	private static void writeTSFMatchesRead(RandomSeed seed, int channels, int slices, int positions, int types)
 	{
 		final String filename = createFile();
 		FileOutputStream out = null;
@@ -286,11 +287,11 @@ public class ResultsManagerTest
 	private static void checkEqual(Spot[] spots, int channel, int slice, int position, int type,
 			MemoryPeakResults actualResults) throws ArrayComparisonFailure
 	{
-		Assertions.assertNotNull( actualResults,"Input results are null");
+		Assertions.assertNotNull(actualResults, "Input results are null");
 
 		final MemoryPeakResults expectedResults = extract(spots, channel, slice, position, type);
 
-		Assertions.assertEquals( expectedResults.size(), actualResults.size(), "Size differ");
+		Assertions.assertEquals(expectedResults.size(), actualResults.size(), "Size differ");
 
 		final PeakResult[] expected = expectedResults.toArray();
 		final PeakResult[] actual = actualResults.toArray();
@@ -300,24 +301,25 @@ public class ResultsManagerTest
 			final PeakResult p1 = expected[i];
 			final PeakResult p2 = actual[i];
 
-			Assertions.assertEquals( p1.getFrame(), p2.getFrame(), ()-> "Peak mismatch @ " + ii);
+			Assertions.assertEquals(p1.getFrame(), p2.getFrame(), () -> "Peak mismatch @ " + ii);
 
-			Assertions.assertEquals( p1.getOrigX(), p2.getOrigX(), ()-> "Orig X mismatch @ " + ii);
-			Assertions.assertEquals( p1.getOrigY(), p2.getOrigY(), ()-> "Orig Y mismatch @ " + ii);
-			Assertions.assertEquals( p1.getOrigValue(), p2.getOrigValue(), ()->"Orig value mismatch @ " + ii);
-			Assertions.assertEquals( p1.getError(), p2.getError(), 1e-6, ()->"Error mismatch @ " + ii);
-			Assertions.assertEquals( p1.getNoise(), p2.getNoise(), () -> "Noise mismatch @ " + ii);
-			Assertions.assertNotNull( p2.getParameters(), ()-> "Params is null @ " + ii);
+			Assertions.assertEquals(p1.getOrigX(), p2.getOrigX(), () -> "Orig X mismatch @ " + ii);
+			Assertions.assertEquals(p1.getOrigY(), p2.getOrigY(), () -> "Orig Y mismatch @ " + ii);
+			Assertions.assertEquals(p1.getOrigValue(), p2.getOrigValue(), () -> "Orig value mismatch @ " + ii);
+			Assertions.assertEquals(p1.getError(), p2.getError(), 1e-6, () -> "Error mismatch @ " + ii);
+			Assertions.assertEquals(p1.getNoise(), p2.getNoise(), () -> "Noise mismatch @ " + ii);
+			Assertions.assertNotNull(p2.getParameters(), () -> "Params is null @ " + ii);
 
-			Assertions.assertEquals( p1.getBackground(), p2.getBackground(), ()-> "Background mismatch @ " + ii);
-			Assertions.assertEquals( p1.getIntensity(), p2.getIntensity(), ()-> "Signal mismatch @ " + ii);
-			Assertions.assertEquals( p1.getXPosition(), p2.getXPosition(), ()-> "XPosition mismatch @ " + ii);
-			Assertions.assertEquals( p1.getYPosition(), p2.getYPosition(), ()-> "YPosition mismatch @ " + ii);
-			Assertions.assertEquals( p1.getZPosition(), p2.getZPosition(), ()-> "ZPosition mismatch @ " + ii);
+			Assertions.assertEquals(p1.getBackground(), p2.getBackground(), () -> "Background mismatch @ " + ii);
+			Assertions.assertEquals(p1.getIntensity(), p2.getIntensity(), () -> "Signal mismatch @ " + ii);
+			Assertions.assertEquals(p1.getXPosition(), p2.getXPosition(), () -> "XPosition mismatch @ " + ii);
+			Assertions.assertEquals(p1.getYPosition(), p2.getYPosition(), () -> "YPosition mismatch @ " + ii);
+			Assertions.assertEquals(p1.getZPosition(), p2.getZPosition(), () -> "ZPosition mismatch @ " + ii);
 			for (int j = PeakResult.STANDARD_PARAMETERS, size = p1.getNumberOfParameters(); j < size; j++)
-				Assertions.assertEquals( p1.getParameter(j), p2.getParameter(j), 1e-6, ()->"Parameter mismatch @ " + ii);
+				Assertions.assertEquals(p1.getParameter(j), p2.getParameter(j), 1e-6,
+						() -> "Parameter mismatch @ " + ii);
 
-			Assertions.assertEquals( p1.getId(), p2.getId(), ()-> "ID mismatch @ " + ii);
+			Assertions.assertEquals(p1.getId(), p2.getId(), () -> "ID mismatch @ " + ii);
 		}
 	}
 

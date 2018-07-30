@@ -25,11 +25,9 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.Maths;
@@ -42,20 +40,22 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class FisherInformationMatrixTest
 {
-	@Test
-	public void canComputeCRLB()
+	@SeededTest
+	public void canComputeCRLB(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputeCRLB(rg, n, 0, true);
 	}
 
-	@Test
-	public void canComputeCRLBWithZeros()
+	@SeededTest
+	public void canComputeCRLBWithZeros(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 2; n < 10; n++)
@@ -65,16 +65,16 @@ public class FisherInformationMatrixTest
 		}
 	}
 
-	@Test
-	public void canComputeCRLBWithReciprocal()
+	@SeededTest
+	public void canComputeCRLBWithReciprocal(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputeCRLB(rg, n, 0, false);
 	}
 
-	@Test
-	public void canComputeCRLBWithReciprocalWithZeros()
+	@SeededTest
+	public void canComputeCRLBWithReciprocalWithZeros(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 2; n < 10; n++)
@@ -84,8 +84,8 @@ public class FisherInformationMatrixTest
 		}
 	}
 
-	@Test
-	public void inversionDoesNotMatchReciprocal()
+	@SeededTest
+	public void inversionDoesNotMatchReciprocal(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
@@ -118,7 +118,6 @@ public class FisherInformationMatrixTest
 	{
 		final int maxx = 10;
 		final int size = maxx * maxx;
-		final RandomDataGenerator rdg = new RandomDataGenerator(rg);
 
 		// Use a real Gaussian function here to compute the Fisher information.
 		// The matrix may be sensitive to the type of equation used.
@@ -131,15 +130,15 @@ public class FisherInformationMatrixTest
 		}
 
 		final double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);
+		a[Gaussian2DFunction.BACKGROUND] = nextUniform(rg, 1, 5);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			a[j + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+			a[j + Gaussian2DFunction.SIGNAL] = nextUniform(rg, 100, 300);
 			// Non-overlapping peaks otherwise the CRLB are poor
-			a[j + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
-			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
-			a[j + Gaussian2DFunction.X_SD] = rdg.nextUniform(1.5, 2);
-			a[j + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1.5, 2);
+			a[j + Gaussian2DFunction.X_POSITION] = nextUniform(rg, 2 + i * 2, 4 + i * 2);
+			a[j + Gaussian2DFunction.Y_POSITION] = nextUniform(rg, 2 + i * 2, 4 + i * 2);
+			a[j + Gaussian2DFunction.X_SD] = nextUniform(rg, 1.5, 2);
+			a[j + Gaussian2DFunction.Y_SD] = nextUniform(rg, 1.5, 2);
 		}
 		f.initialise(a);
 
@@ -172,6 +171,11 @@ public class FisherInformationMatrixTest
 		return new FisherInformationMatrix(I, 1e-3);
 	}
 
+	private static double nextUniform(UniformRandomProvider r, double min, double max)
+	{
+		return min + r.nextDouble() * (max - min);
+	}
+
 	private static Gaussian2DFunction createFunction(int maxx, int npeaks)
 	{
 		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
@@ -184,8 +188,8 @@ public class FisherInformationMatrixTest
 		TestLog.info(format, args);
 	}
 
-	@Test
-	public void canProduceSubset()
+	@SeededTest
+	public void canProduceSubset(RandomSeed seed)
 	{
 		final int k = 5;
 		final int n = 10;
@@ -216,8 +220,8 @@ public class FisherInformationMatrixTest
 		return new FisherInformationMatrix(data, n);
 	}
 
-	@Test
-	public void computeWithSubsetReducesTheCRLB()
+	@SeededTest
+	public void computeWithSubsetReducesTheCRLB(RandomSeed seed)
 	{
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 		final Gaussian2DFunction f = createFunction(10, 1);

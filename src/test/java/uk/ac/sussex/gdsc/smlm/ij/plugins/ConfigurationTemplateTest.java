@@ -30,7 +30,7 @@ import java.util.HashSet;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import org.junit.jupiter.api.Test;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -46,6 +46,8 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class ConfigurationTemplateTest
@@ -130,8 +132,8 @@ public class ConfigurationTemplateTest
 		Assertions.assertArrayEquals(names, ConfigurationTemplate.getTemplateNames());
 	}
 
-	@Test
-	public void canLoadTemplateImageFromFile() throws IOException
+	@SeededTest
+	public void canLoadTemplateImageFromFile(RandomSeed seed) throws IOException
 	{
 		ConfigurationTemplate.clearTemplates();
 

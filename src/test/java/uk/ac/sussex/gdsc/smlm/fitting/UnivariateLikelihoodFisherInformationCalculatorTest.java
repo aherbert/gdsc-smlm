@@ -23,10 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
@@ -42,6 +40,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
 public class UnivariateLikelihoodFisherInformationCalculatorTest
@@ -51,24 +51,24 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		POISSON, HALF_POISSON, POISSON_GAUSSIAN
 	}
 
-	@Test
-	public void canComputePoissonFisherInformation()
+	@SeededTest
+	public void canComputePoissonFisherInformation(RandomSeed seed)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputePoissonFisherInformation(r, Model.POISSON);
 	}
 
-	@Test
-	public void canComputeHalfPoissonFisherInformation()
+	@SeededTest
+	public void canComputeHalfPoissonFisherInformation(RandomSeed seed)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
 			canComputePoissonFisherInformation(r, Model.HALF_POISSON);
 	}
 
-	@Test
-	public void canComputePoissonGaussianApproximationFisherInformation()
+	@SeededTest
+	public void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
@@ -77,17 +77,15 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 
 	private static void canComputePoissonFisherInformation(UniformRandomProvider r, Model model)
 	{
-		final RandomDataGenerator rdg = new RandomDataGenerator(r);
-
 		// Create function
-		final Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
-				null);
+		final Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10,
+				GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
 		final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		params[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
-		params[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-		params[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
-		params[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
-		params[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+		params[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
+		params[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
+		params[Gaussian2DFunction.X_POSITION] = nextUniform(r, 4, 6);
+		params[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 4, 6);
+		params[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
 
 		Gradient1Function f1 = func;
 		FisherInformation fi;
@@ -151,8 +149,8 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		}
 	}
 
-	@Test
-	public void canComputePerPixelPoissonGaussianApproximationFisherInformation()
+	@SeededTest
+	public void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomSeed seed)
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		for (int n = 1; n < 10; n++)
@@ -161,17 +159,15 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 
 	private static void canComputePerPixelPoissonGaussianApproximationFisherInformation(UniformRandomProvider r)
 	{
-		final RandomDataGenerator rdg = new RandomDataGenerator(r);
-
 		// Create function
-		final Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
-				null);
+		final Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10,
+				GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
 		final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		params[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
-		params[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-		params[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
-		params[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
-		params[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+		params[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
+		params[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
+		params[Gaussian2DFunction.X_POSITION] = nextUniform(r, 4, 6);
+		params[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 4, 6);
+		params[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
 
 		Gradient1Function f1 = func;
 		FisherInformation[] fi;
@@ -200,5 +196,10 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		final double[] o = I.getMatrix().data;
 
 		ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6);
+	}
+
+	private static double nextUniform(UniformRandomProvider r, double min, double max)
+	{
+		return min + r.nextDouble() * (max - min);
 	}
 }

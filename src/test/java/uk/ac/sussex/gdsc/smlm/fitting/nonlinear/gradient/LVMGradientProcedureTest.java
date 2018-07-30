@@ -26,17 +26,17 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;import uk.ac.sussex.gdsc.test.junit5.SeededTest;import uk.ac.sussex.gdsc.test.junit5.RandomSeed;import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
@@ -51,11 +51,15 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -76,21 +80,24 @@ public class LVMGradientProcedureTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	double Noise = 0.3;
-	double Background = 0.5;
+	double noise = 0.3;
+	double background = 0.5;
 	// High signal required to enabled the SupportsPrecomputed test to distinguish
 	// LSQ and MLE/WLSQ. With a value of 100 it is possible to get the same gradient
 	// with 3 peaks as with 2 peaks minus the third peak from the data.
-	double Signal = 1000;
-	double Angle = Math.PI;
-	double Xpos = 5;
-	double Ypos = 5;
-	double Xwidth = 1.2;
-	double Ywidth = 1.2;
+	double signal = 1000;
+	double angle = Math.PI;
+	double xpos = 5;
+	double ypos = 5;
+	double xwidth = 1.2;
+	double ywidth = 1.2;
 
-	RandomDataGenerator rdg;
+	private static double random(UniformRandomProvider r, double d)
+	{
+		return d - d * 0.1 + r.nextDouble() * 0.2;
+	}
 
-	@Test
+	@SeededTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		final DummyGradientFunction[] f = new DummyGradientFunction[7];
@@ -163,71 +170,74 @@ public class LVMGradientProcedureTest
 		//@formatter:on
 	}
 
-	@Test
-	public void gradientProcedureLSQComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientProcedureLSQComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(Type.LSQ);
+		gradientProcedureComputesSameAsGradientCalculator(seed, Type.LSQ);
 	}
 
-	@Test
-	public void gradientProcedureMLEComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientProcedureMLEComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(Type.MLE);
+		gradientProcedureComputesSameAsGradientCalculator(seed, Type.MLE);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLEComputesSameAsGradientCalculator()
+	@SeededTest
+	public void gradientProcedureFastLogMLEComputesSameAsGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(Type.FastLogMLE, 1e-5);
+		gradientProcedureComputesSameAsGradientCalculator(seed, Type.FastLogMLE, 1e-5);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(Type type)
+	private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, Type type)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(type, 0);
+		gradientProcedureComputesSameAsGradientCalculator(seed, type, 0);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(Type type, double error)
+	private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, Type type, double error)
 	{
-		gradientProcedureComputesSameAsGradientCalculator(4, type, error);
-		gradientProcedureComputesSameAsGradientCalculator(5, type, error);
-		gradientProcedureComputesSameAsGradientCalculator(6, type, error);
-		gradientProcedureComputesSameAsGradientCalculator(11, type, error);
-		gradientProcedureComputesSameAsGradientCalculator(21, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 4, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 5, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 6, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 11, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(seed, 21, type, error);
 	}
 
-	@Test
-	public void gradientProcedureLSQIsNotSlowerThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureLSQIsNotSlowerThanGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(Type.LSQ);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.LSQ);
 	}
 
-	@Test
-	public void gradientProcedureMLEIsNotSlowerThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureMLEIsNotSlowerThanGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(Type.MLE);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.MLE);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLEIsNotSlowerThanGradientCalculator()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureFastLogMLEIsNotSlowerThanGradientCalculator(RandomSeed seed)
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(Type.FastLogMLE);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.FastLogMLE);
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(Type type)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, Type type)
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(4, type);
-		gradientProcedureIsNotSlowerThanGradientCalculator(5, type);
-		gradientProcedureIsNotSlowerThanGradientCalculator(6, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6, type);
 		// 2 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(11, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11, type);
 		// 4 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(21, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21, type);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, Type type, double error)
+	private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, int nparams, Type type,
+			double error)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
@@ -235,7 +245,8 @@ public class LVMGradientProcedureTest
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		final int[] x = createFakeData(nparams, iter, paramsList, yList);
+		final int[] x = createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList,
+				yList);
 		final int n = x.length;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -312,19 +323,19 @@ public class LVMGradientProcedureTest
 		abstract void run();
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams, final Type type)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams, final Type type)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		final int[] x = createFakeData(nparams, iter, paramsList, yList);
+		final int[] x = createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList,
+				yList);
 		final int n = x.length;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -380,70 +391,71 @@ public class LVMGradientProcedureTest
 				time1, nparams, type, time2, (1.0 * time1) / time2);
 	}
 
-	@Test
-	public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.LSQ, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.LSQ, false);
 	}
 
-	@Test
-	public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.MLE, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.MLE, false);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLEUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureFastLogMLEUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.FastLogMLE, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.FastLogMLE, false);
 	}
 
-	@Test
-	public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedure()
+	@SeededTest
+	public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.WLSQ, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.WLSQ, false);
 	}
 
-	@Test
-	public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.LSQ, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.LSQ, true);
 	}
 
-	@Test
-	public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.MLE, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.MLE, true);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureFastLogMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.FastLogMLE, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.FastLogMLE, true);
 	}
 
-	@Test
-	public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.WLSQ, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.WLSQ, true);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(Type type, boolean precomputed)
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed, Type type,
+			boolean precomputed)
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, type, precomputed);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, type, precomputed);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, type, precomputed);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, type, precomputed);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, type, precomputed);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, type, precomputed);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, Type type, boolean precomputed)
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed, int nparams, Type type,
+			boolean precomputed)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createFakeData(nparams, iter, paramsList, yList);
+		createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
@@ -492,73 +504,80 @@ public class LVMGradientProcedureTest
 		}
 	}
 
-	@Test
-	public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.LSQ, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.LSQ, false);
 	}
 
-	@Test
-	public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.MLE, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.MLE, false);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLEIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureFastLogMLEIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.FastLogMLE, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.FastLogMLE, false);
 	}
 
-	@Test
-	public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedure()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.WLSQ, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.WLSQ, false);
 	}
 
-	@Test
-	public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.LSQ, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.LSQ, true);
 	}
 
-	@Test
-	public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.MLE, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.MLE, true);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureFastLogMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.FastLogMLE, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.FastLogMLE, true);
 	}
 
-	@Test
-	public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	@SpeedTag
+	@SeededTest
+	public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.WLSQ, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.WLSQ, true);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(Type type, boolean precomputed)
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, Type type, boolean precomputed)
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, type, precomputed);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, type, precomputed);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, type, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, type, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, type, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, type, precomputed);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final Type type,
-			final boolean precomputed)
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
+			final Type type, final boolean precomputed)
 	{
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createData(1, iter, paramsList, yList);
+		createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function
 		final FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
@@ -627,33 +646,33 @@ public class LVMGradientProcedureTest
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
-	@Test
-	public void gradientProcedureLSQComputesGradient()
+	@SeededTest
+	public void gradientProcedureLSQComputesGradient(RandomSeed seed)
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.LSQ,
-				false);
+		gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+				Type.LSQ, false);
 	}
 
-	@Test
-	public void gradientProcedureMLEComputesGradient()
+	@SeededTest
+	public void gradientProcedureMLEComputesGradient(RandomSeed seed)
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.MLE,
-				false);
+		gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+				Type.MLE, false);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLECannotComputeGradient()
+	@SeededTest
+	public void gradientProcedureFastLogMLECannotComputeGradient(RandomSeed seed)
 	{
 		Assertions.assertThrows(AssertionFailedError.class, () -> {
-			gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+			gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
 					Type.FastLogMLE, false);
 		});
 	}
 
 	// This test now passes as the tolerance for computing the gradient has been lowered
 	// so that the test passes under a stress test using many different random seeds.
-	//@Test(expected = AssertionError.class)
-	public void gradientProcedureFastLogMLECannotComputeGradientWithHighPrecision()
+	//@SeededTest
+	public void gradientProcedureFastLogMLECannotComputeGradientWithHighPrecision(RandomSeed seed)
 	{
 		// Try different precision
 		for (int n = FastLog.N; n < 23; n++)
@@ -662,8 +681,8 @@ public class LVMGradientProcedureTest
 			{
 				//System.out.printf("Precision n=%d\n", n);
 				fastLog = new TurboLog2(n);
-				gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
-						Type.FastLogMLE, false);
+				gradientProcedureComputesGradient(seed,
+						new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FastLogMLE, false);
 			}
 			catch (final AssertionError e)
 			{
@@ -679,56 +698,56 @@ public class LVMGradientProcedureTest
 		Assertions.fail();
 	}
 
-	@Test
-	public void gradientProcedureWLSQComputesGradient()
+	@SeededTest
+	public void gradientProcedureWLSQComputesGradient(RandomSeed seed)
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+		gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
 				Type.WLSQ, false);
 	}
 
-	@Test
-	public void gradientProcedureLSQComputesGradientWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureLSQComputesGradientWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.LSQ,
-				true);
+		gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+				Type.LSQ, true);
 	}
 
-	@Test
-	public void gradientProcedureMLEComputesGradientWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureMLEComputesGradientWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.MLE,
-				true);
+		gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+				Type.MLE, true);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLECannotComputeGradientWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureFastLogMLECannotComputeGradientWithPrecomputed(RandomSeed seed)
 	{
 		Assertions.assertThrows(AssertionFailedError.class, () -> {
-			gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+			gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
 					Type.FastLogMLE, true);
 		});
 	}
 
-	@Test
-	public void gradientProcedureWLSQComputesGradientWithPrecomputed()
+	@SeededTest
+	public void gradientProcedureWLSQComputesGradientWithPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+		gradientProcedureComputesGradient(seed, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
 				Type.WLSQ, true);
 	}
 
 	@SuppressWarnings("null")
-	private void gradientProcedureComputesGradient(ErfGaussian2DFunction func, Type type, boolean precomputed)
+	private void gradientProcedureComputesGradient(RandomSeed seed, ErfGaussian2DFunction func, Type type,
+			boolean precomputed)
 	{
 		final int nparams = func.getNumberOfGradients();
 		final int[] indices = func.gradientIndices();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		createData(1, iter, paramsList, yList, true);
+		createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList, true);
 
 		// for the gradients
 		final double delta = 1e-4;
@@ -795,53 +814,54 @@ public class LVMGradientProcedureTest
 		}
 	}
 
-	@Test
-	public void gradientProcedureLSQSupportsPrecomputed()
+	@SeededTest
+	public void gradientProcedureLSQSupportsPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureSupportsPrecomputed(Type.LSQ);
+		gradientProcedureSupportsPrecomputed(seed, Type.LSQ);
 	}
 
-	@Test
-	public void gradientProcedureMLESupportsPrecomputed()
+	@SeededTest
+	public void gradientProcedureMLESupportsPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureSupportsPrecomputed(Type.MLE);
+		gradientProcedureSupportsPrecomputed(seed, Type.MLE);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLESupportsPrecomputed()
+	@SeededTest
+	public void gradientProcedureFastLogMLESupportsPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureSupportsPrecomputed(Type.FastLogMLE, false);
+		gradientProcedureSupportsPrecomputed(seed, Type.FastLogMLE, false);
 	}
 
-	@Test
-	public void gradientProcedureFastLogMLECannotSupportPrecomputedWithGradients()
+	@SeededTest
+	public void gradientProcedureFastLogMLECannotSupportPrecomputedWithGradients(RandomSeed seed)
 	{
 		Assertions.assertThrows(AssertionFailedError.class, () -> {
-			gradientProcedureSupportsPrecomputed(Type.FastLogMLE);
+			gradientProcedureSupportsPrecomputed(seed, Type.FastLogMLE);
 		});
 	}
 
-	@Test
-	public void gradientProcedureWLSQSupportsPrecomputed()
+	@SeededTest
+	public void gradientProcedureWLSQSupportsPrecomputed(RandomSeed seed)
 	{
-		gradientProcedureSupportsPrecomputed(Type.WLSQ);
+		gradientProcedureSupportsPrecomputed(seed, Type.WLSQ);
 	}
 
-	private void gradientProcedureSupportsPrecomputed(final Type type)
+	private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type)
 	{
-		gradientProcedureSupportsPrecomputed(type, true);
+		gradientProcedureSupportsPrecomputed(seed, type, true);
 	}
 
-	private void gradientProcedureSupportsPrecomputed(final Type type, boolean checkGradients)
+	private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type, boolean checkGradients)
 	{
 		final int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator(seed.getSeed()));
+		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, noise);
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		// 3 peaks
-		createData(3, iter, paramsList, yList, true);
+		createData(r, 3, iter, paramsList, yList, true);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -849,7 +869,7 @@ public class LVMGradientProcedureTest
 			// Add Gaussian read noise so we have negatives
 			final double min = Maths.min(y);
 			for (int j = 0; j < y.length; j++)
-				y[j] = y[i] - min + rdg.nextGaussian(0, Noise);
+				y[j] = y[i] - min + gs.sample();
 		}
 
 		// We want to know that:
@@ -1105,69 +1125,70 @@ public class LVMGradientProcedureTest
 	 *            Set to true to randomise the params
 	 * @return the double[]
 	 */
-	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
+	private double[] doubleCreateGaussianData(UniformRandomProvider r, int npeaks, double[] params,
+			boolean randomiseParams)
 	{
 		final int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
 		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-		params[0] = random(Background);
+		params[0] = random(r, background);
 		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j + Gaussian2DFunction.SIGNAL] = random(Signal);
-			params[j + Gaussian2DFunction.X_POSITION] = random(Xpos);
-			params[j + Gaussian2DFunction.Y_POSITION] = random(Ypos);
-			params[j + Gaussian2DFunction.X_SD] = random(Xwidth);
-			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
+			params[j + Gaussian2DFunction.SIGNAL] = random(r, signal);
+			params[j + Gaussian2DFunction.X_POSITION] = random(r, xpos);
+			params[j + Gaussian2DFunction.Y_POSITION] = random(r, ypos);
+			params[j + Gaussian2DFunction.X_SD] = random(r, xwidth);
+			params[j + Gaussian2DFunction.Y_SD] = random(r, ywidth);
 		}
 
 		if (npeaks > 1)
 		{
 			// Move the peaks around so they do not overlap
 			final double[] shift = SimpleArrayUtils.newArray(npeaks, -2, 4.0 / (npeaks - 1));
-			Random.shuffle(shift, rdg.getRandomGenerator());
+			Random.shuffle(shift, r);
 			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				params[j + Gaussian2DFunction.X_POSITION] += shift[i];
-			Random.shuffle(shift, rdg.getRandomGenerator());
+			Random.shuffle(shift, r);
 			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				params[j + Gaussian2DFunction.Y_POSITION] += shift[i];
 		}
 
 		final double[] y = new double[n];
+		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
+		{
 			// Add random Poisson noise
-			y[i] = rdg.nextPoisson(func.eval(i));
+			pd.setMeanUnsafe(func.eval(i));
+			y[i] = pd.sample();
+		}
 
 		if (randomiseParams)
 		{
-			params[0] = random(params[0]);
+			params[0] = random(r, params[0]);
 			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
-				params[j + Gaussian2DFunction.SIGNAL] = random(params[j + Gaussian2DFunction.SIGNAL]);
-				params[j + Gaussian2DFunction.X_POSITION] = random(params[j + Gaussian2DFunction.X_POSITION]);
-				params[j + Gaussian2DFunction.Y_POSITION] = random(params[j + Gaussian2DFunction.Y_POSITION]);
-				params[j + Gaussian2DFunction.X_SD] = random(params[j + Gaussian2DFunction.X_SD]);
-				params[j + Gaussian2DFunction.Y_SD] = random(params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
+				params[j + Gaussian2DFunction.SIGNAL] = random(r, params[j + Gaussian2DFunction.SIGNAL]);
+				params[j + Gaussian2DFunction.X_POSITION] = random(r, params[j + Gaussian2DFunction.X_POSITION]);
+				params[j + Gaussian2DFunction.Y_POSITION] = random(r, params[j + Gaussian2DFunction.Y_POSITION]);
+				params[j + Gaussian2DFunction.X_SD] = random(r, params[j + Gaussian2DFunction.X_SD]);
+				params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
 			}
 		}
 
 		return y;
 	}
 
-	private double random(double d)
+	protected int[] createData(UniformRandomProvider r, int npeaks, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
-		return d + rdg.nextUniform(-d * 0.1, d * 0.1);
+		return createData(r, npeaks, iter, paramsList, yList, true);
 	}
 
-	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
-	{
-		return createData(npeaks, iter, paramsList, yList, true);
-	}
-
-	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
-			boolean randomiseParams)
+	protected int[] createData(UniformRandomProvider r, int npeaks, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList, boolean randomiseParams)
 	{
 		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -1175,14 +1196,15 @@ public class LVMGradientProcedureTest
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-			final double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
+			final double[] y = doubleCreateGaussianData(r, npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
 		final int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -1190,17 +1212,16 @@ public class LVMGradientProcedureTest
 		for (int i = 0; i < iter; i++)
 		{
 			final double[] params = new double[nparams];
-			final double[] y = createFakeData(params);
+			final double[] y = createFakeData(r, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	private double[] createFakeData(double[] params)
+	private double[] createFakeData(UniformRandomProvider r, double[] params)
 	{
 		final int n = blockWidth * blockWidth;
-		final UniformRandomProvider r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
 			params[i] = r.nextDouble();
