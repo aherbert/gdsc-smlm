@@ -116,7 +116,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 	public Object getData(RandomSeed source)
 	{
 		final int n = maxx * maxx;
-		SCMOSLikelihoodWrapperTestData data = new SCMOSLikelihoodWrapperTestData();
+		final SCMOSLikelihoodWrapperTestData data = new SCMOSLikelihoodWrapperTestData();
 		data.var = new float[n];
 		data.g = new float[n];
 		data.o = new float[n];
@@ -455,7 +455,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 		final float[] g = testData.g;
 		final float[] o = testData.o;
 		final float[] sd = testData.sd;
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
 
@@ -827,7 +827,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 		final float[] g = testData.g;
 		final float[] o = testData.o;
 		final float[] sd = testData.sd;
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
 

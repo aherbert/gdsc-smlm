@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
 

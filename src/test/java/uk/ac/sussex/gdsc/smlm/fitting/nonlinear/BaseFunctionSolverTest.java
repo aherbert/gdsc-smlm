@@ -162,7 +162,7 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 			if (noiseModel == NoiseModel.SCMOS)
 			{
 				// Special case of per-pixel random weights
-				double[][] data = dataCache.getData(seed, this);
+				final double[][] data = dataCache.getData(seed, this);
 				return data[0];
 			}
 			computeWeights(noiseModel, index);
@@ -178,7 +178,7 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 			if (noiseModel == NoiseModel.SCMOS)
 			{
 				// Special case of per-pixel random noise
-				double[][] data = dataCache.getData(seed, this);
+				final double[][] data = dataCache.getData(seed, this);
 				return data[1];
 			}
 			computeWeights(noiseModel, index);
@@ -189,9 +189,7 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 	private static void computeWeights(NoiseModel noiseModel, int index)
 	{
 		if (noiseModel == NoiseModel.SCMOS)
-		{
 			throw new IllegalStateException("This requires a random generator");
-		}
 		// The rest are fixed for all pixels
 		final double[] w = new double[size * size];
 		final double[] n = new double[size * size];

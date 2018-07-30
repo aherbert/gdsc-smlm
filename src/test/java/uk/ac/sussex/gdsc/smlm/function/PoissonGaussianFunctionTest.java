@@ -298,8 +298,8 @@ public class PoissonGaussianFunctionTest
 		final int max = range[1];
 		final double logGain = Math.log(gain);
 		final double s2 = Maths.pow2(s);
-		Supplier<String> msg1 = () -> String.format("probability g=%f, mu=%f, s=%f", gain, mu, s);
-		Supplier<String> msg2 = () -> String.format("logProbability g=%f, mu=%f, s=%f", gain, mu, s);
+		final Supplier<String> msg1 = () -> String.format("probability g=%f, mu=%f, s=%f", gain, mu, s);
+		final Supplier<String> msg2 = () -> String.format("logProbability g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			double p = f.probability(x);

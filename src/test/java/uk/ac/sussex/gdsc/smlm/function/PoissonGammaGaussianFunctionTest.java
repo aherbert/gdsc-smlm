@@ -326,7 +326,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		ExtraAssumptions.assumeHighComplexity();
 
-		// This is the whole test. It could be separated into parameters that fail 
+		// This is the whole test. It could be separated into parameters that fail
 		// and parameters that are OK.
 		Assertions.assertThrows(AssertionFailedError.class, () -> {
 			for (final double p : photons)

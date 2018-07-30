@@ -78,7 +78,7 @@ public class GradientCalculatorSpeedTest
 	{
 		return d - d * 0.1 + r.nextDouble() * 0.2;
 	}
-	
+
 	@SeededTest
 	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
 	{
@@ -646,7 +646,7 @@ public class GradientCalculatorSpeedTest
 		final int n = blockWidth * blockWidth;
 		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		for (int run = 5; run-- > 0;)
 		{
 			a[Gaussian2DFunction.BACKGROUND] = random(r, background);
@@ -722,7 +722,7 @@ public class GradientCalculatorSpeedTest
 
 		final double[] y = new double[n];
 		func.initialise(params);
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		for (int i = 0; i < y.length; i++)
 		{
 			// Add random Poisson noise

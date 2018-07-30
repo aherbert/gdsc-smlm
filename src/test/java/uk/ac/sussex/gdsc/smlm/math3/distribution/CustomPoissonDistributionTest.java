@@ -87,7 +87,7 @@ public class CustomPoissonDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
+			final RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
 			final long[] e = new long[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
@@ -109,7 +109,7 @@ public class CustomPoissonDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			CustomPoissonDistribution dist = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+			final CustomPoissonDistribution dist = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 			final long[] e = new long[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{

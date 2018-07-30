@@ -135,7 +135,7 @@ public class InterpolatedPoissonFunctionTest
 		for (int j = 0; j < gain.length; j++)
 			for (int i = 0; i < photons.length; i++)
 			{
-				int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
+				final int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
 				TestLog.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
 				TestLog.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
 			}

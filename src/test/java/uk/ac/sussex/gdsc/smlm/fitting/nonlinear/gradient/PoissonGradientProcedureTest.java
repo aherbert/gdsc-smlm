@@ -370,7 +370,7 @@ public class PoissonGradientProcedureTest
 	public void crlbIsHigherWithPrecomputed(RandomSeed seed)
 	{
 		final int iter = 10;
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);

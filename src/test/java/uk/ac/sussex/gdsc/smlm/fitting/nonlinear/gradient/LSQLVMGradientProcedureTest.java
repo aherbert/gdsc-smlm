@@ -567,13 +567,11 @@ public class LSQLVMGradientProcedureTest
 				final Statistics[] rel = new Statistics[nparams];
 				final Statistics[] abs = new Statistics[nparams];
 				if (debug)
-				{
 					for (int i = 0; i < nparams; i++)
 					{
 						rel[i] = new Statistics();
 						abs[i] = new Statistics();
 					}
-				}
 
 				for (int i = 0; i < paramsList.size(); i++)
 				{
@@ -595,13 +593,11 @@ public class LSQLVMGradientProcedureTest
 					Assertions.assertArrayEquals(x2, beta, 1e-10, "X");
 
 					if (debug)
-					{
 						for (int j = 0; j < nparams; j++)
 						{
 							rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
 							abs[j].add(Math.abs(x2[j] - beta[j]));
 						}
-					}
 				}
 
 				if (debug)
@@ -660,7 +656,7 @@ public class LSQLVMGradientProcedureTest
 
 		final double[] y = new double[n];
 		func.initialise(params);
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		for (int i = 0; i < y.length; i++)
 		{
 			// Add random Poisson noise

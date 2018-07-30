@@ -93,29 +93,25 @@ public class Gaussian2DFunctionSpeedTest implements DataProvider<RandomSeed, Obj
 
 	private Gaussian2DFunctionSpeedTestData ensureDataSingle(RandomSeed seed, int size)
 	{
-		Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache.getData(seed, this);
+		final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache.getData(seed, this);
 		if (data.paramsListSinglePeak.size() < size)
-		{
 			synchronized (data.paramsListSinglePeak)
 			{
 				if (data.paramsListSinglePeak.size() < size)
 					createData(data.rand, 1, size, data.paramsListSinglePeak, data.yListSinglePeak);
 			}
-		}
 		return data;
 	}
 
 	private Gaussian2DFunctionSpeedTestData ensureDataMulti(RandomSeed seed, int size)
 	{
-		Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache.getData(seed, this);
+		final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache.getData(seed, this);
 		if (data.paramsListMultiPeak.size() < size)
-		{
 			synchronized (data.paramsListMultiPeak)
 			{
 				if (data.paramsListMultiPeak.size() < size)
 					createData(data.rand, 2, size, data.paramsListMultiPeak, data.yListMultiPeak);
 			}
-		}
 		return data;
 	}
 
@@ -295,13 +291,9 @@ public class Gaussian2DFunctionSpeedTest implements DataProvider<RandomSeed, Obj
 		final int iter = 50;
 		ArrayList<double[]> paramsList2;
 		if (npeaks == 1)
-		{
 			paramsList2 = copyList(ensureDataSingle(seed, iter).paramsListSinglePeak, iter);
-		}
 		else
-		{
 			paramsList2 = copyList(ensureDataMulti(seed, iter).paramsListMultiPeak, iter);
-		}
 
 		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
 		final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2, null);
@@ -353,13 +345,9 @@ public class Gaussian2DFunctionSpeedTest implements DataProvider<RandomSeed, Obj
 		final int iter = 10000;
 		ArrayList<double[]> paramsList2;
 		if (npeaks == 1)
-		{
 			paramsList2 = copyList(ensureDataSingle(seed, iter).paramsListSinglePeak, iter);
-		}
 		else
-		{
 			paramsList2 = copyList(ensureDataMulti(seed, iter).paramsListMultiPeak, iter);
-		}
 
 		// Use the full list of parameters to build the functions
 		final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1, null);

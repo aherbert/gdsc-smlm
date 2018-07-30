@@ -132,11 +132,11 @@ public class AbstractFilterTest implements DataProvider<RandomSeed, Object>
 	 */
 	ArrayList<float[]> getSpeedData(RandomSeed seed, int size)
 	{
-		FloatData data = (FloatData) dataCache.getData(seed, this);
-		ArrayList<float[]> dataSet = data.dataSet;
+		final FloatData data = (FloatData) dataCache.getData(seed, this);
+		final ArrayList<float[]> dataSet = data.dataSet;
 		if (dataSet.size() < size)
 		{
-			UniformRandomProvider rg = data.rg;
+			final UniformRandomProvider rg = data.rg;
 			synchronized (dataSet)
 			{
 				while (dataSet.size() < size)
@@ -168,11 +168,11 @@ public class AbstractFilterTest implements DataProvider<RandomSeed, Object>
 	 */
 	ArrayList<int[]> getIntSpeedData(RandomSeed seed, int size)
 	{
-		FloatData data = (FloatData) dataCache.getData(seed, this);
-		ArrayList<float[]> dataSet = data.dataSet;
+		final FloatData data = (FloatData) dataCache.getData(seed, this);
+		final ArrayList<float[]> dataSet = data.dataSet;
 		if (dataSet.size() < size)
 		{
-			UniformRandomProvider rg = data.rg;
+			final UniformRandomProvider rg = data.rg;
 			synchronized (dataSet)
 			{
 				while (dataSet.size() < size)

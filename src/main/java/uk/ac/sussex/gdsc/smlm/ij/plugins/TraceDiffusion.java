@@ -43,7 +43,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import ij.IJ;
 import ij.gui.Plot;
-import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
@@ -52,6 +51,7 @@ import uk.ac.sussex.gdsc.core.ij.IJLogger;
 import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;

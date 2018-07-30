@@ -57,7 +57,7 @@ public class ImageConverterTest implements DataProvider<RandomSeed, Object>
 	{
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final ByteProcessor bp = new ByteProcessor(w, h);
-		ImageConverterTestData data = new ImageConverterTestData();
+		final ImageConverterTestData data = new ImageConverterTestData();
 		data.bdata = (byte[]) bp.getPixels();
 		data.sdata = new short[data.bdata.length];
 		data.fdata = new float[data.bdata.length];
@@ -73,10 +73,10 @@ public class ImageConverterTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetData(RandomSeed seed)
 	{
-		ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
-		byte[] bdata = data.bdata;
-		short[] sdata = data.sdata;
-		float[] fdata = data.fdata;
+		final ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
+		final byte[] bdata = data.bdata;
+		final short[] sdata = data.sdata;
+		final float[] fdata = data.fdata;
 		final Rectangle bounds = null;
 		final float[] fe = fdata;
 		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
@@ -92,10 +92,10 @@ public class ImageConverterTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetDataWithFullBounds(RandomSeed seed)
 	{
-		ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
-		byte[] bdata = data.bdata;
-		short[] sdata = data.sdata;
-		float[] fdata = data.fdata;
+		final ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
+		final byte[] bdata = data.bdata;
+		final short[] sdata = data.sdata;
+		final float[] fdata = data.fdata;
 		final Rectangle bounds = new Rectangle(0, 0, w, h);
 		final float[] fe = fdata;
 		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
@@ -111,10 +111,10 @@ public class ImageConverterTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetCropData(RandomSeed seed)
 	{
-		ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
-		byte[] bdata = data.bdata;
-		short[] sdata = data.sdata;
-		float[] fdata = data.fdata;
+		final ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
+		final byte[] bdata = data.bdata;
+		final short[] sdata = data.sdata;
+		final float[] fdata = data.fdata;
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(fdata, w, h);
 		for (int i = 0; i < 10; i++)

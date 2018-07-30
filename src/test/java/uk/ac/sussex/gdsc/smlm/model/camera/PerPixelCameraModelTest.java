@@ -54,9 +54,9 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@Override
 	public Object getData(RandomSeed seed)
 	{
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
-		PerPixelCameraModelTestData data = new PerPixelCameraModelTestData();
+		final PerPixelCameraModelTestData data = new PerPixelCameraModelTestData();
 		data.bias = new float[size];
 		data.gain = new float[size];
 		data.variance = new float[size];
@@ -76,7 +76,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetDataWithFullBounds(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
 		final Rectangle bounds = new Rectangle(0, 0, w, h);
 		Assertions.assertArrayEquals(data.bias, model.getBias(bounds));
@@ -98,7 +98,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 
 	private void canGetCropData(RandomSeed seed, boolean initialise)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = createModel(data, initialise);
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
@@ -144,7 +144,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 
 	private void canCropAndGetData(RandomSeed seed, boolean initialise)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = createModel(data, initialise);
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
@@ -163,7 +163,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canConvertDataWithFullBounds(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
 		checkConversion(data, new Rectangle(0, 0, w, h), model);
 	}
@@ -200,7 +200,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canConvertDataWithCropBounds(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
@@ -214,7 +214,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canCropAndConvertDataWithCropBounds(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
@@ -228,7 +228,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetWeightsWithPositiveVariance(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final float[] var = data.variance.clone();
 		for (int i = 0; i < var.length; i++)
 			if (var[i] == 0)
@@ -244,7 +244,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetWeightsWithAllZeroVariance(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final float[] var = new float[data.variance.length];
 		final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, var);
 		final float[] w = model.getWeights(model.getBounds());
@@ -256,7 +256,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetWeightsWithZeroVariance(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final float[] var = data.variance.clone();
 		var[0] = 0;
 		final float min = SimpleArrayUtils.minAboveZero(var);
@@ -284,7 +284,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 
 	private void canGetMeanVariance(RandomSeed seed, boolean initialise, boolean normalised)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final PerPixelCameraModel model = createModel(data, initialise);
 		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
@@ -301,7 +301,7 @@ public class PerPixelCameraModelTest implements DataProvider<RandomSeed, Object>
 	@SeededTest
 	public void canGetCoordinateData(RandomSeed seed)
 	{
-		PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
+		final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getData(seed, this);
 		final int ox = 2;
 		final int oy = 3;
 		final int w = 8;

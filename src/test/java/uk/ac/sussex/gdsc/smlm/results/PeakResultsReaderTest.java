@@ -879,10 +879,8 @@ public class PeakResultsReaderTest
 			ExtraAssertions.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
 					"Params mismatch @ [%d]", i);
 			if (showDeviations)
-			{
 				ExtraAssertions.assertArrayEqualsRelative(p1.getParameterDeviations(), p2.getParameterDeviations(),
 						delta, "Params StdDev mismatch @ [%d]", i);
-			}
 			if (showPrecision)
 				ExtraAssertions.assertEqualsRelative(p1.getPrecision(), p2.getPrecision(), delta,
 						"Precision mismatch @ [%d]", i);

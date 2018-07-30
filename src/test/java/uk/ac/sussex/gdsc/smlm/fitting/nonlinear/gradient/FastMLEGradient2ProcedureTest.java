@@ -82,7 +82,7 @@ public class FastMLEGradient2ProcedureTest
 	{
 		return d - d * 0.1 + r.nextDouble() * 0.2;
 	}
-	
+
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
@@ -149,7 +149,7 @@ public class FastMLEGradient2ProcedureTest
 	public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed)
 	{
 		final int iter = 10;
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -162,7 +162,7 @@ public class FastMLEGradient2ProcedureTest
 		final double[] x = new double[f1.size()];
 		final double[] b = new double[f1.size()];
 
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 
 		for (int i = 0; i < iter; i++)
 		{
@@ -598,7 +598,7 @@ public class FastMLEGradient2ProcedureTest
 
 		final double[] y = new double[n];
 		func.initialise(params);
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		for (int i = 0; i < y.length; i++)
 		{
 			// Add random Poisson noise

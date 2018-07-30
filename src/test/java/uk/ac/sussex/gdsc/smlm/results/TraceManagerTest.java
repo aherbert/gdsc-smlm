@@ -147,7 +147,7 @@ public class TraceManagerTest
 	private static void simulate(RandomSeed seed, int molecules, int maxPulses, int maxOnTime, int maxOffTime,
 			float distance)
 	{
-		UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 		final Trace[] expected = new Trace[molecules];
 		for (int j = 0; j < expected.length; j++)
 		{
@@ -174,7 +174,7 @@ public class TraceManagerTest
 
 	private static void simulateMoving(RandomSeed seed, int molecules, int maxPulses, int maxOnTime, int maxOffTime)
 	{
-		UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
 
 		// When the molecules are moving their paths may intersect.
 		// Thus each molecule is allocated a 2x2 square to move within

@@ -79,7 +79,7 @@ public class CustomGammaDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
+			final RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
 			final double[] e = new double[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{
@@ -101,7 +101,7 @@ public class CustomGammaDistributionTest
 		@Override
 		public Object run(Object data)
 		{
-			CustomGammaDistribution dist = new CustomGammaDistribution(new RandomGeneratorAdapter(r), 1, scale);
+			final CustomGammaDistribution dist = new CustomGammaDistribution(new RandomGeneratorAdapter(r), 1, scale);
 			final double[] e = new double[n * m];
 			for (int i = 0, k = 0; i < n; i++)
 			{

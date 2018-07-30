@@ -64,11 +64,10 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 
 	private SolverSpeedTestData ensureData(RandomSeed seed, int size)
 	{
-		SolverSpeedTestData data = (SolverSpeedTestData) dataCache.getData(seed, this);
-		ArrayList<float[][]> Adata = data.Adata;
-		ArrayList<float[]> Bdata = data.Bdata;
+		final SolverSpeedTestData data = (SolverSpeedTestData) dataCache.getData(seed, this);
+		final ArrayList<float[][]> Adata = data.Adata;
+		final ArrayList<float[]> Bdata = data.Bdata;
 		if (Adata.size() < size)
-		{
 			synchronized (Adata)
 			{
 				while (Adata.size() < size)
@@ -82,7 +81,6 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 					}
 				}
 			}
-		}
 		return data;
 	}
 
@@ -96,7 +94,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 	public void solveLinearAndGaussJordanReturnSameSolutionAndInversionResult(RandomSeed seed)
 	{
 		final int ITER = 100;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 		final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);
 		final ArrayList<double[]> B = copyBdouble(data.Bdata, ITER);
 		final ArrayList<double[][]> A2 = copyAdouble(data.Adata, ITER);
@@ -139,7 +137,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 	public void solveLinearAndGaussJordanReturnSameSolutionResult(RandomSeed seed)
 	{
 		final int ITER = 100;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 		final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);
 		final ArrayList<double[]> B = copyBdouble(data.Bdata, ITER);
 		final ArrayList<double[][]> A2 = copyAdouble(data.Adata, ITER);
@@ -176,7 +174,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 	public void gaussJordanFloatAndDoubleReturnSameSolutionAndInversionResult(RandomSeed seed)
 	{
 		final int ITER = 100;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 		final ArrayList<float[][]> A = copyAfloat(data.Adata, ITER);
 		final ArrayList<float[]> B = copyBfloat(data.Bdata, ITER);
 		final ArrayList<double[][]> A2 = copyAdouble(data.Adata, ITER);
@@ -224,7 +222,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();
@@ -258,7 +256,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();
@@ -298,7 +296,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();
@@ -332,7 +330,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();
@@ -366,7 +364,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();
@@ -400,7 +398,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();
@@ -434,7 +432,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 		ExtraAssumptions.assumeSpeedTest();
 
 		final int ITER = 10000;
-		SolverSpeedTestData data = ensureData(seed, ITER);
+		final SolverSpeedTestData data = ensureData(seed, ITER);
 
 		final GaussJordan solver = new GaussJordan();
 		final EJMLLinearSolver solver2 = new EJMLLinearSolver();

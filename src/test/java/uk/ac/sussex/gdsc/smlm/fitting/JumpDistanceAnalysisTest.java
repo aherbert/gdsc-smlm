@@ -590,7 +590,7 @@ public class JumpDistanceAnalysisTest
 		{
 			if (size > getSize())
 			{
-				BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(random);
+				final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(random);
 				final int extra = size - getSize();
 
 				// Get cumulative fraction

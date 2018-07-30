@@ -269,7 +269,7 @@ public class BinomialFitterTest
 						return bd.inverseCumulativeProbability(p);
 					}
 				});
-		
+
 		final int[] data = new int[2000];
 		if (zeroTruncated)
 		{

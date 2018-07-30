@@ -64,7 +64,7 @@ public class WPoissonGradientProcedureTest implements DataProvider<RandomSeed, d
 	public double[] getData(RandomSeed source)
 	{
 		int n = blockWidth * blockWidth;
-		double[] var = new double[n];
+		final double[] var = new double[n];
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(source.getSeed());
 		while (n-- > 0)
 			// Range 0.9 to 1.1
@@ -75,7 +75,7 @@ public class WPoissonGradientProcedureTest implements DataProvider<RandomSeed, d
 	@SeededTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed)
 	{
-		double[] var = dataCache.getData(seed, this);
+		final double[] var = dataCache.getData(seed, this);
 		final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
 		Assertions.assertEquals(
 				WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
@@ -100,13 +100,13 @@ public class WPoissonGradientProcedureTest implements DataProvider<RandomSeed, d
 
 	private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed, int nparams)
 	{
-		double[] var = dataCache.getData(seed, this);
+		final double[] var = dataCache.getData(seed, this);
 
 		final int iter = 10;
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		createFakeParams(r, nparams, iter, paramsList);
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -191,7 +191,7 @@ public class WPoissonGradientProcedureTest implements DataProvider<RandomSeed, d
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		createFakeParams(r, nparams, iter, paramsList);
 		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -317,7 +317,7 @@ public class WPoissonGradientProcedureTest implements DataProvider<RandomSeed, d
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		double[] var = dataCache.getData(seed, this);
+		final double[] var = dataCache.getData(seed, this);
 		createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function

@@ -854,8 +854,8 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type, boolean checkGradients)
 	{
 		final int iter = 10;
-		UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-		BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, noise);
+		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, noise);
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -1156,7 +1156,7 @@ public class LVMGradientProcedureTest
 		}
 
 		final double[] y = new double[n];
-		CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+		final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
 		{
