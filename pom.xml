@@ -127,7 +127,7 @@ Software for single molecule localisation microscopy (SMLM)
 					</execution>
 				</executions>
 			</plugin>
-				<plugin>
+			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.0</version>
 				<dependencies>
@@ -159,6 +159,11 @@ Software for single molecule localisation microscopy (SMLM)
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<links>
+						<link>http://commons.apache.org/proper/commons-math/javadocs/api-${commons-math3.version}/</link>
+					</links>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
