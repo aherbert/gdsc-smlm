@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.model;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -42,6 +24,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class SphericalDistributionTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(SphericalDistributionTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	@SeededTest
 	public void canSampleUsingTransformationMethod(RandomSeed seed)
 	{
@@ -84,7 +80,7 @@ public class SphericalDistributionTest
 		dist.setUseRejectionMethod(true);
 		final long time2 = getRunTime(dist);
 		ExtraAssertions.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d\n", time2, time1);
-		TestLog.info("Rejection = %d, Transformation = %d\n", time2, time1);
+		TestLog.info(logger,"Rejection = %d, Transformation = %d\n", time2, time1);
 	}
 
 	private static long getRunTime(SphericalDistribution dist)

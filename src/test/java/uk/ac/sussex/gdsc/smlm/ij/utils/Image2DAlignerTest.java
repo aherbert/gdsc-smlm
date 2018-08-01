@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,6 +16,20 @@ import uk.ac.sussex.gdsc.test.TestLog;
 @SuppressWarnings({ "javadoc" })
 public class Image2DAlignerTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(Image2DAlignerTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	private static FloatImage2D createData(int x, int y, double cx, double cy)
 	{
 		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x, y, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE,
@@ -141,7 +137,7 @@ public class Image2DAlignerTest
 		else
 			result = a.align(target, refinements);
 		c = a.getCorrelation();
-		TestLog.info("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
+		TestLog.info(logger,"e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
 				java.util.Arrays.toString(result));
 
 		for (int i = 0; i < 2; i++)

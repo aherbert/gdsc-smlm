@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +34,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class ConfigurationTemplateTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(ConfigurationTemplateTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	@Test
 	public void canCreateResourceTemplate() throws IOException
 	{
@@ -109,7 +105,7 @@ public class ConfigurationTemplateTest
 		{
 			if (set.contains(template.name))
 			{
-				TestLog.info(test + " loaded: " + template);
+				TestLog.info(logger,test + " loaded: " + template);
 				continue;
 			}
 			Assertions.fail(test + " could not load: " + template);

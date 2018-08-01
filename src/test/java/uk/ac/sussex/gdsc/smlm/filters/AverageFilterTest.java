@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.filters;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +23,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(AverageFilterTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	private final int InternalITER3 = 500;
 	private final int InternalITER = 50;
 	private final int ITER3 = 200;
@@ -293,10 +289,10 @@ public class AverageFilterTest extends AbstractFilterTest
 								boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", slow.name,
+			TestLog.logTestStageResult(logger,boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", slow.name,
 					boxSize, boxSlowTotal, fast.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal, fast.name,
+		TestLog.logTestResult(logger,fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal, fast.name,
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -368,11 +364,11 @@ public class AverageFilterTest extends AbstractFilterTest
 								height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
+			TestLog.logTestStageResult(logger,boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
 					slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name, slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name, slowTotal,
 				fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 

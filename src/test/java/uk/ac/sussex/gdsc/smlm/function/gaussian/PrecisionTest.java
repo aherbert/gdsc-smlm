@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
@@ -43,6 +25,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class PrecisionTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(PrecisionTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	int Single = 1;
 	int Double = 2;
 
@@ -429,7 +425,7 @@ public class PrecisionTest
 			maxx *= 2;
 			while (maxx * maxx < Integer.MAX_VALUE)
 			{
-				TestLog.info("maxx = %d\n", maxx);
+				TestLog.info(logger,"maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
 						1e-3);
 				maxx *= 2;
@@ -437,7 +433,7 @@ public class PrecisionTest
 		}
 		catch (final AssertionError e)
 		{
-			TestLog.infoln(e.getMessage());
+			TestLog.info(logger,e.getMessage());
 			//e.printStackTrace();
 			return;
 		}
@@ -501,14 +497,14 @@ public class PrecisionTest
 			maxx *= 2;
 			while (maxx * maxx < Integer.MAX_VALUE)
 			{
-				TestLog.info("maxx = %d\n", maxx);
+				TestLog.info(logger,"maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
 				maxx *= 2;
 			}
 		}
 		catch (final AssertionError e)
 		{
-			TestLog.infoln(e.getMessage());
+			TestLog.info(logger,e.getMessage());
 			//e.printStackTrace();
 			return;
 		}
@@ -632,7 +628,7 @@ public class PrecisionTest
 			c2 = f2.getClass();
 		}
 
-		TestLog.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
+		TestLog.logTestResult(logger,time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
 				c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 
@@ -780,7 +776,7 @@ public class PrecisionTest
 			c2 = f2.getClass();
 		}
 
-		TestLog.logSpeedTestResult(time1 < time2, "%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
+		TestLog.logTestResult(logger,time1 < time2, "%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
 				c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 

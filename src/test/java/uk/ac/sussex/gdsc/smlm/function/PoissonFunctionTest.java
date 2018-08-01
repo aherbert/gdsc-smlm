@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,6 +16,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "unused", "javadoc" })
 public class PoissonFunctionTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(PoissonFunctionTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	static double[] gain = { 0.25, 0.5, 0.7, 1, 1.5, 1.7, 2, 2.2, 4, 8, 16 };
 	static double[] photons = { 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 
@@ -44,8 +40,8 @@ public class PoissonFunctionTest
 			for (int i = 0; i < photons.length; i++)
 			{
 				final int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
-				TestLog.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
-				TestLog.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
+				TestLog.fine(logger,"minRange[%d][%d] = %d;\n", j, i, result[0]);
+				TestLog.fine(logger,"maxRange[%d][%d] = %d;\n", j, i, result[1]);
 			}
 	}
 
@@ -136,7 +132,7 @@ public class PoissonFunctionTest
 		minx += min;
 		maxx += min;
 
-		TestLog.info("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
+		TestLog.info(logger,"g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
 		return new int[] { minx, maxx };
 	}
 

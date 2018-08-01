@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.utils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -42,6 +24,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class ConvolutionTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(ConvolutionTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	int sizeLoops = 8;
 	int sLoops = 6;
 
@@ -133,7 +129,7 @@ public class ConvolutionTest
 	@SeededTest
 	public void doSpeedTest(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		int size = 10;
@@ -179,7 +175,7 @@ public class ConvolutionTest
 	@SeededTest
 	public void doDoubleSpeedTest(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
 		int size = 10;
@@ -226,7 +222,7 @@ public class ConvolutionTest
 	@SeededTest
 	public void doSingleVsDoubleSpeedTest(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -278,7 +274,7 @@ public class ConvolutionTest
 	@SeededTest
 	public void doSingleVsDoubleFFTSpeedTest(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -568,7 +564,7 @@ public class ConvolutionTest
 	@SeededTest
 	public void doScaledSpeedTest(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int scale = 4; scale <= 8; scale *= 2)

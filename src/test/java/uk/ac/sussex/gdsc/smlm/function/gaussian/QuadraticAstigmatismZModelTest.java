@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,6 +17,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class QuadraticAstigmatismZModelTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(QuadraticAstigmatismZModelTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	protected DoubleEquality eq = new DoubleEquality(1e-5, 1e-7);
 
 	// Compute as per Numerical Recipes 5.7.
@@ -57,7 +53,7 @@ public class QuadraticAstigmatismZModelTest
 		final double[] ds_dz2 = new double[2];
 		final double[] ds_duz = new double[1];
 		final double[] ds_dlz = new double[1];
-		final boolean record = TestSettings.allow(LogLevel.INFO);
+		final boolean record = logger.isLoggable(Level.INFO);
 		for (double z = -0.5; z < 0.5; z += 0.01)
 		{
 			final double s0 = QuadraticAstigmatismZModel.getS(z, zDepth);
@@ -81,7 +77,7 @@ public class QuadraticAstigmatismZModelTest
 			final double o2 = ds_dz2[1];
 
 			if (record)
-				TestLog.info("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,
+				TestLog.info(logger,"z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,
 						DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2));
 
 			//double error = DoubleEquality.relativeError(o, e);

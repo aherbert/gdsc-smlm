@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 
@@ -42,6 +24,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public abstract class Gaussian2DFunctionTest
 {
+	private static Logger logger;
+
+	@BeforeAll
+	public static void beforeAll()
+	{
+		logger = Logger.getLogger(Gaussian2DFunctionTest.class.getName());
+	}
+
+	@AfterAll
+	public static void afterAll()
+	{
+		logger = null;
+	}
+
 	protected DoubleEquality eq = new DoubleEquality(1e-2, 1e-3);
 	protected DoubleEquality eq2 = new DoubleEquality(1e-5, 1e-8);
 	protected DoubleEquality eq3 = new DoubleEquality(1e-1, 1e-3); // For the Gaussian integral
@@ -154,8 +150,9 @@ public abstract class Gaussian2DFunctionTest
 			return;
 
 		final int[] gradientIndices = gf.gradientIndices();
-		if (TestSettings.allow(LogLevel.INFO))
-			TestLog.info("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
+		if (logger.isLoggable(Level.INFO))
+			TestLog.info(logger, "Function%d %s %s\n", npeaks, gf.getClass().getName(),
+					Arrays.toString(gradientIndices));
 
 		Assertions.assertEquals(gf.getNPeaks(), npeaks, "Incorrect number of peaks");
 
@@ -206,7 +203,7 @@ public abstract class Gaussian2DFunctionTest
 		final double[] dyda = new double[f1.gradientIndices().length];
 		double[] a;
 
-		boolean record = TestSettings.allow(LogLevel.INFO);
+		boolean record = logger.isLoggable(Level.INFO);
 
 		for (final double background : testbackground)
 			// Peak 1
@@ -229,7 +226,7 @@ public abstract class Gaussian2DFunctionTest
 									if (record)
 									{
 										record = false;
-										TestLog.info("%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
+										TestLog.info(logger, "%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
 												f.getClass().getSimpleName());
 									}
 
@@ -365,15 +362,10 @@ public abstract class Gaussian2DFunctionTest
 
 										}
 								}
-		TestLog.info(new MessageProvider()
-		{
-			@Override
-			public String getMessage()
-			{
-				return String.format("functionComputesTargetGradient %s %s (error %s +/- %s)\n",
-						f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
-						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
-			}
+		logger.info(() -> {
+			return String.format("functionComputesTargetGradient %s %s (error %s +/- %s)\n",
+					f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
+					Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 		});
 	}
 
@@ -393,7 +385,7 @@ public abstract class Gaussian2DFunctionTest
 		final double[] dyda = new double[f2.gradientIndices().length];
 		double[] a;
 
-		boolean record = TestSettings.allow(LogLevel.INFO);
+		boolean record = logger.isLoggable(Level.INFO);
 
 		for (final double background : testbackground)
 			// Peak 1
@@ -427,7 +419,7 @@ public abstract class Gaussian2DFunctionTest
 															if (record)
 															{
 																record = false;
-																TestLog.info("%s %d frozen to %s\n",
+																TestLog.info(logger, "%s %d frozen to %s\n",
 																		f2.getClass().getSimpleName(), 2,
 																		f.getClass().getSimpleName());
 															}
@@ -596,16 +588,11 @@ public abstract class Gaussian2DFunctionTest
 																			"%s != %s", gradient, dyda[gradientIndex]);
 																}
 														}
-		TestLog.info(new MessageProvider()
-		{
-			@Override
-			public String getMessage()
-			{
-				return String.format("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)\n",
-						f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
-						Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-						Utils.rounded(s.getStandardDeviation()));
-			}
+		logger.info(() -> {
+			return String.format("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)\n",
+					f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
+					Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+					Utils.rounded(s.getStandardDeviation()));
 		});
 	}
 

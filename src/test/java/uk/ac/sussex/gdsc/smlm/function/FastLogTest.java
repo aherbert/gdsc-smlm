@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -47,6 +29,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(FastLogTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	ICSIFastLog iLog = ICSIFastLog.create(DataType.BOTH);
 	FFastLog fLog = new FFastLog();
 	DFastLog dLog = new DFastLog();
@@ -224,7 +220,7 @@ public class FastLogTest
 		final float e = (float) Math.log(v);
 		final float o = f.log(v);
 		final float error = FloatEquality.relativeError(e, o);
-		uk.ac.sussex.gdsc.test.TestLog.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
+		uk.ac.sussex.gdsc.test.TestLog.info(logger,"%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
 			if (Double.isNaN(e) && Double.isNaN(o))
@@ -308,7 +304,7 @@ public class FastLogTest
 		final double e = Math.log(v);
 		final double o = f.log(v);
 		final double error = DoubleEquality.relativeError(e, o);
-		uk.ac.sussex.gdsc.test.TestLog.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
+		uk.ac.sussex.gdsc.test.TestLog.info(logger,"%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
 			if (Double.isNaN(e) && Double.isNaN(o))
@@ -326,7 +322,7 @@ public class FastLogTest
 	@SeededTest
 	public void canTestFloatError(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final float[] d = generateRandomFloats(seed, 1000000);
@@ -374,7 +370,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatErrorRange()
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.HIGH);
 
 		final TurboList<TestFastLog> test = new TurboList<>();
 		final int n = 13;
@@ -541,7 +537,7 @@ public class FastLogTest
 	@SeededTest
 	public void canTestDoubleError(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
@@ -580,7 +576,7 @@ public class FastLogTest
 	@SeededTest
 	public void canTestDoubleErrorLog1P(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.HIGH);
 
 		// All float values is a lot so we do a representative set
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
@@ -610,7 +606,7 @@ public class FastLogTest
 	@SeededTest
 	public void canTestDoubleErrorRange(RandomSeed seed)
 	{
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.HIGH);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.HIGH);
 
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 
@@ -770,7 +766,7 @@ public class FastLogTest
 	public void canTestFloatSpeed(RandomSeed seed)
 	{
 		// No assertions, this is just a report
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final float[] x = new float[1000000];
@@ -858,7 +854,7 @@ public class FastLogTest
 	public void canTestDoubleSpeed(RandomSeed seed)
 	{
 		// No assertions, this is just a report
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] x = new double[1000000];
@@ -908,7 +904,7 @@ public class FastLogTest
 	public void canTestDoubleSpeedLog1P(RandomSeed seed)
 	{
 		// No assertions, this is just a report
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] x = new double[1000000];
@@ -937,7 +933,7 @@ public class FastLogTest
 	public void canTestFloatVsDoubleSpeed(RandomSeed seed)
 	{
 		// No assertions, this is just a report
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO); ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
 		final double[] x = new double[1000000];

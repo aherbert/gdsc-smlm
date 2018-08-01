@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 
@@ -34,6 +16,20 @@ import uk.ac.sussex.gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class GaussJordanTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(GaussJordanTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	@Test
 	public void canSolveLinearEquation()
 	{
@@ -51,7 +47,7 @@ public class GaussJordanTest
 		Assertions.assertTrue(result);
 		Assertions.assertArrayEquals(expecteds, b, 1e-4f);
 
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 		{
 			log("x = %s\n", Arrays.toString(b));
 			for (int i = 0; i < b.length; i++)

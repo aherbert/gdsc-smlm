@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +30,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(SolverSpeedTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	private static DataCache<RandomSeed, Object> dataCache = new DataCache<>();
 
 	private class SolverSpeedTestData
@@ -245,7 +241,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 > t1,
+		TestLog.logTestResult(logger,t2 > t1,
 				"GaussJordanFloat = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", t1, t2, (1.0 * t1) / t2);
 	}
 
@@ -279,7 +275,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", t1, t2,
+		TestLog.logTestResult(logger,t2 < t1, "GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", t1, t2,
 				(1.0 * t1) / t2);
 	}
 
@@ -319,7 +315,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 > t1,
+		TestLog.logTestResult(logger,t2 > t1,
 				"GaussJordanDouble = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", t1, t2, (1.0 * t1) / t2);
 	}
 
@@ -353,7 +349,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", t1, t2,
+		TestLog.logTestResult(logger,t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", t1, t2,
 				(1.0 * t1) / t2);
 	}
 
@@ -387,7 +383,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", t1, t2,
+		TestLog.logTestResult(logger,t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", t1, t2,
 				(1.0 * t1) / t2);
 	}
 
@@ -421,7 +417,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", t1,
+		TestLog.logTestResult(logger,t2 < t1, "GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", t1,
 				t2, (1.0 * t1) / t2);
 	}
 
@@ -455,7 +451,7 @@ public class SolverSpeedTest implements DataProvider<RandomSeed, Object>
 			t2 = Math.min(t2, System.nanoTime() - start2);
 		}
 
-		TestLog.logSpeedTestResult(t2 < t1, "GaussJordanDouble = %d : LinearSolver.solve = %d : %fx\n", t1, t2,
+		TestLog.logTestResult(logger,t2 < t1, "GaussJordanDouble = %d : LinearSolver.solve = %d : %fx\n", t1, t2,
 				(1.0 * t1) / t2);
 	}
 

@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +50,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class LVMGradientProcedureTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(LVMGradientProcedureTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	static FastLog fastLog = null;
 
 	static FastLog getFastLog()
@@ -387,7 +383,7 @@ public class LVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestLog.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n",
+		TestLog.logTestResult(logger,time2 < time1, "GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n",
 				time1, nparams, type, time2, (1.0 * time1) / time2);
 	}
 
@@ -642,7 +638,7 @@ public class LVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestLog.logSpeedTestResult(time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", type,
+		TestLog.logTestResult(logger,time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", type,
 				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
@@ -1025,10 +1021,10 @@ public class LVMGradientProcedureTest
 			if (type != Type.LSQ)
 			{
 				if (eq.almostEqualRelativeOrAbsolute(p123.value, s))
-					TestLog.logFailure("p12b3 Same value @ %d (error=%s) : %s == %s\n", i,
+					TestLog.logFailure(logger,"p12b3 Same value @ %d (error=%s) : %s == %s\n", i,
 							DoubleEquality.relativeError(p123.value, s), p123.value, s);
 				if (eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-					TestLog.logFailure("p12b3 Same gradient @ %d (error=%s) : %s vs %s\n", i,
+					TestLog.logFailure(logger,"p12b3 Same gradient @ %d (error=%s) : %s vs %s\n", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
 
@@ -1055,23 +1051,23 @@ public class LVMGradientProcedureTest
 							dj = j;
 						}
 					}
-					TestLog.logFailure("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s\n", i, dj, error,
+					TestLog.logFailure(logger,"p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s\n", i, dj, error,
 							Arrays.toString(alpha[dj]), Arrays.toString(m123[dj]));
 				}
 			}
 			else
 			{
 				if (!eq.almostEqualRelativeOrAbsolute(p123.value, s))
-					TestLog.logFailure("p12b3 Not same value @ %d (error=%s) : %s == %s\n", i,
+					TestLog.logFailure(logger,"p12b3 Not same value @ %d (error=%s) : %s == %s\n", i,
 							DoubleEquality.relativeError(p123.value, s), p123.value, s);
 				if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-					TestLog.logFailure("p12b3 Not same gradient @ %d (error=%s) : %s vs %s\n", i,
+					TestLog.logFailure(logger,"p12b3 Not same gradient @ %d (error=%s) : %s vs %s\n", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
 				for (int j = 0; j < alpha.length; j++)
 					//System.out.printf("%s !=\n%s\n\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
 					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
-						TestLog.logFailure("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s\n", i, j,
+						TestLog.logFailure(logger,"p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s\n", i, j,
 								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
 								Arrays.toString(m123[j]));
 			}

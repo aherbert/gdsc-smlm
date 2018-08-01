@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.filters;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.awt.Rectangle;
 
@@ -46,6 +28,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class GaussianFilterTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(GaussianFilterTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	double[] sigmas = new double[] { 12.4, 9.3, 5, 3.2, 2.1, 0.5 };
 	int size = 256;
 
@@ -275,7 +271,7 @@ public class GaussianFilterTest
 					max = d;
 			}
 
-			TestLog.info("%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
+			TestLog.info(logger,"%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
 			Assertions.assertTrue(max < tolerance);
 		}
 	}
@@ -335,7 +331,7 @@ public class GaussianFilterTest
 		}
 		final int size = ts.getSize();
 		ts.repeat();
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 			ts.report(size);
 		final int n = size / sigmas.length;
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
@@ -343,7 +339,7 @@ public class GaussianFilterTest
 			{
 				final double t1 = ts.get(j).getMean();
 				final double t2 = ts.get(j + k).getMean();
-				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(), t2,
+				TestLog.logTestResult(logger,t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(), t2,
 						ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
 	}
@@ -369,7 +365,7 @@ public class GaussianFilterTest
 		}
 		final int size = ts.getSize();
 		ts.repeat();
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 			ts.report(size);
 		final int n = size / sigmas.length;
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
@@ -377,7 +373,7 @@ public class GaussianFilterTest
 			{
 				final double t1 = ts.get(j).getMean();
 				final double t2 = ts.get(j + k).getMean();
-				TestLog.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(), t2,
+				TestLog.logTestResult(logger,t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(), t2,
 						ts.get(j).getTask().getName(), t1, t2 / t1);
 			}
 	}

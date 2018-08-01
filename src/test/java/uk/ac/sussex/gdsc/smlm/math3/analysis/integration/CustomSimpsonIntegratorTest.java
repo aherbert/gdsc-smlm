@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.junit.jupiter.api.Test;
@@ -33,6 +15,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class CustomSimpsonIntegratorTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(CustomSimpsonIntegratorTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	private interface TestUnivariateFunction extends UnivariateFunction
 	{
 		public double sum(double a, double b);
@@ -145,7 +141,7 @@ public class CustomSimpsonIntegratorTest
 		final double ee = simpson(f, a, b, c);
 		final double o = in.integrate(Integer.MAX_VALUE, f, a, b);
 
-		TestLog.info("%s c=%d  %g-%g  e=%g  ee=%g  o=%g\n", f.getClass().getSimpleName(), c, a, b, e, ee, o);
+		TestLog.info(logger,"%s c=%d  %g-%g  e=%g  ee=%g  o=%g\n", f.getClass().getSimpleName(), c, a, b, e, ee, o);
 
 		final double delta = 1e-6;
 		ExtraAssertions.assertEqualsRelative(e, ee, delta);

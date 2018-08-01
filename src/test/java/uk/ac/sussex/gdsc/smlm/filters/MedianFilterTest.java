@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.filters;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 
@@ -39,6 +21,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class MedianFilterTest extends AbstractFilterTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(MedianFilterTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	private static int InternalITER3 = 200;
 	private static int InternalITER = 20;
 	private static int ITER3 = 100;
@@ -164,11 +160,11 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logTestStageResult(logger,boxFastTotal < boxSlowTotal,
 					"float rollingMedianNxNInternal %d : %d => blockMedianNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal,
 				"float rollingMedianNxNInternal %d => blockMedianNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -252,7 +248,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal,
 				"float blockMedianNxNInternal %d => blockMedian3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -315,7 +311,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal,
 				"float rollingMedian3x3Internal %d => blockMedian3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -400,7 +396,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal,
 				"float rollingMedianNxNInternal %d => rollingMedian3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -489,11 +485,11 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logTestStageResult(logger,boxFastTotal < boxSlowTotal,
 					"float blockMedianNxN %d : %d => blockMedianNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal,
 				"float blockMedianNxN %d => blockMedianNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -558,11 +554,11 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		rollingTime, time), rollingTime < time);
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logTestStageResult(logger,boxFastTotal < boxSlowTotal,
 					"float rollingMedianNxN %d : %d => blockMedianNxN %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float rollingMedianNxN %d => blockMedianNxN %d = %.2fx\n",
+		TestLog.logTestResult(logger,fastTotal < slowTotal, "float rollingMedianNxN %d => blockMedianNxN %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -627,11 +623,11 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestLog.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+			TestLog.logTestStageResult(logger,boxFastTotal < boxSlowTotal,
 					"float rollingMedianNxN %d : %d => rollingMedianNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal,
+		TestLog.logTestResult(logger,fastTotal < slowTotal,
 				"float rollingMedianNxN %d => rollingMedianNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
@@ -715,7 +711,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockMedianNxN %d => blockMedian3x3 %d = %.2fx\n",
+		TestLog.logTestResult(logger,fastTotal < slowTotal, "float blockMedianNxN %d => blockMedian3x3 %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -799,7 +795,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float rollingMedianNxN %d => rollingMedian3x3 %d = %.2fx\n",
+		TestLog.logTestResult(logger,fastTotal < slowTotal, "float rollingMedianNxN %d => rollingMedian3x3 %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -860,7 +856,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				//if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		TestLog.logSpeedTestResult(fastTotal < slowTotal, "float blockMedian3x3 %d => rollingMedian3x3 %d = %.2fx\n",
+		TestLog.logTestResult(logger,fastTotal < slowTotal, "float blockMedian3x3 %d => rollingMedian3x3 %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 }

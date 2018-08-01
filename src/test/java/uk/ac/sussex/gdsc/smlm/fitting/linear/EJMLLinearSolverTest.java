@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 
@@ -51,6 +33,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(EJMLLinearSolverTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	//@formatter:off
 	@Test
 	public void canSolveLinearEquation()
@@ -535,7 +531,7 @@ public class EJMLLinearSolverTest
 							final double[] beta = new double[np];
 							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
-							//TestLog.debug("SS = %f\n", ss);
+							//TestLog.fine(logger,"SS = %f\n", ss);
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
@@ -559,14 +555,14 @@ public class EJMLLinearSolverTest
 				ts.execute(task);
 		final int size = ts.getSize();
 		ts.repeat();
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 			ts.report(size);
 
 		// Since the speed is very similar at sizes 2-5 there is nothing to reliably assert
 		// about the fastest of Cholesky/CholeskyLDLT/Direct.
 		// Just check the PseudoInverse is slowest
 		for (int i = 1; i < size; i++)
-			TestLog.logSpeedTestResult(ts.get(-(size)), ts.get(-i));
+			TestLog.logSpeedTestResult(logger,ts.get(-(size)), ts.get(-i));
 
 		if (np > 2)
 		{
@@ -574,7 +570,7 @@ public class EJMLLinearSolverTest
 			int i = (np == 5) ? 2 : 1;
 			final int size_1 = size - 1;
 			for (; i < size_1; i++)
-				TestLog.logSpeedTestResult(ts.get(-(size_1)), ts.get(-i));
+				TestLog.logSpeedTestResult(logger,ts.get(-(size_1)), ts.get(-i));
 		}
 	}
 
@@ -845,7 +841,7 @@ public class EJMLLinearSolverTest
 							final double[] beta = new double[np];
 							//double ss =
 							calc.findLinearised(n, y, p, alpha, beta, f0);
-							//TestLog.debug("SS = %f\n", ss);
+							//TestLog.fine(logger,"SS = %f\n", ss);
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
@@ -870,34 +866,34 @@ public class EJMLLinearSolverTest
 				ts.execute(task);
 		final int size = ts.getSize();
 		ts.repeat();
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 			ts.report(size);
 
 		// When it is present the DiagonalDirect is fastest (n<=5)
 		if (np <= 5)
 		{
 			for (int i = 2; i <= size; i++)
-				TestLog.logSpeedTestResult(ts.get(-i), ts.get(-1));
+				TestLog.logSpeedTestResult(logger,ts.get(-i), ts.get(-1));
 
 			if (np < 5)
 				// n < 5 Direct is fastest
 				for (int i = 3; i <= size; i++)
-					TestLog.logSpeedTestResult(ts.get(-i), ts.get(-2));
+					TestLog.logSpeedTestResult(logger,ts.get(-i), ts.get(-2));
 			else
 				// Cholesky should be fastest. It is marginal over CholeskyLDLT.
 				// and may not be faster than Direct at n=5 so that comparison is ignored.
 				for (int i = 4; i <= size; i++)
-					TestLog.logSpeedTestResult(ts.get(-i), ts.get(-3));
+					TestLog.logSpeedTestResult(logger,ts.get(-i), ts.get(-3));
 		}
 		else
 			// No Direct inversion possible.
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
-				TestLog.logSpeedTestResult(ts.get(-i), ts.get(-1));
+				TestLog.logSpeedTestResult(logger,ts.get(-i), ts.get(-1));
 	}
 
 	void log(String format, Object... args)
 	{
-		TestLog.info(format, args);
+		TestLog.info(logger,format, args);
 	}
 }

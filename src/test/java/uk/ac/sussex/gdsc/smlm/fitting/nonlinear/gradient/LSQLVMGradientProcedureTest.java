@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 
@@ -61,6 +43,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class LSQLVMGradientProcedureTest
 {
+	private static Logger logger;
+
+	@BeforeAll
+	public static void beforeAll()
+	{
+		logger = Logger.getLogger(LSQLVMGradientProcedureTest.class.getName());
+	}
+
+	@AfterAll
+	public static void afterAll()
+	{
+		logger = null;
+	}
+
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -305,7 +301,7 @@ public class LSQLVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestLog.logSpeedTestResult(time2 < time1, "GradientCalculator = %d : %s %d = %d : %fx\n", time1,
+		TestLog.logTestResult(logger, time2 < time1, "GradientCalculator = %d : %s %d = %d : %fx\n", time1,
 				factory.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
 	}
 
@@ -444,7 +440,7 @@ public class LSQLVMGradientProcedureTest
 		};
 		final long time2 = t2.getTime();
 
-		TestLog.logSpeedTestResult(!doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx\n",
+		TestLog.logTestResult(logger, !doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx\n",
 				factory1.getClass().getSimpleName(), time1, factory2.getClass().getSimpleName(), nparams, time2,
 				(1.0 * time1) / time2);
 	}
@@ -523,8 +519,8 @@ public class LSQLVMGradientProcedureTest
 
 		final int iter = 100;
 
-		final LogLevel logLevel = LogLevel.INFO;
-		final boolean debug = TestSettings.allow(logLevel);
+		final Level logLevel = Level.FINER;
+		final boolean debug = logger.isLoggable(logLevel);
 
 		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 		final ArrayList<double[]> yList = new ArrayList<>(iter);
@@ -553,7 +549,7 @@ public class LSQLVMGradientProcedureTest
 				betaList.add(beta.clone());
 				for (int j = 0; j < nparams; j++)
 					if (Math.abs(beta[j]) < 1e-6)
-						TestLog.info("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
+						TestLog.info(logger, "[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
 				// Solve
 				if (!solver.solve(p.getAlphaMatrix(), beta))
 					throw new AssertionError();
@@ -602,7 +598,7 @@ public class LSQLVMGradientProcedureTest
 
 				if (debug)
 					for (int i = 0; i < nparams; i++)
-						TestLog.log(logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
+						TestLog.log(logger, logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
 								func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
 								abs[i].getMean(), abs[i].getStandardDeviation());
 			}

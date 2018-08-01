@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -60,6 +42,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Object>
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(SCMOSLikelihoodWrapperTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	private final double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
 
 	DoubleEquality eqPerDatum = new DoubleEquality(5e12, 0.01);
@@ -321,7 +317,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 										}
 								}
 		final double p = (100.0 * count) / total;
-		TestLog.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
+		TestLog.info(logger,"Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
 				count, total, p);
 		Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
 	}
@@ -515,7 +511,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 
 								}
 		final double p = (100.0 * count) / total;
-		TestLog.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
+		TestLog.info(logger,"%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
 				p);
 		ExtraAssertions.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
 	}
@@ -580,12 +576,12 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 				double v;
 				v = SCMOSLikelihoodWrapper.likelihood(mu, VAR, G, O, x);
 				//v = pgf.probability(x, mu);
-				//TestLog.debug("x=%f, v=%f\n", x, v);
+				//TestLog.fine(logger,"x=%f, v=%f\n", x, v);
 				return v;
 			}
 		}, min, max);
 
-		//TestLog.debug("mu=%f, p=%f\n", mu, p);
+		//TestLog.fine(logger,"mu=%f, p=%f\n", mu, p);
 		if (test)
 			ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
 	}
@@ -686,7 +682,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 			{
 				maxp = pp;
 				maxi = i;
-				//TestLog.debug("mu=%f, e=%f, k=%f, pp=%f\n", mu, mu * G + O, k[i], pp);
+				//TestLog.fine(logger,"mu=%f, e=%f, k=%f, pp=%f\n", mu, mu * G + O, k[i], pp);
 			}
 			p += pp * step;
 		}
@@ -702,7 +698,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 		final double mode1 = Math.floor(lambda);
 		final double mode2 = Math.ceil(lambda) - 1;
 		final double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
-		//TestLog.debug("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
+		//TestLog.fine(logger,"mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
 		ExtraAssertions.assertEqualsRelative(kmax, k[maxi], 1e-3, "k-max");
 
 		if (test)
@@ -813,7 +809,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 
 	private void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf)
 	{
-		TestLog.infoln(nlf.name);
+		TestLog.info(logger,nlf.name);
 
 		final int n = maxx * maxx;
 
@@ -853,7 +849,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 			op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
 			oll2 -= Math.log(op[j]);
 		}
-		TestLog.info("oll=%f, oll2=%f\n", oll, oll2);
+		TestLog.info(logger,"oll=%f, oll2=%f\n", oll, oll2);
 		ExtraAssertions.assertEqualsRelative(oll2, oll, 1e-10, "Observed Log-likelihood");
 
 		final TDoubleArrayList list = new TDoubleArrayList();
@@ -875,7 +871,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 			}
 			final double llr2 = -2 * Math.log(product.doubleValue());
 			final double q = f.computeQValue(ll);
-			TestLog.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
+			TestLog.info(logger,"a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
 					product.round(new MathContext(4)).toString(), q);
 
 			// Only value if the product could be computed. Low ratios cause it to becomes
@@ -909,7 +905,7 @@ public class SCMOSLikelihoodWrapperTest implements DataProvider<RandomSeed, Obje
 
 		// Allow a tolerance as the random data may alter the p-value computation.
 		// Should allow it to be less than 2 increment either side of the answer.
-		TestLog.info("min fit = %g => %g\n", mina, fita);
+		TestLog.info(logger,"min fit = %g => %g\n", mina, fita);
 		Assertions.assertEquals(1, fita, 0.199, "min");
 	}
 }

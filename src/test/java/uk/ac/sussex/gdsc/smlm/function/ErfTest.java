@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
@@ -43,6 +25,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class ErfTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(ErfTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	//@formatter:off
 	private static abstract class BaseErf
 	{
@@ -121,7 +117,7 @@ public class ErfTest
 				//System.out.printf("x=%f, e=%f, o=%f, error=%f\n", x, e, o, error);
 				Assertions.assertTrue(error < expected);
 			}
-		TestLog.info("erfx %s max error = %g\n", erf.name, max);
+		TestLog.info(logger,"erfx %s max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -213,7 +209,7 @@ public class ErfTest
 					}
 				}
 
-		TestLog.info("erfxx %s max error = %g\n", erf.name, max);
+		TestLog.info(logger,"erfxx %s max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -252,7 +248,7 @@ public class ErfTest
 			Assertions.assertTrue(error < expected);
 		}
 
-		TestLog.info("erfxx %s unit max error = %g\n", erf.name, max);
+		TestLog.info(logger,"erfxx %s unit max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -323,8 +319,8 @@ public class ErfTest
 		Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum3) < 1e-3,
 				() -> erf.name + " Gaussian approx integral is incorrect");
 
-		TestLog.info("%s Erf approx pixel unit max error = %f\n", erf.name, max);
-		TestLog.info("%s Gaussian approx pixel unit max error = %f\n", erf.name, max2);
+		TestLog.info(logger,"%s Erf approx pixel unit max error = %f\n", erf.name, max);
+		TestLog.info(logger,"%s Gaussian approx pixel unit max error = %f\n", erf.name, max2);
 	}
 
 	private static class ErfTimingTask extends BaseTimingTask
@@ -381,7 +377,7 @@ public class ErfTest
 
 		final int size = ts.getSize();
 		ts.repeat(size);
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 			ts.report(size);
 
 		Assertions.assertTrue(ts.get(-3).getMean() < ts.get(-4).getMean());
@@ -457,7 +453,7 @@ public class ErfTest
 
 			final int n = steps * steps;
 			o = norm * sum / n;
-			TestLog.info("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
+			TestLog.info(logger,"n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
 		}
 
 		ExtraAssertions.assertEqualsRelative(e, o, 1e-2);
@@ -615,7 +611,7 @@ public class ErfTest
 
 		final int size = ts.getSize();
 		ts.repeat(size);
-		if (TestSettings.allow(LogLevel.INFO))
+		if (logger.isLoggable(Level.INFO))
 			ts.report();
 
 		for (int i = 0; i < 2; i++)

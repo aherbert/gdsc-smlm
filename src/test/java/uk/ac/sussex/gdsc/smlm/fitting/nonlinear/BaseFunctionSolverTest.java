@@ -1,41 +1,22 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.core.utils.rng.BoxMullerUnitGaussianSampler;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -53,7 +34,6 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.DataCache;
 import uk.ac.sussex.gdsc.test.DataProvider;
-import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -65,6 +45,20 @@ import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 @SuppressWarnings({ "javadoc" })
 public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed, double[][]>
 {
+	private static Logger logger;
+
+	@BeforeAll
+	public static void beforeAll()
+	{
+		logger = Logger.getLogger(BaseFunctionSolverTest.class.getName());
+	}
+
+	@AfterAll
+	public static void afterAll()
+	{
+		logger = null;
+	}
+
 	// Basic Gaussian
 	static double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 	static double[] base = { 0.8, 1, 1.2 }; // Applied (*) to the background
@@ -223,13 +217,13 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 		// This is generated once so create the randon generator here.
 		final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
 		final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
-		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(rg);
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, gain, gainSD);
 		final double[] w = new double[size * size];
 		final double[] n = new double[size * size];
 		for (int i = 0; i < w.length; i++)
 		{
 			final double pixelVariance = ed.sample();
-			final double pixelGain = Math.max(0.1, gain + gs.sample() * gainSD);
+			final double pixelGain = Math.max(0.1, gs.sample());
 			// weights = var / g^2
 			w[i] = pixelVariance / (pixelGain * pixelGain);
 
@@ -418,12 +412,12 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 								{
 									betterPrecision[index]++;
 									args[args.length - 1] = "P*";
-									TestLog.debug(msg, args);
+									TestLog.fine(logger, msg, args);
 								}
 								else
 								{
 									args[args.length - 1] = "P";
-									TestLog.debug(msg, args);
+									TestLog.fine(logger, msg, args);
 								}
 								totalPrecision[index]++;
 							}
@@ -437,12 +431,12 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 							{
 								betterAccuracy[index]++;
 								args[args.length - 1] = "A*";
-								TestLog.debug(msg, args);
+								TestLog.fine(logger, msg, args);
 							}
 							else
 							{
 								args[args.length - 1] = "A";
-								TestLog.debug(msg, args);
+								TestLog.fine(logger, msg, args);
 							}
 							totalAccuracy[index]++;
 						}
@@ -454,12 +448,12 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 						{
 							betterPrecision[index]++;
 							args[args.length - 1] = "P*";
-							TestLog.debug(msg, args);
+							TestLog.fine(logger, msg, args);
 						}
 						else
 						{
 							args[args.length - 1] = "P";
-							TestLog.debug(msg, args);
+							TestLog.fine(logger, msg, args);
 						}
 						totalPrecision[index]++;
 					}
@@ -472,16 +466,16 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 		{
 			better += betterPrecision[index] + betterAccuracy[index];
 			total += totalPrecision[index] + totalAccuracy[index];
-			test(name2, name, statName[index] + " P", betterPrecision[index], totalPrecision[index], LogLevel.DEBUG);
-			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], LogLevel.DEBUG);
+			test(name2, name, statName[index] + " P", betterPrecision[index], totalPrecision[index], Level.FINE);
+			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], Level.FINE);
 		}
-		test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, LogLevel.INFO);
+		test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, Level.INFO);
 	}
 
-	private static void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
+	private static void test(String name2, String name, String statName, int better, int total, Level logLevel)
 	{
 		final double p = (total == 0) ? 0 : 100.0 * better / total;
-		TestLog.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
+		TestLog.log(logger, logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
 		// Do not test if we don't have many examples
 		if (total <= 10)
 			return;
@@ -608,7 +602,7 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 		}
 
 		// Read-noise
-		final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(rg);
+		final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, 0, 1);
 		if (noise != null)
 			for (int i = 0; i < data.length; i++)
 				data[i] += gs.sample() * noise[i];
@@ -680,11 +674,11 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 		double[] e = new double[a.length];
 		double[] o = new double[a.length];
 		solver1.fit(data, null, a, e);
-		//System.out.TestLog.debug("a="+Arrays.toString(a));
+		//System.out.TestLog.fine(logger,"a="+Arrays.toString(a));
 		solver2.computeDeviations(data, a, o);
 
-		//System.out.TestLog.debug("e2="+Arrays.toString(e));
-		//System.out.TestLog.debug("o2="+Arrays.toString(o));
+		//System.out.TestLog.fine(logger,"e2="+Arrays.toString(e));
+		//System.out.TestLog.fine(logger,"o2="+Arrays.toString(o));
 		Assertions.assertArrayEquals(o, e, "Fit 2 peaks and deviations 2 peaks do not match");
 
 		// Try again with y-fit values
@@ -692,7 +686,7 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 		final double[] o1 = new double[f2.size()];
 		final double[] o2 = new double[o1.length];
 		solver1.fit(data, o1, a, e);
-		//System.out.TestLog.debug("a="+Arrays.toString(a));
+		//System.out.TestLog.fine(logger,"a="+Arrays.toString(a));
 		solver2.computeValue(data, o2, a);
 
 		Assertions.assertArrayEquals(o, e, "Fit 2 peaks with yFit and deviations 2 peaks do not match");
@@ -717,8 +711,8 @@ public abstract class BaseFunctionSolverTest implements DataProvider<RandomSeed,
 			final double[] a2 = p12.clone(); // To copy the second peak
 			System.arraycopy(a, 0, a2, 0, a.length); // Add the same fitted first peak
 			solver2.computeDeviations(data, a2, o);
-			//System.out.TestLog.debug("e1p1=" + Arrays.toString(e));
-			//System.out.TestLog.debug("o2=" + Arrays.toString(o));
+			//System.out.TestLog.fine(logger,"e1p1=" + Arrays.toString(e));
+			//System.out.TestLog.fine(logger,"o2=" + Arrays.toString(o));
 
 			// Deviation should be lower with only 1 peak.
 			// Due to matrix inversion this may not be the case for all parameters so count.

@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.function.Supplier;
 
@@ -37,6 +19,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunction2Test
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(PoissonGaussianFunction2Test.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	double[] gain = PoissonGaussianFunctionTest.gain;
 	double[] photons = PoissonGaussianFunctionTest.photons;
 	double[] noise = PoissonGaussianFunctionTest.noise;
@@ -173,7 +169,7 @@ public class PoissonGaussianFunction2Test
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			TestLog.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestLog.info(logger,"g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}

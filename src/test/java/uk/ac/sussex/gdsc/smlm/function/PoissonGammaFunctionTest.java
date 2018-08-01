@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -44,6 +26,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaFunctionTest
 {
+	private static Logger logger;
+
+	@BeforeAll
+	public static void beforeAll()
+	{
+		logger = Logger.getLogger(PoissonGammaFunctionTest.class.getName());
+	}
+
+	@AfterAll
+	public static void afterAll()
+	{
+		logger = null;
+	}
+
 	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
 	static double[] photons = { 0.001, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 
@@ -167,7 +163,7 @@ public class PoissonGammaFunctionTest
 		}
 
 		//if (p2 < 0.98 || p2 > 1.02)
-		TestLog.info("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
+		TestLog.info(logger, "g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
 
 		return p2;
 	}
@@ -290,7 +286,7 @@ public class PoissonGammaFunctionTest
 		}
 
 		final double f = (double) fail / list.size();
-		TestLog.info("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
+		TestLog.info(logger, "g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
 		if (approx)
 			Assertions.assertTrue(f < 0.2);
 		else
@@ -309,7 +305,7 @@ public class PoissonGammaFunctionTest
 			list.add(x / 10.0);
 		final double[] p = list.toArray();
 
-		final boolean report = TestSettings.allow(LogLevel.INFO, TestComplexity.MEDIUM);
+		final boolean report = logger.isLoggable(Level.INFO) && TestSettings.allow(TestComplexity.MEDIUM);
 		if (report)
 			Arrays.sort(p);
 
@@ -328,7 +324,7 @@ public class PoissonGammaFunctionTest
 			{
 				final double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
 
-				System.out.printf("p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, dirac, p0,
+				TestLog.info(logger, "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, dirac, p0,
 						dirac / p0,
 						//uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
 						p01, p0 / p01

@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.filters;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.awt.Rectangle;
 
@@ -45,6 +27,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class KernelFilterTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(KernelFilterTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	int size = 256;
 	int[] borders = { 0, 1, 2, 3, 5, 10 };
 
@@ -241,7 +237,7 @@ public class KernelFilterTest
 				}
 		}
 
-		TestLog.info("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
+		TestLog.info(logger,"%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
 		Assertions.assertTrue(max < tolerance);
 	}
 
@@ -304,9 +300,9 @@ public class KernelFilterTest
 			ts.execute(new MyTimingTask(new ZeroKernelFilterWrapper(kernel, k, k), data, border));
 			final int size = ts.getSize();
 			ts.repeat();
-			if (TestSettings.allow(LogLevel.INFO))
+			if (logger.isLoggable(Level.INFO))
 				ts.report(size);
-			TestLog.logSpeedTestResult(ts.get(-3), ts.get(-1));
+			TestLog.logSpeedTestResult(logger,ts.get(-3), ts.get(-1));
 		}
 	}
 

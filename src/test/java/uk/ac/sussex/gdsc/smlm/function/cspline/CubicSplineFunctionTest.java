@@ -1,33 +1,14 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.Precision;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.data.DoubleStackTrivalueProvider;
@@ -50,18 +31,30 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.LogLevel;
-import uk.ac.sussex.gdsc.test.MessageProvider;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class CubicSplineFunctionTest
 {
+	private static Logger logger;
+
+	@BeforeAll
+	public static void beforeAll()
+	{
+		logger = Logger.getLogger(CubicSplineFunctionTest.class.getName());
+	}
+
+	@AfterAll
+	public static void afterAll()
+	{
+		logger = null;
+	}
+
 	protected DoubleEquality eq = new DoubleEquality(1e-2, 1e-3);
 	protected DoubleEquality eq2 = new DoubleEquality(1e-5, 1e-8);
 	protected DoubleEquality eq3 = new DoubleEquality(1e-1, 1e-3); // For the Gaussian integral
@@ -193,8 +186,7 @@ public abstract class CubicSplineFunctionTest
 			return;
 
 		final int[] gradientIndices = cf.gradientIndices();
-		if (TestSettings.allow(LogLevel.INFO))
-			TestLog.info("Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
+		TestLog.info(logger, "Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
 
 		Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");
 
@@ -349,15 +341,10 @@ public abstract class CubicSplineFunctionTest
 											"%s != %s", gradient, dyda);
 								}
 						}
-		TestLog.info(new MessageProvider()
-		{
-			@Override
-			public String getMessage()
-			{
-				return String.format("functionComputesTargetGradient1 %s %s (error %s +/- %s)\n",
-						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
-			}
+		logger.info(() -> {
+			return String.format("functionComputesTargetGradient1 %s %s (error %s +/- %s)\n",
+					f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+					Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 		});
 	}
 
@@ -468,15 +455,10 @@ public abstract class CubicSplineFunctionTest
 									}
 								}
 						}
-		TestLog.info(new MessageProvider()
-		{
-			@Override
-			public String getMessage()
-			{
-				return String.format("functionComputesTargetGradient2 %s %s (error %s +/- %s)\n",
-						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
-			}
+		logger.info(() -> {
+			return String.format("functionComputesTargetGradient2 %s %s (error %s +/- %s)\n",
+					f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+					Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 		});
 	}
 
@@ -628,15 +610,10 @@ public abstract class CubicSplineFunctionTest
 															"%s != %s", gradient, dyda);
 												}
 										}
-		TestLog.info(new MessageProvider()
-		{
-			@Override
-			public String getMessage()
-			{
-				return String.format("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)\n",
-						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
-			}
+		logger.info(() -> {
+			return String.format("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)\n",
+					f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+					Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 		});
 	}
 
@@ -761,18 +738,14 @@ public abstract class CubicSplineFunctionTest
 													}
 												}
 										}
-		TestLog.info(new MessageProvider()
-		{
-			@Override
-			public String getMessage()
-			{
-				return String.format("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
-						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
-			}
+		logger.info(() -> {
+			return String.format("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
+					f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+					Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 		});
 	}
 
+	@SpeedTag
 	@Test
 	public void runSpeedTestWith1Peak()
 	{
@@ -781,6 +754,7 @@ public abstract class CubicSplineFunctionTest
 		speedTest(1, 2);
 	}
 
+	@SpeedTag
 	@Test
 	public void runSpeedTestWith2Peaks()
 	{
@@ -887,7 +861,8 @@ public abstract class CubicSplineFunctionTest
 	private void speedTest(int n, int order)
 	{
 		// No assertions, this is just a report
-		ExtraAssumptions.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		ExtraAssumptions.assume(logger, Level.INFO);
+		ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
 		final CubicSplineFunction cf = (n == 2) ? f2 : f1;
 		Assumptions.assumeTrue(null != cf);
@@ -967,7 +942,7 @@ public abstract class CubicSplineFunctionTest
 
 		final int size = ts.getSize();
 		ts.repeat(size);
-		ts.report(size);
+		ts.report(logger, size);
 	}
 
 	protected double[] createParameters(double... args)

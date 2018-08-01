@@ -1568,8 +1568,8 @@ public class ResultsManager implements PlugIn
 					String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg, Utils.rounded(dataBounds.x),
 							Utils.rounded(dataBounds.y), Utils.rounded(dataBounds.y + dataBounds.getWidth()),
 							Utils.rounded(dataBounds.x + dataBounds.getHeight())));
-			gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), calibration.getDistanceUnitValue());
-			gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
+			gd.addChoice("Calibration_distance_unit", SettingsManager.getDistanceUnitNames(), calibration.getDistanceUnitValue());
+			gd.addChoice("Calibration_intensity_unit", SettingsManager.getIntensityUnitNames(),
 					calibration.getIntensityUnitValue());
 			gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 			gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);

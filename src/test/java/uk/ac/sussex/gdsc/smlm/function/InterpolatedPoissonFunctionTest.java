@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -37,6 +19,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class InterpolatedPoissonFunctionTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(InterpolatedPoissonFunctionTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	static double[] gain = { 1, 2, 4, 8, 16 };
 	static double[] photons = { 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 
@@ -136,8 +132,8 @@ public class InterpolatedPoissonFunctionTest
 			for (int i = 0; i < photons.length; i++)
 			{
 				final int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
-				TestLog.debug("minRange[%d][%d] = %d;\n", j, i, result[0]);
-				TestLog.debug("maxRange[%d][%d] = %d;\n", j, i, result[1]);
+				TestLog.fine(logger,"minRange[%d][%d] = %d;\n", j, i, result[0]);
+				TestLog.fine(logger,"maxRange[%d][%d] = %d;\n", j, i, result[1]);
 			}
 	}
 
@@ -172,7 +168,7 @@ public class InterpolatedPoissonFunctionTest
 		for (int x = min; x <= max; x++)
 		{
 			final double pp = f.likelihood(x, o);
-			//TestLog.debug("x=%d, p=%f\n", x, pp);
+			//TestLog.fine(logger,"x=%d, p=%f\n", x, pp);
 			p += pp;
 			values.add(pp);
 			if (maxp < pp)
@@ -194,7 +190,7 @@ public class InterpolatedPoissonFunctionTest
 			{
 				min = x;
 				final double pp = f.likelihood(x, o);
-				//TestLog.debug("x=%d, p=%f\n", x, pp);
+				//TestLog.fine(logger,"x=%d, p=%f\n", x, pp);
 				p += pp;
 				values.add(pp);
 				if (maxp < pp)
@@ -211,7 +207,7 @@ public class InterpolatedPoissonFunctionTest
 		{
 			max = x;
 			final double pp = f.likelihood(x, o);
-			//TestLog.debug("x=%d, p=%f\n", x, pp);
+			//TestLog.fine(logger,"x=%d, p=%f\n", x, pp);
 			p += pp;
 			values.add(pp);
 			if (maxp < pp)
@@ -237,7 +233,7 @@ public class InterpolatedPoissonFunctionTest
 		minx += min;
 		maxx += min;
 
-		TestLog.info("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
+		TestLog.info(logger,"g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
 		ExtraAssertions.assertEquals(1, p, 0.02, "g=%f, mu=%f", gain, mu);
 		return new int[] { minx, maxx };
 	}
@@ -272,7 +268,7 @@ public class InterpolatedPoissonFunctionTest
 				}
 			}, min, max);
 
-			TestLog.info("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
+			TestLog.info(logger,"g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
 			//Assertions.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
 		}
 		catch (final TooManyEvaluationsException e)
@@ -281,10 +277,10 @@ public class InterpolatedPoissonFunctionTest
 			//for (double x = 0; x <= max; x += inc)
 			//{
 			//	final double pp = f.likelihood(x, o);
-			//	//TestLog.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, pp);
+			//	//TestLog.fine(logger,"g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, pp);
 			//	p += pp;
 			//}
-			//TestLog.debug("g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
+			//TestLog.fine(logger,"g=%f, mu=%f, o=%f, p=%f\n", gain, mu, o, p);
 			Assertions.fail(e.getMessage());
 		}
 	}
@@ -333,14 +329,14 @@ public class InterpolatedPoissonFunctionTest
 			final double g = (up - lp) / diff;
 			final double error = DoubleEquality.relativeError(g, eg);
 			final double ox = x / gain;
-			//TestLog.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
+			//TestLog.fine(logger,"g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
 			//		error);
 
 			// Ignore tiny gradients. These occur due to floating point error when the gradient
 			// should be zero, e.g. mu*gain=x, i.e. the max of the distribution PMF
 			if (Math.abs(eg) < 1e-10)
 			{
-				TestLog.debug("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
+				TestLog.fine(logger,"g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
 						error);
 				continue;
 			}

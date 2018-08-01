@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.function;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 
@@ -44,6 +26,20 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 @SuppressWarnings({ "javadoc" })
 public class PoissonLikelihoodWrapperTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(PoissonLikelihoodWrapperTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	double alpha = 1 / 40.0;
 	double[] photons = { 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	// Set this at the range output from cumulativeProbabilityIsOneWithIntegerData
@@ -264,7 +260,7 @@ public class PoissonLikelihoodWrapperTest
 										}
 								}
 		final double p = (100.0 * count) / total;
-		TestLog.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
+		TestLog.info(logger,"Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
 				count, total, p);
 		Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
 	}
@@ -448,7 +444,7 @@ public class PoissonLikelihoodWrapperTest
 
 								}
 		final double p = (100.0 * count) / total;
-		TestLog.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
+		TestLog.info(logger,"%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
 				p);
 		Assertions.assertTrue(p > threshold, () -> NAME[targetParameter] + " fraction too low: " + p);
 	}
@@ -515,7 +511,7 @@ public class PoissonLikelihoodWrapperTest
 			if (pp / p < changeTolerance)
 				break;
 		}
-		TestLog.info("mu=%f, p=%f, max=%d\n", mu, p, x);
+		TestLog.info(logger,"mu=%f, p=%f, max=%d\n", mu, p, x);
 		ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
 	}
 
@@ -543,7 +539,7 @@ public class PoissonLikelihoodWrapperTest
 			}
 		}, 0, max);
 
-		TestLog.info("mu=%f, p=%f\n", mu, p);
+		TestLog.info(logger,"mu=%f, p=%f\n", mu, p);
 		ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
 	}
 
@@ -639,7 +635,7 @@ public class PoissonLikelihoodWrapperTest
 				break;
 		}
 
-		TestLog.info("mu=%f, limit=%d, p=%f\n", mu, limit, p);
+		TestLog.info(logger,"mu=%f, limit=%d, p=%f\n", mu, limit, p);
 		ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
 
 		// Check the function can compute the same total

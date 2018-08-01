@@ -1,26 +1,3 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.io.FileOutputStream;
@@ -28,15 +5,17 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 
-import uk.ac.sussex.gdsc.core.logging.Logger;
-import uk.ac.sussex.gdsc.core.utils.rng.BoxMullerUnitGaussianSampler;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
@@ -51,6 +30,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(JumpDistanceAnalysisTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	//Based on the paper: Weimann, L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J.,
 	//Gay, N.J., Bryant, C.E., Klenerman, D. (2013) A Quantitative Comparison of Single-Dye
 	//Tracking Analysis Tools Using Monte Carlo Simulations. PLoS One 8, Issue 5, e64287
@@ -350,8 +343,8 @@ public class JumpDistanceAnalysisTest
 
 		JumpDistanceAnalysis.sort(d, f);
 		final double[] jumpDistances = createData(rg, samples, d, f);
-		final Logger logger = null;
-		//logger = new uk.ac.sussex.gdsc.smlm.utils.logging.ConsoleLogger();
+		final uk.ac.sussex.gdsc.core.logging.Logger logger = null;
+		//logger = new uk.ac.sussex.gdsc.core.logging.ConsoleLogger();
 		final JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
 		jd.setFitRestarts(3);
 		double[][] fit;
@@ -590,7 +583,7 @@ public class JumpDistanceAnalysisTest
 		{
 			if (size > getSize())
 			{
-				final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(random);
+				final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(random, 0, 1);
 				final int extra = size - getSize();
 
 				// Get cumulative fraction
@@ -729,6 +722,6 @@ public class JumpDistanceAnalysisTest
 
 	void log(String format, Object... args)
 	{
-		TestLog.info(format, args);
+		TestLog.info(logger,format, args);
 	}
 }

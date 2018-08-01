@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 
@@ -62,6 +44,20 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class GradientCalculatorSpeedTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(GradientCalculatorSpeedTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -366,7 +362,7 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		TestLog.logSpeedTestResult(start2 < start1,
+		TestLog.logTestResult(logger,start2 < start1,
 				"%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "", start1,
 				nparams, start2, (1.0 * start1) / start2);
 	}
@@ -408,7 +404,7 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		TestLog.logSpeedTestResult(start2 < start1, "GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n",
+		TestLog.logTestResult(logger,start2 < start1, "GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n",
 				start1, start2, (1.0 * start1) / start2);
 	}
 
@@ -545,7 +541,7 @@ public class GradientCalculatorSpeedTest
 
 		// Manipulate the background
 		final double defaultBackground = background;
-		final boolean report = TestSettings.allow(LogLevel.INFO);
+		final boolean report = logger.isLoggable(Level.INFO);
 		try
 		{
 			background = 1e-2;

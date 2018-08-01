@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,6 +17,20 @@ import uk.ac.sussex.gdsc.test.TestLog;
 @SuppressWarnings({ "javadoc" })
 public class Image3DAlignerTest
 {
+    private static Logger logger;
+
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(Image3DAlignerTest.class.getName());
+    }
+
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
+
 	// TODO - Make this test the StackAligner with sub-pixel accuracy and non power of 2 images
 
 	final static double gamma = 2.5;
@@ -155,7 +151,7 @@ public class Image3DAlignerTest
 		else
 			result = a.align(target, refinements, error);
 		c = a.getCorrelation();
-		TestLog.info("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
+		TestLog.info(logger,"e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
 				java.util.Arrays.toString(result));
 
 		for (int i = 0; i < 3; i++)

@@ -1,27 +1,9 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package uk.ac.sussex.gdsc.smlm.fitting;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 
@@ -46,6 +28,20 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class FisherInformationMatrixTest
 {
+	private static Logger logger;
+
+	@BeforeAll
+	public static void beforeAll()
+	{
+		logger = Logger.getLogger(FisherInformationMatrixTest.class.getName());
+	}
+
+	@AfterAll
+	public static void afterAll()
+	{
+		logger = null;
+	}
+
 	@SeededTest
 	public void canComputeCRLB(RandomSeed seed)
 	{
@@ -94,7 +90,7 @@ public class FisherInformationMatrixTest
 			final double[] crlb = m.crlb();
 			final double[] crlb2 = m.crlbReciprocal();
 			// These increasingly do not match with increasing number of parameters.
-			TestLog.info("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
+			TestLog.info(logger, "%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
 			if (n > 1)
 				// Just do a sum so we have a test
 				Assertions.assertThrows(AssertionFailedError.class, () -> {
@@ -109,7 +105,7 @@ public class FisherInformationMatrixTest
 
 		// Invert for CRLB
 		final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
-		TestLog.info("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
+		TestLog.info(logger, "n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
 		ExtraAssertions.assertNotNull(crlb, "CRLB failed: n=%d, k=%d", n, k);
 		return crlb;
 	}
@@ -145,9 +141,9 @@ public class FisherInformationMatrixTest
 		final GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
 		double[][] I = c.fisherInformationMatrix(size, a, f);
 
-		//TestLog.debug("n=%d, k=%d, I=\n", n, k);
+		//TestLog.fine(logger,"n=%d, k=%d, I=\n", n, k);
 		//for (int i = 0; i < I.length; i++)
-		//	TestLog.debugln(Arrays.toString(I[i]));
+		//	TestLog.fine(logger,Arrays.toString(I[i]));
 
 		// Reduce to the desired size
 		I = Arrays.copyOf(I, n);
@@ -163,9 +159,9 @@ public class FisherInformationMatrixTest
 					I[i][j] = I[j][i] = 0;
 		}
 
-		//TestLog.debug("n=%d, k=%d\n", n, k);
+		//TestLog.fine(logger,"n=%d, k=%d\n", n, k);
 		//for (int i = 0; i < n; i++)
-		//	TestLog.debugln(Arrays.toString(I[i]));
+		//	TestLog.fine(logger,Arrays.toString(I[i]));
 
 		// Create matrix
 		return new FisherInformationMatrix(I, 1e-3);
@@ -185,7 +181,7 @@ public class FisherInformationMatrixTest
 
 	void log(String format, Object... args)
 	{
-		TestLog.info(format, args);
+		TestLog.info(logger, format, args);
 	}
 
 	@SeededTest
@@ -197,15 +193,16 @@ public class FisherInformationMatrixTest
 		final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
 		final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
 		final DenseMatrix64F e = m.getMatrix();
-		TestLog.infoln(e);
+		TestLog.log(logger, Level.INFO, e);
 
 		for (int run = 1; run < 10; run++)
 		{
 			final int[] indices = Random.sample(k, n, UniformRandomProvider);
 			Arrays.sort(indices);
 			final DenseMatrix64F o = m.subset(indices).getMatrix();
-			TestLog.infoln(Arrays.toString(indices));
-			TestLog.infoln(o);
+			if (logger.isLoggable(Level.INFO))
+				TestLog.info(logger, Arrays.toString(indices));
+			TestLog.log(logger, Level.INFO, o);
 			for (int i = 0; i < indices.length; i++)
 				for (int j = 0; j < indices.length; j++)
 					Assertions.assertEquals(e.get(indices[i], indices[j]), o.get(i, j));
@@ -235,9 +232,9 @@ public class FisherInformationMatrixTest
 			indices[i] += perPeak;
 		final FisherInformationMatrix m2 = m.subset(indices);
 
-		//TestLog.debugln(m.getMatrix());
-		//TestLog.debugln(m1.getMatrix());
-		//TestLog.debugln(m2.getMatrix());
+		//TestLog.fine(logger,m.getMatrix());
+		//TestLog.fine(logger,m1.getMatrix());
+		//TestLog.fine(logger,m2.getMatrix());
 
 		final double[] crlb = m.crlb();
 		final double[] crlb1 = m1.crlb();
@@ -245,10 +242,10 @@ public class FisherInformationMatrixTest
 		final double[] crlbB = Arrays.copyOf(crlb1, crlb.length);
 		System.arraycopy(crlb2, 1, crlbB, crlb1.length, perPeak);
 
-		//TestLog.debugln(Arrays.toString(crlb));
-		//TestLog.debugln(Arrays.toString(crlb1));
-		//TestLog.debugln(Arrays.toString(crlb2));
-		//TestLog.debugln(Arrays.toString(crlbB));
+		//TestLog.fine(logger,Arrays.toString(crlb));
+		//TestLog.fine(logger,Arrays.toString(crlb1));
+		//TestLog.fine(logger,Arrays.toString(crlb2));
+		//TestLog.fine(logger,Arrays.toString(crlbB));
 
 		// Removing the interaction between fit parameters lowers the bounds
 		for (int i = 0; i < crlb.length; i++)
