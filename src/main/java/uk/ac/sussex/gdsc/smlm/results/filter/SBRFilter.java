@@ -39,160 +39,160 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class SBRFilter extends DirectFilter
 {
-	/**
-	 * The signal-to-background ratio (SBR)
-	 */
-	@XStreamAsAttribute
-	final float sbr;
+    /**
+     * The signal-to-background ratio (SBR)
+     */
+    @XStreamAsAttribute
+    final float sbr;
 
-	/**
-	 * Instantiates a new signal-to-background ratio (SBR) filter.
-	 *
-	 * @param sbr
-	 *            the signal-to-background ratio (SBR)
-	 */
-	public SBRFilter(float sbr)
-	{
-		this.sbr = Math.max(0, sbr);
-	}
+    /**
+     * Instantiates a new signal-to-background ratio (SBR) filter.
+     *
+     * @param sbr
+     *            the signal-to-background ratio (SBR)
+     */
+    public SBRFilter(float sbr)
+    {
+        this.sbr = Math.max(0, sbr);
+    }
 
-	@Override
-	public void setup(MemoryPeakResults peakResults)
-	{
-		// Do nothing
-	}
+    @Override
+    public void setup(MemoryPeakResults peakResults)
+    {
+        // Do nothing
+    }
 
-	@Override
-	public boolean accept(PeakResult peak)
-	{
-		final double background = peak.getBackground();
-		if (background > 0)
-			return peak.getMeanIntensity() / Math.sqrt(background) >= this.sbr;
-		return peak.getSNR() >= this.sbr;
-	}
+    @Override
+    public boolean accept(PeakResult peak)
+    {
+        final double background = peak.getBackground();
+        if (background > 0)
+            return peak.getMeanIntensity() / Math.sqrt(background) >= this.sbr;
+        return peak.getSNR() >= this.sbr;
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return V_PHOTONS | V_BACKGROUND | V_SNR;
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return V_PHOTONS | V_BACKGROUND | V_SNR;
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		final double background = peak.getBackground();
-		if (background > 0)
-		{
-			// Get the mean signal assuming the integral / area of 1 SD of the Gaussian
-			if (Gaussian2DPeakResultHelper.getMeanSignalUsingR1(peak.getSignal(), peak.getXSD(), peak.getYSD()) /
-					Math.sqrt(background) < this.sbr)
-				return V_PHOTONS | V_BACKGROUND;
-			return 0;
-		}
-		if (peak.getSNR() < this.sbr)
-			return V_SNR;
-		return 0;
-	}
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        final double background = peak.getBackground();
+        if (background > 0)
+        {
+            // Get the mean signal assuming the integral / area of 1 SD of the Gaussian
+            if (Gaussian2DPeakResultHelper.getMeanSignalUsingR1(peak.getSignal(), peak.getXSD(), peak.getYSD()) /
+                    Math.sqrt(background) < this.sbr)
+                return V_PHOTONS | V_BACKGROUND;
+            return 0;
+        }
+        if (peak.getSNR() < this.sbr)
+            return V_SNR;
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-	 */
-	@Override
-	public String getDescription()
-	{
-		return "Filter results using a lower SBR threshold.";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
+     */
+    @Override
+    public String getDescription()
+    {
+        return "Filter results using a lower SBR threshold.";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-	 */
-	@Override
-	public int getNumberOfParameters()
-	{
-		return 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
+     */
+    @Override
+    public int getNumberOfParameters()
+    {
+        return 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-	 */
-	@Override
-	protected double getParameterValueInternal(int index)
-	{
-		return sbr;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
+     */
+    @Override
+    protected double getParameterValueInternal(int index)
+    {
+        return sbr;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-	 */
-	@Override
-	public double getParameterIncrement(int index)
-	{
-		checkIndex(index);
-		return SNRFilter.DEFAULT_INCREMENT;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+     */
+    @Override
+    public double getParameterIncrement(int index)
+    {
+        checkIndex(index);
+        return SNRFilter.DEFAULT_INCREMENT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-	 */
-	@Override
-	public ParameterType getParameterType(int index)
-	{
-		checkIndex(index);
-		return ParameterType.SBR;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
+     */
+    @Override
+    public ParameterType getParameterType(int index)
+    {
+        checkIndex(index);
+        return ParameterType.SBR;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-	 */
-	@Override
-	public Filter adjustParameter(int index, double delta)
-	{
-		checkIndex(index);
-		return new SBRFilter(updateParameter(sbr, delta, SNRFilter.DEFAULT_RANGE));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
+     */
+    @Override
+    public Filter adjustParameter(int index, double delta)
+    {
+        checkIndex(index);
+        return new SBRFilter(updateParameter(sbr, delta, SNRFilter.DEFAULT_RANGE));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-	 */
-	@Override
-	public Filter create(double... parameters)
-	{
-		return new SBRFilter((float) parameters[0]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
+     */
+    @Override
+    public Filter create(double... parameters)
+    {
+        return new SBRFilter((float) parameters[0]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-	 */
-	@Override
-	public void weakestParameters(double[] parameters)
-	{
-		setMin(parameters, 0, sbr);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+     */
+    @Override
+    public void weakestParameters(double[] parameters)
+    {
+        setMin(parameters, 0, sbr);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-	 */
-	@Override
-	public double[] mutationStepRange()
-	{
-		return new double[] { SNRFilter.DEFAULT_RANGE };
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
+     */
+    @Override
+    public double[] mutationStepRange()
+    {
+        return new double[] { SNRFilter.DEFAULT_RANGE };
+    }
 }

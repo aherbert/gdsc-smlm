@@ -28,17 +28,17 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface BIXYResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param background
-	 *            the background
-	 * @param intensity
-	 *            the intensity
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 */
-	public void executeBIXY(float background, float intensity, float x, float y);
+    /**
+     * Executes this procedure.
+     *
+     * @param background
+     *            the background
+     * @param intensity
+     *            the intensity
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     */
+    public void executeBIXY(float background, float intensity, float x, float y);
 }

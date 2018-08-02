@@ -30,11 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public interface PeakResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param peakResult
-	 *            the peak result
-	 */
-	public void execute(PeakResult peakResult);
+    /**
+     * Executes this procedure.
+     *
+     * @param peakResult
+     *            the peak result
+     */
+    public void execute(PeakResult peakResult);
 }

@@ -31,42 +31,42 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PeakResultDataParameterConverter extends PeakResultDataFloatConverter
 {
-	/** The parameter index. */
-	public final int index;
+    /** The parameter index. */
+    public final int index;
 
-	/**
-	 * Instantiates a new peak result parameter value.
-	 *
-	 * @param converter
-	 *            the converter
-	 * @param index
-	 *            the index
-	 */
-	public PeakResultDataParameterConverter(Converter converter, int index)
-	{
-		super(converter);
-		this.index = index;
-	}
+    /**
+     * Instantiates a new peak result parameter value.
+     *
+     * @param converter
+     *            the converter
+     * @param index
+     *            the index
+     */
+    public PeakResultDataParameterConverter(Converter converter, int index)
+    {
+        super(converter);
+        this.index = index;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public Float getValue(PeakResult result)
-	{
-		return converter.convert(result.getParameter(index));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public Float getValue(PeakResult result)
+    {
+        return converter.convert(result.getParameter(index));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return PeakResult.getParameterName(index);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return PeakResult.getParameterName(index);
+    }
 }

@@ -33,155 +33,155 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class ConvergenceToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {
-	/** The relative tolerance threshold. */
-	final public double relative;
-	/** The absolute tolerance threshold. */
-	final public double absolute;
-	/** The check score flag. */
-	final public boolean checkScore;
-	/** The check sequence flag. */
-	final public boolean checkSequence;
-	/** The max iterations. */
-	final public int maxIterations;
+    /** The relative tolerance threshold. */
+    final public double relative;
+    /** The absolute tolerance threshold. */
+    final public double absolute;
+    /** The check score flag. */
+    final public boolean checkScore;
+    /** The check sequence flag. */
+    final public boolean checkSequence;
+    /** The max iterations. */
+    final public int maxIterations;
 
-	private int iterations = 0;
+    private int iterations = 0;
 
-	/**
-	 * Build an instance with specified thresholds. This only check convergence using the score.
-	 *
-	 * In order to perform only relative checks, the absolute tolerance
-	 * must be set to a negative value. In order to perform only absolute
-	 * checks, the relative tolerance must be set to a negative value.
-	 *
-	 * @param relative
-	 *            relative tolerance threshold
-	 * @param absolute
-	 *            absolute tolerance threshold
-	 * @throws IllegalArgumentException
-	 *             if none of the convergence criteria are valid
-	 */
-	public ConvergenceToleranceChecker(double relative, double absolute)
-	{
-		this(relative, absolute, true, false, 0);
-	}
+    /**
+     * Build an instance with specified thresholds. This only check convergence using the score.
+     *
+     * In order to perform only relative checks, the absolute tolerance
+     * must be set to a negative value. In order to perform only absolute
+     * checks, the relative tolerance must be set to a negative value.
+     *
+     * @param relative
+     *            relative tolerance threshold
+     * @param absolute
+     *            absolute tolerance threshold
+     * @throws IllegalArgumentException
+     *             if none of the convergence criteria are valid
+     */
+    public ConvergenceToleranceChecker(double relative, double absolute)
+    {
+        this(relative, absolute, true, false, 0);
+    }
 
-	/**
-	 * Build an instance with specified thresholds.
-	 *
-	 * In order to perform only relative checks, the absolute tolerance
-	 * must be set to a negative value. In order to perform only absolute
-	 * checks, the relative tolerance must be set to a negative value.
-	 *
-	 * @param relative
-	 *            relative tolerance threshold
-	 * @param absolute
-	 *            absolute tolerance threshold
-	 * @param checkScore
-	 *            Set to true to check the score
-	 * @param checkSequence
-	 *            Set to true to check the position
-	 * @param maxIterations
-	 *            Set above zero to check the iterations (number of times {@link #converged(SearchResult, SearchResult)}
-	 *            is called)
-	 * @throws IllegalArgumentException
-	 *             if none of the convergence criteria are valid
-	 */
-	public ConvergenceToleranceChecker(double relative, double absolute, boolean checkScore, boolean checkSequence,
-			int maxIterations)
-	{
-		if (maxIterations < 0)
-			maxIterations = 0;
-		boolean canConverge = maxIterations != 0;
+    /**
+     * Build an instance with specified thresholds.
+     *
+     * In order to perform only relative checks, the absolute tolerance
+     * must be set to a negative value. In order to perform only absolute
+     * checks, the relative tolerance must be set to a negative value.
+     *
+     * @param relative
+     *            relative tolerance threshold
+     * @param absolute
+     *            absolute tolerance threshold
+     * @param checkScore
+     *            Set to true to check the score
+     * @param checkSequence
+     *            Set to true to check the position
+     * @param maxIterations
+     *            Set above zero to check the iterations (number of times {@link #converged(SearchResult, SearchResult)}
+     *            is called)
+     * @throws IllegalArgumentException
+     *             if none of the convergence criteria are valid
+     */
+    public ConvergenceToleranceChecker(double relative, double absolute, boolean checkScore, boolean checkSequence,
+            int maxIterations)
+    {
+        if (maxIterations < 0)
+            maxIterations = 0;
+        boolean canConverge = maxIterations != 0;
 
-		if (checkScore || checkSequence)
-			canConverge |= (relative > 0 || absolute > 0);
+        if (checkScore || checkSequence)
+            canConverge |= (relative > 0 || absolute > 0);
 
-		if (!canConverge)
-			noConvergenceCriteria();
+        if (!canConverge)
+            noConvergenceCriteria();
 
-		this.relative = relative;
-		this.absolute = absolute;
-		this.checkScore = checkScore;
-		this.checkSequence = checkSequence;
-		this.maxIterations = maxIterations;
-	}
+        this.relative = relative;
+        this.absolute = absolute;
+        this.checkScore = checkScore;
+        this.checkSequence = checkSequence;
+        this.maxIterations = maxIterations;
+    }
 
-	/**
-	 * Called by the constructor if there are no convergence criteria. Sub-classes that provide additional convergence
-	 * checks must override this to avoid error.
-	 *
-	 * @throws IllegalArgumentException
-	 *             if there are no convergence criteria in the constructor
-	 */
-	protected void noConvergenceCriteria()
-	{
-		throw new IllegalArgumentException("No valid convergence criteria");
-	}
+    /**
+     * Called by the constructor if there are no convergence criteria. Sub-classes that provide additional convergence
+     * checks must override this to avoid error.
+     *
+     * @throws IllegalArgumentException
+     *             if there are no convergence criteria in the constructor
+     */
+    protected void noConvergenceCriteria()
+    {
+        throw new IllegalArgumentException("No valid convergence criteria");
+    }
 
-	/**
-	 * Check if the position has converged
-	 *
-	 * @param p
-	 *            Previous
-	 * @param c
-	 *            Current
-	 * @return True if converged
-	 */
-	private boolean converged(final double[] p, final double[] c)
-	{
-		for (int i = 0; i < p.length; ++i)
-			if (!converged(p[i], c[i]))
-				return false;
-		return true;
-	}
+    /**
+     * Check if the position has converged
+     *
+     * @param p
+     *            Previous
+     * @param c
+     *            Current
+     * @return True if converged
+     */
+    private boolean converged(final double[] p, final double[] c)
+    {
+        for (int i = 0; i < p.length; ++i)
+            if (!converged(p[i], c[i]))
+                return false;
+        return true;
+    }
 
-	/**
-	 * Check if the value has converged
-	 *
-	 * @param p
-	 *            Previous
-	 * @param c
-	 *            Current
-	 * @return True if converged
-	 */
-	private boolean converged(final double p, final double c)
-	{
-		final double difference = Math.abs(p - c);
-		final double size = FastMath.max(Math.abs(p), Math.abs(c));
-		if (difference > size * relative && difference > absolute)
-			return false;
-		return true;
-	}
+    /**
+     * Check if the value has converged
+     *
+     * @param p
+     *            Previous
+     * @param c
+     *            Current
+     * @return True if converged
+     */
+    private boolean converged(final double p, final double c)
+    {
+        final double difference = Math.abs(p - c);
+        final double size = FastMath.max(Math.abs(p), Math.abs(c));
+        if (difference > size * relative && difference > absolute)
+            return false;
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker#converged(uk.ac.sussex.gdsc.smlm.search.ScoreResult,
-	 * uk.ac.sussex.gdsc.smlm.search.ScoreResult)
-	 */
-	@Override
-	public boolean converged(SearchResult<T> previous, SearchResult<T> current)
-	{
-		iterations++;
-		if (maxIterations != 0 && iterations >= maxIterations)
-			return true;
-		if (checkScore && converged(previous.getScore(), current.getScore()))
-			return true;
-		if (checkSequence && converged(previous.getPoint(), current.getPoint()))
-			return true;
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker#converged(uk.ac.sussex.gdsc.smlm.search.ScoreResult,
+     * uk.ac.sussex.gdsc.smlm.search.ScoreResult)
+     */
+    @Override
+    public boolean converged(SearchResult<T> previous, SearchResult<T> current)
+    {
+        iterations++;
+        if (maxIterations != 0 && iterations >= maxIterations)
+            return true;
+        if (checkScore && converged(previous.getScore(), current.getScore()))
+            return true;
+        if (checkSequence && converged(previous.getPoint(), current.getPoint()))
+            return true;
+        return false;
+    }
 
-	private boolean converged(T score, T score2)
-	{
-		return score.compareTo(score2) == 0;
-	}
+    private boolean converged(T score, T score2)
+    {
+        return score.compareTo(score2) == 0;
+    }
 
-	/**
-	 * @return the iterations
-	 */
-	public int getIterations()
-	{
-		return iterations;
-	}
+    /**
+     * @return the iterations
+     */
+    public int getIterations()
+    {
+        return iterations;
+    }
 }

@@ -32,58 +32,59 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
  */
 public class MinMaxResultProcedure implements PeakResultProcedure
 {
-	private float min, max;
-	private final PeakResultValue value;
+    private float min, max;
+    private final PeakResultValue value;
 
-	/**
-	 * Instantiates a new min max result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 * @param value
-	 *            the value
-	 * @throws IllegalStateException
-	 *             If the results are empty
-	 */
-	public MinMaxResultProcedure(MemoryPeakResults results, PeakResultValue value) throws IllegalStateException
-	{
-		this.value = value;
-		min = max = value.getValue(results.getFirst());
-		results.forEach(this);
-	}
+    /**
+     * Instantiates a new min max result procedure.
+     *
+     * @param results
+     *            the results
+     * @param value
+     *            the value
+     * @throws IllegalStateException
+     *             If the results are empty
+     */
+    public MinMaxResultProcedure(MemoryPeakResults results, PeakResultValue value) throws IllegalStateException
+    {
+        this.value = value;
+        min = max = value.getValue(results.getFirst());
+        results.forEach(this);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure#execute(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public void execute(PeakResult peakResult)
-	{
-		final float v = value.getValue(peakResult);
-		if (min > v)
-			min = v;
-		else if (max < v)
-			max = v;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure#execute(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public void execute(PeakResult peakResult)
+    {
+        final float v = value.getValue(peakResult);
+        if (min > v)
+            min = v;
+        else if (max < v)
+            max = v;
+    }
 
-	/**
-	 * Gets the minimum.
-	 *
-	 * @return the minimum
-	 */
-	public float getMinimum()
-	{
-		return min;
-	}
+    /**
+     * Gets the minimum.
+     *
+     * @return the minimum
+     */
+    public float getMinimum()
+    {
+        return min;
+    }
 
-	/**
-	 * Gets the maximum.
-	 *
-	 * @return the maximum
-	 */
-	public float getMaximum()
-	{
-		return max;
-	}
+    /**
+     * Gets the maximum.
+     *
+     * @return the maximum
+     */
+    public float getMaximum()
+    {
+        return max;
+    }
 }

@@ -33,122 +33,122 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 {
-	/** The frame containing the results. */
-	final public int frame;
+    /** The frame containing the results. */
+    final public int frame;
 
-	/** The multi-path results. */
-	final public MultiPathFitResult[] multiPathFitResults;
+    /** The multi-path results. */
+    final public MultiPathFitResult[] multiPathFitResults;
 
-	/**
-	 * The total number of candidates. This may be greater than the size of the {@link #multiPathFitResults} array if
-	 * this is a subset of the results, i.e. has been prefiltered.
-	 */
-	final public int totalCandidates;
+    /**
+     * The total number of candidates. This may be greater than the size of the {@link #multiPathFitResults} array if
+     * this is a subset of the results, i.e. has been prefiltered.
+     */
+    final public int totalCandidates;
 
-	/**
-	 * The number of actual results in the frame. Used during filter scoring.
-	 */
-	final public int nActual;
+    /**
+     * The number of actual results in the frame. Used during filter scoring.
+     */
+    final public int nActual;
 
-	/**
-	 * Instantiates a new multi path fit results.
-	 *
-	 * @param frame
-	 *            the frame
-	 * @param multiPathFitResults
-	 *            the multi path fit results
-	 */
-	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults)
-	{
-		this(frame, multiPathFitResults, (multiPathFitResults == null) ? 0 : multiPathFitResults.length, 0);
-	}
+    /**
+     * Instantiates a new multi path fit results.
+     *
+     * @param frame
+     *            the frame
+     * @param multiPathFitResults
+     *            the multi path fit results
+     */
+    public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults)
+    {
+        this(frame, multiPathFitResults, (multiPathFitResults == null) ? 0 : multiPathFitResults.length, 0);
+    }
 
-	/**
-	 * Instantiates a new multi path fit results.
-	 *
-	 * @param frame
-	 *            the frame
-	 * @param multiPathFitResults
-	 *            the multi path fit results
-	 * @param totalCandidates
-	 *            the total candidates
-	 * @param nActual
-	 *            the number of actual results in the frame
-	 */
-	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates, int nActual)
-	{
-		this.frame = frame;
-		this.multiPathFitResults = multiPathFitResults;
-		this.totalCandidates = totalCandidates;
-		this.nActual = nActual;
-	}
+    /**
+     * Instantiates a new multi path fit results.
+     *
+     * @param frame
+     *            the frame
+     * @param multiPathFitResults
+     *            the multi path fit results
+     * @param totalCandidates
+     *            the total candidates
+     * @param nActual
+     *            the number of actual results in the frame
+     */
+    public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates, int nActual)
+    {
+        this.frame = frame;
+        this.multiPathFitResults = multiPathFitResults;
+        this.totalCandidates = totalCandidates;
+        this.nActual = nActual;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
-	 */
-	@Override
-	public int getFrame()
-	{
-		return frame;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
+     */
+    @Override
+    public int getFrame()
+    {
+        return frame;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
-	 */
-	@Override
-	public int getNumberOfResults()
-	{
-		return multiPathFitResults.length;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
+     */
+    @Override
+    public int getNumberOfResults()
+    {
+        return multiPathFitResults.length;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
-	 */
-	@Override
-	public MultiPathFitResult getResult(int index)
-	{
-		return multiPathFitResults[index];
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
+     */
+    @Override
+    public MultiPathFitResult getResult(int index)
+    {
+        return multiPathFitResults[index];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
-	 */
-	@Override
-	public void complete(int index)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
+     */
+    @Override
+    public void complete(int index)
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
-	 */
-	@Override
-	public int getTotalCandidates()
-	{
-		return totalCandidates;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
+     */
+    @Override
+    public int getTotalCandidates()
+    {
+        return totalCandidates;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public MultiPathFitResults clone()
-	{
-		final MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
-		for (int i = 0; i < list.length; i++)
-			list[i] = multiPathFitResults[i].clone();
-		return new MultiPathFitResults(frame, list, totalCandidates, nActual);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public MultiPathFitResults clone()
+    {
+        final MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
+        for (int i = 0; i < list.length; i++)
+            list[i] = multiPathFitResults[i].clone();
+        return new MultiPathFitResults(frame, list, totalCandidates, nActual);
+    }
 }

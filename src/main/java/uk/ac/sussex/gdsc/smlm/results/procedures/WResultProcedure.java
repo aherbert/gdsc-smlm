@@ -28,11 +28,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface WResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param w
-	 *            the width
-	 */
-	public void executeW(float w);
+    /**
+     * Executes this procedure.
+     *
+     * @param w
+     *            the width
+     */
+    public void executeW(float w);
 }

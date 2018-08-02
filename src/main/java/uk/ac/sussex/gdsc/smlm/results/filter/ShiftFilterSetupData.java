@@ -28,17 +28,17 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class ShiftFilterSetupData implements FilterSetupData
 {
-	/** The shift. */
-	public final double shift;
+    /** The shift. */
+    public final double shift;
 
-	/**
-	 * Instantiates a new shift filter setup data.
-	 *
-	 * @param shift
-	 *            the shift
-	 */
-	public ShiftFilterSetupData(double shift)
-	{
-		this.shift = Math.max(0, shift);
-	}
+    /**
+     * Instantiates a new shift filter setup data.
+     *
+     * @param shift
+     *            the shift
+     */
+    public ShiftFilterSetupData(double shift)
+    {
+        this.shift = Math.max(0, shift);
+    }
 }

@@ -30,19 +30,19 @@ import ij3d.Content;
  */
 public class CustomContent extends Content
 {
-	/**
-	 * Instantiates a new custom content.
-	 *
-	 * @param name
-	 *            the name
-	 * @param isOrdered
-	 *            the is ordered
-	 */
-	public CustomContent(String name, boolean isOrdered)
-	{
-		super(name);
-		// Replace the default from the super constructor
-		final CustomContentInstant ci = new CustomContentInstant(name + "_#0", isOrdered);
-		addInstant(ci);
-	}
+    /**
+     * Instantiates a new custom content.
+     *
+     * @param name
+     *            the name
+     * @param isOrdered
+     *            the is ordered
+     */
+    public CustomContent(String name, boolean isOrdered)
+    {
+        super(name);
+        // Replace the default from the super constructor
+        final CustomContentInstant ci = new CustomContentInstant(name + "_#0", isOrdered);
+        addInstant(ci);
+    }
 }

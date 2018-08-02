@@ -28,123 +28,124 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class Gradient1FunctionStore extends ValueFunctionStore implements Gradient1Function, Gradient1Procedure
 {
-	private final Gradient1Function f;
-	private Gradient1Procedure procedure;
+    private final Gradient1Function f;
+    private Gradient1Procedure procedure;
 
-	/** The number of gradients. */
-	protected final int length;
+    /** The number of gradients. */
+    protected final int length;
 
-	/** The gradients from the last call to {@link #forEach(Gradient1Procedure)}. */
-	public double[][] dyda;
+    /** The gradients from the last call to {@link #forEach(Gradient1Procedure)}. */
+    public double[][] dyda;
 
-	/**
-	 * Instantiates a new gradient 1 function store.
-	 *
-	 * @param f
-	 *            the f
-	 */
-	public Gradient1FunctionStore(Gradient1Function f)
-	{
-		this(f, null, null);
-	}
+    /**
+     * Instantiates a new gradient 1 function store.
+     *
+     * @param f
+     *            the f
+     */
+    public Gradient1FunctionStore(Gradient1Function f)
+    {
+        this(f, null, null);
+    }
 
-	/**
-	 * Instantiates a new gradient 1 function store with storage.
-	 *
-	 * @param f
-	 *            the f
-	 * @param values
-	 *            the values
-	 * @param dyda
-	 *            the dyda
-	 */
-	public Gradient1FunctionStore(Gradient1Function f, double[] values, double[][] dyda)
-	{
-		super(f, values);
-		this.f = f;
-		this.dyda = dyda;
-		length = f.getNumberOfGradients();
-	}
+    /**
+     * Instantiates a new gradient 1 function store with storage.
+     *
+     * @param f
+     *            the f
+     * @param values
+     *            the values
+     * @param dyda
+     *            the dyda
+     */
+    public Gradient1FunctionStore(Gradient1Function f, double[] values, double[][] dyda)
+    {
+        super(f, values);
+        this.f = f;
+        this.dyda = dyda;
+        length = f.getNumberOfGradients();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#initialise(double[])
-	 */
-	@Override
-	public void initialise(double[] a)
-	{
-		f.initialise(a);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#initialise(double[])
+     */
+    @Override
+    public void initialise(double[] a)
+    {
+        f.initialise(a);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
-	 */
-	@Override
-	public void initialise1(double[] a)
-	{
-		f.initialise(a);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
+     */
+    @Override
+    public void initialise1(double[] a)
+    {
+        f.initialise(a);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#gradientIndices()
-	 */
-	@Override
-	public int[] gradientIndices()
-	{
-		return f.gradientIndices();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#gradientIndices()
+     */
+    @Override
+    public int[] gradientIndices()
+    {
+        return f.gradientIndices();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-	 */
-	@Override
-	public int getNumberOfGradients()
-	{
-		return f.getNumberOfGradients();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+     */
+    @Override
+    public int getNumberOfGradients()
+    {
+        return f.getNumberOfGradients();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
-	 */
-	@Override
-	public void forEach(Gradient1Procedure procedure)
-	{
-		i = 0;
-		createValues();
-		createDYDA();
-		this.procedure = procedure;
-		f.forEach((Gradient1Procedure) this);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.function.Gradient1Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
+     */
+    @Override
+    public void forEach(Gradient1Procedure procedure)
+    {
+        i = 0;
+        createValues();
+        createDYDA();
+        this.procedure = procedure;
+        f.forEach((Gradient1Procedure) this);
+    }
 
-	/**
-	 * Creates the {@link #dyda} matrix.
-	 */
-	protected void createDYDA()
-	{
-		if (dyda == null || dyda.length != f.size())
-			dyda = new double[values.length][length];
-	}
+    /**
+     * Creates the {@link #dyda} matrix.
+     */
+    protected void createDYDA()
+    {
+        if (dyda == null || dyda.length != f.size())
+            dyda = new double[values.length][length];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		values[i] = value;
-		System.arraycopy(dy_da[i], 0, dyda[i], 0, length);
-		i++;
-		procedure.execute(value, dy_da);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        values[i] = value;
+        System.arraycopy(dy_da[i], 0, dyda[i], 0, length);
+        i++;
+        procedure.execute(value, dy_da);
+    }
 }

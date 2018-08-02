@@ -32,49 +32,49 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  */
 public class HeightResultProcedure extends UnitResultProcedure implements HResultProcedure
 {
-	/** The height. */
-	public float[] h;
+    /** The height. */
+    public float[] h;
 
-	/**
-	 * Instantiates a new width result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 * @param intensityUnit
-	 *            the intensity unit
-	 */
-	public HeightResultProcedure(MemoryPeakResults results, IntensityUnit intensityUnit)
-	{
-		super(results, intensityUnit);
-	}
+    /**
+     * Instantiates a new width result procedure.
+     *
+     * @param results
+     *            the results
+     * @param intensityUnit
+     *            the intensity unit
+     */
+    public HeightResultProcedure(MemoryPeakResults results, IntensityUnit intensityUnit)
+    {
+        super(results, intensityUnit);
+    }
 
-	/**
-	 * Instantiates a new width result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 */
-	public HeightResultProcedure(MemoryPeakResults results)
-	{
-		super(results);
-	}
+    /**
+     * Instantiates a new width result procedure.
+     *
+     * @param results
+     *            the results
+     */
+    public HeightResultProcedure(MemoryPeakResults results)
+    {
+        super(results);
+    }
 
-	/**
-	 * Gets the height data in the configured units.
-	 *
-	 * @throws DataException
-	 *             if conversion to the required units is not possible
-	 */
-	public void getH() throws DataException
-	{
-		i = 0;
-		this.h = allocate(this.h);
-		results.forEach(getIntensityUnit(), this);
-	}
+    /**
+     * Gets the height data in the configured units.
+     *
+     * @throws DataException
+     *             if conversion to the required units is not possible
+     */
+    public void getH() throws DataException
+    {
+        i = 0;
+        this.h = allocate(this.h);
+        results.forEach(getIntensityUnit(), this);
+    }
 
-	@Override
-	public void executeH(float a)
-	{
-		this.h[i++] = a;
-	}
+    @Override
+    public void executeH(float a)
+    {
+        this.h[i++] = a;
+    }
 }

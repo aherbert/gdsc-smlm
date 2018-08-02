@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.engine;
  */
 public enum FitQueue
 {
-	//@formatter:off
+    //@formatter:off
 	/**
 	 * Block additions if there is a backlog
 	 */
@@ -46,16 +46,16 @@ public enum FitQueue
 	public String getName() { return "Ignore"; }};
 	//@formatter:on
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
+    @Override
+    public String toString()
+    {
+        return getName();
+    }
 
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	abstract public String getName();
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    abstract public String getName();
 }

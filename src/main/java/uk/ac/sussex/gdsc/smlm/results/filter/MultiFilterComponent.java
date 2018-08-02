@@ -28,19 +28,19 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public abstract class MultiFilterComponent
 {
-	/**
-	 * Validate the peak
-	 *
-	 * @param peak
-	 *            the peak
-	 * @return true, if it fails the filter
-	 */
-	public abstract boolean fail(final PreprocessedPeakResult peak);
+    /**
+     * Validate the peak
+     *
+     * @param peak
+     *            the peak
+     * @return true, if it fails the filter
+     */
+    public abstract boolean fail(final PreprocessedPeakResult peak);
 
-	/**
-	 * Gets the type of the component. The return value will match the constants defined in IDirectFilter.
-	 *
-	 * @return the type
-	 */
-	public abstract int getType();
+    /**
+     * Gets the type of the component. The return value will match the constants defined in IDirectFilter.
+     *
+     * @return the type
+     */
+    public abstract int getType();
 }

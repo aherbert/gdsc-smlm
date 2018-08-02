@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides classes to fit (optimise) parameters of a generic (non-linear) function that models 
+ * Provides classes to fit (optimise) parameters of a generic (non-linear) function that models
  * the given the data.
  * <p>
  * These classes are implementations of the interfaces defined in {@link uk.ac.sussex.gdsc.smlm.fitting}.

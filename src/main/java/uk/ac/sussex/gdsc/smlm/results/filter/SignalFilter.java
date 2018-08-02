@@ -34,213 +34,213 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class SignalFilter extends DirectFilter implements IMultiFilter
 {
-	/** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-	public static final double DEFAULT_INCREMENT = 5;
-	/** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-	public static final double DEFAULT_RANGE = 30;
+    /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+    public static final double DEFAULT_INCREMENT = 5;
+    /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+    public static final double DEFAULT_RANGE = 30;
 
-	@XStreamAsAttribute
-	private final double signal;
-	@XStreamOmitField
-	private float signalThreshold;
+    @XStreamAsAttribute
+    private final double signal;
+    @XStreamOmitField
+    private float signalThreshold;
 
-	/**
-	 * Instantiates a new signal filter.
-	 *
-	 * @param signal
-	 *            the signal
-	 */
-	public SignalFilter(double signal)
-	{
-		this.signal = Math.max(0, signal);
-	}
+    /**
+     * Instantiates a new signal filter.
+     *
+     * @param signal
+     *            the signal
+     */
+    public SignalFilter(double signal)
+    {
+        this.signal = Math.max(0, signal);
+    }
 
-	@Override
-	public void setup(MemoryPeakResults peakResults)
-	{
-		// Set the signal limit using the gain
-		signalThreshold = (float) (signal * peakResults.getGain());
-	}
+    @Override
+    public void setup(MemoryPeakResults peakResults)
+    {
+        // Set the signal limit using the gain
+        signalThreshold = (float) (signal * peakResults.getGain());
+    }
 
-	@Override
-	public boolean accept(PeakResult peak)
-	{
-		return peak.getIntensity() >= signalThreshold;
-	}
+    @Override
+    public boolean accept(PeakResult peak)
+    {
+        return peak.getIntensity() >= signalThreshold;
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return V_PHOTONS;
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return V_PHOTONS;
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		if (peak.getSignal() < signal)
-			return V_PHOTONS;
-		return 0;
-	}
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        if (peak.getSignal() < signal)
+            return V_PHOTONS;
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-	 */
-	@Override
-	public String getDescription()
-	{
-		return "Filter results using a lower signal threshold. The threshold is applied in photons (i.e. the signal is divided by the calibrated gain).";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
+     */
+    @Override
+    public String getDescription()
+    {
+        return "Filter results using a lower signal threshold. The threshold is applied in photons (i.e. the signal is divided by the calibrated gain).";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-	 */
-	@Override
-	public int getNumberOfParameters()
-	{
-		return 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
+     */
+    @Override
+    public int getNumberOfParameters()
+    {
+        return 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-	 */
-	@Override
-	protected double getParameterValueInternal(int index)
-	{
-		return signal;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
+     */
+    @Override
+    protected double getParameterValueInternal(int index)
+    {
+        return signal;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-	 */
-	@Override
-	public double getParameterIncrement(int index)
-	{
-		checkIndex(index);
-		return SignalFilter.DEFAULT_INCREMENT;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+     */
+    @Override
+    public double getParameterIncrement(int index)
+    {
+        checkIndex(index);
+        return SignalFilter.DEFAULT_INCREMENT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-	 */
-	@Override
-	public ParameterType getParameterType(int index)
-	{
-		checkIndex(index);
-		return ParameterType.SIGNAL;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
+     */
+    @Override
+    public ParameterType getParameterType(int index)
+    {
+        checkIndex(index);
+        return ParameterType.SIGNAL;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-	 */
-	@Override
-	public Filter adjustParameter(int index, double delta)
-	{
-		checkIndex(index);
-		return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
+     */
+    @Override
+    public Filter adjustParameter(int index, double delta)
+    {
+        checkIndex(index);
+        return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-	 */
-	@Override
-	public Filter create(double... parameters)
-	{
-		return new SignalFilter(parameters[0]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
+     */
+    @Override
+    public Filter create(double... parameters)
+    {
+        return new SignalFilter(parameters[0]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-	 */
-	@Override
-	public void weakestParameters(double[] parameters)
-	{
-		setMin(parameters, 0, signal);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+     */
+    @Override
+    public void weakestParameters(double[] parameters)
+    {
+        setMin(parameters, 0, signal);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-	 */
-	@Override
-	public double[] mutationStepRange()
-	{
-		return new double[] { DEFAULT_RANGE };
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
+     */
+    @Override
+    public double[] mutationStepRange()
+    {
+        return new double[] { DEFAULT_RANGE };
+    }
 
-	@Override
-	public double getSignal()
-	{
-		return signal;
-	}
+    @Override
+    public double getSignal()
+    {
+        return signal;
+    }
 
-	@Override
-	public double getSNR()
-	{
-		return 0;
-	}
+    @Override
+    public double getSNR()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMinWidth()
-	{
-		return 0;
-	}
+    @Override
+    public double getMinWidth()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMaxWidth()
-	{
-		return 0;
-	}
+    @Override
+    public double getMaxWidth()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getShift()
-	{
-		return 0;
-	}
+    @Override
+    public double getShift()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getEShift()
-	{
-		return 0;
-	}
+    @Override
+    public double getEShift()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getPrecision()
-	{
-		return 0;
-	}
+    @Override
+    public double getPrecision()
+    {
+        return 0;
+    }
 
-	@Override
-	public PrecisionType getPrecisionType()
-	{
-		return PrecisionType.NONE;
-	}
+    @Override
+    public PrecisionType getPrecisionType()
+    {
+        return PrecisionType.NONE;
+    }
 
-	@Override
-	public double getMinZ()
-	{
-		return 0;
-	}
+    @Override
+    public double getMinZ()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMaxZ()
-	{
-		return 0;
-	}
+    @Override
+    public double getMaxZ()
+    {
+        return 0;
+    }
 }

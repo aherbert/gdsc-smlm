@@ -30,31 +30,31 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
  */
 public class BatchRun
 {
-	/** The image. */
-	public String image;
+    /** The image. */
+    public String image;
 
-	/** The fit engine configuration. */
-	public FitEngineConfiguration fitEngineConfiguration = null;
+    /** The fit engine configuration. */
+    public FitEngineConfiguration fitEngineConfiguration = null;
 
-	/**
-	 * Instantiates a new batch run.
-	 */
-	public BatchRun()
-	{
-		fitEngineConfiguration = new FitEngineConfiguration();
-	}
+    /**
+     * Instantiates a new batch run.
+     */
+    public BatchRun()
+    {
+        fitEngineConfiguration = new FitEngineConfiguration();
+    }
 
-	/**
-	 * Instantiates a new batch run.
-	 *
-	 * @param image
-	 *            the image
-	 * @param fitEngineConfiguration
-	 *            the fit engine configuration
-	 */
-	public BatchRun(String image, FitEngineConfiguration fitEngineConfiguration)
-	{
-		this.image = image;
-		this.fitEngineConfiguration = fitEngineConfiguration;
-	}
+    /**
+     * Instantiates a new batch run.
+     *
+     * @param image
+     *            the image
+     * @param fitEngineConfiguration
+     *            the fit engine configuration
+     */
+    public BatchRun(String image, FitEngineConfiguration fitEngineConfiguration)
+    {
+        this.image = image;
+        this.fitEngineConfiguration = fitEngineConfiguration;
+    }
 }

@@ -65,318 +65,318 @@ import uk.ac.sussex.gdsc.smlm.model.camera.NullCameraModel;
  */
 public class Noise implements ExtendedPlugInFilter, DialogListener
 {
-	private static final String TITLE = "Noise Estimator";
-	private List<double[]> results;
-	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
-	private PlugInFilterRunner pfr;
-	private ImagePlus imp;
-	private static int algorithm = NoiseEstimatorMethod.ALL_PIXELS_VALUE;
-	private static int algorithm2 = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES_VALUE;
-	private static int lowestPixelsRange = 6;
-	private CalibrationWriter calibration;
-	private CameraModel cameraModel;
+    private static final String TITLE = "Noise Estimator";
+    private List<double[]> results;
+    private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
+    private PlugInFilterRunner pfr;
+    private ImagePlus imp;
+    private static int algorithm = NoiseEstimatorMethod.ALL_PIXELS_VALUE;
+    private static int algorithm2 = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES_VALUE;
+    private static int lowestPixelsRange = 6;
+    private CalibrationWriter calibration;
+    private CameraModel cameraModel;
 
-	private static final String Y_AXIS_COUNT = "Noise (counts)";
-	private static final String Y_AXIS_PHOTON = "Noise (photons)";
-	private String yAxisTitle;
+    private static final String Y_AXIS_COUNT = "Noise (counts)";
+    private static final String Y_AXIS_PHOTON = "Noise (photons)";
+    private String yAxisTitle;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-	 */
-	@Override
-	public int setup(String arg, ImagePlus imp)
-	{
-		if (arg.equalsIgnoreCase("final"))
-		{
-			showResults();
-			return DONE;
-		}
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
+     */
+    @Override
+    public int setup(String arg, ImagePlus imp)
+    {
+        if (arg.equalsIgnoreCase("final"))
+        {
+            showResults();
+            return DONE;
+        }
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (imp == null)
-		{
-			IJ.noImage();
-			return DONE;
-		}
-		this.imp = imp;
-		results = Collections.synchronizedList(new ArrayList<double[]>(imp.getStackSize()));
-		return FLAGS;
-	}
+        if (imp == null)
+        {
+            IJ.noImage();
+            return DONE;
+        }
+        this.imp = imp;
+        results = Collections.synchronizedList(new ArrayList<double[]>(imp.getStackSize()));
+        return FLAGS;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
-	 * ij.plugin.filter.PlugInFilterRunner)
-	 */
-	@Override
-	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
-	{
-		// Select a camera model
-		calibration = CalibrationWriter.create(SettingsManager.readCalibration(0));
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addMessage("Preprocess camera image and estimate global noise");
-		PeakFit.addCameraOptions(gd, calibration);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return DONE;
-		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
-		gd.collectOptions();
-		SettingsManager.writeSettings(calibration.getCalibration());
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
+     * ij.plugin.filter.PlugInFilterRunner)
+     */
+    @Override
+    public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
+    {
+        // Select a camera model
+        calibration = CalibrationWriter.create(SettingsManager.readCalibration(0));
+        ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addMessage("Preprocess camera image and estimate global noise");
+        PeakFit.addCameraOptions(gd, calibration);
+        gd.showDialog();
+        if (gd.wasCanceled())
+            return DONE;
+        calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+        gd.collectOptions();
+        SettingsManager.writeSettings(calibration.getCalibration());
 
-		try
-		{
-			createCameraModel();
-		}
-		catch (final Exception e)
-		{
-			IJ.error(TITLE, e.getMessage());
-			return DONE;
-		}
+        try
+        {
+            createCameraModel();
+        }
+        catch (final Exception e)
+        {
+            IJ.error(TITLE, e.getMessage());
+            return DONE;
+        }
 
-		// If using a stack, provide a preview graph of the noise for two methods
-		if (imp.getStackSize() > 1)
-		{
-			this.pfr = pfr;
+        // If using a stack, provide a preview graph of the noise for two methods
+        if (imp.getStackSize() > 1)
+        {
+            this.pfr = pfr;
 
-			drawPlot();
+            drawPlot();
 
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addHelp(About.HELP_URL);
+            gd = new ExtendedGenericDialog(TITLE);
+            gd.addHelp(About.HELP_URL);
 
-			final String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
+            final String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
 
-			gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
-			gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
-			gd.addSlider("Lowest_radius", 1, 15, lowestPixelsRange);
+            gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
+            gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
+            gd.addSlider("Lowest_radius", 1, 15, lowestPixelsRange);
 
-			//gd.addPreviewCheckbox(pfr);
-			gd.addDialogListener(this);
-			gd.addMessage("Click OK to compute noise table using all methods");
-			gd.showDialog();
+            //gd.addPreviewCheckbox(pfr);
+            gd.addDialogListener(this);
+            gd.addMessage("Click OK to compute noise table using all methods");
+            gd.showDialog();
 
-			if (gd.wasCanceled() || !dialogItemChanged(gd, null))
-				return DONE;
-		}
+            if (gd.wasCanceled() || !dialogItemChanged(gd, null))
+                return DONE;
+        }
 
-		return IJ.setupDialog(imp, FLAGS);
-	}
+        return IJ.setupDialog(imp, FLAGS);
+    }
 
-	private void createCameraModel()
-	{
-		yAxisTitle = Y_AXIS_PHOTON;
-		switch (calibration.getCameraType())
-		{
-			case CCD:
-				cameraModel = new CCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
-				break;
-			case EMCCD:
-				cameraModel = new EMCCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
-				break;
-			case SCMOS:
-				cameraModel = CameraModelManager.load(calibration.getCameraModelName());
-				if (cameraModel == null)
-					throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
-				cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), null, false);
-				// Store for next time
-				final Rectangle bounds = cameraModel.getBounds();
-				final int ox = bounds.x;
-				final int oy = bounds.y;
-				// Reset origin for filtering
-				if (ox != 0 || oy != 0)
-				{
-					cameraModel = cameraModel.copy();
-					cameraModel.setOrigin(0, 0);
-				}
-				break;
-			case CAMERA_TYPE_NA:
-			case UNRECOGNIZED:
-			default:
-				cameraModel = new NullCameraModel();
-				yAxisTitle = Y_AXIS_COUNT;
-				break;
-		}
-	}
+    private void createCameraModel()
+    {
+        yAxisTitle = Y_AXIS_PHOTON;
+        switch (calibration.getCameraType())
+        {
+            case CCD:
+                cameraModel = new CCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
+                break;
+            case EMCCD:
+                cameraModel = new EMCCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
+                break;
+            case SCMOS:
+                cameraModel = CameraModelManager.load(calibration.getCameraModelName());
+                if (cameraModel == null)
+                    throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
+                cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), null, false);
+                // Store for next time
+                final Rectangle bounds = cameraModel.getBounds();
+                final int ox = bounds.x;
+                final int oy = bounds.y;
+                // Reset origin for filtering
+                if (ox != 0 || oy != 0)
+                {
+                    cameraModel = cameraModel.copy();
+                    cameraModel.setOrigin(0, 0);
+                }
+                break;
+            case CAMERA_TYPE_NA:
+            case UNRECOGNIZED:
+            default:
+                cameraModel = new NullCameraModel();
+                yAxisTitle = Y_AXIS_COUNT;
+                break;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-	 */
-	@Override
-	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
-	{
-		algorithm = gd.getNextChoiceIndex();
-		algorithm2 = gd.getNextChoiceIndex();
-		lowestPixelsRange = (int) gd.getNextNumber();
-		if (gd.invalidNumber() || lowestPixelsRange < 1)
-			return false;
-		if (gd.isShowing())
-			drawPlot();
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
+     */
+    @Override
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+    {
+        algorithm = gd.getNextChoiceIndex();
+        algorithm2 = gd.getNextChoiceIndex();
+        lowestPixelsRange = (int) gd.getNextNumber();
+        if (gd.invalidNumber() || lowestPixelsRange < 1)
+            return false;
+        if (gd.isShowing())
+            drawPlot();
+        return true;
+    }
 
-	/**
-	 * Build a plot of the noise estimate from the current frame.
-	 * Limit the preview to 100 frames.
-	 */
-	private void drawPlot()
-	{
-		final NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
-		final NoiseEstimator.Method method1 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm]);
-		final NoiseEstimator.Method method2 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm2]);
-		IJ.showStatus("Estimating noise ...");
+    /**
+     * Build a plot of the noise estimate from the current frame.
+     * Limit the preview to 100 frames.
+     */
+    private void drawPlot()
+    {
+        final NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
+        final NoiseEstimator.Method method1 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm]);
+        final NoiseEstimator.Method method2 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm2]);
+        IJ.showStatus("Estimating noise ...");
 
-		final boolean twoMethods = method1 != method2;
-		final boolean preserveResiduals = method1.name().contains("Residuals") && method2.name().contains("Residuals") &&
-				twoMethods;
+        final boolean twoMethods = method1 != method2;
+        final boolean preserveResiduals = method1.name().contains("Residuals") &&
+                method2.name().contains("Residuals") && twoMethods;
 
-		final int current = imp.getCurrentSlice();
-		final int stackSize = imp.getStackSize();
-		final int preview = 100;
-		int start = current;
-		int end = current + preview;
-		if (end > stackSize)
-		{
-			final int shift = end - stackSize;
-			start -= shift;
-			end = stackSize;
-			start = Math.max(1, start);
-		}
+        final int current = imp.getCurrentSlice();
+        final int stackSize = imp.getStackSize();
+        final int preview = 100;
+        int start = current;
+        int end = current + preview;
+        if (end > stackSize)
+        {
+            final int shift = end - stackSize;
+            start -= shift;
+            end = stackSize;
+            start = Math.max(1, start);
+        }
 
-		final int size = end - start + 1;
-		final double[] xValues = new double[size];
-		final double[] yValues1 = new double[size];
-		final double[] yValues2 = (twoMethods) ? new double[size] : null;
+        final int size = end - start + 1;
+        final double[] xValues = new double[size];
+        final double[] yValues1 = new double[size];
+        final double[] yValues2 = (twoMethods) ? new double[size] : null;
 
-		final ImageStack stack = imp.getImageStack();
-		final Rectangle bounds = imp.getProcessor().getRoi();
-		float[] buffer = null;
-		for (int slice = start, i = 0; slice <= end; slice++, i++)
-		{
-			IJ.showProgress(i, size);
-			final ImageProcessor ip = stack.getProcessor(slice);
-			buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
-			cameraModel.removeBiasAndGain(bounds, buffer);
-			final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
-			ne.preserveResiduals = preserveResiduals;
-			ne.setRange(lowestPixelsRange);
-			xValues[i] = slice;
-			yValues1[i] = ne.getNoise(method1);
-			if (yValues2 != null)
-				yValues2[i] = ne.getNoise(method2);
-		}
-		IJ.showProgress(1);
+        final ImageStack stack = imp.getImageStack();
+        final Rectangle bounds = imp.getProcessor().getRoi();
+        float[] buffer = null;
+        for (int slice = start, i = 0; slice <= end; slice++, i++)
+        {
+            IJ.showProgress(i, size);
+            final ImageProcessor ip = stack.getProcessor(slice);
+            buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
+            cameraModel.removeBiasAndGain(bounds, buffer);
+            final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
+            ne.preserveResiduals = preserveResiduals;
+            ne.setRange(lowestPixelsRange);
+            xValues[i] = slice;
+            yValues1[i] = ne.getNoise(method1);
+            if (yValues2 != null)
+                yValues2[i] = ne.getNoise(method2);
+        }
+        IJ.showProgress(1);
 
-		IJ.showStatus("Plotting noise ...");
+        IJ.showStatus("Plotting noise ...");
 
-		// Get limits
-		final double[] a = Tools.getMinMax(xValues);
-		final double[] b1 = Tools.getMinMax(yValues1);
-		if (twoMethods)
-		{
-			final double[] b2 = Tools.getMinMax(yValues2);
-			b1[0] = FastMath.min(b1[0], b2[0]);
-			b1[1] = FastMath.max(b1[1], b2[1]);
-		}
+        // Get limits
+        final double[] a = Tools.getMinMax(xValues);
+        final double[] b1 = Tools.getMinMax(yValues1);
+        if (twoMethods)
+        {
+            final double[] b2 = Tools.getMinMax(yValues2);
+            b1[0] = FastMath.min(b1[0], b2[0]);
+            b1[1] = FastMath.max(b1[1], b2[1]);
+        }
 
-		final String title = imp.getTitle() + " Noise";
-		final Plot2 plot = new Plot2(title, "Slice", yAxisTitle);
-		double range = b1[1] - b1[0];
-		if (range == 0)
-			range = 1;
-		plot.setLimits(a[0], a[1], b1[0] - 0.05 * range, b1[1] + 0.05 * range);
-		plot.setColor(Color.blue);
-		plot.addPoints(xValues, yValues1, Plot.LINE);
-		//plot.draw();
-		String label = String.format("%s (Blue) = %s", trim(method1.getName()),
-				Utils.rounded(new Statistics(yValues1).getMean()));
-		if (twoMethods)
-		{
-			plot.setColor(Color.red);
-			plot.addPoints(xValues, yValues2, Plot.LINE);
-			label += String.format(", %s (Red) = %s", trim(method2.getName()),
-					Utils.rounded(new Statistics(yValues2).getMean()));
-		}
-		plot.setColor(Color.black);
-		plot.addLabel(0, 0, label);
+        final String title = imp.getTitle() + " Noise";
+        final Plot2 plot = new Plot2(title, "Slice", yAxisTitle);
+        double range = b1[1] - b1[0];
+        if (range == 0)
+            range = 1;
+        plot.setLimits(a[0], a[1], b1[0] - 0.05 * range, b1[1] + 0.05 * range);
+        plot.setColor(Color.blue);
+        plot.addPoints(xValues, yValues1, Plot.LINE);
+        //plot.draw();
+        String label = String.format("%s (Blue) = %s", trim(method1.getName()),
+                Utils.rounded(new Statistics(yValues1).getMean()));
+        if (twoMethods)
+        {
+            plot.setColor(Color.red);
+            plot.addPoints(xValues, yValues2, Plot.LINE);
+            label += String.format(", %s (Red) = %s", trim(method2.getName()),
+                    Utils.rounded(new Statistics(yValues2).getMean()));
+        }
+        plot.setColor(Color.black);
+        plot.addLabel(0, 0, label);
 
-		Utils.display(title, plot);
+        Utils.display(title, plot);
 
-		IJ.showStatus("");
-	}
+        IJ.showStatus("");
+    }
 
-	private static Object trim(String name)
-	{
-		return (name.length() > 20) ? name.substring(0, 20) + "..." : name;
-	}
+    private static Object trim(String name)
+    {
+        return (name.length() > 20) ? name.substring(0, 20) + "..." : name;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-	 */
-	@Override
-	public void run(ImageProcessor ip)
-	{
-		// Perform all methods and add to the results
-		final double[] result = new double[NoiseEstimator.Method.values().length + 1];
-		int i = 0;
-		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
-		final Rectangle bounds = ip.getRoi();
-		final float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
-		cameraModel.removeBiasAndGain(bounds, buffer);
-		final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
-		ne.preserveResiduals = true;
-		for (final NoiseEstimator.Method m : NoiseEstimator.Method.values())
-			result[i++] = ne.getNoise(m);
-		results.add(result);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
+     */
+    @Override
+    public void run(ImageProcessor ip)
+    {
+        // Perform all methods and add to the results
+        final double[] result = new double[NoiseEstimator.Method.values().length + 1];
+        int i = 0;
+        result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
+        final Rectangle bounds = ip.getRoi();
+        final float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+        cameraModel.removeBiasAndGain(bounds, buffer);
+        final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
+        ne.preserveResiduals = true;
+        for (final NoiseEstimator.Method m : NoiseEstimator.Method.values())
+            result[i++] = ne.getNoise(m);
+        results.add(result);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
-	 */
-	@Override
-	public void setNPasses(int nPasses)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
+     */
+    @Override
+    public void setNPasses(int nPasses)
+    {
+        // Do nothing
+    }
 
-	private void showResults()
-	{
-		Collections.sort(results, new Comparator<double[]>()
-		{
-			@Override
-			public int compare(double[] o1, double[] o2)
-			{
-				// Sort on slice number
-				return (o1[0] < o2[0]) ? -1 : 1;
-			}
-		});
+    private void showResults()
+    {
+        Collections.sort(results, new Comparator<double[]>()
+        {
+            @Override
+            public int compare(double[] o1, double[] o2)
+            {
+                // Sort on slice number
+                return (o1[0] < o2[0]) ? -1 : 1;
+            }
+        });
 
-		// Slow when there are lots of results ... Could change the output options in the future
-		final TextWindow tw = new TextWindow(imp.getTitle() + " Noise", createHeader(), "", 800, 400);
-		for (final double[] result : results)
-			tw.append(createResult(result));
-	}
+        // Slow when there are lots of results ... Could change the output options in the future
+        final TextWindow tw = new TextWindow(imp.getTitle() + " Noise", createHeader(), "", 800, 400);
+        for (final double[] result : results)
+            tw.append(createResult(result));
+    }
 
-	private static String createHeader()
-	{
-		final StringBuilder sb = new StringBuilder("Slice");
-		for (final NoiseEstimator.Method m : NoiseEstimator.Method.values())
-			sb.append('\t').append(m);
-		return sb.toString();
-	}
+    private static String createHeader()
+    {
+        final StringBuilder sb = new StringBuilder("Slice");
+        for (final NoiseEstimator.Method m : NoiseEstimator.Method.values())
+            sb.append('\t').append(m);
+        return sb.toString();
+    }
 
-	private static String createResult(double[] result)
-	{
-		final StringBuilder sb = new StringBuilder("" + (int) result[0]);
-		for (int i = 1; i < result.length; i++)
-			sb.append('\t').append(result[i]);
-		return sb.toString();
-	}
+    private static String createResult(double[] result)
+    {
+        final StringBuilder sb = new StringBuilder("" + (int) result[0]);
+        for (int i = 1; i < result.length; i++)
+            sb.append('\t').append(result[i]);
+        return sb.toString();
+    }
 }

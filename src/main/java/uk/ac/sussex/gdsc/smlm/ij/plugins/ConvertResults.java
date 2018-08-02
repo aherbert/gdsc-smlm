@@ -43,108 +43,108 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  */
 public class ConvertResults implements PlugIn
 {
-	private static final String TITLE = "Convert Results";
+    private static final String TITLE = "Convert Results";
 
-	private static String inputOption = "";
+    private static String inputOption = "";
 
-	/*
-	 * (non-)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@Override
-	public void run(String arg)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @Override
+    public void run(String arg)
+    {
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (!showInputDialog())
-			return;
+        if (!showInputDialog())
+            return;
 
-		final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
-		if (results == null || results.size() == 0)
-		{
-			IJ.error(TITLE, "No results could be loaded");
-			return;
-		}
+        final MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
+        if (results == null || results.size() == 0)
+        {
+            IJ.error(TITLE, "No results could be loaded");
+            return;
+        }
 
-		if (!showDialog(results))
-			return;
+        if (!showDialog(results))
+            return;
 
-		IJ.showStatus("Converted " + results.getName());
-	}
+        IJ.showStatus("Converted " + results.getName());
+    }
 
-	private static boolean showInputDialog()
-	{
-		final int size = MemoryPeakResults.countMemorySize();
-		if (size == 0)
-		{
-			IJ.error(TITLE, "There are no fitting results in memory");
-			return false;
-		}
+    private static boolean showInputDialog()
+    {
+        final int size = MemoryPeakResults.countMemorySize();
+        if (size == 0)
+        {
+            IJ.error(TITLE, "There are no fitting results in memory");
+            return false;
+        }
 
-		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
-		gd.addMessage("Select results to convert");
+        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addHelp(About.HELP_URL);
+        gd.addMessage("Select results to convert");
 
-		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+        ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
-		gd.showDialog();
+        gd.showDialog();
 
-		if (gd.wasCanceled())
-			return false;
+        if (gd.wasCanceled())
+            return false;
 
-		inputOption = ResultsManager.getInputSource(gd);
+        inputOption = ResultsManager.getInputSource(gd);
 
-		return true;
-	}
+        return true;
+    }
 
-	private static boolean showDialog(MemoryPeakResults results)
-	{
-		final GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Convert the current units for the results");
-		gd.addHelp(About.HELP_URL);
+    private static boolean showDialog(MemoryPeakResults results)
+    {
+        final GenericDialog gd = new GenericDialog(TITLE);
+        gd.addMessage("Convert the current units for the results");
+        gd.addHelp(About.HELP_URL);
 
-		final CalibrationReader cr = CalibrationWriter.create(results.getCalibration());
+        final CalibrationReader cr = CalibrationWriter.create(results.getCalibration());
 
-		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), UnitHelper.getName(cr.getDistanceUnit()));
-		gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
-		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
-				UnitHelper.getName(cr.getIntensityUnit()));
-		gd.addNumericField("Gain (Count/photon)", cr.getCountPerPhoton(), 2);
-		gd.addChoice("Angle_unit", SettingsManager.getAngleUnitNames(), UnitHelper.getName(cr.getAngleUnit()));
+        gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), UnitHelper.getName(cr.getDistanceUnit()));
+        gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
+        gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
+                UnitHelper.getName(cr.getIntensityUnit()));
+        gd.addNumericField("Gain (Count/photon)", cr.getCountPerPhoton(), 2);
+        gd.addChoice("Angle_unit", SettingsManager.getAngleUnitNames(), UnitHelper.getName(cr.getAngleUnit()));
 
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return false;
+        gd.showDialog();
+        if (gd.wasCanceled())
+            return false;
 
-		final CalibrationWriter cw = results.getCalibrationWriterSafe();
-		final DistanceUnit distanceUnit = SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()];
-		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
-		final IntensityUnit intensityUnit = SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
-		cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
-		final AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
+        final CalibrationWriter cw = results.getCalibrationWriterSafe();
+        final DistanceUnit distanceUnit = SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()];
+        cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
+        final IntensityUnit intensityUnit = SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
+        cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
+        final AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
 
-		// Don't set the calibration with bad values
-		if (distanceUnit.getNumber() > 0 && !(cw.getNmPerPixel() > 0))
-		{
-			IJ.error(TITLE, "Require positive nm/pixel for conversion");
-			return false;
-		}
-		if (intensityUnit.getNumber() > 0 && !(cw.getCountPerPhoton() > 0))
-		{
-			IJ.error(TITLE, "Require positive Count/photon for conversion");
-			return false;
-		}
+        // Don't set the calibration with bad values
+        if (distanceUnit.getNumber() > 0 && !(cw.getNmPerPixel() > 0))
+        {
+            IJ.error(TITLE, "Require positive nm/pixel for conversion");
+            return false;
+        }
+        if (intensityUnit.getNumber() > 0 && !(cw.getCountPerPhoton() > 0))
+        {
+            IJ.error(TITLE, "Require positive Count/photon for conversion");
+            return false;
+        }
 
-		final Calibration newCalibration = cw.getCalibration();
-		results.setCalibration(newCalibration);
+        final Calibration newCalibration = cw.getCalibration();
+        results.setCalibration(newCalibration);
 
-		if (!results.convertToUnits(distanceUnit, intensityUnit, angleUnit))
-		{
-			IJ.error(TITLE, "Conversion failed");
-			return false;
-		}
+        if (!results.convertToUnits(distanceUnit, intensityUnit, angleUnit))
+        {
+            IJ.error(TITLE, "Conversion failed");
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 }

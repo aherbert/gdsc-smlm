@@ -28,59 +28,59 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class BlockMeanFilter extends BlockFilter
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
-	 */
-	@Override
-	protected Normaliser computeWeightedNormaliser(float n)
-	{
-		final float[] divisor = weights.clone();
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
+     */
+    @Override
+    protected Normaliser computeWeightedNormaliser(float n)
+    {
+        final float[] divisor = weights.clone();
 
-		// Use a sum filter to get the sum of the weights in the region
-		final BlockSumFilter sum = new BlockSumFilter();
-		if ((int) n == n)
-			sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
-			//sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
-		else
-			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
-			//sum.blockFilter(divisor, weightWidth, weightHeight, n);
-		return new PerPixelNormaliser(divisor);
-	}
+        // Use a sum filter to get the sum of the weights in the region
+        final BlockSumFilter sum = new BlockSumFilter();
+        if ((int) n == n)
+            sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
+        //sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
+        else
+            sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
+        //sum.blockFilter(divisor, weightWidth, weightHeight, n);
+        return new PerPixelNormaliser(divisor);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
-	 */
-	@Override
-	protected Normaliser computeNormaliser(float n)
-	{
-		return new FixedNormaliser(pow2(2 * n + 1));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
+     */
+    @Override
+    protected Normaliser computeNormaliser(float n)
+    {
+        return new FixedNormaliser(pow2(2 * n + 1));
+    }
 
-	/**
-	 * Get the value squared
-	 *
-	 * @param f
-	 *            the value
-	 * @return the value squared
-	 */
-	private static float pow2(float f)
-	{
-		return f * f;
-	}
+    /**
+     * Get the value squared
+     *
+     * @param f
+     *            the value
+     * @return the value squared
+     */
+    private static float pow2(float f)
+    {
+        return f * f;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public BlockMeanFilter clone()
-	{
-		final BlockMeanFilter o = (BlockMeanFilter) super.clone();
-		return o;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public BlockMeanFilter clone()
+    {
+        final BlockMeanFilter o = (BlockMeanFilter) super.clone();
+        return o;
+    }
 }

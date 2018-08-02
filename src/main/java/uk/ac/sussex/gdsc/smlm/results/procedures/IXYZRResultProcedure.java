@@ -30,19 +30,19 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public interface IXYZRResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param intensity
-	 *            the intensity
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
-	 * @param result
-	 *            the result
-	 */
-	public void executeIXYZR(float intensity, float x, float y, float z, PeakResult result);
+    /**
+     * Executes this procedure.
+     *
+     * @param intensity
+     *            the intensity
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param z
+     *            the z
+     * @param result
+     *            the result
+     */
+    public void executeIXYZR(float intensity, float x, float y, float z, PeakResult result);
 }

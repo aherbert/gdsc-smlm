@@ -28,32 +28,32 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSet0 extends MultiFilterComponentSet
 {
-	/**
-	 * Instantiates a new multi filter component set for 0 components.
-	 *
-	 * @param components
-	 *            the components
-	 */
-	public MultiFilterComponentSet0(MultiFilterComponent[] components)
-	{
-		// Ignore the array
-	}
+    /**
+     * Instantiates a new multi filter component set for 0 components.
+     *
+     * @param components
+     *            the components
+     */
+    public MultiFilterComponentSet0(MultiFilterComponent[] components)
+    {
+        // Ignore the array
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return 0;
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return 0;
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		return 0;
-	}
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        return 0;
+    }
 
-	@Override
-	void replace0(MultiFilterComponent c)
-	{
-		// This set is empty so no replacement is possible. Don't throw an exception though!
-	}
+    @Override
+    void replace0(MultiFilterComponent c)
+    {
+        // This set is empty so no replacement is possible. Don't throw an exception though!
+    }
 }

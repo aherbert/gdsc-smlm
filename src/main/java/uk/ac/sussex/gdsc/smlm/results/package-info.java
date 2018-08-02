@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides classes to store the localisation results from Single Molecule Localisation Microscopy. 
+ * Provides classes to store the localisation results from Single Molecule Localisation Microscopy.
  *
  * @since 1.0.0
  */

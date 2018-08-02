@@ -32,43 +32,43 @@ package uk.ac.sussex.gdsc.smlm.fitting;
  */
 public class MLEScaledFunctionSolver extends ScaledFunctionSolver implements MLEFunctionSolver
 {
-	/** The MLE function solver. */
-	protected final MLEFunctionSolver mleSolver;
+    /** The MLE function solver. */
+    protected final MLEFunctionSolver mleSolver;
 
-	/**
-	 * Instantiates a new MLE scaled function solver.
-	 * <p>
-	 * Indexed parameters are up-scaled prior to calling the inner function solver. Output parameters, deviations and
-	 * the function value are are down-scaled upon completion.
-	 *
-	 * @param solver
-	 *            the solver
-	 * @param scale
-	 *            the scale
-	 * @param indices
-	 *            the indices of the parameters to scale
-	 */
-	public MLEScaledFunctionSolver(MLEFunctionSolver solver, double scale, int[] indices)
-	{
-		super(solver, scale, indices);
-		mleSolver = solver;
-	}
+    /**
+     * Instantiates a new MLE scaled function solver.
+     * <p>
+     * Indexed parameters are up-scaled prior to calling the inner function solver. Output parameters, deviations and
+     * the function value are are down-scaled upon completion.
+     *
+     * @param solver
+     *            the solver
+     * @param scale
+     *            the scale
+     * @param indices
+     *            the indices of the parameters to scale
+     */
+    public MLEScaledFunctionSolver(MLEFunctionSolver solver, double scale, int[] indices)
+    {
+        super(solver, scale, indices);
+        mleSolver = solver;
+    }
 
-	@Override
-	public double getLogLikelihood()
-	{
-		return mleSolver.getLogLikelihood();
-	}
+    @Override
+    public double getLogLikelihood()
+    {
+        return mleSolver.getLogLikelihood();
+    }
 
-	@Override
-	public double getLogLikelihoodRatio()
-	{
-		return mleSolver.getLogLikelihoodRatio();
-	}
+    @Override
+    public double getLogLikelihoodRatio()
+    {
+        return mleSolver.getLogLikelihoodRatio();
+    }
 
-	@Override
-	public double getQ()
-	{
-		return mleSolver.getQ();
-	}
+    @Override
+    public double getQ()
+    {
+        return mleSolver.getQ();
+    }
 }

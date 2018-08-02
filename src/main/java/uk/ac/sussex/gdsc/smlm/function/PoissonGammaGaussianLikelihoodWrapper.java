@@ -48,69 +48,69 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 {
-	final private PoissonGammaGaussianFunction p;
+    final private PoissonGammaGaussianFunction p;
 
-	/**
-	 * Initialise the function.
-	 * <p>
-	 * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
-	 * indices should be passed in to the functions to obtain the value (and gradient).
-	 *
-	 * @param f
-	 *            The function to be used to calculated the expected values (if modelling EMCCD data this should
-	 *            evaluate the value without the bias)
-	 * @param a
-	 *            The initial parameters for the function
-	 * @param k
-	 *            The observed values (if using EMCCD data the bias should be subtracted)
-	 * @param n
-	 *            The number of observed values
-	 * @param alpha
-	 *            Inverse gain of the EMCCD chip
-	 * @param s
-	 *            The Gaussian standard deviation at readout
-	 */
-	public PoissonGammaGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha,
-			double s)
-	{
-		super(f, a, k, n);
-		p = new PoissonGammaGaussianFunction(alpha, s);
-	}
+    /**
+     * Initialise the function.
+     * <p>
+     * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
+     * indices should be passed in to the functions to obtain the value (and gradient).
+     *
+     * @param f
+     *            The function to be used to calculated the expected values (if modelling EMCCD data this should
+     *            evaluate the value without the bias)
+     * @param a
+     *            The initial parameters for the function
+     * @param k
+     *            The observed values (if using EMCCD data the bias should be subtracted)
+     * @param n
+     *            The number of observed values
+     * @param alpha
+     *            Inverse gain of the EMCCD chip
+     * @param s
+     *            The Gaussian standard deviation at readout
+     */
+    public PoissonGammaGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha,
+            double s)
+    {
+        super(f, a, k, n);
+        p = new PoissonGammaGaussianFunction(alpha, s);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
-	 */
-	@Override
-	public double computeLikelihood()
-	{
-		// Compute the negative log-likelihood
-		double ll = 0;
-		for (int i = 0; i < n; i++)
-			ll -= p.logLikelihood(data[i], f.eval(i));
-		return ll;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
+     */
+    @Override
+    public double computeLikelihood()
+    {
+        // Compute the negative log-likelihood
+        double ll = 0;
+        for (int i = 0; i < n; i++)
+            ll -= p.logLikelihood(data[i], f.eval(i));
+        return ll;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
-	 */
-	@Override
-	public double computeLikelihood(int i)
-	{
-		return -p.logLikelihood(data[i], f.eval(i));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
+     */
+    @Override
+    public double computeLikelihood(int i)
+    {
+        return -p.logLikelihood(data[i], f.eval(i));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
-	 */
-	@Override
-	public boolean canComputeGradient()
-	{
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
+     */
+    @Override
+    public boolean canComputeGradient()
+    {
+        return false;
+    }
 }

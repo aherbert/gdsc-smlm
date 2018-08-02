@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides classes to save and load settings. 
+ * Provides classes to save and load settings.
  *
  * @since 1.0.0
  */

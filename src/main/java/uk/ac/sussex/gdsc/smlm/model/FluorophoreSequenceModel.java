@@ -35,284 +35,284 @@ import java.util.List;
  */
 public abstract class FluorophoreSequenceModel extends MoleculeModel implements Comparable<FluorophoreSequenceModel>
 {
-	/**
-	 * Instantiates a new fluorophore sequence model.
-	 *
-	 * @param id
-	 *            the id
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
-	 */
-	public FluorophoreSequenceModel(int id, double x, double y, double z)
-	{
-		super(id, x, y, z);
-	}
+    /**
+     * Instantiates a new fluorophore sequence model.
+     *
+     * @param id
+     *            the id
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param z
+     *            the z
+     */
+    public FluorophoreSequenceModel(int id, double x, double y, double z)
+    {
+        super(id, x, y, z);
+    }
 
-	/**
-	 * Instantiates a new fluorophore sequence model.
-	 *
-	 * @param id
-	 *            the id
-	 * @param xyz
-	 *            the xyz
-	 */
-	public FluorophoreSequenceModel(int id, double[] xyz)
-	{
-		super(id, xyz);
-	}
+    /**
+     * Instantiates a new fluorophore sequence model.
+     *
+     * @param id
+     *            the id
+     * @param xyz
+     *            the xyz
+     */
+    public FluorophoreSequenceModel(int id, double[] xyz)
+    {
+        super(id, xyz);
+    }
 
-	/**
-	 * The number of times the molecule went into the dark state
-	 */
-	private int blinks = 0;
-	/**
-	 * A sequence of fluorescent bursts in pairs of {on,off} times. The burst sequence will be length = 2 * (blinks+1)
-	 */
-	private double[] burstSequence = new double[] { 0, 0 };
+    /**
+     * The number of times the molecule went into the dark state
+     */
+    private int blinks = 0;
+    /**
+     * A sequence of fluorescent bursts in pairs of {on,off} times. The burst sequence will be length = 2 * (blinks+1)
+     */
+    private double[] burstSequence = new double[] { 0, 0 };
 
-	/**
-	 * Sets the burst sequence.
-	 *
-	 * @param sequence
-	 *            the new burst sequence
-	 */
-	protected void setBurstSequence(double[] sequence)
-	{
-		if (sequence != null && sequence.length > 1)
-		{
-			blinks = (sequence.length / 2) - 1;
+    /**
+     * Sets the burst sequence.
+     *
+     * @param sequence
+     *            the new burst sequence
+     */
+    protected void setBurstSequence(double[] sequence)
+    {
+        if (sequence != null && sequence.length > 1)
+        {
+            blinks = (sequence.length / 2) - 1;
 
-			// Ensure the sequence array is an even number in length
-			final int length = 2 * (blinks + 1);
-			if (sequence.length == length)
-				burstSequence = sequence;
-			else
-				burstSequence = Arrays.copyOf(sequence, length);
-		}
-	}
+            // Ensure the sequence array is an even number in length
+            final int length = 2 * (blinks + 1);
+            if (sequence.length == length)
+                burstSequence = sequence;
+            else
+                burstSequence = Arrays.copyOf(sequence, length);
+        }
+    }
 
-	/**
-	 * Gets the number of blinks.
-	 *
-	 * @return The number of times the fluorophore blinked
-	 */
-	public int getNumberOfBlinks()
-	{
-		return blinks;
-	}
+    /**
+     * Gets the number of blinks.
+     *
+     * @return The number of times the fluorophore blinked
+     */
+    public int getNumberOfBlinks()
+    {
+        return blinks;
+    }
 
-	/**
-	 * Get the start time, i.e. when the molecule activated.
-	 * <p>
-	 * Note that a molecule will always have a start time even if it has no blinks. This models a molecule that turns on
-	 * and then bleaches immediately.
-	 *
-	 * @return The start time
-	 */
-	public double getStartTime()
-	{
-		return burstSequence[0];
-	}
+    /**
+     * Get the start time, i.e. when the molecule activated.
+     * <p>
+     * Note that a molecule will always have a start time even if it has no blinks. This models a molecule that turns on
+     * and then bleaches immediately.
+     *
+     * @return The start time
+     */
+    public double getStartTime()
+    {
+        return burstSequence[0];
+    }
 
-	/**
-	 * Get the end time, i.e. when the molecule bleached.
-	 *
-	 * @return The end time
-	 */
-	public double getEndTime()
-	{
-		return burstSequence[burstSequence.length - 1];
-	}
+    /**
+     * Get the end time, i.e. when the molecule bleached.
+     *
+     * @return The end time
+     */
+    public double getEndTime()
+    {
+        return burstSequence[burstSequence.length - 1];
+    }
 
-	/**
-	 * Gets the burst sequence.
-	 *
-	 * @return Fluorescent bursts arranged as list of on/off times: {onT,offT}
-	 */
-	public List<double[]> getBurstSequence()
-	{
-		final ArrayList<double[]> data = new ArrayList<>(blinks + 1);
-		for (int i = 0; i <= blinks; i++)
-			data.add(new double[] { burstSequence[i * 2], burstSequence[i * 2 + 1] });
-		return data;
-	}
+    /**
+     * Gets the burst sequence.
+     *
+     * @return Fluorescent bursts arranged as list of on/off times: {onT,offT}
+     */
+    public List<double[]> getBurstSequence()
+    {
+        final ArrayList<double[]> data = new ArrayList<>(blinks + 1);
+        for (int i = 0; i <= blinks; i++)
+            data.add(new double[] { burstSequence[i * 2], burstSequence[i * 2 + 1] });
+        return data;
+    }
 
-	/**
-	 * Gets the sampled burst sequence.
-	 *
-	 * @return Fluorescent bursts arranged as list of on/off times in integer sampling intervals: {onT,offT}
-	 */
-	public List<int[]> getSampledBurstSequence()
-	{
-		final ArrayList<int[]> data = new ArrayList<>(blinks + 1);
-		for (int i = 0; i <= blinks; i++)
-			data.add(new int[] { (int) (burstSequence[i * 2]), (int) (burstSequence[i * 2 + 1]) });
-		return data;
-	}
+    /**
+     * Gets the sampled burst sequence.
+     *
+     * @return Fluorescent bursts arranged as list of on/off times in integer sampling intervals: {onT,offT}
+     */
+    public List<int[]> getSampledBurstSequence()
+    {
+        final ArrayList<int[]> data = new ArrayList<>(blinks + 1);
+        for (int i = 0; i <= blinks; i++)
+            data.add(new int[] { (int) (burstSequence[i * 2]), (int) (burstSequence[i * 2 + 1]) });
+        return data;
+    }
 
-	/**
-	 * Order by time ascending.
-	 *
-	 * @param o
-	 *            The other fluorophore
-	 * @return -1,0,1
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(FluorophoreSequenceModel o)
-	{
-		return Double.compare(getStartTime(), o.getStartTime());
-	}
+    /**
+     * Order by time ascending.
+     *
+     * @param o
+     *            The other fluorophore
+     * @return -1,0,1
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(FluorophoreSequenceModel o)
+    {
+        return Double.compare(getStartTime(), o.getStartTime());
+    }
 
-	/**
-	 * Gets the on times.
-	 *
-	 * @return The duration of the on times
-	 */
-	public double[] getOnTimes()
-	{
-		final double[] onTimes = new double[blinks + 1];
-		for (int i = 0; i <= blinks; i++)
-			onTimes[i] = burstSequence[i * 2 + 1] - burstSequence[i * 2];
-		return onTimes;
-	}
+    /**
+     * Gets the on times.
+     *
+     * @return The duration of the on times
+     */
+    public double[] getOnTimes()
+    {
+        final double[] onTimes = new double[blinks + 1];
+        for (int i = 0; i <= blinks; i++)
+            onTimes[i] = burstSequence[i * 2 + 1] - burstSequence[i * 2];
+        return onTimes;
+    }
 
-	/**
-	 * Gets the off times.
-	 *
-	 * @return The duration of the off times
-	 */
-	public double[] getOffTimes()
-	{
-		if (blinks < 1)
-			return new double[0];
+    /**
+     * Gets the off times.
+     *
+     * @return The duration of the off times
+     */
+    public double[] getOffTimes()
+    {
+        if (blinks < 1)
+            return new double[0];
 
-		final double[] offTimes = new double[blinks];
-		for (int i = 1; i <= blinks; i++)
-			offTimes[i - 1] = burstSequence[i * 2] - burstSequence[i * 2 - 1];
-		return offTimes;
-	}
+        final double[] offTimes = new double[blinks];
+        for (int i = 1; i <= blinks; i++)
+            offTimes[i - 1] = burstSequence[i * 2] - burstSequence[i * 2 - 1];
+        return offTimes;
+    }
 
-	/**
-	 * Gets the sampled on times.
-	 *
-	 * @return The duration of the on times if sampled at integer time intervals
-	 */
-	public int[] getSampledOnTimes()
-	{
-		if (blinks == 0)
-			return new int[] { end(burstSequence[1]) - start(burstSequence[0]) };
+    /**
+     * Gets the sampled on times.
+     *
+     * @return The duration of the on times if sampled at integer time intervals
+     */
+    public int[] getSampledOnTimes()
+    {
+        if (blinks == 0)
+            return new int[] { end(burstSequence[1]) - start(burstSequence[0]) };
 
-		// Process all blinks. Join together blinks with an off-time that would not be noticed,
-		// i.e. where the molecule was on in consecutive frames.
-		final int[] onTimes = new int[blinks + 1];
-		int n = 0;
-		int tStart = (int) burstSequence[0];
-		for (int i = 0; i < blinks; i++)
-		{
-			final int end1 = end(burstSequence[i * 2 + 1]);
-			final int start2 = start(burstSequence[(i + 1) * 2]);
+        // Process all blinks. Join together blinks with an off-time that would not be noticed,
+        // i.e. where the molecule was on in consecutive frames.
+        final int[] onTimes = new int[blinks + 1];
+        int n = 0;
+        int tStart = (int) burstSequence[0];
+        for (int i = 0; i < blinks; i++)
+        {
+            final int end1 = end(burstSequence[i * 2 + 1]);
+            final int start2 = start(burstSequence[(i + 1) * 2]);
 
-			if (start2 - end1 > 0)
-			{
-				onTimes[n++] = end1 - tStart;
-				tStart = start2;
-			}
-		}
-		onTimes[n++] = end(getEndTime()) - tStart;
+            if (start2 - end1 > 0)
+            {
+                onTimes[n++] = end1 - tStart;
+                tStart = start2;
+            }
+        }
+        onTimes[n++] = end(getEndTime()) - tStart;
 
-		return Arrays.copyOf(onTimes, n);
-	}
+        return Arrays.copyOf(onTimes, n);
+    }
 
-	/**
-	 * Convert the start time to an integer
-	 *
-	 * @param t
-	 *            the time
-	 * @return the integer start time
-	 */
-	private static int start(double t)
-	{
-		return (int) t;
-	}
+    /**
+     * Convert the start time to an integer
+     *
+     * @param t
+     *            the time
+     * @return the integer start time
+     */
+    private static int start(double t)
+    {
+        return (int) t;
+    }
 
-	/**
-	 * Convert the end time to an integer
-	 *
-	 * @param t
-	 *            the time
-	 * @return the integer end time
-	 */
-	private static int end(double t)
-	{
-		return (int) (Math.ceil(t));
-	}
+    /**
+     * Convert the end time to an integer
+     *
+     * @param t
+     *            the time
+     * @return the integer end time
+     */
+    private static int end(double t)
+    {
+        return (int) (Math.ceil(t));
+    }
 
-	/**
-	 * Gets the sampled off times.
-	 *
-	 * @return The duration of the off times if sampled at integer time intervals
-	 */
-	public int[] getSampledOffTimes()
-	{
-		if (blinks == 0)
-			return new int[0];
+    /**
+     * Gets the sampled off times.
+     *
+     * @return The duration of the off times if sampled at integer time intervals
+     */
+    public int[] getSampledOffTimes()
+    {
+        if (blinks == 0)
+            return new int[0];
 
-		// Process all blinks. Join together blinks with an off-time that would not be noticed,
-		// i.e. where the molecule was on in consecutive frames.
-		final int[] offTimes = new int[blinks];
-		int n = 0;
-		for (int i = 0; i < blinks; i++)
-		{
-			final int end1 = end(burstSequence[i * 2 + 1]);
-			final int start2 = start(burstSequence[(i + 1) * 2]);
+        // Process all blinks. Join together blinks with an off-time that would not be noticed,
+        // i.e. where the molecule was on in consecutive frames.
+        final int[] offTimes = new int[blinks];
+        int n = 0;
+        for (int i = 0; i < blinks; i++)
+        {
+            final int end1 = end(burstSequence[i * 2 + 1]);
+            final int start2 = start(burstSequence[(i + 1) * 2]);
 
-			if (start2 - end1 > 0)
-				offTimes[n++] = start2 - end1;
-		}
+            if (start2 - end1 > 0)
+                offTimes[n++] = start2 - end1;
+        }
 
-		return Arrays.copyOf(offTimes, n);
-	}
+        return Arrays.copyOf(offTimes, n);
+    }
 
-	/**
-	 * Gets the on frames.
-	 *
-	 * @return An array of frames when the molecule was on
-	 */
-	public int[] getOnFrames()
-	{
-		final int sequenceStartT = (int) getStartTime();
-		final int sequenceEndT = (int) getEndTime();
+    /**
+     * Gets the on frames.
+     *
+     * @return An array of frames when the molecule was on
+     */
+    public int[] getOnFrames()
+    {
+        final int sequenceStartT = (int) getStartTime();
+        final int sequenceEndT = (int) getEndTime();
 
-		int n = 0;
-		final int[] onFrames = new int[sequenceEndT - sequenceStartT + 1];
-		for (int i = 0; i <= blinks; i++)
-		{
-			final int on = (int) (burstSequence[i * 2]);
-			final int off = (int) (burstSequence[i * 2 + 1]);
+        int n = 0;
+        final int[] onFrames = new int[sequenceEndT - sequenceStartT + 1];
+        for (int i = 0; i <= blinks; i++)
+        {
+            final int on = (int) (burstSequence[i * 2]);
+            final int off = (int) (burstSequence[i * 2 + 1]);
 
-			for (int t = on; t <= off; t++)
-				onFrames[n++] = t;
-		}
+            for (int t = on; t <= off; t++)
+                onFrames[n++] = t;
+        }
 
-		return Arrays.copyOf(onFrames, n);
-	}
+        return Arrays.copyOf(onFrames, n);
+    }
 
-	/**
-	 * Scale the times using the specified factor. Allows adjusting the relative time of the sequence.
-	 *
-	 * @param scale
-	 *            the scale
-	 */
-	public void adjustTime(double scale)
-	{
-		if (scale < 0)
-			throw new IllegalArgumentException("Scale factor must be above zero");
-		for (int i = 0; i < burstSequence.length; i++)
-			burstSequence[i] *= scale;
-	}
+    /**
+     * Scale the times using the specified factor. Allows adjusting the relative time of the sequence.
+     *
+     * @param scale
+     *            the scale
+     */
+    public void adjustTime(double scale)
+    {
+        if (scale < 0)
+            throw new IllegalArgumentException("Scale factor must be above zero");
+        for (int i = 0; i < burstSequence.length; i++)
+            burstSequence[i] *= scale;
+    }
 }

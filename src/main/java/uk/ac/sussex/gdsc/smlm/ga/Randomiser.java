@@ -30,21 +30,21 @@ import org.apache.commons.math3.random.RandomDataGenerator;
  */
 public abstract class Randomiser
 {
-	/** The random data generator. */
-	final RandomDataGenerator random;
+    /** The random data generator. */
+    final RandomDataGenerator random;
 
-	/**
-	 * Instantiates a new randomiser.
-	 *
-	 * @param random
-	 *            the random data generator
-	 * @throws IllegalArgumentException
-	 *             if the random generator is null
-	 */
-	public Randomiser(RandomDataGenerator random)
-	{
-		if (random == null)
-			throw new IllegalArgumentException("Random data generator cannot be null");
-		this.random = random;
-	}
+    /**
+     * Instantiates a new randomiser.
+     *
+     * @param random
+     *            the random data generator
+     * @throws IllegalArgumentException
+     *             if the random generator is null
+     */
+    public Randomiser(RandomDataGenerator random)
+    {
+        if (random == null)
+            throw new IllegalArgumentException("Random data generator cannot be null");
+        this.random = random;
+    }
 }

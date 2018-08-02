@@ -30,28 +30,29 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class IdPeakResultPredicate implements PeakResultPredicate
 {
-	/** The id. */
-	private final int id;
+    /** The id. */
+    private final int id;
 
-	/**
-	 * Instantiates a new id peak result predicate.
-	 *
-	 * @param id
-	 *            the id
-	 */
-	public IdPeakResultPredicate(int id)
-	{
-		this.id = id;
-	}
+    /**
+     * Instantiates a new id peak result predicate.
+     *
+     * @param id
+     *            the id
+     */
+    public IdPeakResultPredicate(int id)
+    {
+        this.id = id;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getId() == id;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public boolean test(PeakResult t)
+    {
+        return t.getId() == id;
+    }
 }

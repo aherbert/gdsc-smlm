@@ -29,50 +29,50 @@ package uk.ac.sussex.gdsc.smlm.model;
  */
 public class FixedLifetimeImageModel extends ImageModel
 {
-	private double next = 0;
+    private double next = 0;
 
-	/**
-	 * Construct a new image model
-	 *
-	 * @param tOn
-	 *            Fixed on-state time
-	 * @param tOff
-	 *            Dark time between successive fluorophores
-	 */
-	public FixedLifetimeImageModel(double tOn, double tOff)
-	{
-		super(tOn, tOff, 0, 0, 0);
-	}
+    /**
+     * Construct a new image model
+     *
+     * @param tOn
+     *            Fixed on-state time
+     * @param tOff
+     *            Dark time between successive fluorophores
+     */
+    public FixedLifetimeImageModel(double tOn, double tOff)
+    {
+        super(tOn, tOff, 0, 0, 0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
-	 */
-	@Override
-	protected double createActivationTime(double[] xyz)
-	{
-		final double tAct = next + getRandom().getRandomGenerator().nextDouble();
-		// Ensure at least tOff full dark frames between lifetimes:
-		// Frames:    |      |      |      |
-		//         ------|
-		//              end             |--------
-		//                              start
-		//                     tOff
-		final int unit = (int) Math.ceil(tOff);
-		final int endT = (int) Math.ceil((tAct + tOn) / unit);
-		next = (endT + 1) * unit;
-		return tAct;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
+     */
+    @Override
+    protected double createActivationTime(double[] xyz)
+    {
+        final double tAct = next + getRandom().getRandomGenerator().nextDouble();
+        // Ensure at least tOff full dark frames between lifetimes:
+        // Frames:    |      |      |      |
+        //         ------|
+        //              end             |--------
+        //                              start
+        //                     tOff
+        final int unit = (int) Math.ceil(tOff);
+        final int endT = (int) Math.ceil((tAct + tOn) / unit);
+        next = (endT + 1) * unit;
+        return tAct;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
-	 */
-	@Override
-	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
-	{
-		return new SimpleFluorophoreSequenceModel(id, xyz, tAct, tOn);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
+     */
+    @Override
+    protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
+    {
+        return new SimpleFluorophoreSequenceModel(id, xyz, tAct, tOn);
+    }
 }

@@ -32,17 +32,17 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class FramePeakResultComparator implements Comparator<PeakResult>
 {
-	/** An instance of the comparator */
-	public static final FramePeakResultComparator INSTANCE = new FramePeakResultComparator();
+    /** An instance of the comparator */
+    public static final FramePeakResultComparator INSTANCE = new FramePeakResultComparator();
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(PeakResult o1, PeakResult o2)
-	{
-		return Integer.compare(o1.getFrame(), o2.getFrame());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(PeakResult o1, PeakResult o2)
+    {
+        return Integer.compare(o1.getFrame(), o2.getFrame());
+    }
 }

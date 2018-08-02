@@ -33,87 +33,87 @@ import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
  */
 public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implements MLEFunctionSolver
 {
-	/** The log-likelihood ratio. */
-	protected double llr = Double.NaN;
+    /** The log-likelihood ratio. */
+    protected double llr = Double.NaN;
 
-	/**
-	 * Default constructor.
-	 *
-	 * @param f
-	 *            the function
-	 * @throws NullPointerException
-	 *             if the function is null
-	 */
-	public MLEBaseFunctionSolver(GradientFunction f)
-	{
-		super(FunctionSolverType.MLE, f);
-	}
+    /**
+     * Default constructor.
+     *
+     * @param f
+     *            the function
+     * @throws NullPointerException
+     *             if the function is null
+     */
+    public MLEBaseFunctionSolver(GradientFunction f)
+    {
+        super(FunctionSolverType.MLE, f);
+    }
 
-	@Override
-	protected void preProcess()
-	{
-		llr = Double.NaN;
-	}
+    @Override
+    protected void preProcess()
+    {
+        llr = Double.NaN;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
-	 */
-	@Override
-	public double getLogLikelihood()
-	{
-		return value;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
+     */
+    @Override
+    public double getLogLikelihood()
+    {
+        return value;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
-	 */
-	@Override
-	public double getLogLikelihoodRatio()
-	{
-		if (Double.isNaN(llr) && lastY != null)
-		{
-			// From https://en.wikipedia.org/wiki/Likelihood-ratio_test#Use:
-			// LLR = 2 * [ ln(likelihood for alternative model) - ln(likelihood for null model)]
-			// The model with more parameters (here alternative) will always fit at least as well—
-			// i.e., have the same or greater log-likelihood—than the model with fewer parameters
-			// (here null)
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
+     */
+    @Override
+    public double getLogLikelihoodRatio()
+    {
+        if (Double.isNaN(llr) && lastY != null)
+        {
+            // From https://en.wikipedia.org/wiki/Likelihood-ratio_test#Use:
+            // LLR = 2 * [ ln(likelihood for alternative model) - ln(likelihood for null model)]
+            // The model with more parameters (here alternative) will always fit at least as well—
+            // i.e., have the same or greater log-likelihood—than the model with fewer parameters
+            // (here null)
 
-			final double llAlternative = computeObservedLogLikelihood(lastY, lastA);
-			final double llNull = getLogLikelihood();
+            final double llAlternative = computeObservedLogLikelihood(lastY, lastA);
+            final double llNull = getLogLikelihood();
 
-			// The alternative should always fit better (higher value) than the null model
-			if (llAlternative < llNull)
-				llr = 0;
-			else
-				llr = 2 * (llAlternative - llNull);
-		}
-		return llr;
-	}
+            // The alternative should always fit better (higher value) than the null model
+            if (llAlternative < llNull)
+                llr = 0;
+            else
+                llr = 2 * (llAlternative - llNull);
+        }
+        return llr;
+    }
 
-	/**
-	 * Compute the observed log likelihood (i.e. the log-likelihood with y as the function value).
-	 *
-	 * @param y
-	 *            the y
-	 * @param a
-	 *            the a
-	 * @return the observed log likelihood
-	 */
-	protected abstract double computeObservedLogLikelihood(double[] y, double[] a);
+    /**
+     * Compute the observed log likelihood (i.e. the log-likelihood with y as the function value).
+     *
+     * @param y
+     *            the y
+     * @param a
+     *            the a
+     * @return the observed log likelihood
+     */
+    protected abstract double computeObservedLogLikelihood(double[] y, double[] a);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getQ()
-	 */
-	@Override
-	public double getQ()
-	{
-		return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),
-				getNumberOfFittedPoints() - getNumberOfFittedParameters());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getQ()
+     */
+    @Override
+    public double getQ()
+    {
+        return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),
+                getNumberOfFittedPoints() - getNumberOfFittedParameters());
+    }
 }

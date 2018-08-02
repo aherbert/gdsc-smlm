@@ -36,250 +36,250 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 {
-	@XStreamAsAttribute
-	private final double precision;
-	@XStreamOmitField
-	private float variance;
+    @XStreamAsAttribute
+    private final double precision;
+    @XStreamOmitField
+    private float variance;
 
-	/**
-	 * Instantiates a new precision CRLB filter.
-	 *
-	 * @param precision
-	 *            the precision
-	 */
-	public PrecisionCRLBFilter(double precision)
-	{
-		this.precision = Math.max(0, precision);
-	}
+    /**
+     * Instantiates a new precision CRLB filter.
+     *
+     * @param precision
+     *            the precision
+     */
+    public PrecisionCRLBFilter(double precision)
+    {
+        this.precision = Math.max(0, precision);
+    }
 
-	@Override
-	public void setup(MemoryPeakResults peakResults)
-	{
-		// Add the 2-fold scale factor here:
-		// (varX + varY)/2 < precision^2
-		// (varX + varY) < precision^2 * 2
-		variance = Filter.getUpperSquaredLimit(precision) * 2f;
-	}
+    @Override
+    public void setup(MemoryPeakResults peakResults)
+    {
+        // Add the 2-fold scale factor here:
+        // (varX + varY)/2 < precision^2
+        // (varX + varY) < precision^2 * 2
+        variance = Filter.getUpperSquaredLimit(precision) * 2f;
+    }
 
-	@Override
-	public boolean accept(PeakResult peak)
-	{
-		// Use the estimated parameter deviations for the peak
-		if (peak.hasParameterDeviations())
-		{
-			final float vx = peak.getParameterDeviation(PeakResult.X);
-			final float vy = peak.getParameterDeviation(PeakResult.Y);
-			return (vx * vx + vy * vy) <= variance;
-		}
-		return true;
-	}
+    @Override
+    public boolean accept(PeakResult peak)
+    {
+        // Use the estimated parameter deviations for the peak
+        if (peak.hasParameterDeviations())
+        {
+            final float vx = peak.getParameterDeviation(PeakResult.X);
+            final float vy = peak.getParameterDeviation(PeakResult.Y);
+            return (vx * vx + vy * vy) <= variance;
+        }
+        return true;
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return V_LOCATION_VARIANCE_CRLB;
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return V_LOCATION_VARIANCE_CRLB;
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		if (peak.getLocationVarianceCRLB() > variance)
-			return V_LOCATION_VARIANCE_CRLB;
-		return 0;
-	}
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        if (peak.getLocationVarianceCRLB() > variance)
+            return V_LOCATION_VARIANCE_CRLB;
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-	 */
-	@Override
-	public String getDescription()
-	{
-		return "Filter results using an upper precision threshold (uses fitted parameter variance).";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
+     */
+    @Override
+    public String getDescription()
+    {
+        return "Filter results using an upper precision threshold (uses fitted parameter variance).";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#requiresParameterDeviations()
-	 */
-	@Override
-	public boolean requiresParameterDeviations()
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#requiresParameterDeviations()
+     */
+    @Override
+    public boolean requiresParameterDeviations()
+    {
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-	 */
-	@Override
-	public int getNumberOfParameters()
-	{
-		return 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
+     */
+    @Override
+    public int getNumberOfParameters()
+    {
+        return 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-	 */
-	@Override
-	protected double getParameterValueInternal(int index)
-	{
-		return precision;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
+     */
+    @Override
+    protected double getParameterValueInternal(int index)
+    {
+        return precision;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-	 */
-	@Override
-	public double getParameterIncrement(int index)
-	{
-		checkIndex(index);
-		return PrecisionFilter.DEFAULT_INCREMENT;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+     */
+    @Override
+    public double getParameterIncrement(int index)
+    {
+        checkIndex(index);
+        return PrecisionFilter.DEFAULT_INCREMENT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-	 */
-	@Override
-	public ParameterType getParameterType(int index)
-	{
-		checkIndex(index);
-		return ParameterType.PRECISION_CRLB;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
+     */
+    @Override
+    public ParameterType getParameterType(int index)
+    {
+        checkIndex(index);
+        return ParameterType.PRECISION_CRLB;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-	 */
-	@Override
-	public Filter adjustParameter(int index, double delta)
-	{
-		checkIndex(index);
-		return new PrecisionCRLBFilter(updateParameter(precision, delta, PrecisionFilter.DEFAULT_RANGE));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
+     */
+    @Override
+    public Filter adjustParameter(int index, double delta)
+    {
+        checkIndex(index);
+        return new PrecisionCRLBFilter(updateParameter(precision, delta, PrecisionFilter.DEFAULT_RANGE));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-	 */
-	@Override
-	public Filter create(double... parameters)
-	{
-		return new PrecisionCRLBFilter(parameters[0]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
+     */
+    @Override
+    public Filter create(double... parameters)
+    {
+        return new PrecisionCRLBFilter(parameters[0]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-	 */
-	@Override
-	public void weakestParameters(double[] parameters)
-	{
-		setMax(parameters, 0, precision);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+     */
+    @Override
+    public void weakestParameters(double[] parameters)
+    {
+        setMax(parameters, 0, precision);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
-	 */
-	@Override
-	public int lowerBoundOrientation(int index)
-	{
-		return 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+     */
+    @Override
+    public int lowerBoundOrientation(int index)
+    {
+        return 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-	 */
-	@Override
-	public double[] upperLimit()
-	{
-		return new double[] { PrecisionFilter.UPPER_LIMIT };
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
+     */
+    @Override
+    public double[] upperLimit()
+    {
+        return new double[] { PrecisionFilter.UPPER_LIMIT };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-	 */
-	@Override
-	public double[] mutationStepRange()
-	{
-		return new double[] { PrecisionFilter.DEFAULT_RANGE };
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
+     */
+    @Override
+    public double[] mutationStepRange()
+    {
+        return new double[] { PrecisionFilter.DEFAULT_RANGE };
+    }
 
-	@Override
-	public double getSignal()
-	{
-		return 0;
-	}
+    @Override
+    public double getSignal()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getSNR()
-	{
-		return 0;
-	}
+    @Override
+    public double getSNR()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMinWidth()
-	{
-		return 0;
-	}
+    @Override
+    public double getMinWidth()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMaxWidth()
-	{
-		return 0;
-	}
+    @Override
+    public double getMaxWidth()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getShift()
-	{
-		return 0;
-	}
+    @Override
+    public double getShift()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getEShift()
-	{
-		return 0;
-	}
+    @Override
+    public double getEShift()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getPrecision()
-	{
-		return precision;
-	}
+    @Override
+    public double getPrecision()
+    {
+        return precision;
+    }
 
-	@Override
-	public PrecisionType getPrecisionType()
-	{
-		return PrecisionType.CRLB;
-	}
+    @Override
+    public PrecisionType getPrecisionType()
+    {
+        return PrecisionType.CRLB;
+    }
 
-	@Override
-	public double getMinZ()
-	{
-		return 0;
-	}
+    @Override
+    public double getMinZ()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMaxZ()
-	{
-		return 0;
-	}
+    @Override
+    public double getMaxZ()
+    {
+        return 0;
+    }
 }

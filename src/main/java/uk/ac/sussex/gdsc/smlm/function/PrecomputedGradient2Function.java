@@ -28,48 +28,48 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class PrecomputedGradient2Function extends PrecomputedGradient1Function implements Gradient2Function
 {
-	/** The second order gradient */
-	protected final double[][] g2;
+    /** The second order gradient */
+    protected final double[][] g2;
 
-	/**
-	 * Instantiates a new pre-computed value function.
-	 *
-	 * @param values
-	 *            the pre-computed values
-	 * @param g1
-	 *            the first order gradient
-	 * @param g2
-	 *            the second order gradient
-	 * @throws IllegalArgumentException
-	 *             if the values length does not match the function size
-	 */
-	public PrecomputedGradient2Function(double[] values, double[][] g1, double[][] g2)
-	{
-		super(values, g1);
-		checkGradient(g2);
-		this.g2 = g2;
-	}
+    /**
+     * Instantiates a new pre-computed value function.
+     *
+     * @param values
+     *            the pre-computed values
+     * @param g1
+     *            the first order gradient
+     * @param g2
+     *            the second order gradient
+     * @throws IllegalArgumentException
+     *             if the values length does not match the function size
+     */
+    public PrecomputedGradient2Function(double[] values, double[][] g1, double[][] g2)
+    {
+        super(values, g1);
+        checkGradient(g2);
+        this.g2 = g2;
+    }
 
-	/**
-	 * Gets a reference to the first order gradients
-	 *
-	 * @return the first order gradients
-	 */
-	public double[][] getGradient2Ref()
-	{
-		return g2;
-	}
+    /**
+     * Gets a reference to the first order gradients
+     *
+     * @return the first order gradients
+     */
+    public double[][] getGradient2Ref()
+    {
+        return g2;
+    }
 
-	@Override
-	public void initialise2(double[] a)
-	{
-		// Ignore
-	}
+    @Override
+    public void initialise2(double[] a)
+    {
+        // Ignore
+    }
 
-	@Override
-	public void forEach(Gradient2Procedure procedure)
-	{
-		for (int i = 0; i < values.length; i++)
-			procedure.execute(values[i], g1[i], g2[i]);
-	}
+    @Override
+    public void forEach(Gradient2Procedure procedure)
+    {
+        for (int i = 0; i < values.length; i++)
+            procedure.execute(values[i], g1[i], g2[i]);
+    }
 }

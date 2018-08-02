@@ -32,61 +32,61 @@ import uk.ac.sussex.gdsc.smlm.function.Bessel;
  */
 public class AiryPattern
 {
-	/**
-	 * Convert Airy radius to Gaussian approximation
-	 * <p>
-	 * See Abraham, et al (2009) Opt Express 17: 23352.
-	 */
-	public static final double FACTOR = 1.323;
+    /**
+     * Convert Airy radius to Gaussian approximation
+     * <p>
+     * See Abraham, et al (2009) Opt Express 17: 23352.
+     */
+    public static final double FACTOR = 1.323;
 
-	/**
-	 * Calculate the intensity of the AiryPattern at distance x from the centre.
-	 *
-	 * @param x
-	 *            the x
-	 * @return The intensity
-	 */
-	public static double intensity(final double x)
-	{
-		if (x == 0)
-			return 1;
-		// I(x) = I0 * ( 2*J1(x) / x )^2
-		// I0 is the maximum intensity of the pattern at the centre
-		// Assuming I0 = 1:
-		final double y = Bessel.J1(x) / x;
-		return 4.0 * y * y;
-	}
+    /**
+     * Calculate the intensity of the AiryPattern at distance x from the centre.
+     *
+     * @param x
+     *            the x
+     * @return The intensity
+     */
+    public static double intensity(final double x)
+    {
+        if (x == 0)
+            return 1;
+        // I(x) = I0 * ( 2*J1(x) / x )^2
+        // I0 is the maximum intensity of the pattern at the centre
+        // Assuming I0 = 1:
+        final double y = Bessel.J1(x) / x;
+        return 4.0 * y * y;
+    }
 
-	/**
-	 * Calculate the intensity of the AiryPattern at distance x from the centre using a Gaussian approximation.
-	 *
-	 * @param x
-	 *            the x
-	 * @return The intensity
-	 */
-	public static double intensityGaussian(double x)
-	{
-		if (x == 0)
-			return 1;
-		x /= FACTOR;
-		return FastMath.exp(-0.5 * (x * x));
-	}
+    /**
+     * Calculate the intensity of the AiryPattern at distance x from the centre using a Gaussian approximation.
+     *
+     * @param x
+     *            the x
+     * @return The intensity
+     */
+    public static double intensityGaussian(double x)
+    {
+        if (x == 0)
+            return 1;
+        x /= FACTOR;
+        return FastMath.exp(-0.5 * (x * x));
+    }
 
-	/**
-	 * Calculate the total power of the AiryPattern at distance x from the centre
-	 * <p>
-	 * Appears to be numerically unstable at {@code x<<1}.
-	 *
-	 * @param x
-	 *            the x
-	 * @return The total power
-	 */
-	public static double power(final double x)
-	{
-		if (x == 0)
-			return 0;
-		final double j0 = Bessel.J0(x);
-		final double j1 = Bessel.J1(x);
-		return 1.0 - j0 * j0 - j1 * j1;
-	}
+    /**
+     * Calculate the total power of the AiryPattern at distance x from the centre
+     * <p>
+     * Appears to be numerically unstable at {@code x<<1}.
+     *
+     * @param x
+     *            the x
+     * @return The total power
+     */
+    public static double power(final double x)
+    {
+        if (x == 0)
+            return 0;
+        final double j0 = Bessel.J0(x);
+        final double j1 = Bessel.J1(x);
+        return 1.0 - j0 * j0 - j1 * j1;
+    }
 }

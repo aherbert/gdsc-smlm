@@ -28,45 +28,46 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterXYWidthComponent extends MultiFilterComponent
 {
-	private final float lowerSigmaThreshold, upperSigmaThreshold;
+    private final float lowerSigmaThreshold, upperSigmaThreshold;
 
-	/**
-	 * Instantiates a new multi filter XY width component.
-	 *
-	 * @param minWidth
-	 *            the min width
-	 * @param maxWidth
-	 *            the max width
-	 */
-	public MultiFilterXYWidthComponent(double minWidth, double maxWidth)
-	{
-		if (minWidth > 0 && minWidth < 1)
-			lowerSigmaThreshold = (float) (minWidth * minWidth);
-		else
-			lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
-	}
+    /**
+     * Instantiates a new multi filter XY width component.
+     *
+     * @param minWidth
+     *            the min width
+     * @param maxWidth
+     *            the max width
+     */
+    public MultiFilterXYWidthComponent(double minWidth, double maxWidth)
+    {
+        if (minWidth > 0 && minWidth < 1)
+            lowerSigmaThreshold = (float) (minWidth * minWidth);
+        else
+            lowerSigmaThreshold = 0;
+        upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
-		return (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
+        return (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;
+    }
 }

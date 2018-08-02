@@ -28,42 +28,43 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterShiftComponent extends MultiFilterComponent
 {
-	private final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+    private final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 
-	private final float offset;
+    private final float offset;
 
-	/**
-	 * Instantiates a new multi filter shift component.
-	 *
-	 * @param shift
-	 *            the shift
-	 */
-	public MultiFilterShiftComponent(double shift)
-	{
-		this.offset = Filter.getUpperSquaredLimit(shift);
-	}
+    /**
+     * Instantiates a new multi filter shift component.
+     *
+     * @param shift
+     *            the shift
+     */
+    public MultiFilterShiftComponent(double shift)
+    {
+        this.offset = Filter.getUpperSquaredLimit(shift);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		if (peak.getXRelativeShift2() > offset)
-			return true;
-		return (peak.getYRelativeShift2() > offset);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        if (peak.getXRelativeShift2() > offset)
+            return true;
+        return (peak.getYRelativeShift2() > offset);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return type;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return type;
+    }
 }

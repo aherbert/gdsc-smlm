@@ -33,20 +33,20 @@ import org.apache.commons.math3.optim.SimplePointChecker;
  */
 public class PositionChecker extends SimplePointChecker<PointValuePair> implements OptimizationData
 {
-	/**
-	 * Build an instance with specified thresholds.
-	 *
-	 * In order to perform only relative checks, the absolute tolerance
-	 * must be set to a negative value. In order to perform only absolute
-	 * checks, the relative tolerance must be set to a negative value.
-	 *
-	 * @param relative
-	 *            relative tolerance threshold
-	 * @param absolute
-	 *            absolute tolerance threshold
-	 */
-	public PositionChecker(double relative, double absolute)
-	{
-		super(relative, absolute);
-	}
+    /**
+     * Build an instance with specified thresholds.
+     *
+     * In order to perform only relative checks, the absolute tolerance
+     * must be set to a negative value. In order to perform only absolute
+     * checks, the relative tolerance must be set to a negative value.
+     *
+     * @param relative
+     *            relative tolerance threshold
+     * @param absolute
+     *            absolute tolerance threshold
+     */
+    public PositionChecker(double relative, double absolute)
+    {
+        super(relative, absolute);
+    }
 }

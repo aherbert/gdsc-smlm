@@ -30,171 +30,171 @@ import uk.ac.sussex.gdsc.core.utils.BooleanRollingArray;
  */
 public class RollingWindowFailCounter extends BaseFailCounter
 {
-	/** The rolling array stores true for a failure. */
-	private final BooleanRollingArray rollingArray;
+    /** The rolling array stores true for a failure. */
+    private final BooleanRollingArray rollingArray;
 
-	/** The number of allowed failures. */
-	private final int allowedFailures;
+    /** The number of allowed failures. */
+    private final int allowedFailures;
 
-	/**
-	 * Instantiates a new rolling window fail counter.
-	 *
-	 * @param allowedFailures
-	 *            the number of allowed failures
-	 * @param window
-	 *            the window size
-	 */
-	private RollingWindowFailCounter(int allowedFailures, int window)
-	{
-		this.allowedFailures = allowedFailures;
-		rollingArray = new BooleanRollingArray(window);
-	}
+    /**
+     * Instantiates a new rolling window fail counter.
+     *
+     * @param allowedFailures
+     *            the number of allowed failures
+     * @param window
+     *            the window size
+     */
+    private RollingWindowFailCounter(int allowedFailures, int window)
+    {
+        this.allowedFailures = allowedFailures;
+        rollingArray = new BooleanRollingArray(window);
+    }
 
-	@Override
-	protected String generateDescription()
-	{
-		return "rollingFailures=" + allowedFailures + "/" + getWindow();
-	}
+    @Override
+    protected String generateDescription()
+    {
+        return "rollingFailures=" + allowedFailures + "/" + getWindow();
+    }
 
-	/**
-	 * Instantiates a new rolling window fail counter.
-	 *
-	 * @param allowedFailures
-	 *            the number of allowed failures
-	 * @param window
-	 *            the window size
-	 * @return the rolling window fail counter
-	 * @throws IllegalArgumentException
-	 *             If the window is not strictly positive, or the window is smaller that the allowed failures
-	 */
-	public static RollingWindowFailCounter create(int allowedFailures, int window) throws IllegalArgumentException
-	{
-		if (window < 1)
-			throw new IllegalArgumentException("Window must be strictly positive");
-		if (window < allowedFailures)
-			throw new IllegalArgumentException("Window must be larger than the allowed failures");
-		return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
-	}
+    /**
+     * Instantiates a new rolling window fail counter.
+     *
+     * @param allowedFailures
+     *            the number of allowed failures
+     * @param window
+     *            the window size
+     * @return the rolling window fail counter
+     * @throws IllegalArgumentException
+     *             If the window is not strictly positive, or the window is smaller that the allowed failures
+     */
+    public static RollingWindowFailCounter create(int allowedFailures, int window) throws IllegalArgumentException
+    {
+        if (window < 1)
+            throw new IllegalArgumentException("Window must be strictly positive");
+        if (window < allowedFailures)
+            throw new IllegalArgumentException("Window must be larger than the allowed failures");
+        return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-	 */
-	@Override
-	public void pass()
-	{
-		rollingArray.add(false);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
+     */
+    @Override
+    public void pass()
+    {
+        rollingArray.add(false);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-	 */
-	@Override
-	public void pass(int n)
-	{
-		if (n < 0)
-			throw new IllegalArgumentException("Number of passes must be positive");
-		rollingArray.add(false, n);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
+     */
+    @Override
+    public void pass(int n)
+    {
+        if (n < 0)
+            throw new IllegalArgumentException("Number of passes must be positive");
+        rollingArray.add(false, n);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-	 */
-	@Override
-	public void fail()
-	{
-		rollingArray.add(true);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
+     */
+    @Override
+    public void fail()
+    {
+        rollingArray.add(true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-	 */
-	@Override
-	public void fail(int n)
-	{
-		if (n < 0)
-			throw new IllegalArgumentException("Number of fails must be positive");
-		rollingArray.add(true, n);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
+     */
+    @Override
+    public void fail(int n)
+    {
+        if (n < 0)
+            throw new IllegalArgumentException("Number of fails must be positive");
+        rollingArray.add(true, n);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-	 */
-	@Override
-	public boolean isOK()
-	{
-		return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
+     */
+    @Override
+    public boolean isOK()
+    {
+        return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-	 */
-	@Override
-	public FailCounter newCounter()
-	{
-		return new RollingWindowFailCounter(allowedFailures, getWindow());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
+     */
+    @Override
+    public FailCounter newCounter()
+    {
+        return new RollingWindowFailCounter(allowedFailures, getWindow());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-	 */
-	@Override
-	public void reset()
-	{
-		rollingArray.clear();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
+     */
+    @Override
+    public void reset()
+    {
+        rollingArray.clear();
+    }
 
-	/**
-	 * Gets the window size.
-	 *
-	 * @return the window size
-	 */
-	public int getWindow()
-	{
-		return rollingArray.getCapacity();
-	}
+    /**
+     * Gets the window size.
+     *
+     * @return the window size
+     */
+    public int getWindow()
+    {
+        return rollingArray.getCapacity();
+    }
 
-	/**
-	 * Gets the fail count within the current window.
-	 *
-	 * @return the fail count
-	 */
-	public int getFailCount()
-	{
-		return rollingArray.getTrueCount();
-	}
+    /**
+     * Gets the fail count within the current window.
+     *
+     * @return the fail count
+     */
+    public int getFailCount()
+    {
+        return rollingArray.getTrueCount();
+    }
 
-	/**
-	 * Gets the current window size. This may be smaller than the window size if not enough pass/fail events have been
-	 * registered.
-	 *
-	 * @return the current window size
-	 */
-	public int getCurrentWindowSize()
-	{
-		return rollingArray.getCount();
-	}
+    /**
+     * Gets the current window size. This may be smaller than the window size if not enough pass/fail events have been
+     * registered.
+     *
+     * @return the current window size
+     */
+    public int getCurrentWindowSize()
+    {
+        return rollingArray.getCount();
+    }
 
-	/**
-	 * Gets the number of allowed failures.
-	 *
-	 * @return the number of allowed failures.
-	 */
-	public int getAllowedFailures()
-	{
-		return allowedFailures;
-	}
+    /**
+     * Gets the number of allowed failures.
+     *
+     * @return the number of allowed failures.
+     */
+    public int getAllowedFailures()
+    {
+        return allowedFailures;
+    }
 }

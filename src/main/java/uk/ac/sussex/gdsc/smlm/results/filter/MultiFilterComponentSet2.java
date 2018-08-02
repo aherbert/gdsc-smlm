@@ -28,40 +28,40 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSet2 extends MultiFilterComponentSet
 {
-	private MultiFilterComponent component0;
-	private final MultiFilterComponent component1;
+    private MultiFilterComponent component0;
+    private final MultiFilterComponent component1;
 
-	/**
-	 * Instantiates a new multi filter component set for 2 components.
-	 *
-	 * @param components
-	 *            the components
-	 */
-public MultiFilterComponentSet2(MultiFilterComponent[] components)
-	{
-		this.component0 = components[0];
-		this.component1 = components[1];
-	}
+    /**
+     * Instantiates a new multi filter component set for 2 components.
+     *
+     * @param components
+     *            the components
+     */
+    public MultiFilterComponentSet2(MultiFilterComponent[] components)
+    {
+        this.component0 = components[0];
+        this.component1 = components[1];
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return component0.getType() | component1.getType();
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return component0.getType() | component1.getType();
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		//@formatter:off
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        //@formatter:off
 		if (component0.fail(peak)) return component0.getType();
 		if (component1.fail(peak)) return component1.getType();
 		//@formatter:on
-		return 0;
-	}
+        return 0;
+    }
 
-	@Override
-	void replace0(MultiFilterComponent c)
-	{
-		component0 = c;
-	}
+    @Override
+    void replace0(MultiFilterComponent c)
+    {
+        component0 = c;
+    }
 }

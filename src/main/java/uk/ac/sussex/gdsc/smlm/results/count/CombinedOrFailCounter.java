@@ -28,66 +28,66 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  */
 public class CombinedOrFailCounter extends CombinedFailCounter
 {
-	/**
-	 * Instantiates a new combined or fail counter.
-	 *
-	 * @param c1
-	 *            the first counter
-	 * @param c2
-	 *            the second counter
-	 */
-	public CombinedOrFailCounter(FailCounter c1, FailCounter c2)
-	{
-		super(c1, c2);
-	}
+    /**
+     * Instantiates a new combined or fail counter.
+     *
+     * @param c1
+     *            the first counter
+     * @param c2
+     *            the second counter
+     */
+    public CombinedOrFailCounter(FailCounter c1, FailCounter c2)
+    {
+        super(c1, c2);
+    }
 
-	@Override
-	protected String getOperator()
-	{
-		return "&&";
-	}
+    @Override
+    protected String getOperator()
+    {
+        return "&&";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-	 */
-	@Override
-	public boolean isOK()
-	{
-		return c1.isOK() || c2.isOK();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
+     */
+    @Override
+    public boolean isOK()
+    {
+        return c1.isOK() || c2.isOK();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-	 */
-	@Override
-	public FailCounter newCounter()
-	{
-		return new CombinedOrFailCounter(c1.newCounter(), c2.newCounter());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
+     */
+    @Override
+    public FailCounter newCounter()
+    {
+        return new CombinedOrFailCounter(c1.newCounter(), c2.newCounter());
+    }
 
-	/**
-	 * Join the fail counters.
-	 * <p>
-	 * If both are not null then return a combined fail counter.
-	 * <p>
-	 * If either are null then a single counter will be returned.
-	 * <p>
-	 * If both are null then null will be returned.
-	 *
-	 * @param c1
-	 *            the first counter
-	 * @param c2
-	 *            the second counter
-	 * @return the fail counter
-	 */
-	public static FailCounter join(FailCounter c1, FailCounter c2)
-	{
-		if (c1 != null)
-			return (c2 != null) ? new CombinedOrFailCounter(c1, c2) : c1;
-		return c2;
-	}
+    /**
+     * Join the fail counters.
+     * <p>
+     * If both are not null then return a combined fail counter.
+     * <p>
+     * If either are null then a single counter will be returned.
+     * <p>
+     * If both are null then null will be returned.
+     *
+     * @param c1
+     *            the first counter
+     * @param c2
+     *            the second counter
+     * @return the fail counter
+     */
+    public static FailCounter join(FailCounter c1, FailCounter c2)
+    {
+        if (c1 != null)
+            return (c2 != null) ? new CombinedOrFailCounter(c1, c2) : c1;
+        return c2;
+    }
 }

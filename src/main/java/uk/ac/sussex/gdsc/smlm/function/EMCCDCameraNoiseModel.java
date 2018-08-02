@@ -31,49 +31,49 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class EMCCDCameraNoiseModel extends CameraNoiseModel
 {
-	/**
-	 * Instantiates a new EM-CCD camera noise model.
-	 *
-	 * @param readNoise
-	 *            the read noise
-	 */
-	public EMCCDCameraNoiseModel(final double readNoise)
-	{
-		super(readNoise);
-	}
+    /**
+     * Instantiates a new EM-CCD camera noise model.
+     *
+     * @param readNoise
+     *            the read noise
+     */
+    public EMCCDCameraNoiseModel(final double readNoise)
+    {
+        super(readNoise);
+    }
 
-	/**
-	 * Instantiates a new EM-CCD camera noise model.
-	 *
-	 * @param readNoise
-	 *            the read noise
-	 * @param bias
-	 *            the bias
-	 */
-	public EMCCDCameraNoiseModel(final double readNoise, final double bias)
-	{
-		super(readNoise, bias);
-	}
+    /**
+     * Instantiates a new EM-CCD camera noise model.
+     *
+     * @param readNoise
+     *            the read noise
+     * @param bias
+     *            the bias
+     */
+    public EMCCDCameraNoiseModel(final double readNoise, final double bias)
+    {
+        super(readNoise, bias);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.function.CameraNoiseModel#variance(double)
-	 */
-	@Override
-	public double variance(final double value)
-	{
-		return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.function.CameraNoiseModel#variance(double)
+     */
+    @Override
+    public double variance(final double value)
+    {
+        return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.function.CameraNoiseModel#isEmCCD()
-	 */
-	@Override
-	public boolean isEmCCD()
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.function.CameraNoiseModel#isEmCCD()
+     */
+    @Override
+    public boolean isEmCCD()
+    {
+        return true;
+    }
 }

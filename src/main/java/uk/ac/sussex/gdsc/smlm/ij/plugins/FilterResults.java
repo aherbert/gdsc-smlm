@@ -53,353 +53,353 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
  */
 public class FilterResults implements PlugIn
 {
-	private static final String TITLE = "Filter Results";
-	private static String inputOption = "";
+    private static final String TITLE = "Filter Results";
+    private static String inputOption = "";
 
-	private MemoryPeakResults results;
+    private MemoryPeakResults results;
 
-	private GUIFilterSettings.Builder filterSettings = GUIProtosHelper.defaultGUIFilterSettings.toBuilder();
+    private GUIFilterSettings.Builder filterSettings = GUIProtosHelper.defaultGUIFilterSettings.toBuilder();
 
-	// Used to pass data from analyseResults() to checkLimits()
-	private float minDrift = Float.MAX_VALUE;
-	private float maxDrift = 0;
-	private float minSignal = Float.MAX_VALUE;
-	private float maxSignal = 0;
-	private float minSNR = Float.MAX_VALUE;
-	private float maxSNR = 0;
-	private double minPrecision = Float.MAX_VALUE;
-	private double maxPrecision = 0;
-	private double averageWidth = 0;
-	private float minWidth = Float.MAX_VALUE;
-	private float maxWidth = 0;
+    // Used to pass data from analyseResults() to checkLimits()
+    private float minDrift = Float.MAX_VALUE;
+    private float maxDrift = 0;
+    private float minSignal = Float.MAX_VALUE;
+    private float maxSignal = 0;
+    private float minSNR = Float.MAX_VALUE;
+    private float maxSNR = 0;
+    private double minPrecision = Float.MAX_VALUE;
+    private double maxPrecision = 0;
+    private double averageWidth = 0;
+    private float minWidth = Float.MAX_VALUE;
+    private float maxWidth = 0;
 
-	private StandardResultProcedure sp;
-	private PrecisionResultProcedure pp;
-	private WidthResultProcedure wp;
+    private StandardResultProcedure sp;
+    private PrecisionResultProcedure pp;
+    private WidthResultProcedure wp;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@Override
-	public void run(String arg)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @Override
+    public void run(String arg)
+    {
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (MemoryPeakResults.isMemoryEmpty())
-		{
-			IJ.error(TITLE, "There are no fitting results in memory");
-			return;
-		}
+        if (MemoryPeakResults.isMemoryEmpty())
+        {
+            IJ.error(TITLE, "There are no fitting results in memory");
+            return;
+        }
 
-		// Show a dialog allowing the results set to be filtered
-		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addMessage("Select a dataset to filter");
-		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
-		inputOption = ResultsManager.getInputSource(gd);
-		results = ResultsManager.loadInputResults(inputOption, false, null, null);
-		if (results == null || results.size() == 0)
-		{
-			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
-			return;
-		}
+        // Show a dialog allowing the results set to be filtered
+        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addMessage("Select a dataset to filter");
+        ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+        gd.showDialog();
+        if (gd.wasCanceled())
+            return;
+        inputOption = ResultsManager.getInputSource(gd);
+        results = ResultsManager.loadInputResults(inputOption, false, null, null);
+        if (results == null || results.size() == 0)
+        {
+            IJ.error(TITLE, "No results could be loaded");
+            IJ.showStatus("");
+            return;
+        }
 
-		if (!analyseResults())
-			return;
+        if (!analyseResults())
+            return;
 
-		if (!showDialog())
-			return;
+        if (!showDialog())
+            return;
 
-		filterResults();
-	}
+        filterResults();
+    }
 
-	/**
-	 * Analyse the results and determine the range for each filter
-	 */
-	private boolean analyseResults()
-	{
-		IJ.showStatus("Analysing results ...");
+    /**
+     * Analyse the results and determine the range for each filter
+     */
+    private boolean analyseResults()
+    {
+        IJ.showStatus("Analysing results ...");
 
-		final ArrayList<String> error = new ArrayList<>();
+        final ArrayList<String> error = new ArrayList<>();
 
-		try
-		{
-			wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
-			wp.getW();
-			final float[] limits = Maths.limits(wp.wx);
-			maxWidth = limits[1];
-			minWidth = limits[0];
-			averageWidth = Maths.sum(wp.wx) / wp.size();
-		}
-		catch (final DataException e)
-		{
-			error.add(e.getMessage());
-			wp = null;
-			maxWidth = minWidth = 0;
-		}
+        try
+        {
+            wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+            wp.getW();
+            final float[] limits = Maths.limits(wp.wx);
+            maxWidth = limits[1];
+            minWidth = limits[0];
+            averageWidth = Maths.sum(wp.wx) / wp.size();
+        }
+        catch (final DataException e)
+        {
+            error.add(e.getMessage());
+            wp = null;
+            maxWidth = minWidth = 0;
+        }
 
-		try
-		{
-			pp = new PrecisionResultProcedure(results);
-			pp.getPrecision();
+        try
+        {
+            pp = new PrecisionResultProcedure(results);
+            pp.getPrecision();
 
-			final double[] limits = Maths.limits(pp.precision);
-			maxPrecision = limits[1];
-			minPrecision = limits[0];
-		}
-		catch (final DataException e)
-		{
-			error.add(e.getMessage());
-			pp = null;
-			maxPrecision = minPrecision = 0;
-		}
+            final double[] limits = Maths.limits(pp.precision);
+            maxPrecision = limits[1];
+            minPrecision = limits[0];
+        }
+        catch (final DataException e)
+        {
+            error.add(e.getMessage());
+            pp = null;
+            maxPrecision = minPrecision = 0;
+        }
 
-		try
-		{
-			sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-			sp.getXYR();
+        try
+        {
+            sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+            sp.getXYR();
 
-			// Re-use for convenience
-			sp.intensity = new float[sp.x.length];
-			sp.background = new float[sp.x.length];
-			sp.z = new float[sp.x.length];
+            // Re-use for convenience
+            sp.intensity = new float[sp.x.length];
+            sp.background = new float[sp.x.length];
+            sp.z = new float[sp.x.length];
 
-			for (int i = 0; i < sp.size(); i++)
-			{
-				if (i % 64 == 0)
-					IJ.showProgress(i, sp.size());
+            for (int i = 0; i < sp.size(); i++)
+            {
+                if (i % 64 == 0)
+                    IJ.showProgress(i, sp.size());
 
-				final PeakResult result = sp.peakResults[i];
+                final PeakResult result = sp.peakResults[i];
 
-				final float drift = getDrift(result, sp.x[i], sp.y[i]);
-				if (maxDrift < drift)
-					maxDrift = drift;
-				if (minDrift > drift)
-					minDrift = drift;
+                final float drift = getDrift(result, sp.x[i], sp.y[i]);
+                if (maxDrift < drift)
+                    maxDrift = drift;
+                if (minDrift > drift)
+                    minDrift = drift;
 
-				final float signal = result.getIntensity();
-				if (maxSignal < signal)
-					maxSignal = signal;
-				if (minSignal > signal)
-					minSignal = signal;
+                final float signal = result.getIntensity();
+                if (maxSignal < signal)
+                    maxSignal = signal;
+                if (minSignal > signal)
+                    minSignal = signal;
 
-				final float snr = getSnr(result);
-				if (maxSNR < snr)
-					maxSNR = snr;
-				if (minSNR > snr)
-					minSNR = snr;
+                final float snr = getSnr(result);
+                if (maxSNR < snr)
+                    maxSNR = snr;
+                if (minSNR > snr)
+                    minSNR = snr;
 
-				// for convenience
-				sp.z[i] = drift;
-				sp.intensity[i] = signal;
-				sp.background[i] = snr;
-			}
-		}
-		catch (final DataException e)
-		{
-			error.add(e.getMessage());
-			sp = null;
-		}
+                // for convenience
+                sp.z[i] = drift;
+                sp.intensity[i] = signal;
+                sp.background[i] = snr;
+            }
+        }
+        catch (final DataException e)
+        {
+            error.add(e.getMessage());
+            sp = null;
+        }
 
-		if (error.size() == 3 || sp == null)
-		{
-			final StringBuilder sb = new StringBuilder("Unable to analyse the results:\n");
-			for (final String s : error)
-				sb.append(s).append(".\n");
-			IJ.error(TITLE, sb.toString());
-			return false;
-		}
+        if (error.size() == 3 || sp == null)
+        {
+            final StringBuilder sb = new StringBuilder("Unable to analyse the results:\n");
+            for (final String s : error)
+                sb.append(s).append(".\n");
+            IJ.error(TITLE, sb.toString());
+            return false;
+        }
 
-		IJ.showProgress(1);
-		IJ.showStatus("");
-		return true;
-	}
+        IJ.showProgress(1);
+        IJ.showStatus("");
+        return true;
+    }
 
-	private static float getDrift(PeakResult result, float x, float y)
-	{
-		return FastMath.max(Math.abs(result.getOrigX() + 0.5f - x), Math.abs(result.getOrigY() + 0.5f - y));
-	}
+    private static float getDrift(PeakResult result, float x, float y)
+    {
+        return FastMath.max(Math.abs(result.getOrigX() + 0.5f - x), Math.abs(result.getOrigY() + 0.5f - y));
+    }
 
-	private static float getSnr(PeakResult result)
-	{
-		if (result.getNoise() <= 0)
-			return 0;
-		return result.getIntensity() / result.getNoise();
-	}
+    private static float getSnr(PeakResult result)
+    {
+        if (result.getNoise() <= 0)
+            return 0;
+        return result.getIntensity() / result.getNoise();
+    }
 
-	/**
-	 * Check that none of the filter values are outside the limits
-	 */
-	private void checkLimits()
-	{
-		if (filterSettings.getMaxDrift() > maxDrift || filterSettings.getMaxDrift() < minDrift)
-			filterSettings.setMaxDrift(maxDrift);
+    /**
+     * Check that none of the filter values are outside the limits
+     */
+    private void checkLimits()
+    {
+        if (filterSettings.getMaxDrift() > maxDrift || filterSettings.getMaxDrift() < minDrift)
+            filterSettings.setMaxDrift(maxDrift);
 
-		if (filterSettings.getMinSignal() > maxSignal || filterSettings.getMinSignal() < minSignal)
-			filterSettings.setMinSignal(minSignal);
+        if (filterSettings.getMinSignal() > maxSignal || filterSettings.getMinSignal() < minSignal)
+            filterSettings.setMinSignal(minSignal);
 
-		if (filterSettings.getMinSnr() > maxSNR || filterSettings.getMinSnr() < minSNR)
-			filterSettings.setMinSnr(minSNR);
+        if (filterSettings.getMinSnr() > maxSNR || filterSettings.getMinSnr() < minSNR)
+            filterSettings.setMinSnr(minSNR);
 
-		if (filterSettings.getMaxPrecision() > maxPrecision || filterSettings.getMaxPrecision() < minPrecision)
-			filterSettings.setMaxPrecision(maxPrecision);
+        if (filterSettings.getMaxPrecision() > maxPrecision || filterSettings.getMaxPrecision() < minPrecision)
+            filterSettings.setMaxPrecision(maxPrecision);
 
-		if (filterSettings.getMinWidth() > maxWidth || filterSettings.getMinWidth() < minWidth)
-			filterSettings.setMinWidth(minWidth);
+        if (filterSettings.getMinWidth() > maxWidth || filterSettings.getMinWidth() < minWidth)
+            filterSettings.setMinWidth(minWidth);
 
-		if (filterSettings.getMaxWidth() > maxWidth || filterSettings.getMaxWidth() < minWidth)
-			filterSettings.setMaxWidth(maxWidth);
+        if (filterSettings.getMaxWidth() > maxWidth || filterSettings.getMaxWidth() < minWidth)
+            filterSettings.setMaxWidth(maxWidth);
 
-		if (filterSettings.getMinWidth() > filterSettings.getMaxWidth())
-		{
-			final float tmp = filterSettings.getMaxWidth();
-			filterSettings.setMaxWidth(filterSettings.getMinWidth());
-			filterSettings.setMinWidth(tmp);
-		}
-	}
+        if (filterSettings.getMinWidth() > filterSettings.getMaxWidth())
+        {
+            final float tmp = filterSettings.getMaxWidth();
+            filterSettings.setMaxWidth(filterSettings.getMinWidth());
+            filterSettings.setMinWidth(tmp);
+        }
+    }
 
-	/**
-	 * Apply the filters to the data
-	 */
-	private void filterResults()
-	{
-		checkLimits();
+    /**
+     * Apply the filters to the data
+     */
+    private void filterResults()
+    {
+        checkLimits();
 
-		final MemoryPeakResults newResults = new MemoryPeakResults();
-		newResults.copySettings(results);
-		newResults.setName(results.getName() + " Filtered");
+        final MemoryPeakResults newResults = new MemoryPeakResults();
+        newResults.copySettings(results);
+        newResults.setName(results.getName() + " Filtered");
 
-		// Initialise the mask
-		final ByteProcessor mask = getMask(filterSettings.getMaskTitle());
-		MaskDistribution maskFilter = null;
-		final float centreX = results.getBounds().width / 2.0f;
-		final float centreY = results.getBounds().height / 2.0f;
-		if (mask != null)
-		{
-			final double scaleX = (double) results.getBounds().width / mask.getWidth();
-			final double scaleY = (double) results.getBounds().height / mask.getHeight();
-			maskFilter = new MaskDistribution((byte[]) mask.getPixels(), mask.getWidth(), mask.getHeight(), 0, scaleX,
-					scaleY);
-		}
+        // Initialise the mask
+        final ByteProcessor mask = getMask(filterSettings.getMaskTitle());
+        MaskDistribution maskFilter = null;
+        final float centreX = results.getBounds().width / 2.0f;
+        final float centreY = results.getBounds().height / 2.0f;
+        if (mask != null)
+        {
+            final double scaleX = (double) results.getBounds().width / mask.getWidth();
+            final double scaleY = (double) results.getBounds().height / mask.getHeight();
+            maskFilter = new MaskDistribution((byte[]) mask.getPixels(), mask.getWidth(), mask.getHeight(), 0, scaleX,
+                    scaleY);
+        }
 
-		for (int i = 0, size = results.size(); i < size; i++)
-		{
-			if (i % 64 == 0)
-				IJ.showProgress(i, size);
+        for (int i = 0, size = results.size(); i < size; i++)
+        {
+            if (i % 64 == 0)
+                IJ.showProgress(i, size);
 
-			// sp will not be null
+            // sp will not be null
 
-			// We stored the drift=z, intensity=signal, background=snr
-			if (sp.z[i] > filterSettings.getMaxDrift())
-				continue;
+            // We stored the drift=z, intensity=signal, background=snr
+            if (sp.z[i] > filterSettings.getMaxDrift())
+                continue;
 
-			if (sp.intensity[i] < filterSettings.getMinSignal())
-				continue;
+            if (sp.intensity[i] < filterSettings.getMinSignal())
+                continue;
 
-			if (sp.background[i] < filterSettings.getMinSnr())
-				continue;
+            if (sp.background[i] < filterSettings.getMinSnr())
+                continue;
 
-			if (maskFilter != null)
-			{
-				// Check the coordinates are inside the mask
-				final double[] xy = new double[] { sp.x[i] - centreX, sp.y[i] - centreY };
-				if (!maskFilter.isWithinXY(xy))
-					continue;
-			}
+            if (maskFilter != null)
+            {
+                // Check the coordinates are inside the mask
+                final double[] xy = new double[] { sp.x[i] - centreX, sp.y[i] - centreY };
+                if (!maskFilter.isWithinXY(xy))
+                    continue;
+            }
 
-			if (pp != null)
-				if (pp.precision[i] > maxPrecision)
-					continue;
+            if (pp != null)
+                if (pp.precision[i] > maxPrecision)
+                    continue;
 
-			if (wp != null)
-			{
-				final float width = wp.wx[i];
-				if (width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth())
-					continue;
-			}
+            if (wp != null)
+            {
+                final float width = wp.wx[i];
+                if (width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth())
+                    continue;
+            }
 
-			// Passed all filters. Add to the results
-			newResults.add(sp.peakResults[i]);
-		}
+            // Passed all filters. Add to the results
+            newResults.add(sp.peakResults[i]);
+        }
 
-		IJ.showProgress(1);
-		IJ.showStatus(newResults.size() + " Filtered localisations");
-		MemoryPeakResults.addResults(newResults);
-	}
+        IJ.showProgress(1);
+        IJ.showStatus(newResults.size() + " Filtered localisations");
+        MemoryPeakResults.addResults(newResults);
+    }
 
-	private static ByteProcessor getMask(String maskTitle)
-	{
-		final ImagePlus imp = WindowManager.getImage(maskTitle);
-		if (imp != null)
-			return (ByteProcessor) imp.getProcessor().convertToByte(false);
-		return null;
-	}
+    private static ByteProcessor getMask(String maskTitle)
+    {
+        final ImagePlus imp = WindowManager.getImage(maskTitle);
+        if (imp != null)
+            return (ByteProcessor) imp.getProcessor().convertToByte(false);
+        return null;
+    }
 
-	private boolean showDialog()
-	{
-		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
+    private boolean showDialog()
+    {
+        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addHelp(About.HELP_URL);
 
-		filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+        filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		checkLimits();
+        checkLimits();
 
-		gd.addSlider("Max_drift", minDrift, maxDrift, filterSettings.getMaxDrift());
-		gd.addSlider("Min_Signal", minSignal, maxSignal, filterSettings.getMinSignal());
-		gd.addSlider("Min_SNR", minSNR, maxSNR, filterSettings.getMinSnr());
-		gd.addSlider("Min_Precision", minPrecision, maxPrecision, filterSettings.getMaxPrecision());
+        gd.addSlider("Max_drift", minDrift, maxDrift, filterSettings.getMaxDrift());
+        gd.addSlider("Min_Signal", minSignal, maxSignal, filterSettings.getMinSignal());
+        gd.addSlider("Min_SNR", minSNR, maxSNR, filterSettings.getMinSnr());
+        gd.addSlider("Min_Precision", minPrecision, maxPrecision, filterSettings.getMaxPrecision());
 
-		// TODO - If calibrated present the widths in nm
-		gd.addMessage("Average Width = " + IJ.d2s(averageWidth, 3));
+        // TODO - If calibrated present the widths in nm
+        gd.addMessage("Average Width = " + IJ.d2s(averageWidth, 3));
 
-		gd.addSlider("Min_Width", minWidth, maxWidth, filterSettings.getMinWidth());
-		gd.addSlider("Max_Width", minWidth, maxWidth, filterSettings.getMaxWidth());
+        gd.addSlider("Min_Width", minWidth, maxWidth, filterSettings.getMinWidth());
+        gd.addSlider("Max_Width", minWidth, maxWidth, filterSettings.getMaxWidth());
 
-		// Get a list of potential mask images
-		final String[] items = getImageList();
-		gd.addChoice("Mask", items, filterSettings.getMaskTitle());
+        // Get a list of potential mask images
+        final String[] items = getImageList();
+        gd.addChoice("Mask", items, filterSettings.getMaskTitle());
 
-		gd.showDialog();
+        gd.showDialog();
 
-		if (gd.wasCanceled())
-			return false;
+        if (gd.wasCanceled())
+            return false;
 
-		filterSettings.setMaxDrift((float) gd.getNextNumber());
-		filterSettings.setMinSignal((float) gd.getNextNumber());
-		filterSettings.setMinSnr((float) gd.getNextNumber());
-		filterSettings.setMaxPrecision((float) gd.getNextNumber());
-		filterSettings.setMinWidth((float) gd.getNextNumber());
-		filterSettings.setMaxWidth((float) gd.getNextNumber());
-		filterSettings.setMaskTitle(gd.getNextChoice());
+        filterSettings.setMaxDrift((float) gd.getNextNumber());
+        filterSettings.setMinSignal((float) gd.getNextNumber());
+        filterSettings.setMinSnr((float) gd.getNextNumber());
+        filterSettings.setMaxPrecision((float) gd.getNextNumber());
+        filterSettings.setMinWidth((float) gd.getNextNumber());
+        filterSettings.setMaxWidth((float) gd.getNextNumber());
+        filterSettings.setMaskTitle(gd.getNextChoice());
 
-		return SettingsManager.writeSettings(filterSettings.build());
-	}
+        return SettingsManager.writeSettings(filterSettings.build());
+    }
 
-	/**
-	 * Build a list of all the image names.
-	 *
-	 * @return The list of images
-	 */
-	public static String[] getImageList()
-	{
-		final ArrayList<String> newImageList = new ArrayList<>();
-		newImageList.add("[None]");
+    /**
+     * Build a list of all the image names.
+     *
+     * @return The list of images
+     */
+    public static String[] getImageList()
+    {
+        final ArrayList<String> newImageList = new ArrayList<>();
+        newImageList.add("[None]");
 
-		for (final int id : Utils.getIDList())
-		{
-			final ImagePlus imp = WindowManager.getImage(id);
-			if (imp == null)
-				continue;
-			if (!imp.getProcessor().isBinary())
-				continue;
-			newImageList.add(imp.getTitle());
-		}
+        for (final int id : Utils.getIDList())
+        {
+            final ImagePlus imp = WindowManager.getImage(id);
+            if (imp == null)
+                continue;
+            if (!imp.getProcessor().isBinary())
+                continue;
+            newImageList.add(imp.getTitle());
+        }
 
-		return newImageList.toArray(new String[0]);
-	}
+        return newImageList.toArray(new String[0]);
+    }
 }

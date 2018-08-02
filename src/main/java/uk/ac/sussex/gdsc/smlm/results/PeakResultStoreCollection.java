@@ -30,17 +30,17 @@ import java.util.Collection;
  */
 public interface PeakResultStoreCollection
 {
-	/**
-	 * Gets the collection.
-	 *
-	 * @return the collection
-	 */
-	public Collection<PeakResult> getCollection();
+    /**
+     * Gets the collection.
+     *
+     * @return the collection
+     */
+    public Collection<PeakResult> getCollection();
 
-	/**
-	 * Gets the collection by reference.
-	 *
-	 * @return the collection
-	 */
-	public Collection<PeakResult> getCollectionReference();
+    /**
+     * Gets the collection by reference.
+     *
+     * @return the collection
+     */
+    public Collection<PeakResult> getCollectionReference();
 }

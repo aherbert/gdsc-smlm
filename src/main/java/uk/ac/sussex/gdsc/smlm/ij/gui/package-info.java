@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides classes for graphical display of data, for example tables. 
+ * Provides classes for graphical display of data, for example tables.
  *
  * @since 1.0.0
  */

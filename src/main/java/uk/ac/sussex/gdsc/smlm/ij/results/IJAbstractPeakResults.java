@@ -32,19 +32,19 @@ import uk.ac.sussex.gdsc.smlm.results.ThreadSafePeakResults;
  */
 public abstract class IJAbstractPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
-	/**
-	 * Sets the calibration.
-	 *
-	 * @param nmPerPixel
-	 *            the nm per pixel
-	 * @param gain
-	 *            the gain
-	 */
-	public void setCalibration(double nmPerPixel, double gain)
-	{
-		final CalibrationWriter cw = getCalibrationWriterSafe();
-		cw.setNmPerPixel(nmPerPixel);
-		cw.setCountPerPhoton(gain);
-		setCalibration(cw.getCalibration());
-	}
+    /**
+     * Sets the calibration.
+     *
+     * @param nmPerPixel
+     *            the nm per pixel
+     * @param gain
+     *            the gain
+     */
+    public void setCalibration(double nmPerPixel, double gain)
+    {
+        final CalibrationWriter cw = getCalibrationWriterSafe();
+        cw.setNmPerPixel(nmPerPixel);
+        cw.setCountPerPhoton(gain);
+        setCalibration(cw.getCalibration());
+    }
 }

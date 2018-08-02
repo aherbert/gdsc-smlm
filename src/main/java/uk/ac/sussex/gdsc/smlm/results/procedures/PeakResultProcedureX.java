@@ -30,14 +30,14 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public interface PeakResultProcedureX
 {
-	/**
-	 * Executes this procedure. A true return value indicates that
-	 * the application executing this procedure should not invoke this
-	 * procedure again.
-	 *
-	 * @param peakResult
-	 *            the peak result
-	 * @return true, if the execution should stop
-	 */
-	public boolean execute(PeakResult peakResult);
+    /**
+     * Executes this procedure. A true return value indicates that
+     * the application executing this procedure should not invoke this
+     * procedure again.
+     *
+     * @param peakResult
+     *            the peak result
+     * @return true, if the execution should stop
+     */
+    public boolean execute(PeakResult peakResult);
 }

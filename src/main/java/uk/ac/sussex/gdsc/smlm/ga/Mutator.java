@@ -32,12 +32,12 @@ package uk.ac.sussex.gdsc.smlm.ga;
 public interface Mutator<T extends Comparable<T>>
 {
 
-	/**
-	 * Mutate the provided chromosome.
-	 *
-	 * @param chromosome
-	 *            the chromosome
-	 * @return a new sequence
-	 */
-	public Chromosome<T> mutate(Chromosome<T> chromosome);
+    /**
+     * Mutate the provided chromosome.
+     *
+     * @param chromosome
+     *            the chromosome
+     * @return a new sequence
+     */
+    public Chromosome<T> mutate(Chromosome<T> chromosome);
 }

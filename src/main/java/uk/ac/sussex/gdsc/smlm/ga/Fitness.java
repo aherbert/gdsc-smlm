@@ -31,38 +31,38 @@ package uk.ac.sussex.gdsc.smlm.ga;
  */
 public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>>
 {
-	/** The comparable object. */
-	final T t;
+    /** The comparable object. */
+    final T t;
 
-	/** The score. */
-	final double score;
+    /** The score. */
+    final double score;
 
-	/**
-	 * Instantiates a new fitness.
-	 *
-	 * @param t
-	 *            the comparable object
-	 * @param score
-	 *            the score
-	 */
-	public Fitness(T t, double score)
-	{
-		this.t = t;
-		this.score = score;
-	}
+    /**
+     * Instantiates a new fitness.
+     *
+     * @param t
+     *            the comparable object
+     * @param score
+     *            the score
+     */
+    public Fitness(T t, double score)
+    {
+        this.t = t;
+        this.score = score;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Fitness<T> o)
-	{
-		if (t == null)
-			return 1;
-		if (o.t == null)
-			return -1;
-		return t.compareTo(o.t);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(Fitness<T> o)
+    {
+        if (t == null)
+            return 1;
+        if (o.t == null)
+            return -1;
+        return t.compareTo(o.t);
+    }
 }

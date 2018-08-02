@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides classes for solving linear equations. 
+ * Provides classes for solving linear equations.
  *
  * @since 1.0.0
  */

@@ -36,131 +36,132 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
  */
 public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 {
-	// Required for the PSF
+    // Required for the PSF
 
-	/** The intensity. */
-	protected double tI;
+    /** The intensity. */
+    protected double tI;
 
-	/**
-	 * Instantiates a new erf gaussian 2D function.
-	 *
-	 * @param maxx
-	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param maxy
-	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 */
-	public SingleErfGaussian2DFunction(int maxx, int maxy)
-	{
-		super(1, maxx, maxy);
-	}
+    /**
+     * Instantiates a new erf gaussian 2D function.
+     *
+     * @param maxx
+     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     * @param maxy
+     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     */
+    public SingleErfGaussian2DFunction(int maxx, int maxy)
+    {
+        super(1, maxx, maxy);
+    }
 
-	@Override
-	public int getNPeaks()
-	{
-		return 1;
-	}
+    @Override
+    public int getNPeaks()
+    {
+        return 1;
+    }
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 *
-	 * @param i
-	 *            Input predictor
-	 * @return The Gaussian value
-	 */
-	@Override
-	public double eval(final int i)
-	{
-		// Unpack the predictor into the dimensions
-		final int y = i / maxx;
-		final int x = i % maxx;
+    /**
+     * Evaluates an 2-dimensional Gaussian function for a single peak.
+     *
+     * @param i
+     *            Input predictor
+     * @return The Gaussian value
+     */
+    @Override
+    public double eval(final int i)
+    {
+        // Unpack the predictor into the dimensions
+        final int y = i / maxx;
+        final int x = i % maxx;
 
-		return tB + tI * deltaEx[x] * deltaEy[y];
-	}
+        return tB + tI * deltaEx[x] * deltaEy[y];
+    }
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 *
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
-	 */
-	@Override
-	public abstract double eval(final int i, final double[] duda);
+    /**
+     * Evaluates an 2-dimensional Gaussian function for a single peak.
+     *
+     * @param i
+     *            Input predictor
+     * @param duda
+     *            Partial gradient of function with respect to each coefficient
+     * @return The predicted value
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+     */
+    @Override
+    public abstract double eval(final int i, final double[] duda);
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 *
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial first gradient of function with respect to each coefficient
-	 * @param d2uda2
-	 *            Partial second gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 */
-	@Override
-	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
+    /**
+     * Evaluates an 2-dimensional Gaussian function for a single peak.
+     *
+     * @param i
+     *            Input predictor
+     * @param duda
+     *            Partial first gradient of function with respect to each coefficient
+     * @param d2uda2
+     *            Partial second gradient of function with respect to each coefficient
+     * @return The predicted value
+     */
+    @Override
+    public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.ValueProcedure)
-	 */
-	@Override
-	public void forEach(ValueProcedure procedure)
-	{
-		if (tB == 0)
-			for (int y = 0; y < maxy; y++)
-			{
-				final double tI_deltaEy = tI * deltaEy[y];
-				for (int x = 0; x < maxx; x++)
-					procedure.execute(tI_deltaEy * deltaEx[x]);
-			}
-		else
-			for (int y = 0; y < maxy; y++)
-			{
-				final double tI_deltaEy = tI * deltaEy[y];
-				for (int x = 0; x < maxx; x++)
-					procedure.execute(tB + tI_deltaEy * deltaEx[x]);
-			}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
+     * ValueProcedure)
+     */
+    @Override
+    public void forEach(ValueProcedure procedure)
+    {
+        if (tB == 0)
+            for (int y = 0; y < maxy; y++)
+            {
+                final double tI_deltaEy = tI * deltaEy[y];
+                for (int x = 0; x < maxx; x++)
+                    procedure.execute(tI_deltaEy * deltaEx[x]);
+            }
+        else
+            for (int y = 0; y < maxy; y++)
+            {
+                final double tI_deltaEy = tI * deltaEy[y];
+                for (int x = 0; x < maxx; x++)
+                    procedure.execute(tB + tI_deltaEy * deltaEx[x]);
+            }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
-	 */
-	@Override
-	public double[] computeValues(double[] variables)
-	{
-		initialise0(variables);
-		final double[] values = new double[size()];
-		if (tB == 0)
-			for (int y = 0, i = 0; y < maxy; y++)
-			{
-				final double tI_deltaEy = tI * deltaEy[y];
-				for (int x = 0; x < maxx; x++)
-					values[i++] = tI_deltaEy * deltaEx[x];
-			}
-		else
-			for (int y = 0, i = 0; y < maxy; y++)
-			{
-				final double tI_deltaEy = tI * deltaEy[y];
-				for (int x = 0; x < maxx; x++)
-					values[i++] = tB + tI_deltaEy * deltaEx[x];
-			}
-		return values;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
+     */
+    @Override
+    public double[] computeValues(double[] variables)
+    {
+        initialise0(variables);
+        final double[] values = new double[size()];
+        if (tB == 0)
+            for (int y = 0, i = 0; y < maxy; y++)
+            {
+                final double tI_deltaEy = tI * deltaEy[y];
+                for (int x = 0; x < maxx; x++)
+                    values[i++] = tI_deltaEy * deltaEx[x];
+            }
+        else
+            for (int y = 0, i = 0; y < maxy; y++)
+            {
+                final double tI_deltaEy = tI * deltaEy[y];
+                for (int x = 0; x < maxx; x++)
+                    values[i++] = tB + tI_deltaEy * deltaEx[x];
+            }
+        return values;
+    }
 
-	// Force implementation
-	@Override
-	public abstract int getNumberOfGradients();
+    // Force implementation
+    @Override
+    public abstract int getNumberOfGradients();
 
-	// Force implementation
-	@Override
-	public abstract double integral(double[] a);
+    // Force implementation
+    @Override
+    public abstract double integral(double[] a);
 }

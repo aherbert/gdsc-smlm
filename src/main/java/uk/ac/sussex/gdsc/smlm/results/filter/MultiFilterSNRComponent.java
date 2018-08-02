@@ -28,38 +28,39 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterSNRComponent extends MultiFilterComponent
 {
-	private final float snr;
+    private final float snr;
 
-	/**
-	 * Instantiates a new multi filter SNR component.
-	 *
-	 * @param snr
-	 *            the snr
-	 */
-	public MultiFilterSNRComponent(float snr)
-	{
-		this.snr = snr;
-	}
+    /**
+     * Instantiates a new multi filter SNR component.
+     *
+     * @param snr
+     *            the snr
+     */
+    public MultiFilterSNRComponent(float snr)
+    {
+        this.snr = snr;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		return peak.getSNR() < this.snr;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        return peak.getSNR() < this.snr;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return IDirectFilter.V_SNR;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return IDirectFilter.V_SNR;
+    }
 }

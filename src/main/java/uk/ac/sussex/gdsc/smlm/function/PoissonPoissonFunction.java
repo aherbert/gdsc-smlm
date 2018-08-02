@@ -65,159 +65,159 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
  */
 public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
-	/**
-	 * The inverse of the on-chip gain multiplication factor
-	 */
-	final double alpha;
+    /**
+     * The inverse of the on-chip gain multiplication factor
+     */
+    final double alpha;
 
-	/**
-	 * The log of the inverse on-chip gain multiplication factor
-	 */
-	final double logAlpha;
+    /**
+     * The log of the inverse on-chip gain multiplication factor
+     */
+    final double logAlpha;
 
-	/** The variance divided by the gain squared (i.e. variance in electron units) */
-	final double var_g2;
+    /** The variance divided by the gain squared (i.e. variance in electron units) */
+    final double var_g2;
 
-	/**
-	 * Instantiates a new poisson poisson function.
-	 *
-	 * @param alpha
-	 *            The inverse of the on-chip gain multiplication factor
-	 * @param variance
-	 *            the variance
-	 */
-	private PoissonPoissonFunction(double alpha, double variance)
-	{
-		if (variance <= 0)
-			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
-		this.alpha = Math.abs(alpha);
-		logAlpha = Math.log(this.alpha);
-		var_g2 = variance * Maths.pow2(this.alpha);
-	}
+    /**
+     * Instantiates a new poisson poisson function.
+     *
+     * @param alpha
+     *            The inverse of the on-chip gain multiplication factor
+     * @param variance
+     *            the variance
+     */
+    private PoissonPoissonFunction(double alpha, double variance)
+    {
+        if (variance <= 0)
+            throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+        this.alpha = Math.abs(alpha);
+        logAlpha = Math.log(this.alpha);
+        var_g2 = variance * Maths.pow2(this.alpha);
+    }
 
-	/**
-	 * Creates the with standard deviation.
-	 *
-	 * @param alpha
-	 *            The inverse of the on-chip gain multiplication factor
-	 * @param s
-	 *            The standard deviation of the Gaussian distribution at readout
-	 * @throws IllegalArgumentException
-	 *             if the variance is zero or below
-	 * @return the poisson poisson function
-	 */
-	public static PoissonPoissonFunction createWithStandardDeviation(final double alpha, final double s)
-	{
-		return new PoissonPoissonFunction(alpha, s * s);
-	}
+    /**
+     * Creates the with standard deviation.
+     *
+     * @param alpha
+     *            The inverse of the on-chip gain multiplication factor
+     * @param s
+     *            The standard deviation of the Gaussian distribution at readout
+     * @throws IllegalArgumentException
+     *             if the variance is zero or below
+     * @return the poisson poisson function
+     */
+    public static PoissonPoissonFunction createWithStandardDeviation(final double alpha, final double s)
+    {
+        return new PoissonPoissonFunction(alpha, s * s);
+    }
 
-	/**
-	 * Creates the with variance.
-	 *
-	 * @param alpha
-	 *            The inverse of the on-chip gain multiplication factor
-	 * @param var
-	 *            The variance of the Gaussian distribution at readout (must be positive)
-	 * @throws IllegalArgumentException
-	 *             if the variance is zero or below
-	 * @return the poisson poisson function
-	 */
-	public static PoissonPoissonFunction createWithVariance(final double alpha, final double var)
-	{
-		return new PoissonPoissonFunction(alpha, var);
-	}
+    /**
+     * Creates the with variance.
+     *
+     * @param alpha
+     *            The inverse of the on-chip gain multiplication factor
+     * @param var
+     *            The variance of the Gaussian distribution at readout (must be positive)
+     * @throws IllegalArgumentException
+     *             if the variance is zero or below
+     * @return the poisson poisson function
+     */
+    public static PoissonPoissonFunction createWithVariance(final double alpha, final double var)
+    {
+        return new PoissonPoissonFunction(alpha, var);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-	 */
-	@Override
-	public double likelihood(double o, double e)
-	{
-		// convert to photons
-		e = e + var_g2;
-		o = o * alpha + var_g2;
-		if (o < 0 || e <= 0)
-			return 0;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
+     */
+    @Override
+    public double likelihood(double o, double e)
+    {
+        // convert to photons
+        e = e + var_g2;
+        o = o * alpha + var_g2;
+        if (o < 0 || e <= 0)
+            return 0;
 
-		// Allow non-integer observed value using the gamma function to provide a
-		// factorial for non-integer values. Standard Poisson:
-		// PMF(l,k) = C * e^-l * l^k / gamma(k+1)
-		// log(PMF) = -l + k * log(l) - logGamma(k+1)
+        // Allow non-integer observed value using the gamma function to provide a
+        // factorial for non-integer values. Standard Poisson:
+        // PMF(l,k) = C * e^-l * l^k / gamma(k+1)
+        // log(PMF) = -l + k * log(l) - logGamma(k+1)
 
-		// P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)
-		// = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br>
+        // P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)
+        // = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br>
 
-		// LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
-		// = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
+        // LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
+        // = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
 
-		double ll = -e;
-		if (o > 0)
-			ll += o * Math.log(e) - logFactorial(o);
+        double ll = -e;
+        if (o > 0)
+            ll += o * Math.log(e) - logFactorial(o);
 
-		// Scale the output so the cumulative probability is 1
-		return FastMath.exp(ll) * alpha;
-	}
+        // Scale the output so the cumulative probability is 1
+        return FastMath.exp(ll) * alpha;
+    }
 
-	/**
-	 * Return the log of the factorial for the given real number, using the gamma function.
-	 *
-	 * @param k
-	 *            the number
-	 * @return the log factorial
-	 */
-	public static double logFactorial(double k)
-	{
-		if (k <= 1)
-			return 0;
-		return Gamma.logGamma(k + 1);
-	}
+    /**
+     * Return the log of the factorial for the given real number, using the gamma function.
+     *
+     * @param k
+     *            the number
+     * @return the log factorial
+     */
+    public static double logFactorial(double k)
+    {
+        if (k <= 1)
+            return 0;
+        return Gamma.logGamma(k + 1);
+    }
 
-	/**
-	 * Return the factorial for the given real number, using the gamma function
-	 *
-	 * @param k
-	 *            the number
-	 * @return the factorial
-	 */
-	public static double factorial(double k)
-	{
-		if (k <= 1)
-			return 1;
-		return Gamma.gamma(k + 1);
-	}
+    /**
+     * Return the factorial for the given real number, using the gamma function
+     *
+     * @param k
+     *            the number
+     * @return the factorial
+     */
+    public static double factorial(double k)
+    {
+        if (k <= 1)
+            return 1;
+        return Gamma.gamma(k + 1);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-	 */
-	@Override
-	public double logLikelihood(double o, double e)
-	{
-		// convert to photons
-		e = e + var_g2;
-		o = o * alpha + var_g2;
-		if (o < 0 || e <= 0)
-			return Double.NEGATIVE_INFINITY;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
+     */
+    @Override
+    public double logLikelihood(double o, double e)
+    {
+        // convert to photons
+        e = e + var_g2;
+        o = o * alpha + var_g2;
+        if (o < 0 || e <= 0)
+            return Double.NEGATIVE_INFINITY;
 
-		// Allow non-integer observed value using the gamma function to provide a
-		// factorial for non-integer values. Standard Poisson:
-		// PMF(l,k) = C * e^-l * l^k / gamma(k+1)
-		// log(PMF) = -l + k * log(l) - logGamma(k+1)
+        // Allow non-integer observed value using the gamma function to provide a
+        // factorial for non-integer values. Standard Poisson:
+        // PMF(l,k) = C * e^-l * l^k / gamma(k+1)
+        // log(PMF) = -l + k * log(l) - logGamma(k+1)
 
-		// P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)
-		// = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br>
+        // P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)
+        // = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x / gamma(x+1) <br>
 
-		// LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
-		// = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
+        // LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
+        // = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
 
-		double ll = -e;
-		if (o > 0)
-			ll += o * Math.log(e) - logFactorial(o);
+        double ll = -e;
+        if (o > 0)
+            ll += o * Math.log(e) - logFactorial(o);
 
-		// Scale the output so the cumulative probability is 1
-		return ll + logAlpha;
-	}
+        // Scale the output so the cumulative probability is 1
+        return ll + logAlpha;
+    }
 }

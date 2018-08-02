@@ -32,23 +32,23 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class IdFramePeakResultComparator implements Comparator<PeakResult>
 {
-	/** An instance of the comparator */
-	public static final IdFramePeakResultComparator INSTANCE = new IdFramePeakResultComparator();
+    /** An instance of the comparator */
+    public static final IdFramePeakResultComparator INSTANCE = new IdFramePeakResultComparator();
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(PeakResult o1, PeakResult o2)
-	{
-		final int id1 = o1.getId();
-		final int id2 = o2.getId();
-		if (id1 < id2)
-			return -1;
-		if (id1 > id2)
-			return 1;
-		return Integer.compare(o1.getFrame(), o2.getFrame());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(PeakResult o1, PeakResult o2)
+    {
+        final int id1 = o1.getId();
+        final int id2 = o2.getId();
+        if (id1 < id2)
+            return -1;
+        if (id1 > id2)
+            return 1;
+        return Integer.compare(o1.getFrame(), o2.getFrame());
+    }
 }

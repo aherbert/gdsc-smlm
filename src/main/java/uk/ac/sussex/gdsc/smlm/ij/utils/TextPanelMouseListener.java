@@ -34,118 +34,118 @@ import ij.text.TextPanel;
  */
 public abstract class TextPanelMouseListener implements MouseListener
 {
-	/** The text panel. */
-	protected TextPanel textPanel;
+    /** The text panel. */
+    protected TextPanel textPanel;
 
-	/**
-	 * Instantiates a new text panel mouse listener.
-	 */
-	public TextPanelMouseListener()
-	{
-	}
+    /**
+     * Instantiates a new text panel mouse listener.
+     */
+    public TextPanelMouseListener()
+    {
+    }
 
-	/**
-	 * Instantiates a new text panel mouse listener.
-	 *
-	 * @param textPanel
-	 *            The text panel to listen to for mouse events
-	 */
-	public TextPanelMouseListener(TextPanel textPanel)
-	{
-		setTextPanel(textPanel);
-	}
+    /**
+     * Instantiates a new text panel mouse listener.
+     *
+     * @param textPanel
+     *            The text panel to listen to for mouse events
+     */
+    public TextPanelMouseListener(TextPanel textPanel)
+    {
+        setTextPanel(textPanel);
+    }
 
-	/**
-	 * Sets the text panel.
-	 *
-	 * @param textPanel
-	 *            the new text panel
-	 */
-	public void setTextPanel(TextPanel textPanel)
-	{
-		if (this.textPanel != null)
-			this.textPanel.removeMouseListener(this);
-		this.textPanel = textPanel;
-		if (this.textPanel != null)
-			this.textPanel.addMouseListener(this);
-	}
+    /**
+     * Sets the text panel.
+     *
+     * @param textPanel
+     *            the new text panel
+     */
+    public void setTextPanel(TextPanel textPanel)
+    {
+        if (this.textPanel != null)
+            this.textPanel.removeMouseListener(this);
+        this.textPanel = textPanel;
+        if (this.textPanel != null)
+            this.textPanel.addMouseListener(this);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e)
-	{
-		// Show the result that was double clicked in the result table
-		if (e.getClickCount() > 1)
-			selected(textPanel.getSelectionStart());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseClicked(MouseEvent e)
+    {
+        // Show the result that was double clicked in the result table
+        if (e.getClickCount() > 1)
+            selected(textPanel.getSelectionStart());
+    }
 
-	/**
-	 * Triggered when a single line from the panel has been selected.
-	 *
-	 * @param selectedIndex
-	 *            the selected index
-	 */
-	public abstract void selected(int selectedIndex);
+    /**
+     * Triggered when a single line from the panel has been selected.
+     *
+     * @param selectedIndex
+     *            the selected index
+     */
+    public abstract void selected(int selectedIndex);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mousePressed(MouseEvent e)
-	{
-		final int index = textPanel.getSelectionStart();
-		final int index2 = textPanel.getSelectionEnd();
-		if (index == index2)
-			return;
-		selected(textPanel.getSelectionStart(), textPanel.getSelectionEnd());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mousePressed(MouseEvent e)
+    {
+        final int index = textPanel.getSelectionStart();
+        final int index2 = textPanel.getSelectionEnd();
+        if (index == index2)
+            return;
+        selected(textPanel.getSelectionStart(), textPanel.getSelectionEnd());
+    }
 
-	/**
-	 * Triggered when multiple lines from the panel have been selected.
-	 *
-	 * @param selectionStart
-	 *            the selection start
-	 * @param selectionEnd
-	 *            the selection end
-	 */
-	public abstract void selected(int selectionStart, int selectionEnd);
+    /**
+     * Triggered when multiple lines from the panel have been selected.
+     *
+     * @param selectionStart
+     *            the selection start
+     * @param selectionEnd
+     *            the selection end
+     */
+    public abstract void selected(int selectionStart, int selectionEnd);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseReleased(MouseEvent e)
-	{
-		// Ignore
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseReleased(MouseEvent e)
+    {
+        // Ignore
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseEntered(MouseEvent e)
-	{
-		// Ignore
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseEntered(MouseEvent e)
+    {
+        // Ignore
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseExited(MouseEvent e)
-	{
-		// Ignore
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseExited(MouseEvent e)
+    {
+        // Ignore
+    }
 }

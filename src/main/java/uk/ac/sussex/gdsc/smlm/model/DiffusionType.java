@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.model;
  */
 public enum DiffusionType
 {
-	//@formatter:off
+    //@formatter:off
 	/**
 	 * A random walk
 	 */
@@ -46,35 +46,35 @@ public enum DiffusionType
 	public String getName() { return "Linear Walk"; }};
 	//@formatter:on
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
+    @Override
+    public String toString()
+    {
+        return getName();
+    }
 
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	abstract public String getName();
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    abstract public String getName();
 
-	/**
-	 * Get the diffusion type from a given string. Returns null if the text is not a valid type.
-	 *
-	 * @param text
-	 *            The text
-	 * @return The diffusion type (or null)
-	 */
-	public static DiffusionType fromString(String text)
-	{
-		if (text != null)
-		{
-			text = text.trim();
-			for (final DiffusionType type : DiffusionType.values())
-				if (text.equalsIgnoreCase(type.getName()))
-					return type;
-		}
-		return null;
-	}
+    /**
+     * Get the diffusion type from a given string. Returns null if the text is not a valid type.
+     *
+     * @param text
+     *            The text
+     * @return The diffusion type (or null)
+     */
+    public static DiffusionType fromString(String text)
+    {
+        if (text != null)
+        {
+            text = text.trim();
+            for (final DiffusionType type : DiffusionType.values())
+                if (text.equalsIgnoreCase(type.getName()))
+                    return type;
+        }
+        return null;
+    }
 }

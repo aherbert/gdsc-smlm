@@ -37,121 +37,121 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 		XYZResultProcedure
 //@formatter:on
 {
-	/** The background. */
-	public float[] background;
+    /** The background. */
+    public float[] background;
 
-	/** The intensity. */
-	public float[] intensity;
+    /** The intensity. */
+    public float[] intensity;
 
-	/** The x. */
-	public float[] x;
+    /** The x. */
+    public float[] x;
 
-	/** The y. */
-	public float[] y;
+    /** The y. */
+    public float[] y;
 
-	/** The z. */
-	public float[] z;
+    /** The z. */
+    public float[] z;
 
-	/**
-	 * Instantiates a new standard result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 */
-	public RawResultProcedure(MemoryPeakResults results)
-	{
-		super(results);
-	}
+    /**
+     * Instantiates a new standard result procedure.
+     *
+     * @param results
+     *            the results
+     */
+    public RawResultProcedure(MemoryPeakResults results)
+    {
+        super(results);
+    }
 
-	/**
-	 * Gets the BIXYZ data in the configured units.
-	 *
-	 * @throws DataException
-	 *             if conversion to the required units is not possible
-	 */
-	public void getBIXYZ() throws DataException
-	{
-		i = 0;
-		this.background = allocate(this.background);
-		this.intensity = allocate(this.intensity);
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		this.z = allocate(this.z);
-		results.forEachNative((BIXYZResultProcedure) this);
-	}
+    /**
+     * Gets the BIXYZ data in the configured units.
+     *
+     * @throws DataException
+     *             if conversion to the required units is not possible
+     */
+    public void getBIXYZ() throws DataException
+    {
+        i = 0;
+        this.background = allocate(this.background);
+        this.intensity = allocate(this.intensity);
+        this.x = allocate(this.x);
+        this.y = allocate(this.y);
+        this.z = allocate(this.z);
+        results.forEachNative((BIXYZResultProcedure) this);
+    }
 
-	@Override
-	public void executeBIXYZ(float background, float intensity, float x, float y, float z)
-	{
-		this.background[i] = background;
-		this.intensity[i] = intensity;
-		this.x[i] = x;
-		this.y[i] = y;
-		this.z[i] = z;
-		i++;
-	}
+    @Override
+    public void executeBIXYZ(float background, float intensity, float x, float y, float z)
+    {
+        this.background[i] = background;
+        this.intensity[i] = intensity;
+        this.x[i] = x;
+        this.y[i] = y;
+        this.z[i] = z;
+        i++;
+    }
 
-	/**
-	 * Gets the I data in the configured units.
-	 *
-	 * @throws DataException
-	 *             if conversion to the required units is not possible
-	 */
-	public void getI() throws DataException
-	{
-		i = 0;
-		this.intensity = allocate(this.intensity);
-		results.forEachNative((IResultProcedure) this);
-	}
+    /**
+     * Gets the I data in the configured units.
+     *
+     * @throws DataException
+     *             if conversion to the required units is not possible
+     */
+    public void getI() throws DataException
+    {
+        i = 0;
+        this.intensity = allocate(this.intensity);
+        results.forEachNative((IResultProcedure) this);
+    }
 
-	@Override
-	public void executeI(float intensity)
-	{
-		this.intensity[i] = intensity;
-		i++;
-	}
+    @Override
+    public void executeI(float intensity)
+    {
+        this.intensity[i] = intensity;
+        i++;
+    }
 
-	/**
-	 * Gets the B data in the configured units.
-	 *
-	 * @throws DataException
-	 *             if conversion to the required units is not possible
-	 */
-	public void getB() throws DataException
-	{
-		i = 0;
-		this.background = allocate(this.background);
-		results.forEachNative((BResultProcedure) this);
-	}
+    /**
+     * Gets the B data in the configured units.
+     *
+     * @throws DataException
+     *             if conversion to the required units is not possible
+     */
+    public void getB() throws DataException
+    {
+        i = 0;
+        this.background = allocate(this.background);
+        results.forEachNative((BResultProcedure) this);
+    }
 
-	@Override
-	public void executeB(float background)
-	{
-		this.background[i] = background;
-		i++;
-	}
+    @Override
+    public void executeB(float background)
+    {
+        this.background[i] = background;
+        i++;
+    }
 
-	/**
-	 * Gets the XYZ data in the configured units.
-	 *
-	 * @throws DataException
-	 *             if conversion to the required units is not possible
-	 */
-	public void getXYZ() throws DataException
-	{
-		i = 0;
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		this.z = allocate(this.z);
-		results.forEachNative((XYZResultProcedure) this);
-	}
+    /**
+     * Gets the XYZ data in the configured units.
+     *
+     * @throws DataException
+     *             if conversion to the required units is not possible
+     */
+    public void getXYZ() throws DataException
+    {
+        i = 0;
+        this.x = allocate(this.x);
+        this.y = allocate(this.y);
+        this.z = allocate(this.z);
+        results.forEachNative((XYZResultProcedure) this);
+    }
 
-	@Override
-	public void executeXYZ(float x, float y, float z)
-	{
-		this.x[i] = x;
-		this.y[i] = y;
-		this.z[i] = z;
-		i++;
-	}
+    @Override
+    public void executeXYZ(float x, float y, float z)
+    {
+        this.x[i] = x;
+        this.y[i] = y;
+        this.z[i] = z;
+        i++;
+    }
 }

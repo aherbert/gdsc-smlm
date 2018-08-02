@@ -34,48 +34,48 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
  */
 public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction
 {
-	/** The number of peaks. */
-	protected final int npeaks;
+    /** The number of peaks. */
+    protected final int npeaks;
 
-	/** The gradient indices. */
-	protected final int[] gradientIndices;
+    /** The gradient indices. */
+    protected final int[] gradientIndices;
 
-	/**
-	 * Instantiates a new multi peak gaussian 2D function.
-	 *
-	 * @param npeaks
-	 *            The number of peaks
-	 * @param maxx
-	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param maxy
-	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 */
-	public MultiPeakGaussian2DFunction(int npeaks, int maxx, int maxy)
-	{
-		super(maxx, maxy);
-		this.npeaks = npeaks;
-		this.gradientIndices = createGradientIndices(npeaks);
-	}
+    /**
+     * Instantiates a new multi peak gaussian 2D function.
+     *
+     * @param npeaks
+     *            The number of peaks
+     * @param maxx
+     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     * @param maxy
+     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     */
+    public MultiPeakGaussian2DFunction(int npeaks, int maxx, int maxy)
+    {
+        super(maxx, maxy);
+        this.npeaks = npeaks;
+        this.gradientIndices = createGradientIndices(npeaks);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.function.GaussianFunction#getNPeaks()
-	 */
-	@Override
-	public int getNPeaks()
-	{
-		return npeaks;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.function.GaussianFunction#getNPeaks()
+     */
+    @Override
+    public int getNPeaks()
+    {
+        return npeaks;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
-	 */
-	@Override
-	public int[] gradientIndices()
-	{
-		return gradientIndices;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
+     */
+    @Override
+    public int[] gradientIndices()
+    {
+        return gradientIndices;
+    }
 }

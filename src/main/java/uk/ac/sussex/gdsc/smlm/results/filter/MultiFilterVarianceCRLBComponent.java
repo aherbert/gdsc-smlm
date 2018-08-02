@@ -28,38 +28,39 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent
 {
-	private final double variance;
+    private final double variance;
 
-	/**
-	 * Instantiates a new multi filter variance CRLB component.
-	 *
-	 * @param precision
-	 *            the precision
-	 */
-	public MultiFilterVarianceCRLBComponent(double precision)
-	{
-		this.variance = Filter.getDUpperSquaredLimit(precision);
-	}
+    /**
+     * Instantiates a new multi filter variance CRLB component.
+     *
+     * @param precision
+     *            the precision
+     */
+    public MultiFilterVarianceCRLBComponent(double precision)
+    {
+        this.variance = Filter.getDUpperSquaredLimit(precision);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		return (peak.getLocationVarianceCRLB() > variance);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        return (peak.getLocationVarianceCRLB() > variance);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return IDirectFilter.V_LOCATION_VARIANCE_CRLB;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return IDirectFilter.V_LOCATION_VARIANCE_CRLB;
+    }
 }

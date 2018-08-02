@@ -33,123 +33,123 @@ import java.awt.Rectangle;
 public class CCDCameraModel extends FixedPixelCameraModel
 {
 
-	/**
-	 * Instantiates a new CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 */
-	public CCDCameraModel(float bias, float gain)
-	{
-		this(bias, gain, 0f);
-	}
+    /**
+     * Instantiates a new CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     */
+    public CCDCameraModel(float bias, float gain)
+    {
+        this(bias, gain, 0f);
+    }
 
-	/**
-	 * Instantiates a new CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 */
-	public CCDCameraModel(double bias, double gain)
-	{
-		this(bias, gain, 0d);
-	}
+    /**
+     * Instantiates a new CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     */
+    public CCDCameraModel(double bias, double gain)
+    {
+        this(bias, gain, 0d);
+    }
 
-	/**
-	 * Instantiates a new CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 * @param variance
-	 *            the variance (in counts)
-	 */
-	public CCDCameraModel(float bias, float gain, float variance)
-	{
-		super(bias, gain, variance);
-	}
+    /**
+     * Instantiates a new CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     * @param variance
+     *            the variance (in counts)
+     */
+    public CCDCameraModel(float bias, float gain, float variance)
+    {
+        super(bias, gain, variance);
+    }
 
-	/**
-	 * Instantiates a new CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 * @param variance
-	 *            the variance (in counts)
-	 */
-	public CCDCameraModel(double bias, double gain, double variance)
-	{
-		super(bias, gain, variance);
-	}
+    /**
+     * Instantiates a new CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     * @param variance
+     *            the variance (in counts)
+     */
+    public CCDCameraModel(double bias, double gain, double variance)
+    {
+        super(bias, gain, variance);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Note: This is an CCD camera model. The normalised variance represents the effective read noise in incident
-	 * photons (i.e. before gain). This can be combined with the expected shot variance of a Poisson distribution
-	 * (mean) to obtain the total variance in photon units:
-	 *
-	 * <pre>
-	 * Total variance (photons) = [Poisson mean] + [normalised variance]
-	 * </pre>
-	 *
-	 * This value multiplied by the [gain]^2 is the variance in counts.
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getNormalisedVariance(java.awt.Rectangle)
-	 */
-	@Override
-	public float[] getNormalisedVariance(Rectangle bounds)
-	{
-		return super.getNormalisedVariance(bounds);
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note: This is an CCD camera model. The normalised variance represents the effective read noise in incident
+     * photons (i.e. before gain). This can be combined with the expected shot variance of a Poisson distribution
+     * (mean) to obtain the total variance in photon units:
+     *
+     * <pre>
+     * Total variance (photons) = [Poisson mean] + [normalised variance]
+     * </pre>
+     *
+     * This value multiplied by the [gain]^2 is the variance in counts.
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getNormalisedVariance(java.awt.Rectangle)
+     */
+    @Override
+    public float[] getNormalisedVariance(Rectangle bounds)
+    {
+        return super.getNormalisedVariance(bounds);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Note: This is an CCD camera model. The normalised variance represents the effective read noise in incident
-	 * photons (i.e. before gain). This can be combined with the expected shot variance of a Poisson distribution
-	 * (mean) to obtain the total variance in photon units:
-	 *
-	 * <pre>
-	 * Total variance (photons) = [Poisson mean] + [normalised variance]
-	 * </pre>
-	 *
-	 * This value multiplied by the [gain]^2 is the variance in counts.
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
-	 */
-	@Override
-	public double getMeanNormalisedVariance(Rectangle bounds)
-	{
-		return super.getMeanNormalisedVariance(bounds);
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note: This is an CCD camera model. The normalised variance represents the effective read noise in incident
+     * photons (i.e. before gain). This can be combined with the expected shot variance of a Poisson distribution
+     * (mean) to obtain the total variance in photon units:
+     *
+     * <pre>
+     * Total variance (photons) = [Poisson mean] + [normalised variance]
+     * </pre>
+     *
+     * This value multiplied by the [gain]^2 is the variance in counts.
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
+     */
+    @Override
+    public double getMeanNormalisedVariance(Rectangle bounds)
+    {
+        return super.getMeanNormalisedVariance(bounds);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#copy()
-	 */
-	@Override
-	public CCDCameraModel copy()
-	{
-		return clone();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#copy()
+     */
+    @Override
+    public CCDCameraModel copy()
+    {
+        return clone();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	protected CCDCameraModel clone()
-	{
-		return (CCDCameraModel) super.clone();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    protected CCDCameraModel clone()
+    {
+        return (CCDCameraModel) super.clone();
+    }
 }

@@ -33,173 +33,176 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public abstract class DirectFilter extends Filter implements IDirectFilter
 {
-	@XStreamOmitField
-	private int result = 0;
-	@XStreamOmitField
-	private float strength = Float.NaN;
+    @XStreamOmitField
+    private int result = 0;
+    @XStreamOmitField
+    private float strength = Float.NaN;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup()
-	 */
-	@Override
-	public void setup()
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup()
+     */
+    @Override
+    public void setup()
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int)
-	 */
-	@Override
-	public void setup(final int flags)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int)
+     */
+    @Override
+    public void setup(final int flags)
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int, uk.ac.sussex.gdsc.smlm.results.filter.FilterSetupData[])
-	 */
-	@Override
-	public void setup(int flags, FilterSetupData... filterSetupData)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int,
+     * uk.ac.sussex.gdsc.smlm.results.filter.FilterSetupData[])
+     */
+    @Override
+    public void setup(int flags, FilterSetupData... filterSetupData)
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFlags()
-	 */
-	@Override
-	public int getFilterSetupFlags() throws IllegalStateException
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFlags()
+     */
+    @Override
+    public int getFilterSetupFlags() throws IllegalStateException
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
-	 */
-	@Override
-	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
-	{
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
+     */
+    @Override
+    public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+    {
+        return null;
+    }
 
-	/**
-	 * Convenience method to convert variable input data to ann array.
-	 *
-	 * @param data
-	 *            the data
-	 * @return the filter setup data
-	 */
-	protected static FilterSetupData[] getFilterSetupData(FilterSetupData... data)
-	{
-		return data;
-	}
+    /**
+     * Convenience method to convert variable input data to ann array.
+     *
+     * @param data
+     *            the data
+     * @return the filter setup data
+     */
+    protected static FilterSetupData[] getFilterSetupData(FilterSetupData... data)
+    {
+        return data;
+    }
 
-	/**
-	 * Check if all of the given bits are set in the flags.
-	 *
-	 * @param flags
-	 *            the flags
-	 * @param bits
-	 *            the bits
-	 * @return True if all are set
-	 */
-	public static boolean areSet(final int flags, final int bits)
-	{
-		return (flags & bits) == bits;
-	}
+    /**
+     * Check if all of the given bits are set in the flags.
+     *
+     * @param flags
+     *            the flags
+     * @param bits
+     *            the bits
+     * @return True if all are set
+     */
+    public static boolean areSet(final int flags, final int bits)
+    {
+        return (flags & bits) == bits;
+    }
 
-	/**
-	 * Check if any of the given bits are set in the flags.
-	 *
-	 * @param flags
-	 *            the flags
-	 * @param bits
-	 *            the bits
-	 * @return True if any are set
-	 */
-	public static boolean anySet(final int flags, final int bits)
-	{
-		return (flags & bits) != 0;
-	}
+    /**
+     * Check if any of the given bits are set in the flags.
+     *
+     * @param flags
+     *            the flags
+     * @param bits
+     *            the bits
+     * @return True if any are set
+     */
+    public static boolean anySet(final int flags, final int bits)
+    {
+        return (flags & bits) != 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#accept(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	final public boolean accept(final PreprocessedPeakResult peak)
-	{
-		return (result = validate(peak)) == 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#accept(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    final public boolean accept(final PreprocessedPeakResult peak)
+    {
+        return (result = validate(peak)) == 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#validate(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public abstract int validate(final PreprocessedPeakResult peak);
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#validate(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public abstract int validate(final PreprocessedPeakResult peak);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getFilterType()
-	 */
-	@Override
-	public FilterType getFilterType()
-	{
-		return FilterType.DIRECT;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getFilterType()
+     */
+    @Override
+    public FilterType getFilterType()
+    {
+        return FilterType.DIRECT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getResult()
-	 */
-	@Override
-	public int getResult()
-	{
-		return result;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getResult()
+     */
+    @Override
+    public int getResult()
+    {
+        return result;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#copy()
-	 */
-	@Override
-	public IDirectFilter copy()
-	{
-		return (IDirectFilter) clone();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#copy()
+     */
+    @Override
+    public IDirectFilter copy()
+    {
+        return (IDirectFilter) clone();
+    }
 
-	/**
-	 * Generate a status message using all the properties of the peak that failed validation
-	 *
-	 * @param peak
-	 *            The peak
-	 * @param flags
-	 *            The validation flags
-	 * @return The message
-	 */
-	public static String getStatusMessage(PreprocessedPeakResult peak, int flags)
-	{
-		if (flags == 0)
-			return "";
-		final StringBuilder sb = new StringBuilder();
-		//@formatter:off
+    /**
+     * Generate a status message using all the properties of the peak that failed validation
+     *
+     * @param peak
+     *            The peak
+     * @param flags
+     *            The validation flags
+     * @return The message
+     */
+    public static String getStatusMessage(PreprocessedPeakResult peak, int flags)
+    {
+        if (flags == 0)
+            return "";
+        final StringBuilder sb = new StringBuilder();
+        //@formatter:off
 		if (areSet(flags, V_AMPLITUDE))	             append(sb, "Amplitude",        peak.getAmplitude());
 		if (areSet(flags, V_PHOTONS))                append(sb, "Signal",           peak.getSignal());
 		if (areSet(flags, V_SNR))                    append(sb, "SNR",              peak.getSNR());
@@ -221,31 +224,31 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		if (areSet(flags, V_X_SD_FACTOR))            append(sb, "X SD Factor",      peak.getXSDFactor());
 		if (areSet(flags, V_Y_SD_FACTOR))            append(sb, "Y SD Factor",      peak.getYSDFactor());
 		//@formatter:on
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	private static void append(StringBuilder sb, String name, double value)
-	{
-		if (sb.length() != 0)
-			sb.append("; ");
-		sb.append(name);
-		sb.append('=');
-		sb.append(value);
-	}
+    private static void append(StringBuilder sb, String name, double value)
+    {
+        if (sb.length() != 0)
+            sb.append("; ");
+        sb.append(name);
+        sb.append('=');
+        sb.append(value);
+    }
 
-	/**
-	 * Generate a message using all flags that are set
-	 *
-	 * @param flags
-	 *            The validation flags
-	 * @return The message
-	 */
-	public static String getFlagMessage(int flags)
-	{
-		if (flags == 0)
-			return "";
-		final StringBuilder sb = new StringBuilder();
-		//@formatter:off
+    /**
+     * Generate a message using all flags that are set
+     *
+     * @param flags
+     *            The validation flags
+     * @return The message
+     */
+    public static String getFlagMessage(int flags)
+    {
+        if (flags == 0)
+            return "";
+        final StringBuilder sb = new StringBuilder();
+        //@formatter:off
 		if (areSet(flags, V_AMPLITUDE))	             append(sb, "Amplitude");
 		if (areSet(flags, V_PHOTONS))                append(sb, "Signal");
 		if (areSet(flags, V_SNR))                    append(sb, "SNR");
@@ -267,121 +270,121 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		if (areSet(flags, V_X_SD_FACTOR))            append(sb, "X SD Factor");
 		if (areSet(flags, V_Y_SD_FACTOR))            append(sb, "Y SD Factor");
 		//@formatter:on
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	private static void append(StringBuilder sb, String name)
-	{
-		if (sb.length() != 0)
-			sb.append("; ");
-		sb.append(name);
-	}
+    private static void append(StringBuilder sb, String name)
+    {
+        if (sb.length() != 0)
+            sb.append("; ");
+        sb.append(name);
+    }
 
-	/**
-	 * Gets the strength. This is used in the {@link #weakestUnsafe(Filter)} method before the parameters are compared.
-	 *
-	 * @return the strength
-	 */
-	public float getStrength()
-	{
-		return strength;
-	}
+    /**
+     * Gets the strength. This is used in the {@link #weakestUnsafe(Filter)} method before the parameters are compared.
+     *
+     * @return the strength
+     */
+    public float getStrength()
+    {
+        return strength;
+    }
 
-	/**
-	 * Sets the strength. This is used in the {@link #weakestUnsafe(DirectFilter)} method before the parameters are
-	 * compared.
-	 *
-	 * @param strength
-	 *            the new strength
-	 */
-	public void setStrength(float strength)
-	{
-		this.strength = strength;
-	}
+    /**
+     * Sets the strength. This is used in the {@link #weakestUnsafe(DirectFilter)} method before the parameters are
+     * compared.
+     *
+     * @param strength
+     *            the new strength
+     */
+    public void setStrength(float strength)
+    {
+        this.strength = strength;
+    }
 
-	/**
-	 * Compute strength using the limits on the parameters. Strength is computed using the distance from the lower/upper
-	 * bounds inside the range for each parameter. The bounds to choose is determined by the method
-	 * {@link #lowerBoundOrientation(int)}.
-	 * <p>
-	 * Warning: No checks are made for the input arrays to be null or incorrect length.
-	 * <p>
-	 * If lower is equal or above upper then this index is ignored.
-	 *
-	 * @param lower
-	 *            the lower limit
-	 * @param upper
-	 *            the upper limit
-	 * @return the strength
-	 */
-	public float computeStrength(double[] lower, double[] upper)
-	{
-		double s = 0;
-		final double[] p = getParameters();
-		for (int i = 0; i < p.length; i++)
-		{
-			final double range = upper[i] - lower[i];
-			if (range <= 0)
-				// Ignore this as it will produce bad strength data
-				continue;
-			final int o = lowerBoundOrientation(i);
-			if (o < 0)
-				s += (p[i] - lower[i]) / range;
-			else if (o > 0)
-				s += (upper[i] - p[i]) / range;
-		}
-		return (float) s;
-	}
+    /**
+     * Compute strength using the limits on the parameters. Strength is computed using the distance from the lower/upper
+     * bounds inside the range for each parameter. The bounds to choose is determined by the method
+     * {@link #lowerBoundOrientation(int)}.
+     * <p>
+     * Warning: No checks are made for the input arrays to be null or incorrect length.
+     * <p>
+     * If lower is equal or above upper then this index is ignored.
+     *
+     * @param lower
+     *            the lower limit
+     * @param upper
+     *            the upper limit
+     * @return the strength
+     */
+    public float computeStrength(double[] lower, double[] upper)
+    {
+        double s = 0;
+        final double[] p = getParameters();
+        for (int i = 0; i < p.length; i++)
+        {
+            final double range = upper[i] - lower[i];
+            if (range <= 0)
+                // Ignore this as it will produce bad strength data
+                continue;
+            final int o = lowerBoundOrientation(i);
+            if (o < 0)
+                s += (p[i] - lower[i]) / range;
+            else if (o > 0)
+                s += (upper[i] - p[i]) / range;
+        }
+        return (float) s;
+    }
 
-	/**
-	 * Get the lower bound orientation for the given parameter index. This is the orientation of the bound for the
-	 * weakest parameter. E.g. if a parameter must be low to be weak, the orientation is -1.
-	 *
-	 * @param index
-	 *            the index
-	 * @return the lower bound orientation.
-	 */
-	public int lowerBoundOrientation(int index)
-	{
-		return -1;
-	}
+    /**
+     * Get the lower bound orientation for the given parameter index. This is the orientation of the bound for the
+     * weakest parameter. E.g. if a parameter must be low to be weak, the orientation is -1.
+     *
+     * @param index
+     *            the index
+     * @return the lower bound orientation.
+     */
+    public int lowerBoundOrientation(int index)
+    {
+        return -1;
+    }
 
-	/**
-	 * Compare to the other filter using the strength property and return the weakest. If equal (or the strength is not
-	 * set) then default to the {@link #weakest(Filter)} method.
-	 * <p>
-	 * This method does not check for null or if the other filter has a different number of parameters.
-	 *
-	 * @param o
-	 *            The other filter
-	 * @return the count difference
-	 */
-	public int weakestUnsafe(DirectFilter o)
-	{
-		//		// This should not happen if used correctly
-		//		if (Float.isNaN(strength) || Float.isNaN(o.strength))
-		//		{
-		//			System.out.println("No strength (nan)");
-		//			return super.weakestUnsafe(o);
-		//		}
-		//		if (Float.isInfinite(strength) || Float.isInfinite(o.strength))
-		//		{
-		//			System.out.println("No strength (inf)");
-		//			return super.weakestUnsafe(o);
-		//		}
+    /**
+     * Compare to the other filter using the strength property and return the weakest. If equal (or the strength is not
+     * set) then default to the {@link #weakest(Filter)} method.
+     * <p>
+     * This method does not check for null or if the other filter has a different number of parameters.
+     *
+     * @param o
+     *            The other filter
+     * @return the count difference
+     */
+    public int weakestUnsafe(DirectFilter o)
+    {
+        //		// This should not happen if used correctly
+        //		if (Float.isNaN(strength) || Float.isNaN(o.strength))
+        //		{
+        //			System.out.println("No strength (nan)");
+        //			return super.weakestUnsafe(o);
+        //		}
+        //		if (Float.isInfinite(strength) || Float.isInfinite(o.strength))
+        //		{
+        //			System.out.println("No strength (inf)");
+        //			return super.weakestUnsafe(o);
+        //		}
 
-		//System.out.println("weakestUnsafe");
+        //System.out.println("weakestUnsafe");
 
-		//int result = super.weakestUnsafe(o);
+        //int result = super.weakestUnsafe(o);
 
-		if (this.strength < o.strength)
-			//if (result >= 0)
-			//	System.out.println("Strength not same as weakest");
-			return -1;
-		if (this.strength > o.strength)
-			//if (result <= 0)
-			//	System.out.println("Strength not same as weakest");
-			return 1;
-		return super.weakestUnsafe(o);
-	}
+        if (this.strength < o.strength)
+            //if (result >= 0)
+            //	System.out.println("Strength not same as weakest");
+            return -1;
+        if (this.strength > o.strength)
+            //if (result <= 0)
+            //	System.out.println("Strength not same as weakest");
+            return 1;
+        return super.weakestUnsafe(o);
+    }
 }

@@ -30,25 +30,25 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PeakResultDataError extends PeakResultDataDouble
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public Double getValue(PeakResult result)
-	{
-		return result.getError();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public Double getValue(PeakResult result)
+    {
+        return result.getError();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return "Error";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return "Error";
+    }
 }

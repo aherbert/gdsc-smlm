@@ -46,54 +46,54 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
  */
 public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, Gradient1Function, NamedFunction
 {
-	/**
-	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
-	 */
-	public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
+    /**
+     * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
+     */
+    public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
 
-	/**
-	 * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
-	 */
-	public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
+    /**
+     * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
+     */
+    public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
 
-	private NoiseModel noiseModel = null;
+    private NoiseModel noiseModel = null;
 
-	/** Constant for 1/2*pi */
-	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
+    /** Constant for 1/2*pi */
+    public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
 
-	/** Index of the background in the parameters array */
-	public static final int BACKGROUND = 0;
-	/** Index of the signal intensity in the parameters array */
-	public static final int SIGNAL = 1;
-	/** Index of the x-position in the parameters array */
-	public static final int X_POSITION = 2;
-	/** Index of the y-position in the parameters array */
-	public static final int Y_POSITION = 3;
-	/** Index of the z-position in the parameters array */
-	public static final int Z_POSITION = 4;
-	/** Index of the x-standard deviation in the parameters array */
-	public static final int X_SD = 5;
-	/** Index of the y-standard deviation in the parameters array */
-	public static final int Y_SD = 6;
-	/** Index of the angle in the parameters array */
-	public static final int ANGLE = 7;
+    /** Index of the background in the parameters array */
+    public static final int BACKGROUND = 0;
+    /** Index of the signal intensity in the parameters array */
+    public static final int SIGNAL = 1;
+    /** Index of the x-position in the parameters array */
+    public static final int X_POSITION = 2;
+    /** Index of the y-position in the parameters array */
+    public static final int Y_POSITION = 3;
+    /** Index of the z-position in the parameters array */
+    public static final int Z_POSITION = 4;
+    /** Index of the x-standard deviation in the parameters array */
+    public static final int X_SD = 5;
+    /** Index of the y-standard deviation in the parameters array */
+    public static final int Y_SD = 6;
+    /** Index of the angle in the parameters array */
+    public static final int ANGLE = 7;
 
-	/** The number of parameters per Gaussian peak */
-	public static final int PARAMETERS_PER_PEAK = 7;
+    /** The number of parameters per Gaussian peak */
+    public static final int PARAMETERS_PER_PEAK = 7;
 
-	/**
-	 * Gets the name of the parameter assuming a 2D Gaussian function.
-	 *
-	 * @param index
-	 *            the index (zero or above)
-	 * @return the name
-	 */
-	public static String getName(int index)
-	{
-		final int i = 1 + (index - 1) % PARAMETERS_PER_PEAK;
-		switch (i)
-		{
-			//@formatter:off
+    /**
+     * Gets the name of the parameter assuming a 2D Gaussian function.
+     *
+     * @param index
+     *            the index (zero or above)
+     * @return the name
+     */
+    public static String getName(int index)
+    {
+        final int i = 1 + (index - 1) % PARAMETERS_PER_PEAK;
+        switch (i)
+        {
+            //@formatter:off
 			case BACKGROUND: return "Background";
 			case SIGNAL: return "Signal";
 			case X_POSITION: return "X";
@@ -104,503 +104,503 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 			case ANGLE: return "Angle";
 			default: return "Unknown: "+index;
 			//@formatter:on
-		}
-	}
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.NamedFunction#getParameterName(int)
-	 */
-	@Override
-	public String getParameterName(int i)
-	{
-		return getName(i);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.NamedFunction#getParameterName(int)
+     */
+    @Override
+    public String getParameterName(int i)
+    {
+        return getName(i);
+    }
 
-	/**
-	 * Gets the peak number (zero-based index) of the parameter assuming a 2D Gaussian function.
-	 *
-	 * @param index
-	 *            the index (zero or above)
-	 * @return the peak number
-	 */
-	public static int getPeak(int index)
-	{
-		if (index < 1)
-			return 0;
-		return (index - 1) / PARAMETERS_PER_PEAK;
-	}
+    /**
+     * Gets the peak number (zero-based index) of the parameter assuming a 2D Gaussian function.
+     *
+     * @param index
+     *            the index (zero or above)
+     * @return the peak number
+     */
+    public static int getPeak(int index)
+    {
+        if (index < 1)
+            return 0;
+        return (index - 1) / PARAMETERS_PER_PEAK;
+    }
 
-	/**
-	 * Gets the index of the parameter in a multi-peak parameter array assuming a 2D Gaussian function.
-	 *
-	 * @param peak
-	 *            the peak number (zero-based index)
-	 * @param parameterIndex
-	 *            the parameter index for a single peak (this can use the class constants, e.g.
-	 *            {@link Gaussian2DFunction#SIGNAL})
-	 * @return the index
-	 */
-	public static int getIndex(int peak, int parameterIndex)
-	{
-		if (parameterIndex < 1)
-			return 0;
-		return peak * PARAMETERS_PER_PEAK + parameterIndex;
-	}
+    /**
+     * Gets the index of the parameter in a multi-peak parameter array assuming a 2D Gaussian function.
+     *
+     * @param peak
+     *            the peak number (zero-based index)
+     * @param parameterIndex
+     *            the parameter index for a single peak (this can use the class constants, e.g.
+     *            {@link Gaussian2DFunction#SIGNAL})
+     * @return the index
+     */
+    public static int getIndex(int peak, int parameterIndex)
+    {
+        if (parameterIndex < 1)
+            return 0;
+        return peak * PARAMETERS_PER_PEAK + parameterIndex;
+    }
 
-	/** The maxx. */
-	protected final int maxx;
-	/** The maxy. */
-	protected final int maxy;
+    /** The maxx. */
+    protected final int maxx;
+    /** The maxy. */
+    protected final int maxy;
 
-	/**
-	 * Instantiates a new gaussian 2 D function.
-	 *
-	 * @param maxx
-	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param maxy
-	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 */
-	public Gaussian2DFunction(int maxx, int maxy)
-	{
-		this.maxx = (maxx < 1) ? 1 : maxx;
-		this.maxy = (maxy < 1) ? 1 : maxy;
-	}
+    /**
+     * Instantiates a new gaussian 2 D function.
+     *
+     * @param maxx
+     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     * @param maxy
+     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     */
+    public Gaussian2DFunction(int maxx, int maxy)
+    {
+        this.maxx = (maxx < 1) ? 1 : maxx;
+        this.maxy = (maxy < 1) ? 1 : maxy;
+    }
 
-	/**
-	 * @return the dimensions
-	 */
-	public int[] getDimensions()
-	{
-		return new int[] { maxx, maxy };
-	}
+    /**
+     * @return the dimensions
+     */
+    public int[] getDimensions()
+    {
+        return new int[] { maxx, maxy };
+    }
 
-	/**
-	 * @return the maximum size in the first dimension
-	 */
-	public int getMaxX()
-	{
-		return maxx;
-	}
+    /**
+     * @return the maximum size in the first dimension
+     */
+    public int getMaxX()
+    {
+        return maxx;
+    }
 
-	/**
-	 * @return the maximum size in the second dimension
-	 */
-	public int getMaxY()
-	{
-		return maxy;
-	}
+    /**
+     * @return the maximum size in the second dimension
+     */
+    public int getMaxY()
+    {
+        return maxy;
+    }
 
-	/**
-	 * Copy the function.
-	 *
-	 * @return a copy
-	 */
-	abstract public Gaussian2DFunction copy();
+    /**
+     * Copy the function.
+     *
+     * @return a copy
+     */
+    abstract public Gaussian2DFunction copy();
 
-	/**
-	 * @return the number of peaks
-	 */
-	public abstract int getNPeaks();
+    /**
+     * @return the number of peaks
+     */
+    public abstract int getNPeaks();
 
-	/**
-	 * @return True if the function can evaluate the background gradient
-	 */
-	public abstract boolean evaluatesBackground();
+    /**
+     * @return True if the function can evaluate the background gradient
+     */
+    public abstract boolean evaluatesBackground();
 
-	/**
-	 * @return True if the function can evaluate the signal gradient
-	 */
-	public abstract boolean evaluatesSignal();
+    /**
+     * @return True if the function can evaluate the signal gradient
+     */
+    public abstract boolean evaluatesSignal();
 
-	/**
-	 * @return True if the function can evaluate the XY-position gradient
-	 */
-	public abstract boolean evaluatesPosition();
+    /**
+     * @return True if the function can evaluate the XY-position gradient
+     */
+    public abstract boolean evaluatesPosition();
 
-	/**
-	 * @return True if the function can evaluate the Z-position gradient
-	 */
-	public boolean evaluatesZ()
-	{
-		// No standard Gaussian 2D function evaluates the z-position
-		return false;
-	}
+    /**
+     * @return True if the function can evaluate the Z-position gradient
+     */
+    public boolean evaluatesZ()
+    {
+        // No standard Gaussian 2D function evaluates the z-position
+        return false;
+    }
 
-	/**
-	 * @return True if the function can evaluate the standard deviation gradient for the 1st dimension
-	 */
-	public abstract boolean evaluatesSD0();
+    /**
+     * @return True if the function can evaluate the standard deviation gradient for the 1st dimension
+     */
+    public abstract boolean evaluatesSD0();
 
-	/**
-	 * @return True if the function can evaluate the standard deviation gradient for the 2nd dimension
-	 */
-	public abstract boolean evaluatesSD1();
+    /**
+     * @return True if the function can evaluate the standard deviation gradient for the 2nd dimension
+     */
+    public abstract boolean evaluatesSD1();
 
-	/**
-	 * @return True if the function can evaluate the angle gradient
-	 */
-	public abstract boolean evaluatesAngle();
+    /**
+     * @return True if the function can evaluate the angle gradient
+     */
+    public abstract boolean evaluatesAngle();
 
-	/**
-	 * @return The number of gradient parameters per peak
-	 */
-	public abstract int getGradientParametersPerPeak();
+    /**
+     * @return The number of gradient parameters per peak
+     */
+    public abstract int getGradientParametersPerPeak();
 
-	/**
-	 * Produce an output predicted value for a given set of input
-	 * predictors (x) and coefficients (a).
-	 * <p>
-	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
-	 * <p>
-	 * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
-	 * using the indices specified in the Gaussian2DFunction class.
-	 *
-	 * @param x
-	 *            Input predictor
-	 * @return The predicted value
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int)
-	 */
-	@Override
-	public abstract double eval(final int x);
+    /**
+     * Produce an output predicted value for a given set of input
+     * predictors (x) and coefficients (a).
+     * <p>
+     * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+     * <p>
+     * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
+     * using the indices specified in the Gaussian2DFunction class.
+     *
+     * @param x
+     *            Input predictor
+     * @return The predicted value
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int)
+     */
+    @Override
+    public abstract double eval(final int x);
 
-	/**
-	 * Produce an output predicted value for a given set of input
-	 * predictors (x) and coefficients (a).
-	 * <p>
-	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
-	 * <p>
-	 * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
-	 * using the indices specified in the Gaussian2DFunction class.
-	 *
-	 * @param x
-	 *            Input predictor
-	 * @param dyda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
-	 */
-	@Override
-	public abstract double eval(final int x, final double[] dyda);
+    /**
+     * Produce an output predicted value for a given set of input
+     * predictors (x) and coefficients (a).
+     * <p>
+     * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+     * <p>
+     * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
+     * using the indices specified in the Gaussian2DFunction class.
+     *
+     * @param x
+     *            Input predictor
+     * @param dyda
+     *            Partial gradient of function with respect to each coefficient
+     * @return The predicted value
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+     */
+    @Override
+    public abstract double eval(final int x, final double[] dyda);
 
-	/**
-	 * Execute the {@link #eval(int, double[])} method and set the expected variance using the noise model
-	 *
-	 * @throws NullPointerException
-	 *             if the noise model is null
-	 */
-	@Override
-	public double eval(final int x, final double[] dyda, final double[] w) throws NullPointerException
-	{
-		final double value = eval(x, dyda);
-		//w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
-		// Just throw a null pointer exception if noiseModel is null
-		w[0] = noiseModel.variance(value);
-		return value;
-	}
+    /**
+     * Execute the {@link #eval(int, double[])} method and set the expected variance using the noise model
+     *
+     * @throws NullPointerException
+     *             if the noise model is null
+     */
+    @Override
+    public double eval(final int x, final double[] dyda, final double[] w) throws NullPointerException
+    {
+        final double value = eval(x, dyda);
+        //w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
+        // Just throw a null pointer exception if noiseModel is null
+        w[0] = noiseModel.variance(value);
+        return value;
+    }
 
-	/**
-	 * Execute the {@link #eval(int)} method and set the expected variance using the noise model
-	 *
-	 * @throws NullPointerException
-	 *             if the noise model is null
-	 * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
-	 */
-	@Override
-	public double evalw(int x, double[] w)
-	{
-		final double value = eval(x);
-		//w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
-		// Just throw a null pointer exception if noiseModel is null
-		w[0] = noiseModel.variance(value);
-		return value;
-	}
+    /**
+     * Execute the {@link #eval(int)} method and set the expected variance using the noise model
+     *
+     * @throws NullPointerException
+     *             if the noise model is null
+     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
+     */
+    @Override
+    public double evalw(int x, double[] w)
+    {
+        final double value = eval(x);
+        //w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
+        // Just throw a null pointer exception if noiseModel is null
+        w[0] = noiseModel.variance(value);
+        return value;
+    }
 
-	/**
-	 * @return the noise model
-	 */
-	public NoiseModel getNoiseModel()
-	{
-		return noiseModel;
-	}
+    /**
+     * @return the noise model
+     */
+    public NoiseModel getNoiseModel()
+    {
+        return noiseModel;
+    }
 
-	/**
-	 * Set the noise model used in {@link #eval(int, double[], double[])}.
-	 *
-	 * @param noiseModel
-	 *            the noise model to set
-	 */
-	public void setNoiseModel(NoiseModel noiseModel)
-	{
-		this.noiseModel = noiseModel;
-	}
+    /**
+     * Set the noise model used in {@link #eval(int, double[], double[])}.
+     *
+     * @param noiseModel
+     *            the noise model to set
+     */
+    public void setNoiseModel(NoiseModel noiseModel)
+    {
+        this.noiseModel = noiseModel;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
-	 */
-	@Override
-	public boolean canComputeWeights()
-	{
-		return (noiseModel != null);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
+     */
+    @Override
+    public boolean canComputeWeights()
+    {
+        return (noiseModel != null);
+    }
 
-	/**
-	 * Build the index array that maps the gradient index back to the original parameter index so that:<br>
-	 * a[indices[i]] += dy_da[i]
-	 *
-	 * @param nPeaks
-	 *            the number of peaks
-	 * @return The indices
-	 */
-	protected int[] createGradientIndices(int nPeaks)
-	{
-		return createGradientIndices(nPeaks, this);
-	}
+    /**
+     * Build the index array that maps the gradient index back to the original parameter index so that:<br>
+     * a[indices[i]] += dy_da[i]
+     *
+     * @param nPeaks
+     *            the number of peaks
+     * @return The indices
+     */
+    protected int[] createGradientIndices(int nPeaks)
+    {
+        return createGradientIndices(nPeaks, this);
+    }
 
-	/**
-	 * Creates the gradient indices.
-	 *
-	 * @param nPeaks
-	 *            the number of peaks
-	 * @param gf
-	 *            the gradient function
-	 * @return the gradient indices.
-	 */
-	protected static int[] createGradientIndices(int nPeaks, Gaussian2DFunction gf)
-	{
-		// Parameters are:
-		// Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
-		final int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
-		final int[] indices = new int[nparams];
+    /**
+     * Creates the gradient indices.
+     *
+     * @param nPeaks
+     *            the number of peaks
+     * @param gf
+     *            the gradient function
+     * @return the gradient indices.
+     */
+    protected static int[] createGradientIndices(int nPeaks, Gaussian2DFunction gf)
+    {
+        // Parameters are:
+        // Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
+        final int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
+        final int[] indices = new int[nparams];
 
-		int p = 0;
-		if (gf.evaluatesBackground())
-			indices[p++] = 0;
-		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
-		{
-			if (gf.evaluatesSignal())
-				indices[p++] = i + SIGNAL;
-			// All functions evaluate the position gradient
-			indices[p++] = i + X_POSITION;
-			indices[p++] = i + Y_POSITION;
-			if (gf.evaluatesZ())
-				indices[p++] = i + Z_POSITION;
-			if (gf.evaluatesSD0())
-				indices[p++] = i + X_SD;
-			if (gf.evaluatesSD1())
-				indices[p++] = i + Y_SD;
-			if (gf.evaluatesAngle())
-				indices[p++] = i + ANGLE;
-		}
+        int p = 0;
+        if (gf.evaluatesBackground())
+            indices[p++] = 0;
+        for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
+        {
+            if (gf.evaluatesSignal())
+                indices[p++] = i + SIGNAL;
+            // All functions evaluate the position gradient
+            indices[p++] = i + X_POSITION;
+            indices[p++] = i + Y_POSITION;
+            if (gf.evaluatesZ())
+                indices[p++] = i + Z_POSITION;
+            if (gf.evaluatesSD0())
+                indices[p++] = i + X_SD;
+            if (gf.evaluatesSD1())
+                indices[p++] = i + Y_SD;
+            if (gf.evaluatesAngle())
+                indices[p++] = i + ANGLE;
+        }
 
-		return indices;
-	}
+        return indices;
+    }
 
-	/**
-	 * Gets the name of the gradient parameter.
-	 *
-	 * @param index
-	 *            the index (must be within the array returned from {@link #gradientIndices()})
-	 * @return the name
-	 */
-	public String getGradientParameterName(int index)
-	{
-		return getName(gradientIndices()[index]);
-	}
+    /**
+     * Gets the name of the gradient parameter.
+     *
+     * @param index
+     *            the index (must be within the array returned from {@link #gradientIndices()})
+     * @return the name
+     */
+    public String getGradientParameterName(int index)
+    {
+        return getName(gradientIndices()[index]);
+    }
 
-	/**
-	 * Locate the index within the gradient indices for the specified parameter.
-	 *
-	 * @param parameterIndex
-	 *            the parameter index
-	 * @return the gradient index (or -1 if not present)
-	 */
-	public int findGradientIndex(int parameterIndex)
-	{
-		final int[] gradientIndices = gradientIndices();
-		for (int i = 0; i < gradientIndices.length; i++)
-			if (gradientIndices[i] == parameterIndex)
-				return i;
-		return -1;
-	}
+    /**
+     * Locate the index within the gradient indices for the specified parameter.
+     *
+     * @param parameterIndex
+     *            the parameter index
+     * @return the gradient index (or -1 if not present)
+     */
+    public int findGradientIndex(int parameterIndex)
+    {
+        final int[] gradientIndices = gradientIndices();
+        for (int i = 0; i < gradientIndices.length; i++)
+            if (gradientIndices[i] == parameterIndex)
+                return i;
+        return -1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
-	 */
-	@Override
-	public double[] computeValues(double[] variables)
-	{
-		initialise0(variables);
-		final double[] values = new double[size()];
-		forEach(new ValueProcedure()
-		{
-			int i = 0;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
+     */
+    @Override
+    public double[] computeValues(double[] variables)
+    {
+        initialise0(variables);
+        final double[] values = new double[size()];
+        forEach(new ValueProcedure()
+        {
+            int i = 0;
 
-			@Override
-			public void execute(double value)
-			{
-				values[i++] = value;
-			}
-		});
-		return values;
-	}
+            @Override
+            public void execute(double value)
+            {
+                values[i++] = value;
+            }
+        });
+        return values;
+    }
 
-	/**
-	 * Compute the integral. This is the sum of the values.
-	 *
-	 * @param a
-	 *            an array of coefficients
-	 * @return the integral
-	 */
-	public double integral(double[] a)
-	{
-		return new IntegralValueProcedure().getIntegral(this, a);
-	}
+    /**
+     * Compute the integral. This is the sum of the values.
+     *
+     * @param a
+     *            an array of coefficients
+     * @return the integral
+     */
+    public double integral(double[] a)
+    {
+        return new IntegralValueProcedure().getIntegral(this, a);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
-	 */
-	@Override
-	public double[][] computeJacobian(double[] variables)
-	{
-		return computeValuesAndJacobian(variables).b;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
+     */
+    @Override
+    public double[][] computeJacobian(double[] variables)
+    {
+        return computeValuesAndJacobian(variables).b;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
-	 */
-	@Override
-	public boolean canComputeValuesAndJacobian()
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
+     */
+    @Override
+    public boolean canComputeValuesAndJacobian()
+    {
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
-	 */
-	@Override
-	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
-	{
-		initialise1(variables);
-		final int n = size();
-		final double[][] jacobian = new double[n][];
-		final double[] values = new double[n];
-		forEach(new Gradient1Procedure()
-		{
-			int i = 0;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
+     */
+    @Override
+    public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
+    {
+        initialise1(variables);
+        final int n = size();
+        final double[][] jacobian = new double[n][];
+        final double[] values = new double[n];
+        forEach(new Gradient1Procedure()
+        {
+            int i = 0;
 
-			@Override
-			public void execute(double value, double[] dy_da)
-			{
-				values[i] = value;
-				jacobian[i++] = dy_da.clone();
-			}
-		});
-		return new Pair<>(values, jacobian);
-	}
+            @Override
+            public void execute(double value, double[] dy_da)
+            {
+                values[i] = value;
+                jacobian[i++] = dy_da.clone();
+            }
+        });
+        return new Pair<>(values, jacobian);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#size()
-	 */
-	@Override
-	public int size()
-	{
-		return maxx * maxy;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#size()
+     */
+    @Override
+    public int size()
+    {
+        return maxx * maxy;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-	 */
-	@Override
-	public int getNumberOfGradients()
-	{
-		return gradientIndices().length;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+     */
+    @Override
+    public int getNumberOfGradients()
+    {
+        return gradientIndices().length;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
-	 */
-	@Override
-	public void forEach(ValueProcedure procedure)
-	{
-		for (int i = 0, n = size(); i < n; i++)
-			procedure.execute(eval(i));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
+     */
+    @Override
+    public void forEach(ValueProcedure procedure)
+    {
+        for (int i = 0, n = size(); i < n; i++)
+            procedure.execute(eval(i));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
-	 */
-	@Override
-	public void forEach(Gradient1Procedure procedure)
-	{
-		final double[] duda = new double[getNumberOfGradients()];
-		for (int i = 0, n = size(); i < n; i++)
-		{
-			final double value = eval(i, duda);
-			procedure.execute(value, duda);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
+     */
+    @Override
+    public void forEach(Gradient1Procedure procedure)
+    {
+        final double[] duda = new double[getNumberOfGradients()];
+        for (int i = 0, n = size(); i < n; i++)
+        {
+            final double value = eval(i, duda);
+            procedure.execute(value, duda);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
-	 */
-	@Override
-	public void initialise0(double[] a)
-	{
-		// TODO - Update these functions to support initialisation
-		// for computing the value only
-		initialise(a);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
+     */
+    @Override
+    public void initialise0(double[] a)
+    {
+        // TODO - Update these functions to support initialisation
+        // for computing the value only
+        initialise(a);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
-	 */
-	@Override
-	public void initialise1(double[] a)
-	{
-		initialise(a);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
+     */
+    @Override
+    public void initialise1(double[] a)
+    {
+        initialise(a);
+    }
 
-	/**
-	 * Check if NaN (invalid) gradients.
-	 *
-	 * @param a
-	 *            the gradients
-	 * @return true, if successful
-	 */
-	protected static boolean invalidGradients(double[] a)
-	{
-		for (int i = 0; i < a.length; i++)
-			if (Double.isNaN(a[i]))
-			{
-				System.out.println(Arrays.toString(a));
-				return true;
-			}
-		return false;
-	}
+    /**
+     * Check if NaN (invalid) gradients.
+     *
+     * @param a
+     *            the gradients
+     * @return true, if successful
+     */
+    protected static boolean invalidGradients(double[] a)
+    {
+        for (int i = 0; i < a.length; i++)
+            if (Double.isNaN(a[i]))
+            {
+                System.out.println(Arrays.toString(a));
+                return true;
+            }
+        return false;
+    }
 }

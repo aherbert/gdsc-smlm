@@ -28,14 +28,14 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public interface Gradient1Procedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param value
-	 *            the value of the function
-	 * @param dy_da
-	 *            Partial first derivative of function with respect to each coefficient identified by
-	 *            {@link GradientFunction#gradientIndices()}
-	 */
-	public void execute(double value, double[] dy_da);
+    /**
+     * Executes this procedure.
+     *
+     * @param value
+     *            the value of the function
+     * @param dy_da
+     *            Partial first derivative of function with respect to each coefficient identified by
+     *            {@link GradientFunction#gradientIndices()}
+     */
+    public void execute(double value, double[] dy_da);
 }

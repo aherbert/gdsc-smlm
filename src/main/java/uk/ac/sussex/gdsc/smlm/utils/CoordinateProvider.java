@@ -28,12 +28,12 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public interface CoordinateProvider
 {
-	/**
-	 * Get the coordinates from the line.
-	 *
-	 * @param line
-	 *            the line
-	 * @return The coordinates (or null)
-	 */
-	public double[] getCoordinates(String line);
+    /**
+     * Get the coordinates from the line.
+     *
+     * @param line
+     *            the line
+     * @return The coordinates (or null)
+     */
+    public double[] getCoordinates(String line);
 }

@@ -28,42 +28,42 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class StandardGradient1Procedure implements Gradient1Procedure
 {
-	private int i;
+    private int i;
 
-	/** The values from the last call to {@link #getValues(Gradient1Function, double[])}. */
-	public double[] values;
-	/** The gradients from the last call to {@link #getValues(Gradient1Function, double[])}. */
-	public double[][] dyda;
+    /** The values from the last call to {@link #getValues(Gradient1Function, double[])}. */
+    public double[] values;
+    /** The gradients from the last call to {@link #getValues(Gradient1Function, double[])}. */
+    public double[][] dyda;
 
-	/**
-	 * Gets the values.
-	 *
-	 * @param f
-	 *            the function
-	 * @param a
-	 *            the function coefficients
-	 * @return the values
-	 */
-	public double[] getValues(Gradient1Function f, double[] a)
-	{
-		values = new double[f.size()];
-		dyda = new double[values.length][];
-		i = 0;
-		f.initialise1(a);
-		f.forEach(this);
-		return values;
-	}
+    /**
+     * Gets the values.
+     *
+     * @param f
+     *            the function
+     * @param a
+     *            the function coefficients
+     * @return the values
+     */
+    public double[] getValues(Gradient1Function f, double[] a)
+    {
+        values = new double[f.size()];
+        dyda = new double[values.length][];
+        i = 0;
+        f.initialise1(a);
+        f.forEach(this);
+        return values;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		values[i] = value;
-		dyda[i] = dy_da.clone();
-		i++;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        values[i] = value;
+        dyda[i] = dy_da.clone();
+        i++;
+    }
 }

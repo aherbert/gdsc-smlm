@@ -28,22 +28,22 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public abstract class BaseFilter implements Cloneable
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public BaseFilter clone()
-	{
-		try
-		{
-			return (BaseFilter) super.clone();
-		}
-		catch (final CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public BaseFilter clone()
+    {
+        try
+        {
+            return (BaseFilter) super.clone();
+        }
+        catch (final CloneNotSupportedException e)
+        {
+            // Ignore
+        }
+        return null;
+    }
 }

@@ -28,27 +28,27 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class FastLogFactory
 {
-	private static FastLog fastLog = null;
+    private static FastLog fastLog = null;
 
-	/**
-	 * Gets the global fast log instance.
-	 *
-	 * @return the fast log instance
-	 */
-	public static FastLog getFastLog()
-	{
-		if (fastLog == null)
-			fastLog = new TurboLog();
-		return fastLog;
-	}
+    /**
+     * Gets the global fast log instance.
+     *
+     * @return the fast log instance
+     */
+    public static FastLog getFastLog()
+    {
+        if (fastLog == null)
+            fastLog = new TurboLog();
+        return fastLog;
+    }
 
-	/**
-	 * Gets an instance of FastLog that uses Math.log, i.e. this is not fast.
-	 *
-	 * @return the log instance
-	 */
-	public static FastLog getLog()
-	{
-		return NonFastLog.INSTANCE;
-	}
+    /**
+     * Gets an instance of FastLog that uses Math.log, i.e. this is not fast.
+     *
+     * @return the log instance
+     */
+    public static FastLog getLog()
+    {
+        return NonFastLog.INSTANCE;
+    }
 }

@@ -30,27 +30,27 @@ import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
  */
 public class PeakFractionalAssignment extends ImmutableFractionalAssignment
 {
-	/** The peak result. */
-	public final PreprocessedPeakResult peakResult;
+    /** The peak result. */
+    public final PreprocessedPeakResult peakResult;
 
-	/**
-	 * Instantiates a new custom fractional assignment.
-	 *
-	 * @param targetId
-	 *            the target id
-	 * @param predictedId
-	 *            the predicted id
-	 * @param distance
-	 *            the distance
-	 * @param score
-	 *            the score
-	 * @param peakResult
-	 *            the peak result
-	 */
-	public PeakFractionalAssignment(int targetId, int predictedId, double distance, double score,
-			PreprocessedPeakResult peakResult)
-	{
-		super(targetId, predictedId, distance, score);
-		this.peakResult = peakResult;
-	}
+    /**
+     * Instantiates a new custom fractional assignment.
+     *
+     * @param targetId
+     *            the target id
+     * @param predictedId
+     *            the predicted id
+     * @param distance
+     *            the distance
+     * @param score
+     *            the score
+     * @param peakResult
+     *            the peak result
+     */
+    public PeakFractionalAssignment(int targetId, int predictedId, double distance, double score,
+            PreprocessedPeakResult peakResult)
+    {
+        super(targetId, predictedId, distance, score);
+        this.peakResult = peakResult;
+    }
 }

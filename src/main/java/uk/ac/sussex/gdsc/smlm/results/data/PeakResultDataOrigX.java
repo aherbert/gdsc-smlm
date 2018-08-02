@@ -30,25 +30,25 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PeakResultDataOrigX extends PeakResultDataInteger
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public Integer getValue(PeakResult result)
-	{
-		return result.getOrigX();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public Integer getValue(PeakResult result)
+    {
+        return result.getOrigX();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return "Orig X";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return "Orig X";
+    }
 }

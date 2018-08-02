@@ -31,11 +31,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface LSEPrecisionProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param precision
-	 *            the precision
-	 */
-	public void executeLSEPrecision(double precision);
+    /**
+     * Executes this procedure.
+     *
+     * @param precision
+     *            the precision
+     */
+    public void executeLSEPrecision(double precision);
 }

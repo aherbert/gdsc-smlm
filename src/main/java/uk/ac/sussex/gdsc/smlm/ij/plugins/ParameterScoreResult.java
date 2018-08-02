@@ -28,32 +28,32 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
  */
 public class ParameterScoreResult
 {
-	/** The score. */
-	final double score;
-	/** The criteria. */
-	final double criteria;
-	/** The parameters. */
-	final double[] parameters;
-	/** The text. */
-	final String text;
+    /** The score. */
+    final double score;
+    /** The criteria. */
+    final double criteria;
+    /** The parameters. */
+    final double[] parameters;
+    /** The text. */
+    final String text;
 
-	/**
-	 * Instantiates a new parameter score result.
-	 *
-	 * @param score
-	 *            the score
-	 * @param criteria
-	 *            the criteria
-	 * @param parameters
-	 *            the parameters
-	 * @param text
-	 *            the text
-	 */
-	public ParameterScoreResult(double score, double criteria, double[] parameters, String text)
-	{
-		this.score = score;
-		this.criteria = criteria;
-		this.parameters = parameters;
-		this.text = text;
-	}
+    /**
+     * Instantiates a new parameter score result.
+     *
+     * @param score
+     *            the score
+     * @param criteria
+     *            the criteria
+     * @param parameters
+     *            the parameters
+     * @param text
+     *            the text
+     */
+    public ParameterScoreResult(double score, double criteria, double[] parameters, String text)
+    {
+        this.score = score;
+        this.criteria = criteria;
+        this.parameters = parameters;
+        this.text = text;
+    }
 }

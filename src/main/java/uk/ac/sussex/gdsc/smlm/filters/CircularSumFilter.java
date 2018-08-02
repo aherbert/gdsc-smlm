@@ -30,37 +30,37 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class CircularSumFilter extends CircularFilter
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
-	 */
-	@Override
-	protected Normaliser computeWeightedNormaliser(double radius)
-	{
-		return NonNormaliser.INSTANCE;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
+     */
+    @Override
+    protected Normaliser computeWeightedNormaliser(double radius)
+    {
+        return NonNormaliser.INSTANCE;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
-	 */
-	@Override
-	protected Normaliser computeNormaliser(int nPoints)
-	{
-		return NonNormaliser.INSTANCE;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
+     */
+    @Override
+    protected Normaliser computeNormaliser(int nPoints)
+    {
+        return NonNormaliser.INSTANCE;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public CircularSumFilter clone()
-	{
-		final CircularSumFilter o = (CircularSumFilter) super.clone();
-		return o;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public CircularSumFilter clone()
+    {
+        final CircularSumFilter o = (CircularSumFilter) super.clone();
+        return o;
+    }
 }

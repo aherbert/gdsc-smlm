@@ -32,29 +32,29 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class FrameEndFrameIntensityPeakResultComparator implements Comparator<PeakResult>
 {
-	/** An instance of the comparator */
-	public static final FrameEndFrameIntensityPeakResultComparator INSTANCE = new FrameEndFrameIntensityPeakResultComparator();
+    /** An instance of the comparator */
+    public static final FrameEndFrameIntensityPeakResultComparator INSTANCE = new FrameEndFrameIntensityPeakResultComparator();
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(PeakResult o1, PeakResult o2)
-	{
-		int f1 = o1.getFrame();
-		int f2 = o2.getFrame();
-		if (f1 < f2)
-			return -1;
-		if (f1 > f2)
-			return 1;
-		f1 = o1.getEndFrame();
-		f2 = o2.getEndFrame();
-		if (f1 < f2)
-			return -1;
-		if (f1 > f2)
-			return 1;
-		return Float.compare(o2.getIntensity(), o1.getIntensity());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(PeakResult o1, PeakResult o2)
+    {
+        int f1 = o1.getFrame();
+        int f2 = o2.getFrame();
+        if (f1 < f2)
+            return -1;
+        if (f1 > f2)
+            return 1;
+        f1 = o1.getEndFrame();
+        f2 = o2.getEndFrame();
+        if (f1 < f2)
+            return -1;
+        if (f1 > f2)
+            return 1;
+        return Float.compare(o2.getIntensity(), o1.getIntensity());
+    }
 }

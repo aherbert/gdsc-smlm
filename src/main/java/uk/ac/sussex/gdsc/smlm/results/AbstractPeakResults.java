@@ -38,338 +38,340 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  */
 public abstract class AbstractPeakResults implements PeakResults
 {
-	/** The default for nm/pixel */
-	public static final double DEFAULT_NM_PER_PIXEL = 0;
-	/** The default for gain */
-	public static final double DEFAULT_GAIN = 0;
-	/** The default for emCCD */
-	public static final boolean DEFAULT_EMCCD = true;
+    /** The default for nm/pixel */
+    public static final double DEFAULT_NM_PER_PIXEL = 0;
+    /** The default for gain */
+    public static final double DEFAULT_GAIN = 0;
+    /** The default for emCCD */
+    public static final boolean DEFAULT_EMCCD = true;
 
-	private ImageSource source = null;
-	private Rectangle bounds = null;
-	private Calibration calibration = null;
-	private PSF psf = null;
-	private String configuration = "";
-	private String name = "";
+    private ImageSource source = null;
+    private Rectangle bounds = null;
+    private Calibration calibration = null;
+    private PSF psf = null;
+    private String configuration = "";
+    private String name = "";
 
-	/** The calibration reader. This is encapsulated */
-	private CalibrationReader calibrationReader = null;
+    /** The calibration reader. This is encapsulated */
+    private CalibrationReader calibrationReader = null;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(java.util.Collection)
-	 */
-	@Override
-	public void addAll(Collection<PeakResult> results)
-	{
-		// Utility function
-		addAll(results.toArray(new PeakResult[results.size()]));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(java.util.Collection)
+     */
+    @Override
+    public void addAll(Collection<PeakResult> results)
+    {
+        // Utility function
+        addAll(results.toArray(new PeakResult[results.size()]));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
-	 */
-	@Override
-	public void addAll(PeakResultStore results)
-	{
-		// Utility function
-		addAll(results.toArray());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
+     */
+    @Override
+    public void addAll(PeakResultStore results)
+    {
+        // Utility function
+        addAll(results.toArray());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#setSource(java.lang.String)
-	 */
-	@Override
-	public void setSource(ImageSource source)
-	{
-		this.source = source;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#setSource(java.lang.String)
+     */
+    @Override
+    public void setSource(ImageSource source)
+    {
+        this.source = source;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#getSource()
-	 */
-	@Override
-	public ImageSource getSource()
-	{
-		return source;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#getSource()
+     */
+    @Override
+    public ImageSource getSource()
+    {
+        return source;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#setBounds(java.lang.String)
-	 */
-	@Override
-	public void setBounds(Rectangle bounds)
-	{
-		this.bounds = bounds;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#setBounds(java.lang.String)
+     */
+    @Override
+    public void setBounds(Rectangle bounds)
+    {
+        this.bounds = bounds;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#getBounds()
-	 */
-	@Override
-	public Rectangle getBounds()
-	{
-		return bounds;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#getBounds()
+     */
+    @Override
+    public Rectangle getBounds()
+    {
+        return bounds;
+    }
 
-	/**
-	 * Gets the bounds as a string.
-	 *
-	 * @return the bounds string
-	 */
-	public String getBoundsString()
-	{
-		if (bounds != null)
-			return String.format("x%d y%d w%d h%d", bounds.x, bounds.y, bounds.width, bounds.height);
-		return "";
-	}
+    /**
+     * Gets the bounds as a string.
+     *
+     * @return the bounds string
+     */
+    public String getBoundsString()
+    {
+        if (bounds != null)
+            return String.format("x%d y%d w%d h%d", bounds.x, bounds.y, bounds.width, bounds.height);
+        return "";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration)
-	 */
-	@Override
-	public void setCalibration(Calibration calibration)
-	{
-		this.calibration = calibration;
-		calibrationReader = (calibration != null) ? new CalibrationReader(calibration) : null;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.
+     * Calibration)
+     */
+    @Override
+    public void setCalibration(Calibration calibration)
+    {
+        this.calibration = calibration;
+        calibrationReader = (calibration != null) ? new CalibrationReader(calibration) : null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#getCalibration()
-	 */
-	@Override
-	public Calibration getCalibration()
-	{
-		return calibration;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#getCalibration()
+     */
+    @Override
+    public Calibration getCalibration()
+    {
+        return calibration;
+    }
 
-	/**
-	 * Checks for calibration.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasCalibration()
-	{
-		return (calibration != null);
-	}
+    /**
+     * Checks for calibration.
+     *
+     * @return true, if successful
+     */
+    public boolean hasCalibration()
+    {
+        return (calibration != null);
+    }
 
-	/**
-	 * Gets the calibration reader with the current calibration.
-	 *
-	 * @return the calibration reader (or null)
-	 */
-	public CalibrationReader getCalibrationReader()
-	{
-		return calibrationReader;
-	}
+    /**
+     * Gets the calibration reader with the current calibration.
+     *
+     * @return the calibration reader (or null)
+     */
+    public CalibrationReader getCalibrationReader()
+    {
+        return calibrationReader;
+    }
 
-	/**
-	 * Gets the calibration writer with the current calibration (must not be null). The writer can be used to update the
-	 * calibration but changes are not saved until
-	 * {@link uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration)}
-	 * is called with the new calibration.
-	 *
-	 * @return the calibration writer
-	 * @throws IllegalArgumentException
-	 *             if the calibration is null
-	 */
-	public CalibrationWriter getCalibrationWriter() throws IllegalArgumentException
-	{
-		return new CalibrationWriter(calibration);
-	}
+    /**
+     * Gets the calibration writer with the current calibration (must not be null). The writer can be used to update the
+     * calibration but changes are not saved until
+     * {@link uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration)}
+     * is called with the new calibration.
+     *
+     * @return the calibration writer
+     * @throws IllegalArgumentException
+     *             if the calibration is null
+     */
+    public CalibrationWriter getCalibrationWriter() throws IllegalArgumentException
+    {
+        return new CalibrationWriter(calibration);
+    }
 
-	/**
-	 * Gets the calibration writer with the current calibration, or a default calibration. The writer can be used to
-	 * update the calibration but changes are not saved until
-	 * {@link uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration)}
-	 * is called with the new calibration.
-	 *
-	 * @return the calibration writer
-	 */
-	public CalibrationWriter getCalibrationWriterSafe()
-	{
-		return (calibration != null) ? new CalibrationWriter(calibration) : new CalibrationWriter();
-	}
+    /**
+     * Gets the calibration writer with the current calibration, or a default calibration. The writer can be used to
+     * update the calibration but changes are not saved until
+     * {@link uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration)}
+     * is called with the new calibration.
+     *
+     * @return the calibration writer
+     */
+    public CalibrationWriter getCalibrationWriterSafe()
+    {
+        return (calibration != null) ? new CalibrationWriter(calibration) : new CalibrationWriter();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#getPSF()
-	 */
-	@Override
-	public PSF getPSF()
-	{
-		return psf;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#getPSF()
+     */
+    @Override
+    public PSF getPSF()
+    {
+        return psf;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#setPSF(uk.ac.sussex.gdsc.smlm.data.config.SMLMSettings.PSF)
-	 */
-	@Override
-	public void setPSF(PSF psf)
-	{
-		this.psf = psf;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#setPSF(uk.ac.sussex.gdsc.smlm.data.config.SMLMSettings.PSF)
+     */
+    @Override
+    public void setPSF(PSF psf)
+    {
+        this.psf = psf;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#setConfiguration(java.lang.String)
-	 */
-	@Override
-	public void setConfiguration(String configuration)
-	{
-		this.configuration = configuration;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#setConfiguration(java.lang.String)
+     */
+    @Override
+    public void setConfiguration(String configuration)
+    {
+        this.configuration = configuration;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#getConfiguration()
-	 */
-	@Override
-	public String getConfiguration()
-	{
-		return configuration;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#getConfiguration()
+     */
+    @Override
+    public String getConfiguration()
+    {
+        return configuration;
+    }
 
-	/**
-	 * @return The name of the results set (or the source if empty)
-	 */
-	@Override
-	public String getName()
-	{
-		if (name.length() > 0)
-			return name;
-		return (getSource() != null) ? getSource().getName() : "";
-	}
+    /**
+     * @return The name of the results set (or the source if empty)
+     */
+    @Override
+    public String getName()
+    {
+        if (name.length() > 0)
+            return name;
+        return (getSource() != null) ? getSource().getName() : "";
+    }
 
-	/**
-	 * @param name
-	 *            The name of the results set
-	 */
-	@Override
-	public void setName(String name)
-	{
-		if (name == null)
-			this.name = "";
-		else
-			this.name = name;
-	}
+    /**
+     * @param name
+     *            The name of the results set
+     */
+    @Override
+    public void setName(String name)
+    {
+        if (name == null)
+            this.name = "";
+        else
+            this.name = name;
+    }
 
-	/**
-	 * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
-	 *
-	 * @return the nmPerPixel
-	 */
-	public double getNmPerPixel()
-	{
-		return (calibration != null) ? calibrationReader.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
-	}
+    /**
+     * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
+     *
+     * @return the nmPerPixel
+     */
+    public double getNmPerPixel()
+    {
+        return (calibration != null) ? calibrationReader.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
+    }
 
-	/**
-	 * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}
-	 *
-	 * @return the gain
-	 */
-	public double getGain()
-	{
-		return (calibration != null) ? calibrationReader.getCountPerPhoton() : DEFAULT_GAIN;
-	}
+    /**
+     * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}
+     *
+     * @return the gain
+     */
+    public double getGain()
+    {
+        return (calibration != null) ? calibrationReader.getCountPerPhoton() : DEFAULT_GAIN;
+    }
 
-	/**
-	 * Checks for a CCD camera.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean isCCDCamera()
-	{
-		return (calibration != null) ? calibrationReader.isCCDCamera() : false;
-	}
+    /**
+     * Checks for a CCD camera.
+     *
+     * @return true, if successful
+     */
+    public boolean isCCDCamera()
+    {
+        return (calibration != null) ? calibrationReader.isCCDCamera() : false;
+    }
 
-	/**
-	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
-	 *
-	 * @return the EMCCD flag
-	 * @deprecated Replaced by the camera type
-	 */
-	@Deprecated
-	public boolean isEMCCD()
-	{
-		return (calibration != null && calibrationReader.isCCDCamera()) ? calibrationReader.isEMCCD() : DEFAULT_EMCCD;
-	}
+    /**
+     * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
+     *
+     * @return the EMCCD flag
+     * @deprecated Replaced by the camera type
+     */
+    @Deprecated
+    public boolean isEMCCD()
+    {
+        return (calibration != null && calibrationReader.isCCDCamera()) ? calibrationReader.isEMCCD() : DEFAULT_EMCCD;
+    }
 
-	/**
-	 * Checks if the results have a valid calibration to compute the localisation precision. This requires the
-	 * pixel size and camera gain, or alternatively the units to be in nm and photons, and camera CCD type.
-	 *
-	 * @return true, if is calibrated for precision
-	 */
-	public boolean isCalibratedForPrecision()
-	{
-		if (calibration != null)
-		{
-			if (!calibrationReader.isCCDCamera())
-				return false;
-			final DistanceUnit du = calibrationReader.getDistanceUnit();
-			final IntensityUnit iu = calibrationReader.getIntensityUnit();
-			if (du == DistanceUnit.NM && iu == IntensityUnit.PHOTON)
-				return true;
-			return isCalibrated();
-		}
-		return false;
-	}
+    /**
+     * Checks if the results have a valid calibration to compute the localisation precision. This requires the
+     * pixel size and camera gain, or alternatively the units to be in nm and photons, and camera CCD type.
+     *
+     * @return true, if is calibrated for precision
+     */
+    public boolean isCalibratedForPrecision()
+    {
+        if (calibration != null)
+        {
+            if (!calibrationReader.isCCDCamera())
+                return false;
+            final DistanceUnit du = calibrationReader.getDistanceUnit();
+            final IntensityUnit iu = calibrationReader.getIntensityUnit();
+            if (du == DistanceUnit.NM && iu == IntensityUnit.PHOTON)
+                return true;
+            return isCalibrated();
+        }
+        return false;
+    }
 
-	/**
-	 * Checks if the results have a basic calibration. This requires the pixel
-	 * size and camera gain with the distance and intensity units.
-	 *
-	 * @return true, if is calibrated
-	 */
-	public boolean isCalibrated()
-	{
-		if (calibration != null)
-		{
-			final DistanceUnit du = calibrationReader.getDistanceUnit();
-			final IntensityUnit iu = calibrationReader.getIntensityUnit();
-			//@formatter:off
+    /**
+     * Checks if the results have a basic calibration. This requires the pixel
+     * size and camera gain with the distance and intensity units.
+     *
+     * @return true, if is calibrated
+     */
+    public boolean isCalibrated()
+    {
+        if (calibration != null)
+        {
+            final DistanceUnit du = calibrationReader.getDistanceUnit();
+            final IntensityUnit iu = calibrationReader.getIntensityUnit();
+            //@formatter:off
 			return (du != null && calibrationReader.getNmPerPixel() > 0) &&
 				   (iu != null && calibrationReader.getCountPerPhoton() > 0);
 			//@formatter:on
-		}
-		return false;
-	}
+        }
+        return false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.utils.fitting.results.PeakResults#copySettings(gdsc.utils.fitting.results.PeakResults)
-	 */
-	@Override
-	public void copySettings(PeakResults peakResults)
-	{
-		this.setSource(peakResults.getSource());
-		this.setBounds(peakResults.getBounds());
-		this.setCalibration(peakResults.getCalibration());
-		this.setPSF(peakResults.getPSF());
-		this.setConfiguration(peakResults.getConfiguration());
-		this.setName(peakResults.getName());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.utils.fitting.results.PeakResults#copySettings(gdsc.utils.fitting.results.PeakResults)
+     */
+    @Override
+    public void copySettings(PeakResults peakResults)
+    {
+        this.setSource(peakResults.getSource());
+        this.setBounds(peakResults.getBounds());
+        this.setCalibration(peakResults.getCalibration());
+        this.setPSF(peakResults.getPSF());
+        this.setConfiguration(peakResults.getConfiguration());
+        this.setName(peakResults.getName());
+    }
 }

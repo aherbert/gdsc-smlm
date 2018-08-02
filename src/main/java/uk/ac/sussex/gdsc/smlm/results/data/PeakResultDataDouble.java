@@ -30,25 +30,25 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
  */
 public abstract class PeakResultDataDouble implements PeakResultData<Double>
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return "";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return "";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueClass()
-	 */
-	@Override
-	public Class<?> getValueClass()
-	{
-		return Double.class;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueClass()
+     */
+    @Override
+    public Class<?> getValueClass()
+    {
+        return Double.class;
+    }
 }

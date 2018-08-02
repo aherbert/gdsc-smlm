@@ -33,92 +33,92 @@ package uk.ac.sussex.gdsc.smlm.model;
  */
 public class ActivationEnergyImageModel extends ImageModel
 {
-	private double eAct;
-	private SpatialIllumination illumination;
+    private double eAct;
+    private SpatialIllumination illumination;
 
-	/**
-	 * Construct a new image model
-	 *
-	 * @param eAct
-	 *            Average energy for activation
-	 * @param illumination
-	 *            The illumination model
-	 * @param tOn
-	 *            Average on-state time
-	 * @param tOff
-	 *            Average off-state time for the first dark state
-	 * @param tOff2
-	 *            Average off-state time for the second dark state
-	 * @param nBlinks
-	 *            Average number of blinks int the first dark state (used for each burst between second dark states)
-	 * @param nBlinks2
-	 *            Average number of blinks into the second dark state
-	 */
-	public ActivationEnergyImageModel(double eAct, SpatialIllumination illumination, double tOn, double tOff,
-			double tOff2, double nBlinks, double nBlinks2)
-	{
-		super(tOn, tOff, tOff2, nBlinks, nBlinks2);
-		init(eAct, illumination);
-	}
+    /**
+     * Construct a new image model
+     *
+     * @param eAct
+     *            Average energy for activation
+     * @param illumination
+     *            The illumination model
+     * @param tOn
+     *            Average on-state time
+     * @param tOff
+     *            Average off-state time for the first dark state
+     * @param tOff2
+     *            Average off-state time for the second dark state
+     * @param nBlinks
+     *            Average number of blinks int the first dark state (used for each burst between second dark states)
+     * @param nBlinks2
+     *            Average number of blinks into the second dark state
+     */
+    public ActivationEnergyImageModel(double eAct, SpatialIllumination illumination, double tOn, double tOff,
+            double tOff2, double nBlinks, double nBlinks2)
+    {
+        super(tOn, tOff, tOff2, nBlinks, nBlinks2);
+        init(eAct, illumination);
+    }
 
-	private void init(double eAct, SpatialIllumination illumination)
-	{
-		checkParameter("eAct", eAct);
-		if (illumination == null)
-			throw new IllegalArgumentException("SpatialIllumination is null");
-		this.eAct = eAct;
-		this.illumination = illumination;
-	}
+    private void init(double eAct, SpatialIllumination illumination)
+    {
+        checkParameter("eAct", eAct);
+        if (illumination == null)
+            throw new IllegalArgumentException("SpatialIllumination is null");
+        this.eAct = eAct;
+        this.illumination = illumination;
+    }
 
-	/**
-	 * @return the average energy for activation
-	 */
-	public double getActivationEnergy()
-	{
-		return eAct;
-	}
+    /**
+     * @return the average energy for activation
+     */
+    public double getActivationEnergy()
+    {
+        return eAct;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
-	 */
-	@Override
-	protected double createActivationTime(double[] xyz)
-	{
-		return getActivationTime(xyz, frameLimit);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
+     */
+    @Override
+    protected double createActivationTime(double[] xyz)
+    {
+        return getActivationTime(xyz, frameLimit);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
-	 */
-	@Override
-	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
-	{
-		return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
-				isUseGeometricDistribution(), getRandom());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
+     */
+    @Override
+    protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
+    {
+        return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
+                isUseGeometricDistribution(), getRandom());
+    }
 
-	private double getActivationTime(double[] xyz, int frames)
-	{
-		final double activation = getRandom().nextExponential(eAct);
-		double e = 0;
-		for (int t = 0; t < frames; t++)
-		{
-			// Q. Should the molecule be moving during the activation phase?
-			final double[] photons = illumination.getPulsedPhotons(xyz, t + 1);
+    private double getActivationTime(double[] xyz, int frames)
+    {
+        final double activation = getRandom().nextExponential(eAct);
+        double e = 0;
+        for (int t = 0; t < frames; t++)
+        {
+            // Q. Should the molecule be moving during the activation phase?
+            final double[] photons = illumination.getPulsedPhotons(xyz, t + 1);
 
-			e += photons[0]; // pulse energy
-			if (e > activation)
-				return t;
+            e += photons[0]; // pulse energy
+            if (e > activation)
+                return t;
 
-			e += photons[1]; // during energy
-			if (e > activation)
-				// Interpolate
-				return t + 1 - (e - activation) / photons[1];
-		}
-		return frames; // default to the number of frames.
-	}
+            e += photons[1]; // during energy
+            if (e > activation)
+                // Interpolate
+                return t + 1 - (e - activation) / photons[1];
+        }
+        return frames; // default to the number of frames.
+    }
 }

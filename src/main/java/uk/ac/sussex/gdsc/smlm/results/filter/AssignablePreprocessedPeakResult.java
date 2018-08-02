@@ -30,19 +30,19 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 {
-	/**
-	 * Set the assignments between this result and the true data.
-	 *
-	 * @param assignments
-	 *            The assignments
-	 */
-	public void setAssignments(ResultAssignment[] assignments);
+    /**
+     * Set the assignments between this result and the true data.
+     *
+     * @param assignments
+     *            The assignments
+     */
+    public void setAssignments(ResultAssignment[] assignments);
 
-	/**
-	 * Sets the ignore flag. If true then the result should be ignored from the total counts when scoring.
-	 *
-	 * @param ignore
-	 *            the new ignore flag
-	 */
-	public void setIgnore(boolean ignore);
+    /**
+     * Sets the ignore flag. If true then the result should be ignored from the total counts when scoring.
+     *
+     * @param ignore
+     *            the new ignore flag
+     */
+    public void setIgnore(boolean ignore);
 }

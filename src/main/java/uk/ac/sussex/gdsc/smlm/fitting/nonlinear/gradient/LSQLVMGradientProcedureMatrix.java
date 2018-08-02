@@ -36,103 +36,103 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
 {
-	/**
-	 * The scaled Hessian curvature matrix (size n*n)
-	 */
-	public final double[][] alpha;
+    /**
+     * The scaled Hessian curvature matrix (size n*n)
+     */
+    public final double[][] alpha;
 
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 */
-	public LSQLVMGradientProcedureMatrix(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		super(y, b, func);
-		alpha = new double[n][n];
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param b
+     *            Baseline pre-computed y-values
+     * @param func
+     *            Gradient function
+     */
+    public LSQLVMGradientProcedureMatrix(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        super(y, b, func);
+        alpha = new double[n][n];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		final double dy = y[++yi] - value;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        final double dy = y[++yi] - value;
 
-		// Compute:
-		// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
-		//   that is, it describes the local curvature of a function of many variables.)
-		// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
+        // Compute:
+        // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
+        //   that is, it describes the local curvature of a function of many variables.)
+        // - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
-		for (int j = 0; j < n; j++)
-		{
-			final double wgt = dy_da[j];
+        for (int j = 0; j < n; j++)
+        {
+            final double wgt = dy_da[j];
 
-			for (int k = 0; k <= j; k++)
-				alpha[j][k] += wgt * dy_da[k];
+            for (int k = 0; k <= j; k++)
+                alpha[j][k] += wgt * dy_da[k];
 
-			beta[j] += wgt * dy;
-		}
+            beta[j] += wgt * dy;
+        }
 
-		this.value += dy * dy;
-	}
+        this.value += dy * dy;
+    }
 
-	@Override
-	protected void initialiseGradient()
-	{
-		for (int i = 0; i < n; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
-	}
+    @Override
+    protected void initialiseGradient()
+    {
+        for (int i = 0; i < n; i++)
+        {
+            beta[i] = 0;
+            for (int j = 0; j <= i; j++)
+                alpha[i][j] = 0;
+        }
+    }
 
-	@Override
-	protected void finishGradient()
-	{
-		// Generate symmetric matrix
-		for (int i = 0; i < n - 1; i++)
-			for (int j = i + 1; j < n; j++)
-				alpha[i][j] = alpha[j][i];
-	}
+    @Override
+    protected void finishGradient()
+    {
+        // Generate symmetric matrix
+        for (int i = 0; i < n - 1; i++)
+            for (int j = i + 1; j < n; j++)
+                alpha[i][j] = alpha[j][i];
+    }
 
-	@Override
-	protected boolean checkGradients()
-	{
-		for (int i = 0; i < n; i++)
-		{
-			if (Double.isNaN(beta[i]))
-				return true;
-			for (int j = 0; j <= i; j++)
-				if (Double.isNaN(alpha[i][j]))
-					return true;
-		}
-		return false;
-	}
+    @Override
+    protected boolean checkGradients()
+    {
+        for (int i = 0; i < n; i++)
+        {
+            if (Double.isNaN(beta[i]))
+                return true;
+            for (int j = 0; j <= i; j++)
+                if (Double.isNaN(alpha[i][j]))
+                    return true;
+        }
+        return false;
+    }
 
-	@Override
-	public double[][] getAlphaMatrix()
-	{
-		return alpha;
-	}
+    @Override
+    public double[][] getAlphaMatrix()
+    {
+        return alpha;
+    }
 
-	@Override
-	public void getAlphaMatrix(double[][] alpha)
-	{
-		for (int i = 0; i < n; i++)
-			System.arraycopy(this.alpha, 0, alpha, 0, n);
-	}
+    @Override
+    public void getAlphaMatrix(double[][] alpha)
+    {
+        for (int i = 0; i < n; i++)
+            System.arraycopy(this.alpha, 0, alpha, 0, n);
+    }
 
-	@Override
-	public void getAlphaLinear(double[] alpha)
-	{
-		toLinear(this.alpha, alpha);
-	}
+    @Override
+    public void getAlphaLinear(double[] alpha)
+    {
+        toLinear(this.alpha, alpha);
+    }
 }

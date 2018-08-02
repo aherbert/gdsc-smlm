@@ -33,92 +33,93 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
  */
 public class FunctionHelper
 {
-	/**
-	 * Gets the mean value using a fraction of the cumulative value, when values are sorted in descending order. All
-	 * values must be positive. The input values are modified by sorting.
-	 * <p>
-	 * If {@code fraction <= 0} then the max value is returned. If {@code fraction >=1} then the mean of the data is returned.
-	 *
-	 * @param values
-	 *            the values
-	 * @param fraction
-	 *            the fraction
-	 * @return the mean value
-	 * @throws DataException
-	 *             if the values are not positive.
-	 */
-	public static double getMeanValue(double[] values, double fraction) throws DataException
-	{
-		if (fraction <= 0)
-			return Maths.max(values);
-		double sum = 0;
-		for (int i = 0; i < values.length; i++)
-		{
-			if (values[i] < 0)
-				throw new DataException("Values must be positive");
-			sum += values[i];
-		}
-		if (fraction >= 1)
-			return sum / values.length;
-		final double target = sum * fraction;
-		sum = 0;
-		Arrays.sort(values);
-		for (int i = values.length; i-- > 0;)
-		{
-			sum += values[i];
-			if (sum >= target)
-			{
-				// Interpolate the count X to obtain the target
-				final int x = values.length - i;
-				return target / Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
-			}
-		}
-		// Edge case
-		return sum / values.length;
-	}
+    /**
+     * Gets the mean value using a fraction of the cumulative value, when values are sorted in descending order. All
+     * values must be positive. The input values are modified by sorting.
+     * <p>
+     * If {@code fraction <= 0} then the max value is returned. If {@code fraction >=1} then the mean of the data is
+     * returned.
+     *
+     * @param values
+     *            the values
+     * @param fraction
+     *            the fraction
+     * @return the mean value
+     * @throws DataException
+     *             if the values are not positive.
+     */
+    public static double getMeanValue(double[] values, double fraction) throws DataException
+    {
+        if (fraction <= 0)
+            return Maths.max(values);
+        double sum = 0;
+        for (int i = 0; i < values.length; i++)
+        {
+            if (values[i] < 0)
+                throw new DataException("Values must be positive");
+            sum += values[i];
+        }
+        if (fraction >= 1)
+            return sum / values.length;
+        final double target = sum * fraction;
+        sum = 0;
+        Arrays.sort(values);
+        for (int i = values.length; i-- > 0;)
+        {
+            sum += values[i];
+            if (sum >= target)
+            {
+                // Interpolate the count X to obtain the target
+                final int x = values.length - i;
+                return target / Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
+            }
+        }
+        // Edge case
+        return sum / values.length;
+    }
 
-	/**
-	 * Gets the x-value corresponding to a fraction of the cumulative value, when values are sorted in descending order.
-	 * All
-	 * values must be positive. The input values are modified by sorting.
-	 * <p>
-	 * If {@code fraction <= 0} then zero is returned. If {@code fraction >= 1} then data.length is returned.
-	 *
-	 * @param values
-	 *            the values
-	 * @param fraction
-	 *            the fraction
-	 * @return the x-value
-	 * @throws DataException
-	 *             if the values are not positive.
-	 */
-	public static double getXValue(double[] values, double fraction) throws DataException
-	{
-		if (fraction <= 0)
-			return 0;
-		if (fraction >= 1)
-			return values.length;
-		double sum = 0;
-		for (int i = 0; i < values.length; i++)
-		{
-			if (values[i] < 0)
-				throw new DataException("Values must be positive");
-			sum += values[i];
-		}
-		final double target = sum * fraction;
-		sum = 0;
-		Arrays.sort(values);
-		for (int i = values.length; i-- > 0;)
-		{
-			sum += values[i];
-			if (sum >= target)
-			{
-				// Interpolate the count X to obtain the target
-				final int x = values.length - i;
-				return Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
-			}
-		}
-		// Edge case
-		return values.length;
-	}
+    /**
+     * Gets the x-value corresponding to a fraction of the cumulative value, when values are sorted in descending order.
+     * All
+     * values must be positive. The input values are modified by sorting.
+     * <p>
+     * If {@code fraction <= 0} then zero is returned. If {@code fraction >= 1} then data.length is returned.
+     *
+     * @param values
+     *            the values
+     * @param fraction
+     *            the fraction
+     * @return the x-value
+     * @throws DataException
+     *             if the values are not positive.
+     */
+    public static double getXValue(double[] values, double fraction) throws DataException
+    {
+        if (fraction <= 0)
+            return 0;
+        if (fraction >= 1)
+            return values.length;
+        double sum = 0;
+        for (int i = 0; i < values.length; i++)
+        {
+            if (values[i] < 0)
+                throw new DataException("Values must be positive");
+            sum += values[i];
+        }
+        final double target = sum * fraction;
+        sum = 0;
+        Arrays.sort(values);
+        for (int i = values.length; i-- > 0;)
+        {
+            sum += values[i];
+            if (sum >= target)
+            {
+                // Interpolate the count X to obtain the target
+                final int x = values.length - i;
+                return Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
+            }
+        }
+        // Edge case
+        return values.length;
+    }
 }

@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.fitting;
  */
 public enum FitStatus
 {
-	//@formatter:off
+    //@formatter:off
     /** OK */
     OK{ @Override public String getName() { return "OK"; }},
     /** Singular non-linear model */
@@ -79,16 +79,16 @@ public enum FitStatus
     UNKNOWN{ @Override public String getName() { return "Unknown"; }};
 	//@formatter:on
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
+    @Override
+    public String toString()
+    {
+        return getName();
+    }
 
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	abstract public String getName();
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    abstract public String getName();
 }

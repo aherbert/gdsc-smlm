@@ -36,191 +36,191 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class SingleNSFixedGaussian2DFunction extends Gaussian2DFunction
 {
-	private static final int[] gradientIndices;
-	static
-	{
-		gradientIndices = createGradientIndices(1, new SingleNSFixedGaussian2DFunction(1, 1));
-	}
+    private static final int[] gradientIndices;
+    static
+    {
+        gradientIndices = createGradientIndices(1, new SingleNSFixedGaussian2DFunction(1, 1));
+    }
 
-	/** The width. */
-	protected double width;
+    /** The width. */
+    protected double width;
 
-	/** The background. */
-	protected double background;
-	/** The x0 position. */
-	protected double x0pos;
-	/** The x1 position. */
-	protected double x1pos;
+    /** The background. */
+    protected double background;
+    /** The x0 position. */
+    protected double x0pos;
+    /** The x1 position. */
+    protected double x1pos;
 
-	/** The amplitude/height normalisation: 1/(2*pi*sx*sy). */
-	protected double n;
-	/** The amplitude/height. */
-	protected double height;
-	/** position pre-factor */
-	protected double aa;
-	/** position gradient pre-factor */
-	protected double aa2;
+    /** The amplitude/height normalisation: 1/(2*pi*sx*sy). */
+    protected double n;
+    /** The amplitude/height. */
+    protected double height;
+    /** position pre-factor */
+    protected double aa;
+    /** position gradient pre-factor */
+    protected double aa2;
 
-	/**
-	 * Constructor
-	 *
-	 * @param maxx
-	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param maxy
-	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 */
-	public SingleNSFixedGaussian2DFunction(int maxx, int maxy)
-	{
-		super(maxx, maxy);
-	}
+    /**
+     * Constructor
+     *
+     * @param maxx
+     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     * @param maxy
+     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     */
+    public SingleNSFixedGaussian2DFunction(int maxx, int maxy)
+    {
+        super(maxx, maxy);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-	 */
-	@Override
-	public Gaussian2DFunction copy()
-	{
-		return new SingleNSFixedGaussian2DFunction(maxx, maxy);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+     */
+    @Override
+    public Gaussian2DFunction copy()
+    {
+        return new SingleNSFixedGaussian2DFunction(maxx, maxy);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-	 */
-	@Override
-	public void initialise(double[] a)
-	{
-		background = a[BACKGROUND];
-		x0pos = a[X_POSITION];
-		x1pos = a[Y_POSITION];
-		width = a[X_SD];
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
+     */
+    @Override
+    public void initialise(double[] a)
+    {
+        background = a[BACKGROUND];
+        x0pos = a[X_POSITION];
+        x1pos = a[Y_POSITION];
+        width = a[X_SD];
 
-		final double sx = a[X_SD];
-		final double sx2 = sx * sx;
+        final double sx = a[X_SD];
+        final double sx2 = sx * sx;
 
-		n = ONE_OVER_TWO_PI / sx2;
-		height = a[SIGNAL] * n;
+        n = ONE_OVER_TWO_PI / sx2;
+        height = a[SIGNAL] * n;
 
-		// All prefactors are negated since the Gaussian uses the exponential to the negative:
-		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+        // All prefactors are negated since the Gaussian uses the exponential to the negative:
+        // A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 
-		aa = -0.5 / sx2;
-		aa2 = -2.0 * aa;
-	}
+        aa = -0.5 / sx2;
+        aa2 = -2.0 * aa;
+    }
 
-	/**
-	 * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
-	 * <p>
-	 * {@inheritDoc}
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
-	 */
-	@Override
-	public double eval(final int x, final double[] dyda)
-	{
-		// First parameter is the background level
-		dyda[0] = 1.0; // Gradient for a constant background is 1
+    /**
+     * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
+     */
+    @Override
+    public double eval(final int x, final double[] dyda)
+    {
+        // First parameter is the background level
+        dyda[0] = 1.0; // Gradient for a constant background is 1
 
-		// Unpack the predictor into the dimensions
-		final int x1 = x / maxx;
-		final int x0 = x % maxx;
+        // Unpack the predictor into the dimensions
+        final int x1 = x / maxx;
+        final int x0 = x % maxx;
 
-		return background + gaussian(x0, x1, dyda);
-	}
+        return background + gaussian(x0, x1, dyda);
+    }
 
-	private double gaussian(final int x0, final int x1, final double[] dy_da)
-	{
-		final double dx = x0 - x0pos;
-		final double dy = x1 - x1pos;
+    private double gaussian(final int x0, final int x1, final double[] dy_da)
+    {
+        final double dx = x0 - x0pos;
+        final double dy = x1 - x1pos;
 
-		// Calculate gradients
-		final double y = height * FastMath.exp(aa * (dx * dx + dy * dy));
-		final double yaa2 = y * aa2;
-		dy_da[1] = yaa2 * dx;
-		dy_da[2] = yaa2 * dy;
+        // Calculate gradients
+        final double y = height * FastMath.exp(aa * (dx * dx + dy * dy));
+        final double yaa2 = y * aa2;
+        dy_da[1] = yaa2 * dx;
+        dy_da[2] = yaa2 * dy;
 
-		return y;
-	}
+        return y;
+    }
 
-	/**
-	 * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
-	 * <p>
-	 * {@inheritDoc}
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
-	 */
-	@Override
-	public double eval(final int x)
-	{
-		// Unpack the predictor into the dimensions
-		final int x1 = x / maxx;
-		final int x0 = x % maxx;
+    /**
+     * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
+     */
+    @Override
+    public double eval(final int x)
+    {
+        // Unpack the predictor into the dimensions
+        final int x1 = x / maxx;
+        final int x0 = x % maxx;
 
-		final double dx = x0 - x0pos;
-		final double dy = x1 - x1pos;
+        final double dx = x0 - x0pos;
+        final double dy = x1 - x1pos;
 
-		return background + height * FastMath.exp(aa * (dx * dx + dy * dy));
-	}
+        return background + height * FastMath.exp(aa * (dx * dx + dy * dy));
+    }
 
-	@Override
-	public int getNPeaks()
-	{
-		return 1;
-	}
+    @Override
+    public int getNPeaks()
+    {
+        return 1;
+    }
 
-	@Override
-	public boolean evaluatesBackground()
-	{
-		return true;
-	}
+    @Override
+    public boolean evaluatesBackground()
+    {
+        return true;
+    }
 
-	@Override
-	public boolean evaluatesSignal()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesSignal()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesAngle()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesAngle()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesPosition()
-	{
-		return true;
-	}
+    @Override
+    public boolean evaluatesPosition()
+    {
+        return true;
+    }
 
-	@Override
-	public boolean evaluatesSD0()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesSD0()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesSD1()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesSD1()
+    {
+        return false;
+    }
 
-	@Override
-	public int getGradientParametersPerPeak()
-	{
-		return 2;
-	}
+    @Override
+    public int getGradientParametersPerPeak()
+    {
+        return 2;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-	 */
-	@Override
-	public int[] gradientIndices()
-	{
-		return gradientIndices;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
+     */
+    @Override
+    public int[] gradientIndices()
+    {
+        return gradientIndices;
+    }
 }

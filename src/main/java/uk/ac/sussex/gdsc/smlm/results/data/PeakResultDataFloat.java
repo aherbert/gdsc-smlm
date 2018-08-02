@@ -30,25 +30,25 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
  */
 public abstract class PeakResultDataFloat implements PeakResultData<Float>
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return "";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return "";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueClass()
-	 */
-	@Override
-	public Class<?> getValueClass()
-	{
-		return Float.class;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueClass()
+     */
+    @Override
+    public Class<?> getValueClass()
+    {
+        return Float.class;
+    }
 }

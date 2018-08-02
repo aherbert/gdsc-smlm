@@ -28,5 +28,5 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public interface ThreadSafePeakResults extends PeakResults
 {
-	// Marker interface
+    // Marker interface
 }

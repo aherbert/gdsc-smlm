@@ -28,13 +28,13 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface WxWyResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param wx
-	 *            the x width
-	 * @param wy
-	 *            the y width
-	 */
-	public void executeWxWy(float wx, float wy);
+    /**
+     * Executes this procedure.
+     *
+     * @param wx
+     *            the x width
+     * @param wy
+     *            the y width
+     */
+    public void executeWxWy(float wx, float wy);
 }

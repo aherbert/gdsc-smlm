@@ -33,81 +33,81 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
  */
 public class ImagePSFHelper
 {
-	/**
-	 * Convert the ImagePSF to a string.
-	 *
-	 * @param imagePsf
-	 *            the image psf
-	 * @return the string
-	 */
-	public static String toString(ImagePSFOrBuilder imagePsf)
-	{
-		return SettingsManager.toJSON(imagePsf, SettingsManager.FLAG_JSON_WHITESPACE);
-	}
+    /**
+     * Convert the ImagePSF to a string.
+     *
+     * @param imagePsf
+     *            the image psf
+     * @return the string
+     */
+    public static String toString(ImagePSFOrBuilder imagePsf)
+    {
+        return SettingsManager.toJSON(imagePsf, SettingsManager.FLAG_JSON_WHITESPACE);
+    }
 
-	/**
-	 * Get the ImagePSF from a string.
-	 *
-	 * @param string
-	 *            the string
-	 * @return the image PSF
-	 */
-	public static ImagePSF fromString(String string)
-	{
-		final ImagePSF.Builder builder = ImagePSF.newBuilder();
-		if (SettingsManager.fromJSON(string, builder))
-			return builder.build();
-		return null;
-	}
+    /**
+     * Get the ImagePSF from a string.
+     *
+     * @param string
+     *            the string
+     * @return the image PSF
+     */
+    public static ImagePSF fromString(String string)
+    {
+        final ImagePSF.Builder builder = ImagePSF.newBuilder();
+        if (SettingsManager.fromJSON(string, builder))
+            return builder.build();
+        return null;
+    }
 
-	/**
-	 * Creates the ImagePSF.
-	 *
-	 * @param centreImage
-	 *            the centre image
-	 * @param pixelSize
-	 *            the pixel size
-	 * @param pixelDepth
-	 *            the pixel depth
-	 * @param imageCount
-	 *            the image count
-	 * @param fwhm
-	 *            the fwhm
-	 * @return the image PSF
-	 */
-	public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm)
-	{
-		return create(centreImage, pixelSize, pixelDepth, imageCount, fwhm, null);
-	}
+    /**
+     * Creates the ImagePSF.
+     *
+     * @param centreImage
+     *            the centre image
+     * @param pixelSize
+     *            the pixel size
+     * @param pixelDepth
+     *            the pixel depth
+     * @param imageCount
+     *            the image count
+     * @param fwhm
+     *            the fwhm
+     * @return the image PSF
+     */
+    public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm)
+    {
+        return create(centreImage, pixelSize, pixelDepth, imageCount, fwhm, null);
+    }
 
-	/**
-	 * Creates the ImagePSF.
-	 *
-	 * @param centreImage
-	 *            the centre image
-	 * @param pixelSize
-	 *            the pixel size
-	 * @param pixelDepth
-	 *            the pixel depth
-	 * @param imageCount
-	 *            the image count
-	 * @param fwhm
-	 *            the fwhm
-	 * @param notes
-	 *            the notes
-	 * @return the image PSF
-	 */
-	public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm,
-			HashMap<String, String> notes)
-	{
-		final ImagePSF.Builder builder = ImagePSF.newBuilder();
-		builder.setCentreImage(centreImage);
-		builder.setPixelSize(pixelSize);
-		builder.setPixelDepth(pixelDepth);
-		builder.setImageCount(imageCount);
-		builder.setFwhm(fwhm);
-		if (notes != null)
-			builder.putAllNotes(notes);
-		return builder.build();
-	}
+    /**
+     * Creates the ImagePSF.
+     *
+     * @param centreImage
+     *            the centre image
+     * @param pixelSize
+     *            the pixel size
+     * @param pixelDepth
+     *            the pixel depth
+     * @param imageCount
+     *            the image count
+     * @param fwhm
+     *            the fwhm
+     * @param notes
+     *            the notes
+     * @return the image PSF
+     */
+    public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm,
+            HashMap<String, String> notes)
+    {
+        final ImagePSF.Builder builder = ImagePSF.newBuilder();
+        builder.setCentreImage(centreImage);
+        builder.setPixelSize(pixelSize);
+        builder.setPixelDepth(pixelDepth);
+        builder.setImageCount(imageCount);
+        builder.setFwhm(fwhm);
+        if (notes != null)
+            builder.putAllNotes(notes);
+        return builder.build();
+    }
 }

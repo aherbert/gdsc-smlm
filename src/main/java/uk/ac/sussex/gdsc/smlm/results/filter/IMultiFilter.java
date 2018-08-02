@@ -29,75 +29,75 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public interface IMultiFilter
 {
-	/**
-	 * Gets the signal.
-	 *
-	 * @return the signal
-	 */
-	public double getSignal();
+    /**
+     * Gets the signal.
+     *
+     * @return the signal
+     */
+    public double getSignal();
 
-	/**
-	 * Gets the Signal-to-noise ratio.
-	 *
-	 * @return the Signal-to-noise ratio (SNR)
-	 */
-	public double getSNR();
+    /**
+     * Gets the Signal-to-noise ratio.
+     *
+     * @return the Signal-to-noise ratio (SNR)
+     */
+    public double getSNR();
 
-	/**
-	 * Gets the min width.
-	 *
-	 * @return the min width
-	 */
-	public double getMinWidth();
+    /**
+     * Gets the min width.
+     *
+     * @return the min width
+     */
+    public double getMinWidth();
 
-	/**
-	 * Gets the max width.
-	 *
-	 * @return the max width
-	 */
-	public double getMaxWidth();
+    /**
+     * Gets the max width.
+     *
+     * @return the max width
+     */
+    public double getMaxWidth();
 
-	/**
-	 * Gets the coordinate shift.
-	 *
-	 * @return the shift
-	 */
-	public double getShift();
+    /**
+     * Gets the coordinate shift.
+     *
+     * @return the shift
+     */
+    public double getShift();
 
-	/**
-	 * Gets the Euclidian shift.
-	 *
-	 * @return the Euclidian shift
-	 */
-	public double getEShift();
+    /**
+     * Gets the Euclidian shift.
+     *
+     * @return the Euclidian shift
+     */
+    public double getEShift();
 
-	/**
-	 * Gets the precision.
-	 *
-	 * @return the precision
-	 */
-	public double getPrecision();
+    /**
+     * Gets the precision.
+     *
+     * @return the precision
+     */
+    public double getPrecision();
 
-	/**
-	 * Gets the precision type.
-	 *
-	 * @return the precision type
-	 */
-	public PrecisionType getPrecisionType();
+    /**
+     * Gets the precision type.
+     *
+     * @return the precision type
+     */
+    public PrecisionType getPrecisionType();
 
-	/**
-	 * Gets the min allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
-	 * assumed that depth filtering is disabled.
-	 *
-	 * @return the min z depth
-	 */
-	public double getMinZ();
+    /**
+     * Gets the min allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
+     * assumed that depth filtering is disabled.
+     *
+     * @return the min z depth
+     */
+    public double getMinZ();
 
-	/**
-	 * Gets the max allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
-	 * assumed that depth filtering is disabled.
-	 *
-	 * @return the max z depth
-	 */
-	public double getMaxZ();
+    /**
+     * Gets the max allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
+     * assumed that depth filtering is disabled.
+     *
+     * @return the max z depth
+     */
+    public double getMaxZ();
 }

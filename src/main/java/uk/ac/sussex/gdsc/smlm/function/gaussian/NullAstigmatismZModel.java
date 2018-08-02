@@ -28,68 +28,68 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
  */
 public class NullAstigmatismZModel implements AstigmatismZModel
 {
-	/** The width in x. */
-	public final double sx;
-	/** The width in y. */
-	public final double sy;
+    /** The width in x. */
+    public final double sx;
+    /** The width in y. */
+    public final double sy;
 
-	/**
-	 * Instantiates a new null astigmatism Z model.
-	 *
-	 * @param sx
-	 *            the sx
-	 * @param sy
-	 *            the sy
-	 * @throws IllegalArgumentException
-	 *             if the widths are not positive
-	 */
-	public NullAstigmatismZModel(double sx, double sy) throws IllegalArgumentException
-	{
-		if (!(sx > 0 && sy > 0))
-			throw new IllegalArgumentException("Width must be positive");
-		this.sx = sx;
-		this.sy = sy;
-	}
+    /**
+     * Instantiates a new null astigmatism Z model.
+     *
+     * @param sx
+     *            the sx
+     * @param sy
+     *            the sy
+     * @throws IllegalArgumentException
+     *             if the widths are not positive
+     */
+    public NullAstigmatismZModel(double sx, double sy) throws IllegalArgumentException
+    {
+        if (!(sx > 0 && sy > 0))
+            throw new IllegalArgumentException("Width must be positive");
+        this.sx = sx;
+        this.sy = sy;
+    }
 
-	@Override
-	public double getSx(double z)
-	{
-		return sx;
-	}
+    @Override
+    public double getSx(double z)
+    {
+        return sx;
+    }
 
-	@Override
-	public double getSx(double z, double[] ds_dz)
-	{
-		ds_dz[0] = 0;
-		return sx;
-	}
+    @Override
+    public double getSx(double z, double[] ds_dz)
+    {
+        ds_dz[0] = 0;
+        return sx;
+    }
 
-	@Override
-	public double getSx2(double z, double[] ds_dz)
-	{
-		ds_dz[0] = 0;
-		ds_dz[1] = 0;
-		return sx;
-	}
+    @Override
+    public double getSx2(double z, double[] ds_dz)
+    {
+        ds_dz[0] = 0;
+        ds_dz[1] = 0;
+        return sx;
+    }
 
-	@Override
-	public double getSy(double z)
-	{
-		return sy;
-	}
+    @Override
+    public double getSy(double z)
+    {
+        return sy;
+    }
 
-	@Override
-	public double getSy(double z, double[] ds_dz)
-	{
-		ds_dz[0] = 0;
-		return sy;
-	}
+    @Override
+    public double getSy(double z, double[] ds_dz)
+    {
+        ds_dz[0] = 0;
+        return sy;
+    }
 
-	@Override
-	public double getSy2(double z, double[] ds_dz)
-	{
-		ds_dz[0] = 0;
-		ds_dz[1] = 0;
-		return sy;
-	}
+    @Override
+    public double getSy2(double z, double[] ds_dz)
+    {
+        ds_dz[0] = 0;
+        ds_dz[1] = 0;
+        return sy;
+    }
 }

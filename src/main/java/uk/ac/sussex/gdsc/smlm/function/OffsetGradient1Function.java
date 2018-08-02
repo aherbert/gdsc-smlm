@@ -27,229 +27,229 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
 public class OffsetGradient1Function extends OffsetValueFunction
-		implements Gradient1Function, Gradient1Procedure, NonLinearFunction
+        implements Gradient1Function, Gradient1Procedure, NonLinearFunction
 {
-	/** The gradient1 function. */
-	protected final Gradient1Function f1;
+    /** The gradient1 function. */
+    protected final Gradient1Function f1;
 
-	/** The procedure. */
-	protected Gradient1Procedure procedure;
+    /** The procedure. */
+    protected Gradient1Procedure procedure;
 
-	/**
-	 * Class for evaluating a function and storing the values and gradients
-	 */
-	protected class FunctionStore implements Gradient1Procedure
-	{
-		private int i;
+    /**
+     * Class for evaluating a function and storing the values and gradients
+     */
+    protected class FunctionStore implements Gradient1Procedure
+    {
+        private int i;
 
-		/** The values. */
-		public final double[] values;
+        /** The values. */
+        public final double[] values;
 
-		/** The dyda gradients. */
-		public final double[][] dyda;
+        /** The dyda gradients. */
+        public final double[][] dyda;
 
-		/** The number of gradients. */
-		public final int length;
+        /** The number of gradients. */
+        public final int length;
 
-		/**
-		 * Instantiates a new function store.
-		 *
-		 * @param values
-		 *            the values
-		 * @param dyda
-		 *            the dyda
-		 */
-		public FunctionStore(double[] values, double[][] dyda)
-		{
-			length = f1.getNumberOfGradients();
-			if (values == null)
-			{
-				values = new double[f1.size()];
-				dyda = new double[values.length][length];
-			}
-			this.values = values;
-			this.dyda = dyda;
-		}
+        /**
+         * Instantiates a new function store.
+         *
+         * @param values
+         *            the values
+         * @param dyda
+         *            the dyda
+         */
+        public FunctionStore(double[] values, double[][] dyda)
+        {
+            length = f1.getNumberOfGradients();
+            if (values == null)
+            {
+                values = new double[f1.size()];
+                dyda = new double[values.length][length];
+            }
+            this.values = values;
+            this.dyda = dyda;
+        }
 
-		/**
-		 * Gets the values.
-		 */
-		public void getValues()
-		{
-			i = 0;
-			f1.forEach(this);
-		}
+        /**
+         * Gets the values.
+         */
+        public void getValues()
+        {
+            i = 0;
+            f1.forEach(this);
+        }
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-		 */
-		@Override
-		public void execute(double value, double[] dy_da)
-		{
-			values[i] = value;
-			System.arraycopy(dy_da, 0, dyda[i], 0, length);
-			i++;
-		}
-	}
+        /*
+         * (non-Javadoc)
+         *
+         * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+         */
+        @Override
+        public void execute(double value, double[] dy_da)
+        {
+            values[i] = value;
+            System.arraycopy(dy_da, 0, dyda[i], 0, length);
+            i++;
+        }
+    }
 
-	/** Used to store all the values and gradients for the NonLinearFunction interface */
-	protected FunctionStore store = null;
+    /** Used to store all the values and gradients for the NonLinearFunction interface */
+    protected FunctionStore store = null;
 
-	/** All the values for the NonLinearFunction interface. */
-	protected double[] all_values;
+    /** All the values for the NonLinearFunction interface. */
+    protected double[] all_values;
 
-	/** All the gradients for the NonLinearFunction interface. */
-	protected double[][] all_dyda;
+    /** All the gradients for the NonLinearFunction interface. */
+    protected double[][] all_dyda;
 
-	/**
-	 * Instantiates a new offset gradient1 function.
-	 *
-	 * @param f
-	 *            the function
-	 * @param values
-	 *            the precomputed values
-	 * @throws IllegalArgumentException
-	 *             if the values length does not match the function size
-	 */
-	protected OffsetGradient1Function(Gradient1Function f, double[] values)
-	{
-		super(f, values);
-		f1 = f;
-	}
+    /**
+     * Instantiates a new offset gradient1 function.
+     *
+     * @param f
+     *            the function
+     * @param values
+     *            the precomputed values
+     * @throws IllegalArgumentException
+     *             if the values length does not match the function size
+     */
+    protected OffsetGradient1Function(Gradient1Function f, double[] values)
+    {
+        super(f, values);
+        f1 = f;
+    }
 
-	/**
-	 * Instantiates a new offset gradient1 function.
-	 *
-	 * @param pre
-	 *            the function
-	 * @param values
-	 *            the precomputed values
-	 * @throws IllegalArgumentException
-	 *             if the values length does not match the function size
-	 */
-	protected OffsetGradient1Function(OffsetGradient1Function pre, double[] values)
-	{
-		super(pre, values);
-		f1 = (Gradient1Function) f;
-	}
+    /**
+     * Instantiates a new offset gradient1 function.
+     *
+     * @param pre
+     *            the function
+     * @param values
+     *            the precomputed values
+     * @throws IllegalArgumentException
+     *             if the values length does not match the function size
+     */
+    protected OffsetGradient1Function(OffsetGradient1Function pre, double[] values)
+    {
+        super(pre, values);
+        f1 = (Gradient1Function) f;
+    }
 
-	/**
-	 * Gets the gradient 1 function.
-	 *
-	 * @return the gradient 1 function
-	 */
-	public Gradient1Function getGradient1Function()
-	{
-		return f1;
-	}
+    /**
+     * Gets the gradient 1 function.
+     *
+     * @return the gradient 1 function
+     */
+    public Gradient1Function getGradient1Function()
+    {
+        return f1;
+    }
 
-	@Override
-	public void initialise(double[] a)
-	{
-		store = null;
-		f1.initialise(a);
-		i = 0;
-	}
+    @Override
+    public void initialise(double[] a)
+    {
+        store = null;
+        f1.initialise(a);
+        i = 0;
+    }
 
-	@Override
-	public int[] gradientIndices()
-	{
-		return f1.gradientIndices();
-	}
+    @Override
+    public int[] gradientIndices()
+    {
+        return f1.gradientIndices();
+    }
 
-	@Override
-	public int getNumberOfGradients()
-	{
-		return f1.getNumberOfGradients();
-	}
+    @Override
+    public int getNumberOfGradients()
+    {
+        return f1.getNumberOfGradients();
+    }
 
-	@Override
-	public void initialise1(double[] a)
-	{
-		f1.initialise1(a);
-	}
+    @Override
+    public void initialise1(double[] a)
+    {
+        f1.initialise1(a);
+    }
 
-	@Override
-	public void forEach(Gradient1Procedure procedure)
-	{
-		this.procedure = procedure;
-		i = 0;
-		f1.forEach((Gradient1Procedure) this);
-	}
+    @Override
+    public void forEach(Gradient1Procedure procedure)
+    {
+        this.procedure = procedure;
+        i = 0;
+        f1.forEach((Gradient1Procedure) this);
+    }
 
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		procedure.execute(value + values[i++], dy_da);
-	}
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        procedure.execute(value + values[i++], dy_da);
+    }
 
-	/**
-	 * Wrap a function with pre-computed values.
-	 *
-	 * @param func
-	 *            the function
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
-	 */
-	public static Gradient1Function wrapGradient1Function(final Gradient1Function func, final double[] b)
-	{
-		if (b != null && b.length == func.size())
-		{
-			// Avoid multiple wrapping
-			if (func instanceof OffsetGradient1Function)
-				return new OffsetGradient1Function((OffsetGradient1Function) func, b);
-			return new OffsetGradient1Function(func, b);
-		}
-		return func;
-	}
+    /**
+     * Wrap a function with pre-computed values.
+     *
+     * @param func
+     *            the function
+     * @param b
+     *            Baseline pre-computed y-values
+     * @return the wrapped function (or the original if pre-computed values are null or wrong length)
+     */
+    public static Gradient1Function wrapGradient1Function(final Gradient1Function func, final double[] b)
+    {
+        if (b != null && b.length == func.size())
+        {
+            // Avoid multiple wrapping
+            if (func instanceof OffsetGradient1Function)
+                return new OffsetGradient1Function((OffsetGradient1Function) func, b);
+            return new OffsetGradient1Function(func, b);
+        }
+        return func;
+    }
 
-	@Override
-	public double eval(int x, double[] dyda)
-	{
-		createStore();
-		System.arraycopy(all_dyda[i], 0, dyda, 0, store.length);
-		return all_values[x];
-	}
+    @Override
+    public double eval(int x, double[] dyda)
+    {
+        createStore();
+        System.arraycopy(all_dyda[i], 0, dyda, 0, store.length);
+        return all_values[x];
+    }
 
-	private void createStore()
-	{
-		if (store == null)
-		{
-			store = new FunctionStore(all_values, all_dyda);
-			store.getValues();
-			// Re-use space
-			all_values = store.values;
-			all_dyda = store.dyda;
-		}
-	}
+    private void createStore()
+    {
+        if (store == null)
+        {
+            store = new FunctionStore(all_values, all_dyda);
+            store.getValues();
+            // Re-use space
+            all_values = store.values;
+            all_dyda = store.dyda;
+        }
+    }
 
-	@Override
-	public double eval(int x)
-	{
-		createStore();
-		return store.values[x];
-	}
+    @Override
+    public double eval(int x)
+    {
+        createStore();
+        return store.values[x];
+    }
 
-	@Override
-	public double eval(int x, double[] dyda, double[] w)
-	{
-		w[0] = 1;
-		return eval(x, dyda);
-	}
+    @Override
+    public double eval(int x, double[] dyda, double[] w)
+    {
+        w[0] = 1;
+        return eval(x, dyda);
+    }
 
-	@Override
-	public double evalw(int x, double[] w)
-	{
-		w[0] = 1;
-		return eval(x);
-	}
+    @Override
+    public double evalw(int x, double[] w)
+    {
+        w[0] = 1;
+        return eval(x);
+    }
 
-	@Override
-	public boolean canComputeWeights()
-	{
-		return false;
-	}
+    @Override
+    public boolean canComputeWeights()
+    {
+        return false;
+    }
 }

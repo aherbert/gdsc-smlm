@@ -35,93 +35,93 @@ import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
  */
 public interface PeakResultStoreList extends PeakResultStore
 {
-	/**
-	 * Gets the result.
-	 *
-	 * @param index
-	 *            the index
-	 * @return the peak result
-	 */
-	public PeakResult get(int index);
+    /**
+     * Gets the result.
+     *
+     * @param index
+     *            the index
+     * @return the peak result
+     */
+    public PeakResult get(int index);
 
-	/**
-	 * Removes the result.
-	 *
-	 * @param index
-	 *            the index
-	 * @return the peak result removed
-	 * @throws IndexOutOfBoundsException
-	 *             If the index is invalid
-	 */
-	public PeakResult remove(int index);
+    /**
+     * Removes the result.
+     *
+     * @param index
+     *            the index
+     * @return the peak result removed
+     * @throws IndexOutOfBoundsException
+     *             If the index is invalid
+     */
+    public PeakResult remove(int index);
 
-	/**
-	 * Removes a range of results.
-	 *
-	 * @param fromIndex
-	 *            the from index
-	 * @param toIndex
-	 *            the to index (inclusive)
-	 * @throws IndexOutOfBoundsException
-	 *             If the index is invalid
-	 */
-	public void remove(int fromIndex, int toIndex);
+    /**
+     * Removes a range of results.
+     *
+     * @param fromIndex
+     *            the from index
+     * @param toIndex
+     *            the to index (inclusive)
+     * @throws IndexOutOfBoundsException
+     *             If the index is invalid
+     */
+    public void remove(int fromIndex, int toIndex);
 
-	/**
-	 * Sort the results.
-	 */
-	default public void sort()
-	{
-		sort(FrameIdPeakResultComparator.INSTANCE);
-	}
+    /**
+     * Sort the results.
+     */
+    default public void sort()
+    {
+        sort(FrameIdPeakResultComparator.INSTANCE);
+    }
 
-	/**
-	 * Sort the results.
-	 *
-	 * @param comparator
-	 *            the comparator
-	 */
-	public void sort(Comparator<PeakResult> comparator);
+    /**
+     * Sort the results.
+     *
+     * @param comparator
+     *            the comparator
+     */
+    public void sort(Comparator<PeakResult> comparator);
 
-	/**
-	 * Shuffle the results.
-	 *
-	 * @param randomSource
-	 *            the random source
-	 */
-	public void shuffle(final RandomGenerator randomSource);
+    /**
+     * Shuffle the results.
+     *
+     * @param randomSource
+     *            the random source
+     */
+    public void shuffle(final RandomGenerator randomSource);
 
-	/**
-	 * Shuffle the results.
-	 *
-	 * @param randomSource
-	 *            the random source
-	 */
-	public void shuffle(final UniformRandomProvider randomSource);
-	
-	/**
-	 * Returns the index of the first occurrence of the specified result
-	 * in this store, or -1 if this list does not contain the element.
-	 * More formally, returns the lowest index <tt>i</tt> such that
-	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
-	 *
-	 * @param result
-	 *            the result
-	 * @return the index (or -1)
-	 */
-	public int indexOf(PeakResult result);
+    /**
+     * Shuffle the results.
+     *
+     * @param randomSource
+     *            the random source
+     */
+    public void shuffle(final UniformRandomProvider randomSource);
 
-	/**
-	 * Returns the index of the last occurrence of the specified result
-	 * in this store, or -1 if this list does not contain the element.
-	 * More formally, returns the highest index <tt>i</tt> such that
-	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
-	 *
-	 * @param result
-	 *            the result
-	 * @return the index (or -1)
-	 */
-	public int lastIndexOf(PeakResult result);
+    /**
+     * Returns the index of the first occurrence of the specified result
+     * in this store, or -1 if this list does not contain the element.
+     * More formally, returns the lowest index <tt>i</tt> such that
+     * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
+     * or -1 if there is no such index.
+     *
+     * @param result
+     *            the result
+     * @return the index (or -1)
+     */
+    public int indexOf(PeakResult result);
+
+    /**
+     * Returns the index of the last occurrence of the specified result
+     * in this store, or -1 if this list does not contain the element.
+     * More formally, returns the highest index <tt>i</tt> such that
+     * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
+     * or -1 if there is no such index.
+     *
+     * @param result
+     *            the result
+     * @return the index (or -1)
+     */
+    public int lastIndexOf(PeakResult result);
 }

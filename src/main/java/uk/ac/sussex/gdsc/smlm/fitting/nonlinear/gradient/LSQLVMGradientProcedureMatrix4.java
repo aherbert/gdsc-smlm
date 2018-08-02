@@ -36,77 +36,77 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public class LSQLVMGradientProcedureMatrix4 extends LSQLVMGradientProcedureMatrix
 {
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 */
-	public LSQLVMGradientProcedureMatrix4(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		super(y, b, func);
-		if (n != 4)
-			throw new IllegalArgumentException("Function must compute 4 gradients");
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param b
+     *            Baseline pre-computed y-values
+     * @param func
+     *            Gradient function
+     */
+    public LSQLVMGradientProcedureMatrix4(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        super(y, b, func);
+        if (n != 4)
+            throw new IllegalArgumentException("Function must compute 4 gradients");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		final double dy = y[++yi] - value;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        final double dy = y[++yi] - value;
 
-		alpha[0][0] += dy_da[0] * dy_da[0];
-		alpha[1][0] += dy_da[1] * dy_da[0];
-		alpha[1][1] += dy_da[1] * dy_da[1];
-		alpha[2][0] += dy_da[2] * dy_da[0];
-		alpha[2][1] += dy_da[2] * dy_da[1];
-		alpha[2][2] += dy_da[2] * dy_da[2];
-		alpha[3][0] += dy_da[3] * dy_da[0];
-		alpha[3][1] += dy_da[3] * dy_da[1];
-		alpha[3][2] += dy_da[3] * dy_da[2];
-		alpha[3][3] += dy_da[3] * dy_da[3];
+        alpha[0][0] += dy_da[0] * dy_da[0];
+        alpha[1][0] += dy_da[1] * dy_da[0];
+        alpha[1][1] += dy_da[1] * dy_da[1];
+        alpha[2][0] += dy_da[2] * dy_da[0];
+        alpha[2][1] += dy_da[2] * dy_da[1];
+        alpha[2][2] += dy_da[2] * dy_da[2];
+        alpha[3][0] += dy_da[3] * dy_da[0];
+        alpha[3][1] += dy_da[3] * dy_da[1];
+        alpha[3][2] += dy_da[3] * dy_da[2];
+        alpha[3][3] += dy_da[3] * dy_da[3];
 
-		beta[0] += dy_da[0] * dy;
-		beta[1] += dy_da[1] * dy;
-		beta[2] += dy_da[2] * dy;
-		beta[3] += dy_da[3] * dy;
+        beta[0] += dy_da[0] * dy;
+        beta[1] += dy_da[1] * dy;
+        beta[2] += dy_da[2] * dy;
+        beta[3] += dy_da[3] * dy;
 
-		this.value += dy * dy;
-	}
+        this.value += dy * dy;
+    }
 
-	@Override
-	protected void initialiseGradient()
-	{
-		alpha[0][0] = 0;
-		alpha[1][0] = 0;
-		alpha[1][1] = 0;
-		alpha[2][0] = 0;
-		alpha[2][1] = 0;
-		alpha[2][2] = 0;
-		alpha[3][0] = 0;
-		alpha[3][1] = 0;
-		alpha[3][2] = 0;
-		alpha[3][3] = 0;
-		beta[0] = 0;
-		beta[1] = 0;
-		beta[2] = 0;
-		beta[3] = 0;
-	}
+    @Override
+    protected void initialiseGradient()
+    {
+        alpha[0][0] = 0;
+        alpha[1][0] = 0;
+        alpha[1][1] = 0;
+        alpha[2][0] = 0;
+        alpha[2][1] = 0;
+        alpha[2][2] = 0;
+        alpha[3][0] = 0;
+        alpha[3][1] = 0;
+        alpha[3][2] = 0;
+        alpha[3][3] = 0;
+        beta[0] = 0;
+        beta[1] = 0;
+        beta[2] = 0;
+        beta[3] = 0;
+    }
 
-	@Override
-	protected void finishGradient()
-	{
-		alpha[0][1] = alpha[1][0];
-		alpha[0][2] = alpha[2][0];
-		alpha[0][3] = alpha[3][0];
-		alpha[1][2] = alpha[2][1];
-		alpha[1][3] = alpha[3][1];
-		alpha[2][3] = alpha[3][2];
-	}
+    @Override
+    protected void finishGradient()
+    {
+        alpha[0][1] = alpha[1][0];
+        alpha[0][2] = alpha[2][0];
+        alpha[0][3] = alpha[3][0];
+        alpha[1][2] = alpha[2][1];
+        alpha[1][3] = alpha[3][1];
+        alpha[2][3] = alpha[3][2];
+    }
 }

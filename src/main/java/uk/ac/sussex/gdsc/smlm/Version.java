@@ -38,122 +38,123 @@ import java.util.regex.Pattern;
  */
 public class Version
 {
-	/** Constant for the string "unknown" */
-	public static final String UNKNOWN = "unknown";
-	private static String version = null;
-	private static String buildDate = null;
+    /** Constant for the string "unknown" */
+    public static final String UNKNOWN = "unknown";
+    private static String version = null;
+    private static String buildDate = null;
 
-	static
-	{
-		// Locate the version file
-		final Class<Version> resourceClass = Version.class;
-		try (final InputStream propertiesStream = resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/Version.txt"))
-		{
-			// Read the version properties
-			final Properties props = new Properties();
-			props.load(propertiesStream);
-			version = props.getProperty("version");
-			buildDate = props.getProperty("build.date");
-		}
-		catch (final IOException e)
-		{
-			// Ignore
-		}
+    static
+    {
+        // Locate the version file
+        final Class<Version> resourceClass = Version.class;
+        try (final InputStream propertiesStream = resourceClass
+                .getResourceAsStream("/uk/ac/sussex/gdsc/smlm/Version.txt"))
+        {
+            // Read the version properties
+            final Properties props = new Properties();
+            props.load(propertiesStream);
+            version = props.getProperty("version");
+            buildDate = props.getProperty("build.date");
+        }
+        catch (final IOException e)
+        {
+            // Ignore
+        }
 
-		if (version == null || version.length() == 0)
-			version = UNKNOWN;
-		if (buildDate == null || buildDate.length() == 0)
-			buildDate = UNKNOWN;
-	}
+        if (version == null || version.length() == 0)
+            version = UNKNOWN;
+        if (buildDate == null || buildDate.length() == 0)
+            buildDate = UNKNOWN;
+    }
 
-	/**
-	 * The main method. Output the version and build date.
-	 *
-	 * @param args
-	 *            the arguments
-	 */
-	public static void main(String[] args)
-	{
-		final StringBuilder msg = new StringBuilder();
-		final String newLine = System.getProperty("line.separator");
-		msg.append("Version : ").append(version).append(newLine);
-		msg.append("Build Date : ").append(buildDate).append(newLine);
-		System.out.print(msg.toString());
-	}
+    /**
+     * The main method. Output the version and build date.
+     *
+     * @param args
+     *            the arguments
+     */
+    public static void main(String[] args)
+    {
+        final StringBuilder msg = new StringBuilder();
+        final String newLine = System.getProperty("line.separator");
+        msg.append("Version : ").append(version).append(newLine);
+        msg.append("Build Date : ").append(buildDate).append(newLine);
+        System.out.print(msg.toString());
+    }
 
-	/**
-	 * Get the GDSC SMLM version
-	 *
-	 * @return The uk.ac.sussex.gdsc.smlm package version
-	 */
-	public static String getVersion()
-	{
-		return version;
-	}
+    /**
+     * Get the GDSC SMLM version
+     *
+     * @return The uk.ac.sussex.gdsc.smlm package version
+     */
+    public static String getVersion()
+    {
+        return version;
+    }
 
-	/**
-	 * Get the GDSC SMLM package build date
-	 *
-	 * @return The uk.ac.sussex.gdsc.smlm package build date
-	 */
-	public static String getBuildDate()
-	{
-		return buildDate;
-	}
+    /**
+     * Get the GDSC SMLM package build date
+     *
+     * @return The uk.ac.sussex.gdsc.smlm package build date
+     */
+    public static String getBuildDate()
+    {
+        return buildDate;
+    }
 
-	/**
-	 * Get the major version
-	 *
-	 * @return The major version (or 0 if unknown)
-	 */
-	public static int getMajorVersion()
-	{
-		final Pattern p = Pattern.compile("^\\d+");
-		final Matcher m = p.matcher(version);
-		if (m.find())
-			return Integer.parseInt(m.group());
-		return 0;
-	}
+    /**
+     * Get the major version
+     *
+     * @return The major version (or 0 if unknown)
+     */
+    public static int getMajorVersion()
+    {
+        final Pattern p = Pattern.compile("^\\d+");
+        final Matcher m = p.matcher(version);
+        if (m.find())
+            return Integer.parseInt(m.group());
+        return 0;
+    }
 
-	/**
-	 * Get the minor version
-	 *
-	 * @return The minor version (or 0 if unknown)
-	 */
-	public static int getMinorVersion()
-	{
-		final Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
-		final Matcher m = p.matcher(version);
-		if (m.find())
-			return Integer.parseInt(m.group(1));
-		return 0;
-	}
+    /**
+     * Get the minor version
+     *
+     * @return The minor version (or 0 if unknown)
+     */
+    public static int getMinorVersion()
+    {
+        final Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
+        final Matcher m = p.matcher(version);
+        if (m.find())
+            return Integer.parseInt(m.group(1));
+        return 0;
+    }
 
-	/**
-	 * Get the patch version
-	 *
-	 * @return The patch version (or 0 if unknown)
-	 */
-	public static int getPatchVersion()
-	{
-		final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
-		final Matcher m = p.matcher(version);
-		if (m.find())
-			return Integer.parseInt(m.group(1));
-		return 0;
-	}
+    /**
+     * Get the patch version
+     *
+     * @return The patch version (or 0 if unknown)
+     */
+    public static int getPatchVersion()
+    {
+        final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
+        final Matcher m = p.matcher(version);
+        if (m.find())
+            return Integer.parseInt(m.group(1));
+        return 0;
+    }
 
-	/**
-	 * Get a string with the major, minor and patch versions
-	 *
-	 * @return Major.Minor.Patch
-	 */
-	public static String getMajorMinorPatch()
-	{
-		final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
-		final Matcher m = p.matcher(version);
-		if (m.find())
-			return m.group();
-		return "";
-	}
+    /**
+     * Get a string with the major, minor and patch versions
+     *
+     * @return Major.Minor.Patch
+     */
+    public static String getMajorMinorPatch()
+    {
+        final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
+        final Matcher m = p.matcher(version);
+        if (m.find())
+            return m.group();
+        return "";
+    }
 }

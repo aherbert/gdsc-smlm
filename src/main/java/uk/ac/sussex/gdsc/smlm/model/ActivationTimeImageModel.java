@@ -31,64 +31,64 @@ package uk.ac.sussex.gdsc.smlm.model;
  */
 public class ActivationTimeImageModel extends ImageModel
 {
-	private double tAct;
+    private double tAct;
 
-	/**
-	 * Construct a new image model
-	 *
-	 * @param tAct
-	 *            Average time for activation
-	 * @param tOn
-	 *            Average on-state time
-	 * @param tOff
-	 *            Average off-state time for the first dark state
-	 * @param tOff2
-	 *            Average off-state time for the second dark state
-	 * @param nBlinks
-	 *            Average number of blinks in the first dark state (used for each burst between second dark states)
-	 * @param nBlinks2
-	 *            Average number of blinks into the second dark state
-	 */
-	public ActivationTimeImageModel(double tAct, double tOn, double tOff, double tOff2, double nBlinks, double nBlinks2)
-	{
-		super(tOn, tOff, tOff2, nBlinks, nBlinks2);
-		init(tAct);
-	}
+    /**
+     * Construct a new image model
+     *
+     * @param tAct
+     *            Average time for activation
+     * @param tOn
+     *            Average on-state time
+     * @param tOff
+     *            Average off-state time for the first dark state
+     * @param tOff2
+     *            Average off-state time for the second dark state
+     * @param nBlinks
+     *            Average number of blinks in the first dark state (used for each burst between second dark states)
+     * @param nBlinks2
+     *            Average number of blinks into the second dark state
+     */
+    public ActivationTimeImageModel(double tAct, double tOn, double tOff, double tOff2, double nBlinks, double nBlinks2)
+    {
+        super(tOn, tOff, tOff2, nBlinks, nBlinks2);
+        init(tAct);
+    }
 
-	private void init(double tAct)
-	{
-		checkParameter("tAct", tAct);
-		this.tAct = tAct;
-	}
+    private void init(double tAct)
+    {
+        checkParameter("tAct", tAct);
+        this.tAct = tAct;
+    }
 
-	/**
-	 * @return the tAct
-	 */
-	public double gettAct()
-	{
-		return tAct;
-	}
+    /**
+     * @return the tAct
+     */
+    public double gettAct()
+    {
+        return tAct;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
-	 */
-	@Override
-	protected double createActivationTime(double[] xyz)
-	{
-		return getRandom().nextExponential(tAct);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
+     */
+    @Override
+    protected double createActivationTime(double[] xyz)
+    {
+        return getRandom().nextExponential(tAct);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
-	 */
-	@Override
-	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
-	{
-		return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
-				isUseGeometricDistribution(), getRandom());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
+     */
+    @Override
+    protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
+    {
+        return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
+                isUseGeometricDistribution(), getRandom());
+    }
 }

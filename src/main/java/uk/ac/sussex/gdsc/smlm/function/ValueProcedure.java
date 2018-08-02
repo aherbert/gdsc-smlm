@@ -28,11 +28,11 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public interface ValueProcedure
 {
-	/**
-	 * Executes this procedure
-	 *
-	 * @param value
-	 *            the value of the function
-	 */
-	public void execute(double value);
+    /**
+     * Executes this procedure
+     *
+     * @param value
+     *            the value of the function
+     */
+    public void execute(double value);
 }

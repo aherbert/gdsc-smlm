@@ -33,27 +33,27 @@ import java.util.List;
  */
 public interface FitnessFunction<T extends Comparable<T>>
 {
-	/**
-	 * Initialise the fitness function using a population of individuals. This can be used to pre-process the population
-	 * before the {@link #fitness(Chromosome)} method is run on each individual.
-	 *
-	 * @param individuals
-	 *            The population of individuals that will be assessed
-	 */
-	public void initialise(List<? extends Chromosome<T>> individuals);
+    /**
+     * Initialise the fitness function using a population of individuals. This can be used to pre-process the population
+     * before the {@link #fitness(Chromosome)} method is run on each individual.
+     *
+     * @param individuals
+     *            The population of individuals that will be assessed
+     */
+    public void initialise(List<? extends Chromosome<T>> individuals);
 
-	/**
-	 * Calculate the fitness.
-	 *
-	 * @param chromosome
-	 *            the chromosome
-	 * @return the fitness
-	 */
-	public T fitness(Chromosome<T> chromosome);
+    /**
+     * Calculate the fitness.
+     *
+     * @param chromosome
+     *            the chromosome
+     * @return the fitness
+     */
+    public T fitness(Chromosome<T> chromosome);
 
-	/**
-	 * Shutdown the fitness function. This can be used to post-process the population
-	 * after the {@link #fitness(Chromosome)} method is run on each individual.
-	 */
-	public void shutdown();
+    /**
+     * Shutdown the fitness function. This can be used to post-process the population
+     * after the {@link #fitness(Chromosome)} method is run on each individual.
+     */
+    public void shutdown();
 }

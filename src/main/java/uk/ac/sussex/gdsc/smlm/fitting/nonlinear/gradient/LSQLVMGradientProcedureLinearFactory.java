@@ -30,37 +30,37 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public class LSQLVMGradientProcedureLinearFactory extends BaseLSQLVMGradientProcedureFactory
 {
-	/**
-	 * Create a new gradient procedure
-	 *
-	 * @param y
-	 *            Data to fit
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	public static LSQLVMGradientProcedureLinear create(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		switch (func.getNumberOfGradients())
-		{
-			case 5:
-				return new LSQLVMGradientProcedureLinear5(y, b, func);
-			case 4:
-				return new LSQLVMGradientProcedureLinear4(y, b, func);
-			case 6:
-				return new LSQLVMGradientProcedureLinear6(y, b, func);
+    /**
+     * Create a new gradient procedure
+     *
+     * @param y
+     *            Data to fit
+     * @param b
+     *            Baseline pre-computed y-values
+     * @param func
+     *            Gradient function
+     * @return the gradient procedure
+     */
+    public static LSQLVMGradientProcedureLinear create(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        switch (func.getNumberOfGradients())
+        {
+            case 5:
+                return new LSQLVMGradientProcedureLinear5(y, b, func);
+            case 4:
+                return new LSQLVMGradientProcedureLinear4(y, b, func);
+            case 6:
+                return new LSQLVMGradientProcedureLinear6(y, b, func);
 
-			default:
-				return new LSQLVMGradientProcedureLinear(y, b, func);
-		}
-	}
+            default:
+                return new LSQLVMGradientProcedureLinear(y, b, func);
+        }
+    }
 
-	// Instance method for testing
-	@Override
-	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		return create(y, b, func);
-	}
+    // Instance method for testing
+    @Override
+    BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        return create(y, b, func);
+    }
 }

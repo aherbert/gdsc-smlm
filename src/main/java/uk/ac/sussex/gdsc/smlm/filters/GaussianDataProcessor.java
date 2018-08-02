@@ -33,146 +33,148 @@ import uk.ac.sussex.gdsc.core.ij.Utils;
  */
 public class GaussianDataProcessor extends DataProcessor
 {
-	private final double sigma;
-	private GaussianFilter filter;
+    private final double sigma;
+    private GaussianFilter filter;
 
-	/**
-	 * Constructor
-	 *
-	 * @param border
-	 *            The border to ignore for maxima
-	 * @param smooth
-	 *            The distance into neighbouring pixels to extend. The resulting standard deviation can be found using
-	 *            {@link #getSigma()}
-	 */
-	public GaussianDataProcessor(int border, double smooth)
-	{
-		super(border);
-		this.sigma = getSigma(smooth);
-		filter = new GaussianFilter(0.02);
-	}
+    /**
+     * Constructor
+     *
+     * @param border
+     *            The border to ignore for maxima
+     * @param smooth
+     *            The distance into neighbouring pixels to extend. The resulting standard deviation can be found using
+     *            {@link #getSigma()}
+     */
+    public GaussianDataProcessor(int border, double smooth)
+    {
+        super(border);
+        this.sigma = getSigma(smooth);
+        filter = new GaussianFilter(0.02);
+    }
 
-	/**
-	 * Get the Gaussian standard deviation for the desired smoothing distance.
-	 *
-	 * @param smooth
-	 *            the smoothing distance
-	 * @return the Gaussian standard deviation for the desired smoothing distance.
-	 */
-	public static double getSigma(double smooth)
-	{
-		if (smooth < 0)
-			return 0;
-		return smooth;
-	}
+    /**
+     * Get the Gaussian standard deviation for the desired smoothing distance.
+     *
+     * @param smooth
+     *            the smoothing distance
+     * @return the Gaussian standard deviation for the desired smoothing distance.
+     */
+    public static double getSigma(double smooth)
+    {
+        if (smooth < 0)
+            return 0;
+        return smooth;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
-	 */
-	@Override
-	public boolean isWeighted()
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
+     */
+    @Override
+    public boolean isWeighted()
+    {
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
-	 */
-	@Override
-	public void setWeights(float[] weights, int width, int height)
-	{
-		filter.setWeights(weights, width, height);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
+     */
+    @Override
+    public void setWeights(float[] weights, int width, int height)
+    {
+        filter.setWeights(weights, width, height);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
-	 */
-	@Override
-	public boolean hasWeights()
-	{
-		return filter.hasWeights();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
+     */
+    @Override
+    public boolean hasWeights()
+    {
+        return filter.hasWeights();
+    }
 
-	/* (non-Javadoc)
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
-	 */
-	@Override
-	public float[] process(float[] data, int width, int height)
-	{
-		float[] smoothData = data;
-		if (sigma > 0)
-		{
-			// Smoothing destructively modifies the data so create a copy
-			smoothData = Arrays.copyOf(data, width * height);
-			if (GaussianFilter.getBorder(sigma) <= getBorder())
-				filter.convolveInternal(smoothData, width, height, sigma);
-			else
-				filter.convolve(smoothData, width, height, sigma);
-		}
-		return smoothData;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
+     */
+    @Override
+    public float[] process(float[] data, int width, int height)
+    {
+        float[] smoothData = data;
+        if (sigma > 0)
+        {
+            // Smoothing destructively modifies the data so create a copy
+            smoothData = Arrays.copyOf(data, width * height);
+            if (GaussianFilter.getBorder(sigma) <= getBorder())
+                filter.convolveInternal(smoothData, width, height, sigma);
+            else
+                filter.convolve(smoothData, width, height, sigma);
+        }
+        return smoothData;
+    }
 
-	/**
-	 * @return the Gaussian standard deviation
-	 */
-	public double getSigma()
-	{
-		return sigma;
-	}
+    /**
+     * @return the Gaussian standard deviation
+     */
+    public double getSigma()
+    {
+        return sigma;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public GaussianDataProcessor clone()
-	{
-		final GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
-		// Ensure the object is duplicated and not passed by reference.
-		f.filter = filter.clone();
-		return f;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public GaussianDataProcessor clone()
+    {
+        final GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
+        // Ensure the object is duplicated and not passed by reference.
+        f.filter = filter.clone();
+        return f;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return "Gaussian";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
+     */
+    @Override
+    public String getName()
+    {
+        return "Gaussian";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
-	 */
-	@Override
-	public List<String> getParameters()
-	{
-		final List<String> list = super.getParameters();
-		list.add("sigma = " + Utils.rounded(sigma));
-		list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
-		return list;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
+     */
+    @Override
+    public List<String> getParameters()
+    {
+        final List<String> list = super.getParameters();
+        list.add("sigma = " + Utils.rounded(sigma));
+        list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
+        return list;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
-	 */
-	@Override
-	public double getSpread()
-	{
-		return 6 * sigma;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
+     */
+    @Override
+    public double getSpread()
+    {
+        return 6 * sigma;
+    }
 }

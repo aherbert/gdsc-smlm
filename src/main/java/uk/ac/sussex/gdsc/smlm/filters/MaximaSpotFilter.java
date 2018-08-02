@@ -35,143 +35,143 @@ import uk.ac.sussex.gdsc.core.filters.NonMaximumSuppression;
  */
 public abstract class MaximaSpotFilter extends SpotFilter
 {
-	private final int search;
-	private final int border;
-	private NonMaximumSuppression nms;
-	private float[] data2 = null;
+    private final int search;
+    private final int border;
+    private NonMaximumSuppression nms;
+    private float[] data2 = null;
 
-	/**
-	 * Create the spot filter
-	 *
-	 * @param search
-	 *            The search width for non-maximum suppression
-	 * @param border
-	 *            The border to ignore for maxima
-	 * @throws IllegalArgumentException
-	 *             if search is below 1 or border is below zero
-	 */
-	public MaximaSpotFilter(int search, int border)
-	{
-		if (search < 1)
-			throw new IllegalArgumentException("Search width must be 1 or above");
-		if (border < 0)
-			throw new IllegalArgumentException("Border must be 0 or above");
-		this.search = search;
-		this.border = border;
-		nms = new NonMaximumSuppression();
-		// Do a neighbour check when using a low block size
-		nms.setNeighbourCheck(search < 3);
-	}
+    /**
+     * Create the spot filter
+     *
+     * @param search
+     *            The search width for non-maximum suppression
+     * @param border
+     *            The border to ignore for maxima
+     * @throws IllegalArgumentException
+     *             if search is below 1 or border is below zero
+     */
+    public MaximaSpotFilter(int search, int border)
+    {
+        if (search < 1)
+            throw new IllegalArgumentException("Search width must be 1 or above");
+        if (border < 0)
+            throw new IllegalArgumentException("Border must be 0 or above");
+        this.search = search;
+        this.border = border;
+        nms = new NonMaximumSuppression();
+        // Do a neighbour check when using a low block size
+        nms.setNeighbourCheck(search < 3);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#find(float[], int, int)
-	 */
-	@Override
-	protected Spot[] find(final float[] data, final int width, final int height)
-	{
-		data2 = preprocessData(data, width, height);
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#find(float[], int, int)
+     */
+    @Override
+    protected Spot[] find(final float[] data, final int width, final int height)
+    {
+        data2 = preprocessData(data, width, height);
 
-		//uk.ac.sussex.gdsc.core.ij.Utils.display("Spot Filter", new FloatProcessor(width, height, data2));
+        //uk.ac.sussex.gdsc.core.ij.Utils.display("Spot Filter", new FloatProcessor(width, height, data2));
 
-		final int[] maxIndices = getMaxima(data2, width, height);
-		if (maxIndices.length == 0)
-			return null;
+        final int[] maxIndices = getMaxima(data2, width, height);
+        if (maxIndices.length == 0)
+            return null;
 
-		final Spot[] spots = new Spot[maxIndices.length];
-		for (int n = 0; n < maxIndices.length; n++)
-		{
-			final int y = maxIndices[n] / width;
-			final int x = maxIndices[n] % width;
-			final float intensity = data2[maxIndices[n]];
-			spots[n] = new Spot(x, y, intensity);
-		}
-		return spots;
-	}
+        final Spot[] spots = new Spot[maxIndices.length];
+        for (int n = 0; n < maxIndices.length; n++)
+        {
+            final int y = maxIndices[n] / width;
+            final int x = maxIndices[n] % width;
+            final float intensity = data2[maxIndices[n]];
+            spots[n] = new Spot(x, y, intensity);
+        }
+        return spots;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getPreprocessedData()
-	 */
-	@Override
-	public float[] getPreprocessedData()
-	{
-		return data2;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getPreprocessedData()
+     */
+    @Override
+    public float[] getPreprocessedData()
+    {
+        return data2;
+    }
 
-	/**
-	 * Pre-process the data before finding local maxima.
-	 *
-	 * @param data
-	 *            the data
-	 * @param width
-	 *            the width
-	 * @param height
-	 *            the height
-	 * @return The pre-processed data
-	 */
-	public abstract float[] preprocessData(final float[] data, final int width, final int height);
+    /**
+     * Pre-process the data before finding local maxima.
+     *
+     * @param data
+     *            the data
+     * @param width
+     *            the width
+     * @param height
+     *            the height
+     * @return The pre-processed data
+     */
+    public abstract float[] preprocessData(final float[] data, final int width, final int height);
 
-	/**
-	 * Find the indices of the maxima using the currently configured parameters
-	 * <p>
-	 * Data must be arranged in yx block order, i.e. height rows of width.
-	 *
-	 * @param data
-	 *            the data
-	 * @param width
-	 *            the width
-	 * @param height
-	 *            the height
-	 * @return Indices of the maxima
-	 */
-	protected int[] getMaxima(float[] data, int width, int height)
-	{
-		// Check upper limits are safe
-		final int n = FastMath.min(search, FastMath.min(width, height));
-		final int border = FastMath.min(this.border, FastMath.min(width, height) / 2);
-		return nms.blockFindInternal(data, width, height, n, border);
-	}
+    /**
+     * Find the indices of the maxima using the currently configured parameters
+     * <p>
+     * Data must be arranged in yx block order, i.e. height rows of width.
+     *
+     * @param data
+     *            the data
+     * @param width
+     *            the width
+     * @param height
+     *            the height
+     * @return Indices of the maxima
+     */
+    protected int[] getMaxima(float[] data, int width, int height)
+    {
+        // Check upper limits are safe
+        final int n = FastMath.min(search, FastMath.min(width, height));
+        final int border = FastMath.min(this.border, FastMath.min(width, height) / 2);
+        return nms.blockFindInternal(data, width, height, n, border);
+    }
 
-	/**
-	 * @return the search width for maxima (maximum must be the highest point in a 2n+1 region)
-	 */
-	public int getSearch()
-	{
-		return search;
-	}
+    /**
+     * @return the search width for maxima (maximum must be the highest point in a 2n+1 region)
+     */
+    public int getSearch()
+    {
+        return search;
+    }
 
-	/**
-	 * @return the border at the edge to ignore for maxima
-	 */
-	public int getBorder()
-	{
-		return border;
-	}
+    /**
+     * @return the border at the edge to ignore for maxima
+     */
+    public int getBorder()
+    {
+        return border;
+    }
 
-	@Override
-	public List<String> getParameters()
-	{
-		final ArrayList<String> list = new ArrayList<>();
-		list.add("search = " + search);
-		list.add("border = " + border);
-		return list;
-	}
+    @Override
+    public List<String> getParameters()
+    {
+        final ArrayList<String> list = new ArrayList<>();
+        list.add("search = " + search);
+        list.add("border = " + border);
+        return list;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public MaximaSpotFilter clone()
-	{
-		final MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
-		// Ensure the object is duplicated and not passed by reference.
-		f.nms = nms.clone();
-		f.data2 = null;
-		return f;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public MaximaSpotFilter clone()
+    {
+        final MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
+        // Ensure the object is duplicated and not passed by reference.
+        f.nms = nms.clone();
+        f.data2 = null;
+        return f;
+    }
 }

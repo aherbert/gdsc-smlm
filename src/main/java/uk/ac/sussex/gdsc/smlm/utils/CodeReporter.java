@@ -28,15 +28,15 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public class CodeReporter
 {
-	/**
-	 * Print the classname, methodname and line number from the throwable
-	 *
-	 * @param t
-	 *            the throwable
-	 */
-	public static void debug(Throwable t)
-	{
-		final StackTraceElement e = t.getStackTrace()[0];
-		System.err.printf("%s:%s:%d\n", e.getClassName(), e.getMethodName(), e.getLineNumber());
-	}
+    /**
+     * Print the classname, methodname and line number from the throwable
+     *
+     * @param t
+     *            the throwable
+     */
+    public static void debug(Throwable t)
+    {
+        final StackTraceElement e = t.getStackTrace()[0];
+        System.err.printf("%s:%s:%d\n", e.getClassName(), e.getMethodName(), e.getLineNumber());
+    }
 }

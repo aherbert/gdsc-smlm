@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public enum FileFormat
 {
-	//@formatter:off
+    //@formatter:off
 	/** SMLM Text */
     SMLM_TEXT{
     	@Override public String getName() { return "SMLM Text"; }
@@ -51,26 +51,26 @@ public enum FileFormat
     UNKNOWN{ @Override public String getName() { return "Unknown"; }};
 	//@formatter:on
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
+    @Override
+    public String toString()
+    {
+        return getName();
+    }
 
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	abstract public String getName();
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    abstract public String getName();
 
-	/**
-	 * Checks if is a GDSC SMLM format.
-	 *
-	 * @return true, if is a GDSC SMLM format
-	 */
-	public boolean isSMLM()
-	{
-		return false;
-	}
+    /**
+     * Checks if is a GDSC SMLM format.
+     *
+     * @return true, if is a GDSC SMLM format
+     */
+    public boolean isSMLM()
+    {
+        return false;
+    }
 }

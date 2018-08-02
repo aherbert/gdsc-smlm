@@ -30,10 +30,10 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public interface RandomGeneratorFactory
 {
-	/**
-	 * Create a new random generator
-	 *
-	 * @return a new random generator
-	 */
-	public RandomGenerator createRandomGenerator();
+    /**
+     * Create a new random generator
+     *
+     * @return a new random generator
+     */
+    public RandomGenerator createRandomGenerator();
 }

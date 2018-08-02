@@ -30,17 +30,17 @@ import uk.ac.sussex.gdsc.core.data.utils.Converter;
  */
 public abstract class PeakResultDataFloatConverter extends PeakResultDataFloat
 {
-	/** The converter. */
-	final Converter converter;
+    /** The converter. */
+    final Converter converter;
 
-	/**
-	 * Instantiates a new peak result data float converter.
-	 *
-	 * @param converter
-	 *            the converter
-	 */
-	public PeakResultDataFloatConverter(Converter converter)
-	{
-		this.converter = converter;
-	}
+    /**
+     * Instantiates a new peak result data float converter.
+     *
+     * @param converter
+     *            the converter
+     */
+    public PeakResultDataFloatConverter(Converter converter)
+    {
+        this.converter = converter;
+    }
 }

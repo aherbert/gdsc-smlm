@@ -32,59 +32,59 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
  */
 public class XmlUtils extends uk.ac.sussex.gdsc.core.utils.XmlUtils
 {
-	private static XStream xs = null;
+    private static XStream xs = null;
 
-	/**
-	 * Convert an object to XML.
-	 *
-	 * @param obj
-	 *            the object
-	 * @return XML string representation
-	 */
-	public static String toXML(Object obj)
-	{
-		init();
-		if (xs != null)
-			try
-			{
-				return xs.toXML(obj);
-			}
-			catch (final XStreamException ex)
-			{
-				//ex.printStackTrace();
-			}
-		return "";
-	}
+    /**
+     * Convert an object to XML.
+     *
+     * @param obj
+     *            the object
+     * @return XML string representation
+     */
+    public static String toXML(Object obj)
+    {
+        init();
+        if (xs != null)
+            try
+            {
+                return xs.toXML(obj);
+            }
+            catch (final XStreamException ex)
+            {
+                //ex.printStackTrace();
+            }
+        return "";
+    }
 
-	/**
-	 * Load an object from the XML string representation.
-	 *
-	 * @param xml
-	 *            the xml
-	 * @return the object
-	 */
-	public static Object fromXML(String xml)
-	{
-		init();
-		if (xs != null)
-			try
-			{
-				return xs.fromXML(xml);
-			}
-			catch (final XStreamException ex)
-			{
-				//ex.printStackTrace();
-			}
-		return null;
-	}
+    /**
+     * Load an object from the XML string representation.
+     *
+     * @param xml
+     *            the xml
+     * @return the object
+     */
+    public static Object fromXML(String xml)
+    {
+        init();
+        if (xs != null)
+            try
+            {
+                return xs.fromXML(xml);
+            }
+            catch (final XStreamException ex)
+            {
+                //ex.printStackTrace();
+            }
+        return null;
+    }
 
-	private static void init()
-	{
-		if (xs == null)
-		{
-			xs = new XStream(new DomDriver());
-			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
-			xs.allowTypesByWildcard(new String[] { "uk.ac.sussex.gdsc.smlm.**" });
-		}
-	}
+    private static void init()
+    {
+        if (xs == null)
+        {
+            xs = new XStream(new DomDriver());
+            XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+            xs.allowTypesByWildcard(new String[] { "uk.ac.sussex.gdsc.smlm.**" });
+        }
+    }
 }

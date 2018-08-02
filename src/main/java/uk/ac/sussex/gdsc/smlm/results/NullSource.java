@@ -29,50 +29,50 @@ package uk.ac.sussex.gdsc.smlm.results;
 public class NullSource extends ImageSource
 {
 
-	/**
-	 * Create a new image source.
-	 *
-	 * @param name
-	 *            the name
-	 */
-	public NullSource(String name)
-	{
-		super(name);
-	}
+    /**
+     * Create a new image source.
+     *
+     * @param name
+     *            the name
+     */
+    public NullSource(String name)
+    {
+        super(name);
+    }
 
-	@Override
-	protected boolean openSource()
-	{
-		return false;
-	}
+    @Override
+    protected boolean openSource()
+    {
+        return false;
+    }
 
-	@Override
-	protected void closeSource()
-	{
-		// Nothing to do
-	}
+    @Override
+    protected void closeSource()
+    {
+        // Nothing to do
+    }
 
-	@Override
-	protected boolean initialiseSequentialRead()
-	{
-		return false;
-	}
+    @Override
+    protected boolean initialiseSequentialRead()
+    {
+        return false;
+    }
 
-	@Override
-	protected float[] nextRawFrame()
-	{
-		return null;
-	}
+    @Override
+    protected float[] nextRawFrame()
+    {
+        return null;
+    }
 
-	@Override
-	protected float[] getRawFrame(int frame)
-	{
-		return null;
-	}
+    @Override
+    protected float[] getRawFrame(int frame)
+    {
+        return null;
+    }
 
-	@Override
-	public boolean isValid(int frame)
-	{
-		return false;
-	}
+    @Override
+    public boolean isValid(int frame)
+    {
+        return false;
+    }
 }

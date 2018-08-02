@@ -84,408 +84,408 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.ParameterSettings;
 @Deprecated
 public class BatchPeakFit implements PlugIn
 {
-	private static final String TITLE = "Batch Peak Fit";
+    private static final String TITLE = "Batch Peak Fit";
 
-	private static String configFilename = "";
+    private static String configFilename = "";
 
-	private final XStream xs;
-	private TextField configFilenameText;
+    private final XStream xs;
+    private TextField configFilenameText;
 
-	/**
-	 * Default constructor
-	 */
-	public BatchPeakFit()
-	{
-		xs = createXStream();
-	}
+    /**
+     * Default constructor
+     */
+    public BatchPeakFit()
+    {
+        xs = createXStream();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@Override
-	public void run(String arg)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @Override
+    public void run(String arg)
+    {
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (!showDialog())
-			return;
+        if (!showDialog())
+            return;
 
-		runBatch(configFilename);
-	}
+        runBatch(configFilename);
+    }
 
-	/**
-	 * Reads the batch configuration file. For each parameter variation, create a fitting configuration. Then run the
-	 * fit engine on each input image using each configuration.
-	 *
-	 * @param configurationFilename
-	 *            the configuration filename
-	 */
-	private void runBatch(String configurationFilename)
-	{
-		final BatchSettings settings = loadSettings(configurationFilename);
-		if (settings == null || settings.parameters.isEmpty())
-		{
-			IJ.log("No settings for the fitting engine");
-			return;
-		}
+    /**
+     * Reads the batch configuration file. For each parameter variation, create a fitting configuration. Then run the
+     * fit engine on each input image using each configuration.
+     *
+     * @param configurationFilename
+     *            the configuration filename
+     */
+    private void runBatch(String configurationFilename)
+    {
+        final BatchSettings settings = loadSettings(configurationFilename);
+        if (settings == null || settings.parameters.isEmpty())
+        {
+            IJ.log("No settings for the fitting engine");
+            return;
+        }
 
-		if (!new File(settings.resultsDirectory).exists())
-			if (!new File(settings.resultsDirectory).mkdirs())
-			{
-				IJ.log("Unable to create the results directory: " + settings.resultsDirectory);
-				return;
-			}
+        if (!new File(settings.resultsDirectory).exists())
+            if (!new File(settings.resultsDirectory).mkdirs())
+            {
+                IJ.log("Unable to create the results directory: " + settings.resultsDirectory);
+                return;
+            }
 
-		final Document doc = getDefaultSettingsXmlDocument();
-		if (doc == null)
-			return;
+        final Document doc = getDefaultSettingsXmlDocument();
+        if (doc == null)
+            return;
 
-		// Create XML for each variation
-		final ArrayList<String> xmlSettings = new ArrayList<>();
-		setParameters(settings.parameters, 0, doc, xmlSettings);
+        // Create XML for each variation
+        final ArrayList<String> xmlSettings = new ArrayList<>();
+        setParameters(settings.parameters, 0, doc, xmlSettings);
 
-		// Run all the variants on the input images
-		for (final String imageFilename : settings.images)
-		{
-			final ImagePlus imp = IJ.openImage(imageFilename);
-			if (imp == null)
-			{
-				IJ.log("Unable to load image: " + imageFilename);
-				continue;
-			}
+        // Run all the variants on the input images
+        for (final String imageFilename : settings.images)
+        {
+            final ImagePlus imp = IJ.openImage(imageFilename);
+            if (imp == null)
+            {
+                IJ.log("Unable to load image: " + imageFilename);
+                continue;
+            }
 
-			processImage(settings, imp, xmlSettings);
-		}
-	}
+            processImage(settings, imp, xmlSettings);
+        }
+    }
 
-	private Document getDefaultSettingsXmlDocument()
-	{
-		// Create an XML document of the default settings
-		Document doc = null;
-		try
-		{
-			final String configXml = xs.toXML(new FitEngineConfiguration());
-			doc = loadDocument(configXml);
-		}
-		catch (final XStreamException ex)
-		{
-			ex.printStackTrace();
-		}
-		return doc;
-	}
+    private Document getDefaultSettingsXmlDocument()
+    {
+        // Create an XML document of the default settings
+        Document doc = null;
+        try
+        {
+            final String configXml = xs.toXML(new FitEngineConfiguration());
+            doc = loadDocument(configXml);
+        }
+        catch (final XStreamException ex)
+        {
+            ex.printStackTrace();
+        }
+        return doc;
+    }
 
-	/**
-	 * Modify the XML document using the specified values for the given parameter. For each value
-	 * call the method recursively for the next parameter. If there are no more parameters
-	 * then add the XML document to the xmlSettings.
-	 *
-	 * @param parameters
-	 *            The list of parameters
-	 * @param i
-	 *            Parameter to process
-	 * @param doc
-	 *            The XML document containing all the current parameters
-	 * @param xmlSettings
-	 *            A list of XML parameter settings
-	 */
-	private void setParameters(ArrayList<ParameterSettings> parameters, int i, Document doc,
-			ArrayList<String> xmlSettings)
-	{
-		// For all the fields within Calibration, PSF, FitEngineSettings
-		// print out the field name and default value. The FitEngineSettings has to
-		// extract the FitSettings separately.
-		// The user can then set any field to a list of comma-separated values and the
-		// plugin will produce a functional fit configuration for each combination.
-		//FitSettings  s = FitSettings.getDefaultInstance();
-		//Descriptor d = s.getDescriptorForType();
-		//FieldDescriptor fd = d.findFieldByNumber(0);
-		//fd.
+    /**
+     * Modify the XML document using the specified values for the given parameter. For each value
+     * call the method recursively for the next parameter. If there are no more parameters
+     * then add the XML document to the xmlSettings.
+     *
+     * @param parameters
+     *            The list of parameters
+     * @param i
+     *            Parameter to process
+     * @param doc
+     *            The XML document containing all the current parameters
+     * @param xmlSettings
+     *            A list of XML parameter settings
+     */
+    private void setParameters(ArrayList<ParameterSettings> parameters, int i, Document doc,
+            ArrayList<String> xmlSettings)
+    {
+        // For all the fields within Calibration, PSF, FitEngineSettings
+        // print out the field name and default value. The FitEngineSettings has to
+        // extract the FitSettings separately.
+        // The user can then set any field to a list of comma-separated values and the
+        // plugin will produce a functional fit configuration for each combination.
+        //FitSettings  s = FitSettings.getDefaultInstance();
+        //Descriptor d = s.getDescriptorForType();
+        //FieldDescriptor fd = d.findFieldByNumber(0);
+        //fd.
 
-		if (i < parameters.size())
-		{
-			final ParameterSettings param = parameters.get(i);
-			final NodeList nodes = doc.getElementsByTagName(param.name);
-			if (nodes.getLength() == 1)
-			{
-				// For each value, set the parameter and move to the next
-				final String[] values = param.value.split(",");
-				for (final String value : values)
-				{
-					final Node node = nodes.item(0);
-					node.setTextContent(value);
-					setParameters(parameters, i + 1, doc, xmlSettings);
-				}
-			}
-			else
-				// Just move to the next parameter
-				setParameters(parameters, i + 1, doc, xmlSettings);
-		}
-		else
-		{
-			// Add the final XML to the parameters to run
-			final TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer transformer;
-			try
-			{
-				transformer = tf.newTransformer();
-				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-				final StringWriter writer = new StringWriter();
-				transformer.transform(new DOMSource(doc), new StreamResult(writer));
-				xmlSettings.add(writer.getBuffer().toString());
-			}
-			catch (final TransformerConfigurationException e)
-			{
-				e.printStackTrace();
-			}
-			catch (final TransformerException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	}
+        if (i < parameters.size())
+        {
+            final ParameterSettings param = parameters.get(i);
+            final NodeList nodes = doc.getElementsByTagName(param.name);
+            if (nodes.getLength() == 1)
+            {
+                // For each value, set the parameter and move to the next
+                final String[] values = param.value.split(",");
+                for (final String value : values)
+                {
+                    final Node node = nodes.item(0);
+                    node.setTextContent(value);
+                    setParameters(parameters, i + 1, doc, xmlSettings);
+                }
+            }
+            else
+                // Just move to the next parameter
+                setParameters(parameters, i + 1, doc, xmlSettings);
+        }
+        else
+        {
+            // Add the final XML to the parameters to run
+            final TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer;
+            try
+            {
+                transformer = tf.newTransformer();
+                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                final StringWriter writer = new StringWriter();
+                transformer.transform(new DOMSource(doc), new StreamResult(writer));
+                xmlSettings.add(writer.getBuffer().toString());
+            }
+            catch (final TransformerConfigurationException e)
+            {
+                e.printStackTrace();
+            }
+            catch (final TransformerException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private BatchSettings loadSettings(String configurationFilename)
-	{
-		BatchSettings settings = null;
-		try (FileInputStream fs = new FileInputStream(configurationFilename))
-		{
-			settings = (BatchSettings) xs.fromXML(fs);
-		}
-		catch (final ClassCastException ex)
-		{
-			//ex.printStackTrace();
-		}
-		catch (final FileNotFoundException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch (final XStreamException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch (final IOException e)
-		{
-			e.printStackTrace();
-		}
-		return settings;
-	}
+    private BatchSettings loadSettings(String configurationFilename)
+    {
+        BatchSettings settings = null;
+        try (FileInputStream fs = new FileInputStream(configurationFilename))
+        {
+            settings = (BatchSettings) xs.fromXML(fs);
+        }
+        catch (final ClassCastException ex)
+        {
+            //ex.printStackTrace();
+        }
+        catch (final FileNotFoundException ex)
+        {
+            ex.printStackTrace();
+        }
+        catch (final XStreamException ex)
+        {
+            ex.printStackTrace();
+        }
+        catch (final IOException e)
+        {
+            e.printStackTrace();
+        }
+        return settings;
+    }
 
-	private static Document loadDocument(String xml)
-	{
-		final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder;
-		try
-		{
-			docBuilder = docFactory.newDocumentBuilder();
-			return docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
+    private static Document loadDocument(String xml)
+    {
+        final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder;
+        try
+        {
+            docBuilder = docFactory.newDocumentBuilder();
+            return docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
+        }
+        catch (final Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	private void processImage(BatchSettings settings, ImagePlus imp, ArrayList<String> xmlSettings)
-	{
-		final String imageFilename = imp.getOriginalFileInfo().directory + imp.getOriginalFileInfo().fileName;
-		final String basename = getBaseName(imp.getOriginalFileInfo().fileName);
-		final String format = settings.resultsDirectory + File.separatorChar + basename + ".%05d";
+    private void processImage(BatchSettings settings, ImagePlus imp, ArrayList<String> xmlSettings)
+    {
+        final String imageFilename = imp.getOriginalFileInfo().directory + imp.getOriginalFileInfo().fileName;
+        final String basename = getBaseName(imp.getOriginalFileInfo().fileName);
+        final String format = settings.resultsDirectory + File.separatorChar + basename + ".%05d";
 
-		final String statusSuffix = String.format(" / %d: %s", xmlSettings.size(), imp.getOriginalFileInfo().fileName);
+        final String statusSuffix = String.format(" / %d: %s", xmlSettings.size(), imp.getOriginalFileInfo().fileName);
 
-		final Calibration calibration = settings.getCalibration();
-		for (int i = 0; i < xmlSettings.size(); i++)
-		{
-			IJ.showStatus((i + 1) + statusSuffix);
+        final Calibration calibration = settings.getCalibration();
+        for (int i = 0; i < xmlSettings.size(); i++)
+        {
+            IJ.showStatus((i + 1) + statusSuffix);
 
-			// Create the configuration
-			FitEngineConfiguration fitConfig = null;
-			try
-			{
-				fitConfig = (FitEngineConfiguration) xs.fromXML(xmlSettings.get(i));
-			}
-			catch (final XStreamException e)
-			{
-				// Ignore
-			}
-			if (fitConfig == null)
-				continue;
+            // Create the configuration
+            FitEngineConfiguration fitConfig = null;
+            try
+            {
+                fitConfig = (FitEngineConfiguration) xs.fromXML(xmlSettings.get(i));
+            }
+            catch (final XStreamException e)
+            {
+                // Ignore
+            }
+            if (fitConfig == null)
+                continue;
 
-			// No need to skip settings that do not make sense as we will catch exceptions.
-			// This relies on the fit engine to throw exceptions for invalid settings.
+            // No need to skip settings that do not make sense as we will catch exceptions.
+            // This relies on the fit engine to throw exceptions for invalid settings.
 
-			// Update the configuration
-			fitConfig.getFitConfiguration().setCalibration(calibration);
-			// Ensure the state is restored after XStream object reconstruction
-			fitConfig.getFitConfiguration().initialiseState();
+            // Update the configuration
+            fitConfig.getFitConfiguration().setCalibration(calibration);
+            // Ensure the state is restored after XStream object reconstruction
+            fitConfig.getFitConfiguration().initialiseState();
 
-			final String prefix = String.format(format, i);
+            final String prefix = String.format(format, i);
 
-			// Save the settings
-			final String settingsFilename = saveRunSettings(prefix, imageFilename, fitConfig);
+            // Save the settings
+            final String settingsFilename = saveRunSettings(prefix, imageFilename, fitConfig);
 
-			// Run the fit engine
-			if (settings.runPeakFit)
-			{
-				final ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
-				try
-				{
-					final PeakFit peakFit = new PeakFit(fitConfig, resultsSettings);
-					peakFit.setSilent(true);
-					peakFit.run(imp, false);
+            // Run the fit engine
+            if (settings.runPeakFit)
+            {
+                final ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
+                try
+                {
+                    final PeakFit peakFit = new PeakFit(fitConfig, resultsSettings);
+                    peakFit.setSilent(true);
+                    peakFit.run(imp, false);
 
-					IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
-							peakFit.getSize(), Utils.timeToString(peakFit.getTime())));
-				}
-				catch (final Exception e)
-				{
-					// Ignore this as we assume this is from incorrect fit configuration
-				}
-			}
-		}
+                    IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
+                            peakFit.getSize(), Utils.timeToString(peakFit.getTime())));
+                }
+                catch (final Exception e)
+                {
+                    // Ignore this as we assume this is from incorrect fit configuration
+                }
+            }
+        }
 
-		IJ.showStatus("");
-	}
+        IJ.showStatus("");
+    }
 
-	private static String getBaseName(String name)
-	{
-		final int dot = name.lastIndexOf('.');
-		return (dot == -1) ? name : name.substring(0, dot);
-	}
+    private static String getBaseName(String name)
+    {
+        final int dot = name.lastIndexOf('.');
+        return (dot == -1) ? name : name.substring(0, dot);
+    }
 
-	private String saveRunSettings(String prefix, String imageFilename, FitEngineConfiguration fitConfig)
-	{
-		final BatchRun batchRun = new BatchRun(imageFilename, fitConfig);
-		final String settingsFilename = prefix + ".xml";
-		try (FileOutputStream fs = new FileOutputStream(settingsFilename))
-		{
-			xs.toXML(batchRun, fs);
-			return settingsFilename;
-		}
-		catch (final FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		catch (final XStreamException e)
-		{
-			e.printStackTrace();
-		}
-		catch (final IOException e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
+    private String saveRunSettings(String prefix, String imageFilename, FitEngineConfiguration fitConfig)
+    {
+        final BatchRun batchRun = new BatchRun(imageFilename, fitConfig);
+        final String settingsFilename = prefix + ".xml";
+        try (FileOutputStream fs = new FileOutputStream(settingsFilename))
+        {
+            xs.toXML(batchRun, fs);
+            return settingsFilename;
+        }
+        catch (final FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        catch (final XStreamException e)
+        {
+            e.printStackTrace();
+        }
+        catch (final IOException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	private static ResultsSettings createResultsSettings(FitEngineConfiguration fitConfig, String prefix)
-	{
-		final ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
-		resultsSettings.setShowDeviations(fitConfig.getFitConfiguration().isComputeDeviations());
-		resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(prefix + ".xls");
-		resultsSettings.getResultsFileSettingsBuilder().setFileFormat(ResultsFileFormat.TEXT);
-		return resultsSettings.build();
-	}
+    private static ResultsSettings createResultsSettings(FitEngineConfiguration fitConfig, String prefix)
+    {
+        final ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
+        resultsSettings.setShowDeviations(fitConfig.getFitConfiguration().isComputeDeviations());
+        resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(prefix + ".xls");
+        resultsSettings.getResultsFileSettingsBuilder().setFileFormat(ResultsFileFormat.TEXT);
+        return resultsSettings.build();
+    }
 
-	/**
-	 * Ask for parameters
-	 *
-	 * @return True if not cancelled
-	 */
-	private boolean showDialog()
-	{
-		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
+    /**
+     * Ask for parameters
+     *
+     * @return True if not cancelled
+     */
+    private boolean showDialog()
+    {
+        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addHelp(About.HELP_URL);
 
-		gd.addFilenameField("Config_filename", configFilename);
-		if (Utils.isShowGenericDialog())
-		{
-			configFilenameText = (TextField) gd.getStringFields().get(0);
+        gd.addFilenameField("Config_filename", configFilename);
+        if (Utils.isShowGenericDialog())
+        {
+            configFilenameText = (TextField) gd.getStringFields().get(0);
 
-			// Add a button to create a configuration file
-			gd.addAndGetButton("Create config file", new ActionListener()
-			{
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					final Document doc = getDefaultSettingsXmlDocument();
-					if (doc == null)
-						return;
+            // Add a button to create a configuration file
+            gd.addAndGetButton("Create config file", new ActionListener()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    final Document doc = getDefaultSettingsXmlDocument();
+                    if (doc == null)
+                        return;
 
-					try
-					{
-						// Look for nodes that are part of the fit configuration
-						final XPathFactory factory = XPathFactory.newInstance();
-						final XPath xpath = factory.newXPath();
-						// TODO: Check this still works after the package was refactored 
-						final XPathExpression expr = xpath
-								.compile("//uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration//*");
+                    try
+                    {
+                        // Look for nodes that are part of the fit configuration
+                        final XPathFactory factory = XPathFactory.newInstance();
+                        final XPath xpath = factory.newXPath();
+                        // TODO: Check this still works after the package was refactored 
+                        final XPathExpression expr = xpath
+                                .compile("//uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration//*");
 
-						// For each node, add the name and value to the BatchParameters
-						final BatchSettings batchSettings = new BatchSettings();
-						batchSettings.resultsDirectory = System.getProperty("java.io.tmpdir");
-						batchSettings.images.add("/path/to/image.tif");
+                        // For each node, add the name and value to the BatchParameters
+                        final BatchSettings batchSettings = new BatchSettings();
+                        batchSettings.resultsDirectory = System.getProperty("java.io.tmpdir");
+                        batchSettings.images.add("/path/to/image.tif");
 
-						final Object result = expr.evaluate(doc, XPathConstants.NODESET);
-						final NodeList nodes = (NodeList) result;
-						for (int i = 0; i < nodes.getLength(); i++)
-						{
-							final Node node = nodes.item(i);
-							if (node.getChildNodes().getLength() == 1)
-								batchSettings.parameters
-										.add(new ParameterSettings(node.getNodeName(), node.getTextContent()));
-						}
+                        final Object result = expr.evaluate(doc, XPathConstants.NODESET);
+                        final NodeList nodes = (NodeList) result;
+                        for (int i = 0; i < nodes.getLength(); i++)
+                        {
+                            final Node node = nodes.item(i);
+                            if (node.getChildNodes().getLength() == 1)
+                                batchSettings.parameters
+                                        .add(new ParameterSettings(node.getNodeName(), node.getTextContent()));
+                        }
 
-						// Save the settings file
-						final String[] path = Utils.decodePath(configFilenameText.getText());
-						final OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
-						if (chooser.getFileName() != null)
-						{
-							String newFilename = chooser.getDirectory() + chooser.getFileName();
-							newFilename = Utils.replaceExtension(newFilename, ".xml");
-							try (FileOutputStream fs = new FileOutputStream(newFilename))
-							{
-								xs.toXML(batchSettings, fs);
-							}
+                        // Save the settings file
+                        final String[] path = Utils.decodePath(configFilenameText.getText());
+                        final OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
+                        if (chooser.getFileName() != null)
+                        {
+                            String newFilename = chooser.getDirectory() + chooser.getFileName();
+                            newFilename = Utils.replaceExtension(newFilename, ".xml");
+                            try (FileOutputStream fs = new FileOutputStream(newFilename))
+                            {
+                                xs.toXML(batchSettings, fs);
+                            }
 
-							// Update dialog filename
-							configFilenameText.setText(newFilename);
-						}
-					}
-					catch (final Exception ex)
-					{
-						ex.printStackTrace();
-					}
-				}
-			});
-		}
+                            // Update dialog filename
+                            configFilenameText.setText(newFilename);
+                        }
+                    }
+                    catch (final Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+        }
 
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return false;
+        gd.showDialog();
+        if (gd.wasCanceled())
+            return false;
 
-		configFilename = gd.getNextString().trim();
+        configFilename = gd.getNextString().trim();
 
-		return true;
-	}
+        return true;
+    }
 
-	private static XStream createXStream()
-	{
-		final XStream xs = new XStream(new DomDriver());
-		XStream.setupDefaultSecurity(xs); // to be removed after 1.5
-		// TODO: Check this still works after the package was refactored 
-		xs.allowTypesByWildcard(new String[] { "uk.ac.sussex.gdsc.smlm.**" });
-		xs.alias("gdsc.fitting.batchSettings", BatchSettings.class);
-		xs.alias("parameter", ParameterSettings.class);
-		xs.alias("gdsc.fitting.batchRun", BatchRun.class);
+    private static XStream createXStream()
+    {
+        final XStream xs = new XStream(new DomDriver());
+        XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+        // TODO: Check this still works after the package was refactored 
+        xs.allowTypesByWildcard(new String[] { "uk.ac.sussex.gdsc.smlm.**" });
+        xs.alias("gdsc.fitting.batchSettings", BatchSettings.class);
+        xs.alias("parameter", ParameterSettings.class);
+        xs.alias("gdsc.fitting.batchRun", BatchRun.class);
 
-		xs.omitField(FitConfiguration.class, "flags");
-		xs.omitField(FitConfiguration.class, "signalThreshold");
-		//xs.omitField(FitConfiguration.class, "noise");
-		xs.omitField(FitConfiguration.class, "enableValidation");
+        xs.omitField(FitConfiguration.class, "flags");
+        xs.omitField(FitConfiguration.class, "signalThreshold");
+        //xs.omitField(FitConfiguration.class, "noise");
+        xs.omitField(FitConfiguration.class, "enableValidation");
 
-		return xs;
-	}
+        return xs;
+    }
 }

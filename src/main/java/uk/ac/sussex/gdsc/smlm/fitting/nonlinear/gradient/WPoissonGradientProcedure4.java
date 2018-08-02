@@ -38,57 +38,57 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public class WPoissonGradientProcedure4 extends WPoissonGradientProcedure
 {
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param var
-	 *            the base variance of each observation (must be positive)
-	 * @param func
-	 *            Gradient function
-	 */
-	public WPoissonGradientProcedure4(final double[] y, final double[] var, final Gradient1Function func)
-	{
-		super(y, var, func);
-		if (n != 4)
-			throw new IllegalArgumentException("Function must compute 4 gradients");
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param var
+     *            the base variance of each observation (must be positive)
+     * @param func
+     *            Gradient function
+     */
+    public WPoissonGradientProcedure4(final double[] y, final double[] var, final Gradient1Function func)
+    {
+        super(y, var, func);
+        if (n != 4)
+            throw new IllegalArgumentException("Function must compute 4 gradients");
+    }
 
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		// Note: Ignore the value
-		final double w = this.w[yi++];
-		data[0] += dy_da[0] * w * dy_da[0];
-		double wgt;
-		wgt = dy_da[1] * w;
-		data[1] += wgt * dy_da[0];
-		data[2] += wgt * dy_da[1];
-		wgt = dy_da[2] * w;
-		data[3] += wgt * dy_da[0];
-		data[4] += wgt * dy_da[1];
-		data[5] += wgt * dy_da[2];
-		wgt = dy_da[3] * w;
-		data[6] += wgt * dy_da[0];
-		data[7] += wgt * dy_da[1];
-		data[8] += wgt * dy_da[2];
-		data[9] += wgt * dy_da[3];
-	}
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        // Note: Ignore the value
+        final double w = this.w[yi++];
+        data[0] += dy_da[0] * w * dy_da[0];
+        double wgt;
+        wgt = dy_da[1] * w;
+        data[1] += wgt * dy_da[0];
+        data[2] += wgt * dy_da[1];
+        wgt = dy_da[2] * w;
+        data[3] += wgt * dy_da[0];
+        data[4] += wgt * dy_da[1];
+        data[5] += wgt * dy_da[2];
+        wgt = dy_da[3] * w;
+        data[6] += wgt * dy_da[0];
+        data[7] += wgt * dy_da[1];
+        data[8] += wgt * dy_da[2];
+        data[9] += wgt * dy_da[3];
+    }
 
-	@Override
-	protected void initialiseWorkingMatrix()
-	{
-		GradientProcedureHelper.initialiseWorkingMatrix4(data);
-	}
+    @Override
+    protected void initialiseWorkingMatrix()
+    {
+        GradientProcedureHelper.initialiseWorkingMatrix4(data);
+    }
 
-	@Override
-	public void getMatrix(double[][] matrix)
-	{
-		GradientProcedureHelper.getMatrix4(data, matrix);
-	}
+    @Override
+    public void getMatrix(double[][] matrix)
+    {
+        GradientProcedureHelper.getMatrix4(data, matrix);
+    }
 
-	@Override
-	public void getLinear(double[] matrix)
-	{
-		GradientProcedureHelper.getMatrix4(data, matrix);
-	}
+    @Override
+    public void getLinear(double[] matrix)
+    {
+        GradientProcedureHelper.getMatrix4(data, matrix);
+    }
 }

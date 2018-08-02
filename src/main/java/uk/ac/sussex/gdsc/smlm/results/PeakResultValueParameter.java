@@ -28,28 +28,29 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public class PeakResultValueParameter implements PeakResultValue
 {
-	/** The parameter index. */
-	public final int index;
+    /** The parameter index. */
+    public final int index;
 
-	/**
-	 * Instantiates a new peak result parameter value.
-	 *
-	 * @param index
-	 *            the index
-	 */
-	public PeakResultValueParameter(int index)
-	{
-		this.index = index;
-	}
+    /**
+     * Instantiates a new peak result parameter value.
+     *
+     * @param index
+     *            the index
+     */
+    public PeakResultValueParameter(int index)
+    {
+        this.index = index;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultValue#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public float getValue(PeakResult result)
-	{
-		return result.getParameter(index);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultValue#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public float getValue(PeakResult result)
+    {
+        return result.getParameter(index);
+    }
 }

@@ -28,15 +28,15 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface IXYResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param intensity
-	 *            the intensity
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 */
-	public void executeIXY(float intensity, float x, float y);
+    /**
+     * Executes this procedure.
+     *
+     * @param intensity
+     *            the intensity
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     */
+    public void executeIXY(float intensity, float x, float y);
 }

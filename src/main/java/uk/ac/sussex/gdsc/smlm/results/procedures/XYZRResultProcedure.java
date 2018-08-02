@@ -30,17 +30,17 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public interface XYZRResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
-	 * @param result
-	 *            the result
-	 */
-	public void executeXYZR(float x, float y, float z, PeakResult result);
+    /**
+     * Executes this procedure.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param z
+     *            the z
+     * @param result
+     *            the result
+     */
+    public void executeXYZR(float x, float y, float z, PeakResult result);
 }

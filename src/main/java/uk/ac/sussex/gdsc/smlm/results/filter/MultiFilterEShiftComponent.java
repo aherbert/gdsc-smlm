@@ -28,40 +28,41 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterEShiftComponent extends MultiFilterComponent
 {
-	private final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+    private final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 
-	private final float eoffset;
+    private final float eoffset;
 
-	/**
-	 * Instantiates a new multi filter E shift component.
-	 *
-	 * @param eshift
-	 *            the eshift
-	 */
-	public MultiFilterEShiftComponent(double eshift)
-	{
-		this.eoffset = Filter.getUpperSquaredLimit(eshift);
-	}
+    /**
+     * Instantiates a new multi filter E shift component.
+     *
+     * @param eshift
+     *            the eshift
+     */
+    public MultiFilterEShiftComponent(double eshift)
+    {
+        this.eoffset = Filter.getUpperSquaredLimit(eshift);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		return (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        return (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return type;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return type;
+    }
 }

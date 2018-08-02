@@ -29,123 +29,123 @@ package uk.ac.sussex.gdsc.smlm.fitting;
  */
 public class WrappedFunctionSolver implements FunctionSolver
 {
-	/** The solver. */
-	protected final FunctionSolver solver;
+    /** The solver. */
+    protected final FunctionSolver solver;
 
-	/**
-	 * Instantiates a new wrapped function solver.
-	 *
-	 * @param solver
-	 *            the solver
-	 */
-	public WrappedFunctionSolver(FunctionSolver solver)
-	{
-		if (solver == null)
-			throw new NullPointerException("FunctionSolver is null");
-		this.solver = solver;
-	}
+    /**
+     * Instantiates a new wrapped function solver.
+     *
+     * @param solver
+     *            the solver
+     */
+    public WrappedFunctionSolver(FunctionSolver solver)
+    {
+        if (solver == null)
+            throw new NullPointerException("FunctionSolver is null");
+        this.solver = solver;
+    }
 
-	// Pass through all interface calls to the inner function solver.
+    // Pass through all interface calls to the inner function solver.
 
-	@Override
-	public FunctionSolverType getType()
-	{
-		return solver.getType();
-	}
+    @Override
+    public FunctionSolverType getType()
+    {
+        return solver.getType();
+    }
 
-	@Override
-	public FitStatus fit(double[] y, double[] f, double[] a, double[] aDev)
-	{
-		return solver.fit(y, f, a, aDev);
-	}
+    @Override
+    public FitStatus fit(double[] y, double[] f, double[] a, double[] aDev)
+    {
+        return solver.fit(y, f, a, aDev);
+    }
 
-	@Override
-	public int getNumberOfFittedParameters()
-	{
-		return solver.getNumberOfFittedParameters();
-	}
+    @Override
+    public int getNumberOfFittedParameters()
+    {
+        return solver.getNumberOfFittedParameters();
+    }
 
-	@Override
-	public int getNumberOfFittedPoints()
-	{
-		return solver.getNumberOfFittedPoints();
-	}
+    @Override
+    public int getNumberOfFittedPoints()
+    {
+        return solver.getNumberOfFittedPoints();
+    }
 
-	@Override
-	public int getIterations()
-	{
-		return solver.getIterations();
-	}
+    @Override
+    public int getIterations()
+    {
+        return solver.getIterations();
+    }
 
-	@Override
-	public int getEvaluations()
-	{
-		return solver.getEvaluations();
-	}
+    @Override
+    public int getEvaluations()
+    {
+        return solver.getEvaluations();
+    }
 
-	@Override
-	public boolean isBounded()
-	{
-		return solver.isBounded();
-	}
+    @Override
+    public boolean isBounded()
+    {
+        return solver.isBounded();
+    }
 
-	@Override
-	public boolean isConstrained()
-	{
-		return solver.isConstrained();
-	}
+    @Override
+    public boolean isConstrained()
+    {
+        return solver.isConstrained();
+    }
 
-	@Override
-	public boolean isWeighted()
-	{
-		return solver.isWeighted();
-	}
+    @Override
+    public boolean isWeighted()
+    {
+        return solver.isWeighted();
+    }
 
-	@Override
-	public boolean isStrictlyPositiveFunction()
-	{
-		return solver.isStrictlyPositiveFunction();
-	}
+    @Override
+    public boolean isStrictlyPositiveFunction()
+    {
+        return solver.isStrictlyPositiveFunction();
+    }
 
-	@Override
-	public void setBounds(double[] lower, double[] upper)
-	{
-		solver.setBounds(lower, upper);
-	}
+    @Override
+    public void setBounds(double[] lower, double[] upper)
+    {
+        solver.setBounds(lower, upper);
+    }
 
-	@Override
-	public void setConstraints(double[] lower, double[] upper)
-	{
-		solver.setConstraints(lower, upper);
-	}
+    @Override
+    public void setConstraints(double[] lower, double[] upper)
+    {
+        solver.setConstraints(lower, upper);
+    }
 
-	@Override
-	public void setWeights(double[] weights)
-	{
-		solver.setWeights(weights);
-	}
+    @Override
+    public void setWeights(double[] weights)
+    {
+        solver.setWeights(weights);
+    }
 
-	@Override
-	public double getValue()
-	{
-		return solver.getValue();
-	}
+    @Override
+    public double getValue()
+    {
+        return solver.getValue();
+    }
 
-	@Override
-	public boolean evaluate(double[] y, double[] f, double[] a)
-	{
-		return solver.evaluate(y, f, a);
-	}
+    @Override
+    public boolean evaluate(double[] y, double[] f, double[] a)
+    {
+        return solver.evaluate(y, f, a);
+    }
 
-	@Override
-	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
-	{
-		return solver.computeDeviations(y, a, aDev);
-	}
+    @Override
+    public boolean computeDeviations(double[] y, double[] a, double[] aDev)
+    {
+        return solver.computeDeviations(y, a, aDev);
+    }
 
-	@Override
-	public String getName(int i)
-	{
-		return solver.getName(i);
-	}
+    @Override
+    public String getName(int i)
+    {
+        return solver.getName(i);
+    }
 }

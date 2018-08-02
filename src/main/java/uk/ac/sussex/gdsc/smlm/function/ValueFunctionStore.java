@@ -28,93 +28,93 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class ValueFunctionStore implements ValueFunction, ValueProcedure
 {
-	private final ValueFunction f;
-	private ValueProcedure procedure;
+    private final ValueFunction f;
+    private ValueProcedure procedure;
 
-	/** The counter i. */
-	protected int i;
-	/** The values from the last call to {@link #forEach(ValueProcedure)} */
-	public double[] values;
+    /** The counter i. */
+    protected int i;
+    /** The values from the last call to {@link #forEach(ValueProcedure)} */
+    public double[] values;
 
-	/**
-	 * Instantiates a new value function store.
-	 *
-	 * @param f
-	 *            the f
-	 */
-	public ValueFunctionStore(ValueFunction f)
-	{
-		this(f, null);
-	}
+    /**
+     * Instantiates a new value function store.
+     *
+     * @param f
+     *            the f
+     */
+    public ValueFunctionStore(ValueFunction f)
+    {
+        this(f, null);
+    }
 
-	/**
-	 * Instantiates a new value function store with storage.
-	 *
-	 * @param f
-	 *            the f
-	 * @param values
-	 *            the values
-	 */
-	public ValueFunctionStore(ValueFunction f, double[] values)
-	{
-		this.f = f;
-		this.values = values;
-	}
+    /**
+     * Instantiates a new value function store with storage.
+     *
+     * @param f
+     *            the f
+     * @param values
+     *            the values
+     */
+    public ValueFunctionStore(ValueFunction f, double[] values)
+    {
+        this.f = f;
+        this.values = values;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#size()
-	 */
-	@Override
-	public int size()
-	{
-		return f.size();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#size()
+     */
+    @Override
+    public int size()
+    {
+        return f.size();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
-	 */
-	@Override
-	public void initialise0(double[] a)
-	{
-		f.initialise0(a);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
+     */
+    @Override
+    public void initialise0(double[] a)
+    {
+        f.initialise0(a);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
-	 */
-	@Override
-	public void forEach(ValueProcedure procedure)
-	{
-		i = 0;
-		createValues();
-		this.procedure = procedure;
-		f.forEach(this);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
+     */
+    @Override
+    public void forEach(ValueProcedure procedure)
+    {
+        i = 0;
+        createValues();
+        this.procedure = procedure;
+        f.forEach(this);
+    }
 
-	/**
-	 * Creates the {@link #values} array.
-	 */
-	protected void createValues()
-	{
-		if (values == null || values.length != f.size())
-			values = new double[f.size()];
-	}
+    /**
+     * Creates the {@link #values} array.
+     */
+    protected void createValues()
+    {
+        if (values == null || values.length != f.size())
+            values = new double[f.size()];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	@Override
-	public void execute(double value)
-	{
-		values[i++] = value;
-		procedure.execute(value);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
+     */
+    @Override
+    public void execute(double value)
+    {
+        values[i++] = value;
+        procedure.execute(value);
+    }
 }

@@ -28,46 +28,46 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class StandardGradient2Procedure implements Gradient2Procedure
 {
-	private int i;
+    private int i;
 
-	/** The values from the last call to {@link #getValues(Gradient2Function, double[])}. */
-	public double[] values;
-	/** The gradients from the last call to {@link #getValues(Gradient2Function, double[])}. */
-	public double[][] dyda;
-	/** The second order gradients from the last call to {@link #getValues(Gradient2Function, double[])}. */
-	public double[][] d2yda2;
+    /** The values from the last call to {@link #getValues(Gradient2Function, double[])}. */
+    public double[] values;
+    /** The gradients from the last call to {@link #getValues(Gradient2Function, double[])}. */
+    public double[][] dyda;
+    /** The second order gradients from the last call to {@link #getValues(Gradient2Function, double[])}. */
+    public double[][] d2yda2;
 
-	/**
-	 * Gets the values.
-	 *
-	 * @param f
-	 *            the function
-	 * @param a
-	 *            the function coefficients
-	 * @return the values
-	 */
-	public double[] getValues(Gradient2Function f, double[] a)
-	{
-		values = new double[f.size()];
-		dyda = new double[values.length][];
-		d2yda2 = new double[values.length][];
-		i = 0;
-		f.initialise2(a);
-		f.forEach(this);
-		return values;
-	}
+    /**
+     * Gets the values.
+     *
+     * @param f
+     *            the function
+     * @param a
+     *            the function coefficients
+     * @return the values
+     */
+    public double[] getValues(Gradient2Function f, double[] a)
+    {
+        values = new double[f.size()];
+        dyda = new double[values.length][];
+        d2yda2 = new double[values.length][];
+        i = 0;
+        f.initialise2(a);
+        f.forEach(this);
+        return values;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double value, double[] dy_da, double[] d2y_da2)
-	{
-		values[i] = value;
-		dyda[i] = dy_da.clone();
-		d2yda2[i] = d2y_da2.clone();
-		i++;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double value, double[] dy_da, double[] d2y_da2)
+    {
+        values[i] = value;
+        dyda[i] = dy_da.clone();
+        d2yda2[i] = d2y_da2.clone();
+        i++;
+    }
 }

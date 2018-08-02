@@ -30,39 +30,39 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PeakResultDataParameterDeviation extends PeakResultDataFloat
 {
-	/** The parameter index. */
-	public final int index;
+    /** The parameter index. */
+    public final int index;
 
-	/**
-	 * Instantiates a new peak result parameter value.
-	 *
-	 * @param index
-	 *            the index
-	 */
-	public PeakResultDataParameterDeviation(int index)
-	{
-		this.index = index;
-	}
+    /**
+     * Instantiates a new peak result parameter value.
+     *
+     * @param index
+     *            the index
+     */
+    public PeakResultDataParameterDeviation(int index)
+    {
+        this.index = index;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public Float getValue(PeakResult result)
-	{
-		return result.getParameterDeviation(index);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public Float getValue(PeakResult result)
+    {
+        return result.getParameterDeviation(index);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return PeakResult.getParameterName(index) + " Deviation";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return PeakResult.getParameterName(index) + " Deviation";
+    }
 }

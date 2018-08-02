@@ -28,11 +28,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface BResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param background
-	 *            the background
-	 */
-	public void executeB(float background);
+    /**
+     * Executes this procedure.
+     *
+     * @param background
+     *            the background
+     */
+    public void executeB(float background);
 }

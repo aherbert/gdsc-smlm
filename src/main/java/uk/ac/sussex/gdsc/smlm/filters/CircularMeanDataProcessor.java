@@ -33,148 +33,148 @@ import uk.ac.sussex.gdsc.core.ij.Utils;
  */
 public class CircularMeanDataProcessor extends DataProcessor
 {
-	private final double radius;
-	private CircularMeanFilter filter;
+    private final double radius;
+    private CircularMeanFilter filter;
 
-	/**
-	 * Constructor
-	 *
-	 * @param border
-	 *            The border to ignore for maxima
-	 * @param smooth
-	 *            The distance into neighbouring pixels to extend
-	 */
-	public CircularMeanDataProcessor(int border, double smooth)
-	{
-		super(border);
-		this.radius = getSigma(smooth);
-		filter = new CircularMeanFilter();
-	}
+    /**
+     * Constructor
+     *
+     * @param border
+     *            The border to ignore for maxima
+     * @param smooth
+     *            The distance into neighbouring pixels to extend
+     */
+    public CircularMeanDataProcessor(int border, double smooth)
+    {
+        super(border);
+        this.radius = getSigma(smooth);
+        filter = new CircularMeanFilter();
+    }
 
-	/**
-	 * Get the radius for the desired smoothing distance.
-	 *
-	 * @param smooth
-	 *            the smoothing distance
-	 * @return the radius for the desired smoothing distance.
-	 */
-	public static double getSigma(double smooth)
-	{
-		if (smooth < 0)
-			return 0;
-		return smooth;
-	}
+    /**
+     * Get the radius for the desired smoothing distance.
+     *
+     * @param smooth
+     *            the smoothing distance
+     * @return the radius for the desired smoothing distance.
+     */
+    public static double getSigma(double smooth)
+    {
+        if (smooth < 0)
+            return 0;
+        return smooth;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
-	 */
-	@Override
-	public boolean isWeighted()
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
+     */
+    @Override
+    public boolean isWeighted()
+    {
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
-	 */
-	@Override
-	public void setWeights(float[] weights, int width, int height)
-	{
-		filter.setWeights(weights, width, height);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
+     */
+    @Override
+    public void setWeights(float[] weights, int width, int height)
+    {
+        filter.setWeights(weights, width, height);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
-	 */
-	@Override
-	public boolean hasWeights()
-	{
-		return filter.hasWeights();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
+     */
+    @Override
+    public boolean hasWeights()
+    {
+        return filter.hasWeights();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
-	 */
-	@Override
-	public float[] process(float[] data, int width, int height)
-	{
-		float[] smoothData = data;
-		if (radius > 0)
-		{
-			// Smoothing destructively modifies the data so create a copy
-			smoothData = Arrays.copyOf(data, width * height);
-			if (CircularFilter.getBorder(radius) <= getBorder())
-				filter.convolveInternal(smoothData, width, height, radius);
-			else
-				filter.convolve(smoothData, width, height, radius);
-		}
-		return smoothData;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
+     */
+    @Override
+    public float[] process(float[] data, int width, int height)
+    {
+        float[] smoothData = data;
+        if (radius > 0)
+        {
+            // Smoothing destructively modifies the data so create a copy
+            smoothData = Arrays.copyOf(data, width * height);
+            if (CircularFilter.getBorder(radius) <= getBorder())
+                filter.convolveInternal(smoothData, width, height, radius);
+            else
+                filter.convolve(smoothData, width, height, radius);
+        }
+        return smoothData;
+    }
 
-	/**
-	 * Gets the radius.
-	 *
-	 * @return the smoothing radius
-	 */
-	public double getRadius()
-	{
-		return radius;
-	}
+    /**
+     * Gets the radius.
+     *
+     * @return the smoothing radius
+     */
+    public double getRadius()
+    {
+        return radius;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public CircularMeanDataProcessor clone()
-	{
-		final CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
-		// Ensure the object is duplicated and not passed by reference.
-		f.filter = filter.clone();
-		return f;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public CircularMeanDataProcessor clone()
+    {
+        final CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
+        // Ensure the object is duplicated and not passed by reference.
+        f.filter = filter.clone();
+        return f;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return "Circular Mean";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
+     */
+    @Override
+    public String getName()
+    {
+        return "Circular Mean";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
-	 */
-	@Override
-	public List<String> getParameters()
-	{
-		final List<String> list = super.getParameters();
-		list.add("radius = " + Utils.rounded(radius));
-		return list;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
+     */
+    @Override
+    public List<String> getParameters()
+    {
+        final List<String> list = super.getParameters();
+        list.add("radius = " + Utils.rounded(radius));
+        return list;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
-	 */
-	@Override
-	public double getSpread()
-	{
-		return CircularFilter.getPixelRadius(radius) * 2;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
+     */
+    @Override
+    public double getSpread()
+    {
+        return CircularFilter.getPixelRadius(radius) * 2;
+    }
 }

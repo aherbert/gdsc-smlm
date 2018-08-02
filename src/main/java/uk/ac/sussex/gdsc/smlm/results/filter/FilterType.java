@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public enum FilterType
 {
-	//@formatter:off
+    //@formatter:off
 	/**
 	 * A basic filter
 	 */
@@ -41,16 +41,16 @@ public enum FilterType
 	public String getName() { return "Direct"; }};
 	//@formatter:on
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
+    @Override
+    public String toString()
+    {
+        return getName();
+    }
 
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	abstract public String getName();
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    abstract public String getName();
 }

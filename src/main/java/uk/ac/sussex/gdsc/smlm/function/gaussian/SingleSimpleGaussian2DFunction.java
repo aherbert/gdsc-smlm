@@ -42,154 +42,154 @@ import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
  */
 public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 {
-	private static final int[] gradientIndices = new int[0];
+    private static final int[] gradientIndices = new int[0];
 
-	/** The x0 position. */
-	protected double x0pos;
-	/** The x1 position. */
-	protected double x1pos;
+    /** The x0 position. */
+    protected double x0pos;
+    /** The x1 position. */
+    protected double x1pos;
 
-	/** The amplitude/height. */
-	protected double height;
-	/** position pre-factor */
-	protected double aa;
+    /** The amplitude/height. */
+    protected double height;
+    /** position pre-factor */
+    protected double aa;
 
-	/**
-	 * Constructor
-	 *
-	 * @param maxx
-	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param maxy
-	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 */
-	public SingleSimpleGaussian2DFunction(int maxx, int maxy)
-	{
-		super(maxx, maxy);
-	}
+    /**
+     * Constructor
+     *
+     * @param maxx
+     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     * @param maxy
+     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     */
+    public SingleSimpleGaussian2DFunction(int maxx, int maxy)
+    {
+        super(maxx, maxy);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-	 */
-	@Override
-	public Gaussian2DFunction copy()
-	{
-		return new SingleSimpleGaussian2DFunction(maxx, maxy);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+     */
+    @Override
+    public Gaussian2DFunction copy()
+    {
+        return new SingleSimpleGaussian2DFunction(maxx, maxy);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-	 */
-	@Override
-	public void initialise(double[] a)
-	{
-		x0pos = a[X_POSITION];
-		x1pos = a[Y_POSITION];
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
+     */
+    @Override
+    public void initialise(double[] a)
+    {
+        x0pos = a[X_POSITION];
+        x1pos = a[Y_POSITION];
 
-		final double sx = a[X_SD];
-		final double sx2 = sx * sx;
+        final double sx = a[X_SD];
+        final double sx2 = sx * sx;
 
-		final double n = ONE_OVER_TWO_PI / sx2;
-		height = a[SIGNAL] * n;
+        final double n = ONE_OVER_TWO_PI / sx2;
+        height = a[SIGNAL] * n;
 
-		// All prefactors are negated since the Gaussian uses the exponential to the negative:
-		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+        // All prefactors are negated since the Gaussian uses the exponential to the negative:
+        // A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 
-		aa = -0.5 / sx2;
-	}
+        aa = -0.5 / sx2;
+    }
 
-	/**
-	 * Not implemented.
-	 * <p>
-	 * {@inheritDoc}
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
-	 */
-	@Override
-	public double eval(final int x, final double[] dyda)
-	{
-		throw new NotImplementedException();
-	}
+    /**
+     * Not implemented.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
+     */
+    @Override
+    public double eval(final int x, final double[] dyda)
+    {
+        throw new NotImplementedException();
+    }
 
-	/**
-	 * Evaluates an 2-dimensional circular Gaussian function for a single peak.
-	 * <p>
-	 * {@inheritDoc}
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
-	 */
-	@Override
-	public double eval(final int x)
-	{
-		// Unpack the predictor into the dimensions
-		final int x1 = x / maxx;
-		final int x0 = x % maxx;
+    /**
+     * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
+     */
+    @Override
+    public double eval(final int x)
+    {
+        // Unpack the predictor into the dimensions
+        final int x1 = x / maxx;
+        final int x0 = x % maxx;
 
-		final double dx = x0 - x0pos;
-		final double dy = x1 - x1pos;
+        final double dx = x0 - x0pos;
+        final double dy = x1 - x1pos;
 
-		return height * FastMath.exp(aa * (dx * dx + dy * dy));
-	}
+        return height * FastMath.exp(aa * (dx * dx + dy * dy));
+    }
 
-	@Override
-	public int getNPeaks()
-	{
-		return 1;
-	}
+    @Override
+    public int getNPeaks()
+    {
+        return 1;
+    }
 
-	@Override
-	public boolean evaluatesBackground()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesBackground()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesSignal()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesSignal()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesAngle()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesAngle()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesPosition()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesPosition()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesSD0()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesSD0()
+    {
+        return false;
+    }
 
-	@Override
-	public boolean evaluatesSD1()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesSD1()
+    {
+        return false;
+    }
 
-	@Override
-	public int getGradientParametersPerPeak()
-	{
-		return 0;
-	}
+    @Override
+    public int getGradientParametersPerPeak()
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-	 */
-	@Override
-	public int[] gradientIndices()
-	{
-		return gradientIndices;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
+     */
+    @Override
+    public int[] gradientIndices()
+    {
+        return gradientIndices;
+    }
 }

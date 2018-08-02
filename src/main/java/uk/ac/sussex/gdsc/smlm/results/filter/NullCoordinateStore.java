@@ -28,179 +28,179 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class NullCoordinateStore implements CoordinateStore
 {
-	/** An instance to ignore calls to the CoordinateStore interface */
-	public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
+    /** An instance to ignore calls to the CoordinateStore interface */
+    public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
 
-	/**
-	 * Instantiates a new null coordinate store.
-	 */
-	private NullCoordinateStore()
-	{
-	}
+    /**
+     * Instantiates a new null coordinate store.
+     */
+    private NullCoordinateStore()
+    {
+    }
 
-	/**
-	 * Creates an instance if the argument is null, else return the argument.
-	 *
-	 * @param coordinateStore
-	 *            the coordinate store (may be null)
-	 * @return the coordinate store (not null)
-	 */
-	public static CoordinateStore replaceIfNull(CoordinateStore coordinateStore)
-	{
-		return (coordinateStore == null) ? INSTANCE : coordinateStore;
-	}
+    /**
+     * Creates an instance if the argument is null, else return the argument.
+     *
+     * @param coordinateStore
+     *            the coordinate store (may be null)
+     * @return the coordinate store (not null)
+     */
+    public static CoordinateStore replaceIfNull(CoordinateStore coordinateStore)
+    {
+        return (coordinateStore == null) ? INSTANCE : coordinateStore;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getResolution()
-	 */
-	@Override
-	public double getXYResolution()
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getResolution()
+     */
+    @Override
+    public double getXYResolution()
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getZResolution()
-	 */
-	@Override
-	public double getZResolution()
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getZResolution()
+     */
+    @Override
+    public double getZResolution()
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
-	 */
-	@Override
-	public void addToQueue(double x, double y, double z)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
+     */
+    @Override
+    public void addToQueue(double x, double y, double z)
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#flush()
-	 */
-	@Override
-	public void flush()
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#flush()
+     */
+    @Override
+    public void flush()
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
-	 */
-	@Override
-	public void add(double x, double y, double z)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
+     */
+    @Override
+    public void add(double x, double y, double z)
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#clear()
-	 */
-	@Override
-	public void clear()
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#clear()
+     */
+    @Override
+    public void clear()
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
-	 */
-	@Override
-	public boolean contains(double x, double y, double z)
-	{
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
+     */
+    @Override
+    public boolean contains(double x, double y, double z)
+    {
+        return false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
-	 */
-	@Override
-	public double[] find(double x, double y, double z)
-	{
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
+     */
+    @Override
+    public double[] find(double x, double y, double z)
+    {
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#newInstance()
-	 */
-	@Override
-	public CoordinateStore newInstance()
-	{
-		return this;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#newInstance()
+     */
+    @Override
+    public CoordinateStore newInstance()
+    {
+        return this;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
-	 */
-	@Override
-	public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
-	{
-		return this;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
+     */
+    @Override
+    public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
+    {
+        return this;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinX()
-	 */
-	@Override
-	public int getMinX()
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinX()
+     */
+    @Override
+    public int getMinX()
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinY()
-	 */
-	@Override
-	public int getMinY()
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinY()
+     */
+    @Override
+    public int getMinY()
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getWidth()
-	 */
-	@Override
-	public int getWidth()
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getWidth()
+     */
+    @Override
+    public int getWidth()
+    {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getHeight()
-	 */
-	@Override
-	public int getHeight()
-	{
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getHeight()
+     */
+    @Override
+    public int getHeight()
+    {
+        return 0;
+    }
 }

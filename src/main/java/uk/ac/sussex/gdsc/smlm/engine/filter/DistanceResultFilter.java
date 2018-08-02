@@ -39,96 +39,97 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 @Deprecated
 public class DistanceResultFilter extends ResultFilter
 {
-	/**
-	 * Instantiates a new distance result filter.
-	 *
-	 * @param filter
-	 *            the filter
-	 * @param d
-	 *            the d
-	 * @param nMaxima
-	 *            the n maxima
-	 */
-	public DistanceResultFilter(List<float[]> filter, float d, int nMaxima)
-	{
-		super(filter, d, nMaxima);
-		filteredFitResults = new FitResult[nMaxima];
-		filteredIndices = new int[nMaxima];
-		peakResults = new ArrayList<>(nMaxima);
-	}
+    /**
+     * Instantiates a new distance result filter.
+     *
+     * @param filter
+     *            the filter
+     * @param d
+     *            the d
+     * @param nMaxima
+     *            the n maxima
+     */
+    public DistanceResultFilter(List<float[]> filter, float d, int nMaxima)
+    {
+        super(filter, d, nMaxima);
+        filteredFitResults = new FitResult[nMaxima];
+        filteredIndices = new int[nMaxima];
+        peakResults = new ArrayList<>(nMaxima);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
-	 * uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-	 */
-	@Override
-	public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
-	{
-		boolean found = false;
-		for (final PeakResult r : results)
-		{
-			if (r == null)
-				continue;
-			for (final float[] coord : filter)
-			{
-				final float dx = r.getXPosition() - coord[0];
-				final float dy = r.getYPosition() - coord[1];
-				if (dx * dx + dy * dy < d2)
-				{
-					found = true;
-					peakResults.add(r);
-					break;
-				}
-			}
-		}
-		if (found)
-		{
-			// Add the result and the fitted index to the filtered results
-			filteredFitResults[filteredCount] = fitResult;
-			filteredIndices[filteredCount] = maxIndex;
-			filteredCount++;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
+     * uk.ac.sussex.gdsc.smlm.results.PeakResult[])
+     */
+    @Override
+    public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
+    {
+        boolean found = false;
+        for (final PeakResult r : results)
+        {
+            if (r == null)
+                continue;
+            for (final float[] coord : filter)
+            {
+                final float dx = r.getXPosition() - coord[0];
+                final float dy = r.getYPosition() - coord[1];
+                if (dx * dx + dy * dy < d2)
+                {
+                    found = true;
+                    peakResults.add(r);
+                    break;
+                }
+            }
+        }
+        if (found)
+        {
+            // Add the result and the fitted index to the filtered results
+            filteredFitResults[filteredCount] = fitResult;
+            filteredIndices[filteredCount] = maxIndex;
+            filteredCount++;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int, float, float)
-	 */
-	@Override
-	public void filter(FitResult fitResult, int maxIndex, float x, float y)
-	{
-		boolean found = false;
-		for (final float[] coord : filter)
-		{
-			final float dx = x - coord[0];
-			final float dy = y - coord[1];
-			if (dx * dx + dy * dy < d2)
-			{
-				found = true;
-				break;
-			}
-		}
-		if (found)
-		{
-			// Add the result and the fitted index to the filtered results
-			filteredFitResults[filteredCount] = fitResult;
-			filteredIndices[filteredCount] = maxIndex;
-			filteredCount++;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
+     * float, float)
+     */
+    @Override
+    public void filter(FitResult fitResult, int maxIndex, float x, float y)
+    {
+        boolean found = false;
+        for (final float[] coord : filter)
+        {
+            final float dx = x - coord[0];
+            final float dy = y - coord[1];
+            if (dx * dx + dy * dy < d2)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+        {
+            // Add the result and the fitted index to the filtered results
+            filteredFitResults[filteredCount] = fitResult;
+            filteredIndices[filteredCount] = maxIndex;
+            filteredCount++;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#finalise()
-	 */
-	@Override
-	public void finalise()
-	{
-		filteredFitResults = Arrays.copyOf(filteredFitResults, filteredCount);
-		filteredIndices = Arrays.copyOf(filteredIndices, filteredCount);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#finalise()
+     */
+    @Override
+    public void finalise()
+    {
+        filteredFitResults = Arrays.copyOf(filteredFitResults, filteredCount);
+        filteredIndices = Arrays.copyOf(filteredIndices, filteredCount);
+    }
 }

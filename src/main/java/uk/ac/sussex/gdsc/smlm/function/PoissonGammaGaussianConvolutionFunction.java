@@ -49,200 +49,200 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
  */
 public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
-	/**
-	 * The on-chip gain multiplication factor
-	 */
-	final double g;
+    /**
+     * The on-chip gain multiplication factor
+     */
+    final double g;
 
-	private final double var;
-	private final double s;
-	private final double range;
-	private final double var_by_2;
+    private final double var;
+    private final double s;
+    private final double range;
+    private final double var_by_2;
 
-	private final double logNormalisationGaussian;
+    private final double logNormalisationGaussian;
 
-	/**
-	 * Instantiates a new poisson gaussian convolution function.
-	 *
-	 * @param alpha
-	 *            The inverse of the on-chip gain multiplication factor
-	 * @param variance
-	 *            The variance of the Gaussian distribution at readout (must be positive)
-	 * @param isVariance
-	 *            Set to true if the input parameter is variance; otherwise is is standard deviation
-	 */
-	private PoissonGammaGaussianConvolutionFunction(double alpha, double variance, boolean isVariance)
-	{
-		if (variance <= 0)
-			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
-		alpha = Math.abs(alpha);
+    /**
+     * Instantiates a new poisson gaussian convolution function.
+     *
+     * @param alpha
+     *            The inverse of the on-chip gain multiplication factor
+     * @param variance
+     *            The variance of the Gaussian distribution at readout (must be positive)
+     * @param isVariance
+     *            Set to true if the input parameter is variance; otherwise is is standard deviation
+     */
+    private PoissonGammaGaussianConvolutionFunction(double alpha, double variance, boolean isVariance)
+    {
+        if (variance <= 0)
+            throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+        alpha = Math.abs(alpha);
 
-		this.g = 1.0 / alpha;
-		if (isVariance)
-		{
-			s = Math.sqrt(variance);
-			this.var = variance;
-		}
-		else
-		{
-			s = variance;
-			this.var = s * s;
-		}
-		var_by_2 = var * 2;
+        this.g = 1.0 / alpha;
+        if (isVariance)
+        {
+            s = Math.sqrt(variance);
+            this.var = variance;
+        }
+        else
+        {
+            s = variance;
+            this.var = s * s;
+        }
+        var_by_2 = var * 2;
 
-		// Use a range to cover the Gaussian convolution
-		range = 5 * this.s;
+        // Use a range to cover the Gaussian convolution
+        range = 5 * this.s;
 
-		// Determine the normalisation factor A in the event that the probability
-		// distribution is being used as a discrete distribution.
-		logNormalisationGaussian = PoissonGaussianFunction.getLogNormalisation(var);
-	}
+        // Determine the normalisation factor A in the event that the probability
+        // distribution is being used as a discrete distribution.
+        logNormalisationGaussian = PoissonGaussianFunction.getLogNormalisation(var);
+    }
 
-	/**
-	 * Creates the with standard deviation.
-	 *
-	 * @param alpha
-	 *            The inverse of the on-chip gain multiplication factor
-	 * @param s
-	 *            The standard deviation of the Gaussian distribution at readout
-	 * @return the poisson gaussian function 2
-	 * @throws IllegalArgumentException
-	 *             if the variance is zero or below
-	 */
-	public static PoissonGammaGaussianConvolutionFunction createWithStandardDeviation(final double alpha,
-			final double s)
-	{
-		return new PoissonGammaGaussianConvolutionFunction(alpha, s, false);
-	}
+    /**
+     * Creates the with standard deviation.
+     *
+     * @param alpha
+     *            The inverse of the on-chip gain multiplication factor
+     * @param s
+     *            The standard deviation of the Gaussian distribution at readout
+     * @return the poisson gaussian function 2
+     * @throws IllegalArgumentException
+     *             if the variance is zero or below
+     */
+    public static PoissonGammaGaussianConvolutionFunction createWithStandardDeviation(final double alpha,
+            final double s)
+    {
+        return new PoissonGammaGaussianConvolutionFunction(alpha, s, false);
+    }
 
-	/**
-	 * Creates the with variance.
-	 *
-	 * @param alpha
-	 *            The inverse of the on-chip gain multiplication factor
-	 * @param var
-	 *            The variance of the Gaussian distribution at readout (must be positive)
-	 * @return the poisson gaussian function 2
-	 * @throws IllegalArgumentException
-	 *             if the variance is zero or below
-	 */
-	public static PoissonGammaGaussianConvolutionFunction createWithVariance(final double alpha, final double var)
-	{
-		return new PoissonGammaGaussianConvolutionFunction(alpha, var, true);
-	}
+    /**
+     * Creates the with variance.
+     *
+     * @param alpha
+     *            The inverse of the on-chip gain multiplication factor
+     * @param var
+     *            The variance of the Gaussian distribution at readout (must be positive)
+     * @return the poisson gaussian function 2
+     * @throws IllegalArgumentException
+     *             if the variance is zero or below
+     */
+    public static PoissonGammaGaussianConvolutionFunction createWithVariance(final double alpha, final double var)
+    {
+        return new PoissonGammaGaussianConvolutionFunction(alpha, var, true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-	 */
-	@Override
-	public double likelihood(final double o, final double e)
-	{
-		if (e <= 0)
-			// If no Poisson mean then just use the Gaussian
-			return FastMath.exp((-o * o / var_by_2) + logNormalisationGaussian);
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
+     */
+    @Override
+    public double likelihood(final double o, final double e)
+    {
+        if (e <= 0)
+            // If no Poisson mean then just use the Gaussian
+            return FastMath.exp((-o * o / var_by_2) + logNormalisationGaussian);
 
-		// Note:
-		// This is a convolution of two continuous probability distributions.
-		// It does not compute a good estimate when the variance is small since the
-		// single point approximation to the gaussian is not valid. This is not
-		// relevant for a EM-CCD since the variance is likely to be above 10 counts.
-		// It also underestimates the cumulative distribution (sum < 1) when the Poisson
-		// mean is close to 1 or the gain is small (<4) due to underestimation in the
-		// Poisson-Gamma distribution.
+        // Note:
+        // This is a convolution of two continuous probability distributions.
+        // It does not compute a good estimate when the variance is small since the
+        // single point approximation to the gaussian is not valid. This is not
+        // relevant for a EM-CCD since the variance is likely to be above 10 counts.
+        // It also underestimates the cumulative distribution (sum < 1) when the Poisson
+        // mean is close to 1 or the gain is small (<4) due to underestimation in the
+        // Poisson-Gamma distribution.
 
-		// Use a range to cover the Gaussian convolution
-		final double max = o + range;
-		if (max < 0)
-			return 0;
-		double min = o - range;
-		if (min < 0)
-			min = 0;
+        // Use a range to cover the Gaussian convolution
+        final double max = o + range;
+        if (max < 0)
+            return 0;
+        double min = o - range;
+        if (min < 0)
+            min = 0;
 
-		return computeP(o, e, max, min);
-	}
+        return computeP(o, e, max, min);
+    }
 
-	private double computeP(final double o, final double e, double max, double min)
-	{
-		final int cmax = (int) Math.ceil(max);
-		final int cmin = (int) Math.floor(min);
+    private double computeP(final double o, final double e, double max, double min)
+    {
+        final int cmax = (int) Math.ceil(max);
+        final int cmin = (int) Math.floor(min);
 
-		if (cmin == cmax)
-			// Edge case with no range
-			return FastMath.exp(
-					// Poisson-Gamma
-					PoissonGammaFunction.logPoissonGamma(cmin, e, g)
-					// Gaussian
-							- (Maths.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
+        if (cmin == cmax)
+            // Edge case with no range
+            return FastMath.exp(
+                    // Poisson-Gamma
+                    PoissonGammaFunction.logPoissonGamma(cmin, e, g)
+                    // Gaussian
+                            - (Maths.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
 
-		double p = 0;
+        double p = 0;
 
-		// Overcome the problem with small variance using a set number of steps to
-		// cover the range. This effectively makes the Poisson-Gamma a continuous
-		// probability distribution.
-		// Note:
-		// This does seem to be valid. The Poisson-Gamma is a discrete PMF.
-		// The CameraModelAnalysis plugin works with full integration if this function
-		// is computed using integer steps.
-		//
-		// This is to computing:
-		// Poisson-Gamma PMF(c)  x  Gaussian PDF(c-o)
-		//
-		// The solution is to compute:
-		// Poisson-Gamma PMF(c)  x  Gaussian CDF(c-o-0.5,c-o+0.5)
-		//
-		// This can be done in the PoissonGammaGaussianFunction.
+        // Overcome the problem with small variance using a set number of steps to
+        // cover the range. This effectively makes the Poisson-Gamma a continuous
+        // probability distribution.
+        // Note:
+        // This does seem to be valid. The Poisson-Gamma is a discrete PMF.
+        // The CameraModelAnalysis plugin works with full integration if this function
+        // is computed using integer steps.
+        //
+        // This is to computing:
+        // Poisson-Gamma PMF(c)  x  Gaussian PDF(c-o)
+        //
+        // The solution is to compute:
+        // Poisson-Gamma PMF(c)  x  Gaussian CDF(c-o-0.5,c-o+0.5)
+        //
+        // This can be done in the PoissonGammaGaussianFunction.
 
-		//		if (s < 0)
-		//		{
-		//			double step = (max - min) / 10;
-		//
-		//			for (int i = 0; i <= 10; i++)
-		//			{
-		//				double c = min + i * step;
-		//				p += FastMath.exp(
-		//						// Poisson-Gamma
-		//						logPoissonGamma(c, e, g)
-		//						// Gaussian
-		//								- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
-		//			}
-		//			p *= step;
-		//		}
-		//		else
-		//		{
+        //		if (s < 0)
+        //		{
+        //			double step = (max - min) / 10;
+        //
+        //			for (int i = 0; i <= 10; i++)
+        //			{
+        //				double c = min + i * step;
+        //				p += FastMath.exp(
+        //						// Poisson-Gamma
+        //						logPoissonGamma(c, e, g)
+        //						// Gaussian
+        //								- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
+        //			}
+        //			p *= step;
+        //		}
+        //		else
+        //		{
 
-		for (int c = cmin; c <= cmax; c++)
-			p += FastMath.exp(
-					// Poisson-Gamma
-					PoissonGammaFunction.logPoissonGamma(c, e, g)
-					// Gaussian
-							- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
+        for (int c = cmin; c <= cmax; c++)
+            p += FastMath.exp(
+                    // Poisson-Gamma
+                    PoissonGammaFunction.logPoissonGamma(c, e, g)
+                    // Gaussian
+                            - (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
 
-		//		}
+        //		}
 
-		return p;
-	}
+        return p;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-	 */
-	@Override
-	public double logLikelihood(double o, double e)
-	{
-		if (e <= 0)
-			// If no Poisson mean then just use the Gaussian
-			return (-o * o / var_by_2) + logNormalisationGaussian;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
+     */
+    @Override
+    public double logLikelihood(double o, double e)
+    {
+        if (e <= 0)
+            // If no Poisson mean then just use the Gaussian
+            return (-o * o / var_by_2) + logNormalisationGaussian;
 
-		final double max = o + range;
-		if (max < 0)
-			return Double.NEGATIVE_INFINITY;
-		double min = o - range;
-		if (min < 0)
-			min = 0;
+        final double max = o + range;
+        if (max < 0)
+            return Double.NEGATIVE_INFINITY;
+        double min = o - range;
+        if (min < 0)
+            min = 0;
 
-		return Math.log(computeP(o, e, max, min));
-	}
+        return Math.log(computeP(o, e, max, min));
+    }
 }

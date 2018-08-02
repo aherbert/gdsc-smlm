@@ -33,196 +33,196 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
  */
 public class GradientCalculator4 extends GradientCalculator
 {
-	/**
-	 * Instantiates a new gradient calculator for a 4x4 matrix.
-	 */
-	public GradientCalculator4()
-	{
-		super(4);
-	}
+    /**
+     * Instantiates a new gradient calculator for a 4x4 matrix.
+     */
+    public GradientCalculator4()
+    {
+        super(4);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
-	 * gdsc.fitting.function.NonLinearFunction)
-	 */
-	@Override
-	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
-			NonLinearFunction func)
-	{
-		double ssx = 0;
-		final double[] dy_da = new double[4];
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
+     * gdsc.fitting.function.NonLinearFunction)
+     */
+    @Override
+    public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
+            NonLinearFunction func)
+    {
+        double ssx = 0;
+        final double[] dy_da = new double[4];
 
-		alpha[0][0] = 0;
-		alpha[1][0] = 0;
-		alpha[1][1] = 0;
-		alpha[2][0] = 0;
-		alpha[2][1] = 0;
-		alpha[2][2] = 0;
-		alpha[3][0] = 0;
-		alpha[3][1] = 0;
-		alpha[3][2] = 0;
-		alpha[3][3] = 0;
+        alpha[0][0] = 0;
+        alpha[1][0] = 0;
+        alpha[1][1] = 0;
+        alpha[2][0] = 0;
+        alpha[2][1] = 0;
+        alpha[2][2] = 0;
+        alpha[3][0] = 0;
+        alpha[3][1] = 0;
+        alpha[3][2] = 0;
+        alpha[3][3] = 0;
 
-		beta[0] = 0;
-		beta[1] = 0;
-		beta[2] = 0;
-		beta[3] = 0;
+        beta[0] = 0;
+        beta[1] = 0;
+        beta[2] = 0;
+        beta[3] = 0;
 
-		func.initialise(a);
+        func.initialise(a);
 
-		if (func.canComputeWeights())
-		{
-			final double[] w = new double[1];
-			for (int i = 0; i < x.length; i++)
-			{
-				final double dy = y[i] - func.eval(x[i], dy_da, w);
-				final double weight = getWeight(w[0]);
+        if (func.canComputeWeights())
+        {
+            final double[] w = new double[1];
+            for (int i = 0; i < x.length; i++)
+            {
+                final double dy = y[i] - func.eval(x[i], dy_da, w);
+                final double weight = getWeight(w[0]);
 
-				alpha[0][0] += dy_da[0] * weight * dy_da[0];
-				alpha[1][0] += dy_da[1] * weight * dy_da[0];
-				alpha[1][1] += dy_da[1] * weight * dy_da[1];
-				alpha[2][0] += dy_da[2] * weight * dy_da[0];
-				alpha[2][1] += dy_da[2] * weight * dy_da[1];
-				alpha[2][2] += dy_da[2] * weight * dy_da[2];
-				alpha[3][0] += dy_da[3] * weight * dy_da[0];
-				alpha[3][1] += dy_da[3] * weight * dy_da[1];
-				alpha[3][2] += dy_da[3] * weight * dy_da[2];
-				alpha[3][3] += dy_da[3] * weight * dy_da[3];
+                alpha[0][0] += dy_da[0] * weight * dy_da[0];
+                alpha[1][0] += dy_da[1] * weight * dy_da[0];
+                alpha[1][1] += dy_da[1] * weight * dy_da[1];
+                alpha[2][0] += dy_da[2] * weight * dy_da[0];
+                alpha[2][1] += dy_da[2] * weight * dy_da[1];
+                alpha[2][2] += dy_da[2] * weight * dy_da[2];
+                alpha[3][0] += dy_da[3] * weight * dy_da[0];
+                alpha[3][1] += dy_da[3] * weight * dy_da[1];
+                alpha[3][2] += dy_da[3] * weight * dy_da[2];
+                alpha[3][3] += dy_da[3] * weight * dy_da[3];
 
-				beta[0] += dy_da[0] * weight * dy;
-				beta[1] += dy_da[1] * weight * dy;
-				beta[2] += dy_da[2] * weight * dy;
-				beta[3] += dy_da[3] * weight * dy;
+                beta[0] += dy_da[0] * weight * dy;
+                beta[1] += dy_da[1] * weight * dy;
+                beta[2] += dy_da[2] * weight * dy;
+                beta[3] += dy_da[3] * weight * dy;
 
-				ssx += dy * dy * weight;
-			}
-		}
-		else
-			for (int i = 0; i < x.length; i++)
-			{
-				final double dy = y[i] - func.eval(x[i], dy_da);
+                ssx += dy * dy * weight;
+            }
+        }
+        else
+            for (int i = 0; i < x.length; i++)
+            {
+                final double dy = y[i] - func.eval(x[i], dy_da);
 
-				alpha[0][0] += dy_da[0] * dy_da[0];
-				alpha[1][0] += dy_da[1] * dy_da[0];
-				alpha[1][1] += dy_da[1] * dy_da[1];
-				alpha[2][0] += dy_da[2] * dy_da[0];
-				alpha[2][1] += dy_da[2] * dy_da[1];
-				alpha[2][2] += dy_da[2] * dy_da[2];
-				alpha[3][0] += dy_da[3] * dy_da[0];
-				alpha[3][1] += dy_da[3] * dy_da[1];
-				alpha[3][2] += dy_da[3] * dy_da[2];
-				alpha[3][3] += dy_da[3] * dy_da[3];
+                alpha[0][0] += dy_da[0] * dy_da[0];
+                alpha[1][0] += dy_da[1] * dy_da[0];
+                alpha[1][1] += dy_da[1] * dy_da[1];
+                alpha[2][0] += dy_da[2] * dy_da[0];
+                alpha[2][1] += dy_da[2] * dy_da[1];
+                alpha[2][2] += dy_da[2] * dy_da[2];
+                alpha[3][0] += dy_da[3] * dy_da[0];
+                alpha[3][1] += dy_da[3] * dy_da[1];
+                alpha[3][2] += dy_da[3] * dy_da[2];
+                alpha[3][3] += dy_da[3] * dy_da[3];
 
-				beta[0] += dy_da[0] * dy;
-				beta[1] += dy_da[1] * dy;
-				beta[2] += dy_da[2] * dy;
-				beta[3] += dy_da[3] * dy;
+                beta[0] += dy_da[0] * dy;
+                beta[1] += dy_da[1] * dy;
+                beta[2] += dy_da[2] * dy;
+                beta[3] += dy_da[3] * dy;
 
-				ssx += dy * dy;
-			}
+                ssx += dy * dy;
+            }
 
-		// Generate symmetric matrix
-		alpha[0][1] = alpha[1][0];
-		alpha[0][2] = alpha[2][0];
-		alpha[0][3] = alpha[3][0];
-		alpha[1][2] = alpha[2][1];
-		alpha[1][3] = alpha[3][1];
-		alpha[2][3] = alpha[3][2];
+        // Generate symmetric matrix
+        alpha[0][1] = alpha[1][0];
+        alpha[0][2] = alpha[2][0];
+        alpha[0][3] = alpha[3][0];
+        alpha[1][2] = alpha[2][1];
+        alpha[1][3] = alpha[3][1];
+        alpha[2][3] = alpha[3][2];
 
-		return checkGradients(alpha, beta, nparams, ssx);
-	}
+        return checkGradients(alpha, beta, nparams, ssx);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[] double[], double[][],
-	 * double[], gdsc.fitting.function.NonLinearFunction)
-	 */
-	@Override
-	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
-	{
-		double ssx = 0;
-		final double[] dy_da = new double[4];
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[] double[], double[][],
+     * double[], gdsc.fitting.function.NonLinearFunction)
+     */
+    @Override
+    public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+    {
+        double ssx = 0;
+        final double[] dy_da = new double[4];
 
-		alpha[0][0] = 0;
-		alpha[1][0] = 0;
-		alpha[1][1] = 0;
-		alpha[2][0] = 0;
-		alpha[2][1] = 0;
-		alpha[2][2] = 0;
-		alpha[3][0] = 0;
-		alpha[3][1] = 0;
-		alpha[3][2] = 0;
-		alpha[3][3] = 0;
+        alpha[0][0] = 0;
+        alpha[1][0] = 0;
+        alpha[1][1] = 0;
+        alpha[2][0] = 0;
+        alpha[2][1] = 0;
+        alpha[2][2] = 0;
+        alpha[3][0] = 0;
+        alpha[3][1] = 0;
+        alpha[3][2] = 0;
+        alpha[3][3] = 0;
 
-		beta[0] = 0;
-		beta[1] = 0;
-		beta[2] = 0;
-		beta[3] = 0;
+        beta[0] = 0;
+        beta[1] = 0;
+        beta[2] = 0;
+        beta[3] = 0;
 
-		func.initialise(a);
+        func.initialise(a);
 
-		if (func.canComputeWeights())
-		{
-			final double[] w = new double[1];
-			for (int i = 0; i < n; i++)
-			{
-				final double dy = y[i] - func.eval(i, dy_da, w);
-				final double weight = getWeight(w[0]);
+        if (func.canComputeWeights())
+        {
+            final double[] w = new double[1];
+            for (int i = 0; i < n; i++)
+            {
+                final double dy = y[i] - func.eval(i, dy_da, w);
+                final double weight = getWeight(w[0]);
 
-				alpha[0][0] += dy_da[0] * weight * dy_da[0];
-				alpha[1][0] += dy_da[1] * weight * dy_da[0];
-				alpha[1][1] += dy_da[1] * weight * dy_da[1];
-				alpha[2][0] += dy_da[2] * weight * dy_da[0];
-				alpha[2][1] += dy_da[2] * weight * dy_da[1];
-				alpha[2][2] += dy_da[2] * weight * dy_da[2];
-				alpha[3][0] += dy_da[3] * weight * dy_da[0];
-				alpha[3][1] += dy_da[3] * weight * dy_da[1];
-				alpha[3][2] += dy_da[3] * weight * dy_da[2];
-				alpha[3][3] += dy_da[3] * weight * dy_da[3];
+                alpha[0][0] += dy_da[0] * weight * dy_da[0];
+                alpha[1][0] += dy_da[1] * weight * dy_da[0];
+                alpha[1][1] += dy_da[1] * weight * dy_da[1];
+                alpha[2][0] += dy_da[2] * weight * dy_da[0];
+                alpha[2][1] += dy_da[2] * weight * dy_da[1];
+                alpha[2][2] += dy_da[2] * weight * dy_da[2];
+                alpha[3][0] += dy_da[3] * weight * dy_da[0];
+                alpha[3][1] += dy_da[3] * weight * dy_da[1];
+                alpha[3][2] += dy_da[3] * weight * dy_da[2];
+                alpha[3][3] += dy_da[3] * weight * dy_da[3];
 
-				beta[0] += dy_da[0] * weight * dy;
-				beta[1] += dy_da[1] * weight * dy;
-				beta[2] += dy_da[2] * weight * dy;
-				beta[3] += dy_da[3] * weight * dy;
+                beta[0] += dy_da[0] * weight * dy;
+                beta[1] += dy_da[1] * weight * dy;
+                beta[2] += dy_da[2] * weight * dy;
+                beta[3] += dy_da[3] * weight * dy;
 
-				ssx += dy * dy * weight;
-			}
-		}
-		else
-			for (int i = 0; i < n; i++)
-			{
-				final double dy = y[i] - func.eval(i, dy_da);
+                ssx += dy * dy * weight;
+            }
+        }
+        else
+            for (int i = 0; i < n; i++)
+            {
+                final double dy = y[i] - func.eval(i, dy_da);
 
-				alpha[0][0] += dy_da[0] * dy_da[0];
-				alpha[1][0] += dy_da[1] * dy_da[0];
-				alpha[1][1] += dy_da[1] * dy_da[1];
-				alpha[2][0] += dy_da[2] * dy_da[0];
-				alpha[2][1] += dy_da[2] * dy_da[1];
-				alpha[2][2] += dy_da[2] * dy_da[2];
-				alpha[3][0] += dy_da[3] * dy_da[0];
-				alpha[3][1] += dy_da[3] * dy_da[1];
-				alpha[3][2] += dy_da[3] * dy_da[2];
-				alpha[3][3] += dy_da[3] * dy_da[3];
+                alpha[0][0] += dy_da[0] * dy_da[0];
+                alpha[1][0] += dy_da[1] * dy_da[0];
+                alpha[1][1] += dy_da[1] * dy_da[1];
+                alpha[2][0] += dy_da[2] * dy_da[0];
+                alpha[2][1] += dy_da[2] * dy_da[1];
+                alpha[2][2] += dy_da[2] * dy_da[2];
+                alpha[3][0] += dy_da[3] * dy_da[0];
+                alpha[3][1] += dy_da[3] * dy_da[1];
+                alpha[3][2] += dy_da[3] * dy_da[2];
+                alpha[3][3] += dy_da[3] * dy_da[3];
 
-				beta[0] += dy_da[0] * dy;
-				beta[1] += dy_da[1] * dy;
-				beta[2] += dy_da[2] * dy;
-				beta[3] += dy_da[3] * dy;
+                beta[0] += dy_da[0] * dy;
+                beta[1] += dy_da[1] * dy;
+                beta[2] += dy_da[2] * dy;
+                beta[3] += dy_da[3] * dy;
 
-				ssx += dy * dy;
-			}
+                ssx += dy * dy;
+            }
 
-		// Generate symmetric matrix
-		alpha[0][1] = alpha[1][0];
-		alpha[0][2] = alpha[2][0];
-		alpha[0][3] = alpha[3][0];
-		alpha[1][2] = alpha[2][1];
-		alpha[1][3] = alpha[3][1];
-		alpha[2][3] = alpha[3][2];
+        // Generate symmetric matrix
+        alpha[0][1] = alpha[1][0];
+        alpha[0][2] = alpha[2][0];
+        alpha[0][3] = alpha[3][0];
+        alpha[1][2] = alpha[2][1];
+        alpha[1][3] = alpha[3][1];
+        alpha[2][3] = alpha[3][2];
 
-		return checkGradients(alpha, beta, nparams, ssx);
-	}
+        return checkGradients(alpha, beta, nparams, ssx);
+    }
 }

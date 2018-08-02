@@ -34,26 +34,26 @@ import java.util.Arrays;
 public class ScoreFunctionHelper<T extends Comparable<T>>
 {
 
-	/**
-	 * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
-	 * sorted. The results should contain the best result at position 0 in the output array.
-	 * <p>
-	 * Helper implementation of the FullScoreFunction.cut(...) method. Uses a full sort then truncation to the given
-	 * size.
-	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param scores
-	 *            The scores
-	 * @param size
-	 *            The size
-	 * @return The reduced list
-	 */
-	public static <T extends Comparable<T>> SearchResult<T>[] cut(SearchResult<T>[] scores, int size)
-	{
-		if (scores == null || scores.length == 1)
-			return scores;
-		Arrays.sort(scores);
-		return (size < scores.length) ? Arrays.copyOf(scores, size) : scores;
-	}
+    /**
+     * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
+     * sorted. The results should contain the best result at position 0 in the output array.
+     * <p>
+     * Helper implementation of the FullScoreFunction.cut(...) method. Uses a full sort then truncation to the given
+     * size.
+     *
+     * @param <T>
+     *            the generic type
+     * @param scores
+     *            The scores
+     * @param size
+     *            The size
+     * @return The reduced list
+     */
+    public static <T extends Comparable<T>> SearchResult<T>[] cut(SearchResult<T>[] scores, int size)
+    {
+        if (scores == null || scores.length == 1)
+            return scores;
+        Arrays.sort(scores);
+        return (size < scores.length) ? Arrays.copyOf(scores, size) : scores;
+    }
 }

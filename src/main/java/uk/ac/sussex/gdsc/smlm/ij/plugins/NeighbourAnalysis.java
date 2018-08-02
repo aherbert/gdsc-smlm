@@ -41,121 +41,121 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager;
  */
 public class NeighbourAnalysis implements PlugIn
 {
-	private static final String TITLE = "Neighbour Analysis";
-	private static String inputOption = "";
-	private static double distanceThreshold = 0.6;
-	private static int timeThreshold = 1;
+    private static final String TITLE = "Neighbour Analysis";
+    private static String inputOption = "";
+    private static double distanceThreshold = 0.6;
+    private static int timeThreshold = 1;
 
-	private static String filename = "";
+    private static String filename = "";
 
-	private MemoryPeakResults results;
+    private MemoryPeakResults results;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@Override
-	public void run(String arg)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @Override
+    public void run(String arg)
+    {
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (MemoryPeakResults.isMemoryEmpty())
-		{
-			IJ.error(TITLE, "No localisations in memory");
-			return;
-		}
+        if (MemoryPeakResults.isMemoryEmpty())
+        {
+            IJ.error(TITLE, "No localisations in memory");
+            return;
+        }
 
-		if (!showDialog())
-			return;
+        if (!showDialog())
+            return;
 
-		final TraceManager manager = new TraceManager(results);
+        final TraceManager manager = new TraceManager(results);
 
-		// Run the tracing
-		manager.setTracker(new IJTrackProgress());
-		final Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
+        // Run the tracing
+        manager.setTracker(new IJTrackProgress());
+        final Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
 
-		saveTraces(traces);
-	}
+        saveTraces(traces);
+    }
 
-	private void saveTraces(Trace[] traces)
-	{
-		final String[] path = Utils.decodePath(filename);
-		final OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
-		if (chooser.getFileName() != null)
-		{
-			filename = chooser.getDirectory() + chooser.getFileName();
+    private void saveTraces(Trace[] traces)
+    {
+        final String[] path = Utils.decodePath(filename);
+        final OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
+        if (chooser.getFileName() != null)
+        {
+            filename = chooser.getDirectory() + chooser.getFileName();
 
-			// Remove extension and replace with .xls
-			final int index = filename.lastIndexOf('.');
-			if (index > 0)
-				filename = filename.substring(0, index);
-			filename += ".xls";
+            // Remove extension and replace with .xls
+            final int index = filename.lastIndexOf('.');
+            if (index > 0)
+                filename = filename.substring(0, index);
+            filename += ".xls";
 
-			final boolean showDeviations = results.hasDeviations();
-			final TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
-			traceResults.copySettings(results);
-			traceResults.begin();
-			if (!traceResults.isActive())
-			{
-				IJ.error(TITLE, "Failed to write to file: " + filename);
-				return;
-			}
-			traceResults.addComment(createSettingsComment());
-			for (final Trace trace : traces)
-				traceResults.addCluster(trace); // addTrace(...) does a sort on the results
-			traceResults.end();
-		}
-	}
+            final boolean showDeviations = results.hasDeviations();
+            final TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
+            traceResults.copySettings(results);
+            traceResults.begin();
+            if (!traceResults.isActive())
+            {
+                IJ.error(TITLE, "Failed to write to file: " + filename);
+                return;
+            }
+            traceResults.addComment(createSettingsComment());
+            for (final Trace trace : traces)
+                traceResults.addCluster(trace); // addTrace(...) does a sort on the results
+            traceResults.end();
+        }
+    }
 
-	private static String createSettingsComment()
-	{
-		return String.format("Neighbour tracing : distance-threshold = %f : time-threshold = %d", distanceThreshold,
-				timeThreshold);
-	}
+    private static String createSettingsComment()
+    {
+        return String.format("Neighbour tracing : distance-threshold = %f : time-threshold = %d", distanceThreshold,
+                timeThreshold);
+    }
 
-	private boolean showDialog()
-	{
-		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
+    private boolean showDialog()
+    {
+        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+        ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
-		gd.addNumericField("Distance_Threshold (px)", distanceThreshold, 4);
-		gd.addNumericField("Time_Threshold (frames)", timeThreshold, 0);
+        gd.addNumericField("Distance_Threshold (px)", distanceThreshold, 4);
+        gd.addNumericField("Time_Threshold (frames)", timeThreshold, 0);
 
-		gd.showDialog();
+        gd.showDialog();
 
-		if (gd.wasCanceled() || !readDialog(gd))
-			return false;
+        if (gd.wasCanceled() || !readDialog(gd))
+            return false;
 
-		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
-		if (results == null || results.size() == 0)
-		{
-			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
-			return false;
-		}
+        // Load the results
+        results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
+        if (results == null || results.size() == 0)
+        {
+            IJ.error(TITLE, "No results could be loaded");
+            IJ.showStatus("");
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private static boolean readDialog(ExtendedGenericDialog gd)
-	{
-		inputOption = ResultsManager.getInputSource(gd);
-		distanceThreshold = gd.getNextNumber();
-		timeThreshold = (int) gd.getNextNumber();
+    private static boolean readDialog(ExtendedGenericDialog gd)
+    {
+        inputOption = ResultsManager.getInputSource(gd);
+        distanceThreshold = gd.getNextNumber();
+        timeThreshold = (int) gd.getNextNumber();
 
-		if (distanceThreshold < 0)
-			distanceThreshold = 0;
-		if (timeThreshold < 0)
-			timeThreshold = 0;
-		if (timeThreshold == 0 && distanceThreshold == 0)
-		{
-			IJ.error(TITLE, "No thresholds specified");
-			return false;
-		}
-		return !gd.invalidNumber();
-	}
+        if (distanceThreshold < 0)
+            distanceThreshold = 0;
+        if (timeThreshold < 0)
+            timeThreshold = 0;
+        if (timeThreshold == 0 && distanceThreshold == 0)
+        {
+            IJ.error(TITLE, "No thresholds specified");
+            return false;
+        }
+        return !gd.invalidNumber();
+    }
 }

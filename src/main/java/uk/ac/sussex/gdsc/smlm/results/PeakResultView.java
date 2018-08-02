@@ -28,21 +28,21 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public interface PeakResultView
 {
-	/**
-	 * Gets the results by frame.
-	 *
-	 * @param frame
-	 *            the frame
-	 * @return the results
-	 */
-	public PeakResult[] getResultsByFrame(int frame);
+    /**
+     * Gets the results by frame.
+     *
+     * @param frame
+     *            the frame
+     * @return the results
+     */
+    public PeakResult[] getResultsByFrame(int frame);
 
-	/**
-	 * Gets the results by id.
-	 *
-	 * @param id
-	 *            the id
-	 * @return the results
-	 */
-	public PeakResult[] getResultsById(int id);
+    /**
+     * Gets the results by id.
+     *
+     * @param id
+     *            the id
+     * @return the results
+     */
+    public PeakResult[] getResultsById(int id);
 }

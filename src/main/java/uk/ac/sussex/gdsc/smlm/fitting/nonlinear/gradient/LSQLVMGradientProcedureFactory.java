@@ -30,46 +30,46 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public class LSQLVMGradientProcedureFactory extends BaseLSQLVMGradientProcedureFactory
 {
-	/**
-	 * Create a new gradient procedure
-	 *
-	 * @param y
-	 *            Data to fit
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	public static LSQLVMGradientProcedure create(final double[] y, final Gradient1Function func)
-	{
-		switch (func.getNumberOfGradients())
-		{
-			case 5:
-				return new LSQLVMGradientProcedure5(y, func);
-			case 4:
-				return new LSQLVMGradientProcedure4(y, func);
-			case 6:
-				return new LSQLVMGradientProcedure6(y, func);
+    /**
+     * Create a new gradient procedure
+     *
+     * @param y
+     *            Data to fit
+     * @param func
+     *            Gradient function
+     * @return the gradient procedure
+     */
+    public static LSQLVMGradientProcedure create(final double[] y, final Gradient1Function func)
+    {
+        switch (func.getNumberOfGradients())
+        {
+            case 5:
+                return new LSQLVMGradientProcedure5(y, func);
+            case 4:
+                return new LSQLVMGradientProcedure4(y, func);
+            case 6:
+                return new LSQLVMGradientProcedure6(y, func);
 
-			default:
-				return new LSQLVMGradientProcedure(y, func);
-		}
-	}
+            default:
+                return new LSQLVMGradientProcedure(y, func);
+        }
+    }
 
-	// Instance method for testing
-	@Override
-	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		switch (func.getNumberOfGradients())
-		{
-			case 5:
-				return new LSQLVMGradientProcedure5(y, b, func);
-			case 4:
-				return new LSQLVMGradientProcedure4(y, b, func);
-			case 6:
-				return new LSQLVMGradientProcedure6(y, b, func);
+    // Instance method for testing
+    @Override
+    BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        switch (func.getNumberOfGradients())
+        {
+            case 5:
+                return new LSQLVMGradientProcedure5(y, b, func);
+            case 4:
+                return new LSQLVMGradientProcedure4(y, b, func);
+            case 6:
+                return new LSQLVMGradientProcedure6(y, b, func);
 
-			default:
-				return new LSQLVMGradientProcedure(y, b, func);
-		}
-	}
+            default:
+                return new LSQLVMGradientProcedure(y, b, func);
+        }
+    }
 }

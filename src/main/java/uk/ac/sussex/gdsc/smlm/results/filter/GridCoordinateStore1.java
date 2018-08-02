@@ -30,63 +30,63 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class GridCoordinateStore1 extends GridCoordinateStore
 {
-	// Note: We have package level constructors so that the factory must be used to create an instance.
+    // Note: We have package level constructors so that the factory must be used to create an instance.
 
-	/**
-	 * Create a grid for coordinates.
-	 *
-	 * @param minx
-	 *            the min x coordinate value
-	 * @param miny
-	 *            the min y coordinate value
-	 * @param width
-	 *            the width
-	 * @param height
-	 *            the height
-	 * @param xyResolution
-	 *            the xy resolution
-	 * @param zResolution
-	 *            the z resolution
-	 */
-	GridCoordinateStore1(int minx, int miny, int width, int height, double xyResolution, double zResolution)
-	{
-		super(minx, miny, width, height, xyResolution, zResolution);
-		checkResolution(xyResolution);
-	}
+    /**
+     * Create a grid for coordinates.
+     *
+     * @param minx
+     *            the min x coordinate value
+     * @param miny
+     *            the min y coordinate value
+     * @param width
+     *            the width
+     * @param height
+     *            the height
+     * @param xyResolution
+     *            the xy resolution
+     * @param zResolution
+     *            the z resolution
+     */
+    GridCoordinateStore1(int minx, int miny, int width, int height, double xyResolution, double zResolution)
+    {
+        super(minx, miny, width, height, xyResolution, zResolution);
+        checkResolution(xyResolution);
+    }
 
-	private static void checkResolution(double xyResolution)
-	{
-		if (xyResolution > 1)
-			throw new IllegalArgumentException("XY Resolution must be <= 1");
-	}
+    private static void checkResolution(double xyResolution)
+    {
+        if (xyResolution > 1)
+            throw new IllegalArgumentException("XY Resolution must be <= 1");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore#newInstance(int, int, int, int)
-	 */
-	@Override
-	public GridCoordinateStore newInstance(int minx, int miny, int width, int height)
-	{
-		return new GridCoordinateStore1(minx, miny, width, height, getXYResolution(), getZResolution());
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore#newInstance(int, int, int, int)
+     */
+    @Override
+    public GridCoordinateStore newInstance(int minx, int miny, int width, int height)
+    {
+        return new GridCoordinateStore1(minx, miny, width, height, getXYResolution(), getZResolution());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore#getBlock(double)
-	 */
-	@Override
-	protected int getBlock(final double x)
-	{
-		// blockResolution is always 1
-		return (int) x;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore#getBlock(double)
+     */
+    @Override
+    protected int getBlock(final double x)
+    {
+        // blockResolution is always 1
+        return (int) x;
+    }
 
-	@Override
-	public void changeXYResolution(double xyResolution)
-	{
-		checkResolution(xyResolution);
-		super.changeXYResolution(xyResolution);
-	}
+    @Override
+    public void changeXYResolution(double xyResolution)
+    {
+        checkResolution(xyResolution);
+        super.changeXYResolution(xyResolution);
+    }
 }

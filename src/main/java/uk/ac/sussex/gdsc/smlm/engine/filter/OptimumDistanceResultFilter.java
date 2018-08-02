@@ -42,143 +42,144 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 @Deprecated
 public class OptimumDistanceResultFilter extends ResultFilter
 {
-	private final FitResult[] bestFitResults;
-	private final int[] bestIndices;
-	private final float[] bestD2;
-	private final float[] bestSignal;
-	private final PeakResult[] bestPeakResults;
+    private final FitResult[] bestFitResults;
+    private final int[] bestIndices;
+    private final float[] bestD2;
+    private final float[] bestSignal;
+    private final PeakResult[] bestPeakResults;
 
-	/**
-	 * Instantiates a new optimum distance result filter.
-	 *
-	 * @param filter
-	 *            the filter
-	 * @param d
-	 *            the d
-	 * @param nMaxima
-	 *            the n maxima
-	 */
-	public OptimumDistanceResultFilter(List<float[]> filter, float d, int nMaxima)
-	{
-		super(filter, d, nMaxima);
-		bestFitResults = new FitResult[filter.size()];
-		bestIndices = new int[filter.size()];
-		bestD2 = new float[filter.size()];
-		Arrays.fill(bestD2, d2);
-		bestSignal = new float[filter.size()];
-		bestPeakResults = new PeakResult[filter.size()];
-	}
+    /**
+     * Instantiates a new optimum distance result filter.
+     *
+     * @param filter
+     *            the filter
+     * @param d
+     *            the d
+     * @param nMaxima
+     *            the n maxima
+     */
+    public OptimumDistanceResultFilter(List<float[]> filter, float d, int nMaxima)
+    {
+        super(filter, d, nMaxima);
+        bestFitResults = new FitResult[filter.size()];
+        bestIndices = new int[filter.size()];
+        bestD2 = new float[filter.size()];
+        Arrays.fill(bestD2, d2);
+        bestSignal = new float[filter.size()];
+        bestPeakResults = new PeakResult[filter.size()];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
-	 * uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-	 */
-	@Override
-	public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
-	{
-		for (final PeakResult r : results)
-		{
-			if (r == null)
-				continue;
-			for (int i = 0; i < filter.size(); i++)
-			{
-				final float[] coord = filter.get(i);
-				final float dx = r.getXPosition() - coord[0];
-				final float dy = r.getYPosition() - coord[1];
-				// Only check if within the distance threshold
-				if (dx * dx + dy * dy < d2)
-				{
-					// Then filter by signal strength
-					final float s = r.getIntensity();
-					if (s < bestSignal[i])
-						continue;
-					bestFitResults[i] = fitResult;
-					bestIndices[i] = maxIndex;
-					bestSignal[i] = s;
-					bestPeakResults[i] = r;
-				}
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
+     * uk.ac.sussex.gdsc.smlm.results.PeakResult[])
+     */
+    @Override
+    public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
+    {
+        for (final PeakResult r : results)
+        {
+            if (r == null)
+                continue;
+            for (int i = 0; i < filter.size(); i++)
+            {
+                final float[] coord = filter.get(i);
+                final float dx = r.getXPosition() - coord[0];
+                final float dy = r.getYPosition() - coord[1];
+                // Only check if within the distance threshold
+                if (dx * dx + dy * dy < d2)
+                {
+                    // Then filter by signal strength
+                    final float s = r.getIntensity();
+                    if (s < bestSignal[i])
+                        continue;
+                    bestFitResults[i] = fitResult;
+                    bestIndices[i] = maxIndex;
+                    bestSignal[i] = s;
+                    bestPeakResults[i] = r;
+                }
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int, float, float)
-	 */
-	@Override
-	public void filter(FitResult fitResult, int maxIndex, float x, float y)
-	{
-		for (int i = 0; i < filter.size(); i++)
-		{
-			// Skip if there is a peak result for this target coordinate
-			if (bestPeakResults[i] != null)
-				continue;
-			final float[] coord = filter.get(i);
-			final float dx = x - coord[0];
-			final float dy = y - coord[1];
-			final float dd = dx * dx + dy * dy;
-			// Check if this starting position is the closest
-			if (dd < bestD2[i])
-			{
-				bestFitResults[i] = fitResult;
-				bestIndices[i] = maxIndex;
-				bestD2[i] = dd;
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
+     * float, float)
+     */
+    @Override
+    public void filter(FitResult fitResult, int maxIndex, float x, float y)
+    {
+        for (int i = 0; i < filter.size(); i++)
+        {
+            // Skip if there is a peak result for this target coordinate
+            if (bestPeakResults[i] != null)
+                continue;
+            final float[] coord = filter.get(i);
+            final float dx = x - coord[0];
+            final float dy = y - coord[1];
+            final float dd = dx * dx + dy * dy;
+            // Check if this starting position is the closest
+            if (dd < bestD2[i])
+            {
+                bestFitResults[i] = fitResult;
+                bestIndices[i] = maxIndex;
+                bestD2[i] = dd;
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#finalise()
-	 */
-	@Override
-	public void finalise()
-	{
-		// Note that there could be the same result allocated to two target positions
-		// so find the unique results
-		final int[] uniqueIndices = new int[bestIndices.length];
-		int unique = 0;
-		for (int i = 0; i < bestIndices.length; i++)
-		{
-			if (bestFitResults[i] == null)
-				continue;
-			boolean found = false;
-			for (int j = unique; j-- > 0;)
-				if (bestIndices[uniqueIndices[j]] == bestIndices[i])
-				{
-					found = true;
-					break;
-				}
-			if (!found)
-				uniqueIndices[unique++] = i;
-		}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#finalise()
+     */
+    @Override
+    public void finalise()
+    {
+        // Note that there could be the same result allocated to two target positions
+        // so find the unique results
+        final int[] uniqueIndices = new int[bestIndices.length];
+        int unique = 0;
+        for (int i = 0; i < bestIndices.length; i++)
+        {
+            if (bestFitResults[i] == null)
+                continue;
+            boolean found = false;
+            for (int j = unique; j-- > 0;)
+                if (bestIndices[uniqueIndices[j]] == bestIndices[i])
+                {
+                    found = true;
+                    break;
+                }
+            if (!found)
+                uniqueIndices[unique++] = i;
+        }
 
-		// The fit results and the indices must match so preserve the same order
-		filteredCount = unique;
-		filteredFitResults = new FitResult[unique];
-		filteredIndices = new int[unique];
-		for (int i = 0; i < unique; i++)
-		{
-			filteredFitResults[i] = bestFitResults[uniqueIndices[i]];
-			filteredIndices[i] = bestIndices[uniqueIndices[i]];
-		}
+        // The fit results and the indices must match so preserve the same order
+        filteredCount = unique;
+        filteredFitResults = new FitResult[unique];
+        filteredIndices = new int[unique];
+        for (int i = 0; i < unique; i++)
+        {
+            filteredFitResults[i] = bestFitResults[uniqueIndices[i]];
+            filteredIndices[i] = bestIndices[uniqueIndices[i]];
+        }
 
-		// The peak results can be in any order so use a set to find the unique results
-		if (unique > 0)
-		{
-			final TreeSet<PeakResult> set = new TreeSet<>();
-			for (final PeakResult r : bestPeakResults)
-				if (r != null)
-					set.add(r);
+        // The peak results can be in any order so use a set to find the unique results
+        if (unique > 0)
+        {
+            final TreeSet<PeakResult> set = new TreeSet<>();
+            for (final PeakResult r : bestPeakResults)
+                if (r != null)
+                    set.add(r);
 
-			peakResults = new ArrayList<>(set.size());
-			peakResults.addAll(set);
-		}
-		else
-			peakResults = new ArrayList<>();
-	}
+            peakResults = new ArrayList<>(set.size());
+            peakResults.addAll(set);
+        }
+        else
+            peakResults = new ArrayList<>();
+    }
 }

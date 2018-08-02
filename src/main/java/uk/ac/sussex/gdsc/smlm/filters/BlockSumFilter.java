@@ -28,47 +28,47 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class BlockSumFilter extends BlockFilter
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
-	 */
-	@Override
-	protected Normaliser computeWeightedNormaliser(float n)
-	{
-		final float[] divisor = weights.clone();
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
+     */
+    @Override
+    protected Normaliser computeWeightedNormaliser(float n)
+    {
+        final float[] divisor = weights.clone();
 
-		// Use a mean filter to get the mean of the weights in the region
-		final BlockMeanFilter sum = new BlockMeanFilter();
-		if ((int) n == n)
-			sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
-			//sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
-		else
-			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
-			//sum.blockFilter(divisor, weightWidth, weightHeight, n);
-		return new PerPixelNormaliser(divisor);
-	}
+        // Use a mean filter to get the mean of the weights in the region
+        final BlockMeanFilter sum = new BlockMeanFilter();
+        if ((int) n == n)
+            sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
+        //sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
+        else
+            sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
+        //sum.blockFilter(divisor, weightWidth, weightHeight, n);
+        return new PerPixelNormaliser(divisor);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
-	 */
-	@Override
-	protected Normaliser computeNormaliser(float n)
-	{
-		return NonNormaliser.INSTANCE;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
+     */
+    @Override
+    protected Normaliser computeNormaliser(float n)
+    {
+        return NonNormaliser.INSTANCE;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public BlockSumFilter clone()
-	{
-		final BlockSumFilter o = (BlockSumFilter) super.clone();
-		return o;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public BlockSumFilter clone()
+    {
+        final BlockSumFilter o = (BlockSumFilter) super.clone();
+        return o;
+    }
 }

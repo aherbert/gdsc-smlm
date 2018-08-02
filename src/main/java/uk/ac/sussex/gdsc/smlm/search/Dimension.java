@@ -28,82 +28,82 @@ package uk.ac.sussex.gdsc.smlm.search;
  */
 public interface Dimension
 {
-	/**
-	 * Gets the current lower bound of the range
-	 *
-	 * @return the current lower bound of the range
-	 */
-	public double getLower();
+    /**
+     * Gets the current lower bound of the range
+     *
+     * @return the current lower bound of the range
+     */
+    public double getLower();
 
-	/**
-	 * Gets the current upper bound of the range
-	 *
-	 * @return the current upper bound of the range
-	 */
-	public double getUpper();
+    /**
+     * Gets the current upper bound of the range
+     *
+     * @return the current upper bound of the range
+     */
+    public double getUpper();
 
-	/**
-	 * Gets the current centre of the range
-	 *
-	 * @return the current centre of the range
-	 */
-	public double getCentre();
+    /**
+     * Gets the current centre of the range
+     *
+     * @return the current centre of the range
+     */
+    public double getCentre();
 
-	/**
-	 * Gets the minimum allowed value of the range.
-	 *
-	 * @return the minimum
-	 */
-	public double getMin();
+    /**
+     * Gets the minimum allowed value of the range.
+     *
+     * @return the minimum
+     */
+    public double getMin();
 
-	/**
-	 * Gets the maximum allowed value of the range.
-	 *
-	 * @return the maximum
-	 */
-	public double getMax();
+    /**
+     * Gets the maximum allowed value of the range.
+     *
+     * @return the maximum
+     */
+    public double getMax();
 
-	/**
-	 * Checks if is active.
-	 *
-	 * @return true, if is active
-	 */
-	public boolean isActive();
+    /**
+     * Checks if is active.
+     *
+     * @return true, if is active
+     */
+    public boolean isActive();
 
-	/**
-	 * Checks if the value is at (or beyond) the lower/upper bounds of the current dimension range.
-	 *
-	 * @param v
-	 *            the value
-	 * @return true, if is at bounds
-	 */
-	public boolean isAtBounds(double v);
+    /**
+     * Checks if the value is at (or beyond) the lower/upper bounds of the current dimension range.
+     *
+     * @param v
+     *            the value
+     * @return true, if is at bounds
+     */
+    public boolean isAtBounds(double v);
 
-	/**
-	 * Creates a new dimension with the given bounds. The current min/max and other settings should be respected.
-	 *
-	 * @param lower
-	 *            the lower
-	 * @param upper
-	 *            the upper
-	 * @return the dimension
-	 */
-	public Dimension create(double lower, double upper);
+    /**
+     * Creates a new dimension with the given bounds. The current min/max and other settings should be respected.
+     *
+     * @param lower
+     *            the lower
+     * @param upper
+     *            the upper
+     * @return the dimension
+     */
+    public Dimension create(double lower, double upper);
 
-	/**
-	 * Round the value to the working resolution of the dimension. The resolution defines the minimum delta between
-	 * values in the dimension; it can be zero in which case no rounding is performed.
-	 *
-	 * @param value
-	 *            the value
-	 * @return the rounded value
-	 */
-	public double round(double value);
+    /**
+     * Round the value to the working resolution of the dimension. The resolution defines the minimum delta between
+     * values in the dimension; it can be zero in which case no rounding is performed.
+     *
+     * @param value
+     *            the value
+     * @return the rounded value
+     */
+    public double round(double value);
 
-	/**
-	 * True if the dimension can round values.
-	 *
-	 * @return true, if can round
-	 */
-	public boolean canRound();
+    /**
+     * True if the dimension can round values.
+     *
+     * @return true, if can round
+     */
+    public boolean canRound();
 }

@@ -34,124 +34,124 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 {
 
-	/**
-	 * Instantiates a new multi filter CRLB.
-	 *
-	 * @param signal
-	 *            the signal
-	 * @param snr
-	 *            the snr
-	 * @param minWidth
-	 *            the min width
-	 * @param maxWidth
-	 *            the max width
-	 * @param shift
-	 *            the shift
-	 * @param eshift
-	 *            the eshift
-	 * @param precision
-	 *            the precision
-	 * @param minZ
-	 *            the min Z
-	 * @param maxZ
-	 *            the max Z
-	 */
-	public MultiFilterCRLB(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
-			double precision, float minZ, float maxZ)
-	{
-		super(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
-	}
+    /**
+     * Instantiates a new multi filter CRLB.
+     *
+     * @param signal
+     *            the signal
+     * @param snr
+     *            the snr
+     * @param minWidth
+     *            the min width
+     * @param maxWidth
+     *            the max width
+     * @param shift
+     *            the shift
+     * @param eshift
+     *            the eshift
+     * @param precision
+     *            the precision
+     * @param minZ
+     *            the min Z
+     * @param maxZ
+     *            the max Z
+     */
+    public MultiFilterCRLB(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
+            double precision, float minZ, float maxZ)
+    {
+        super(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
+    }
 
-	@Override
-	protected String generateName()
-	{
-		return String.format(
-				"MultiCRLB: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f, Width=%.2f-%.2f",
-				signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
-	}
+    @Override
+    protected String generateName()
+    {
+        return String.format(
+                "MultiCRLB: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f, Width=%.2f-%.2f",
+                signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
+    }
 
-	@Override
-	protected void setupCalculator(MemoryPeakResults peakResults)
-	{
-		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
-	}
+    @Override
+    protected void setupCalculator(MemoryPeakResults peakResults)
+    {
+        calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
+    }
 
-	@Override
-	protected MultiFilterComponent createPrecisionComponent()
-	{
-		return new MultiFilterVarianceCRLBComponent(precision);
-	}
+    @Override
+    protected MultiFilterComponent createPrecisionComponent()
+    {
+        return new MultiFilterVarianceCRLBComponent(precision);
+    }
 
-	@Override
-	protected double getVariance(PeakResult peak)
-	{
-		if (peak.hasParameterDeviations())
-		{
-			final float vx = peak.getParameterDeviation(PeakResult.X);
-			final float vy = peak.getParameterDeviation(PeakResult.Y);
-			return (vx * vx + vy * vy);
-		}
-		return variance; // Return the current limit
-	}
+    @Override
+    protected double getVariance(PeakResult peak)
+    {
+        if (peak.hasParameterDeviations())
+        {
+            final float vx = peak.getParameterDeviation(PeakResult.X);
+            final float vy = peak.getParameterDeviation(PeakResult.Y);
+            return (vx * vx + vy * vy);
+        }
+        return variance; // Return the current limit
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-	 */
-	@Override
-	public String getDescription()
-	{
-		return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift, precision (uses fitted parameter variance) and Z-depth";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
+     */
+    @Override
+    public String getDescription()
+    {
+        return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift, precision (uses fitted parameter variance) and Z-depth";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#requiresParameterDeviations()
-	 */
-	@Override
-	public boolean requiresParameterDeviations()
-	{
-		return (precision != 0);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#requiresParameterDeviations()
+     */
+    @Override
+    public boolean requiresParameterDeviations()
+    {
+        return (precision != 0);
+    }
 
-	@Override
-	protected ParameterType getPrecisionParamaterType()
-	{
-		return ParameterType.PRECISION_CRLB;
-	}
+    @Override
+    protected ParameterType getPrecisionParamaterType()
+    {
+        return ParameterType.PRECISION_CRLB;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-	 */
-	@Override
-	public Filter adjustParameter(int index, double delta)
-	{
-		checkIndex(index);
-		final double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
-		params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
-		return new MultiFilterCRLB(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6],
-				(float) params[7], (float) params[8]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
+     */
+    @Override
+    public Filter adjustParameter(int index, double delta)
+    {
+        checkIndex(index);
+        final double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
+        params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
+        return new MultiFilterCRLB(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6],
+                (float) params[7], (float) params[8]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-	 */
-	@Override
-	public Filter create(double... parameters)
-	{
-		return new MultiFilterCRLB(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
-				parameters[5], parameters[6], (float) parameters[7], (float) parameters[8]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
+     */
+    @Override
+    public Filter create(double... parameters)
+    {
+        return new MultiFilterCRLB(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
+                parameters[5], parameters[6], (float) parameters[7], (float) parameters[8]);
+    }
 
-	@Override
-	public PrecisionType getPrecisionType()
-	{
-		return PrecisionType.CRLB;
-	}
+    @Override
+    public PrecisionType getPrecisionType()
+    {
+        return PrecisionType.CRLB;
+    }
 }

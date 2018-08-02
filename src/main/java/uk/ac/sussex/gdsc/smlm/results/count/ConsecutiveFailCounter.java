@@ -28,141 +28,141 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  */
 public class ConsecutiveFailCounter extends BaseFailCounter
 {
-	/** The fail count. */
-	private int failCount = 0;
+    /** The fail count. */
+    private int failCount = 0;
 
-	/** The number of allowed failures. */
-	private final int allowedFailures;
+    /** The number of allowed failures. */
+    private final int allowedFailures;
 
-	/**
-	 * Instantiates a new consecutive fail counter.
-	 *
-	 * @param allowedFailures
-	 *            the number of allowed failures
-	 */
-	private ConsecutiveFailCounter(int allowedFailures)
-	{
-		this.allowedFailures = allowedFailures;
-	}
+    /**
+     * Instantiates a new consecutive fail counter.
+     *
+     * @param allowedFailures
+     *            the number of allowed failures
+     */
+    private ConsecutiveFailCounter(int allowedFailures)
+    {
+        this.allowedFailures = allowedFailures;
+    }
 
-	@Override
-	protected String generateDescription()
-	{
-		return "consecutiveFailures=" + allowedFailures;
-	}
+    @Override
+    protected String generateDescription()
+    {
+        return "consecutiveFailures=" + allowedFailures;
+    }
 
-	/**
-	 * Instantiates a new consecutive fail counter.
-	 *
-	 * @param allowedFailures
-	 *            the number of allowed failures
-	 * @return the consecutive fail counter
-	 */
-	public static ConsecutiveFailCounter create(int allowedFailures)
-	{
-		return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
-	}
+    /**
+     * Instantiates a new consecutive fail counter.
+     *
+     * @param allowedFailures
+     *            the number of allowed failures
+     * @return the consecutive fail counter
+     */
+    public static ConsecutiveFailCounter create(int allowedFailures)
+    {
+        return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-	 */
-	@Override
-	public void pass()
-	{
-		failCount = 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
+     */
+    @Override
+    public void pass()
+    {
+        failCount = 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-	 */
-	@Override
-	public void pass(int n)
-	{
-		failCount = 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
+     */
+    @Override
+    public void pass(int n)
+    {
+        failCount = 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-	 */
-	@Override
-	public void fail()
-	{
-		if (failCount == Integer.MAX_VALUE)
-			throw new IllegalStateException("Unable to increment");
-		failCount++;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
+     */
+    @Override
+    public void fail()
+    {
+        if (failCount == Integer.MAX_VALUE)
+            throw new IllegalStateException("Unable to increment");
+        failCount++;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-	 */
-	@Override
-	public void fail(int n)
-	{
-		if (n < 0)
-			throw new IllegalArgumentException("Number of fails must be positive");
-		if (Integer.MAX_VALUE - n < failCount)
-			throw new IllegalStateException("Unable to increment");
-		failCount += n;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
+     */
+    @Override
+    public void fail(int n)
+    {
+        if (n < 0)
+            throw new IllegalArgumentException("Number of fails must be positive");
+        if (Integer.MAX_VALUE - n < failCount)
+            throw new IllegalStateException("Unable to increment");
+        failCount += n;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-	 */
-	@Override
-	public boolean isOK()
-	{
-		return failCount <= allowedFailures;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
+     */
+    @Override
+    public boolean isOK()
+    {
+        return failCount <= allowedFailures;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-	 */
-	@Override
-	public FailCounter newCounter()
-	{
-		return new ConsecutiveFailCounter(allowedFailures);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
+     */
+    @Override
+    public FailCounter newCounter()
+    {
+        return new ConsecutiveFailCounter(allowedFailures);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-	 */
-	@Override
-	public void reset()
-	{
-		failCount = 0;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
+     */
+    @Override
+    public void reset()
+    {
+        failCount = 0;
+    }
 
-	/**
-	 * Gets the fail count.
-	 *
-	 * @return the fail count
-	 */
-	public int getFailCount()
-	{
-		return failCount;
-	}
+    /**
+     * Gets the fail count.
+     *
+     * @return the fail count
+     */
+    public int getFailCount()
+    {
+        return failCount;
+    }
 
-	/**
-	 * Gets the number of allowed failures.
-	 *
-	 * @return the number of allowed failures.
-	 */
-	public int getAllowedFailures()
-	{
-		return allowedFailures;
-	}
+    /**
+     * Gets the number of allowed failures.
+     *
+     * @return the number of allowed failures.
+     */
+    public int getAllowedFailures()
+    {
+        return allowedFailures;
+    }
 }

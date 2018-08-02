@@ -31,26 +31,26 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public interface PeakResultData<E>
 {
-	/**
-	 * Gets the value of the result.
-	 *
-	 * @param result
-	 *            the result
-	 * @return the value
-	 */
-	public E getValue(PeakResult result);
+    /**
+     * Gets the value of the result.
+     *
+     * @param result
+     *            the result
+     * @return the value
+     */
+    public E getValue(PeakResult result);
 
-	/**
-	 * Gets the name of the value.
-	 *
-	 * @return the name
-	 */
-	public String getValueName();
+    /**
+     * Gets the name of the value.
+     *
+     * @return the name
+     */
+    public String getValueName();
 
-	/**
-	 * Gets the class type of the value.
-	 *
-	 * @return the name
-	 */
-	public Class<?> getValueClass();
+    /**
+     * Gets the class type of the value.
+     *
+     * @return the name
+     */
+    public Class<?> getValueClass();
 }

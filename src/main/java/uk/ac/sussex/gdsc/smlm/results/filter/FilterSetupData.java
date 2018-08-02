@@ -28,5 +28,5 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public interface FilterSetupData
 {
-	// Marker interface
+    // Marker interface
 }

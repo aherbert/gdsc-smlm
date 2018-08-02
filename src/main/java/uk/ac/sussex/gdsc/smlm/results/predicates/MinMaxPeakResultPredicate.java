@@ -31,47 +31,48 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
  */
 public class MinMaxPeakResultPredicate implements PeakResultPredicate
 {
-	/** The min of the value range. */
-	public final float min;
+    /** The min of the value range. */
+    public final float min;
 
-	/** The max of the value range. */
-	public final float max;
+    /** The max of the value range. */
+    public final float max;
 
-	/** The value. */
-	public final PeakResultValue value;
+    /** The value. */
+    public final PeakResultValue value;
 
-	/**
-	 * Instantiates a new min max peak result predicate.
-	 *
-	 * @param min
-	 *            the min of the value range
-	 * @param max
-	 *            the max of the value range
-	 * @param value
-	 *            the value
-	 * @throws IllegalArgumentException
-	 *             If the min/max are NaN. If min is greater than max. If value is null.
-	 */
-	public MinMaxPeakResultPredicate(float min, float max, PeakResultValue value) throws IllegalArgumentException
-	{
-		if (Float.isNaN(min) || Float.isNaN(max) || min > max)
-			throw new IllegalArgumentException("Min/Max range is invalid");
-		if (value == null)
-			throw new IllegalArgumentException("No value function");
-		this.min = min;
-		this.max = max;
-		this.value = value;
-	}
+    /**
+     * Instantiates a new min max peak result predicate.
+     *
+     * @param min
+     *            the min of the value range
+     * @param max
+     *            the max of the value range
+     * @param value
+     *            the value
+     * @throws IllegalArgumentException
+     *             If the min/max are NaN. If min is greater than max. If value is null.
+     */
+    public MinMaxPeakResultPredicate(float min, float max, PeakResultValue value) throws IllegalArgumentException
+    {
+        if (Float.isNaN(min) || Float.isNaN(max) || min > max)
+            throw new IllegalArgumentException("Min/Max range is invalid");
+        if (value == null)
+            throw new IllegalArgumentException("No value function");
+        this.min = min;
+        this.max = max;
+        this.value = value;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		final float v = value.getValue(t);
-		return v >= min && v <= max;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public boolean test(PeakResult t)
+    {
+        final float v = value.getValue(t);
+        return v >= min && v <= max;
+    }
 }

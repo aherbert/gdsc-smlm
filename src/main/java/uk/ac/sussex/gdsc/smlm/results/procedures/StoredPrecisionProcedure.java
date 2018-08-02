@@ -28,11 +28,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface StoredPrecisionProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param precision
-	 *            the precision
-	 */
-	public void executeStoredPrecision(double precision);
+    /**
+     * Executes this procedure.
+     *
+     * @param precision
+     *            the precision
+     */
+    public void executeStoredPrecision(double precision);
 }

@@ -28,13 +28,13 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface XYResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 */
-	public void executeXY(float x, float y);
+    /**
+     * Executes this procedure.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     */
+    public void executeXY(float x, float y);
 }

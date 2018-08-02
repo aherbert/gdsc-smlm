@@ -32,100 +32,101 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * set of data points (x, y).
  * <p>
  * This procedure computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
- * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
+ * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input
+ * data
  * must be Poisson distributed for this to be relevant.
  */
 public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 {
-	/**
-	 * @param y
-	 *            Data to fit (must be positive)
-	 * @param func
-	 *            Gradient function
-	 */
-	public MLELVMGradientProcedure(final double[] y, final Gradient1Function func)
-	{
-		super(y, func);
-		// We could check that y is positive ...
-	}
+    /**
+     * @param y
+     *            Data to fit (must be positive)
+     * @param func
+     *            Gradient function
+     */
+    public MLELVMGradientProcedure(final double[] y, final Gradient1Function func)
+    {
+        super(y, func);
+        // We could check that y is positive ...
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double fi, double[] dfi_da)
-	{
-		++yi;
-		// Function must produce a strictly positive output.
-		// ---
-		// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// effectively ignores any function value below zero. This could lead to a
-		// situation where the best chisq value can be achieved by setting the output
-		// function to produce 0 for all evaluations.
-		// Optimally the function should be bounded to always produce a positive number.
-		// ---
-		if (fi > 0.0)
-		{
-			final double xi = y[yi];
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double fi, double[] dfi_da)
+    {
+        ++yi;
+        // Function must produce a strictly positive output.
+        // ---
+        // The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+        // effectively ignores any function value below zero. This could lead to a
+        // situation where the best chisq value can be achieved by setting the output
+        // function to produce 0 for all evaluations.
+        // Optimally the function should be bounded to always produce a positive number.
+        // ---
+        if (fi > 0.0)
+        {
+            final double xi = y[yi];
 
-			// We assume y[i] is positive but must handle zero
-			if (xi > 0.0)
-			{
-				value += (fi - xi - xi * Math.log(fi / xi));
-				final double xi_fi2 = xi / fi / fi;
-				final double e = 1 - (xi / fi);
-				for (int k = 0, i = 0; k < n; k++)
-				{
-					beta[k] -= e * dfi_da[k];
-					final double w = dfi_da[k] * xi_fi2;
-					for (int l = 0; l <= k; l++)
-						alpha[i++] += w * dfi_da[l];
-				}
-			}
-			else
-			{
-				value += fi;
-				for (int k = 0; k < n; k++)
-					beta[k] -= dfi_da[k];
-			}
-		}
-	}
+            // We assume y[i] is positive but must handle zero
+            if (xi > 0.0)
+            {
+                value += (fi - xi - xi * Math.log(fi / xi));
+                final double xi_fi2 = xi / fi / fi;
+                final double e = 1 - (xi / fi);
+                for (int k = 0, i = 0; k < n; k++)
+                {
+                    beta[k] -= e * dfi_da[k];
+                    final double w = dfi_da[k] * xi_fi2;
+                    for (int l = 0; l <= k; l++)
+                        alpha[i++] += w * dfi_da[l];
+                }
+            }
+            else
+            {
+                value += fi;
+                for (int k = 0; k < n; k++)
+                    beta[k] -= dfi_da[k];
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	@Override
-	public void execute(double fi)
-	{
-		++yi;
-		// Function must produce a strictly positive output.
-		if (fi > 0.0)
-		{
-			final double xi = y[yi];
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
+     */
+    @Override
+    public void execute(double fi)
+    {
+        ++yi;
+        // Function must produce a strictly positive output.
+        if (fi > 0.0)
+        {
+            final double xi = y[yi];
 
-			// We assume y[i] is positive but must handle zero
-			if (xi > 0.0)
-				value += (fi - xi - xi * Math.log(fi / xi));
-			else
-				value += fi;
-		}
-	}
+            // We assume y[i] is positive but must handle zero
+            if (xi > 0.0)
+                value += (fi - xi - xi * Math.log(fi / xi));
+            else
+                value += fi;
+        }
+    }
 
-	@Override
-	protected void finishGradient()
-	{
-		// Move the factor of 2 to the end
-		value *= 2;
-	}
+    @Override
+    protected void finishGradient()
+    {
+        // Move the factor of 2 to the end
+        value *= 2;
+    }
 
-	@Override
-	protected void finishValue()
-	{
-		// Move the factor of 2 to the end
-		value *= 2;
-	}
+    @Override
+    protected void finishValue()
+    {
+        // Move the factor of 2 to the end
+        value *= 2;
+    }
 }

@@ -35,31 +35,31 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat
 {
-	/** The index of the x width. */
-	final static int i = PeakResult.STANDARD_PARAMETERS;
-	/** The index of the y width. */
-	final static int j = i + 1;
+    /** The index of the x width. */
+    final static int i = PeakResult.STANDARD_PARAMETERS;
+    /** The index of the y width. */
+    final static int j = i + 1;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public Float getValue(PeakResult result)
-	{
-		return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getIntensity(), result.getParameter(i),
-				result.getParameter(j)));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public Float getValue(PeakResult result)
+    {
+        return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getIntensity(), result.getParameter(i),
+                result.getParameter(j)));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return "Gaussian2D mean signal";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return "Gaussian2D mean signal";
+    }
 }

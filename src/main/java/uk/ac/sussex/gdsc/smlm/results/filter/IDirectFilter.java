@@ -31,223 +31,223 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public interface IDirectFilter
 {
-	/**
-	 * Validation flag for the signal in photons
-	 */
-	public final static int V_PHOTONS = 0x000000001;
+    /**
+     * Validation flag for the signal in photons
+     */
+    public final static int V_PHOTONS = 0x000000001;
 
-	/**
-	 * Validation flag for the SNR
-	 */
-	public final static int V_SNR = 0x000000002;
+    /**
+     * Validation flag for the SNR
+     */
+    public final static int V_SNR = 0x000000002;
 
-	/**
-	 * Validation flag for the noise
-	 */
-	public final static int V_NOISE = 0x000000004;
+    /**
+     * Validation flag for the noise
+     */
+    public final static int V_NOISE = 0x000000004;
 
-	/**
-	 * Validation flag for the location variance
-	 */
-	public final static int V_LOCATION_VARIANCE = 0x000000008;
+    /**
+     * Validation flag for the location variance
+     */
+    public final static int V_LOCATION_VARIANCE = 0x000000008;
 
-	/**
-	 * Validation flag for the location variance using the local background
-	 */
-	public final static int V_LOCATION_VARIANCE2 = 0x000000010;
+    /**
+     * Validation flag for the location variance using the local background
+     */
+    public final static int V_LOCATION_VARIANCE2 = 0x000000010;
 
-	/**
-	 * Validation flag for the average peak standard deviation in the X and Y dimension
-	 */
-	public final static int V_SD = 0x000000020;
+    /**
+     * Validation flag for the average peak standard deviation in the X and Y dimension
+     */
+    public final static int V_SD = 0x000000020;
 
-	/**
-	 * Validation flag for the background
-	 */
-	public final static int V_BACKGROUND = 0x000000040;
+    /**
+     * Validation flag for the background
+     */
+    public final static int V_BACKGROUND = 0x000000040;
 
-	/**
-	 * Validation flag for the amplitude
-	 */
-	public final static int V_AMPLITUDE = 0x000000080;
+    /**
+     * Validation flag for the amplitude
+     */
+    public final static int V_AMPLITUDE = 0x000000080;
 
-	/**
-	 * Validation flag for the angle (for an elliptical Gaussian peak)
-	 */
-	public final static int V_ANGLE = 0x000000100;
+    /**
+     * Validation flag for the angle (for an elliptical Gaussian peak)
+     */
+    public final static int V_ANGLE = 0x000000100;
 
-	/**
-	 * Validation flag for the x position
-	 */
-	public final static int V_X = 0x000000200;
+    /**
+     * Validation flag for the x position
+     */
+    public final static int V_X = 0x000000200;
 
-	/**
-	 * Validation flag for the y position
-	 */
-	public final static int V_Y = 0x000000400;
+    /**
+     * Validation flag for the y position
+     */
+    public final static int V_Y = 0x000000400;
 
-	/**
-	 * Validation flag for the relative x position shift squared
-	 */
-	public final static int V_X_RELATIVE_SHIFT = 0x000000800;
+    /**
+     * Validation flag for the relative x position shift squared
+     */
+    public final static int V_X_RELATIVE_SHIFT = 0x000000800;
 
-	/**
-	 * Validation flag for the relative y position shift squared
-	 */
-	public final static int V_Y_RELATIVE_SHIFT = 0x000001000;
+    /**
+     * Validation flag for the relative y position shift squared
+     */
+    public final static int V_Y_RELATIVE_SHIFT = 0x000001000;
 
-	/**
-	 * Validation flag for the x-dimension standard deviation
-	 */
-	public final static int V_X_SD = 0x000002000;
+    /**
+     * Validation flag for the x-dimension standard deviation
+     */
+    public final static int V_X_SD = 0x000002000;
 
-	/**
-	 * Validation flag for the y-dimension standard deviation
-	 */
-	public final static int V_Y_SD = 0x000004000;
+    /**
+     * Validation flag for the y-dimension standard deviation
+     */
+    public final static int V_Y_SD = 0x000004000;
 
-	/**
-	 * Validation flag for the x-dimension width factor
-	 */
-	public final static int V_X_SD_FACTOR = 0x000008000;
+    /**
+     * Validation flag for the x-dimension width factor
+     */
+    public final static int V_X_SD_FACTOR = 0x000008000;
 
-	/**
-	 * Validation flag for the y-dimension width factor
-	 */
-	public final static int V_Y_SD_FACTOR = 0x000010000;
+    /**
+     * Validation flag for the y-dimension width factor
+     */
+    public final static int V_Y_SD_FACTOR = 0x000010000;
 
-	/**
-	 * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower bound
-	 */
-	public final static int V_LOCATION_VARIANCE_CRLB = 0x000020000;
+    /**
+     * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower bound
+     */
+    public final static int V_LOCATION_VARIANCE_CRLB = 0x000020000;
 
-	/**
-	 * Validation flag for the z position
-	 */
-	public final static int V_Z = 0x000040000;
+    /**
+     * Validation flag for the z position
+     */
+    public final static int V_Z = 0x000040000;
 
-	/**
-	 * Disable filtering using the width of the result
-	 */
-	public final static int NO_WIDTH = 0x000000001;
+    /**
+     * Disable filtering using the width of the result
+     */
+    public final static int NO_WIDTH = 0x000000001;
 
-	/**
-	 * Disable filtering using the shift of the result
-	 */
-	public final static int NO_SHIFT = 0x000000002;
+    /**
+     * Disable filtering using the shift of the result
+     */
+    public final static int NO_SHIFT = 0x000000002;
 
-	/**
-	 * Enable filtering both X and Y widths
-	 */
-	public final static int XY_WIDTH = 0x000000004;
+    /**
+     * Enable filtering both X and Y widths
+     */
+    public final static int XY_WIDTH = 0x000000004;
 
-	/**
-	 * Disable Z filtering (use when not fitting in 3D)
-	 */
-	public final static int NO_Z = 0x000000008;
+    /**
+     * Disable Z filtering (use when not fitting in 3D)
+     */
+    public final static int NO_Z = 0x000000008;
 
-	/**
-	 * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the
-	 * filter {@link #validate(PreprocessedPeakResult)} method if the result fails validation.
-	 *
-	 * @return the validation flags
-	 */
-	public int getValidationFlags();
+    /**
+     * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the
+     * filter {@link #validate(PreprocessedPeakResult)} method if the result fails validation.
+     *
+     * @return the validation flags
+     */
+    public int getValidationFlags();
 
-	/**
-	 * Called before the accept method is called for PreprocessedPeakResult
-	 * <p>
-	 * This should be called once to initialise the filter before processing a batch of results.
-	 *
-	 * @see #validate(PreprocessedPeakResult)
-	 */
-	public void setup();
+    /**
+     * Called before the accept method is called for PreprocessedPeakResult
+     * <p>
+     * This should be called once to initialise the filter before processing a batch of results.
+     *
+     * @see #validate(PreprocessedPeakResult)
+     */
+    public void setup();
 
-	/**
-	 * Called before the accept method is called for PreprocessedPeakResult. The flags can control the type of filtering
-	 * requested. Filters are asked to respect the flags defined in this class.
-	 * <p>
-	 * This should be called once to initialise the filter before processing a batch of results.
-	 *
-	 * @param flags
-	 *            Flags used to control the filter
-	 * @see #validate(PreprocessedPeakResult)
-	 */
-	public void setup(final int flags);
+    /**
+     * Called before the accept method is called for PreprocessedPeakResult. The flags can control the type of filtering
+     * requested. Filters are asked to respect the flags defined in this class.
+     * <p>
+     * This should be called once to initialise the filter before processing a batch of results.
+     *
+     * @param flags
+     *            Flags used to control the filter
+     * @see #validate(PreprocessedPeakResult)
+     */
+    public void setup(final int flags);
 
-	/**
-	 * Called before the accept method is called for PreprocessedPeakResult. The filter data can control the
-	 * type of filtering requested.
-	 * <p>
-	 * This should be called once to initialise the filter before processing a batch of results.
-	 *
-	 * @param flags
-	 *            Flags used to control the filter
-	 * @param filterSetupData
-	 *            Data used to control the filter
-	 * @see #validate(PreprocessedPeakResult)
-	 */
-	public void setup(final int flags, final FilterSetupData... filterSetupData);
+    /**
+     * Called before the accept method is called for PreprocessedPeakResult. The filter data can control the
+     * type of filtering requested.
+     * <p>
+     * This should be called once to initialise the filter before processing a batch of results.
+     *
+     * @param flags
+     *            Flags used to control the filter
+     * @param filterSetupData
+     *            Data used to control the filter
+     * @see #validate(PreprocessedPeakResult)
+     */
+    public void setup(final int flags, final FilterSetupData... filterSetupData);
 
-	/**
-	 * Gets the flags required to reinitialise the current filter state using {@link #setup(int)} or
-	 * {@link #setup(int, FilterSetupData...)}
-	 *
-	 * @return the flags
-	 * @throws IllegalStateException
-	 *             If setup has not been called and the flags cannot be created
-	 */
-	public int getFilterSetupFlags() throws IllegalStateException;
+    /**
+     * Gets the flags required to reinitialise the current filter state using {@link #setup(int)} or
+     * {@link #setup(int, FilterSetupData...)}
+     *
+     * @return the flags
+     * @throws IllegalStateException
+     *             If setup has not been called and the flags cannot be created
+     */
+    public int getFilterSetupFlags() throws IllegalStateException;
 
-	/**
-	 * Gets the filter setup data required to reinitialise the current filter state using
-	 * {@link #setup(int, FilterSetupData...)}
-	 *
-	 * @return the filter setup data (can be null)
-	 * @throws IllegalStateException
-	 *             If setup has not been called and the data cannot be created
-	 */
-	public FilterSetupData[] getFilterSetupData() throws IllegalStateException;
+    /**
+     * Gets the filter setup data required to reinitialise the current filter state using
+     * {@link #setup(int, FilterSetupData...)}
+     *
+     * @return the filter setup data (can be null)
+     * @throws IllegalStateException
+     *             If setup has not been called and the data cannot be created
+     */
+    public FilterSetupData[] getFilterSetupData() throws IllegalStateException;
 
-	/**
-	 * Filter the peak result.
-	 * <p>
-	 * Calls {@link #validate(PreprocessedPeakResult)} and stores the result. This can be obtained using
-	 * {@link #getResult()}.
-	 *
-	 * @param peak
-	 *            The peak result
-	 * @return true if the peak should be accepted
-	 */
-	public boolean accept(final PreprocessedPeakResult peak);
+    /**
+     * Filter the peak result.
+     * <p>
+     * Calls {@link #validate(PreprocessedPeakResult)} and stores the result. This can be obtained using
+     * {@link #getResult()}.
+     *
+     * @param peak
+     *            The peak result
+     * @return true if the peak should be accepted
+     */
+    public boolean accept(final PreprocessedPeakResult peak);
 
-	/**
-	 * Filter the peak result.
-	 *
-	 * @param peak
-	 *            The peak result
-	 * @return zero if the peak should be accepted, otherwise set to flags indicating the field that failed validation.
-	 */
-	public int validate(final PreprocessedPeakResult peak);
+    /**
+     * Filter the peak result.
+     *
+     * @param peak
+     *            The peak result
+     * @return zero if the peak should be accepted, otherwise set to flags indicating the field that failed validation.
+     */
+    public int validate(final PreprocessedPeakResult peak);
 
-	/**
-	 * Return the type of filter. This should be a DirectFilter.
-	 *
-	 * @return Should return DirectFilter
-	 */
-	public FilterType getFilterType();
+    /**
+     * Return the type of filter. This should be a DirectFilter.
+     *
+     * @return Should return DirectFilter
+     */
+    public FilterType getFilterType();
 
-	/**
-	 * Return the result flag generated during the last call to {@link #accept(PreprocessedPeakResult)}.
-	 *
-	 * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
-	 */
-	public int getResult();
+    /**
+     * Return the result flag generated during the last call to {@link #accept(PreprocessedPeakResult)}.
+     *
+     * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
+     */
+    public int getResult();
 
-	/**
-	 * Copy this filter.
-	 *
-	 * @return the copy
-	 */
-	public IDirectFilter copy();
+    /**
+     * Copy this filter.
+     *
+     * @return the copy
+     */
+    public IDirectFilter copy();
 }

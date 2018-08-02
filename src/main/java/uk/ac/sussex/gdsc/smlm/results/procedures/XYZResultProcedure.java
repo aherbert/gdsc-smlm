@@ -28,15 +28,15 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface XYZResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
-	 */
-	public void executeXYZ(float x, float y, float z);
+    /**
+     * Executes this procedure.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param z
+     *            the z
+     */
+    public void executeXYZ(float x, float y, float z);
 }

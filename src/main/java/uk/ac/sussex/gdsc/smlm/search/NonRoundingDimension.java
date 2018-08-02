@@ -28,68 +28,68 @@ package uk.ac.sussex.gdsc.smlm.search;
  */
 class NonRoundingDimension implements Dimension
 {
-	@Override
-	public double getLower()
-	{
-		return 0;
-	}
+    @Override
+    public double getLower()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getUpper()
-	{
-		return 0;
-	}
+    @Override
+    public double getUpper()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getCentre()
-	{
-		return 0;
-	}
+    @Override
+    public double getCentre()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMin()
-	{
-		return 0;
-	}
+    @Override
+    public double getMin()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMax()
-	{
-		return 0;
-	}
+    @Override
+    public double getMax()
+    {
+        return 0;
+    }
 
-	@Override
-	public boolean isActive()
-	{
-		return true;
-	}
+    @Override
+    public boolean isActive()
+    {
+        return true;
+    }
 
-	@Override
-	public boolean isAtBounds(double v)
-	{
-		return false;
-	}
+    @Override
+    public boolean isAtBounds(double v)
+    {
+        return false;
+    }
 
-	@Override
-	public Dimension create(double lower, double upper)
-	{
-		return null;
-	}
+    @Override
+    public Dimension create(double lower, double upper)
+    {
+        return null;
+    }
 
-	/**
-	 * Does not round the number
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.search.Dimension#round(double)
-	 */
-	@Override
-	public double round(double value)
-	{
-		return value;
-	}
+    /**
+     * Does not round the number
+     *
+     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#round(double)
+     */
+    @Override
+    public double round(double value)
+    {
+        return value;
+    }
 
-	@Override
-	public boolean canRound()
-	{
-		return true;
-	}
+    @Override
+    public boolean canRound()
+    {
+        return true;
+    }
 }

@@ -30,15 +30,15 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public interface XYRResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param result
-	 *            the result
-	 */
-	public void executeXYR(float x, float y, PeakResult result);
+    /**
+     * Executes this procedure.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param result
+     *            the result
+     */
+    public void executeXYR(float x, float y, PeakResult result);
 }

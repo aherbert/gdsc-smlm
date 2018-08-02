@@ -30,15 +30,15 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public interface BIRResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param background
-	 *            the background
-	 * @param intensity
-	 *            the intensity
-	 * @param result
-	 *            the result
-	 */
-	public void executeBIR(float background, float intensity, PeakResult result);
+    /**
+     * Executes this procedure.
+     *
+     * @param background
+     *            the background
+     * @param intensity
+     *            the intensity
+     * @param result
+     *            the result
+     */
+    public void executeBIR(float background, float intensity, PeakResult result);
 }

@@ -28,65 +28,65 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class FixedNonLinearFunction implements NonLinearFunction
 {
-	/** The values. */
-	final double[] values;
+    /** The values. */
+    final double[] values;
 
-	/**
-	 * Instantiates a new fixed non linear function.
-	 *
-	 * @param values
-	 *            the values
-	 */
-	public FixedNonLinearFunction(double[] values)
-	{
-		this.values = values;
-	}
+    /**
+     * Instantiates a new fixed non linear function.
+     *
+     * @param values
+     *            the values
+     */
+    public FixedNonLinearFunction(double[] values)
+    {
+        this.values = values;
+    }
 
-	@Override
-	public void initialise(double[] a)
-	{
-		// Do nothing
-	}
+    @Override
+    public void initialise(double[] a)
+    {
+        // Do nothing
+    }
 
-	@Override
-	public int[] gradientIndices()
-	{
-		return new int[0];
-	}
+    @Override
+    public int[] gradientIndices()
+    {
+        return new int[0];
+    }
 
-	@Override
-	public int getNumberOfGradients()
-	{
-		return 0;
-	}
+    @Override
+    public int getNumberOfGradients()
+    {
+        return 0;
+    }
 
-	@Override
-	public double eval(int x, double[] dyda)
-	{
-		return values[x];
-	}
+    @Override
+    public double eval(int x, double[] dyda)
+    {
+        return values[x];
+    }
 
-	@Override
-	public double eval(int x)
-	{
-		return values[x];
-	}
+    @Override
+    public double eval(int x)
+    {
+        return values[x];
+    }
 
-	@Override
-	public double eval(int x, double[] dyda, double[] w)
-	{
-		return values[x];
-	}
+    @Override
+    public double eval(int x, double[] dyda, double[] w)
+    {
+        return values[x];
+    }
 
-	@Override
-	public double evalw(int x, double[] w)
-	{
-		return values[x];
-	}
+    @Override
+    public double evalw(int x, double[] w)
+    {
+        return values[x];
+    }
 
-	@Override
-	public boolean canComputeWeights()
-	{
-		return false;
-	}
+    @Override
+    public boolean canComputeWeights()
+    {
+        return false;
+    }
 }

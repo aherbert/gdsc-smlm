@@ -30,37 +30,37 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
  */
 public interface ExtendedNonLinearFunction extends NonLinearFunction
 {
-	/**
-	 * Compute the values of all the data points.
-	 *
-	 * @param variables
-	 *            the variables
-	 * @return The values
-	 */
-	public double[] computeValues(double[] variables);
+    /**
+     * Compute the values of all the data points.
+     *
+     * @param variables
+     *            the variables
+     * @return The values
+     */
+    public double[] computeValues(double[] variables);
 
-	/**
-	 * Compute the Jacobian of the gradients of all the data points.
-	 *
-	 * @param variables
-	 *            the variables
-	 * @return The Jacobian
-	 */
-	public double[][] computeJacobian(double[] variables);
+    /**
+     * Compute the Jacobian of the gradients of all the data points.
+     *
+     * @param variables
+     *            the variables
+     * @return The Jacobian
+     */
+    public double[][] computeJacobian(double[] variables);
 
-	/**
-	 * Return true if the function can compute the values and the Jacobian.
-	 *
-	 * @return true, if the function can compute the values and the Jacobian.
-	 */
-	public boolean canComputeValuesAndJacobian();
+    /**
+     * Return true if the function can compute the values and the Jacobian.
+     *
+     * @return true, if the function can compute the values and the Jacobian.
+     */
+    public boolean canComputeValuesAndJacobian();
 
-	/**
-	 * Compute the values and the Jacobian of the gradients of all the data points.
-	 *
-	 * @param variables
-	 *            the variables
-	 * @return The values and the Jacobian
-	 */
-	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);
+    /**
+     * Compute the values and the Jacobian of the gradients of all the data points.
+     *
+     * @param variables
+     *            the variables
+     * @return The values and the Jacobian
+     */
+    public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);
 }

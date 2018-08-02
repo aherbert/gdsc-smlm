@@ -30,40 +30,40 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class CircularMeanFilter extends CircularFilter
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
-	 */
-	@Override
-	protected Normaliser computeWeightedNormaliser(double radius)
-	{
-		final float[] nPoints = weights.clone();
-		final CircularSumFilter sum = new CircularSumFilter();
-		sum.convolve(nPoints, weightWidth, weightHeight, radius);
-		return new PerPixelNormaliser(nPoints);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
+     */
+    @Override
+    protected Normaliser computeWeightedNormaliser(double radius)
+    {
+        final float[] nPoints = weights.clone();
+        final CircularSumFilter sum = new CircularSumFilter();
+        sum.convolve(nPoints, weightWidth, weightHeight, radius);
+        return new PerPixelNormaliser(nPoints);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
-	 */
-	@Override
-	protected Normaliser computeNormaliser(int nPoints)
-	{
-		return new FixedNormaliser(nPoints);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
+     */
+    @Override
+    protected Normaliser computeNormaliser(int nPoints)
+    {
+        return new FixedNormaliser(nPoints);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public CircularMeanFilter clone()
-	{
-		final CircularMeanFilter o = (CircularMeanFilter) super.clone();
-		return o;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public CircularMeanFilter clone()
+    {
+        final CircularMeanFilter o = (CircularMeanFilter) super.clone();
+        return o;
+    }
 }

@@ -31,14 +31,14 @@ package uk.ac.sussex.gdsc.smlm.ga;
  */
 public interface ConvergenceChecker<T extends Comparable<T>>
 {
-	/**
-	 * Check if the chromosome has converged.
-	 *
-	 * @param previous
-	 *            the previous
-	 * @param current
-	 *            the current
-	 * @return true if the chromosome has converged
-	 */
-	public boolean converged(Chromosome<T> previous, Chromosome<T> current);
+    /**
+     * Check if the chromosome has converged.
+     *
+     * @param previous
+     *            the previous
+     * @param current
+     *            the current
+     * @return true if the chromosome has converged
+     */
+    public boolean converged(Chromosome<T> previous, Chromosome<T> current);
 }

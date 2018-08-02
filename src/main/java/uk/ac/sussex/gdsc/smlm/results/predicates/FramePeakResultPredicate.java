@@ -30,28 +30,29 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class FramePeakResultPredicate implements PeakResultPredicate
 {
-	/** The frame. */
-	private final int frame;
+    /** The frame. */
+    private final int frame;
 
-	/**
-	 * Instantiates a new frame peak result predicate.
-	 *
-	 * @param frame
-	 *            the frame
-	 */
-	public FramePeakResultPredicate(int frame)
-	{
-		this.frame = frame;
-	}
+    /**
+     * Instantiates a new frame peak result predicate.
+     *
+     * @param frame
+     *            the frame
+     */
+    public FramePeakResultPredicate(int frame)
+    {
+        this.frame = frame;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return t.getFrame() == frame;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public boolean test(PeakResult t)
+    {
+        return t.getFrame() == frame;
+    }
 }

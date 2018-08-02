@@ -36,52 +36,52 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure
 {
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param func
-	 *            Gradient function
-	 */
-	public BaseLSQLVMGradientProcedure(final double[] y, final Gradient1Function func)
-	{
-		super(y, func);
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param func
+     *            Gradient function
+     */
+    public BaseLSQLVMGradientProcedure(final double[] y, final Gradient1Function func)
+    {
+        super(y, func);
+    }
 
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 */
-	public BaseLSQLVMGradientProcedure(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		super(y, b, func);
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param b
+     *            Baseline pre-computed y-values
+     * @param func
+     *            Gradient function
+     */
+    public BaseLSQLVMGradientProcedure(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        super(y, b, func);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	@Override
-	public void execute(double value)
-	{
-		// Produce a sum-of-squares
-		final double dy = y[++yi] - value;
-		this.value += dy * dy;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
+     */
+    @Override
+    public void execute(double value)
+    {
+        // Produce a sum-of-squares
+        final double dy = y[++yi] - value;
+        this.value += dy * dy;
+    }
 
-	@Override
-	protected void initialiseValue()
-	{
-		// Do nothing
-	}
+    @Override
+    protected void initialiseValue()
+    {
+        // Do nothing
+    }
 
-	@Override
-	protected void finishValue()
-	{
-		// Do nothing
-	}
+    @Override
+    protected void finishValue()
+    {
+        // Do nothing
+    }
 }

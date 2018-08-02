@@ -30,46 +30,46 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
  */
 public class FastMLEGradient2ProcedureFactory
 {
-	/**
-	 * Create a new gradient procedure.
-	 *
-	 * @param x
-	 *            Data to fit (must be positive, i.e. the value of a Poisson process)
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	public static FastMLEGradient2Procedure create(final double[] x, final Gradient2Function func)
-	{
-		return new FastMLEGradient2Procedure(x, func);
-		// Note:
-		// JUnit speed tests show the unrolled version are slower, i.e. the JVM is able to
-		// efficiently optimise the single for loops in the procedure. So just return the
-		// default implementation.
-		//return createUnrolled(x, func);
-	}
+    /**
+     * Create a new gradient procedure.
+     *
+     * @param x
+     *            Data to fit (must be positive, i.e. the value of a Poisson process)
+     * @param func
+     *            Gradient function
+     * @return the gradient procedure
+     */
+    public static FastMLEGradient2Procedure create(final double[] x, final Gradient2Function func)
+    {
+        return new FastMLEGradient2Procedure(x, func);
+        // Note:
+        // JUnit speed tests show the unrolled version are slower, i.e. the JVM is able to
+        // efficiently optimise the single for loops in the procedure. So just return the
+        // default implementation.
+        //return createUnrolled(x, func);
+    }
 
-	/**
-	 * Create a new gradient procedure that has the loops unrolled.
-	 *
-	 * @param x
-	 *            Data to fit (must be positive, i.e. the value of a Poisson process)
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	static FastMLEGradient2Procedure createUnrolled(final double[] x, final Gradient2Function func)
-	{
-		switch (func.getNumberOfGradients())
-		{
-			case 5:
-				return new FastMLEGradient2Procedure5(x, func);
-			case 4:
-				return new FastMLEGradient2Procedure4(x, func);
-			case 6:
-				return new FastMLEGradient2Procedure6(x, func);
-			default:
-				return new FastMLEGradient2Procedure(x, func);
-		}
-	}
+    /**
+     * Create a new gradient procedure that has the loops unrolled.
+     *
+     * @param x
+     *            Data to fit (must be positive, i.e. the value of a Poisson process)
+     * @param func
+     *            Gradient function
+     * @return the gradient procedure
+     */
+    static FastMLEGradient2Procedure createUnrolled(final double[] x, final Gradient2Function func)
+    {
+        switch (func.getNumberOfGradients())
+        {
+            case 5:
+                return new FastMLEGradient2Procedure5(x, func);
+            case 4:
+                return new FastMLEGradient2Procedure4(x, func);
+            case 6:
+                return new FastMLEGradient2Procedure6(x, func);
+            default:
+                return new FastMLEGradient2Procedure(x, func);
+        }
+    }
 }

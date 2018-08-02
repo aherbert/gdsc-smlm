@@ -30,21 +30,22 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PassPeakResultPredicate implements PeakResultPredicate
 {
-	/**
-	 * Instantiates a new pass peak result predicate.
-	 */
-	public PassPeakResultPredicate()
-	{
-	}
+    /**
+     * Instantiates a new pass peak result predicate.
+     */
+    public PassPeakResultPredicate()
+    {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public boolean test(PeakResult t)
+    {
+        return true;
+    }
 }

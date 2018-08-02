@@ -32,123 +32,123 @@ import java.awt.Rectangle;
  */
 public class EMCCDCameraModel extends FixedPixelCameraModel
 {
-	/**
-	 * Instantiates a new EM-CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 */
-	public EMCCDCameraModel(float bias, float gain)
-	{
-		this(bias, gain, 0f);
-	}
+    /**
+     * Instantiates a new EM-CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     */
+    public EMCCDCameraModel(float bias, float gain)
+    {
+        this(bias, gain, 0f);
+    }
 
-	/**
-	 * Instantiates a new EM-CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 */
-	public EMCCDCameraModel(double bias, double gain)
-	{
-		this(bias, gain, 0d);
-	}
+    /**
+     * Instantiates a new EM-CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     */
+    public EMCCDCameraModel(double bias, double gain)
+    {
+        this(bias, gain, 0d);
+    }
 
-	/**
-	 * Instantiates a new EM-CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 * @param variance
-	 *            the variance (in counts)
-	 */
-	public EMCCDCameraModel(float bias, float gain, float variance)
-	{
-		super(bias, gain, variance);
-	}
+    /**
+     * Instantiates a new EM-CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     * @param variance
+     *            the variance (in counts)
+     */
+    public EMCCDCameraModel(float bias, float gain, float variance)
+    {
+        super(bias, gain, variance);
+    }
 
-	/**
-	 * Instantiates a new EM-CCD camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the total gain (count/photon)
-	 * @param variance
-	 *            the variance (in counts)
-	 */
-	public EMCCDCameraModel(double bias, double gain, double variance)
-	{
-		super(bias, gain, variance);
-	}
+    /**
+     * Instantiates a new EM-CCD camera model.
+     *
+     * @param bias
+     *            the bias (in counts)
+     * @param gain
+     *            the total gain (count/photon)
+     * @param variance
+     *            the variance (in counts)
+     */
+    public EMCCDCameraModel(double bias, double gain, double variance)
+    {
+        super(bias, gain, variance);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Note: This is an EM-CCD camera model. The normalised variance represents the effective read noise in incident
-	 * photons (i.e. before EM-gain). This can be combined with the expected shot variance of a Poisson distribution
-	 * (mean) scaled by the EM-amplification noise factor (2) to obtain the total variance in photon units:
-	 *
-	 * <pre>
-	 * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
-	 * </pre>
-	 *
-	 * This value multiplied by the [gain]^2 is the variance in counts.
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getNormalisedVariance(java.awt.Rectangle)
-	 */
-	@Override
-	public float[] getNormalisedVariance(Rectangle bounds)
-	{
-		return super.getNormalisedVariance(bounds);
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note: This is an EM-CCD camera model. The normalised variance represents the effective read noise in incident
+     * photons (i.e. before EM-gain). This can be combined with the expected shot variance of a Poisson distribution
+     * (mean) scaled by the EM-amplification noise factor (2) to obtain the total variance in photon units:
+     *
+     * <pre>
+     * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
+     * </pre>
+     *
+     * This value multiplied by the [gain]^2 is the variance in counts.
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getNormalisedVariance(java.awt.Rectangle)
+     */
+    @Override
+    public float[] getNormalisedVariance(Rectangle bounds)
+    {
+        return super.getNormalisedVariance(bounds);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Note: This is an EM-CCD camera model. The normalised variance represents the effective read noise in incident
-	 * photons (i.e. before EM-gain). This can be combined with the expected shot variance of a Poisson distribution
-	 * (mean) scaled by the EM-amplification noise factor (2) to obtain the total variance in photon units:
-	 *
-	 * <pre>
-	 * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
-	 * </pre>
-	 *
-	 * This value multiplied by the [gain]^2 is the variance in counts.
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
-	 */
-	@Override
-	public double getMeanNormalisedVariance(Rectangle bounds)
-	{
-		return super.getMeanNormalisedVariance(bounds);
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note: This is an EM-CCD camera model. The normalised variance represents the effective read noise in incident
+     * photons (i.e. before EM-gain). This can be combined with the expected shot variance of a Poisson distribution
+     * (mean) scaled by the EM-amplification noise factor (2) to obtain the total variance in photon units:
+     *
+     * <pre>
+     * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
+     * </pre>
+     *
+     * This value multiplied by the [gain]^2 is the variance in counts.
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
+     */
+    @Override
+    public double getMeanNormalisedVariance(Rectangle bounds)
+    {
+        return super.getMeanNormalisedVariance(bounds);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#copy()
-	 */
-	@Override
-	public EMCCDCameraModel copy()
-	{
-		return clone();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#copy()
+     */
+    @Override
+    public EMCCDCameraModel copy()
+    {
+        return clone();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	protected EMCCDCameraModel clone()
-	{
-		return (EMCCDCameraModel) super.clone();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    protected EMCCDCameraModel clone()
+    {
+        return (EMCCDCameraModel) super.clone();
+    }
 }

@@ -28,42 +28,42 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSet7 extends MultiFilterComponentSet
 {
-	private MultiFilterComponent component0;
-	private final MultiFilterComponent component1;
-	private final MultiFilterComponent component2;
-	private final MultiFilterComponent component3;
-	private final MultiFilterComponent component4;
-	private final MultiFilterComponent component5;
-	private final MultiFilterComponent component6;
+    private MultiFilterComponent component0;
+    private final MultiFilterComponent component1;
+    private final MultiFilterComponent component2;
+    private final MultiFilterComponent component3;
+    private final MultiFilterComponent component4;
+    private final MultiFilterComponent component5;
+    private final MultiFilterComponent component6;
 
-	/**
-	 * Instantiates a new multi filter component set for 7 components.
-	 *
-	 * @param components
-	 *            the components
-	 */
-	public MultiFilterComponentSet7(MultiFilterComponent[] components)
-	{
-		this.component0 = components[0];
-		this.component1 = components[1];
-		this.component2 = components[2];
-		this.component3 = components[3];
-		this.component4 = components[4];
-		this.component5 = components[5];
-		this.component6 = components[6];
-	}
+    /**
+     * Instantiates a new multi filter component set for 7 components.
+     *
+     * @param components
+     *            the components
+     */
+    public MultiFilterComponentSet7(MultiFilterComponent[] components)
+    {
+        this.component0 = components[0];
+        this.component1 = components[1];
+        this.component2 = components[2];
+        this.component3 = components[3];
+        this.component4 = components[4];
+        this.component5 = components[5];
+        this.component6 = components[6];
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return component0.getType() | component1.getType() | component2.getType() | component3.getType() |
-				component4.getType() | component5.getType() | component6.getType();
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return component0.getType() | component1.getType() | component2.getType() | component3.getType() |
+                component4.getType() | component5.getType() | component6.getType();
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		//@formatter:off
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        //@formatter:off
 		if (component0.fail(peak)) return component0.getType();
 		if (component1.fail(peak)) return component1.getType();
 		if (component2.fail(peak)) return component2.getType();
@@ -72,12 +72,12 @@ public class MultiFilterComponentSet7 extends MultiFilterComponentSet
 		if (component5.fail(peak)) return component5.getType();
 		if (component6.fail(peak)) return component6.getType();
 		//@formatter:on
-		return 0;
-	}
+        return 0;
+    }
 
-	@Override
-	void replace0(MultiFilterComponent c)
-	{
-		component0 = c;
-	}
+    @Override
+    void replace0(MultiFilterComponent c)
+    {
+        component0 = c;
+    }
 }

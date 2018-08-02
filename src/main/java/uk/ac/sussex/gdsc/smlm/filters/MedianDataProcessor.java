@@ -33,166 +33,167 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class MedianDataProcessor extends DataProcessor
 {
-	private final int smooth;
-	private MedianFilter filter = new MedianFilter();
+    private final int smooth;
+    private MedianFilter filter = new MedianFilter();
 
-	/**
-	 * Constructor
-	 *
-	 * @param border
-	 *            The border to ignore for maxima
-	 * @param smooth
-	 *            The smoothing width to apply to the data
-	 */
-	public MedianDataProcessor(int border, double smooth)
-	{
-		super(border);
-		this.smooth = convert(smooth);
-	}
+    /**
+     * Constructor
+     *
+     * @param border
+     *            The border to ignore for maxima
+     * @param smooth
+     *            The smoothing width to apply to the data
+     */
+    public MedianDataProcessor(int border, double smooth)
+    {
+        super(border);
+        this.smooth = convert(smooth);
+    }
 
-	/**
-	 * Convert the smoothing parameter to the value which is used for the MedianFilter.
-	 * We only use int smoothing. Values below zero are set to zero.
-	 *
-	 * @param smooth
-	 *            the smoothing parameter
-	 * @return The adjusted value
-	 * @see MedianFilter
-	 */
-	public static int convert(double smooth)
-	{
-		if (smooth < 0)
-			return 0;
-		return (int) smooth;
-	}
+    /**
+     * Convert the smoothing parameter to the value which is used for the MedianFilter.
+     * We only use int smoothing. Values below zero are set to zero.
+     *
+     * @param smooth
+     *            the smoothing parameter
+     * @return The adjusted value
+     * @see MedianFilter
+     */
+    public static int convert(double smooth)
+    {
+        if (smooth < 0)
+            return 0;
+        return (int) smooth;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
-	 */
-	@Override
-	public boolean isWeighted()
-	{
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
+     */
+    @Override
+    public boolean isWeighted()
+    {
+        return false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
-	 */
-	@Override
-	public void setWeights(float[] weights, int width, int height)
-	{
-		// Do nothing
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
+     */
+    @Override
+    public void setWeights(float[] weights, int width, int height)
+    {
+        // Do nothing
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
-	 */
-	@Override
-	public boolean hasWeights()
-	{
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
+     */
+    @Override
+    public boolean hasWeights()
+    {
+        return false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
-	 */
-	@Override
-	public float[] process(float[] data, int width, int height)
-	{
-		float[] smoothData = data;
-		if (smooth > 0)
-		{
-			// Smoothing destructively modifies the data so create a copy
-			smoothData = Arrays.copyOf(data, width * height);
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
+     */
+    @Override
+    public float[] process(float[] data, int width, int height)
+    {
+        float[] smoothData = data;
+        if (smooth > 0)
+        {
+            // Smoothing destructively modifies the data so create a copy
+            smoothData = Arrays.copyOf(data, width * height);
 
-			// Check upper limits are safe
-			final int tmpSmooth = FastMath.min(smooth, FastMath.min(width, height) / 2);
+            // Check upper limits are safe
+            final int tmpSmooth = FastMath.min(smooth, FastMath.min(width, height) / 2);
 
-			// JUnit speed tests show that the rolling median is not faster.
-			// It used to be faster on windows less than 3.
+            // JUnit speed tests show that the rolling median is not faster.
+            // It used to be faster on windows less than 3.
 
-			//if (tmpSmooth <= 3)
-			//{
-			//	if (tmpSmooth <= getBorder())
-			//	{
-			//		filter.rollingMedianInternal(smoothData, width, height, tmpSmooth);
-			//	}
-			//	else
-			//	{
-			//		filter.rollingMedian(smoothData, width, height, tmpSmooth);
-			//	}
-			//}
-			//else
-			//{
-			if (tmpSmooth <= getBorder())
-				filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
-			else filter.blockMedian(smoothData, width, height, tmpSmooth);
-		}
-		return smoothData;
-	}
+            //if (tmpSmooth <= 3)
+            //{
+            //	if (tmpSmooth <= getBorder())
+            //	{
+            //		filter.rollingMedianInternal(smoothData, width, height, tmpSmooth);
+            //	}
+            //	else
+            //	{
+            //		filter.rollingMedian(smoothData, width, height, tmpSmooth);
+            //	}
+            //}
+            //else
+            //{
+            if (tmpSmooth <= getBorder())
+                filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
+            else
+                filter.blockMedian(smoothData, width, height, tmpSmooth);
+        }
+        return smoothData;
+    }
 
-	/**
-	 * @return the smoothing width
-	 */
-	public int getSmooth()
-	{
-		return smooth;
-	}
+    /**
+     * @return the smoothing width
+     */
+    public int getSmooth()
+    {
+        return smooth;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public MedianDataProcessor clone()
-	{
-		final MedianDataProcessor f = (MedianDataProcessor) super.clone();
-		// Ensure the object is duplicated and not passed by reference.
-		f.filter = filter.clone();
-		return f;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public MedianDataProcessor clone()
+    {
+        final MedianDataProcessor f = (MedianDataProcessor) super.clone();
+        // Ensure the object is duplicated and not passed by reference.
+        f.filter = filter.clone();
+        return f;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return "Median";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
+     */
+    @Override
+    public String getName()
+    {
+        return "Median";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
-	 */
-	@Override
-	public List<String> getParameters()
-	{
-		final List<String> list = super.getParameters();
-		list.add("smooth = " + smooth);
-		return list;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
+     */
+    @Override
+    public List<String> getParameters()
+    {
+        final List<String> list = super.getParameters();
+        list.add("smooth = " + smooth);
+        return list;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
-	 */
-	@Override
-	public double getSpread()
-	{
-		return 2 * smooth + 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
+     */
+    @Override
+    public double getSpread()
+    {
+        return 2 * smooth + 1;
+    }
 }

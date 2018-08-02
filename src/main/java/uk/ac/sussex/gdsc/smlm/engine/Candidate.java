@@ -31,134 +31,134 @@ import uk.ac.sussex.gdsc.smlm.filters.Spot;
 class Candidate extends Spot
 {
 
-	/** The index. */
-	final public int index;
+    /** The index. */
+    final public int index;
 
-	/** Flag to indicate if the candidate has been fit. */
-	public boolean fit = false;
+    /** Flag to indicate if the candidate has been fit. */
+    public boolean fit = false;
 
-	// Results of fitting
+    // Results of fitting
 
-	/** The params. */
-	public float[] params;
+    /** The params. */
+    public float[] params;
 
-	/** The param deviations. */
-	public float[] paramDevs;
+    /** The param deviations. */
+    public float[] paramDevs;
 
-	/** The error. */
-	public double error;
+    /** The error. */
+    public double error;
 
-	/** The noise. */
-	public float noise;
+    /** The noise. */
+    public float noise;
 
-	/** The mean intensity. */
-	public float meanIntensity;
+    /** The mean intensity. */
+    public float meanIntensity;
 
-	/** The precision. */
-	public double precision;
+    /** The precision. */
+    public double precision;
 
-	/**
-	 * Instantiates a new candidate.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param intensity
-	 *            the intensity
-	 * @param score
-	 *            the score
-	 * @param index
-	 *            the index
-	 */
-	public Candidate(int x, int y, float intensity, float score, int index)
-	{
-		super(x, y, intensity, score);
-		this.index = index;
-	}
+    /**
+     * Instantiates a new candidate.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param intensity
+     *            the intensity
+     * @param score
+     *            the score
+     * @param index
+     *            the index
+     */
+    public Candidate(int x, int y, float intensity, float score, int index)
+    {
+        super(x, y, intensity, score);
+        this.index = index;
+    }
 
-	/**
-	 * Instantiates a new candidate.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param index
-	 *            the index
-	 * @param params
-	 *            the params
-	 * @param paramDevs
-	 *            the param deviations
-	 * @param error
-	 *            the error
-	 * @param noise
-	 *            the noise
-	 * @param meanIntensity
-	 *            the mean intensity
-	 * @param valid
-	 *            the valid
-	 */
-	public Candidate(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
-			float meanIntensity, boolean valid)
-	{
-		super(x, y, 0, 0);
-		this.index = index;
-		this.params = params;
-		this.paramDevs = paramDevs;
-		this.error = error;
-		this.noise = noise;
-		this.meanIntensity = meanIntensity;
-		this.fit = valid;
-	}
+    /**
+     * Instantiates a new candidate.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param index
+     *            the index
+     * @param params
+     *            the params
+     * @param paramDevs
+     *            the param deviations
+     * @param error
+     *            the error
+     * @param noise
+     *            the noise
+     * @param meanIntensity
+     *            the mean intensity
+     * @param valid
+     *            the valid
+     */
+    public Candidate(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
+            float meanIntensity, boolean valid)
+    {
+        super(x, y, 0, 0);
+        this.index = index;
+        this.params = params;
+        this.paramDevs = paramDevs;
+        this.error = error;
+        this.noise = noise;
+        this.meanIntensity = meanIntensity;
+        this.fit = valid;
+    }
 
-	/**
-	 * Instantiates a new candidate.
-	 *
-	 * @param spot
-	 *            the spot
-	 * @param index
-	 *            the index
-	 */
-	public Candidate(Spot spot, int index)
-	{
-		super(spot.x, spot.y, spot.intensity, spot.getScore());
-		this.index = index;
-	}
+    /**
+     * Instantiates a new candidate.
+     *
+     * @param spot
+     *            the spot
+     * @param index
+     *            the index
+     */
+    public Candidate(Spot spot, int index)
+    {
+        super(spot.x, spot.y, spot.intensity, spot.getScore());
+        this.index = index;
+    }
 
-	/**
-	 * Creates a fitted candidate with fitted parameters.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param index
-	 *            the index
-	 * @param params
-	 *            the params
-	 * @param paramDevs
-	 *            the param deviations
-	 * @param error
-	 *            the error
-	 * @param noise
-	 *            the noise
-	 * @param meanIntensity
-	 *            the mean intensity
-	 * @param valid
-	 *            the valid
-	 * @return the candidate
-	 */
-	public Candidate createFitted(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
-			float meanIntensity, boolean valid)
-	{
-		final Candidate c = new Candidate(x, y, intensity, getScore(), index);
-		c.params = params;
-		c.paramDevs = paramDevs;
-		c.error = error;
-		c.noise = noise;
-		c.meanIntensity = meanIntensity;
-		c.fit = valid;
-		return c;
-	}
+    /**
+     * Creates a fitted candidate with fitted parameters.
+     *
+     * @param x
+     *            the x
+     * @param y
+     *            the y
+     * @param index
+     *            the index
+     * @param params
+     *            the params
+     * @param paramDevs
+     *            the param deviations
+     * @param error
+     *            the error
+     * @param noise
+     *            the noise
+     * @param meanIntensity
+     *            the mean intensity
+     * @param valid
+     *            the valid
+     * @return the candidate
+     */
+    public Candidate createFitted(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
+            float meanIntensity, boolean valid)
+    {
+        final Candidate c = new Candidate(x, y, intensity, getScore(), index);
+        c.params = params;
+        c.paramDevs = paramDevs;
+        c.error = error;
+        c.noise = noise;
+        c.meanIntensity = meanIntensity;
+        c.fit = valid;
+        return c;
+    }
 }

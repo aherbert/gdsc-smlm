@@ -28,51 +28,51 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSetDefault extends MultiFilterComponentSet
 {
-	private final MultiFilterComponent[] components;
+    private final MultiFilterComponent[] components;
 
-	/**
-	 * Instantiates a new multi filter component set default.
-	 *
-	 * @param components
-	 *            the components
-	 */
-	public MultiFilterComponentSetDefault(MultiFilterComponent[] components)
-	{
-		this.components = components;
-	}
+    /**
+     * Instantiates a new multi filter component set default.
+     *
+     * @param components
+     *            the components
+     */
+    public MultiFilterComponentSetDefault(MultiFilterComponent[] components)
+    {
+        this.components = components;
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		int flags = 0;
-		for (int i = 0; i < components.length; i++)
-			flags |= components[i].getType();
-		return flags;
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        int flags = 0;
+        for (int i = 0; i < components.length; i++)
+            flags |= components[i].getType();
+        return flags;
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		for (int i = 0; i < components.length; i++)
-			if (components[i].fail(peak))
-				return components[i].getType();
-		return 0;
-	}
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        for (int i = 0; i < components.length; i++)
+            if (components[i].fail(peak))
+                return components[i].getType();
+        return 0;
+    }
 
-	@Override
-	void replace0(MultiFilterComponent c)
-	{
-		if (components.length > 0)
-			components[0] = c;
-	}
+    @Override
+    void replace0(MultiFilterComponent c)
+    {
+        if (components.length > 0)
+            components[0] = c;
+    }
 
-	@Override
-	public MultiFilterComponentSet clone()
-	{
-		// Copy the array
-		final MultiFilterComponent[] c = new MultiFilterComponent[components.length];
-		if (c.length > 0)
-			System.arraycopy(components, 0, c, 0, c.length);
-		return new MultiFilterComponentSetDefault(c);
-	}
+    @Override
+    public MultiFilterComponentSet clone()
+    {
+        // Copy the array
+        final MultiFilterComponent[] c = new MultiFilterComponent[components.length];
+        if (c.length > 0)
+            System.arraycopy(components, 0, c, 0, c.length);
+        return new MultiFilterComponentSetDefault(c);
+    }
 }

@@ -28,116 +28,116 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class FilterScore implements Comparable<FilterScore>
 {
-	/** The filter. */
-	final public Filter filter;
+    /** The filter. */
+    final public Filter filter;
 
-	/** The score. */
-	final public double score;
+    /** The score. */
+    final public double score;
 
-	/** The criteria. */
-	final public double criteria;
+    /** The criteria. */
+    final public double criteria;
 
-	/** Flag to indicate if the criteria passed. */
-	final public boolean criteriaPassed;
+    /** Flag to indicate if the criteria passed. */
+    final public boolean criteriaPassed;
 
-	/** Flag to indicate if the filters are all same type. */
-	final public boolean allSameType;
+    /** Flag to indicate if the filters are all same type. */
+    final public boolean allSameType;
 
-	/**
-	 * Instantiates a new filter score.
-	 *
-	 * @param filter
-	 *            the filter
-	 * @param score
-	 *            the score
-	 * @param criteria
-	 *            the criteria
-	 * @param allSameType
-	 *            the all same type
-	 * @param criteriaPassed
-	 *            the criteria passed
-	 */
-	public FilterScore(Filter filter, double score, double criteria, boolean allSameType, boolean criteriaPassed)
-	{
-		this.filter = filter;
-		this.score = score;
-		this.criteria = criteria;
-		this.allSameType = allSameType;
-		this.criteriaPassed = criteriaPassed;
-	}
+    /**
+     * Instantiates a new filter score.
+     *
+     * @param filter
+     *            the filter
+     * @param score
+     *            the score
+     * @param criteria
+     *            the criteria
+     * @param allSameType
+     *            the all same type
+     * @param criteriaPassed
+     *            the criteria passed
+     */
+    public FilterScore(Filter filter, double score, double criteria, boolean allSameType, boolean criteriaPassed)
+    {
+        this.filter = filter;
+        this.score = score;
+        this.criteria = criteria;
+        this.allSameType = allSameType;
+        this.criteriaPassed = criteriaPassed;
+    }
 
-	@Override
-	public int compareTo(FilterScore that)
-	{
-		if (that == null)
-			return -1;
+    @Override
+    public int compareTo(FilterScore that)
+    {
+        if (that == null)
+            return -1;
 
-		//		if (this.criteriaPassed && !that.criteriaPassed)
-		//			return -1;
-		//		if (that.criteriaPassed && !this.criteriaPassed)
-		//			return 1;
+        //		if (this.criteriaPassed && !that.criteriaPassed)
+        //			return -1;
+        //		if (that.criteriaPassed && !this.criteriaPassed)
+        //			return 1;
 
-		if (this.criteriaPassed)
-		{
-			// Must pass criteria first
-			if (!that.criteriaPassed)
-				return -1;
+        if (this.criteriaPassed)
+        {
+            // Must pass criteria first
+            if (!that.criteriaPassed)
+                return -1;
 
-			// Sort by the score
-			if (this.score > that.score)
-				return -1;
-			if (this.score < that.score)
-				return 1;
-			if (this.criteria > that.criteria)
-				return -1;
-			if (this.criteria < that.criteria)
-				return 1;
-			// If the same type then compare the parameters
-			if (allSameType)
-				return compareParameters(that);
-			else if (this.filter.getType().equals(that.filter.getType()))
-				return compareParameters(that);
-			return 0;
-		}
+            // Sort by the score
+            if (this.score > that.score)
+                return -1;
+            if (this.score < that.score)
+                return 1;
+            if (this.criteria > that.criteria)
+                return -1;
+            if (this.criteria < that.criteria)
+                return 1;
+            // If the same type then compare the parameters
+            if (allSameType)
+                return compareParameters(that);
+            else if (this.filter.getType().equals(that.filter.getType()))
+                return compareParameters(that);
+            return 0;
+        }
 
-		// Must pass criteria first
-		if (that.criteriaPassed)
-			return 1;
+        // Must pass criteria first
+        if (that.criteriaPassed)
+            return 1;
 
-		// Sort by how close we are to passing the criteria
-		if (this.criteria > that.criteria)
-			return -1;
-		if (this.criteria < that.criteria)
-			return 1;
-		if (this.score > that.score)
-			return -1;
-		if (this.score < that.score)
-			return 1;
-		// If the same type then compare the parameters
-		if (allSameType)
-			return compareParameters(that);
-		else if (this.filter.getType().equals(that.filter.getType()))
-			return compareParameters(that);
-		return 0;
-	}
+        // Sort by how close we are to passing the criteria
+        if (this.criteria > that.criteria)
+            return -1;
+        if (this.criteria < that.criteria)
+            return 1;
+        if (this.score > that.score)
+            return -1;
+        if (this.score < that.score)
+            return 1;
+        // If the same type then compare the parameters
+        if (allSameType)
+            return compareParameters(that);
+        else if (this.filter.getType().equals(that.filter.getType()))
+            return compareParameters(that);
+        return 0;
+    }
 
-	/**
-	 * Compare the parameters to the other score to count the number of strongest parameters.
-	 *
-	 * @param that
-	 *            the other filter score
-	 * @return the count difference
-	 */
-	protected int compareParameters(FilterScore that)
-	{
-		// Get the filter with the strongest params
-		return that.filter.weakestUnsafe(this.filter);
-	}
+    /**
+     * Compare the parameters to the other score to count the number of strongest parameters.
+     *
+     * @param that
+     *            the other filter score
+     * @return the count difference
+     */
+    protected int compareParameters(FilterScore that)
+    {
+        // Get the filter with the strongest params
+        return that.filter.weakestUnsafe(this.filter);
+    }
 
-	@Override
-	public String toString()
-	{
-		// Add the score
-		return String.format("%s : %.3f (%.3f)", filter.getName(), score, criteria);
-	}
+    @Override
+    public String toString()
+    {
+        // Add the score
+        return String.format("%s : %.3f (%.3f)", filter.getName(), score, criteria);
+    }
 }

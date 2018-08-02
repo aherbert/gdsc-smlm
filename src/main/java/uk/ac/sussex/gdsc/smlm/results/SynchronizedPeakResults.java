@@ -34,64 +34,64 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
  */
 public class SynchronizedPeakResults implements ThreadSafePeakResults
 {
-	private final PeakResults r;
-	private final Object lock = new Object();
+    private final PeakResults r;
+    private final Object lock = new Object();
 
-	/**
-	 * Instantiates a new synchronized peak results.
-	 *
-	 * @param peakResults
-	 *            the peak results
-	 * @throws IllegalArgumentException
-	 *             if the results are null
-	 */
-	public SynchronizedPeakResults(PeakResults peakResults)
-	{
-		if (peakResults == null)
-			throw new IllegalArgumentException("PeakResults must not be null");
-		this.r = peakResults;
-	}
+    /**
+     * Instantiates a new synchronized peak results.
+     *
+     * @param peakResults
+     *            the peak results
+     * @throws IllegalArgumentException
+     *             if the results are null
+     */
+    public SynchronizedPeakResults(PeakResults peakResults)
+    {
+        if (peakResults == null)
+            throw new IllegalArgumentException("PeakResults must not be null");
+        this.r = peakResults;
+    }
 
-	/**
-	 * Creates a PeakResults object that is synchronized if not already a thread-safe instance.
-	 * <p>
-	 * The input is unchanged if already a thread-safe instance.
-	 *
-	 * @param peakResults
-	 *            the peak results
-	 * @return the peak results
-	 * @throws IllegalArgumentException
-	 *             if the results are null
-	 */
-	public static PeakResults create(PeakResults peakResults)
-	{
-		if (peakResults instanceof ThreadSafePeakResults)
-			return peakResults;
-		return new SynchronizedPeakResults(peakResults);
-	}
+    /**
+     * Creates a PeakResults object that is synchronized if not already a thread-safe instance.
+     * <p>
+     * The input is unchanged if already a thread-safe instance.
+     *
+     * @param peakResults
+     *            the peak results
+     * @return the peak results
+     * @throws IllegalArgumentException
+     *             if the results are null
+     */
+    public static PeakResults create(PeakResults peakResults)
+    {
+        if (peakResults instanceof ThreadSafePeakResults)
+            return peakResults;
+        return new SynchronizedPeakResults(peakResults);
+    }
 
-	/**
-	 * Creates a PeakResults object that is synchronized if the thread count is above 1, otherwise the input results are
-	 * returned.
-	 * <p>
-	 * The input is unchanged if already a thread-safe instance.
-	 *
-	 * @param peakResults
-	 *            the peak results
-	 * @param threadCount
-	 *            the thread count
-	 * @return the peak results
-	 * @throws IllegalArgumentException
-	 *             if the results are null
-	 */
-	public static PeakResults create(PeakResults peakResults, int threadCount)
-	{
-		if (threadCount <= 1 || peakResults instanceof ThreadSafePeakResults)
-			return peakResults;
-		return new SynchronizedPeakResults(peakResults);
-	}
+    /**
+     * Creates a PeakResults object that is synchronized if the thread count is above 1, otherwise the input results are
+     * returned.
+     * <p>
+     * The input is unchanged if already a thread-safe instance.
+     *
+     * @param peakResults
+     *            the peak results
+     * @param threadCount
+     *            the thread count
+     * @return the peak results
+     * @throws IllegalArgumentException
+     *             if the results are null
+     */
+    public static PeakResults create(PeakResults peakResults, int threadCount)
+    {
+        if (threadCount <= 1 || peakResults instanceof ThreadSafePeakResults)
+            return peakResults;
+        return new SynchronizedPeakResults(peakResults);
+    }
 
-	//@formatter:off
+    //@formatter:off
 
 	@Override
 	public void begin()

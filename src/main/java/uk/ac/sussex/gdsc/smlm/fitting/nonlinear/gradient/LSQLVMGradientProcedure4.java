@@ -36,82 +36,82 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 public class LSQLVMGradientProcedure4 extends LSQLVMGradientProcedure
 {
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param func
-	 *            Gradient function
-	 */
-	public LSQLVMGradientProcedure4(final double[] y, final Gradient1Function func)
-	{
-		super(y, func);
-		if (n != 4)
-			throw new IllegalArgumentException("Function must compute 4 gradients");
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param func
+     *            Gradient function
+     */
+    public LSQLVMGradientProcedure4(final double[] y, final Gradient1Function func)
+    {
+        super(y, func);
+        if (n != 4)
+            throw new IllegalArgumentException("Function must compute 4 gradients");
+    }
 
-	/**
-	 * @param y
-	 *            Data to fit
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 */
-	public LSQLVMGradientProcedure4(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		super(y, b, func);
-		if (n != 4)
-			throw new IllegalArgumentException("Function must compute 4 gradients");
-	}
+    /**
+     * @param y
+     *            Data to fit
+     * @param b
+     *            Baseline pre-computed y-values
+     * @param func
+     *            Gradient function
+     */
+    public LSQLVMGradientProcedure4(final double[] y, final double[] b, final Gradient1Function func)
+    {
+        super(y, b, func);
+        if (n != 4)
+            throw new IllegalArgumentException("Function must compute 4 gradients");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-	 */
-	@Override
-	public void execute(double value, double[] dy_da)
-	{
-		final double dy = y[++yi] - value;
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+     */
+    @Override
+    public void execute(double value, double[] dy_da)
+    {
+        final double dy = y[++yi] - value;
 
-		alpha[0] += dy_da[0] * dy_da[0];
-		alpha[1] += dy_da[1] * dy_da[0];
-		alpha[2] += dy_da[1] * dy_da[1];
-		alpha[3] += dy_da[2] * dy_da[0];
-		alpha[4] += dy_da[2] * dy_da[1];
-		alpha[5] += dy_da[2] * dy_da[2];
-		alpha[6] += dy_da[3] * dy_da[0];
-		alpha[7] += dy_da[3] * dy_da[1];
-		alpha[8] += dy_da[3] * dy_da[2];
-		alpha[9] += dy_da[3] * dy_da[3];
+        alpha[0] += dy_da[0] * dy_da[0];
+        alpha[1] += dy_da[1] * dy_da[0];
+        alpha[2] += dy_da[1] * dy_da[1];
+        alpha[3] += dy_da[2] * dy_da[0];
+        alpha[4] += dy_da[2] * dy_da[1];
+        alpha[5] += dy_da[2] * dy_da[2];
+        alpha[6] += dy_da[3] * dy_da[0];
+        alpha[7] += dy_da[3] * dy_da[1];
+        alpha[8] += dy_da[3] * dy_da[2];
+        alpha[9] += dy_da[3] * dy_da[3];
 
-		beta[0] += dy_da[0] * dy;
-		beta[1] += dy_da[1] * dy;
-		beta[2] += dy_da[2] * dy;
-		beta[3] += dy_da[3] * dy;
+        beta[0] += dy_da[0] * dy;
+        beta[1] += dy_da[1] * dy;
+        beta[2] += dy_da[2] * dy;
+        beta[3] += dy_da[3] * dy;
 
-		this.value += dy * dy;
-	}
+        this.value += dy * dy;
+    }
 
-	@Override
-	protected void initialiseGradient()
-	{
-		GradientProcedureHelper.initialiseWorkingMatrix4(alpha);
-		beta[0] = 0;
-		beta[1] = 0;
-		beta[2] = 0;
-		beta[3] = 0;
-	}
+    @Override
+    protected void initialiseGradient()
+    {
+        GradientProcedureHelper.initialiseWorkingMatrix4(alpha);
+        beta[0] = 0;
+        beta[1] = 0;
+        beta[2] = 0;
+        beta[3] = 0;
+    }
 
-	@Override
-	public void getAlphaMatrix(double[][] alpha)
-	{
-		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
-	}
+    @Override
+    public void getAlphaMatrix(double[][] alpha)
+    {
+        GradientProcedureHelper.getMatrix4(this.alpha, alpha);
+    }
 
-	@Override
-	public void getAlphaLinear(double[] alpha)
-	{
-		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
-	}
+    @Override
+    public void getAlphaLinear(double[] alpha)
+    {
+        GradientProcedureHelper.getMatrix4(this.alpha, alpha);
+    }
 }

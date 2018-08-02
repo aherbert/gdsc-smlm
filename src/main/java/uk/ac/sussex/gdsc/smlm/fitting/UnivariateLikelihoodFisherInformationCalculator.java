@@ -61,95 +61,95 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
  */
 public class UnivariateLikelihoodFisherInformationCalculator implements FisherInformationCalculator
 {
-	/** The gradient function. */
-	protected final Gradient1Function gf;
+    /** The gradient function. */
+    protected final Gradient1Function gf;
 
-	/** The Fisher information for each evaluated point in the function. */
-	protected final FisherInformation[] fi;
+    /** The Fisher information for each evaluated point in the function. */
+    protected final FisherInformation[] fi;
 
-	/**
-	 * Instantiates a new univariate likelihood fisher information calculator.
-	 *
-	 * @param gf
-	 *            the gradient function
-	 * @param fi
-	 *            the fisher information of the output value of the function
-	 */
-	public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf, FisherInformation fi)
-	{
-		if (gf == null || fi == null)
-			throw new NullPointerException();
-		this.gf = gf;
-		this.fi = new FisherInformation[gf.size()];
-		Arrays.fill(this.fi, fi);
-	}
+    /**
+     * Instantiates a new univariate likelihood fisher information calculator.
+     *
+     * @param gf
+     *            the gradient function
+     * @param fi
+     *            the fisher information of the output value of the function
+     */
+    public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf, FisherInformation fi)
+    {
+        if (gf == null || fi == null)
+            throw new NullPointerException();
+        this.gf = gf;
+        this.fi = new FisherInformation[gf.size()];
+        Arrays.fill(this.fi, fi);
+    }
 
-	/**
-	 * Instantiates a new univariate likelihood fisher information calculator.
-	 *
-	 * @param gf
-	 *            the gradient function
-	 * @param fi
-	 *            the fisher information of the output of each value of the function
-	 */
-	public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf, FisherInformation[] fi)
-	{
-		if (gf == null || fi == null)
-			throw new NullPointerException();
-		if (fi.length != gf.size())
-			throw new IllegalArgumentException("Fisher information must be provided for each function value");
-		this.gf = gf;
-		this.fi = fi;
-	}
+    /**
+     * Instantiates a new univariate likelihood fisher information calculator.
+     *
+     * @param gf
+     *            the gradient function
+     * @param fi
+     *            the fisher information of the output of each value of the function
+     */
+    public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf, FisherInformation[] fi)
+    {
+        if (gf == null || fi == null)
+            throw new NullPointerException();
+        if (fi.length != gf.size())
+            throw new IllegalArgumentException("Fisher information must be provided for each function value");
+        this.gf = gf;
+        this.fi = fi;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @throws DataException
-	 *             If the Fisher information cannot be computed for a function value
-	 * @throws DataException
-	 *             If the Fisher information is infinite for a function value
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
-	 */
-	@Override
-	public FisherInformationMatrix compute(double[] parameters) throws DataException
-	{
-		final int n = gf.getNumberOfGradients();
-		final double[] data = new double[n * (n + 1) / 2];
-		gf.initialise1(parameters);
-		gf.forEach(new Gradient1Procedure()
-		{
-			int k = -1;
+    /**
+     * {@inheritDoc}
+     *
+     * @throws DataException
+     *             If the Fisher information cannot be computed for a function value
+     * @throws DataException
+     *             If the Fisher information is infinite for a function value
+     *
+     * @see uk.ac.sussex.gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
+     */
+    @Override
+    public FisherInformationMatrix compute(double[] parameters) throws DataException
+    {
+        final int n = gf.getNumberOfGradients();
+        final double[] data = new double[n * (n + 1) / 2];
+        gf.initialise1(parameters);
+        gf.forEach(new Gradient1Procedure()
+        {
+            int k = -1;
 
-			@Override
-			public void execute(double v, double[] dv_dt)
-			{
-				k++;
-				if (!fi[k].isValid(v))
-					return;
-				// Get the Fisher information of the value
-				final double f = fi[k].getFisherInformation(v);
-				if (f == 0)
-					// No summation
-					return;
-				if (f == Double.POSITIVE_INFINITY)
-					throw new DataException("Fisher information is infinite at f(" + k + ")");
+            @Override
+            public void execute(double v, double[] dv_dt)
+            {
+                k++;
+                if (!fi[k].isValid(v))
+                    return;
+                // Get the Fisher information of the value
+                final double f = fi[k].getFisherInformation(v);
+                if (f == 0)
+                    // No summation
+                    return;
+                if (f == Double.POSITIVE_INFINITY)
+                    throw new DataException("Fisher information is infinite at f(" + k + ")");
 
-				// Compute the actual matrix data
-				for (int i = 0, c = 0; i < n; i++)
-				{
-					final double wgt = f * dv_dt[i];
-					for (int j = 0; j <= i; j++)
-						data[c++] += wgt * dv_dt[j];
-				}
-			}
-		});
-		// Generate symmetric matrix
-		final double[] matrix = new double[n * n];
-		for (int i = 0, c = 0; i < n; i++)
-			for (int j = 0; j <= i; j++)
-				matrix[i * n + j] = matrix[j * n + i] = data[c++];
-		return new FisherInformationMatrix(matrix, n);
-	}
+                // Compute the actual matrix data
+                for (int i = 0, c = 0; i < n; i++)
+                {
+                    final double wgt = f * dv_dt[i];
+                    for (int j = 0; j <= i; j++)
+                        data[c++] += wgt * dv_dt[j];
+                }
+            }
+        });
+        // Generate symmetric matrix
+        final double[] matrix = new double[n * n];
+        for (int i = 0, c = 0; i < n; i++)
+            for (int j = 0; j <= i; j++)
+                matrix[i * n + j] = matrix[j * n + i] = data[c++];
+        return new FisherInformationMatrix(matrix, n);
+    }
 }

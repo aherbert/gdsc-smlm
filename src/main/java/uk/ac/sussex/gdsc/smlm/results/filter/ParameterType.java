@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.smlm.data.NamedObject;
  */
 public enum ParameterType implements NamedObject
 {
-	//@formatter:off
+    //@formatter:off
 	/** Signal */
     SIGNAL("Signal"),
     /** Signal Range */
@@ -93,45 +93,45 @@ public enum ParameterType implements NamedObject
 
 	//@formatter:on
 
-	private final String name;
-	private final String shortName;
+    private final String name;
+    private final String shortName;
 
-	private ParameterType(String name)
-	{
-		this(name, name);
-	}
+    private ParameterType(String name)
+    {
+        this(name, name);
+    }
 
-	private ParameterType(String name, String sname)
-	{
-		this.name = name;
-		this.shortName = sname;
-	}
+    private ParameterType(String name, String sname)
+    {
+        this.name = name;
+        this.shortName = sname;
+    }
 
-	@Override
-	public String toString()
-	{
-		return shortName;
-	}
+    @Override
+    public String toString()
+    {
+        return shortName;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return name;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getName()
+     */
+    @Override
+    public String getName()
+    {
+        return name;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getShortName()
-	 */
-	@Override
-	public String getShortName()
-	{
-		return shortName;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getShortName()
+     */
+    @Override
+    public String getShortName()
+    {
+        return shortName;
+    }
 }

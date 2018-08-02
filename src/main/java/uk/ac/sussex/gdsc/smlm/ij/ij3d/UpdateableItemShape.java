@@ -28,25 +28,25 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
  */
 public interface UpdateableItemShape extends ItemShape
 {
-	/**
-	 * Reorder the mesh items using the given indices. The number of indices must match the number of items in the mesh
-	 * and contain all indices from 0 to size-1.
-	 *
-	 * @param indices
-	 *            the indices
-	 * @throws IllegalArgumentException
-	 *             if the indices are not valid
-	 */
-	public void reorder(int[] indices) throws IllegalArgumentException;
+    /**
+     * Reorder the mesh items using the given indices. The number of indices must match the number of items in the mesh
+     * and contain all indices from 0 to size-1.
+     *
+     * @param indices
+     *            the indices
+     * @throws IllegalArgumentException
+     *             if the indices are not valid
+     */
+    public void reorder(int[] indices) throws IllegalArgumentException;
 
-	/**
-	 * Reorder the mesh items using the given indices. The output number of items will be the minimum of indices.length
-	 * or the current mesh size. There is no checking whether the indices are valid.
-	 *
-	 * @param indices
-	 *            the indices
-	 * @throws IllegalArgumentException
-	 *             if the indices are not valid
-	 */
-	public void reorderFast(int[] indices) throws IllegalArgumentException;
+    /**
+     * Reorder the mesh items using the given indices. The output number of items will be the minimum of indices.length
+     * or the current mesh size. There is no checking whether the indices are valid.
+     *
+     * @param indices
+     *            the indices
+     * @throws IllegalArgumentException
+     *             if the indices are not valid
+     */
+    public void reorderFast(int[] indices) throws IllegalArgumentException;
 }

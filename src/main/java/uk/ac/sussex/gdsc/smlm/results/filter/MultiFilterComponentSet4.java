@@ -28,46 +28,46 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSet4 extends MultiFilterComponentSet
 {
-	private MultiFilterComponent component0;
-	private final MultiFilterComponent component1;
-	private final MultiFilterComponent component2;
-	private final MultiFilterComponent component3;
+    private MultiFilterComponent component0;
+    private final MultiFilterComponent component1;
+    private final MultiFilterComponent component2;
+    private final MultiFilterComponent component3;
 
-	/**
-	 * Instantiates a new multi filter component set for 4 components.
-	 *
-	 * @param components
-	 *            the components
-	 */
-	public MultiFilterComponentSet4(MultiFilterComponent[] components)
-	{
-		this.component0 = components[0];
-		this.component1 = components[1];
-		this.component2 = components[2];
-		this.component3 = components[3];
-	}
+    /**
+     * Instantiates a new multi filter component set for 4 components.
+     *
+     * @param components
+     *            the components
+     */
+    public MultiFilterComponentSet4(MultiFilterComponent[] components)
+    {
+        this.component0 = components[0];
+        this.component1 = components[1];
+        this.component2 = components[2];
+        this.component3 = components[3];
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return component0.getType() | component1.getType() | component2.getType() | component3.getType();
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return component0.getType() | component1.getType() | component2.getType() | component3.getType();
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		//@formatter:off
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        //@formatter:off
 		if (component0.fail(peak)) return component0.getType();
 		if (component1.fail(peak)) return component1.getType();
 		if (component2.fail(peak)) return component2.getType();
 		if (component3.fail(peak)) return component3.getType();
 		//@formatter:on
-		return 0;
-	}
+        return 0;
+    }
 
-	@Override
-	void replace0(MultiFilterComponent c)
-	{
-		component0 = c;
-	}
+    @Override
+    void replace0(MultiFilterComponent c)
+    {
+        component0 = c;
+    }
 }

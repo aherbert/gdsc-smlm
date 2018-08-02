@@ -36,87 +36,87 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2DFunction
 {
-	private static final int[] gradientIndices;
-	static
-	{
-		gradientIndices = createGradientIndices(1, new SingleNBCircularGaussian2DFunction(1, 1));
-	}
+    private static final int[] gradientIndices;
+    static
+    {
+        gradientIndices = createGradientIndices(1, new SingleNBCircularGaussian2DFunction(1, 1));
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param maxx
-	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param maxy
-	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 */
-	public SingleNBCircularGaussian2DFunction(int maxx, int maxy)
-	{
-		super(maxx, maxy);
-	}
+    /**
+     * Constructor
+     *
+     * @param maxx
+     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     * @param maxy
+     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+     */
+    public SingleNBCircularGaussian2DFunction(int maxx, int maxy)
+    {
+        super(maxx, maxy);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-	 */
-	@Override
-	public Gaussian2DFunction copy()
-	{
-		return new SingleNBCircularGaussian2DFunction(maxx, maxy);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+     */
+    @Override
+    public Gaussian2DFunction copy()
+    {
+        return new SingleNBCircularGaussian2DFunction(maxx, maxy);
+    }
 
-	/**
-	 * Evaluates an 2-dimensional circular Gaussian function for a single peak.
-	 * <p>
-	 * {@inheritDoc}
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
-	 */
-	@Override
-	public double eval(final int x, final double[] dyda)
-	{
-		// Unpack the predictor into the dimensions
-		final int x1 = x / maxx;
-		final int x0 = x % maxx;
+    /**
+     * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
+     */
+    @Override
+    public double eval(final int x, final double[] dyda)
+    {
+        // Unpack the predictor into the dimensions
+        final int x1 = x / maxx;
+        final int x0 = x % maxx;
 
-		return background + gaussian(x0, x1, dyda);
-	}
+        return background + gaussian(x0, x1, dyda);
+    }
 
-	private double gaussian(final int x0, final int x1, final double[] dy_da)
-	{
-		final double dx = x0 - x0pos;
-		final double dy = x1 - x1pos;
+    private double gaussian(final int x0, final int x1, final double[] dy_da)
+    {
+        final double dx = x0 - x0pos;
+        final double dy = x1 - x1pos;
 
-		// Calculate gradients
+        // Calculate gradients
 
-		final double aadx2dy2 = aa * (dx * dx + dy * dy);
-		final double exp = FastMath.exp(aadx2dy2);
-		dy_da[0] = n * exp;
-		final double y = height * exp;
-		final double yaa2 = y * aa2;
-		dy_da[1] = yaa2 * dx;
-		dy_da[2] = yaa2 * dy;
+        final double aadx2dy2 = aa * (dx * dx + dy * dy);
+        final double exp = FastMath.exp(aadx2dy2);
+        dy_da[0] = n * exp;
+        final double y = height * exp;
+        final double yaa2 = y * aa2;
+        dy_da[1] = yaa2 * dx;
+        dy_da[2] = yaa2 * dy;
 
-		dy_da[3] = ax * y * (1 + aadx2dy2);
+        dy_da[3] = ax * y * (1 + aadx2dy2);
 
-		return y;
-	}
+        return y;
+    }
 
-	@Override
-	public boolean evaluatesBackground()
-	{
-		return false;
-	}
+    @Override
+    public boolean evaluatesBackground()
+    {
+        return false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-	 */
-	@Override
-	public int[] gradientIndices()
-	{
-		return gradientIndices;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
+     */
+    @Override
+    public int[] gradientIndices()
+    {
+        return gradientIndices;
+    }
 }

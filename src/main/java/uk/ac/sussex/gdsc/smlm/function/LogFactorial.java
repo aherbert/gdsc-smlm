@@ -34,454 +34,454 @@ import org.apache.commons.math3.special.Gamma;
  */
 public class LogFactorial
 {
-	/**
-	 * The master table containing {@code log(n!)}.
-	 * <p>
-	 * This should only ever be modified when holding the lock!
-	 */
-	private static volatile double[] MASTER_TABLE;
+    /**
+     * The master table containing {@code log(n!)}.
+     * <p>
+     * This should only ever be modified when holding the lock!
+     */
+    private static volatile double[] MASTER_TABLE;
 
-	/** All long-representable factorials */
-	static final long[] FACTORIALS = new long[] { 1l, 1l, 2l, 6l, 24l, 120l, 720l, 5040l, 40320l, 362880l, 3628800l,
-			39916800l, 479001600l, 6227020800l, 87178291200l, 1307674368000l, 20922789888000l, 355687428096000l,
-			6402373705728000l, 121645100408832000l, 2432902008176640000l };
+    /** All long-representable factorials */
+    static final long[] FACTORIALS = new long[] { 1l, 1l, 2l, 6l, 24l, 120l, 720l, 5040l, 40320l, 362880l, 3628800l,
+            39916800l, 479001600l, 6227020800l, 87178291200l, 1307674368000l, 20922789888000l, 355687428096000l,
+            6402373705728000l, 121645100408832000l, 2432902008176640000l };
 
-	static
-	{
-		MASTER_TABLE = new double[FACTORIALS.length];
-		// Since log(1) == 0 ignore the first two values
-		for (int k = 0; k < FACTORIALS.length; k++)
-			MASTER_TABLE[k] = Math.log(FACTORIALS[k]);
-	}
+    static
+    {
+        MASTER_TABLE = new double[FACTORIALS.length];
+        // Since log(1) == 0 ignore the first two values
+        for (int k = 0; k < FACTORIALS.length; k++)
+            MASTER_TABLE[k] = Math.log(FACTORIALS[k]);
+    }
 
-	/** Main lock guarding all access to {@link #MASTER_TABLE}. */
-	private static final ReadWriteLock lock = new ReentrantReadWriteLock();
+    /** Main lock guarding all access to {@link #MASTER_TABLE}. */
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-	/**
-	 * Gets the maximum N that is tabulated.
-	 * <p>
-	 * Note: This has synchronisation overhead.
-	 *
-	 * @return the max N
-	 */
-	public static int getTableMaxN()
-	{
-		final ReadWriteLock rwl = LogFactorial.lock;
-		rwl.readLock().lock();
-		int maxN = MASTER_TABLE.length - 1;
-		// Unlock read
-		rwl.readLock().unlock();
-		return maxN;
-	}
+    /**
+     * Gets the maximum N that is tabulated.
+     * <p>
+     * Note: This has synchronisation overhead.
+     *
+     * @return the max N
+     */
+    public static int getTableMaxN()
+    {
+        final ReadWriteLock rwl = LogFactorial.lock;
+        rwl.readLock().lock();
+        int maxN = MASTER_TABLE.length - 1;
+        // Unlock read
+        rwl.readLock().unlock();
+        return maxN;
+    }
 
-	/**
-	 * Increase the tabulated values up to a max n. Does nothing if already above the given n.
-	 * <p>
-	 * Note: This has synchronisation overhead.
-	 *
-	 * @param n
-	 *            the n
-	 */
-	public static void increaseTableMaxN(int n)
-	{
-		n = getLowerLimitN(n);
-		
-		final ReadWriteLock rwl = LogFactorial.lock;
-		rwl.readLock().lock();
-		if (MASTER_TABLE.length <= n)
-		{
-			// Must release read lock before acquiring write lock
-			rwl.readLock().unlock();
-			rwl.writeLock().lock();
-			try
-			{
-				// Recheck state because another thread might have
-				// acquired write lock and changed state before we did.
-				if (MASTER_TABLE.length <= n)
-				{
-					MASTER_TABLE = changeSize(MASTER_TABLE, n);
-				}
-				// Downgrade by acquiring read lock before releasing write lock
-				rwl.readLock().lock();
-			}
-			finally
-			{
-				rwl.writeLock().unlock(); // Unlock write, still hold read
-			}
-		}
-		// Unlock read
-		rwl.readLock().unlock();
-	}
+    /**
+     * Increase the tabulated values up to a max n. Does nothing if already above the given n.
+     * <p>
+     * Note: This has synchronisation overhead.
+     *
+     * @param n
+     *            the n
+     */
+    public static void increaseTableMaxN(int n)
+    {
+        n = getLowerLimitN(n);
 
-	/**
-	 * Change the size of the table to tabulate up to a maximum of n.
-	 *
-	 * @param table
-	 *            the table
-	 * @param n
-	 *            the n
-	 * @return the new table (length = n+1)
-	 */
-	private static double[] changeSize(double[] table, int n)
-	{
-		final double[] newTable = Arrays.copyOf(table, n + 1);
+        final ReadWriteLock rwl = LogFactorial.lock;
+        rwl.readLock().lock();
+        if (MASTER_TABLE.length <= n)
+        {
+            // Must release read lock before acquiring write lock
+            rwl.readLock().unlock();
+            rwl.writeLock().lock();
+            try
+            {
+                // Recheck state because another thread might have
+                // acquired write lock and changed state before we did.
+                if (MASTER_TABLE.length <= n)
+                {
+                    MASTER_TABLE = changeSize(MASTER_TABLE, n);
+                }
+                // Downgrade by acquiring read lock before releasing write lock
+                rwl.readLock().lock();
+            }
+            finally
+            {
+                rwl.writeLock().unlock(); // Unlock write, still hold read
+            }
+        }
+        // Unlock read
+        rwl.readLock().unlock();
+    }
 
-		// Using gamma for consistency with non-tabulated values
-		int k = table.length - 1;
-		while (k < n)
-		{
-			k++;
-			newTable[k] = Gamma.logGamma(k + 1);
-		}
+    /**
+     * Change the size of the table to tabulate up to a maximum of n.
+     *
+     * @param table
+     *            the table
+     * @param n
+     *            the n
+     * @return the new table (length = n+1)
+     */
+    private static double[] changeSize(double[] table, int n)
+    {
+        final double[] newTable = Arrays.copyOf(table, n + 1);
 
-		return newTable;
-	}
+        // Using gamma for consistency with non-tabulated values
+        int k = table.length - 1;
+        while (k < n)
+        {
+            k++;
+            newTable[k] = Gamma.logGamma(k + 1);
+        }
 
-	/**
-	 * Reduces the tabulated values down to a max n. Does nothing if already below the given n.
-	 * <p>
-	 * Note: This has synchronisation overhead.
-	 *
-	 * @param n
-	 *            the new table max N
-	 */
-	public static void reduceTableMaxN(int n)
-	{
-		final int n1 = getLowerLimitN(n) + 1;
-		
-		final ReadWriteLock rwl = LogFactorial.lock;
-		rwl.readLock().lock();
-		if (MASTER_TABLE.length > n1)
-		{
-			// Must release read lock before acquiring write lock
-			rwl.readLock().unlock();
-			rwl.writeLock().lock();
-			try
-			{
-				// Recheck state because another thread might have
-				// acquired write lock and changed state before we did.
-				if (MASTER_TABLE.length > n1)
-				{
-					MASTER_TABLE = changeSize(MASTER_TABLE, n);
-				}
-				// Downgrade by acquiring read lock before releasing write lock
-				rwl.readLock().lock();
-			}
-			finally
-			{
-				rwl.writeLock().unlock(); // Unlock write, still hold read
-			}
-		}
+        return newTable;
+    }
 
-		// Unlock read
-		rwl.readLock().unlock();
-	}
+    /**
+     * Reduces the tabulated values down to a max n. Does nothing if already below the given n.
+     * <p>
+     * Note: This has synchronisation overhead.
+     *
+     * @param n
+     *            the new table max N
+     */
+    public static void reduceTableMaxN(int n)
+    {
+        final int n1 = getLowerLimitN(n) + 1;
 
-	/**
-	 * Gets the lower limit on N in order to keep the representable factorials
-	 *
-	 * @param n
-	 *            the n
-	 * @return the lower limit
-	 */
-	private static int getLowerLimitN(int n)
-	{
-		return Math.max(n, FACTORIALS.length - 1);
-	}
+        final ReadWriteLock rwl = LogFactorial.lock;
+        rwl.readLock().lock();
+        if (MASTER_TABLE.length > n1)
+        {
+            // Must release read lock before acquiring write lock
+            rwl.readLock().unlock();
+            rwl.writeLock().lock();
+            try
+            {
+                // Recheck state because another thread might have
+                // acquired write lock and changed state before we did.
+                if (MASTER_TABLE.length > n1)
+                {
+                    MASTER_TABLE = changeSize(MASTER_TABLE, n);
+                }
+                // Downgrade by acquiring read lock before releasing write lock
+                rwl.readLock().lock();
+            }
+            finally
+            {
+                rwl.writeLock().unlock(); // Unlock write, still hold read
+            }
+        }
 
-	/**
-	 * Compute the log of n!. Uses tabulated values or the gamma function if n is large.
-	 * <p>
-	 * Note: This has no synchronisation overhead.
-	 *
-	 * @param n
-	 *            the n (must be positive)
-	 * @return log(n!)
-	 * @throws ArrayIndexOutOfBoundsException
-	 *             if n is negative
-	 */
-	public static double logF(int n) throws ArrayIndexOutOfBoundsException
-	{
-		// This is not synchronized. 
-		// We read a copy of the table from main memory. 
-		// If it is too small then just compute using the Gamma function.		
-		final double[] logF = MASTER_TABLE;
-		if (n < logF.length)
-			return logF[n];
-		return Gamma.logGamma(n + 1);
-	}
+        // Unlock read
+        rwl.readLock().unlock();
+    }
 
-	/**
-	 * Compute the log of k!. Uses the gamma function
-	 * <p>
-	 * Note: This has no synchronisation overhead.
-	 *
-	 * @param k
-	 *            the k
-	 * @return log(k!)
-	 */
-	public static double logF(double k)
-	{
-		if (k <= 1)
-			return 0;
-		return Gamma.logGamma(k + 1);
-	}
+    /**
+     * Gets the lower limit on N in order to keep the representable factorials
+     *
+     * @param n
+     *            the n
+     * @return the lower limit
+     */
+    private static int getLowerLimitN(int n)
+    {
+        return Math.max(n, FACTORIALS.length - 1);
+    }
 
-	/////////////////////////////////////
-	// Instance with pre-computed values
-	/////////////////////////////////////
+    /**
+     * Compute the log of n!. Uses tabulated values or the gamma function if n is large.
+     * <p>
+     * Note: This has no synchronisation overhead.
+     *
+     * @param n
+     *            the n (must be positive)
+     * @return log(n!)
+     * @throws ArrayIndexOutOfBoundsException
+     *             if n is negative
+     */
+    public static double logF(int n) throws ArrayIndexOutOfBoundsException
+    {
+        // This is not synchronized. 
+        // We read a copy of the table from main memory. 
+        // If it is too small then just compute using the Gamma function.		
+        final double[] logF = MASTER_TABLE;
+        if (n < logF.length)
+            return logF[n];
+        return Gamma.logGamma(n + 1);
+    }
 
-	private volatile double[] objectTable;
+    /**
+     * Compute the log of k!. Uses the gamma function
+     * <p>
+     * Note: This has no synchronisation overhead.
+     *
+     * @param k
+     *            the k
+     * @return log(k!)
+     */
+    public static double logF(double k)
+    {
+        if (k <= 1)
+            return 0;
+        return Gamma.logGamma(k + 1);
+    }
 
-	/** Main lock guarding all access to {@link #objectTable}. */
-	private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
+    /////////////////////////////////////
+    // Instance with pre-computed values
+    /////////////////////////////////////
 
-	/**
-	 * Instantiates a new log factorial using the current static table.
-	 * <p>
-	 * The size of the static table can be obtained using {@link #getTableMaxN()}.
-	 * Note that the table may be changed by other threads. The size of the newly
-	 * constructed object can be obtained using {@link #getMaxN()}.
-	 */
-	public LogFactorial()
-	{
-		// Copy the static values already present
-		objectTable = LogFactorial.MASTER_TABLE;
-	}
+    private volatile double[] objectTable;
 
-	/**
-	 * Instantiates a new log factorial.
-	 *
-	 * @param objectTable
-	 *            the object table
-	 */
-	private LogFactorial(double[] objectTable)
-	{
-		this.objectTable = objectTable;
-	}
+    /** Main lock guarding all access to {@link #objectTable}. */
+    private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
 
-	/**
-	 * Instantiates a new log factorial using the given table size.
-	 *
-	 * @param n
-	 *            the n
-	 */
-	public LogFactorial(int n)
-	{
-		// Copy the static values already present
-		objectTable = changeSize(LogFactorial.MASTER_TABLE, getLowerLimitN(n));
-	}
+    /**
+     * Instantiates a new log factorial using the current static table.
+     * <p>
+     * The size of the static table can be obtained using {@link #getTableMaxN()}.
+     * Note that the table may be changed by other threads. The size of the newly
+     * constructed object can be obtained using {@link #getMaxN()}.
+     */
+    public LogFactorial()
+    {
+        // Copy the static values already present
+        objectTable = LogFactorial.MASTER_TABLE;
+    }
 
-	/**
-	 * Gets the maximum N that is tabulated.
-	 * <p>
-	 * Note: This has synchronisation overhead.
-	 *
-	 * @return the max N
-	 */
-	public int getMaxN()
-	{
-		final ReadWriteLock rwl = this.objectLock;
-		rwl.readLock().lock();
-		int maxN = objectTable.length - 1;
-		// Unlock read
-		rwl.readLock().unlock();
-		return maxN;
-	}
+    /**
+     * Instantiates a new log factorial.
+     *
+     * @param objectTable
+     *            the object table
+     */
+    private LogFactorial(double[] objectTable)
+    {
+        this.objectTable = objectTable;
+    }
 
-	/**
-	 * Increase the tabulated values up to a max n. Does nothing if already above the given n.
-	 * <p>
-	 * Note: This has synchronisation overhead.
-	 *
-	 * @param n
-	 *            the n
-	 */
-	public void increaseMaxN(int n)
-	{
-		n = getLowerLimitN(n);
-		
-		final ReadWriteLock rwl = LogFactorial.lock;
-		rwl.readLock().lock();
-		if (objectTable.length <= n)
-		{
-			// Must release read lock before acquiring write lock
-			rwl.readLock().unlock();
-			rwl.writeLock().lock();
-			try
-			{
-				// Recheck state because another thread might have
-				// acquired write lock and changed state before we did.
-				if (objectTable.length <= n)
-				{
-					// Use the master table if it is bigger as that has all values pre-computed.
-					final double[] masterTable = LogFactorial.MASTER_TABLE;
-					if (masterTable.length > objectTable.length)
-						objectTable = Arrays.copyOf(masterTable, Math.min(n + 1, masterTable.length));
+    /**
+     * Instantiates a new log factorial using the given table size.
+     *
+     * @param n
+     *            the n
+     */
+    public LogFactorial(int n)
+    {
+        // Copy the static values already present
+        objectTable = changeSize(LogFactorial.MASTER_TABLE, getLowerLimitN(n));
+    }
 
-					if (objectTable.length <= n)
-						objectTable = changeSize(objectTable, n);
-				}
-				// Downgrade by acquiring read lock before releasing write lock
-				rwl.readLock().lock();
-			}
-			finally
-			{
-				rwl.writeLock().unlock(); // Unlock write, still hold read
-			}
-		}
+    /**
+     * Gets the maximum N that is tabulated.
+     * <p>
+     * Note: This has synchronisation overhead.
+     *
+     * @return the max N
+     */
+    public int getMaxN()
+    {
+        final ReadWriteLock rwl = this.objectLock;
+        rwl.readLock().lock();
+        int maxN = objectTable.length - 1;
+        // Unlock read
+        rwl.readLock().unlock();
+        return maxN;
+    }
 
-		// Unlock read
-		rwl.readLock().unlock();
-	}
+    /**
+     * Increase the tabulated values up to a max n. Does nothing if already above the given n.
+     * <p>
+     * Note: This has synchronisation overhead.
+     *
+     * @param n
+     *            the n
+     */
+    public void increaseMaxN(int n)
+    {
+        n = getLowerLimitN(n);
 
-	/**
-	 * Ensure the table contains values for the specified range of N.
-	 * <p>
-	 * This can be called before using the object with a known range of n.
-	 * <p>
-	 * Note: This has synchronisation overhead.
-	 *
-	 * @param minN
-	 *            the min N
-	 * @param maxN
-	 *            the max N
-	 * @throws IllegalArgumentException
-	 *             If min is greater than max
-	 */
-	public void ensureRange(int minN, int maxN) throws IllegalArgumentException
-	{
-		// Validate the range
-		if (minN < 0)
-			minN = 0;
-		maxN = getLowerLimitN(maxN);		
-		if (minN > maxN)
-			throw new IllegalArgumentException("Max must be greater than min");
-		
-		final ReadWriteLock rwl = LogFactorial.lock;
-		rwl.readLock().lock();
-		if (objectTable.length <= maxN || !checkRange(minN, maxN))
-		{
-			// Must release read lock before acquiring write lock
-			rwl.readLock().unlock();
-			rwl.writeLock().lock();
-			try
-			{
-				// Recheck state because another thread might have
-				// acquired write lock and changed state before we did.
-				if (objectTable.length <= maxN)
-				{
-					// Use the master table if it is bigger as that has all values pre-computed.
-					final double[] masterTable = LogFactorial.MASTER_TABLE;
-					objectTable = Arrays.copyOf((masterTable.length > objectTable.length) ? masterTable : objectTable,
-							maxN + 1);
-				}
+        final ReadWriteLock rwl = LogFactorial.lock;
+        rwl.readLock().lock();
+        if (objectTable.length <= n)
+        {
+            // Must release read lock before acquiring write lock
+            rwl.readLock().unlock();
+            rwl.writeLock().lock();
+            try
+            {
+                // Recheck state because another thread might have
+                // acquired write lock and changed state before we did.
+                if (objectTable.length <= n)
+                {
+                    // Use the master table if it is bigger as that has all values pre-computed.
+                    final double[] masterTable = LogFactorial.MASTER_TABLE;
+                    if (masterTable.length > objectTable.length)
+                        objectTable = Arrays.copyOf(masterTable, Math.min(n + 1, masterTable.length));
 
-				// Check range has pre-computed values
-				for (int n = Math.max(2, minN); n <= maxN; n++)
-					if (objectTable[n] == 0)
-					{
-						// Already hold the write lock so just write the values
-						objectTable[n] = Gamma.logGamma(n + 1);
-					}
+                    if (objectTable.length <= n)
+                        objectTable = changeSize(objectTable, n);
+                }
+                // Downgrade by acquiring read lock before releasing write lock
+                rwl.readLock().lock();
+            }
+            finally
+            {
+                rwl.writeLock().unlock(); // Unlock write, still hold read
+            }
+        }
 
-				// Downgrade by acquiring read lock before releasing write lock
-				rwl.readLock().lock();
-			}
-			finally
-			{
-				rwl.writeLock().unlock(); // Unlock write, still hold read
-			}
-		}
+        // Unlock read
+        rwl.readLock().unlock();
+    }
 
-		// Unlock read
-		rwl.readLock().unlock();
-	}
+    /**
+     * Ensure the table contains values for the specified range of N.
+     * <p>
+     * This can be called before using the object with a known range of n.
+     * <p>
+     * Note: This has synchronisation overhead.
+     *
+     * @param minN
+     *            the min N
+     * @param maxN
+     *            the max N
+     * @throws IllegalArgumentException
+     *             If min is greater than max
+     */
+    public void ensureRange(int minN, int maxN) throws IllegalArgumentException
+    {
+        // Validate the range
+        if (minN < 0)
+            minN = 0;
+        maxN = getLowerLimitN(maxN);
+        if (minN > maxN)
+            throw new IllegalArgumentException("Max must be greater than min");
 
-	/**
-	 * Check the table has computed values in the range minN to maxN inclusive.
-	 * <p>
-	 * Only call when holding the read lock.
-	 *
-	 * @param minN
-	 *            the min N
-	 * @param maxN
-	 *            the max N
-	 * @return true, if successful
-	 */
-	private boolean checkRange(int minN, int maxN)
-	{
-		for (int n = Math.max(2, minN); n <= maxN; n++)
-			if (objectTable[n] == 0)
-				return false;
-		return true;
-	}
+        final ReadWriteLock rwl = LogFactorial.lock;
+        rwl.readLock().lock();
+        if (objectTable.length <= maxN || !checkRange(minN, maxN))
+        {
+            // Must release read lock before acquiring write lock
+            rwl.readLock().unlock();
+            rwl.writeLock().lock();
+            try
+            {
+                // Recheck state because another thread might have
+                // acquired write lock and changed state before we did.
+                if (objectTable.length <= maxN)
+                {
+                    // Use the master table if it is bigger as that has all values pre-computed.
+                    final double[] masterTable = LogFactorial.MASTER_TABLE;
+                    objectTable = Arrays.copyOf((masterTable.length > objectTable.length) ? masterTable : objectTable,
+                            maxN + 1);
+                }
 
-	/**
-	 * Get the log of n! using tabulated values.
-	 * <p>
-	 * Note: This has no synchronisation overhead.
-	 *
-	 * @param n
-	 *            the n (must be positive)
-	 * @return log(n!)
-	 * @throws ArrayIndexOutOfBoundsException
-	 *             if n is outside the table bounds
-	 * @see #getMaxN()
-	 */
-	public double getLogF(int n) throws ArrayIndexOutOfBoundsException
-	{
-		final double value = objectTable[n];
-		return (value == 0) ? LogFactorial.logF(n) : value;
-	}
+                // Check range has pre-computed values
+                for (int n = Math.max(2, minN); n <= maxN; n++)
+                    if (objectTable[n] == 0)
+                    {
+                        // Already hold the write lock so just write the values
+                        objectTable[n] = Gamma.logGamma(n + 1);
+                    }
 
-	/**
-	 * Get the log of n! using tabulated values.
-	 * <p>
-	 * Note: This has no synchronisation overhead.
-	 * <p>
-	 * No checks are made that the object table contains a pre-computed value,
-	 * for instance in the case where the table was created using {@link #ensureRange(int, int)}
-	 * there may be values outside the range that are zero.
-	 *
-	 * @param n
-	 *            the n (must be positive)
-	 * @return log(n!)
-	 * @throws ArrayIndexOutOfBoundsException
-	 *             if n is outside the table bounds
-	 * @see #getMaxN()
-	 */
-	public double getLogFUnsafe(int n) throws ArrayIndexOutOfBoundsException
-	{
-		return objectTable[n];
-	}
+                // Downgrade by acquiring read lock before releasing write lock
+                rwl.readLock().lock();
+            }
+            finally
+            {
+                rwl.writeLock().unlock(); // Unlock write, still hold read
+            }
+        }
 
-	/**
-	 * Copy the object.
-	 *
-	 * @return the log factorial
-	 */
-	public LogFactorial copy()
-	{
-		return new LogFactorial(objectTable);
-	}
+        // Unlock read
+        rwl.readLock().unlock();
+    }
 
-	/**
-	 * Copy the object with the given table size.
-	 * <p>
-	 * If n is larger then the current size then the table will be expanded.
-	 *
-	 * @param n
-	 *            the n
-	 * @return the log factorial
-	 */
-	public LogFactorial withN(int n)
-	{
-		// Copy the values already present
-		final double[] masterTable = LogFactorial.MASTER_TABLE;
-		double[] objectTable = this.objectTable;
-		if (masterTable.length > objectTable.length)
-			objectTable = masterTable;		
-		return new LogFactorial(changeSize(objectTable, getLowerLimitN(n)));
-	}
+    /**
+     * Check the table has computed values in the range minN to maxN inclusive.
+     * <p>
+     * Only call when holding the read lock.
+     *
+     * @param minN
+     *            the min N
+     * @param maxN
+     *            the max N
+     * @return true, if successful
+     */
+    private boolean checkRange(int minN, int maxN)
+    {
+        for (int n = Math.max(2, minN); n <= maxN; n++)
+            if (objectTable[n] == 0)
+                return false;
+        return true;
+    }
+
+    /**
+     * Get the log of n! using tabulated values.
+     * <p>
+     * Note: This has no synchronisation overhead.
+     *
+     * @param n
+     *            the n (must be positive)
+     * @return log(n!)
+     * @throws ArrayIndexOutOfBoundsException
+     *             if n is outside the table bounds
+     * @see #getMaxN()
+     */
+    public double getLogF(int n) throws ArrayIndexOutOfBoundsException
+    {
+        final double value = objectTable[n];
+        return (value == 0) ? LogFactorial.logF(n) : value;
+    }
+
+    /**
+     * Get the log of n! using tabulated values.
+     * <p>
+     * Note: This has no synchronisation overhead.
+     * <p>
+     * No checks are made that the object table contains a pre-computed value,
+     * for instance in the case where the table was created using {@link #ensureRange(int, int)}
+     * there may be values outside the range that are zero.
+     *
+     * @param n
+     *            the n (must be positive)
+     * @return log(n!)
+     * @throws ArrayIndexOutOfBoundsException
+     *             if n is outside the table bounds
+     * @see #getMaxN()
+     */
+    public double getLogFUnsafe(int n) throws ArrayIndexOutOfBoundsException
+    {
+        return objectTable[n];
+    }
+
+    /**
+     * Copy the object.
+     *
+     * @return the log factorial
+     */
+    public LogFactorial copy()
+    {
+        return new LogFactorial(objectTable);
+    }
+
+    /**
+     * Copy the object with the given table size.
+     * <p>
+     * If n is larger then the current size then the table will be expanded.
+     *
+     * @param n
+     *            the n
+     * @return the log factorial
+     */
+    public LogFactorial withN(int n)
+    {
+        // Copy the values already present
+        final double[] masterTable = LogFactorial.MASTER_TABLE;
+        double[] objectTable = this.objectTable;
+        if (masterTable.length > objectTable.length)
+            objectTable = masterTable;
+        return new LogFactorial(changeSize(objectTable, getLowerLimitN(n)));
+    }
 }

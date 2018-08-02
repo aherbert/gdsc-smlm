@@ -28,128 +28,128 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class FixedNormaliser implements Normaliser
 {
-	/** The normalisation. */
-	public final float normalisation;
+    /** The normalisation. */
+    public final float normalisation;
 
-	/**
-	 * Instantiates a new fixed normaliser.
-	 *
-	 * @param normalisation
-	 *            the normalisation
-	 */
-	public FixedNormaliser(float normalisation)
-	{
-		this.normalisation = normalisation;
-	}
+    /**
+     * Instantiates a new fixed normaliser.
+     *
+     * @param normalisation
+     *            the normalisation
+     */
+    public FixedNormaliser(float normalisation)
+    {
+        this.normalisation = normalisation;
+    }
 
-	/**
-	 * Normalise the sum.
-	 *
-	 * @param sum
-	 *            the sum
-	 * @param index
-	 *            the index
-	 * @return the normalised value
-	 */
-	@Override
-	public float normalise(double sum, int index)
-	{
-		return (float) (sum / normalisation);
-	}
+    /**
+     * Normalise the sum.
+     *
+     * @param sum
+     *            the sum
+     * @param index
+     *            the index
+     * @return the normalised value
+     */
+    @Override
+    public float normalise(double sum, int index)
+    {
+        return (float) (sum / normalisation);
+    }
 
-	/**
-	 * Normalise the sum.
-	 *
-	 * @param sum
-	 *            the sum
-	 * @param index
-	 *            the index
-	 * @return the normalised value
-	 */
-	@Override
-	public float normalise(float sum, int index)
-	{
-		return sum / normalisation;
-	}
+    /**
+     * Normalise the sum.
+     *
+     * @param sum
+     *            the sum
+     * @param index
+     *            the index
+     * @return the normalised value
+     */
+    @Override
+    public float normalise(float sum, int index)
+    {
+        return sum / normalisation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int)
-	 */
-	@Override
-	public void normalise(float[] data, int size)
-	{
-		for (int i = 0; i < size; i++)
-			data[i] /= normalisation;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int)
+     */
+    @Override
+    public void normalise(float[] data, int size)
+    {
+        for (int i = 0; i < size; i++)
+            data[i] /= normalisation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
-	 */
-	@Override
-	public void normalise(float[] data, float[] out, int size)
-	{
-		for (int i = 0; i < size; i++)
-			out[i] = data[i] / normalisation;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
+     */
+    @Override
+    public void normalise(float[] data, float[] out, int size)
+    {
+        for (int i = 0; i < size; i++)
+            out[i] = data[i] / normalisation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
-	 */
-	@Override
-	public void normalise(float[] data, int maxx, int maxy, int border)
-	{
-		final int xlimit = maxx - border;
-		final int ylimit = maxy - border;
-		for (int y = border; y < ylimit; y++)
-			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-				data[i] /= normalisation;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
+     */
+    @Override
+    public void normalise(float[] data, int maxx, int maxy, int border)
+    {
+        final int xlimit = maxx - border;
+        final int ylimit = maxy - border;
+        for (int y = border; y < ylimit; y++)
+            for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+                data[i] /= normalisation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
-	 */
-	@Override
-	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
-	{
-		final int xlimit = maxx - border;
-		final int ylimit = maxy - border;
-		for (int y = border; y < ylimit; y++)
-			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-				out[i] = data[i] / normalisation;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
+     */
+    @Override
+    public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
+    {
+        final int xlimit = maxx - border;
+        final int ylimit = maxy - border;
+        for (int y = border; y < ylimit; y++)
+            for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+                out[i] = data[i] / normalisation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
-	 */
-	@Override
-	public void normalise(double[] data, float[] out, int size)
-	{
-		for (int i = 0; i < size; i++)
-			out[i] = (float) (data[i] / normalisation);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
+     */
+    @Override
+    public void normalise(double[] data, float[] out, int size)
+    {
+        for (int i = 0; i < size; i++)
+            out[i] = (float) (data[i] / normalisation);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
-	 */
-	@Override
-	public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
-	{
-		final int xlimit = maxx - border;
-		final int ylimit = maxy - border;
-		for (int y = border; y < ylimit; y++)
-			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-				out[i] = (float) (data[i] / normalisation);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
+     */
+    @Override
+    public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
+    {
+        final int xlimit = maxx - border;
+        final int ylimit = maxy - border;
+        for (int y = border; y < ylimit; y++)
+            for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+                out[i] = (float) (data[i] / normalisation);
+    }
 }

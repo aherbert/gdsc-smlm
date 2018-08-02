@@ -30,21 +30,22 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class FailPeakResultPredicate implements PeakResultPredicate
 {
-	/**
-	 * Instantiates a new fail peak result predicate.
-	 */
-	public FailPeakResultPredicate()
-	{
-	}
+    /**
+     * Instantiates a new fail peak result predicate.
+     */
+    public FailPeakResultPredicate()
+    {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public boolean test(PeakResult t)
-	{
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+     */
+    @Override
+    public boolean test(PeakResult t)
+    {
+        return false;
+    }
 }

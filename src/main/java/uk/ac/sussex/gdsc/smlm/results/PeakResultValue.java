@@ -28,12 +28,12 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public interface PeakResultValue
 {
-	/**
-	 * Gets the value of the result.
-	 *
-	 * @param result
-	 *            the result
-	 * @return the value
-	 */
-	public float getValue(PeakResult result);
+    /**
+     * Gets the value of the result.
+     *
+     * @param result
+     *            the result
+     * @return the value
+     */
+    public float getValue(PeakResult result);
 }

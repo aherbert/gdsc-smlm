@@ -36,241 +36,241 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PrecisionFilter extends DirectFilter implements IMultiFilter
 {
-	/** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-	public static final double DEFAULT_INCREMENT = 1;
-	/** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-	public static final double DEFAULT_RANGE = 10;
-	/** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-	public static final double UPPER_LIMIT = 70;
+    /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+    public static final double DEFAULT_INCREMENT = 1;
+    /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+    public static final double DEFAULT_RANGE = 10;
+    /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+    public static final double UPPER_LIMIT = 70;
 
-	@XStreamAsAttribute
-	private final double precision;
-	@XStreamOmitField
-	private double variance;
-	@XStreamOmitField
-	private Gaussian2DPeakResultCalculator calculator;
+    @XStreamAsAttribute
+    private final double precision;
+    @XStreamOmitField
+    private double variance;
+    @XStreamOmitField
+    private Gaussian2DPeakResultCalculator calculator;
 
-	/**
-	 * Instantiates a new precision filter.
-	 *
-	 * @param precision
-	 *            the precision
-	 */
-	public PrecisionFilter(double precision)
-	{
-		this.precision = Math.max(0, precision);
-	}
+    /**
+     * Instantiates a new precision filter.
+     *
+     * @param precision
+     *            the precision
+     */
+    public PrecisionFilter(double precision)
+    {
+        this.precision = Math.max(0, precision);
+    }
 
-	@Override
-	public void setup(MemoryPeakResults peakResults)
-	{
-		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.LSE_PRECISION);
-		variance = Filter.getDUpperSquaredLimit(precision);
-	}
+    @Override
+    public void setup(MemoryPeakResults peakResults)
+    {
+        calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+                Gaussian2DPeakResultHelper.LSE_PRECISION);
+        variance = Filter.getDUpperSquaredLimit(precision);
+    }
 
-	@Override
-	public boolean accept(PeakResult peak)
-	{
-		// Use the background noise to estimate precision
-		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) <= variance;
-	}
+    @Override
+    public boolean accept(PeakResult peak)
+    {
+        // Use the background noise to estimate precision
+        return calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) <= variance;
+    }
 
-	@Override
-	public int getValidationFlags()
-	{
-		return V_LOCATION_VARIANCE;
-	}
+    @Override
+    public int getValidationFlags()
+    {
+        return V_LOCATION_VARIANCE;
+    }
 
-	@Override
-	public int validate(final PreprocessedPeakResult peak)
-	{
-		if (peak.getLocationVariance() > variance)
-			return V_LOCATION_VARIANCE;
-		return 0;
-	}
+    @Override
+    public int validate(final PreprocessedPeakResult peak)
+    {
+        if (peak.getLocationVariance() > variance)
+            return V_LOCATION_VARIANCE;
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-	 */
-	@Override
-	public String getDescription()
-	{
-		return "Filter results using an upper precision threshold.";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
+     */
+    @Override
+    public String getDescription()
+    {
+        return "Filter results using an upper precision threshold.";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-	 */
-	@Override
-	public int getNumberOfParameters()
-	{
-		return 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
+     */
+    @Override
+    public int getNumberOfParameters()
+    {
+        return 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-	 */
-	@Override
-	protected double getParameterValueInternal(int index)
-	{
-		return precision;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
+     */
+    @Override
+    protected double getParameterValueInternal(int index)
+    {
+        return precision;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-	 */
-	@Override
-	public double getParameterIncrement(int index)
-	{
-		checkIndex(index);
-		return PrecisionFilter.DEFAULT_INCREMENT;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+     */
+    @Override
+    public double getParameterIncrement(int index)
+    {
+        checkIndex(index);
+        return PrecisionFilter.DEFAULT_INCREMENT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-	 */
-	@Override
-	public ParameterType getParameterType(int index)
-	{
-		checkIndex(index);
-		return ParameterType.PRECISION;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
+     */
+    @Override
+    public ParameterType getParameterType(int index)
+    {
+        checkIndex(index);
+        return ParameterType.PRECISION;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-	 */
-	@Override
-	public Filter adjustParameter(int index, double delta)
-	{
-		checkIndex(index);
-		return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
+     */
+    @Override
+    public Filter adjustParameter(int index, double delta)
+    {
+        checkIndex(index);
+        return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-	 */
-	@Override
-	public Filter create(double... parameters)
-	{
-		return new PrecisionFilter(parameters[0]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
+     */
+    @Override
+    public Filter create(double... parameters)
+    {
+        return new PrecisionFilter(parameters[0]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-	 */
-	@Override
-	public void weakestParameters(double[] parameters)
-	{
-		setMax(parameters, 0, precision);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+     */
+    @Override
+    public void weakestParameters(double[] parameters)
+    {
+        setMax(parameters, 0, precision);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
-	 */
-	@Override
-	public int lowerBoundOrientation(int index)
-	{
-		return 1;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+     */
+    @Override
+    public int lowerBoundOrientation(int index)
+    {
+        return 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-	 */
-	@Override
-	public double[] upperLimit()
-	{
-		return new double[] { UPPER_LIMIT };
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
+     */
+    @Override
+    public double[] upperLimit()
+    {
+        return new double[] { UPPER_LIMIT };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-	 */
-	@Override
-	public double[] mutationStepRange()
-	{
-		return new double[] { DEFAULT_RANGE };
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
+     */
+    @Override
+    public double[] mutationStepRange()
+    {
+        return new double[] { DEFAULT_RANGE };
+    }
 
-	@Override
-	public double getSignal()
-	{
-		return 0;
-	}
+    @Override
+    public double getSignal()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getSNR()
-	{
-		return 0;
-	}
+    @Override
+    public double getSNR()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMinWidth()
-	{
-		return 0;
-	}
+    @Override
+    public double getMinWidth()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMaxWidth()
-	{
-		return 0;
-	}
+    @Override
+    public double getMaxWidth()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getShift()
-	{
-		return 0;
-	}
+    @Override
+    public double getShift()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getEShift()
-	{
-		return 0;
-	}
+    @Override
+    public double getEShift()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getPrecision()
-	{
-		return precision;
-	}
+    @Override
+    public double getPrecision()
+    {
+        return precision;
+    }
 
-	@Override
-	public PrecisionType getPrecisionType()
-	{
-		return PrecisionType.ESTIMATE;
-	}
+    @Override
+    public PrecisionType getPrecisionType()
+    {
+        return PrecisionType.ESTIMATE;
+    }
 
-	@Override
-	public double getMinZ()
-	{
-		return 0;
-	}
+    @Override
+    public double getMinZ()
+    {
+        return 0;
+    }
 
-	@Override
-	public double getMaxZ()
-	{
-		return 0;
-	}
+    @Override
+    public double getMaxZ()
+    {
+        return 0;
+    }
 }

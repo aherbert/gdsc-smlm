@@ -32,142 +32,142 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class SphericalDistribution implements SpatialDistribution
 {
-	private final double radius, r2, range;
-	private final RandomGenerator randomGenerator;
-	private boolean useRejectionMethod = true;
-	private final double[] origin = new double[3];
+    private final double radius, r2, range;
+    private final RandomGenerator randomGenerator;
+    private boolean useRejectionMethod = true;
+    private final double[] origin = new double[3];
 
-	/**
-	 * Instantiates a new spherical distribution.
-	 *
-	 * @param radius
-	 *            the radius
-	 */
-	public SphericalDistribution(double radius)
-	{
-		this(radius, null);
-	}
+    /**
+     * Instantiates a new spherical distribution.
+     *
+     * @param radius
+     *            the radius
+     */
+    public SphericalDistribution(double radius)
+    {
+        this(radius, null);
+    }
 
-	/**
-	 * Instantiates a new spherical distribution.
-	 *
-	 * @param radius
-	 *            the radius
-	 * @param randomGenerator
-	 *            the random generator
-	 */
-	public SphericalDistribution(double radius, RandomGenerator randomGenerator)
-	{
-		if (randomGenerator == null)
-			randomGenerator = new JDKRandomGenerator();
-		if (radius < 0)
-			throw new IllegalArgumentException("Radius must be positive: {0}");
-		this.radius = radius;
-		this.r2 = radius * radius;
-		this.range = 2 * radius;
-		this.randomGenerator = randomGenerator;
-	}
+    /**
+     * Instantiates a new spherical distribution.
+     *
+     * @param radius
+     *            the radius
+     * @param randomGenerator
+     *            the random generator
+     */
+    public SphericalDistribution(double radius, RandomGenerator randomGenerator)
+    {
+        if (randomGenerator == null)
+            randomGenerator = new JDKRandomGenerator();
+        if (radius < 0)
+            throw new IllegalArgumentException("Radius must be positive: {0}");
+        this.radius = radius;
+        this.r2 = radius * radius;
+        this.range = 2 * radius;
+        this.randomGenerator = randomGenerator;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#next()
-	 */
-	@Override
-	public double[] next()
-	{
-		final double[] xyz = new double[3];
-		if (radius > 0)
-			if (useRejectionMethod)
-			{
-				// -=-=-=-
-				// Rejection method:
-				// Sample from a cube and then check if within a sphere
-				// -=-=-=-
-				double d2 = 0;
-				do
-				{
-					for (int i = 0; i < 3; i++)
-						//xyz[i] = randomGenerator.nextDouble() * ((randomGenerator.nextBoolean()) ? -radius : radius);
-						// Avoid extra call to the random generator
-						xyz[i] = randomGenerator.nextDouble() * range - radius;
-					d2 = xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2];
-				} while (d2 > r2);
-			}
-			else
-			{
-				// -=-=-=-
-				// Transformation method:
-				// Generate a random point on the surface of the sphere and then sample within.
-				// -=-=-=-
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#next()
+     */
+    @Override
+    public double[] next()
+    {
+        final double[] xyz = new double[3];
+        if (radius > 0)
+            if (useRejectionMethod)
+            {
+                // -=-=-=-
+                // Rejection method:
+                // Sample from a cube and then check if within a sphere
+                // -=-=-=-
+                double d2 = 0;
+                do
+                {
+                    for (int i = 0; i < 3; i++)
+                        //xyz[i] = randomGenerator.nextDouble() * ((randomGenerator.nextBoolean()) ? -radius : radius);
+                        // Avoid extra call to the random generator
+                        xyz[i] = randomGenerator.nextDouble() * range - radius;
+                    d2 = xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2];
+                } while (d2 > r2);
+            }
+            else
+            {
+                // -=-=-=-
+                // Transformation method:
+                // Generate a random point on the surface of the sphere and then sample within.
+                // -=-=-=-
 
-				// Generate a random unit vector: X1, X2, X3 sampled with mean 0 and variance 1
-				for (int i = 0; i < 3; i++)
-					xyz[i] = randomGenerator.nextGaussian();
+                // Generate a random unit vector: X1, X2, X3 sampled with mean 0 and variance 1
+                for (int i = 0; i < 3; i++)
+                    xyz[i] = randomGenerator.nextGaussian();
 
-				// Calculate the distance: RsU^1/3 / length
-				final double d = (radius * FastMath.cbrt(randomGenerator.nextDouble())) /
-						Math.sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
-				for (int i = 0; i < 3; i++)
-					xyz[i] *= d;
-			}
-		return xyz;
-	}
+                // Calculate the distance: RsU^1/3 / length
+                final double d = (radius * FastMath.cbrt(randomGenerator.nextDouble())) /
+                        Math.sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
+                for (int i = 0; i < 3; i++)
+                    xyz[i] *= d;
+            }
+        return xyz;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithin(double[])
-	 */
-	@Override
-	public boolean isWithin(double[] xyz)
-	{
-		final double[] delta = { xyz[0] - origin[0], xyz[1] - origin[1], xyz[2] - origin[2] };
-		return (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]) < r2;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithin(double[])
+     */
+    @Override
+    public boolean isWithin(double[] xyz)
+    {
+        final double[] delta = { xyz[0] - origin[0], xyz[1] - origin[1], xyz[2] - origin[2] };
+        return (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]) < r2;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
-	 */
-	@Override
-	public boolean isWithinXY(double[] xyz)
-	{
-		final double[] delta = { xyz[0] - origin[0], xyz[1] - origin[1] };
-		return (delta[0] * delta[0] + delta[1] * delta[1]) < r2;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
+     */
+    @Override
+    public boolean isWithinXY(double[] xyz)
+    {
+        final double[] delta = { xyz[0] - origin[0], xyz[1] - origin[1] };
+        return (delta[0] * delta[0] + delta[1] * delta[1]) < r2;
+    }
 
-	/**
-	 * @return If true then sample from the distribution using the rejection method. The alternative is a transformation
-	 *         method.
-	 */
-	public boolean isUseRejectionMethod()
-	{
-		return useRejectionMethod;
-	}
+    /**
+     * @return If true then sample from the distribution using the rejection method. The alternative is a transformation
+     *         method.
+     */
+    public boolean isUseRejectionMethod()
+    {
+        return useRejectionMethod;
+    }
 
-	/**
-	 * @param useRejectionMethod
-	 *            If true then sample from the distribution using the rejection method. The alternative is a
-	 *            transformation
-	 *            method.
-	 */
-	public void setUseRejectionMethod(boolean useRejectionMethod)
-	{
-		this.useRejectionMethod = useRejectionMethod;
-	}
+    /**
+     * @param useRejectionMethod
+     *            If true then sample from the distribution using the rejection method. The alternative is a
+     *            transformation
+     *            method.
+     */
+    public void setUseRejectionMethod(boolean useRejectionMethod)
+    {
+        this.useRejectionMethod = useRejectionMethod;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#initialise(double[])
-	 */
-	@Override
-	public void initialise(double[] xyz)
-	{
-		if (xyz != null && xyz.length > 2)
-			for (int i = 0; i < 3; i++)
-				origin[i] = xyz[i];
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#initialise(double[])
+     */
+    @Override
+    public void initialise(double[] xyz)
+    {
+        if (xyz != null && xyz.length > 2)
+            for (int i = 0; i < 3; i++)
+                origin[i] = xyz[i];
+    }
 }

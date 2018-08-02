@@ -42,118 +42,118 @@ import uk.ac.sussex.gdsc.core.ij.Utils;
  */
 public class ImageBackground implements PlugInFilter
 {
-	private final static String TITLE = "Image Background";
+    private final static String TITLE = "Image Background";
 
-	private static float bias = 500;
-	private static double sigma = 2;
+    private static float bias = 500;
+    private static double sigma = 2;
 
-	private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-	private ImagePlus imp;
+    private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+    private ImagePlus imp;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-	 */
-	@Override
-	public int setup(String arg, ImagePlus imp)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
+     */
+    @Override
+    public int setup(String arg, ImagePlus imp)
+    {
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (imp == null)
-		{
-			IJ.noImage();
-			return DONE;
-		}
+        if (imp == null)
+        {
+            IJ.noImage();
+            return DONE;
+        }
 
-		this.imp = imp;
+        this.imp = imp;
 
-		return showDialog();
-	}
+        return showDialog();
+    }
 
-	private int showDialog()
-	{
-		final GenericDialog gd = new GenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
+    private int showDialog()
+    {
+        final GenericDialog gd = new GenericDialog(TITLE);
+        gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Creates a background and mask image from a sample input stack\nusing a median projection");
+        gd.addMessage("Creates a background and mask image from a sample input stack\nusing a median projection");
 
-		gd.addNumericField("Bias", bias, 0);
-		gd.addSlider("Blur", 0, 20, sigma);
+        gd.addNumericField("Bias", bias, 0);
+        gd.addSlider("Blur", 0, 20, sigma);
 
-		gd.showDialog();
+        gd.showDialog();
 
-		if (gd.wasCanceled())
-			return DONE;
+        if (gd.wasCanceled())
+            return DONE;
 
-		bias = (float) gd.getNextNumber();
-		sigma = gd.getNextNumber();
+        bias = (float) gd.getNextNumber();
+        sigma = gd.getNextNumber();
 
-		// Check arguments
-		try
-		{
-			Parameters.isPositive("Bias", bias);
-		}
-		catch (final IllegalArgumentException e)
-		{
-			IJ.error(TITLE, e.getMessage());
-			return DONE;
-		}
+        // Check arguments
+        try
+        {
+            Parameters.isPositive("Bias", bias);
+        }
+        catch (final IllegalArgumentException e)
+        {
+            IJ.error(TITLE, e.getMessage());
+            return DONE;
+        }
 
-		return flags;
-	}
+        return flags;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-	 */
-	@Override
-	public void run(ImageProcessor ip)
-	{
-		final ImageProcessor median = getProjection();
-		//Utils.display("Median", median);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
+     */
+    @Override
+    public void run(ImageProcessor ip)
+    {
+        final ImageProcessor median = getProjection();
+        //Utils.display("Median", median);
 
-		final ImageProcessor background = applyBlur(median);
-		subtractBias(background);
+        final ImageProcessor background = applyBlur(median);
+        subtractBias(background);
 
-		Utils.display("Background", background);
+        Utils.display("Background", background);
 
-		// Q. Is there a better way to do the thresholding for foreground pixels.
-		// Ideally we want to outline cell shapes.
-		final ImageProcessor mask = median.convertToByte(true);
-		mask.autoThreshold();
+        // Q. Is there a better way to do the thresholding for foreground pixels.
+        // Ideally we want to outline cell shapes.
+        final ImageProcessor mask = median.convertToByte(true);
+        mask.autoThreshold();
 
-		Utils.display("Mask", mask);
-	}
+        Utils.display("Mask", mask);
+    }
 
-	private ImageProcessor getProjection()
-	{
-		// Get median intensity projection
-		final ZProjector p = new ZProjector(imp);
-		p.setMethod(ZProjector.MEDIAN_METHOD);
-		p.doProjection();
-		final ImageProcessor median = p.getProjection().getProcessor();
-		return median;
-	}
+    private ImageProcessor getProjection()
+    {
+        // Get median intensity projection
+        final ZProjector p = new ZProjector(imp);
+        p.setMethod(ZProjector.MEDIAN_METHOD);
+        p.doProjection();
+        final ImageProcessor median = p.getProjection().getProcessor();
+        return median;
+    }
 
-	private static ImageProcessor applyBlur(ImageProcessor median)
-	{
-		ImageProcessor blur = median;
-		if (sigma > 0)
-		{
-			blur = median.duplicate();
-			final GaussianBlur gb = new GaussianBlur();
-			gb.blurGaussian(blur, sigma, sigma, 0.0002);
-		}
-		return blur;
-	}
+    private static ImageProcessor applyBlur(ImageProcessor median)
+    {
+        ImageProcessor blur = median;
+        if (sigma > 0)
+        {
+            blur = median.duplicate();
+            final GaussianBlur gb = new GaussianBlur();
+            gb.blurGaussian(blur, sigma, sigma, 0.0002);
+        }
+        return blur;
+    }
 
-	private static void subtractBias(ImageProcessor background)
-	{
-		final float[] data = (float[]) background.getPixels();
-		for (int i = 0; i < data.length; i++)
-			data[i] = FastMath.max(0f, data[i] - bias);
-		background.resetMinAndMax();
-	}
+    private static void subtractBias(ImageProcessor background)
+    {
+        final float[] data = (float[]) background.getPixels();
+        for (int i = 0; i < data.length; i++)
+            data[i] = FastMath.max(0f, data[i] - bias);
+        background.resetMinAndMax();
+    }
 }

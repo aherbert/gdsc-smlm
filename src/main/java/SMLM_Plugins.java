@@ -48,16 +48,16 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools;
  */
 public class SMLM_Plugins implements PlugIn
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@SuppressWarnings("unused")
-	@Override
-	public void run(String arg)
-	{
-		// Create the SMLM Tools plugin.
-		new SMLMTools();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public void run(String arg)
+    {
+        // Create the SMLM Tools plugin.
+        new SMLMTools();
+    }
 }

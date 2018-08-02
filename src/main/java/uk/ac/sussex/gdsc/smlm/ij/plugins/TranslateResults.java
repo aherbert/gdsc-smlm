@@ -41,83 +41,83 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
  */
 public class TranslateResults implements PlugIn
 {
-	private static final String TITLE = "Translate Results";
+    private static final String TITLE = "Translate Results";
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@Override
-	public void run(String arg)
-	{
-		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @Override
+    public void run(String arg)
+    {
+        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (MemoryPeakResults.isMemoryEmpty())
-		{
-			IJ.error(TITLE, "There are no fitting results in memory");
-			return;
-		}
+        if (MemoryPeakResults.isMemoryEmpty())
+        {
+            IJ.error(TITLE, "There are no fitting results in memory");
+            return;
+        }
 
-		final TranslateResultsSettings.Builder settings = SettingsManager.readTranslateResultsSettings(0).toBuilder();
+        final TranslateResultsSettings.Builder settings = SettingsManager.readTranslateResultsSettings(0).toBuilder();
 
-		// Show a dialog allowing the results set to be filtered
-		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addMessage("Select a dataset to translate");
-		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
-		gd.addNumericField("x", settings.getDx(), 3);
-		gd.addNumericField("y", settings.getDy(), 3);
-		gd.addNumericField("z", settings.getDz(), 3);
-		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), settings.getDistanceUnitValue());
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
+        // Show a dialog allowing the results set to be filtered
+        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+        gd.addMessage("Select a dataset to translate");
+        ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
+        gd.addNumericField("x", settings.getDx(), 3);
+        gd.addNumericField("y", settings.getDy(), 3);
+        gd.addNumericField("z", settings.getDz(), 3);
+        gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), settings.getDistanceUnitValue());
+        gd.showDialog();
+        if (gd.wasCanceled())
+            return;
 
-		settings.setInputOption(ResultsManager.getInputSource(gd));
-		settings.setDx(gd.getNextNumber());
-		settings.setDy(gd.getNextNumber());
-		settings.setDz(gd.getNextNumber());
-		settings.setDistanceUnitValue(gd.getNextChoiceIndex());
+        settings.setInputOption(ResultsManager.getInputSource(gd));
+        settings.setDx(gd.getNextNumber());
+        settings.setDy(gd.getNextNumber());
+        settings.setDz(gd.getNextNumber());
+        settings.setDistanceUnitValue(gd.getNextChoiceIndex());
 
-		SettingsManager.writeSettings(settings);
+        SettingsManager.writeSettings(settings);
 
-		final MemoryPeakResults results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
-		if (results == null || results.size() == 0)
-		{
-			IJ.error(TITLE, "No results could be loaded");
-			return;
-		}
+        final MemoryPeakResults results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
+        if (results == null || results.size() == 0)
+        {
+            IJ.error(TITLE, "No results could be loaded");
+            return;
+        }
 
-		TypeConverter<DistanceUnit> c;
-		try
-		{
-			c = results.getDistanceConverter(settings.getDistanceUnit());
-		}
-		catch (final DataException e)
-		{
-			IJ.error(TITLE, "Unit conversion error: " + e.getMessage());
-			return;
-		}
+        TypeConverter<DistanceUnit> c;
+        try
+        {
+            c = results.getDistanceConverter(settings.getDistanceUnit());
+        }
+        catch (final DataException e)
+        {
+            IJ.error(TITLE, "Unit conversion error: " + e.getMessage());
+            return;
+        }
 
-		final float x = (float) c.convertBack(settings.getDx());
-		final float y = (float) c.convertBack(settings.getDy());
-		final float z = (float) c.convertBack(settings.getDz());
+        final float x = (float) c.convertBack(settings.getDx());
+        final float y = (float) c.convertBack(settings.getDy());
+        final float z = (float) c.convertBack(settings.getDz());
 
-		// Reset the 2D bounds
-		if (x != 0 || y != 0)
-			results.setBounds(null);
+        // Reset the 2D bounds
+        if (x != 0 || y != 0)
+            results.setBounds(null);
 
-		results.forEach(new PeakResultProcedure()
-		{
-			@Override
-			public void execute(PeakResult peakResult)
-			{
-				// Requires a direct reference!
-				final float[] params = peakResult.getParameters();
-				params[PeakResult.X] += x;
-				params[PeakResult.Y] += y;
-				params[PeakResult.Z] += z;
-			}
-		});
-	}
+        results.forEach(new PeakResultProcedure()
+        {
+            @Override
+            public void execute(PeakResult peakResult)
+            {
+                // Requires a direct reference!
+                final float[] params = peakResult.getParameters();
+                params[PeakResult.X] += x;
+                params[PeakResult.Y] += y;
+                params[PeakResult.Z] += z;
+            }
+        });
+    }
 }

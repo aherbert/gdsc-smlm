@@ -28,42 +28,43 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterZComponent extends MultiFilterComponent
 {
-	private final float minZ, maxZ;
+    private final float minZ, maxZ;
 
-	/**
-	 * Instantiates a new multi filter Z component.
-	 *
-	 * @param minZ
-	 *            the min Z
-	 * @param maxZ
-	 *            the max Z
-	 */
-	public MultiFilterZComponent(double minZ, double maxZ)
-	{
-		this.minZ = (float) minZ;
-		this.maxZ = (float) maxZ;
-	}
+    /**
+     * Instantiates a new multi filter Z component.
+     *
+     * @param minZ
+     *            the min Z
+     * @param maxZ
+     *            the max Z
+     */
+    public MultiFilterZComponent(double minZ, double maxZ)
+    {
+        this.minZ = (float) minZ;
+        this.maxZ = (float) maxZ;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		final float z = peak.getZ();
-		return (z > maxZ || z < minZ);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        final float z = peak.getZ();
+        return (z > maxZ || z < minZ);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return IDirectFilter.V_Z;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return IDirectFilter.V_Z;
+    }
 }

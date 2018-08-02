@@ -33,113 +33,113 @@ import uk.ac.sussex.gdsc.core.utils.Digest;
  */
 public class PeakResultDigest
 {
-	/** The expected data bytes without the parameters */
-	private static final int EXPECTED_DATA_BYTES = 48;
+    /** The expected data bytes without the parameters */
+    private static final int EXPECTED_DATA_BYTES = 48;
 
-	private final MessageDigest digest;
-	// Allocate assuming 8 parameters and deviations
-	private ByteBuffer buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + 4 * 2 * 8);
+    private final MessageDigest digest;
+    // Allocate assuming 8 parameters and deviations
+    private ByteBuffer buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + 4 * 2 * 8);
 
-	/**
-	 * Instantiates a new IJ digest.
-	 */
-	public PeakResultDigest()
-	{
-		this(Digest.MD5);
-	}
+    /**
+     * Instantiates a new IJ digest.
+     */
+    public PeakResultDigest()
+    {
+        this(Digest.MD5);
+    }
 
-	/**
-	 * Instantiates a new IJ digest.
-	 *
-	 * @param algorithm
-	 *            the algorithm
-	 */
-	public PeakResultDigest(String algorithm)
-	{
-		digest = Digest.getDigest(algorithm);
-	}
+    /**
+     * Instantiates a new IJ digest.
+     *
+     * @param algorithm
+     *            the algorithm
+     */
+    public PeakResultDigest(String algorithm)
+    {
+        digest = Digest.getDigest(algorithm);
+    }
 
-	/**
-	 * Reset the digest.
-	 */
-	public void reset()
-	{
-		digest.reset();
-	}
+    /**
+     * Reset the digest.
+     */
+    public void reset()
+    {
+        digest.reset();
+    }
 
-	/**
-	 * Update the digest with the peak result.
-	 *
-	 * @param peakResult
-	 *            the peak result
-	 */
-	public void update(PeakResult peakResult)
-	{
-		// Check buffer size
-		final int n = peakResult.getNumberOfParameters();
-		int required = n * 4;
-		if (peakResult.hasParameterDeviations())
-			required *= 2;
+    /**
+     * Update the digest with the peak result.
+     *
+     * @param peakResult
+     *            the peak result
+     */
+    public void update(PeakResult peakResult)
+    {
+        // Check buffer size
+        final int n = peakResult.getNumberOfParameters();
+        int required = n * 4;
+        if (peakResult.hasParameterDeviations())
+            required *= 2;
 
-		if (buffer.capacity() < EXPECTED_DATA_BYTES + required)
-			buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + required);
-		else
-			buffer.clear();
+        if (buffer.capacity() < EXPECTED_DATA_BYTES + required)
+            buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + required);
+        else
+            buffer.clear();
 
-		// Add standard data
-		buffer.putInt(peakResult.getFrame()); // 4
-		buffer.putInt(peakResult.getOrigX()); // 8
-		buffer.putInt(peakResult.getOrigY()); // 12
-		buffer.putFloat(peakResult.getOrigValue()); // 16
-		buffer.putDouble(peakResult.getError()); // 24
-		buffer.putFloat(peakResult.getNoise()); // 28
-		buffer.putFloat(peakResult.getMeanIntensity()); // 32
+        // Add standard data
+        buffer.putInt(peakResult.getFrame()); // 4
+        buffer.putInt(peakResult.getOrigX()); // 8
+        buffer.putInt(peakResult.getOrigY()); // 12
+        buffer.putFloat(peakResult.getOrigValue()); // 16
+        buffer.putDouble(peakResult.getError()); // 24
+        buffer.putFloat(peakResult.getNoise()); // 28
+        buffer.putFloat(peakResult.getMeanIntensity()); // 32
 
-		// Optional data
-		if (peakResult.hasId())
-			buffer.putInt(peakResult.getId()); // 36
-		if (peakResult.hasEndFrame())
-			buffer.putInt(peakResult.getEndFrame()); // 40
-		if (peakResult.hasPrecision())
-			buffer.putDouble(peakResult.getPrecision()); // 48
+        // Optional data
+        if (peakResult.hasId())
+            buffer.putInt(peakResult.getId()); // 36
+        if (peakResult.hasEndFrame())
+            buffer.putInt(peakResult.getEndFrame()); // 40
+        if (peakResult.hasPrecision())
+            buffer.putDouble(peakResult.getPrecision()); // 48
 
-		for (int i = 0; i < n; i++)
-			buffer.putFloat(peakResult.getParameter(i));
-		if (peakResult.hasParameterDeviations())
-			for (int i = 0; i < n; i++)
-				buffer.putFloat(peakResult.getParameterDeviation(i));
+        for (int i = 0; i < n; i++)
+            buffer.putFloat(peakResult.getParameter(i));
+        if (peakResult.hasParameterDeviations())
+            for (int i = 0; i < n; i++)
+                buffer.putFloat(peakResult.getParameterDeviation(i));
 
-		buffer.flip();
+        buffer.flip();
 
-		digest.update(buffer);
-	}
+        digest.update(buffer);
+    }
 
-	/**
-	 * Get the digest and reset.
-	 *
-	 * @return the hex string
-	 */
-	public String digest()
-	{
-		return Digest.toHex(digest.digest());
-	}
+    /**
+     * Get the digest and reset.
+     *
+     * @return the hex string
+     */
+    public String digest()
+    {
+        return Digest.toHex(digest.digest());
+    }
 
-	/**
-	 * Get a snapshot of the current digest. This is done by cloning the digest. If this is not support then return
-	 * null.
-	 *
-	 * @return the hex string (or null)
-	 */
-	public String snapshot()
-	{
-		try
-		{
-			final MessageDigest d = (MessageDigest) digest.clone();
-			return Digest.toHex(d.digest());
-		}
-		catch (final CloneNotSupportedException e)
-		{
-			return null;
-		}
-	}
+    /**
+     * Get a snapshot of the current digest. This is done by cloning the digest. If this is not support then return
+     * null.
+     *
+     * @return the hex string (or null)
+     */
+    public String snapshot()
+    {
+        try
+        {
+            final MessageDigest d = (MessageDigest) digest.clone();
+            return Digest.toHex(d.digest());
+        }
+        catch (final CloneNotSupportedException e)
+        {
+            return null;
+        }
+    }
 }

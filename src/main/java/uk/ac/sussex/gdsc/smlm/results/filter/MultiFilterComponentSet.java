@@ -28,46 +28,46 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public abstract class MultiFilterComponentSet implements Cloneable
 {
-	/**
-	 * Gets the validation flags. These are possible return flags from the {@link #validate(PreprocessedPeakResult)}
-	 * method.
-	 *
-	 * @return the validation flags
-	 */
-	abstract public int getValidationFlags();
+    /**
+     * Gets the validation flags. These are possible return flags from the {@link #validate(PreprocessedPeakResult)}
+     * method.
+     *
+     * @return the validation flags
+     */
+    abstract public int getValidationFlags();
 
-	/**
-	 * Validate the peak
-	 *
-	 * @param peak
-	 *            the peak
-	 * @return the result
-	 */
-	public abstract int validate(final PreprocessedPeakResult peak);
+    /**
+     * Validate the peak
+     *
+     * @param peak
+     *            the peak
+     * @return the result
+     */
+    public abstract int validate(final PreprocessedPeakResult peak);
 
-	/**
-	 * Replace the first component.
-	 *
-	 * @param c
-	 *            the replacement component
-	 */
-	abstract void replace0(MultiFilterComponent c);
+    /**
+     * Replace the first component.
+     *
+     * @param c
+     *            the replacement component
+     */
+    abstract void replace0(MultiFilterComponent c);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public MultiFilterComponentSet clone()
-	{
-		try
-		{
-			return (MultiFilterComponentSet) super.clone();
-		}
-		catch (final CloneNotSupportedException e)
-		{
-			return null;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public MultiFilterComponentSet clone()
+    {
+        try
+        {
+            return (MultiFilterComponentSet) super.clone();
+        }
+        catch (final CloneNotSupportedException e)
+        {
+            return null;
+        }
+    }
 }

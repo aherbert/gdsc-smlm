@@ -31,30 +31,30 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class HalfPoissonFisherInformation extends BasePoissonFisherInformation
 {
-	/*
-	 * {@inheritDoc}
-	 * <p>
-	 * The input parameter refers to the mean of the Poisson distribution. The Fisher information is 1/(2*mean).
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
-	 */
-	@Override
-	public double getFisherInformation(double t)
-	{
-		if (t <= 0)
-			throw new IllegalArgumentException("Poisson mean must be positive");
-		return 0.5 / t;
-	}
+    /*
+     * {@inheritDoc}
+     * <p>
+     * The input parameter refers to the mean of the Poisson distribution. The Fisher information is 1/(2*mean).
+     *
+     * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
+     */
+    @Override
+    public double getFisherInformation(double t)
+    {
+        if (t <= 0)
+            throw new IllegalArgumentException("Poisson mean must be positive");
+        return 0.5 / t;
+    }
 
-	@Override
-	public double getAlpha(double t)
-	{
-		return 0.5;
-	}
+    @Override
+    public double getAlpha(double t)
+    {
+        return 0.5;
+    }
 
-	@Override
-	protected void postClone()
-	{
-		// Nothing to do.
-	}
+    @Override
+    protected void postClone()
+    {
+        // Nothing to do.
+    }
 }

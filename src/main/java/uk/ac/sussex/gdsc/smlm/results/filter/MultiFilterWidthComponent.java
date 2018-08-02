@@ -28,45 +28,46 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterWidthComponent extends MultiFilterComponent
 {
-	private final float lowerSigmaThreshold, upperSigmaThreshold;
+    private final float lowerSigmaThreshold, upperSigmaThreshold;
 
-	/**
-	 * Instantiates a new multi filter width component.
-	 *
-	 * @param minWidth
-	 *            the min width
-	 * @param maxWidth
-	 *            the max width
-	 */
-	public MultiFilterWidthComponent(double minWidth, double maxWidth)
-	{
-		if (minWidth > 0 && minWidth < 1)
-			this.lowerSigmaThreshold = (float) minWidth;
-		else
-			lowerSigmaThreshold = 0;
-		this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
-	}
+    /**
+     * Instantiates a new multi filter width component.
+     *
+     * @param minWidth
+     *            the min width
+     * @param maxWidth
+     *            the max width
+     */
+    public MultiFilterWidthComponent(double minWidth, double maxWidth)
+    {
+        if (minWidth > 0 && minWidth < 1)
+            this.lowerSigmaThreshold = (float) minWidth;
+        else
+            lowerSigmaThreshold = 0;
+        this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		final float xsdf = peak.getXSDFactor();
-		return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        final float xsdf = peak.getXSDFactor();
+        return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return IDirectFilter.V_X_SD_FACTOR;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return IDirectFilter.V_X_SD_FACTOR;
+    }
 }

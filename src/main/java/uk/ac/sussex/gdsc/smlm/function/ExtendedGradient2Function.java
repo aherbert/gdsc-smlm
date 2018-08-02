@@ -28,20 +28,20 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public interface ExtendedGradient2Function extends Gradient2Function
 {
-	/**
-	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
-	 * initialisation.
-	 *
-	 * @param a
-	 *            An array of coefficients
-	 */
-	public void initialiseExtended2(final double[] a);
+    /**
+     * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
+     * initialisation.
+     *
+     * @param a
+     *            An array of coefficients
+     */
+    public void initialiseExtended2(final double[] a);
 
-	/**
-	 * Applies the procedure for the valid range of the function.
-	 *
-	 * @param procedure
-	 *            the procedure
-	 */
-	public void forEach(ExtendedGradient2Procedure procedure);
+    /**
+     * Applies the procedure for the valid range of the function.
+     *
+     * @param procedure
+     *            the procedure
+     */
+    public void forEach(ExtendedGradient2Procedure procedure);
 }

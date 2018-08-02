@@ -40,323 +40,323 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class AreaAverageFilter extends BaseWeightedFilter
 {
-	// Use duplicate filters to support efficient caching of the weights
-	private BlockSumFilter sumFilter1 = new BlockSumFilter();
-	private BlockSumFilter sumFilter2 = new BlockSumFilter();
-	private BlockMeanFilter blockMeanFilter1 = new BlockMeanFilter();
-	private BlockMeanFilter blockMeanFilter2 = new BlockMeanFilter();
+    // Use duplicate filters to support efficient caching of the weights
+    private BlockSumFilter sumFilter1 = new BlockSumFilter();
+    private BlockSumFilter sumFilter2 = new BlockSumFilter();
+    private BlockMeanFilter blockMeanFilter1 = new BlockMeanFilter();
+    private BlockMeanFilter blockMeanFilter2 = new BlockMeanFilter();
 
-	private boolean simpleInterpolation = false;
+    private boolean simpleInterpolation = false;
 
-	/**
-	 * Compute the block average within a 2w+1 size block around each point.
-	 * Pixels within border regions (width = ceil(w)) are unchanged.
-	 * <p>
-	 * Note: the input data is destructively modified
-	 *
-	 * @param data
-	 *            The input/output data (packed in YX order)
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
-	 * @param w
-	 *            The width
-	 */
-	public void areaAverageUsingSumsInternal(float[] data, final int maxx, final int maxy, final double w)
-	{
-		if (w <= 0)
-			return;
+    /**
+     * Compute the block average within a 2w+1 size block around each point.
+     * Pixels within border regions (width = ceil(w)) are unchanged.
+     * <p>
+     * Note: the input data is destructively modified
+     *
+     * @param data
+     *            The input/output data (packed in YX order)
+     * @param maxx
+     *            The width of the data
+     * @param maxy
+     *            The height of the data
+     * @param w
+     *            The width
+     */
+    public void areaAverageUsingSumsInternal(float[] data, final int maxx, final int maxy, final double w)
+    {
+        if (w <= 0)
+            return;
 
-		final int n = (int) w;
-		final int n1 = (n == w) ? n : n + 1;
-		final int blockSize = 2 * n1 + 1;
-		if (maxx < blockSize || maxy < blockSize)
-			return;
+        final int n = (int) w;
+        final int n1 = (n == w) ? n : n + 1;
+        final int blockSize = 2 * n1 + 1;
+        if (maxx < blockSize || maxy < blockSize)
+            return;
 
-		if (n == n1)
-		{
-			// There is no edge
-			blockMeanFilter1.rollingBlockFilterInternal(data, maxx, maxy, n);
-			return;
-		}
+        if (n == n1)
+        {
+            // There is no edge
+            blockMeanFilter1.rollingBlockFilterInternal(data, maxx, maxy, n);
+            return;
+        }
 
-		// Calculate the sum in the n and n+1 regions
-		final float[] sum1;
-		if (n == 0)
-			sum1 = data;
-		else
-		{
-			sum1 = data.clone();
-			sumFilter1.rollingBlockFilter(sum1, maxx, maxy, n);
-		}
-		final float[] sum2 = data.clone();
-		sumFilter2.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
+        // Calculate the sum in the n and n+1 regions
+        final float[] sum1;
+        if (n == 0)
+            sum1 = data;
+        else
+        {
+            sum1 = data.clone();
+            sumFilter1.rollingBlockFilter(sum1, maxx, maxy, n);
+        }
+        final float[] sum2 = data.clone();
+        sumFilter2.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
 
-		// Get the average by adding the inner sum to the weighted edge pixels.
-		final double area = (2 * w + 1) * (2 * w + 1);
+        // Get the average by adding the inner sum to the weighted edge pixels.
+        final double area = (2 * w + 1) * (2 * w + 1);
 
-		final float edgeWeight;
+        final float edgeWeight;
 
-		if (simpleInterpolation)
-			edgeWeight = (float) (w - n);
-		else
-		{
-			// Use the area to produce the weighting
-			final int inner = (2 * n + 1) * (2 * n + 1);
-			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
-			edgeWeight = (float) ((area - inner) / (outer - inner));
-		}
+        if (simpleInterpolation)
+            edgeWeight = (float) (w - n);
+        else
+        {
+            // Use the area to produce the weighting
+            final int inner = (2 * n + 1) * (2 * n + 1);
+            final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+            edgeWeight = (float) ((area - inner) / (outer - inner));
+        }
 
-		final float norm = (float) (1.0 / area);
+        final float norm = (float) (1.0 / area);
 
-		for (int y = n1; y < maxy - n1; y++)
-		{
-			int index = y * maxx + n1;
-			for (int x = n1; x < maxx - n1; x++, index++)
-				data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
-		}
-	}
+        for (int y = n1; y < maxy - n1; y++)
+        {
+            int index = y * maxx + n1;
+            for (int x = n1; x < maxx - n1; x++, index++)
+                data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
+        }
+    }
 
-	/**
-	 * Compute the block average within a 2w+1 size block around each point.
-	 * <p>
-	 * Note: the input data is destructively modified
-	 *
-	 * @param data
-	 *            The input/output data (packed in YX order)
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
-	 * @param w
-	 *            The width
-	 */
-	public void areaAverageUsingSums(float[] data, final int maxx, final int maxy, final double w)
-	{
-		if (w <= 0)
-			return;
+    /**
+     * Compute the block average within a 2w+1 size block around each point.
+     * <p>
+     * Note: the input data is destructively modified
+     *
+     * @param data
+     *            The input/output data (packed in YX order)
+     * @param maxx
+     *            The width of the data
+     * @param maxy
+     *            The height of the data
+     * @param w
+     *            The width
+     */
+    public void areaAverageUsingSums(float[] data, final int maxx, final int maxy, final double w)
+    {
+        if (w <= 0)
+            return;
 
-		final int n = (int) w;
-		final int n1 = (n == w) ? n : n + 1;
+        final int n = (int) w;
+        final int n1 = (n == w) ? n : n + 1;
 
-		if (n == n1 || (maxx < n1 && maxy < n1))
-		{
-			// There is no edge
-			blockMeanFilter1.rollingBlockFilter(data, maxx, maxy, n);
-			return;
-		}
+        if (n == n1 || (maxx < n1 && maxy < n1))
+        {
+            // There is no edge
+            blockMeanFilter1.rollingBlockFilter(data, maxx, maxy, n);
+            return;
+        }
 
-		// Calculate the sum in the n and n+1 regions
-		final float[] sum1;
-		if (n == 0)
-			sum1 = data;
-		else
-		{
-			sum1 = data.clone();
-			sumFilter1.rollingBlockFilter(sum1, maxx, maxy, n);
-		}
-		final float[] sum2 = data.clone();
-		sumFilter2.rollingBlockFilter(sum2, maxx, maxy, n1);
+        // Calculate the sum in the n and n+1 regions
+        final float[] sum1;
+        if (n == 0)
+            sum1 = data;
+        else
+        {
+            sum1 = data.clone();
+            sumFilter1.rollingBlockFilter(sum1, maxx, maxy, n);
+        }
+        final float[] sum2 = data.clone();
+        sumFilter2.rollingBlockFilter(sum2, maxx, maxy, n1);
 
-		// Get the average by adding the inner sum to the weighted edge pixels.
-		final double area = (2 * w + 1) * (2 * w + 1);
+        // Get the average by adding the inner sum to the weighted edge pixels.
+        final double area = (2 * w + 1) * (2 * w + 1);
 
-		final float edgeWeight;
+        final float edgeWeight;
 
-		if (simpleInterpolation)
-			edgeWeight = (float) (w - n);
-		else
-		{
-			// Use the area to produce the weighting
-			final int inner = (2 * n + 1) * (2 * n + 1);
-			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
-			edgeWeight = (float) ((area - inner) / (outer - inner));
-		}
+        if (simpleInterpolation)
+            edgeWeight = (float) (w - n);
+        else
+        {
+            // Use the area to produce the weighting
+            final int inner = (2 * n + 1) * (2 * n + 1);
+            final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+            edgeWeight = (float) ((area - inner) / (outer - inner));
+        }
 
-		final float norm = (float) (1.0 / area);
+        final float norm = (float) (1.0 / area);
 
-		for (int index = 0; index < sum1.length; index++)
-			data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
-	}
+        for (int index = 0; index < sum1.length; index++)
+            data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
+    }
 
-	/**
-	 * Compute the block average within a 2w+1 size block around each point.
-	 * Pixels within border regions (width = ceil(w)) are unchanged.
-	 * <p>
-	 * Note: the input data is destructively modified
-	 *
-	 * @param data
-	 *            The input/output data (packed in YX order)
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
-	 * @param w
-	 *            The width
-	 */
-	public void areaAverageUsingAveragesInternal(float[] data, final int maxx, final int maxy, final double w)
-	{
-		if (w <= 0)
-			return;
+    /**
+     * Compute the block average within a 2w+1 size block around each point.
+     * Pixels within border regions (width = ceil(w)) are unchanged.
+     * <p>
+     * Note: the input data is destructively modified
+     *
+     * @param data
+     *            The input/output data (packed in YX order)
+     * @param maxx
+     *            The width of the data
+     * @param maxy
+     *            The height of the data
+     * @param w
+     *            The width
+     */
+    public void areaAverageUsingAveragesInternal(float[] data, final int maxx, final int maxy, final double w)
+    {
+        if (w <= 0)
+            return;
 
-		final int n = (int) w;
-		final int n1 = (n == w) ? n : n + 1;
-		final int blockSize = 2 * n1 + 1;
-		if (maxx < blockSize || maxy < blockSize)
-			return;
+        final int n = (int) w;
+        final int n1 = (n == w) ? n : n + 1;
+        final int blockSize = 2 * n1 + 1;
+        if (maxx < blockSize || maxy < blockSize)
+            return;
 
-		if (n == n1)
-		{
-			// There is no edge
-			blockMeanFilter1.rollingBlockFilterInternal(data, maxx, maxy, n);
-			return;
-		}
+        if (n == n1)
+        {
+            // There is no edge
+            blockMeanFilter1.rollingBlockFilterInternal(data, maxx, maxy, n);
+            return;
+        }
 
-		// Calculate the sum in the n and n+1 regions
-		final float[] av1;
-		if (n == 0)
-			av1 = data;
-		else
-		{
-			av1 = data.clone();
-			blockMeanFilter1.rollingBlockFilter(av1, maxx, maxy, n);
-		}
-		final float[] av2 = data.clone();
-		blockMeanFilter2.rollingBlockFilterInternal(av2, maxx, maxy, n1);
+        // Calculate the sum in the n and n+1 regions
+        final float[] av1;
+        if (n == 0)
+            av1 = data;
+        else
+        {
+            av1 = data.clone();
+            blockMeanFilter1.rollingBlockFilter(av1, maxx, maxy, n);
+        }
+        final float[] av2 = data.clone();
+        blockMeanFilter2.rollingBlockFilterInternal(av2, maxx, maxy, n1);
 
-		// Get the average by weighting the two
-		final float outerWeight;
+        // Get the average by weighting the two
+        final float outerWeight;
 
-		if (simpleInterpolation)
-			outerWeight = (float) (w - n);
-		else
-		{
-			// Use the area to produce the weighting
-			final int inner = (2 * n + 1) * (2 * n + 1);
-			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
-			final double area = (2 * w + 1) * (2 * w + 1);
-			outerWeight = (float) ((area - inner) / (outer - inner));
-		}
+        if (simpleInterpolation)
+            outerWeight = (float) (w - n);
+        else
+        {
+            // Use the area to produce the weighting
+            final int inner = (2 * n + 1) * (2 * n + 1);
+            final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+            final double area = (2 * w + 1) * (2 * w + 1);
+            outerWeight = (float) ((area - inner) / (outer - inner));
+        }
 
-		final float innerWeight = 1 - outerWeight;
+        final float innerWeight = 1 - outerWeight;
 
-		for (int y = n1; y < maxy - n1; y++)
-		{
-			int index = y * maxx + n1;
-			for (int x = n1; x < maxx - n1; x++, index++)
-				data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
-		}
-	}
+        for (int y = n1; y < maxy - n1; y++)
+        {
+            int index = y * maxx + n1;
+            for (int x = n1; x < maxx - n1; x++, index++)
+                data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
+        }
+    }
 
-	/**
-	 * Compute the block average within a 2w+1 size block around each point.
-	 * <p>
-	 * Note: the input data is destructively modified
-	 *
-	 * @param data
-	 *            The input/output data (packed in YX order)
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
-	 * @param w
-	 *            The width
-	 */
-	public void areaAverageUsingAverages(float[] data, final int maxx, final int maxy, final double w)
-	{
-		if (w <= 0)
-			return;
+    /**
+     * Compute the block average within a 2w+1 size block around each point.
+     * <p>
+     * Note: the input data is destructively modified
+     *
+     * @param data
+     *            The input/output data (packed in YX order)
+     * @param maxx
+     *            The width of the data
+     * @param maxy
+     *            The height of the data
+     * @param w
+     *            The width
+     */
+    public void areaAverageUsingAverages(float[] data, final int maxx, final int maxy, final double w)
+    {
+        if (w <= 0)
+            return;
 
-		final int n = (int) w;
-		final int n1 = (n == w) ? n : n + 1;
+        final int n = (int) w;
+        final int n1 = (n == w) ? n : n + 1;
 
-		if (n == n1 || (maxx < n1 && maxy < n1))
-		{
-			// There is no edge
-			blockMeanFilter1.rollingBlockFilter(data, maxx, maxy, n);
-			return;
-		}
+        if (n == n1 || (maxx < n1 && maxy < n1))
+        {
+            // There is no edge
+            blockMeanFilter1.rollingBlockFilter(data, maxx, maxy, n);
+            return;
+        }
 
-		// Calculate the sum in the n and n+1 regions
-		final float[] av1;
-		if (n == 0)
-			av1 = data;
-		else
-		{
-			av1 = data.clone();
-			blockMeanFilter1.rollingBlockFilter(av1, maxx, maxy, n);
-		}
-		final float[] av2 = data.clone();
-		blockMeanFilter2.rollingBlockFilter(av2, maxx, maxy, n1);
+        // Calculate the sum in the n and n+1 regions
+        final float[] av1;
+        if (n == 0)
+            av1 = data;
+        else
+        {
+            av1 = data.clone();
+            blockMeanFilter1.rollingBlockFilter(av1, maxx, maxy, n);
+        }
+        final float[] av2 = data.clone();
+        blockMeanFilter2.rollingBlockFilter(av2, maxx, maxy, n1);
 
-		// Get the average by weighting the two
-		final float outerWeight;
+        // Get the average by weighting the two
+        final float outerWeight;
 
-		if (simpleInterpolation)
-			outerWeight = (float) (w - n);
-		else
-		{
-			// Use the area to produce the weighting
-			final int inner = (2 * n + 1) * (2 * n + 1);
-			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
-			final double area = (2 * w + 1) * (2 * w + 1);
-			outerWeight = (float) ((area - inner) / (outer - inner));
-		}
+        if (simpleInterpolation)
+            outerWeight = (float) (w - n);
+        else
+        {
+            // Use the area to produce the weighting
+            final int inner = (2 * n + 1) * (2 * n + 1);
+            final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+            final double area = (2 * w + 1) * (2 * w + 1);
+            outerWeight = (float) ((area - inner) / (outer - inner));
+        }
 
-		final float innerWeight = 1 - outerWeight;
+        final float innerWeight = 1 - outerWeight;
 
-		for (int index = 0; index < av1.length; index++)
-			data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
-	}
+        for (int index = 0; index < av1.length; index++)
+            data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public AreaAverageFilter clone()
-	{
-		final AreaAverageFilter o = (AreaAverageFilter) super.clone();
-		o.sumFilter1 = sumFilter1.clone();
-		o.sumFilter2 = sumFilter2.clone();
-		o.blockMeanFilter1 = blockMeanFilter1.clone();
-		o.blockMeanFilter2 = blockMeanFilter2.clone();
-		return o;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public AreaAverageFilter clone()
+    {
+        final AreaAverageFilter o = (AreaAverageFilter) super.clone();
+        o.sumFilter1 = sumFilter1.clone();
+        o.sumFilter2 = sumFilter2.clone();
+        o.blockMeanFilter1 = blockMeanFilter1.clone();
+        o.blockMeanFilter2 = blockMeanFilter2.clone();
+        return o;
+    }
 
-	/**
-	 * @return true for simple interpolation
-	 */
-	public boolean isSimpleInterpolation()
-	{
-		return simpleInterpolation;
-	}
+    /**
+     * @return true for simple interpolation
+     */
+    public boolean isSimpleInterpolation()
+    {
+        return simpleInterpolation;
+    }
 
-	/**
-	 * The average for block size n and n+1 is linearly interpolated. Set this to true to use a weight of (w-n) for the
-	 * outer average. Set to false to use a weight based on the area of the edge pixels in the (2w+1) region.
-	 *
-	 * @param simpleInterpolation
-	 *            true for simple interpolation
-	 */
-	public void setSimpleInterpolation(boolean simpleInterpolation)
-	{
-		this.simpleInterpolation = simpleInterpolation;
-	}
+    /**
+     * The average for block size n and n+1 is linearly interpolated. Set this to true to use a weight of (w-n) for the
+     * outer average. Set to false to use a weight based on the area of the edge pixels in the (2w+1) region.
+     *
+     * @param simpleInterpolation
+     *            true for simple interpolation
+     */
+    public void setSimpleInterpolation(boolean simpleInterpolation)
+    {
+        this.simpleInterpolation = simpleInterpolation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-	 */
-	@Override
-	protected void newWeights()
-	{
-		sumFilter1.setWeights(weights, weightWidth, weightHeight);
-		sumFilter2.setWeights(weights, weightWidth, weightHeight);
-		blockMeanFilter1.setWeights(weights, weightWidth, weightHeight);
-		blockMeanFilter2.setWeights(weights, weightWidth, weightHeight);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
+     */
+    @Override
+    protected void newWeights()
+    {
+        sumFilter1.setWeights(weights, weightWidth, weightHeight);
+        sumFilter2.setWeights(weights, weightWidth, weightHeight);
+        blockMeanFilter1.setWeights(weights, weightWidth, weightHeight);
+        blockMeanFilter2.setWeights(weights, weightWidth, weightHeight);
+    }
 }

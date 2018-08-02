@@ -28,71 +28,71 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
  */
 public interface AstigmatismZModel extends Cloneable
 {
-	/**
-	 * Gets the standard deviation in dimension x for the given z-depth.
-	 *
-	 * @param z
-	 *            the z
-	 * @return
-	 * 		the standard deviation in dimension x
-	 */
-	public double getSx(double z);
+    /**
+     * Gets the standard deviation in dimension x for the given z-depth.
+     *
+     * @param z
+     *            the z
+     * @return
+     *         the standard deviation in dimension x
+     */
+    public double getSx(double z);
 
-	/**
-	 * Gets the standard deviation and partial derivatives in dimension x for the given z-depth.
-	 *
-	 * @param z
-	 *            the z
-	 * @param ds_dz
-	 *            the first derivative of s given z
-	 * @return
-	 * 		the standard deviation in dimension x
-	 */
-	public double getSx(double z, double[] ds_dz);
+    /**
+     * Gets the standard deviation and partial derivatives in dimension x for the given z-depth.
+     *
+     * @param z
+     *            the z
+     * @param ds_dz
+     *            the first derivative of s given z
+     * @return
+     *         the standard deviation in dimension x
+     */
+    public double getSx(double z, double[] ds_dz);
 
-	/**
-	 * Gets the standard deviation and partial derivatives in dimension x for the given z-depth.
-	 *
-	 * @param z
-	 *            the z
-	 * @param ds_dz
-	 *            the first and second derivative of s given z
-	 * @return
-	 * 		the standard deviation in dimension x
-	 */
-	public double getSx2(double z, double[] ds_dz);
+    /**
+     * Gets the standard deviation and partial derivatives in dimension x for the given z-depth.
+     *
+     * @param z
+     *            the z
+     * @param ds_dz
+     *            the first and second derivative of s given z
+     * @return
+     *         the standard deviation in dimension x
+     */
+    public double getSx2(double z, double[] ds_dz);
 
-	/**
-	 * Gets the standard deviation in dimension y for the given z-depth.
-	 *
-	 * @param z
-	 *            the z
-	 * @return
-	 * 		the standard deviation in dimension y
-	 */
-	public double getSy(double z);
+    /**
+     * Gets the standard deviation in dimension y for the given z-depth.
+     *
+     * @param z
+     *            the z
+     * @return
+     *         the standard deviation in dimension y
+     */
+    public double getSy(double z);
 
-	/**
-	 * Gets the standard deviation and partial derivatives in dimension y for the given z-depth.
-	 *
-	 * @param z
-	 *            the z
-	 * @param ds_dz
-	 *            the first derivative of s given z
-	 * @return
-	 * 		the standard deviation in dimension y
-	 */
-	public double getSy(double z, double[] ds_dz);
+    /**
+     * Gets the standard deviation and partial derivatives in dimension y for the given z-depth.
+     *
+     * @param z
+     *            the z
+     * @param ds_dz
+     *            the first derivative of s given z
+     * @return
+     *         the standard deviation in dimension y
+     */
+    public double getSy(double z, double[] ds_dz);
 
-	/**
-	 * Gets the standard deviation and partial derivatives in dimension y for the given z-depth.
-	 *
-	 * @param z
-	 *            the z
-	 * @param ds_dz
-	 *            the first and second derivative of s given z
-	 * @return
-	 * 		the standard deviation in dimension y
-	 */
-	public double getSy2(double z, double[] ds_dz);
+    /**
+     * Gets the standard deviation and partial derivatives in dimension y for the given z-depth.
+     *
+     * @param z
+     *            the z
+     * @param ds_dz
+     *            the first and second derivative of s given z
+     * @return
+     *         the standard deviation in dimension y
+     */
+    public double getSy2(double z, double[] ds_dz);
 }

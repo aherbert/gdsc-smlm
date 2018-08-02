@@ -34,112 +34,112 @@ import uk.ac.sussex.gdsc.smlm.Version;
  */
 public class SMLMUsageTracker implements PlugIn
 {
-	private static final String TITLE = "SMLM Usage Tracker";
-	private static HashMap<String, String[]> map = new HashMap<>();
-	private static boolean trackerInitialised = false;
-	private static boolean mapInitialised = false;
+    private static final String TITLE = "SMLM Usage Tracker";
+    private static HashMap<String, String[]> map = new HashMap<>();
+    private static boolean trackerInitialised = false;
+    private static boolean mapInitialised = false;
 
-	/**
-	 * Record the use of the ImageJ plugin using the raw class and argument passed by ImageJ. The plugins config
-	 * file will be used to identify the correct ImageJ plugin path and title.
-	 *
-	 * @param clazz
-	 *            The class
-	 * @param argument
-	 *            The plugin argument
-	 */
-	public static void recordPlugin(@SuppressWarnings("rawtypes") Class clazz, String argument)
-	{
-		initialiseTracker();
-		if (ImageJAnalyticsTracker.isDisabled())
-			return;
+    /**
+     * Record the use of the ImageJ plugin using the raw class and argument passed by ImageJ. The plugins config
+     * file will be used to identify the correct ImageJ plugin path and title.
+     *
+     * @param clazz
+     *            The class
+     * @param argument
+     *            The plugin argument
+     */
+    public static void recordPlugin(@SuppressWarnings("rawtypes") Class clazz, String argument)
+    {
+        initialiseTracker();
+        if (ImageJAnalyticsTracker.isDisabled())
+            return;
 
-		initialiseMap();
+        initialiseMap();
 
-		final String[] pair = map.get(ImageJAnalyticsTracker.getKey(clazz.getName(), argument));
-		if (pair == null)
-			recordPlugin(clazz.getName().replace('.', '/'), argument);
-		else
-			trackPageView(pair[0], pair[1]);
-	}
+        final String[] pair = map.get(ImageJAnalyticsTracker.getKey(clazz.getName(), argument));
+        if (pair == null)
+            recordPlugin(clazz.getName().replace('.', '/'), argument);
+        else
+            trackPageView(pair[0], pair[1]);
+    }
 
-	/**
-	 * Record the use of the ImageJ plugin
-	 *
-	 * @param name
-	 *            The plugin name
-	 * @param argument
-	 *            The plugin argument
-	 */
-	private static void recordPlugin(String name, String argument)
-	{
-		String url = '/' + name;
-		if (argument != null && argument.length() > 0)
-			url += "?arg=" + argument;
+    /**
+     * Record the use of the ImageJ plugin
+     *
+     * @param name
+     *            The plugin name
+     * @param argument
+     *            The plugin argument
+     */
+    private static void recordPlugin(String name, String argument)
+    {
+        String url = '/' + name;
+        if (argument != null && argument.length() > 0)
+            url += "?arg=" + argument;
 
-		trackPageView(url, name);
-	}
+        trackPageView(url, name);
+    }
 
-	private static void trackPageView(String pageUrl, String pageTitle)
-	{
-		ImageJAnalyticsTracker.pageview(pageUrl, pageTitle);
-	}
+    private static void trackPageView(String pageUrl, String pageTitle)
+    {
+        ImageJAnalyticsTracker.pageview(pageUrl, pageTitle);
+    }
 
-	/**
-	 * Create the tracker and then verify the opt in/out status of the user if it unknown or a new major.minor version.
-	 */
-	private static void initialiseTracker()
-	{
-		if (trackerInitialised)
-			return;
+    /**
+     * Create the tracker and then verify the opt in/out status of the user if it unknown or a new major.minor version.
+     */
+    private static void initialiseTracker()
+    {
+        if (trackerInitialised)
+            return;
 
-		synchronized (SMLMUsageTracker.class)
-		{
-			// Check again since this may be a second thread that was waiting
-			if (trackerInitialised)
-				return;
+        synchronized (SMLMUsageTracker.class)
+        {
+            // Check again since this may be a second thread that was waiting
+            if (trackerInitialised)
+                return;
 
-			trackerInitialised = true;
+            trackerInitialised = true;
 
-			// Initialise analytics
-			ImageJAnalyticsTracker.initialise();
-			// Record the version of the GDSC SMLM plugins
-			ImageJAnalyticsTracker.addCustomDimension(7, Version.getVersion());
-			// Prompt the user to opt-in/out of analytics if the status is unknown
-			if (ImageJAnalyticsTracker.unknownStatus())
-				ImageJAnalyticsTracker.showDialog(TITLE, true);
-			//ImageJAnalyticsTracker.logPreferences(false);
-		}
-	}
+            // Initialise analytics
+            ImageJAnalyticsTracker.initialise();
+            // Record the version of the GDSC SMLM plugins
+            ImageJAnalyticsTracker.addCustomDimension(7, Version.getVersion());
+            // Prompt the user to opt-in/out of analytics if the status is unknown
+            if (ImageJAnalyticsTracker.unknownStatus())
+                ImageJAnalyticsTracker.showDialog(TITLE, true);
+            //ImageJAnalyticsTracker.logPreferences(false);
+        }
+    }
 
-	/**
-	 * Create the map between the ImageJ plugin class and argument and the ImageJ menu path and plugin title
-	 */
-	private static void initialiseMap()
-	{
-		if (mapInitialised)
-			return;
+    /**
+     * Create the map between the ImageJ plugin class and argument and the ImageJ menu path and plugin title
+     */
+    private static void initialiseMap()
+    {
+        if (mapInitialised)
+            return;
 
-		synchronized (map)
-		{
-			// Check again since this may be a second thread that was waiting
-			if (mapInitialised)
-				return;
+        synchronized (map)
+        {
+            // Check again since this may be a second thread that was waiting
+            if (mapInitialised)
+                return;
 
-			mapInitialised = true;
-			ImageJAnalyticsTracker.buildPluginMap(map, SMLMTools.getPluginsConfig());
-		}
-	}
+            mapInitialised = true;
+            ImageJAnalyticsTracker.buildPluginMap(map, SMLMTools.getPluginsConfig());
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ij.plugin.PlugIn#run(java.lang.String)
-	 */
-	@Override
-	public void run(String arg)
-	{
-		recordPlugin(this.getClass(), arg);
-		ImageJAnalyticsTracker.showDialog(TITLE, false);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see ij.plugin.PlugIn#run(java.lang.String)
+     */
+    @Override
+    public void run(String arg)
+    {
+        recordPlugin(this.getClass(), arg);
+        ImageJAnalyticsTracker.showDialog(TITLE, false);
+    }
 }

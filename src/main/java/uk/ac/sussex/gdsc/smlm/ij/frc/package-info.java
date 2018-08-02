@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides an implementation of the Fourier Ring Correlation (FRC), 
+ * Provides an implementation of the Fourier Ring Correlation (FRC),
  * a measure of the resolution of a microscopy image.
  *
  * @since 1.0.0

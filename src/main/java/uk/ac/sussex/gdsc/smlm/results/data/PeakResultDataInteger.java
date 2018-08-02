@@ -30,25 +30,25 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
  */
 public abstract class PeakResultDataInteger implements PeakResultData<Integer>
 {
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-	 */
-	@Override
-	public String getValueName()
-	{
-		return "";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
+     */
+    @Override
+    public String getValueName()
+    {
+        return "";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueClass()
-	 */
-	@Override
-	public Class<?> getValueClass()
-	{
-		return Integer.class;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueClass()
+     */
+    @Override
+    public Class<?> getValueClass()
+    {
+        return Integer.class;
+    }
 }

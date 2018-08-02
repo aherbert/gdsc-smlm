@@ -30,129 +30,129 @@ import java.util.List;
  */
 public class SingleSpotFilter extends MaximaSpotFilter
 {
-	private DataProcessor processor;
+    private DataProcessor processor;
 
-	/**
-	 * Constructor
-	 *
-	 * @param search
-	 *            The search width for non-maximum suppression
-	 * @param border
-	 *            The border to ignore for maxima
-	 * @param processor
-	 *            The data processor
-	 * @throws IllegalArgumentException
-	 *             if processor is null
-	 */
-	public SingleSpotFilter(int search, int border, DataProcessor processor)
-	{
-		super(search, border);
-		if (processor == null)
-			throw new IllegalArgumentException("Processor is null");
-		this.processor = processor;
-	}
+    /**
+     * Constructor
+     *
+     * @param search
+     *            The search width for non-maximum suppression
+     * @param border
+     *            The border to ignore for maxima
+     * @param processor
+     *            The data processor
+     * @throws IllegalArgumentException
+     *             if processor is null
+     */
+    public SingleSpotFilter(int search, int border, DataProcessor processor)
+    {
+        super(search, border);
+        if (processor == null)
+            throw new IllegalArgumentException("Processor is null");
+        this.processor = processor;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
-	 */
-	@Override
-	public boolean isAbsoluteIntensity()
-	{
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
+     */
+    @Override
+    public boolean isAbsoluteIntensity()
+    {
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isWeighted()
-	 */
-	@Override
-	public boolean isWeighted()
-	{
-		return processor.isWeighted();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isWeighted()
+     */
+    @Override
+    public boolean isWeighted()
+    {
+        return processor.isWeighted();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
-	 */
-	@Override
-	public void setWeights(float[] weights, int width, int height)
-	{
-		processor.setWeights(weights, width, height);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
+     */
+    @Override
+    public void setWeights(float[] weights, int width, int height)
+    {
+        processor.setWeights(weights, width, height);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#hasWeights()
-	 */
-	@Override
-	public boolean hasWeights()
-	{
-		return processor.hasWeights();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#hasWeights()
+     */
+    @Override
+    public boolean hasWeights()
+    {
+        return processor.hasWeights();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
-	 */
-	@Override
-	public float[] preprocessData(float[] data, int width, int height)
-	{
-		return processor.process(data, width, height);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
+     */
+    @Override
+    public float[] preprocessData(float[] data, int width, int height)
+    {
+        return processor.process(data, width, height);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public SingleSpotFilter clone()
-	{
-		final SingleSpotFilter f = (SingleSpotFilter) super.clone();
-		// Ensure the object is duplicated and not passed by reference.
-		f.processor = processor.clone();
-		return f;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public SingleSpotFilter clone()
+    {
+        final SingleSpotFilter f = (SingleSpotFilter) super.clone();
+        // Ensure the object is duplicated and not passed by reference.
+        f.processor = processor.clone();
+        return f;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return "Single";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getName()
+     */
+    @Override
+    public String getName()
+    {
+        return "Single";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#getParameters()
-	 */
-	@Override
-	public List<String> getParameters()
-	{
-		final List<String> list = super.getParameters();
-		list.add("Filter = " + processor.getDescription());
-		return list;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#getParameters()
+     */
+    @Override
+    public List<String> getParameters()
+    {
+        final List<String> list = super.getParameters();
+        list.add("Filter = " + processor.getDescription());
+        return list;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getSpread()
-	 */
-	@Override
-	public double getSpread()
-	{
-		return processor.getSpread();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getSpread()
+     */
+    @Override
+    public double getSpread()
+    {
+        return processor.getSpread();
+    }
 }

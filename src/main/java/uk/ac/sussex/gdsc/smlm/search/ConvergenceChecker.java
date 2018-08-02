@@ -31,14 +31,14 @@ package uk.ac.sussex.gdsc.smlm.search;
  */
 public interface ConvergenceChecker<T extends Comparable<T>>
 {
-	/**
-	 * Check if the point has converged.
-	 *
-	 * @param previous
-	 *            the previous
-	 * @param current
-	 *            the current
-	 * @return true if the point has converged
-	 */
-	public boolean converged(SearchResult<T> previous, SearchResult<T> current);
+    /**
+     * Check if the point has converged.
+     *
+     * @param previous
+     *            the previous
+     * @param current
+     *            the current
+     * @return true if the point has converged
+     */
+    public boolean converged(SearchResult<T> previous, SearchResult<T> current);
 }

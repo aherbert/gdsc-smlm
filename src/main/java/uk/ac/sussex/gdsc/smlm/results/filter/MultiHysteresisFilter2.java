@@ -41,135 +41,135 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 {
-	@XStreamOmitField
-	private boolean useBackground = false;
+    @XStreamOmitField
+    private boolean useBackground = false;
 
-	/**
-	 * Instantiates a new multi hysteresis filter 2.
-	 *
-	 * @param searchDistance
-	 *            the search distance
-	 * @param searchDistanceMode
-	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
-	 * @param timeThreshold
-	 *            the time threshold
-	 * @param timeThresholdMode
-	 *            0 = frames; 1 = seconds
-	 * @param strictSignal
-	 *            the strict signal
-	 * @param rangeSignal
-	 *            the range signal
-	 * @param strictSnr
-	 *            the strict snr
-	 * @param rangeSnr
-	 *            the range snr
-	 * @param strictMinWidth
-	 *            the strict min width
-	 * @param rangeMinWidth
-	 *            the range min width
-	 * @param strictMaxWidth
-	 *            the strict max width
-	 * @param rangeMaxWidth
-	 *            the range max width
-	 * @param strictShift
-	 *            the strict shift
-	 * @param rangeShift
-	 *            the range shift
-	 * @param strictPrecision
-	 *            the strict precision
-	 * @param rangePrecision
-	 *            the range precision
-	 */
-	public MultiHysteresisFilter2(double searchDistance, int searchDistanceMode, double timeThreshold,
-			int timeThresholdMode, double strictSignal, double rangeSignal, float strictSnr, float rangeSnr,
-			double strictMinWidth, double rangeMinWidth, double strictMaxWidth, double rangeMaxWidth,
-			double strictShift, double rangeShift, double strictPrecision, double rangePrecision)
-	{
-		super(searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode, strictSignal, rangeSignal,
-				strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift,
-				rangeShift, strictPrecision, rangePrecision);
-	}
+    /**
+     * Instantiates a new multi hysteresis filter 2.
+     *
+     * @param searchDistance
+     *            the search distance
+     * @param searchDistanceMode
+     *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
+     * @param timeThreshold
+     *            the time threshold
+     * @param timeThresholdMode
+     *            0 = frames; 1 = seconds
+     * @param strictSignal
+     *            the strict signal
+     * @param rangeSignal
+     *            the range signal
+     * @param strictSnr
+     *            the strict snr
+     * @param rangeSnr
+     *            the range snr
+     * @param strictMinWidth
+     *            the strict min width
+     * @param rangeMinWidth
+     *            the range min width
+     * @param strictMaxWidth
+     *            the strict max width
+     * @param rangeMaxWidth
+     *            the range max width
+     * @param strictShift
+     *            the strict shift
+     * @param rangeShift
+     *            the range shift
+     * @param strictPrecision
+     *            the strict precision
+     * @param rangePrecision
+     *            the range precision
+     */
+    public MultiHysteresisFilter2(double searchDistance, int searchDistanceMode, double timeThreshold,
+            int timeThresholdMode, double strictSignal, double rangeSignal, float strictSnr, float rangeSnr,
+            double strictMinWidth, double rangeMinWidth, double strictMaxWidth, double rangeMaxWidth,
+            double strictShift, double rangeShift, double strictPrecision, double rangePrecision)
+    {
+        super(searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode, strictSignal, rangeSignal,
+                strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift,
+                rangeShift, strictPrecision, rangePrecision);
+    }
 
-	@Override
-	protected String generateName()
-	{
-		return String.format(
-				"Multi Hysteresis2: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision2=%.1f+%.1f (%s)",
-				strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
-				rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, getTraceParameters());
-	}
+    @Override
+    protected String generateName()
+    {
+        return String.format(
+                "Multi Hysteresis2: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision2=%.1f+%.1f (%s)",
+                strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
+                rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, getTraceParameters());
+    }
 
-	@Override
-	protected void setupCalculator(MemoryPeakResults peakResults)
-	{
-		try
-		{
-			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-					Gaussian2DPeakResultHelper.LSE_PRECISION_X);
-			useBackground = true;
-		}
-		catch (final ConfigurationException e)
-		{
-			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-					Gaussian2DPeakResultHelper.LSE_PRECISION);
-			useBackground = false;
-		}
-	}
+    @Override
+    protected void setupCalculator(MemoryPeakResults peakResults)
+    {
+        try
+        {
+            calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+                    Gaussian2DPeakResultHelper.LSE_PRECISION_X);
+            useBackground = true;
+        }
+        catch (final ConfigurationException e)
+        {
+            calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+                    Gaussian2DPeakResultHelper.LSE_PRECISION);
+            useBackground = false;
+        }
+    }
 
-	@Override
-	protected double getVariance(PeakResult result)
-	{
-		if (useBackground)
-			return calculator.getLSEVariance(result.getParameters());
-		return calculator.getLSEVariance(result.getParameters(), result.getNoise());
-	}
+    @Override
+    protected double getVariance(PeakResult result)
+    {
+        if (useBackground)
+            return calculator.getLSEVariance(result.getParameters());
+        return calculator.getLSEVariance(result.getParameters(), result.getNoise());
+    }
 
-	@Override
-	public String getDescription()
-	{
-		return "Filter results using a multiple thresholds: Signal, SNR, width, shift, precision (uses fitted background to set noise). Any results within the " +
-				"strict limits are included. Any results outside the weak limits are excluded. " +
-				super.getDescription();
-	}
+    @Override
+    public String getDescription()
+    {
+        return "Filter results using a multiple thresholds: Signal, SNR, width, shift, precision (uses fitted background to set noise). Any results within the " +
+                "strict limits are included. Any results outside the weak limits are excluded. " +
+                super.getDescription();
+    }
 
-	@Override
-	protected ParameterType getPrecisionParamaterType()
-	{
-		return ParameterType.PRECISION2;
-	}
+    @Override
+    protected ParameterType getPrecisionParamaterType()
+    {
+        return ParameterType.PRECISION2;
+    }
 
-	@Override
-	protected ParameterType getPrecisionRangeParamaterType()
-	{
-		return ParameterType.PRECISION2_RANGE;
-	}
+    @Override
+    protected ParameterType getPrecisionRangeParamaterType()
+    {
+        return ParameterType.PRECISION2_RANGE;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-	 */
-	@Override
-	public Filter create(double... parameters)
-	{
-		return new MultiHysteresisFilter2(parameters[0], (int) parameters[1], parameters[2], (int) parameters[3],
-				parameters[4], parameters[5], (float) parameters[6], (float) parameters[7], parameters[8],
-				parameters[9], parameters[10], parameters[11], parameters[12], parameters[13], parameters[14],
-				parameters[15]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
+     */
+    @Override
+    public Filter create(double... parameters)
+    {
+        return new MultiHysteresisFilter2(parameters[0], (int) parameters[1], parameters[2], (int) parameters[3],
+                parameters[4], parameters[5], (float) parameters[6], (float) parameters[7], parameters[8],
+                parameters[9], parameters[10], parameters[11], parameters[12], parameters[13], parameters[14],
+                parameters[15]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#newChromosome(double[])
-	 */
-	@Override
-	public Chromosome<FilterScore> newChromosome(double[] sequence)
-	{
-		// Override the default Hysteresis filter implementation for speed since this is the filter we
-		// will most likely optimise using the genetic algorithm
-		return new MultiHysteresisFilter2(sequence[0], searchDistanceMode, sequence[1], timeThresholdMode, sequence[2],
-				sequence[3], (float) sequence[4], (float) sequence[5], sequence[6], sequence[7], sequence[8],
-				sequence[9], sequence[10], sequence[11], sequence[12], sequence[13]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#newChromosome(double[])
+     */
+    @Override
+    public Chromosome<FilterScore> newChromosome(double[] sequence)
+    {
+        // Override the default Hysteresis filter implementation for speed since this is the filter we
+        // will most likely optimise using the genetic algorithm
+        return new MultiHysteresisFilter2(sequence[0], searchDistanceMode, sequence[1], timeThresholdMode, sequence[2],
+                sequence[3], (float) sequence[4], (float) sequence[5], sequence[6], sequence[7], sequence[8],
+                sequence[9], sequence[10], sequence[11], sequence[12], sequence[13]);
+    }
 }

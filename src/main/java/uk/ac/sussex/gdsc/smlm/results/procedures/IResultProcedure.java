@@ -28,11 +28,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
  */
 public interface IResultProcedure
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param intensity
-	 *            the intensity
-	 */
-	public void executeI(float intensity);
+    /**
+     * Executes this procedure.
+     *
+     * @param intensity
+     *            the intensity
+     */
+    public void executeI(float intensity);
 }

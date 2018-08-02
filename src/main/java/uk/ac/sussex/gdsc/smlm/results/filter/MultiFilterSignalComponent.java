@@ -28,38 +28,39 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class MultiFilterSignalComponent extends MultiFilterComponent
 {
-	private final float signal;
+    private final float signal;
 
-	/**
-	 * Instantiates a new multi filter signal component.
-	 *
-	 * @param signal
-	 *            the signal
-	 */
-	public MultiFilterSignalComponent(double signal)
-	{
-		this.signal = (float) signal;
-	}
+    /**
+     * Instantiates a new multi filter signal component.
+     *
+     * @param signal
+     *            the signal
+     */
+    public MultiFilterSignalComponent(double signal)
+    {
+        this.signal = (float) signal;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult)
-	 */
-	@Override
-	public boolean fail(final PreprocessedPeakResult peak)
-	{
-		return peak.getSignal() < this.signal;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
+     * PreprocessedPeakResult)
+     */
+    @Override
+    public boolean fail(final PreprocessedPeakResult peak)
+    {
+        return peak.getSignal() < this.signal;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-	 */
-	@Override
-	public int getType()
-	{
-		return IDirectFilter.V_PHOTONS;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
+     */
+    @Override
+    public int getType()
+    {
+        return IDirectFilter.V_PHOTONS;
+    }
 }
