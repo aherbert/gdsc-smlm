@@ -1,5 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,10 +59,10 @@ public class TensorTest
         {
             final StringBuilder sb = new StringBuilder();
             final String newLine = System.getProperty("line.separator");
-            sb.append(String.format("com = %s%s", java.util.Arrays.toString(com), newLine));
+            sb.append(String.format("%scom = %s", newLine, Arrays.toString(com)));
             for (int i = 0; i < v.length; i++)
-                sb.append(String.format("[%d] %f = %s  %.2f%s", i, v[i], java.util.Arrays.toString(vv[i]),
-                        180.0 * Math.atan2(vv[i][1], vv[i][0]) / Math.PI, newLine));
+                sb.append(String.format("%s[%d] %f = %s  %.2f", newLine, i, v[i], java.util.Arrays.toString(vv[i]),
+                        180.0 * Math.atan2(vv[i][1], vv[i][0]) / Math.PI));
             logger.info(sb.toString());
         }
     }

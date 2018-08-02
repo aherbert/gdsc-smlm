@@ -132,7 +132,7 @@ public class ConvolutionTest
     public void doSpeedTest(RandomSeed seed)
     {
         ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        ExtraAssumptions.assume(TestComplexity.HIGH);
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
         int size = 10;
@@ -180,7 +180,7 @@ public class ConvolutionTest
     public void doDoubleSpeedTest(RandomSeed seed)
     {
         ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        ExtraAssumptions.assume(TestComplexity.HIGH);
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
         int size = 10;
@@ -229,7 +229,7 @@ public class ConvolutionTest
     public void doSingleVsDoubleSpeedTest(RandomSeed seed)
     {
         ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        ExtraAssumptions.assume(TestComplexity.HIGH);
 
         int size = 10;
         for (int i = 0; i < sizeLoops / 2; i++)
@@ -283,7 +283,7 @@ public class ConvolutionTest
     public void doSingleVsDoubleFFTSpeedTest(RandomSeed seed)
     {
         ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        ExtraAssumptions.assume(TestComplexity.HIGH);
 
         int size = 10;
         for (int i = 0; i < sizeLoops / 2; i++)
@@ -575,7 +575,7 @@ public class ConvolutionTest
     public void doScaledSpeedTest(RandomSeed seed)
     {
         ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        ExtraAssumptions.assume(TestComplexity.HIGH);
 
         int size = 10;
         for (int scale = 4; scale <= 8; scale *= 2)

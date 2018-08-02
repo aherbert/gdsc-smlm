@@ -184,7 +184,7 @@ public class FilterTest
         final int size = ts.repeat();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
 
         for (int i = 0; i < size; i += 2)
         {

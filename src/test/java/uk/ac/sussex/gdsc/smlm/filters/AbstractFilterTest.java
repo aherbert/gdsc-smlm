@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
@@ -20,7 +21,7 @@ import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 @SuppressWarnings({ "javadoc" })
 public class AbstractFilterTest implements Function<RandomSeed, Object>
 {
-    private static Logger logger;
+    protected static Logger logger;
 
     @BeforeAll
     public static void beforeAll()
@@ -34,7 +35,13 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
         logger = null;
     }
 
-    final boolean debug = logger.isLoggable(Level.FINE);
+    boolean debug;
+
+    @BeforeEach
+    void checkLogging()
+    {
+        debug = logger.isLoggable(Level.FINE);
+    }
 
     // TODO - The test data should be representative of the final use case
 

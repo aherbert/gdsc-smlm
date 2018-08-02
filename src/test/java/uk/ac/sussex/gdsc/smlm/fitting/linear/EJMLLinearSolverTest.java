@@ -566,7 +566,7 @@ public class EJMLLinearSolverTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
 
         // Since the speed is very similar at sizes 2-5 there is nothing to reliably assert
         // about the fastest of Cholesky/CholeskyLDLT/Direct.
@@ -877,7 +877,7 @@ public class EJMLLinearSolverTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
 
         // When it is present the DiagonalDirect is fastest (n<=5)
         if (np <= 5)

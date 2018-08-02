@@ -1,14 +1,11 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.ij.Utils;
@@ -34,20 +31,6 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
-    private static Logger logger;
-
-    @BeforeAll
-    public static void beforeAll()
-    {
-        logger = Logger.getLogger(ErfGaussian2DFunctionTest.class.getName());
-    }
-
-    @AfterAll
-    public static void afterAll()
-    {
-        logger = null;
-    }
-
     public ErfGaussian2DFunctionTest()
     {
         super();

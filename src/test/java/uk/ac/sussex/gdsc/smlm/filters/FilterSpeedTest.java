@@ -1,10 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -15,20 +11,6 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class FilterSpeedTest extends AbstractFilterTest
 {
-    private static Logger logger;
-
-    @BeforeAll
-    public static void beforeAll()
-    {
-        logger = Logger.getLogger(FilterSpeedTest.class.getName());
-    }
-
-    @AfterAll
-    public static void afterAll()
-    {
-        logger = null;
-    }
-
     @SpeedTag
     @SeededTest
     public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal(RandomSeed seed)

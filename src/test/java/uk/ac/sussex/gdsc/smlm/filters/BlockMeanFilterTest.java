@@ -2,13 +2,10 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.junit.internal.ArrayComparisonFailure;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
@@ -21,20 +18,6 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class BlockMeanFilterTest extends AbstractFilterTest
 {
-    private static Logger logger;
-
-    @BeforeAll
-    public static void beforeAll()
-    {
-        logger = Logger.getLogger(BlockMeanFilterTest.class.getName());
-    }
-
-    @AfterAll
-    public static void afterAll()
-    {
-        logger = null;
-    }
-
     private final int InternalITER3 = 500;
     private final int InternalITER = 50;
     private final int ITER3 = 200;

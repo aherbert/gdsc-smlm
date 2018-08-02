@@ -898,7 +898,7 @@ public class PoissonCalculatorTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
 
         final int index = ts.getSize() - 1;
         Assertions.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());

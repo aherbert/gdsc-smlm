@@ -136,7 +136,7 @@ public class CustomGammaDistributionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
 
         Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
     }

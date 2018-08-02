@@ -41,6 +41,9 @@ public class FisherInformationMatrixTest
         logger = null;
     }
 
+    /** The level for logging output. */
+    private final Level level = Level.FINE;
+
     @SeededTest
     public void canComputeCRLB(RandomSeed seed)
     {
@@ -89,7 +92,8 @@ public class FisherInformationMatrixTest
             final double[] crlb = m.crlb();
             final double[] crlb2 = m.crlbReciprocal();
             // These increasingly do not match with increasing number of parameters.
-            TestLog.info(logger, "%s =? %s", Arrays.toString(crlb), Arrays.toString(crlb2));
+            if (logger.isLoggable(level))
+                logger.log(level, TestLog.getSupplier("%s =? %s", Arrays.toString(crlb), Arrays.toString(crlb2)));
             if (n > 1)
                 // Just do a sum so we have a test
                 Assertions.assertThrows(AssertionFailedError.class, () -> {
@@ -98,13 +102,14 @@ public class FisherInformationMatrixTest
         }
     }
 
-    private static double[] canComputeCRLB(UniformRandomProvider rg, int n, int k, boolean invert)
+    private double[] canComputeCRLB(UniformRandomProvider rg, int n, int k, boolean invert)
     {
         final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, k);
 
         // Invert for CRLB
         final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
-        TestLog.info(logger, "n=%d, k=%d : %s", n, k, Arrays.toString(crlb));
+        if (logger.isLoggable(level))
+            logger.log(level, TestLog.getSupplier("n=%d, k=%d : %s", n, k, Arrays.toString(crlb)));
         ExtraAssertions.assertNotNull(crlb, "CRLB failed: n=%d, k=%d", n, k);
         return crlb;
     }
@@ -187,16 +192,19 @@ public class FisherInformationMatrixTest
         final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
         final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
         final DenseMatrix64F e = m.getMatrix();
-        TestLog.log(logger, Level.INFO, e);
+        if (logger.isLoggable(level))
+            logger.log(level, String.valueOf(e));
 
         for (int run = 1; run < 10; run++)
         {
             final int[] indices = Random.sample(k, n, UniformRandomProvider);
             Arrays.sort(indices);
             final DenseMatrix64F o = m.subset(indices).getMatrix();
-            if (logger.isLoggable(Level.INFO))
-                TestLog.info(logger, Arrays.toString(indices));
-            TestLog.log(logger, Level.INFO, o);
+            if (logger.isLoggable(level))
+            {
+                logger.log(level, TestLog.getSupplier(Arrays.toString(indices)));
+                logger.log(level, String.valueOf(o));
+            }
             for (int i = 0; i < indices.length; i++)
                 for (int j = 0; j < indices.length; j++)
                     Assertions.assertEquals(e.get(indices[i], indices[j]), o.get(i, j));

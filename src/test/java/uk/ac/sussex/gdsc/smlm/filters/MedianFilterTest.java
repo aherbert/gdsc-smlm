@@ -1,12 +1,9 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.internal.ArrayComparisonFailure;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -19,20 +16,6 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 @SuppressWarnings({ "javadoc" })
 public class MedianFilterTest extends AbstractFilterTest
 {
-    private static Logger logger;
-
-    @BeforeAll
-    public static void beforeAll()
-    {
-        logger = Logger.getLogger(MedianFilterTest.class.getName());
-    }
-
-    @AfterAll
-    public static void afterAll()
-    {
-        logger = null;
-    }
-
     private static int InternalITER3 = 200;
     private static int InternalITER = 20;
     private static int ITER3 = 100;

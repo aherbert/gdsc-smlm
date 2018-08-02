@@ -18,20 +18,6 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 {
-    private static Logger logger;
-
-    @BeforeAll
-    public static void beforeAll()
-    {
-        logger = Logger.getLogger(SteppingFunctionSolverTest.class.getName());
-    }
-
-    @AfterAll
-    public static void afterAll()
-    {
-        logger = null;
-    }
-
     @SeededTest
     public void canFitSingleGaussianEMCCD_x_x__LSELVM(RandomSeed seed)
     {

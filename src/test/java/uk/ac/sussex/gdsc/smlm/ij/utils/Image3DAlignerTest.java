@@ -1,5 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterAll;
@@ -150,8 +151,9 @@ public class Image3DAlignerTest
         else
             result = a.align(target, refinements, error);
         c = a.getCorrelation();
-        TestLog.info(logger, "e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
-                java.util.Arrays.toString(result));
+        if (logger.isLoggable(Level.FINE))
+            logger.fine(TestLog.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
+                    java.util.Arrays.toString(result)));
 
         for (int i = 0; i < 3; i++)
             Assertions.assertEquals(e[i], result[i], tolerance);

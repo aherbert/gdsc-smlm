@@ -235,7 +235,7 @@ public class KernelFilterTest
                 }
         }
 
-        TestLog.info(logger, "%s vs %s @ %d = %g", f1.getName(), f2.getName(), border, max);
+        logger.fine(TestLog.getSupplier("%s vs %s @ %d = %g", f1.getName(), f2.getName(), border, max));
         Assertions.assertTrue(max < tolerance);
     }
 
@@ -299,7 +299,7 @@ public class KernelFilterTest
             final int size = ts.getSize();
             ts.repeat();
             if (logger.isLoggable(Level.INFO))
-                ts.report(size);
+                ts.report(logger, size);
             TestLog.logSpeedTestResult(logger, ts.get(-3), ts.get(-1));
         }
     }

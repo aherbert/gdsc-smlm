@@ -269,7 +269,8 @@ public class GaussianFilterTest
                     max = d;
             }
 
-            TestLog.info(logger, "%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(), weighted, sigma, max);
+            logger.fine(
+                    TestLog.getSupplier("%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(), weighted, sigma, max));
             Assertions.assertTrue(max < tolerance);
         }
     }
@@ -330,7 +331,7 @@ public class GaussianFilterTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
         final int n = size / sigmas.length;
         for (int i = 0, j = size; i < sigmas.length; i++, j += n)
             for (int k = 1; k < n; k++)
@@ -364,7 +365,7 @@ public class GaussianFilterTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(size);
+            ts.report(logger, size);
         final int n = size / sigmas.length;
         for (int i = 0, j = size; i < sigmas.length; i++, j += n)
             for (int k = 1; k < n; k++)

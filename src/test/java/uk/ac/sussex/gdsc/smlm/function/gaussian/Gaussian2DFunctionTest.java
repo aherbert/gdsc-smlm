@@ -20,7 +20,7 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public abstract class Gaussian2DFunctionTest
 {
-    private static Logger logger;
+    protected static Logger logger;
 
     @BeforeAll
     public static void beforeAll()

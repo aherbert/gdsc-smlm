@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 @SuppressWarnings({ "javadoc" })
 public abstract class BaseFunctionSolverTest implements Function<RandomSeed, double[][]>
 {
-    private static Logger logger;
+    protected static Logger logger;
 
     @BeforeAll
     public static void beforeAll()
