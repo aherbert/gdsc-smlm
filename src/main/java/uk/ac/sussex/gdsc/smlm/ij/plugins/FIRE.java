@@ -1238,9 +1238,14 @@ public class FIRE implements PlugIn
 			plot.setLimitsToFit(false);
 			// Q. For some reason the limits calculated are ignored,
 			// so set them as the defaults.
+			// The FRC should not go above 1 so limit Y.
+			// Use reflection method
 			final double[] limits = plot.getCurrentMinAndMax();
-			// The FRC should not go above 1 so limit Y
-			plot.setLimits(limits[0], limits[1], Math.min(0, limits[2]), 1.05);
+			if (limits != null)
+				plot.setLimits(limits[0], limits[1], Math.min(0, limits[2]), 1.05);
+			else
+				// Auto-range:
+				plot.setLimits(Double.NaN, Double.NaN, Double.NaN, 1.05);
 			return plot;
 		}
 	}
